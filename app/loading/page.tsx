@@ -1,18 +1,29 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoadingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
+    const birthDate = searchParams.get("birthDate") || "";
+    const birthTime = searchParams.get("birthTime") || "";
+    const gender = searchParams.get("gender") || "";
+
+    const params = new URLSearchParams({
+      birthDate,
+      birthTime,
+      gender,
+    });
+
     const timer = setTimeout(() => {
-      router.push("/result");
+      router.push(`/result?${params.toString()}`);
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [router]);
+  }, [router, searchParams]);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#f7f3ea] px-6 text-center">

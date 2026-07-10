@@ -12,7 +12,7 @@ export default function LoadingPage() {
       const birthDate = searchParams.get("birthDate") || "";
       const birthTime = searchParams.get("birthTime") || "";
       const gender = searchParams.get("gender") || "";
-
+const calendarType = searchParams.get("calendarType") || "양력";
       try {
         const response = await fetch("/api/analyze", {
           method: "POST",
@@ -23,6 +23,7 @@ export default function LoadingPage() {
             birthDate,
             birthTime,
             gender,
+             calendarType,
           }),
         });
 
@@ -38,6 +39,7 @@ export default function LoadingPage() {
           birthDate,
           birthTime,
           gender,
+           calendarType,
         });
 
         router.push(`/result?${params.toString()}`);

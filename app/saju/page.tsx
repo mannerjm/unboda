@@ -9,12 +9,14 @@ export default function SajuPage() {
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("");
   const [gender, setGender] = useState("남성");
+const [calendarType, setCalendarType] = useState("양력");
 
   const startAnalysis = () => {
     const params = new URLSearchParams({
       birthDate,
-      birthTime,
-      gender,
+  birthTime,
+  gender,
+  calendarType,
     });
 
     router.push(`/loading?${params.toString()}`);
@@ -25,6 +27,20 @@ export default function SajuPage() {
       <h1 className="text-5xl font-bold mb-8">사주 정보 입력</h1>
 
       <div className="w-full max-w-md space-y-5">
+        <div className="space-y-2">
+  <label className="text-sm font-medium text-stone-700">
+    달력 종류
+  </label>
+
+  <select
+    value={calendarType}
+    onChange={(e) => setCalendarType(e.target.value)}
+    className="w-full rounded-xl border p-4"
+  >
+    <option value="양력">양력</option>
+    <option value="음력">음력</option>
+  </select>
+</div>
         <input
           type="date"
           value={birthDate}

@@ -8,21 +8,47 @@ export default function LoadingPage() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const birthDate = searchParams.get("birthDate") || "";
-    const birthTime = searchParams.get("birthTime") || "";
-    const gender = searchParams.get("gender") || "";
+    const analyzeSaju = async () => {
+      const birthDate = searchParams.get("birthDate") || "";
+      const birthTime = searchParams.get("birthTime") || "";
+      const gender = searchParams.get("gender") || "";
 
-    const params = new URLSearchParams({
-      birthDate,
-      birthTime,
-      gender,
-    });
+      try {
+        const response = await fetch("/api/analyze", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            birthDate,
+            birthTime,
+            gender,
+          }),
+        });
 
-    const timer = setTimeout(() => {
-      router.push(`/result?${params.toString()}`);
-    }, 3000);
+        const data = await response.json();
 
-    return () => clearTimeout(timer);
+        if (!response.ok) {
+          throw new Error(data.error || "AI 분석에 실패했습니다.");
+        }
+
+        sessionStorage.setItem("sajuResult", data.result || "");
+
+        const params = new URLSearchParams({
+          birthDate,
+          birthTime,
+          gender,
+        });
+
+        router.push(`/result?${params.toString()}`);
+      } catch (error) {
+        console.error(error);
+        alert("AI 분석 중 오류가 발생했습니다.");
+        router.push("/saju");
+      }
+    };
+
+    analyzeSaju();
   }, [router, searchParams]);
 
   return (
@@ -36,8 +62,9 @@ export default function LoadingPage() {
       </h1>
 
       <p className="text-stone-600 mb-10 leading-8">
-        생년월일과 태어난 시간을 바탕으로<br />
-        명리 데이터를 분석하고 있습니다.
+        생년월일과 태어난 시간을 바탕으로
+        <br />
+        AI 분석 결과를 만들고 있습니다.
       </p>
 
       <div className="w-16 h-16 border-4 border-stone-300 border-t-stone-900 rounded-full animate-spin" />

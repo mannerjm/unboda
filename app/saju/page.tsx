@@ -10,7 +10,7 @@ export default function SajuPage() {
   const [birthTime, setBirthTime] = useState("");
   const [gender, setGender] = useState("남성");
 const [calendarType, setCalendarType] = useState("양력");
-
+const [isLeapMonth, setIsLeapMonth] = useState("평달");
   const startAnalysis = () => {
     const params = new URLSearchParams({
       birthDate,
@@ -41,12 +41,32 @@ const [calendarType, setCalendarType] = useState("양력");
     <option value="음력">음력</option>
   </select>
 </div>
-        <input
-          type="date"
-          value={birthDate}
-          onChange={(e) => setBirthDate(e.target.value)}
-          className="w-full border rounded-xl p-4"
-        />
+
+
+{calendarType === "음력" && (
+  <div className="space-y-2">
+    <label className="text-sm font-medium text-stone-700">
+      윤달 여부
+    </label>
+
+    <select
+      value={isLeapMonth}
+      onChange={(e) => setIsLeapMonth(e.target.value)}
+      className="w-full rounded-xl border p-4"
+    >
+      <option value="평달">평달</option>
+      <option value="윤달">윤달</option>
+    </select>
+  </div>
+)}
+
+<input
+  type="date"
+  value={birthDate}
+  onChange={(e) => setBirthDate(e.target.value)}
+  className="w-full rounded-xl border p-4"
+/>
+        
 
         <input
           type="time"

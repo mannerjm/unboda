@@ -13,6 +13,7 @@ export default function LoadingPage() {
       const birthTime = searchParams.get("birthTime") || "";
       const gender = searchParams.get("gender") || "";
 const calendarType = searchParams.get("calendarType") || "양력";
+const isLeapMonth = searchParams.get("isLeapMonth") || "평달";
       try {
         const response = await fetch("/api/analyze", {
           method: "POST",
@@ -24,6 +25,7 @@ const calendarType = searchParams.get("calendarType") || "양력";
             birthTime,
             gender,
              calendarType,
+              isLeapMonth,
           }),
         });
 
@@ -40,6 +42,7 @@ const calendarType = searchParams.get("calendarType") || "양력";
           birthTime,
           gender,
            calendarType,
+             isLeapMonth,
         });
 
         router.push(`/result?${params.toString()}`);

@@ -2,6 +2,42 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+
+const titleIcons: Record<string, string> = {
+  "한눈에 보는 핵심": "✨",
+  "성격과 강점": "💪",
+  "보완하면 좋은 점": "⚠️",
+  "직업과 일": "💼",
+  재물운: "💰",
+  인간관계: "❤️",
+  "올해 실천하면 좋은 것": "🎯",
+  "운보다 한마디": "💬",
+};
+
+function formatUnbodaMessage(text: string) {
+  const headingPattern = /^#{1,6}\s*운보다 한마디\s*$/m;
+  const match = headingPattern.exec(text);
+
+  if (!match) {
+    return text;
+  }
+
+  const headingEnd = match.index + match[0].length;
+  const beforeMessage = text.slice(0, headingEnd);
+  const message = text.slice(headingEnd).trim();
+
+  if (!message) {
+    return text;
+  }
+
+  const quotedMessage = message
+    .split("\n")
+    .map((line) => (line.trim() ? `> ${line.trim()}` : ">"))
+    .join("\n");
+
+  return `${beforeMessage}\n\n${quotedMessage}`;
+}
 
 export default function ResultPage() {
   const router = useRouter();
@@ -69,33 +105,83 @@ export default function ResultPage() {
             </div>
           </div>
 
-          <div className="space-y-5 text-[16px] leading-9 text-stone-700">
-  {aiResult
-    ? aiResult.split("\n").map((line, index) => {
-        const trimmedLine = line.trim();
+          <div className="text-[16px] leading-9 text-stone-700">
+  {aiResult ? (
+    <ReactMarkdown
+      components={{
+        h1: ({ children }) => {
+  const title = String(children);
+  const icon = titleIcons[title] || "✦";
 
-        if (!trimmedLine) {
-          return <div key={index} className="h-2" />;
-        }
+  return (
+    <section className="mb-6 mt-12 border-t border-stone-200 pt-8 first:mt-0 first:border-t-0 first:pt-0">
+      <h2 className="flex items-center gap-3 text-2xl font-bold text-stone-900">
+        <span
+          aria-hidden="true"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-100 text-xl"
+        >
+          {icon}
+        </span>
+        <span>{children}</span>
+      </h2>
+    </section>
+  );
+},
 
-        const isTitle =
-          trimmedLine.startsWith("**") &&
-          trimmedLine.endsWith("**");
+h2: ({ children }) => {
+  const title = String(children);
+  const icon = titleIcons[title] || "✦";
 
-        if (isTitle) {
-          return (
-            <h3
-              key={index}
-              className="mt-8 text-xl font-bold text-stone-900"
-            >
-              {trimmedLine.replaceAll("**", "")}
-            </h3>
-          );
-        }
+  return (
+    <section className="mb-6 mt-12 border-t border-stone-200 pt-8">
+      <h2 className="flex items-center gap-3 text-2xl font-bold text-stone-900">
+        <span
+          aria-hidden="true"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-100 text-xl"
+        >
+          {icon}
+        </span>
+        <span>{children}</span>
+      </h2>
+    </section>
+  );
+},
 
-        return <p key={index}>{trimmedLine}</p>;
-      })
-    : "분석 결과를 불러오는 중입니다..."}
+h3: ({ children }) => {
+  const title = String(children);
+  const icon = titleIcons[title] || "✦";
+
+  return (
+    <h3 className="mb-5 mt-10 flex items-center gap-3 text-xl font-bold text-stone-900">
+      <span aria-hidden="true">{icon}</span>
+      <span>{children}</span>
+    </h3>
+  );
+},
+        p: ({ children }) => (
+          <p className="mb-6 leading-9">{children}</p>
+        ),
+        ul: ({ children }) => (
+          <ul className="mb-6 space-y-3 pl-6">{children}</ul>
+        ),
+        li: ({ children }) => (
+          <li className="list-disc">{children}</li>
+        ),
+        blockquote: ({ children }) => (
+  <blockquote className="my-8 rounded-3xl border border-stone-200 bg-stone-50 px-7 py-6 text-lg font-medium leading-8 text-stone-800 shadow-sm">
+    {children}
+  </blockquote>
+),
+        strong: ({ children }) => (
+          <strong className="font-bold text-stone-900">{children}</strong>
+        ),
+      }}
+    >
+      {formatUnbodaMessage(aiResult)}
+    </ReactMarkdown>
+  ) : (
+    "분석 결과를 불러오는 중입니다..."
+  )}
 </div>
         </section>
 

@@ -199,22 +199,34 @@ const savedSaju = sessionStorage.getItem("sajuData");
         label: "시주",
         stem: sajuData.hourStem,
         branch: sajuData.hourBranch,
+         tenGod: sajuData.hourTenGod,
+          branchTenGod: sajuData.hourBranchTenGod,
+          stage: sajuData.hourStage,
       },
       {
         label: "일주",
         stem: sajuData.dayStem,
         branch: sajuData.dayBranch,
+         tenGod: sajuData.dayTenGod,
+          branchTenGod: sajuData.dayBranchTenGod,
         highlighted: true,
+        stage: sajuData.dayStage,
       },
       {
         label: "월주",
         stem: sajuData.monthStem,
         branch: sajuData.monthBranch,
+          tenGod: sajuData.monthTenGod,
+           branchTenGod: sajuData.monthBranchTenGod,
+           stage: sajuData.monthStage,
       },
       {
-        label: "년주",
-        stem: sajuData.yearStem,
-        branch: sajuData.yearBranch,
+         label: "년주",
+  stem: sajuData.yearStem,
+  branch: sajuData.yearBranch,
+  tenGod: sajuData.yearTenGod,
+  branchTenGod: sajuData.yearBranchTenGod,
+  stage: sajuData.yearStage,
       },
     ].map((pillar) => {
   const stemStyle = getFiveElementStyle(
@@ -228,89 +240,128 @@ const savedSaju = sessionStorage.getItem("sajuData");
   );
 
   return (
-      <div
-        key={pillar.label}
-        className={`overflow-hidden rounded-2xl border text-center ${
+  <div
+    key={pillar.label}
+    className={`h-full overflow-hidden rounded-2xl border text-center ${
+      pillar.highlighted
+        ? "border-stone-900 bg-stone-900 text-white shadow-md"
+        : "border-stone-200 bg-stone-50 text-stone-900"
+    }`}
+  >
+    <div
+      className={`border-b px-2 py-3 ${
+        pillar.highlighted
+          ? "border-white/20"
+          : "border-stone-200"
+      }`}
+    >
+      <p className="text-sm font-semibold">{pillar.label}</p>
+
+      {pillar.tenGod && (
+        <p
+          className={`mt-1 text-xs ${
+            pillar.highlighted
+              ? "text-white/60"
+              : "text-stone-500"
+          }`}
+        >
+          {pillar.tenGod}
+        </p>
+      )}
+    </div>
+
+    <div className="flex min-h-[125px] flex-col items-center justify-center px-2 py-4">
+      <p
+        className={`mb-1 text-[11px] ${
           pillar.highlighted
-            ? "border-stone-900 bg-stone-900 text-white shadow-md"
-            : "border-stone-200 bg-stone-50 text-stone-900"
+            ? "text-white/50"
+            : "text-stone-400"
         }`}
       >
-        <div
-          className={`border-b px-2 py-3 text-sm font-semibold ${
+        천간
+      </p>
+
+      <p
+        className={`text-4xl font-bold sm:text-5xl ${stemStyle.textClass}`}
+      >
+        {pillar.stem || "-"}
+      </p>
+
+      {stemStyle.label && (
+        <p
+          className={`mt-1 text-[11px] ${
             pillar.highlighted
-              ? "border-white/20"
-              : "border-stone-200"
+              ? "text-white/60"
+              : "text-stone-400"
           }`}
         >
-          {pillar.label}
-        </div>
+          {stemStyle.label}
+        </p>
+      )}
+    </div>
 
-        <div className="px-2 py-5">
-          <p
-            className={`mb-2 text-xs ${
-              pillar.highlighted
-                ? "text-white/60"
-                : "text-stone-400"
-            }`}
-          >
-            천간
-          </p>
+    <div
+      className={`flex min-h-[155px] flex-col items-center justify-center border-t px-2 py-4 ${
+        pillar.highlighted
+          ? "border-white/20"
+          : "border-stone-200"
+      }`}
+    >
+      <p
+        className={`mb-1 text-[11px] ${
+          pillar.highlighted
+            ? "text-white/50"
+            : "text-stone-400"
+        }`}
+      >
+        지지
+      </p>
 
-          <p
-  className={`text-4xl font-bold sm:text-5xl ${stemStyle.textClass}`}
->
-  {pillar.stem || "-"}
-</p>
+      <p
+        className={`mb-1 text-xs ${
+          pillar.highlighted
+            ? "text-white/70"
+            : "text-stone-500"
+        }`}
+      >
+        {pillar.branchTenGod || ""}
+      </p>
 
-{stemStyle.label && (
-  <p
-    className={`mt-2 text-xs ${
-      pillar.highlighted ? "text-white/60" : "text-stone-400"
-    }`}
-  >
-    {stemStyle.label}
-  </p>
-)}
-        </div>
+      <p
+        className={`text-4xl font-bold sm:text-5xl ${branchStyle.textClass}`}
+      >
+        {pillar.branch || "-"}
+      </p>
 
-        <div
-          className={`border-t px-2 py-5 ${
+      {branchStyle.label && (
+        <p
+          className={`mt-1 text-[11px] ${
             pillar.highlighted
-              ? "border-white/20"
-              : "border-stone-200"
+              ? "text-white/60"
+              : "text-stone-400"
           }`}
         >
-          <p
-            className={`mb-2 text-xs ${
-              pillar.highlighted
-                ? "text-white/60"
-                : "text-stone-400"
-            }`}
-          >
-            지지
-          </p>
+          {branchStyle.label}
+        </p>
+      )}
 
-          <p
-  className={`text-4xl font-bold sm:text-5xl ${branchStyle.textClass}`}
->
-  {pillar.branch || "-"}
-</p>
-
-{branchStyle.label && (
-  <p
-    className={`mt-2 text-xs ${
-      pillar.highlighted ? "text-white/60" : "text-stone-400"
-    }`}
-  >
-    {branchStyle.label}
-  </p>
-)}
-        </div>
-      </div>
-    );
-})}
+      {pillar.stage && (
+        <span
+          className={`mt-3 rounded-full px-3 py-1 text-[11px] font-medium ${
+            pillar.highlighted
+              ? "bg-white/10 text-white/75"
+              : "bg-stone-100 text-stone-500"
+          }`}
+        >
+          {pillar.stage}
+        </span>
+      )}
+    </div>
   </div>
+);
+})}
+</div>
+    
 
   <p className="mt-6 text-center text-xs leading-6 text-stone-500">
     일주는 본인을 중심으로 보는 기둥이므로 화면에서 강조해 표시했습니다.

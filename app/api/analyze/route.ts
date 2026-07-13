@@ -118,14 +118,30 @@ export async function POST(req: Request) {
     monthPillarHanja: saju.monthPillarHanja,
     dayPillarHanja: saju.dayPillarHanja,
     hourPillarHanja: saju.hourPillarHanja,
+
     yearStem: saju.yearStem,
     yearBranch: saju.yearBranch,
+    yearTenGod: saju.yearTenGod,
+    yearBranchTenGod: saju.yearBranchTenGod,
+    yearStage: saju.yearStage,
+
     monthStem: saju.monthStem,
     monthBranch: saju.monthBranch,
+    monthTenGod: saju.monthTenGod,
+    monthBranchTenGod: saju.monthBranchTenGod,
+    monthStage: saju.monthStage,
+
     dayStem: saju.dayStem,
     dayBranch: saju.dayBranch,
+    dayTenGod: saju.dayTenGod,
+     dayBranchTenGod: saju.dayBranchTenGod,
+     dayStage: saju.dayStage,
+
     hourStem: saju.hourStem,
     hourBranch: saju.hourBranch,
+    hourTenGod: saju.hourTenGod,
+     hourBranchTenGod: saju.hourBranchTenGod,
+     hourStage: saju.hourStage,
   },
 });
   } catch (error) {

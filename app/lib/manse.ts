@@ -231,6 +231,95 @@ function getTwelveSpirit(
 
   return twelveSpiritOrder[distance];
 }
+const heavenlyNobleBranches: Record<string, string[]> = {
+  甲: ["丑", "未"],
+  乙: ["子", "申"],
+  丙: ["亥", "酉"],
+  丁: ["酉", "亥"],
+  戊: ["丑", "未"],
+  己: ["子", "申"],
+  庚: ["丑", "未"],
+  辛: ["寅", "午"],
+  壬: ["卯", "巳"],
+  癸: ["卯", "巳"],
+};
+
+function hasHeavenlyNoble(
+  dayStem: string,
+  targetBranch: string
+) {
+  const nobleBranches = heavenlyNobleBranches[dayStem];
+
+  if (!nobleBranches || !targetBranch) {
+    return false;
+  }
+
+  return nobleBranches.includes(targetBranch);
+}
+const heavenlyVirtueMap: Record<
+  string,
+  { type: "stem" | "branch"; value: string }
+> = {
+  寅: { type: "stem", value: "丁" },
+  卯: { type: "branch", value: "申" },
+  辰: { type: "stem", value: "壬" },
+  巳: { type: "stem", value: "辛" },
+  午: { type: "branch", value: "亥" },
+  未: { type: "stem", value: "甲" },
+  申: { type: "stem", value: "癸" },
+  酉: { type: "branch", value: "寅" },
+  戌: { type: "stem", value: "丙" },
+  亥: { type: "stem", value: "乙" },
+  子: { type: "branch", value: "巳" },
+  丑: { type: "stem", value: "庚" },
+};
+
+const monthlyVirtueStemMap: Record<string, string> = {
+  寅: "丙",
+  午: "丙",
+  戌: "丙",
+
+  亥: "甲",
+  卯: "甲",
+  未: "甲",
+
+  申: "壬",
+  子: "壬",
+  辰: "壬",
+
+  巳: "庚",
+  酉: "庚",
+  丑: "庚",
+};
+
+function hasHeavenlyVirtue(
+  monthBranch: string,
+  targetStem: string,
+  targetBranch: string
+) {
+  const condition = heavenlyVirtueMap[monthBranch];
+
+  if (!condition) {
+    return false;
+  }
+
+  return condition.type === "stem"
+    ? targetStem === condition.value
+    : targetBranch === condition.value;
+}
+
+function hasMonthlyVirtue(
+  monthBranch: string,
+  targetStem: string
+) {
+  const virtueStem = monthlyVirtueStemMap[monthBranch];
+
+  if (!virtueStem) {
+    return false;
+  }
+
+  return targetStem === virtueStem;
+}
 export function getSaju(
   birthDate: string,
   birthTime: string,
@@ -306,6 +395,82 @@ const hourSpirit = getTwelveSpirit(
   saju.hourPillarHanja?.[1] ?? ""
 );
 
+const dayStem = saju.dayPillarHanja[0];
+
+const yearNoble = hasHeavenlyNoble(
+  dayStem,
+  saju.yearPillarHanja[1]
+);
+
+const monthNoble = hasHeavenlyNoble(
+  dayStem,
+  saju.monthPillarHanja[1]
+);
+
+const dayNoble = hasHeavenlyNoble(
+  dayStem,
+  saju.dayPillarHanja[1]
+);
+
+const hourNoble = hasHeavenlyNoble(
+  dayStem,
+  saju.hourPillarHanja?.[1] ?? ""
+);
+function getNobleList(
+  targetStem: string,
+  targetBranch: string
+) {
+  const nobles: string[] = [];
+
+  if (
+    hasHeavenlyNoble(
+      saju.dayPillarHanja[0],
+      targetBranch
+    )
+  ) {
+    nobles.push("천을귀인");
+  }
+
+  if (
+    hasHeavenlyVirtue(
+      saju.monthPillarHanja[1],
+      targetStem,
+      targetBranch
+    )
+  ) {
+    nobles.push("천덕귀인");
+  }
+
+  if (
+    hasMonthlyVirtue(
+      saju.monthPillarHanja[1],
+      targetStem
+    )
+  ) {
+    nobles.push("월덕귀인");
+  }
+
+  return nobles;
+}
+const yearNobles = getNobleList(
+  saju.yearPillarHanja[0],
+  saju.yearPillarHanja[1]
+);
+
+const monthNobles = getNobleList(
+  saju.monthPillarHanja[0],
+  saju.monthPillarHanja[1]
+);
+
+const dayNobles = getNobleList(
+  saju.dayPillarHanja[0],
+  saju.dayPillarHanja[1]
+);
+
+const hourNobles = getNobleList(
+  saju.hourPillarHanja?.[0] ?? "",
+  saju.hourPillarHanja?.[1] ?? ""
+);
 
   return {
      solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
@@ -328,6 +493,8 @@ yearBranchTenGod: getTenGod(
 ),
 yearStage,
 yearSpirit,
+yearNoble,
+yearNobles,
 
 
   monthPillar: saju.monthPillar,
@@ -346,7 +513,8 @@ monthBranchTenGod: getTenGod(
 ),
 monthStage,
 monthSpirit,
-
+monthNoble,
+monthNobles,
 
   dayPillar: saju.dayPillar,
   dayPillarHanja: saju.dayPillarHanja,
@@ -361,6 +529,8 @@ dayBranchTenGod: getTenGod(
 ),
 dayStage,
 daySpirit,
+dayNoble,
+dayNobles,
 
   hourPillar: saju.hourPillar,
 hourPillarHanja: saju.hourPillarHanja ?? "",
@@ -378,5 +548,7 @@ hourBranchTenGod: getTenGod(
 ),
 hourStage,
 hourSpirit,
+hourNoble,
+hourNobles,
 };
 }

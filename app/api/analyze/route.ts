@@ -127,6 +127,8 @@ export async function POST(req: Request) {
     yearBranchTenGod: saju.yearBranchTenGod,
     yearStage: saju.yearStage,
     yearSpirit: saju.yearSpirit,
+    yearNoble: saju.yearNoble,
+    yearNobles: saju.yearNobles,
 
     monthStem: saju.monthStem,
     monthBranch: saju.monthBranch,
@@ -135,6 +137,8 @@ export async function POST(req: Request) {
     monthBranchTenGod: saju.monthBranchTenGod,
     monthStage: saju.monthStage,
     monthSpirit: saju.monthSpirit,
+    monthNoble: saju.monthNoble,
+    monthNobles: saju.monthNobles,
 
     dayStem: saju.dayStem,
     dayBranch: saju.dayBranch,
@@ -143,6 +147,8 @@ export async function POST(req: Request) {
      dayBranchTenGod: saju.dayBranchTenGod,
      dayStage: saju.dayStage,
      daySpirit: saju.daySpirit,
+     dayNoble: saju.dayNoble,
+     dayNobles: saju.dayNobles,
 
     hourStem: saju.hourStem,
     hourBranch: saju.hourBranch,
@@ -151,6 +157,8 @@ export async function POST(req: Request) {
      hourBranchTenGod: saju.hourBranchTenGod,
      hourStage: saju.hourStage,
      hourSpirit: saju.hourSpirit,
+     hourNoble: saju.hourNoble,
+     hourNobles: saju.hourNobles,
   },
 });
   } catch (error) {

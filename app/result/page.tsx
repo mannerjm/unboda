@@ -204,6 +204,8 @@ const savedSaju = sessionStorage.getItem("sajuData");
           stage: sajuData.hourStage,
            hiddenStems: sajuData.hourHiddenStems,
            spirit: sajuData.hourSpirit,
+            noble: sajuData.hourNoble,
+              nobles: sajuData.hourNobles,
       },
       {
         label: "일주",
@@ -215,6 +217,8 @@ const savedSaju = sessionStorage.getItem("sajuData");
         stage: sajuData.dayStage,
           hiddenStems: sajuData.dayHiddenStems,
             spirit: sajuData.daySpirit,
+            noble: sajuData.dayNoble,
+             nobles: sajuData.dayNobles,
       },
       {
         label: "월주",
@@ -225,6 +229,8 @@ const savedSaju = sessionStorage.getItem("sajuData");
            stage: sajuData.monthStage,
              hiddenStems: sajuData.monthHiddenStems,
                spirit: sajuData.monthSpirit,
+                noble: sajuData.monthNoble,
+                  nobles: sajuData.monthNobles,
       },
       {
          label: "년주",
@@ -235,6 +241,8 @@ const savedSaju = sessionStorage.getItem("sajuData");
   stage: sajuData.yearStage,
     hiddenStems: sajuData.yearHiddenStems,
      spirit: sajuData.yearSpirit,
+       noble: sajuData.yearNoble,
+        nobles: sajuData.yearNobles,
       },
     ].map((pillar) => {
   const stemStyle = getFiveElementStyle(
@@ -406,6 +414,18 @@ const savedSaju = sessionStorage.getItem("sajuData");
     {pillar.spirit}
   </span>
 )}
+{pillar.nobles?.map((noble: string, index: number) => (
+  <span
+    key={index}
+    className={`mt-2 rounded-full px-3 py-1 text-[11px] font-semibold ${
+      pillar.highlighted
+        ? "bg-amber-300/20 text-amber-200"
+        : "bg-amber-50 text-amber-700"
+    }`}
+  >
+    {noble}
+  </span>
+))}
     </div>
   </div>
 );

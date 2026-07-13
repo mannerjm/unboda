@@ -36,7 +36,7 @@ const isLeapMonth = searchParams.get("isLeapMonth") || "평달";
         }
 
         sessionStorage.setItem("sajuResult", data.result || "");
-
+sessionStorage.setItem("sajuData", JSON.stringify(data.saju || {}));
         const params = new URLSearchParams({
           birthDate,
           birthTime,

@@ -38,22 +38,110 @@ function formatUnbodaMessage(text: string) {
 
   return `${beforeMessage}\n\n${quotedMessage}`;
 }
+type FiveElement = "wood" | "fire" | "earth" | "metal" | "water";
 
+const fiveElementMap: Record<string, FiveElement> = {
+  // 천간
+  甲: "wood",
+  乙: "wood",
+  丙: "fire",
+  丁: "fire",
+  戊: "earth",
+  己: "earth",
+  庚: "metal",
+  辛: "metal",
+  壬: "water",
+  癸: "water",
+
+  // 지지
+  寅: "wood",
+  卯: "wood",
+  巳: "fire",
+  午: "fire",
+  辰: "earth",
+  戌: "earth",
+  丑: "earth",
+  未: "earth",
+  申: "metal",
+  酉: "metal",
+  子: "water",
+  亥: "water",
+};
+
+const fiveElementStyles: Record<
+  FiveElement,
+  {
+    label: string;
+    normal: string;
+    highlighted: string;
+  }
+> = {
+  wood: {
+    label: "목",
+    normal: "text-emerald-700",
+    highlighted: "text-emerald-300",
+  },
+  fire: {
+    label: "화",
+    normal: "text-red-600",
+    highlighted: "text-red-300",
+  },
+  earth: {
+    label: "토",
+    normal: "text-amber-700",
+    highlighted: "text-amber-300",
+  },
+  metal: {
+    label: "금",
+    normal: "text-slate-600",
+    highlighted: "text-slate-200",
+  },
+  water: {
+    label: "수",
+    normal: "text-blue-700",
+    highlighted: "text-sky-300",
+  },
+};
+
+function getFiveElementStyle(
+  character: string | undefined,
+  highlighted = false
+) {
+  const element = character ? fiveElementMap[character] : undefined;
+
+  if (!element) {
+    return {
+      label: "",
+      textClass: highlighted ? "text-white" : "text-stone-900",
+    };
+  }
+
+  const style = fiveElementStyles[element];
+
+  return {
+    label: style.label,
+    textClass: highlighted ? style.highlighted : style.normal,
+  };
+}
 export default function ResultPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [aiResult, setAiResult] = useState("");
-
+const [sajuData, setSajuData] = useState<any>({});
   const birthDate = searchParams.get("birthDate") || "입력 없음";
   const birthTime = searchParams.get("birthTime") || "입력 없음";
   const gender = searchParams.get("gender") || "입력 없음";
 
   useEffect(() => {
     const savedResult = sessionStorage.getItem("sajuResult");
-
+const savedSaju = sessionStorage.getItem("sajuData");
     if (savedResult) {
       setAiResult(savedResult);
-    } else {
+    } 
+    if (savedSaju) {
+    setSajuData(JSON.parse(savedSaju));
+}
+    else {
       setAiResult("AI 분석 결과를 찾을 수 없습니다.");
     }
   }, []);
@@ -88,7 +176,146 @@ export default function ResultPage() {
             <InfoCard label="성별" value={gender} />
           </div>
         </section>
+<section className="mb-8 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
+  <div className="mb-8 flex items-end justify-between">
+    <div>
+      <p className="mb-2 text-xs tracking-[0.3em] text-stone-500">
+        FOUR PILLARS
+      </p>
 
+      <h2 className="text-2xl font-bold text-stone-900">
+        사주팔자
+      </h2>
+    </div>
+
+    <p className="text-sm text-stone-500">
+      시 · 일 · 월 · 년
+    </p>
+  </div>
+
+  <div className="grid grid-cols-4 gap-2 sm:gap-4">
+    {[
+      {
+        label: "시주",
+        stem: sajuData.hourStem,
+        branch: sajuData.hourBranch,
+      },
+      {
+        label: "일주",
+        stem: sajuData.dayStem,
+        branch: sajuData.dayBranch,
+        highlighted: true,
+      },
+      {
+        label: "월주",
+        stem: sajuData.monthStem,
+        branch: sajuData.monthBranch,
+      },
+      {
+        label: "년주",
+        stem: sajuData.yearStem,
+        branch: sajuData.yearBranch,
+      },
+    ].map((pillar) => {
+  const stemStyle = getFiveElementStyle(
+    pillar.stem,
+    pillar.highlighted
+  );
+
+  const branchStyle = getFiveElementStyle(
+    pillar.branch,
+    pillar.highlighted
+  );
+
+  return (
+      <div
+        key={pillar.label}
+        className={`overflow-hidden rounded-2xl border text-center ${
+          pillar.highlighted
+            ? "border-stone-900 bg-stone-900 text-white shadow-md"
+            : "border-stone-200 bg-stone-50 text-stone-900"
+        }`}
+      >
+        <div
+          className={`border-b px-2 py-3 text-sm font-semibold ${
+            pillar.highlighted
+              ? "border-white/20"
+              : "border-stone-200"
+          }`}
+        >
+          {pillar.label}
+        </div>
+
+        <div className="px-2 py-5">
+          <p
+            className={`mb-2 text-xs ${
+              pillar.highlighted
+                ? "text-white/60"
+                : "text-stone-400"
+            }`}
+          >
+            천간
+          </p>
+
+          <p
+  className={`text-4xl font-bold sm:text-5xl ${stemStyle.textClass}`}
+>
+  {pillar.stem || "-"}
+</p>
+
+{stemStyle.label && (
+  <p
+    className={`mt-2 text-xs ${
+      pillar.highlighted ? "text-white/60" : "text-stone-400"
+    }`}
+  >
+    {stemStyle.label}
+  </p>
+)}
+        </div>
+
+        <div
+          className={`border-t px-2 py-5 ${
+            pillar.highlighted
+              ? "border-white/20"
+              : "border-stone-200"
+          }`}
+        >
+          <p
+            className={`mb-2 text-xs ${
+              pillar.highlighted
+                ? "text-white/60"
+                : "text-stone-400"
+            }`}
+          >
+            지지
+          </p>
+
+          <p
+  className={`text-4xl font-bold sm:text-5xl ${branchStyle.textClass}`}
+>
+  {pillar.branch || "-"}
+</p>
+
+{branchStyle.label && (
+  <p
+    className={`mt-2 text-xs ${
+      pillar.highlighted ? "text-white/60" : "text-stone-400"
+    }`}
+  >
+    {branchStyle.label}
+  </p>
+)}
+        </div>
+      </div>
+    );
+})}
+  </div>
+
+  <p className="mt-6 text-center text-xs leading-6 text-stone-500">
+    일주는 본인을 중심으로 보는 기둥이므로 화면에서 강조해 표시했습니다.
+  </p>
+</section>
         <section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
           <div className="mb-7 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-900 text-lg text-white">

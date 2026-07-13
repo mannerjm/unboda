@@ -38,16 +38,28 @@ export function getSaju(
   );
 
   return {
-    solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
-      solarDay
-    ).padStart(2, "0")}`,
-    yearPillar: saju.yearPillar,
-    yearPillarHanja: saju.yearPillarHanja,
-    monthPillar: saju.monthPillar,
-    monthPillarHanja: saju.monthPillarHanja,
-    dayPillar: saju.dayPillar,
-    dayPillarHanja: saju.dayPillarHanja,
-    hourPillar: saju.hourPillar,
-    hourPillarHanja: saju.hourPillarHanja,
-  };
+     solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
+    solarDay
+  ).padStart(2, "0")}`,
+
+  yearPillar: saju.yearPillar,
+  yearPillarHanja: saju.yearPillarHanja,
+  yearStem: saju.yearPillarHanja[0],
+  yearBranch: saju.yearPillarHanja[1],
+
+  monthPillar: saju.monthPillar,
+  monthPillarHanja: saju.monthPillarHanja,
+  monthStem: saju.monthPillarHanja[0],
+  monthBranch: saju.monthPillarHanja[1],
+
+  dayPillar: saju.dayPillar,
+  dayPillarHanja: saju.dayPillarHanja,
+  dayStem: saju.dayPillarHanja[0],
+  dayBranch: saju.dayPillarHanja[1],
+
+  hourPillar: saju.hourPillar,
+hourPillarHanja: saju.hourPillarHanja ?? "",
+hourStem: saju.hourPillarHanja?.[0] ?? "",
+hourBranch: saju.hourPillarHanja?.[1] ?? "",
+};
 }

@@ -91,7 +91,11 @@ export async function POST(req: Request) {
 
 # 운보다 한마디
 
-사용자가 응원을 받는 느낌으로 마무리하세요.
+마지막 메시지는 반드시 Markdown 인용문 형식으로 작성하세요.
+문장 맨 앞에 > 기호를 붙이고, 2~4문장으로 따뜻하게 마무리하세요.
+
+예시 형식:
+> 조급하게 결과를 만들려고 하지 않아도 괜찮습니다. 지금처럼 자신의 속도를 지키며 한 걸음씩 나아가면, 시간이 지날수록 더 단단한 길이 만들어질 것입니다.
 `;
 
     const completion = await openai.chat.completions.create({
@@ -105,10 +109,25 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({
-      result:
-        completion.choices[0].message.content ||
-        "AI 분석 결과를 생성하지 못했습니다.",
-    });
+  result:
+    completion.choices[0].message.content ||
+    "AI 분석 결과를 생성하지 못했습니다.",
+  saju: {
+    solarDate: saju.solarDate,
+    yearPillarHanja: saju.yearPillarHanja,
+    monthPillarHanja: saju.monthPillarHanja,
+    dayPillarHanja: saju.dayPillarHanja,
+    hourPillarHanja: saju.hourPillarHanja,
+    yearStem: saju.yearStem,
+    yearBranch: saju.yearBranch,
+    monthStem: saju.monthStem,
+    monthBranch: saju.monthBranch,
+    dayStem: saju.dayStem,
+    dayBranch: saju.dayBranch,
+    hourStem: saju.hourStem,
+    hourBranch: saju.hourBranch,
+  },
+});
   } catch (error) {
     console.error("OpenAI 또는 만세력 오류:", error);
 

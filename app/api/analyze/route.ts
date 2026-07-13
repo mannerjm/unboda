@@ -114,6 +114,7 @@ export async function POST(req: Request) {
     "AI 분석 결과를 생성하지 못했습니다.",
   saju: {
     solarDate: saju.solarDate,
+
     yearPillarHanja: saju.yearPillarHanja,
     monthPillarHanja: saju.monthPillarHanja,
     dayPillarHanja: saju.dayPillarHanja,
@@ -125,6 +126,7 @@ export async function POST(req: Request) {
     yearTenGod: saju.yearTenGod,
     yearBranchTenGod: saju.yearBranchTenGod,
     yearStage: saju.yearStage,
+    yearSpirit: saju.yearSpirit,
 
     monthStem: saju.monthStem,
     monthBranch: saju.monthBranch,
@@ -132,6 +134,7 @@ export async function POST(req: Request) {
     monthTenGod: saju.monthTenGod,
     monthBranchTenGod: saju.monthBranchTenGod,
     monthStage: saju.monthStage,
+    monthSpirit: saju.monthSpirit,
 
     dayStem: saju.dayStem,
     dayBranch: saju.dayBranch,
@@ -139,6 +142,7 @@ export async function POST(req: Request) {
     dayTenGod: saju.dayTenGod,
      dayBranchTenGod: saju.dayBranchTenGod,
      dayStage: saju.dayStage,
+     daySpirit: saju.daySpirit,
 
     hourStem: saju.hourStem,
     hourBranch: saju.hourBranch,
@@ -146,6 +150,7 @@ export async function POST(req: Request) {
     hourTenGod: saju.hourTenGod,
      hourBranchTenGod: saju.hourBranchTenGod,
      hourStage: saju.hourStage,
+     hourSpirit: saju.hourSpirit,
   },
 });
   } catch (error) {

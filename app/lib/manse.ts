@@ -168,6 +168,69 @@ function getTwelveStage(dayStem: string, targetBranch: string) {
 
   return twelveStages[distance];
 }
+const twelveSpiritOrder = [
+  "겁살",
+  "재살",
+  "천살",
+  "지살",
+  "년살",
+  "월살",
+  "망신살",
+  "장성살",
+  "반안살",
+  "역마살",
+  "육해살",
+  "화개살",
+] as const;
+
+const twelveSpiritStartBranch: Record<string, string> = {
+  // 寅午戌 그룹은 亥부터 겁살
+  寅: "亥",
+  午: "亥",
+  戌: "亥",
+
+  // 申子辰 그룹은 巳부터 겁살
+  申: "巳",
+  子: "巳",
+  辰: "巳",
+
+  // 巳酉丑 그룹은 寅부터 겁살
+  巳: "寅",
+  酉: "寅",
+  丑: "寅",
+
+  // 亥卯未 그룹은 申부터 겁살
+  亥: "申",
+  卯: "申",
+  未: "申",
+};
+
+function getTwelveSpirit(
+  baseBranch: string,
+  targetBranch: string
+) {
+  const startBranch = twelveSpiritStartBranch[baseBranch];
+
+  if (!startBranch || !targetBranch) {
+    return "";
+  }
+
+  const startIndex = branchOrder.indexOf(
+    startBranch as (typeof branchOrder)[number]
+  );
+
+  const targetIndex = branchOrder.indexOf(
+    targetBranch as (typeof branchOrder)[number]
+  );
+
+  if (startIndex === -1 || targetIndex === -1) {
+    return "";
+  }
+
+  const distance = (targetIndex - startIndex + 12) % 12;
+
+  return twelveSpiritOrder[distance];
+}
 export function getSaju(
   birthDate: string,
   birthTime: string,
@@ -221,6 +284,29 @@ const hourStage = getTwelveStage(
   saju.hourPillarHanja?.[1] ?? ""
 );
 
+const baseBranch = saju.dayPillarHanja[1];
+
+const yearSpirit = getTwelveSpirit(
+  baseBranch,
+  saju.yearPillarHanja[1]
+);
+
+const monthSpirit = getTwelveSpirit(
+  baseBranch,
+  saju.monthPillarHanja[1]
+);
+
+const daySpirit = getTwelveSpirit(
+  baseBranch,
+  saju.dayPillarHanja[1]
+);
+
+const hourSpirit = getTwelveSpirit(
+  baseBranch,
+  saju.hourPillarHanja?.[1] ?? ""
+);
+
+
   return {
      solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
     solarDay
@@ -241,6 +327,7 @@ yearBranchTenGod: getTenGod(
   branchHiddenStem[saju.yearPillarHanja[1]] ?? ""
 ),
 yearStage,
+yearSpirit,
 
 
   monthPillar: saju.monthPillar,
@@ -258,6 +345,7 @@ monthBranchTenGod: getTenGod(
   branchHiddenStem[saju.monthPillarHanja[1]] ?? ""
 ),
 monthStage,
+monthSpirit,
 
 
   dayPillar: saju.dayPillar,
@@ -272,6 +360,7 @@ dayBranchTenGod: getTenGod(
   branchHiddenStem[saju.dayPillarHanja[1]] ?? ""
 ),
 dayStage,
+daySpirit,
 
   hourPillar: saju.hourPillar,
 hourPillarHanja: saju.hourPillarHanja ?? "",
@@ -288,5 +377,6 @@ hourBranchTenGod: getTenGod(
   branchHiddenStem[saju.hourPillarHanja?.[1] ?? ""] ?? ""
 ),
 hourStage,
+hourSpirit,
 };
 }

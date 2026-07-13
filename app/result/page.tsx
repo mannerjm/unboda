@@ -203,6 +203,7 @@ const savedSaju = sessionStorage.getItem("sajuData");
           branchTenGod: sajuData.hourBranchTenGod,
           stage: sajuData.hourStage,
            hiddenStems: sajuData.hourHiddenStems,
+           spirit: sajuData.hourSpirit,
       },
       {
         label: "일주",
@@ -213,6 +214,7 @@ const savedSaju = sessionStorage.getItem("sajuData");
         highlighted: true,
         stage: sajuData.dayStage,
           hiddenStems: sajuData.dayHiddenStems,
+            spirit: sajuData.daySpirit,
       },
       {
         label: "월주",
@@ -222,6 +224,7 @@ const savedSaju = sessionStorage.getItem("sajuData");
            branchTenGod: sajuData.monthBranchTenGod,
            stage: sajuData.monthStage,
              hiddenStems: sajuData.monthHiddenStems,
+               spirit: sajuData.monthSpirit,
       },
       {
          label: "년주",
@@ -231,6 +234,7 @@ const savedSaju = sessionStorage.getItem("sajuData");
   branchTenGod: sajuData.yearBranchTenGod,
   stage: sajuData.yearStage,
     hiddenStems: sajuData.yearHiddenStems,
+     spirit: sajuData.yearSpirit,
       },
     ].map((pillar) => {
   const stemStyle = getFiveElementStyle(
@@ -391,6 +395,17 @@ const savedSaju = sessionStorage.getItem("sajuData");
           {pillar.stage}
         </span>
       )}
+      {pillar.spirit && (
+  <span
+    className={`mt-2 rounded-full px-3 py-1 text-[11px] font-medium ${
+      pillar.highlighted
+        ? "bg-white/10 text-white/75"
+        : "bg-stone-100 text-stone-500"
+    }`}
+  >
+    {pillar.spirit}
+  </span>
+)}
     </div>
   </div>
 );

@@ -202,6 +202,7 @@ const savedSaju = sessionStorage.getItem("sajuData");
          tenGod: sajuData.hourTenGod,
           branchTenGod: sajuData.hourBranchTenGod,
           stage: sajuData.hourStage,
+           hiddenStems: sajuData.hourHiddenStems,
       },
       {
         label: "일주",
@@ -211,6 +212,7 @@ const savedSaju = sessionStorage.getItem("sajuData");
           branchTenGod: sajuData.dayBranchTenGod,
         highlighted: true,
         stage: sajuData.dayStage,
+          hiddenStems: sajuData.dayHiddenStems,
       },
       {
         label: "월주",
@@ -219,6 +221,7 @@ const savedSaju = sessionStorage.getItem("sajuData");
           tenGod: sajuData.monthTenGod,
            branchTenGod: sajuData.monthBranchTenGod,
            stage: sajuData.monthStage,
+             hiddenStems: sajuData.monthHiddenStems,
       },
       {
          label: "년주",
@@ -227,6 +230,7 @@ const savedSaju = sessionStorage.getItem("sajuData");
   tenGod: sajuData.yearTenGod,
   branchTenGod: sajuData.yearBranchTenGod,
   stage: sajuData.yearStage,
+    hiddenStems: sajuData.yearHiddenStems,
       },
     ].map((pillar) => {
   const stemStyle = getFiveElementStyle(
@@ -344,6 +348,37 @@ const savedSaju = sessionStorage.getItem("sajuData");
           {branchStyle.label}
         </p>
       )}
+      {Array.isArray(pillar.hiddenStems) &&
+  pillar.hiddenStems.length > 0 && (
+    <div className="mt-3">
+      <p
+        className={`mb-1 text-[10px] ${
+          pillar.highlighted
+            ? "text-white/50"
+            : "text-stone-400"
+        }`}
+      >
+        지장간
+      </p>
+
+      <div className="flex flex-wrap justify-center gap-1">
+        {pillar.hiddenStems.map(
+          (hiddenStem: string, index: number) => (
+            <span
+              key={`${hiddenStem}-${index}`}
+              className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                pillar.highlighted
+                  ? "bg-white/10 text-white/75"
+                  : "bg-stone-100 text-stone-600"
+              }`}
+            >
+              {hiddenStem}
+            </span>
+          )
+        )}
+      </div>
+    </div>
+  )}
 
       {pillar.stage && (
         <span

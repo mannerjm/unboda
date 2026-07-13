@@ -121,24 +121,28 @@ export async function POST(req: Request) {
 
     yearStem: saju.yearStem,
     yearBranch: saju.yearBranch,
+    yearHiddenStems: saju.yearHiddenStems,
     yearTenGod: saju.yearTenGod,
     yearBranchTenGod: saju.yearBranchTenGod,
     yearStage: saju.yearStage,
 
     monthStem: saju.monthStem,
     monthBranch: saju.monthBranch,
+    monthHiddenStems: saju.monthHiddenStems,
     monthTenGod: saju.monthTenGod,
     monthBranchTenGod: saju.monthBranchTenGod,
     monthStage: saju.monthStage,
 
     dayStem: saju.dayStem,
     dayBranch: saju.dayBranch,
+    dayHiddenStems: saju.dayHiddenStems,
     dayTenGod: saju.dayTenGod,
      dayBranchTenGod: saju.dayBranchTenGod,
      dayStage: saju.dayStage,
 
     hourStem: saju.hourStem,
     hourBranch: saju.hourBranch,
+    hourHiddenStems: saju.hourHiddenStems,
     hourTenGod: saju.hourTenGod,
      hourBranchTenGod: saju.hourBranchTenGod,
      hourStage: saju.hourStage,

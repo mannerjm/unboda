@@ -49,6 +49,20 @@ const branchHiddenStem: Record<string, string> = {
   戌: "戊",
   亥: "壬",
 };
+const branchHiddenStems: Record<string, string[]> = {
+  子: ["癸"],
+  丑: ["己", "癸", "辛"],
+  寅: ["甲", "丙", "戊"],
+  卯: ["乙"],
+  辰: ["戊", "乙", "癸"],
+  巳: ["丙", "戊", "庚"],
+  午: ["丁", "己"],
+  未: ["己", "丁", "乙"],
+  申: ["庚", "壬", "戊"],
+  酉: ["辛"],
+  戌: ["戊", "辛", "丁"],
+  亥: ["壬", "甲"],
+};
 
 function getTenGod(dayStem: string, targetStem: string) {
   const day = stemInfoMap[dayStem];
@@ -216,6 +230,8 @@ const hourStage = getTwelveStage(
   yearPillarHanja: saju.yearPillarHanja,
   yearStem: saju.yearPillarHanja[0],
   yearBranch: saju.yearPillarHanja[1],
+  yearHiddenStems:
+  branchHiddenStems[saju.yearPillarHanja[1]] ?? [],
   yearTenGod: getTenGod(
   saju.dayPillarHanja[0],
   saju.yearPillarHanja[0]
@@ -231,6 +247,8 @@ yearStage,
   monthPillarHanja: saju.monthPillarHanja,
   monthStem: saju.monthPillarHanja[0],
   monthBranch: saju.monthPillarHanja[1],
+  monthHiddenStems:
+  branchHiddenStems[saju.monthPillarHanja[1]] ?? [],
   monthTenGod: getTenGod(
   saju.dayPillarHanja[0],
   saju.monthPillarHanja[0]
@@ -246,6 +264,8 @@ monthStage,
   dayPillarHanja: saju.dayPillarHanja,
   dayStem: saju.dayPillarHanja[0],
   dayBranch: saju.dayPillarHanja[1],
+  dayHiddenStems:
+  branchHiddenStems[saju.dayPillarHanja[1]] ?? [],
   dayTenGod: "일원",
 dayBranchTenGod: getTenGod(
   saju.dayPillarHanja[0],
@@ -257,6 +277,8 @@ dayStage,
 hourPillarHanja: saju.hourPillarHanja ?? "",
 hourStem: saju.hourPillarHanja?.[0] ?? "",
 hourBranch: saju.hourPillarHanja?.[1] ?? "",
+hourHiddenStems:
+  branchHiddenStems[saju.hourPillarHanja?.[1] ?? ""] ?? [],
 hourTenGod: getTenGod(
   saju.dayPillarHanja[0],
   saju.hourPillarHanja?.[0] ?? ""

@@ -2,6 +2,8 @@ import {
   calculateSaju,
   lunarToSolar,
 } from "@fullstackfamily/manseryeok";
+import { calculateWeightedElements } from "./elements";
+import { interpretElementAnalysis } from "./elementInterpretation";
 type StemInfo = {
   element: "목" | "화" | "토" | "금" | "수";
   polarity: "양" | "음";
@@ -472,6 +474,23 @@ const hourNobles = getNobleList(
   saju.hourPillarHanja?.[1] ?? ""
 );
 
+const elementAnalysis = calculateWeightedElements(
+  [
+    saju.yearPillarHanja[0],
+    saju.monthPillarHanja[0],
+    saju.dayPillarHanja[0],
+    saju.hourPillarHanja?.[0] ?? "",
+  ],
+  [
+    saju.yearPillarHanja[1],
+    saju.monthPillarHanja[1],
+    saju.dayPillarHanja[1],
+    saju.hourPillarHanja?.[1] ?? "",
+  ]
+);
+const elementInterpretation =
+  interpretElementAnalysis(elementAnalysis);
+
   return {
      solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
     solarDay
@@ -550,5 +569,8 @@ hourStage,
 hourSpirit,
 hourNoble,
 hourNobles,
+
+elementAnalysis,
+elementInterpretation,
 };
 }

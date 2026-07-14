@@ -1,5 +1,5 @@
 "use client";
-
+import { calculateWeightedElements } from "../lib/elements";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
@@ -145,6 +145,33 @@ const savedSaju = sessionStorage.getItem("sajuData");
       setAiResult("AI 분석 결과를 찾을 수 없습니다.");
     }
   }, []);
+
+  if (!sajuData.yearStem) {
+  return null;
+}
+
+const elementAnalysis = calculateWeightedElements(
+  [
+    sajuData.yearStem,
+    sajuData.monthStem,
+    sajuData.dayStem,
+    sajuData.hourStem,
+  ],
+  [
+    sajuData.yearBranch,
+    sajuData.monthBranch,
+    sajuData.dayBranch,
+    sajuData.hourBranch,
+  ]
+);
+
+const elementItems = [
+  { key: "목", label: "목" },
+  { key: "화", label: "화" },
+  { key: "토", label: "토" },
+  { key: "금", label: "금" },
+  { key: "수", label: "수" },
+] as const;
 
   return (
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
@@ -435,6 +462,87 @@ const savedSaju = sessionStorage.getItem("sajuData");
 
   <p className="mt-6 text-center text-xs leading-6 text-stone-500">
     일주는 본인을 중심으로 보는 기둥이므로 화면에서 강조해 표시했습니다.
+  </p>
+</section>
+<section className="mt-7 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+  <div className="mb-7 flex items-end justify-between gap-4">
+    <div>
+      <p className="mb-2 text-xs tracking-[0.3em] text-stone-500">
+        FIVE ELEMENTS
+      </p>
+
+      <h2 className="text-2xl font-bold text-stone-900">
+        오행 분석
+      </h2>
+    </div>
+
+    <p className="text-xs text-stone-500">
+  천간·지지·지장간 반영
+</p>
+  </div>
+
+  <div className="space-y-5">
+    {elementItems.map((item) => {
+      const score = elementAnalysis.counts[item.key];
+      const percentage =
+        elementAnalysis.percentages[item.key];
+
+      return (
+        <div key={item.key}>
+          <div className="mb-2 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-sm font-bold text-stone-800">
+                {item.label}
+              </span>
+
+              <span className="text-sm font-semibold text-stone-800">
+                {score}점
+              </span>
+            </div>
+
+            <span className="text-sm font-bold text-stone-700">
+              {percentage}%
+            </span>
+          </div>
+
+          <div className="h-3 overflow-hidden rounded-full bg-stone-100">
+            <div
+              className="h-full rounded-full bg-stone-800 transition-all duration-500"
+              style={{
+                width: `${Math.min(percentage, 100)}%`,
+              }}
+            />
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <div className="mt-8 grid gap-4 sm:grid-cols-2">
+    <div className="rounded-2xl bg-stone-50 p-5">
+      <p className="mb-2 text-xs text-stone-500">
+        가장 강한 오행
+      </p>
+
+      <p className="text-lg font-bold text-stone-900">
+        {elementAnalysis.strongest.join(", ")}
+      </p>
+    </div>
+
+    <div className="rounded-2xl bg-stone-50 p-5">
+      <p className="mb-2 text-xs text-stone-500">
+        가장 약한 오행
+      </p>
+
+      <p className="text-lg font-bold text-stone-900">
+        {elementAnalysis.weakest.join(", ")}
+      </p>
+    </div>
+  </div>
+
+  <p className="mt-6 text-center text-xs leading-6 text-stone-500">
+    현재 결과는 천간·지지·지장간 가중치를 반영한
+    오행 점수 v1입니다.
   </p>
 </section>
         <section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">

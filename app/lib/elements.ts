@@ -1,3 +1,10 @@
+import {
+  BRANCH_HIDDEN_STEMS,
+  BRANCH_WEIGHT,
+  HIDDEN_STEM_WEIGHT,
+  STEM_WEIGHT,
+} from "./weights";
+
 export type Element = "목" | "화" | "토" | "금" | "수";
 
 export const stemElementMap: Record<string, Element> = {
@@ -99,6 +106,80 @@ export function calculateElements(
       total === 0
         ? 0
         : Math.round((counts[element] / total) * 100);
+  }
+
+  const values = Object.values(counts);
+  const highest = Math.max(...values);
+  const lowest = Math.min(...values);
+
+  const strongest = elementOrder.filter(
+    (element) => counts[element] === highest
+  );
+
+  const weakest = elementOrder.filter(
+    (element) => counts[element] === lowest
+  );
+
+  return {
+    counts,
+    percentages,
+    total,
+    strongest,
+    weakest,
+  };
+}
+
+export function calculateWeightedElements(
+  stems: string[],
+  branches: string[]
+): ElementAnalysis {
+  const counts = createEmptyCounts();
+
+  // 천간 점수
+  for (const stem of stems) {
+    const element = stemElementMap[stem];
+
+    if (element) {
+      counts[element] += STEM_WEIGHT;
+    }
+  }
+
+  // 지지 본체 점수와 지장간 점수
+  for (const branch of branches) {
+    const branchElement = branchElementMap[branch];
+
+    if (branchElement) {
+      counts[branchElement] += BRANCH_WEIGHT;
+    }
+
+    const hiddenStems = BRANCH_HIDDEN_STEMS[branch] ?? [];
+
+    for (const hiddenStem of hiddenStems) {
+      const hiddenElement = stemElementMap[hiddenStem.stem];
+
+      if (!hiddenElement) {
+        continue;
+      }
+
+      counts[hiddenElement] +=
+        HIDDEN_STEM_WEIGHT[hiddenStem.position];
+    }
+  }
+
+  const total = Object.values(counts).reduce(
+    (sum, value) => sum + value,
+    0
+  );
+
+  const percentages = createEmptyCounts();
+
+  for (const element of elementOrder) {
+    percentages[element] =
+      total === 0
+        ? 0
+        : Number(
+            ((counts[element] / total) * 100).toFixed(1)
+          );
   }
 
   const values = Object.values(counts);

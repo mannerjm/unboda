@@ -163,6 +163,7 @@ export async function POST(req: Request) {
      elementAnalysis: saju.elementAnalysis,
 strengthAnalysis: saju.strengthAnalysis,
 elementInterpretation: saju.elementInterpretation,
+elementRelations: saju.elementRelations,
   },
 });
   } catch (error) {

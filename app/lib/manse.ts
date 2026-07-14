@@ -1,3 +1,4 @@
+import { analyzeElementRelations } from "./elementRelations";
 import { calculateStrength } from "./strength";
 import {
   calculateSaju,
@@ -497,6 +498,9 @@ const elementInterpretation =
   elementAnalysis
 );
 
+const elementRelations =
+  analyzeElementRelations(elementAnalysis);
+
   return {
      solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
     solarDay
@@ -579,5 +583,6 @@ hourNobles,
 elementAnalysis,
 elementInterpretation,
 strengthAnalysis,
+elementRelations,
 };
 }

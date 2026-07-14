@@ -162,8 +162,10 @@ console.log("오행해석", sajuData.elementInterpretation);
 
 if (
   !sajuData.strengthAnalysis ||
-  !sajuData.elementInterpretation
+  !sajuData.elementInterpretation ||
+  !sajuData.elementRelations
 ) {
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6">
       <div className="rounded-3xl border border-stone-200 bg-white p-8 text-center shadow-sm">
@@ -195,6 +197,7 @@ const elementAnalysis = calculateWeightedElements(
 );
 const strengthAnalysis = sajuData.strengthAnalysis;
 const elementInterpretation = sajuData.elementInterpretation;
+const elementRelations = sajuData.elementRelations;
 
 const elementItems = [
   { key: "목", label: "목" },
@@ -645,6 +648,55 @@ const elementItems = [
         </p>
       </div>
     ))}
+  </div>
+</section>
+<section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+  <div className="mb-6">
+    <p className="text-xs tracking-[0.25em] text-stone-500">
+      ELEMENT RELATIONS
+    </p>
+
+    <h2 className="mt-1 text-2xl font-bold">
+      오행 상생·상극
+    </h2>
+  </div>
+
+  <p className="mb-6 text-sm leading-7 text-stone-600">
+    {elementRelations.summary}
+  </p>
+
+  <div className="grid gap-4 sm:grid-cols-2">
+    {elementRelations.relations.map(
+      (
+        relation: {
+          source: string;
+          target: string;
+          type: string;
+          strength: string;
+          description: string;
+        },
+        index: number
+      ) => (
+        <div
+          key={`${relation.source}-${relation.target}-${relation.type}-${index}`}
+          className="rounded-2xl bg-stone-50 p-5"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <p className="font-semibold text-stone-900">
+              {relation.source} → {relation.target}
+            </p>
+
+            <span className="rounded-full bg-stone-900 px-3 py-1 text-xs font-medium text-white">
+              {relation.type} · {relation.strength}
+            </span>
+          </div>
+
+          <p className="mt-3 text-sm leading-7 text-stone-600">
+            {relation.description}
+          </p>
+        </div>
+      )
+    )}
   </div>
 </section>
         <section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">

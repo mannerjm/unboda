@@ -159,6 +159,10 @@ export async function POST(req: Request) {
      hourSpirit: saju.hourSpirit,
      hourNoble: saju.hourNoble,
      hourNobles: saju.hourNobles,
+
+     elementAnalysis: saju.elementAnalysis,
+strengthAnalysis: saju.strengthAnalysis,
+elementInterpretation: saju.elementInterpretation,
   },
 });
   } catch (error) {

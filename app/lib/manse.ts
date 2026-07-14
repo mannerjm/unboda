@@ -1,3 +1,4 @@
+import { calculateStrength } from "./strength";
 import {
   calculateSaju,
   lunarToSolar,
@@ -491,6 +492,11 @@ const elementAnalysis = calculateWeightedElements(
 const elementInterpretation =
   interpretElementAnalysis(elementAnalysis);
 
+  const strengthAnalysis = calculateStrength(
+  saju.dayPillarHanja[0],
+  elementAnalysis
+);
+
   return {
      solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
     solarDay
@@ -572,5 +578,6 @@ hourNobles,
 
 elementAnalysis,
 elementInterpretation,
+strengthAnalysis,
 };
 }

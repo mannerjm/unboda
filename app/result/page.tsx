@@ -146,8 +146,37 @@ const savedSaju = sessionStorage.getItem("sajuData");
     }
   }, []);
 
-  if (!sajuData.yearStem) {
-  return null;
+ if (!sajuData.yearStem) {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea]">
+      <p className="text-sm text-stone-500">
+        사주 데이터를 불러오는 중입니다...
+      </p>
+    </main>
+  );
+}
+console.log("저장된 사주 데이터", sajuData);
+console.log("신강신약", sajuData.strengthAnalysis);
+console.log("오행해석", sajuData.elementInterpretation);
+
+
+if (
+  !sajuData.strengthAnalysis ||
+  !sajuData.elementInterpretation
+) {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6">
+      <div className="rounded-3xl border border-stone-200 bg-white p-8 text-center shadow-sm">
+        <p className="font-semibold text-stone-900">
+          새 분석 데이터가 없습니다.
+        </p>
+
+        <p className="mt-3 text-sm leading-6 text-stone-500">
+          사주 입력 화면으로 돌아가서 다시 조회해 주세요.
+        </p>
+      </div>
+    </main>
+  );
 }
 
 const elementAnalysis = calculateWeightedElements(
@@ -164,6 +193,8 @@ const elementAnalysis = calculateWeightedElements(
     sajuData.hourBranch,
   ]
 );
+const strengthAnalysis = sajuData.strengthAnalysis;
+const elementInterpretation = sajuData.elementInterpretation;
 
 const elementItems = [
   { key: "목", label: "목" },
@@ -544,6 +575,77 @@ const elementItems = [
     현재 결과는 천간·지지·지장간 가중치를 반영한
     오행 점수 v1입니다.
   </p>
+</section>
+<section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+  <div className="mb-7 flex items-center gap-3">
+    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-900 text-lg text-white">
+      ⚖
+    </div>
+
+    <div>
+      <p className="text-xs tracking-[0.25em] text-stone-500">
+        STRENGTH ANALYSIS
+      </p>
+
+      <h2 className="mt-1 text-2xl font-bold">
+        신강·신약 참고 지표
+      </h2>
+    </div>
+  </div>
+
+  <div className="rounded-2xl bg-stone-50 p-6">
+    <p className="text-lg font-semibold">
+      판정 :
+      <span className="ml-2 text-indigo-600">
+        {strengthAnalysis.level}
+      </span>
+    </p>
+
+    <p className="mt-3 text-stone-700">
+      {strengthAnalysis.summary}
+    </p>
+  </div>
+</section>
+<section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+  <div className="mb-6">
+    <p className="text-xs tracking-[0.25em] text-stone-500">
+      FIVE ELEMENT INTERPRETATION
+    </p>
+
+    <h2 className="mt-1 text-2xl font-bold">
+      오행 해석
+    </h2>
+  </div>
+
+  <div className="space-y-5">
+    {elementInterpretation.items.map(
+  (
+    item: {
+      element: string;
+      level: string;
+      description: string;
+    }
+  ) => (
+      <div
+        key={item.element}
+        className="rounded-2xl bg-stone-50 p-5"
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">
+            {item.element}
+          </h3>
+
+          <span className="rounded-full bg-stone-900 px-3 py-1 text-sm text-white">
+            {item.level}
+          </span>
+        </div>
+
+        <p className="mt-3 leading-7 text-stone-700">
+          {item.description}
+        </p>
+      </div>
+    ))}
+  </div>
 </section>
         <section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
           <div className="mb-7 flex items-center gap-3">

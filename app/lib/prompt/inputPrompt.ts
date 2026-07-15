@@ -1,0 +1,39 @@
+export function buildInputPrompt(
+  calendarType: string,
+  isLeapMonth: boolean,
+  birthDate: string,
+  birthTime: string,
+  gender: string,
+  saju: any
+) {
+  return `
+달력 기준: ${calendarType}
+윤달 여부: ${isLeapMonth ? "윤달" : "평달"}
+
+생년월일:
+${birthDate}
+
+출생시간:
+${birthTime}
+
+성별:
+${gender}
+
+양력 변환:
+${saju.solarDate}
+
+실제 계산된 사주팔자
+
+년주:
+${saju.yearPillarHanja}
+
+월주:
+${saju.monthPillarHanja}
+
+일주:
+${saju.dayPillarHanja}
+
+시주:
+${saju.hourPillarHanja}
+`;
+}

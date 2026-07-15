@@ -1,6 +1,9 @@
 import OpenAI from "openai";
 import { getSaju } from "@/app/lib/manse";
 import { NextResponse } from "next/server";
+import { buildBasePrompt } from "@/app/lib/prompt/basePrompt";
+import { buildFortunePrompt } from "@/app/lib/prompt/fortunePrompt";
+import { buildPrompt } from "@/app/lib/prompt/builder";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -28,8 +31,10 @@ export async function POST(req: Request) {
       JSON.stringify(saju, null, 2)
     );
 
-    const prompt = `
-당신은 차분하고 신뢰감 있게 설명하는 한국어 명리 상담가입니다.
+   const prompt = `
+${buildBasePrompt()}
+
+${buildFortunePrompt()}
 
 아래 출생 정보와 실제 계산된 사주팔자를 바탕으로 참고용 리포트를 작성하세요.
 

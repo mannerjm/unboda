@@ -1,3 +1,4 @@
+import { analyzeFortuneBrain } from "./fortuneBrain";
 import { analyzeElementRelations } from "./elementRelations";
 import { calculateStrength } from "./strength";
 import {
@@ -501,6 +502,12 @@ const elementInterpretation =
 const elementRelations =
   analyzeElementRelations(elementAnalysis);
 
+  const fortuneBrain = analyzeFortuneBrain({
+  strength: strengthAnalysis,
+  elements: elementInterpretation,
+  relations: elementRelations,
+});
+
   return {
      solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
     solarDay
@@ -584,5 +591,6 @@ elementAnalysis,
 elementInterpretation,
 strengthAnalysis,
 elementRelations,
+fortuneBrain,
 };
 }

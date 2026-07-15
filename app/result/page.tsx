@@ -666,7 +666,7 @@ const elementItems = [
   </p>
 
   <div className="grid gap-4 sm:grid-cols-2">
-    {elementRelations.relations.map(
+    {elementRelations.highlights.map(
       (
         relation: {
           source: string;

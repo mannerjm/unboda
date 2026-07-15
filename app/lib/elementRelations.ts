@@ -21,6 +21,7 @@ export type ElementRelationItem = {
 
 export type ElementRelationsAnalysis = {
   relations: ElementRelationItem[];
+  highlights: ElementRelationItem[];
   summary: string;
 };
 
@@ -106,6 +107,36 @@ export function analyzeElementRelations(
         `${controlledTarget}의 비율은 ${controlledPercentage}%입니다.`,
     });
   }
+const highlights = [...relations]
+  .sort((a, b) => {
+    const aDifference = Math.abs(
+      a.sourcePercentage - a.targetPercentage
+    );
+
+    const bDifference = Math.abs(
+      b.sourcePercentage - b.targetPercentage
+    );
+
+    const aStrengthScore =
+      a.strength === "강함"
+        ? 3
+        : a.strength === "보통"
+          ? 2
+          : 1;
+
+    const bStrengthScore =
+      b.strength === "강함"
+        ? 3
+        : b.strength === "보통"
+          ? 2
+          : 1;
+
+    return (
+      bStrengthScore - aStrengthScore ||
+      bDifference - aDifference
+    );
+  })
+  .slice(0, 4);
 
   const strongestText =
     analysis.strongest.length > 0
@@ -118,10 +149,11 @@ export function analyzeElementRelations(
       : "없음";
 
   return {
-    relations,
-    summary:
+  relations,
+  highlights,
+  summary:
       `가장 강한 오행은 ${strongestText}, ` +
       `가장 약한 오행은 ${weakestText}입니다. ` +
-      `상생과 상극 관계를 함께 살펴 균형을 판단합니다.`,
+      `아래에는 현재 구조에서 영향력이 큰 관계를 우선 표시합니다.`
   };
 }

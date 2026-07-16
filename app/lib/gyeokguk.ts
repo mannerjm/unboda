@@ -172,12 +172,25 @@ const specialGyeokguk =
     : "";
 
 // 월지 지장간 중 월간에 실제로 투출된 글자
-const exposedHiddenStem = monthHiddenStems.find(
-  (hiddenStem) => hiddenStem === monthStem
-);
+const visibleStems = [
+  yearStem,
+  monthStem,
+  hourStem,
+].filter(Boolean);
 
 // 지장간 첫 번째 값을 본기로 사용
 const mainHiddenStem = monthHiddenStems[0] ?? "";
+
+const exposedHiddenStems = monthHiddenStems.filter(
+  (hiddenStem) => visibleStems.includes(hiddenStem)
+);
+
+const exposedHiddenStem =
+  mainHiddenStem && exposedHiddenStems.includes(mainHiddenStem)
+    ? mainHiddenStem
+    : exposedHiddenStems[0] ?? "";
+
+
 
 // 투간된 글자가 8격에 해당하면 최우선
 const exposedGyeokguk = exposedHiddenStem
@@ -189,14 +202,22 @@ const mainGyeokguk = mainHiddenStem
   ? toGyeokgukName(mainHiddenStem)
   : "";
 
+const hasDirectExposure =
+  exposedGyeokguk !== "";
+
+const fallbackGyeokguk =
+  !hasDirectExposure && mainGyeokguk
+    ? `${mainGyeokguk} 후보`
+    : "";
+
 const detectedSpecialCandidate =
   specialCandidates[0] ?? "";
 
 const primary =
   exposedGyeokguk ||
-  mainGyeokguk ||
   specialGyeokguk ||
   detectedSpecialCandidate ||
+  fallbackGyeokguk ||
   "특수격 검토 필요";
 
 const candidates = Array.from(
@@ -216,12 +237,11 @@ const reason = exposedGyeokguk
       dayStem,
        exposedHiddenStem ?? ""
     )} 관계이므로 ${exposedGyeokguk}을 1차 격국으로 판단했습니다.`
-  : mainGyeokguk
-  ? `월지 ${monthBranch}에서 직접 투출된 8격 성분이 없어 본기 ${mainHiddenStem}을 우선 검토했습니다. ` +
-    `일간 ${dayStem} 기준 ${getTenGod(
-      dayStem,
-      mainHiddenStem
-    )} 관계이므로 ${mainGyeokguk}을 1차 격국으로 판단했습니다.`
+  : fallbackGyeokguk
+? `월지 ${monthBranch}에서 직접 투출된 8격 성분이 없어 본기 ${mainHiddenStem}을 우선 검토했습니다. 일간 ${dayStem} 기준 ${getTenGod(
+    dayStem,
+    mainHiddenStem
+  )} 관계이므로 ${mainGyeokguk}을 확정하지 않고 ${fallbackGyeokguk}로 분류했습니다.`
   : specialGyeokguk
 ? `월지 ${monthBranch}가 일간 ${dayStem} 기준 ${specialGyeokguk} 조건에 해당하여 ${specialGyeokguk}으로 판단했습니다.`
 : detectedSpecialCandidate

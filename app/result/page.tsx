@@ -614,6 +614,51 @@ const elementItems = [
 <section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
   <div className="mb-6">
     <p className="text-xs tracking-[0.25em] text-stone-500">
+      YONGSHIN ANALYSIS
+    </p>
+
+    <h2 className="mt-1 text-2xl font-bold">
+      용신 분석
+    </h2>
+  </div>
+
+  <div className="space-y-4">
+    <div className="rounded-2xl bg-stone-50 p-5">
+      <p className="font-semibold">
+        주 용신
+      </p>
+
+      <p className="mt-2 text-lg font-bold">
+        {sajuData.yongshinAnalysis.primary}
+      </p>
+    </div>
+
+    <div className="rounded-2xl bg-stone-50 p-5">
+      <p className="font-semibold">
+        보조 용신
+      </p>
+
+      <p className="mt-2 text-stone-700">
+        {sajuData.yongshinAnalysis.secondary.length > 0
+          ? sajuData.yongshinAnalysis.secondary.join(", ")
+          : "없음"}
+      </p>
+    </div>
+
+    <div className="rounded-2xl bg-stone-50 p-5">
+      <p className="font-semibold">
+        판단 근거
+      </p>
+
+      <p className="mt-2 leading-7 text-stone-700">
+        {sajuData.yongshinAnalysis.reason}
+      </p>
+    </div>
+  </div>
+</section>
+<section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+  <div className="mb-6">
+    <p className="text-xs tracking-[0.25em] text-stone-500">
       FIVE ELEMENT INTERPRETATION
     </p>
 

@@ -8,6 +8,7 @@ export function buildFortunePrompt() {
 신강/신약,
 상생·상극,
 FortuneBrain,
+용신 분석,
 십신,
 길신,
 흉신을 종합하여 설명하세요.

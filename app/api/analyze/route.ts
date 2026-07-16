@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       JSON.stringify(saju, null, 2)
     );
 
-    
+
 const modularPrompt = buildPrompt({
   calendarType,
   isLeapMonth,
@@ -107,6 +107,7 @@ const modularPrompt = buildPrompt({
 strengthAnalysis: saju.strengthAnalysis,
 elementInterpretation: saju.elementInterpretation,
 elementRelations: saju.elementRelations,
+yongshinAnalysis: saju.yongshinAnalysis,
 fortuneBrain: saju.fortuneBrain,
   },
 });

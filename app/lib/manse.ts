@@ -1,3 +1,4 @@
+import { analyzeYongshin } from "./yongshin";
 import { analyzeFortuneBrain } from "./fortuneBrain";
 import { analyzeElementRelations } from "./elementRelations";
 import { calculateStrength } from "./strength";
@@ -499,6 +500,12 @@ const elementInterpretation =
   elementAnalysis
 );
 
+const yongshinAnalysis = analyzeYongshin(
+   saju.dayPillarHanja[0],
+  strengthAnalysis,
+  elementAnalysis
+);
+
 const elementRelations =
   analyzeElementRelations(elementAnalysis);
 
@@ -591,6 +598,7 @@ elementAnalysis,
 elementInterpretation,
 strengthAnalysis,
 elementRelations,
+yongshinAnalysis,
 fortuneBrain,
 };
 }

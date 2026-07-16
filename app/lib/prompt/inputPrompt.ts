@@ -39,5 +39,10 @@ ${saju.dayPillarHanja}
 
 시주:
 ${saju.hourPillarHanja}
+
+용신 분석:
+주 용신 후보: ${saju.yongshinAnalysis.primary}
+보조 용신 후보: ${saju.yongshinAnalysis.secondary.join(", ") || "없음"}
+판단 근거: ${saju.yongshinAnalysis.reason}
 `;
 }

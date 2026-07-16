@@ -501,7 +501,8 @@ const elementInterpretation =
 );
 
 const yongshinAnalysis = analyzeYongshin(
-   saju.dayPillarHanja[0],
+  saju.dayPillarHanja[0],
+  saju.monthPillarHanja[1],
   strengthAnalysis,
   elementAnalysis
 );

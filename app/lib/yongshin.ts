@@ -9,6 +9,17 @@ type FiveElement = "목" | "화" | "토" | "금" | "수";
 export type YongshinResult = {
   primary: FiveElement;
   secondary: FiveElement[];
+  scores: Record<FiveElement, number>;
+  scoreDetails: Record<
+    FiveElement,
+    {
+      strength: number;
+      balance: number;
+      season: number;
+      excess: number;
+      total: number;
+    }
+  >;
   reason: string;
 };
 
@@ -70,6 +81,7 @@ function findControllingElement(target: FiveElement): FiveElement {
 
 export function analyzeYongshin(
   dayStem: string,
+  monthBranch: string,
   strength: StrengthResult,
   elements: ElementAnalysisResult
 ): YongshinResult {
@@ -79,6 +91,23 @@ export function analyzeYongshin(
     throw new Error(`일간 오행을 찾을 수 없습니다: ${dayStem}`);
   }
 
+  const seasonByBranch: Record<string, string> = {
+  寅: "목",
+  卯: "목",
+  辰: "토",
+  巳: "화",
+  午: "화",
+  未: "토",
+  申: "금",
+  酉: "금",
+  戌: "토",
+  亥: "수",
+  子: "수",
+  丑: "토",
+};
+
+  const seasonElement = seasonByBranch[monthBranch] ?? "";
+  
   const percentages = elements.percentages;
 
   const level = strength.level;
@@ -86,56 +115,105 @@ export function analyzeYongshin(
   const isWeak = level.includes("신약");
   const isStrong = level.includes("신강");
 
-  let candidates: FiveElement[];
+  const fiveElements: FiveElement[] = ["목", "화", "토", "금", "수"];
 
-  if (isWeak) {
-    // 신약: 나를 생해주는 기운 → 나와 같은 기운 순으로 우선
-    const resourceElement = findGeneratingElement(dayElement);
+const scores: Record<FiveElement, number> = {
+  목: 0,
+  화: 0,
+  토: 0,
+  금: 0,
+  수: 0,
+};
 
-    candidates = [
-      resourceElement,
-      dayElement,
-    ];
-  } else if (isStrong) {
-    // 신강: 내 기운을 빼주는 기운 → 내가 극하는 기운 → 나를 극하는 기운
-    const outputElement = generates[dayElement];
-    const wealthElement = controls[dayElement];
-    const officerElement = findControllingElement(dayElement);
+const scoreDetails: YongshinResult["scoreDetails"] = {
+  목: { strength: 0, balance: 0, season: 0, excess: 0, total: 0 },
+  화: { strength: 0, balance: 0, season: 0, excess: 0, total: 0 },
+  토: { strength: 0, balance: 0, season: 0, excess: 0, total: 0 },
+  금: { strength: 0, balance: 0, season: 0, excess: 0, total: 0 },
+  수: { strength: 0, balance: 0, season: 0, excess: 0, total: 0 },
+};
 
-    candidates = [
-      outputElement,
-      wealthElement,
-      officerElement,
-    ];
-  } else {
-    // 중화에 가까우면 실제 비율이 부족한 오행을 우선
-    candidates = (
-      Object.entries(percentages) as [FiveElement, number][]
-    )
-      .sort(([, a], [, b]) => a - b)
-      .map(([element]) => element);
+// 1. 신강·신약에 따른 기본 가점
+if (isWeak) {
+  const resourceElement = findGeneratingElement(dayElement);
+
+  scores[resourceElement] += 40;
+scoreDetails[resourceElement].strength += 40;
+
+scores[dayElement] += 25;
+scoreDetails[dayElement].strength += 25;
+
+} else if (isStrong) {
+  const outputElement = generates[dayElement];
+  const wealthElement = controls[dayElement];
+  const officerElement = findControllingElement(dayElement);
+
+ scores[outputElement] += 40;
+scoreDetails[outputElement].strength += 40;
+ scores[wealthElement] += 30;
+scoreDetails[wealthElement].strength += 30;
+  scores[officerElement] += 20;
+scoreDetails[officerElement].strength += 20;
+} else {
+  // 중화에 가까운 경우는 부족한 오행을 더 중요하게 봄
+  for (const element of fiveElements) {
+    scores[element] += 20;
+  }
+}
+
+// 2. 실제 오행 비율이 낮을수록 가점
+for (const element of fiveElements) {
+  const balanceScore = Math.max(0, 25 - percentages[element]);
+
+  scores[element] += balanceScore;
+  scoreDetails[element].balance += balanceScore;
+}
+
+// 3. 월령의 계절 오행이 이미 강하게 작용하는 경우 감점
+if (seasonElement && seasonElement in scores) {
+  const element = seasonElement as FiveElement;
+
+  scores[element] -= 15;
+  scoreDetails[element].season -= 15;
+}
+
+// 4. 지나치게 높은 오행은 용신 후보에서 감점
+for (const element of fiveElements) {
+  if (percentages[element] >= 30) {
+    scores[element] -= 20;
+    scoreDetails[element].excess -= 20;
   }
 
-  // 같은 후보가 중복될 가능성 제거
-  const uniqueCandidates = [...new Set(candidates)];
+  if (percentages[element] >= 40) {
+    scores[element] -= 15;
+    scoreDetails[element].excess -= 15;
+  }
+}
+for (const element of fiveElements) {
+  scoreDetails[element].total = scores[element];
+}
+// 5. 최종 점수 순으로 정렬
+const rankedCandidates = [...fiveElements].sort(
+  (a, b) => scores[b] - scores[a]
+);
 
-  // 후보들 중 실제 비율이 더 낮은 오행을 우선
-  const rankedCandidates = uniqueCandidates.sort(
-    (a, b) => percentages[a] - percentages[b]
-  );
+const primary = rankedCandidates[0] ?? dayElement;
+const secondary = rankedCandidates.slice(1, 3);
 
-  const primary = rankedCandidates[0] ?? dayElement;
-  const secondary = rankedCandidates.slice(1, 3);
 
-  const reason = isWeak
-    ? `일간은 ${dayElement}이고 ${level}으로 판단되었습니다. 본인의 기운을 보충하는 흐름을 우선 고려하여 ${primary}을 주 용신 후보로 판단했습니다.`
-    : isStrong
-      ? `일간은 ${dayElement}이고 ${level}으로 판단되었습니다. 과한 기운을 자연스럽게 소모하거나 조절하는 흐름을 우선 고려하여 ${primary}을 주 용신 후보로 판단했습니다.`
-      : `일간은 ${dayElement}이고 현재 구조는 한쪽으로 크게 치우치지 않은 것으로 판단되었습니다. 전체 오행 비율을 비교해 상대적으로 보완 가치가 높은 ${primary}을 주 용신 후보로 판단했습니다.`;
+  const reason =
+  `일간은 ${dayElement}이고 ${level}으로 판단되었습니다. ` +
+  `월지 ${monthBranch}의 계절 오행은 ${seasonElement}입니다. ` +
+  `신강·신약 구조, 계절 영향, 실제 오행 분포를 함께 점수화한 결과 ` +
+  `${primary}이 가장 높은 보완 우선도를 보여 주 용신으로 선정되었습니다. ` +
+  `보조 후보는 ${secondary.join(", ")} 순이며, ` +
+  `현재 점수는 ${primary} ${scores[primary].toFixed(1)}점입니다.`;
 
   return {
-    primary,
-    secondary,
-    reason,
-  };
+  primary,
+  secondary,
+  scores,
+  scoreDetails,
+  reason,
+};
 }

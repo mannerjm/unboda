@@ -646,6 +646,42 @@ const elementItems = [
     </div>
 
     <div className="rounded-2xl bg-stone-50 p-5">
+  <p className="font-semibold">
+    용신 점수
+  </p>
+
+  <div className="mt-3 space-y-2 text-sm text-stone-700">
+    {Object.entries(sajuData.yongshinAnalysis.scores)
+      .sort(([, a], [, b]) => b - a)
+      .map(([element, score]) => {
+  const detail =
+    sajuData.yongshinAnalysis.scoreDetails[
+      element as keyof typeof sajuData.yongshinAnalysis.scoreDetails
+    ];
+
+  return (
+    <div
+      key={element}
+      className="rounded-xl border border-stone-200 bg-white p-3"
+    >
+      <div className="flex items-center justify-between font-semibold">
+        <span>{element}</span>
+        <span>{score.toFixed(1)}점</span>
+      </div>
+
+      <div className="mt-2 grid grid-cols-2 gap-1 text-xs text-stone-500">
+        <span>신강·신약: {detail.strength.toFixed(1)}</span>
+        <span>균형 보정: {detail.balance.toFixed(1)}</span>
+        <span>계절 보정: {detail.season.toFixed(1)}</span>
+        <span>과다 보정: {detail.excess.toFixed(1)}</span>
+      </div>
+    </div>
+  );
+})}
+  </div>
+</div>
+
+    <div className="rounded-2xl bg-stone-50 p-5">
       <p className="font-semibold">
         판단 근거
       </p>

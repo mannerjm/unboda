@@ -1,10 +1,14 @@
+import type { getSaju } from "../manse";
+
+type SajuResult = ReturnType<typeof getSaju>;
+
 export function buildInputPrompt(
   calendarType: string,
   isLeapMonth: boolean,
   birthDate: string,
   birthTime: string,
   gender: string,
-  saju: any
+  saju: SajuResult
 ) {
   return `
 달력 기준: ${calendarType}

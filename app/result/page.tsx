@@ -3,6 +3,8 @@ import { calculateWeightedElements } from "../lib/elements";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+import type { getSaju } from "../lib/manse";
+type SajuResult = ReturnType<typeof getSaju>;
 
 const titleIcons: Record<string, string> = {
   "한눈에 보는 핵심": "✨",
@@ -127,7 +129,7 @@ export default function ResultPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [aiResult, setAiResult] = useState("");
-const [sajuData, setSajuData] = useState<any>({});
+const [sajuData, setSajuData] = useState<SajuResult | null>(null);
   const birthDate = searchParams.get("birthDate") || "입력 없음";
   const birthTime = searchParams.get("birthTime") || "입력 없음";
   const gender = searchParams.get("gender") || "입력 없음";
@@ -146,7 +148,7 @@ const savedSaju = sessionStorage.getItem("sajuData");
     }
   }, []);
 
- if (!sajuData.yearStem) {
+ if (!sajuData) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea]">
       <p className="text-sm text-stone-500">

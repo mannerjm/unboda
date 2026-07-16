@@ -10,6 +10,7 @@ export type YongshinResult = {
   primary: FiveElement;
   secondary: FiveElement[];
   scores: Record<FiveElement, number>;
+  normalizedScores: Record<FiveElement, number>;
   scoreDetails: Record<
     FiveElement,
     {
@@ -315,22 +316,50 @@ const rankedCandidates = [...fiveElements].sort(
   (a, b) => scores[b] - scores[a]
 );
 
+const rawValues = rankedCandidates.map((element) => scores[element]);
+const minScore = Math.min(...rawValues);
+const maxScore = Math.max(...rawValues);
+
+const normalizedScores = Object.fromEntries(
+  fiveElements.map((element) => {
+    const normalized =
+      maxScore === minScore
+        ? 50
+        : ((scores[element] - minScore) / (maxScore - minScore)) * 100;
+
+    return [element, Math.round(normalized * 10) / 10];
+  })
+) as Record<FiveElement, number>;
+
 const primary = rankedCandidates[0] ?? dayElement;
 const secondary = rankedCandidates.slice(1, 3);
 
 
-  const reason =
+  const primaryDetail = scoreDetails[primary];
+const secondCandidate = secondary[0];
+const scoreGap = secondCandidate
+  ? scores[primary] - scores[secondCandidate]
+  : 0;
+
+const topicParticle = (value: string) =>
+  ["화", "수"].includes(value) ? "는" : "은";
+
+const objectParticle = (value: string) =>
+  ["화", "수"].includes(value) ? "를" : "을";
+
+const reason =
   `일간은 ${dayElement}이고 ${level}으로 판단되었습니다. ` +
   `월지 ${monthBranch}의 계절 오행은 ${seasonElement}입니다. ` +
-  `신강·신약 구조, 계절 영향, 실제 오행 분포를 함께 점수화한 결과 ` +
-  `${primary}이 가장 높은 보완 우선도를 보여 주 용신으로 선정되었습니다. ` +
-  `보조 후보는 ${secondary.join(", ")} 순이며, ` +
-  `현재 점수는 ${primary} ${scores[primary].toFixed(1)}점입니다.`;
+  `${primary}${topicParticle(primary)} 신강·신약 구조, 계절 영향, 실제 오행 분포를 함께 점수화한 결과 ` +
+  `가장 높은 보완 우선도를 보였습니다. ` +
+  `2순위 ${secondary[0]}보다 원점수 기준 ${scoreGap.toFixed(1)}점 높습니다. ` +
+  `따라서 ${primary}${objectParticle(primary)} 주 용신으로, ${secondary.join(", ")}을 보조 후보로 판단했습니다.`;
 
   return {
   primary,
   secondary,
   scores,
+   normalizedScores,
   scoreDetails,
   reason,
 };

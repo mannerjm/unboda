@@ -108,6 +108,7 @@ strengthAnalysis: saju.strengthAnalysis,
 elementInterpretation: saju.elementInterpretation,
 elementRelations: saju.elementRelations,
 yongshinAnalysis: saju.yongshinAnalysis,
+gyeokgukAnalysis: saju.gyeokgukAnalysis,
 fortuneBrain: saju.fortuneBrain,
   },
 });

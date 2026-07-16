@@ -666,7 +666,18 @@ const elementItems = [
     >
       <div className="flex items-center justify-between font-semibold">
         <span>{element}</span>
-        <span>{score.toFixed(1)}점</span>
+        <div className="text-right">
+  <div className="font-semibold">
+    보완 우선도 {
+  sajuData.yongshinAnalysis.normalizedScores[
+    element as keyof typeof sajuData.yongshinAnalysis.normalizedScores
+  ].toFixed(1)
+}
+  </div>
+  <div className="text-xs text-stone-400">
+    원점수 {score.toFixed(1)}
+  </div>
+</div>
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-1 text-xs text-stone-500">
@@ -690,6 +701,51 @@ const elementItems = [
 
       <p className="mt-2 leading-7 text-stone-700">
         {sajuData.yongshinAnalysis.reason}
+      </p>
+    </div>
+  </div>
+</section>
+<section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+  <div className="mb-6">
+    <p className="text-xs tracking-[0.25em] text-stone-500">
+      GYEOKGUK ANALYSIS
+    </p>
+
+    <h2 className="mt-1 text-2xl font-bold">
+      격국 분석
+    </h2>
+  </div>
+
+  <div className="space-y-4">
+    <div className="rounded-2xl bg-stone-50 p-5">
+      <p className="font-semibold">
+        주 격국
+      </p>
+
+      <p className="mt-2 text-lg font-bold">
+        {sajuData.gyeokgukAnalysis.primary}
+      </p>
+    </div>
+
+    <div className="rounded-2xl bg-stone-50 p-5">
+      <p className="font-semibold">
+        후보 격국
+      </p>
+
+      <p className="mt-2 text-stone-700">
+        {sajuData.gyeokgukAnalysis.candidates.length > 0
+          ? sajuData.gyeokgukAnalysis.candidates.join(", ")
+          : "없음"}
+      </p>
+    </div>
+
+    <div className="rounded-2xl bg-stone-50 p-5">
+      <p className="font-semibold">
+        판단 근거
+      </p>
+
+      <p className="mt-2 leading-7 text-stone-700">
+        {sajuData.gyeokgukAnalysis.reason}
       </p>
     </div>
   </div>

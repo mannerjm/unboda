@@ -1,3 +1,4 @@
+import type { StrengthAnalysis } from "./strength";
 import { getTenGod } from "./tenGod";
 
 
@@ -20,6 +21,8 @@ type GyeokgukInput = {
   hourBranch: string;
 
   monthHiddenStems: string[];
+
+  strengthAnalysis: StrengthAnalysis;
 };
 
 export function analyzeGyeokguk({
@@ -32,6 +35,7 @@ export function analyzeGyeokguk({
   dayBranch,
   hourBranch,
   monthHiddenStems,
+  strengthAnalysis,
 }: GyeokgukInput): GyeokgukResult {
 
 const toGyeokgukName = (stem: string) => {
@@ -107,7 +111,17 @@ const drainingCount = tenGods.filter(
 
 const specialCandidates: string[] = [];
 
+const isVeryStrong =
+  strengthAnalysis.level === "매우 신강";
+
+const isVeryWeak =
+  strengthAnalysis.level === "매우 신약";
+
+const hasMeaningfulSupport =
+  supportingCount >= 2;
+
 if (
+  isVeryStrong &&
   supportingCount >= 4 &&
   supportingCount > drainingCount
 ) {
@@ -115,6 +129,8 @@ if (
 }
 
 if (
+  isVeryWeak &&
+  !hasMeaningfulSupport &&
   drainingCount >= 5 &&
   drainingCount > supportingCount
 ) {

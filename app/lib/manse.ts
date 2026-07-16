@@ -461,6 +461,8 @@ const gyeokgukAnalysis = analyzeGyeokguk({
 
   monthHiddenStems:
     branchHiddenStems[saju.monthPillarHanja[1]] ?? [],
+
+   strengthAnalysis,
 });
 
 

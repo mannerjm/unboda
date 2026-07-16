@@ -13,11 +13,13 @@ export type YongshinResult = {
   scoreDetails: Record<
     FiveElement,
     {
-      strength: number;
-      balance: number;
-      season: number;
-      excess: number;
-      total: number;
+       strength: number;
+    balance: number;
+    season: number;
+    climate: number;
+    passage: number;
+    excess: number;
+    total: number;
     }
   >;
   reason: string;
@@ -126,11 +128,51 @@ const scores: Record<FiveElement, number> = {
 };
 
 const scoreDetails: YongshinResult["scoreDetails"] = {
-  목: { strength: 0, balance: 0, season: 0, excess: 0, total: 0 },
-  화: { strength: 0, balance: 0, season: 0, excess: 0, total: 0 },
-  토: { strength: 0, balance: 0, season: 0, excess: 0, total: 0 },
-  금: { strength: 0, balance: 0, season: 0, excess: 0, total: 0 },
-  수: { strength: 0, balance: 0, season: 0, excess: 0, total: 0 },
+  목: {
+    strength: 0,
+    balance: 0,
+    season: 0,
+    climate: 0,
+    passage: 0,
+    excess: 0,
+    total: 0,
+  },
+  화: {
+    strength: 0,
+    balance: 0,
+    season: 0,
+    climate: 0,
+    passage: 0,
+    excess: 0,
+    total: 0,
+  },
+  토: {
+    strength: 0,
+    balance: 0,
+    season: 0,
+    climate: 0,
+    passage: 0,
+    excess: 0,
+    total: 0,
+  },
+  금: {
+    strength: 0,
+    balance: 0,
+    season: 0,
+    climate: 0,
+    passage: 0,
+    excess: 0,
+    total: 0,
+  },
+  수: {
+    strength: 0,
+    balance: 0,
+    season: 0,
+    climate: 0,
+    passage: 0,
+    excess: 0,
+    total: 0,
+  },
 };
 
 // 1. 신강·신약에 따른 기본 가점
@@ -188,11 +230,87 @@ for (const element of fiveElements) {
     scores[element] -= 15;
     scoreDetails[element].excess -= 15;
   }
+  }
+
+  // 5. 조후 보정
+const hotBranches = ["巳", "午"];
+const coldBranches = ["亥", "子"];
+const dryBranches = ["申", "酉", "戌"];
+const wetBranches = ["亥", "子", "丑"];
+
+if (hotBranches.includes(monthBranch)) {
+  scores["수"] += 25;
+  scoreDetails["수"].climate += 25;
+
+  scores["화"] -= 10;
+  scoreDetails["화"].climate -= 10;
 }
+
+if (coldBranches.includes(monthBranch)) {
+  scores["화"] += 25;
+  scoreDetails["화"].climate += 25;
+
+  scores["수"] -= 10;
+  scoreDetails["수"].climate -= 10;
+}
+
+if (dryBranches.includes(monthBranch)) {
+  scores["수"] += 10;
+  scoreDetails["수"].climate += 10;
+}
+
+if (wetBranches.includes(monthBranch)) {
+  scores["화"] += 10;
+  scoreDetails["화"].climate += 10;
+}
+// 6. 통관 보정
+const passageRules: Array<{
+  first: FiveElement;
+  second: FiveElement;
+  mediator: FiveElement;
+}> = [
+  { first: "목", second: "금", mediator: "수" },
+  { first: "화", second: "수", mediator: "목" },
+  { first: "토", second: "목", mediator: "화" },
+  { first: "금", second: "화", mediator: "토" },
+  { first: "수", second: "토", mediator: "금" },
+];
+
+const passageCandidates = passageRules
+  .filter((rule) => {
+    const firstValue = percentages[rule.first];
+    const secondValue = percentages[rule.second];
+
+    return firstValue >= 15 && secondValue >= 15;
+  })
+  .map((rule) => {
+    const firstValue = percentages[rule.first];
+    const secondValue = percentages[rule.second];
+
+    // 충돌하는 두 오행 중 약한 쪽을 기준으로 통관 필요도 계산
+    const conflictStrength = Math.min(firstValue, secondValue);
+
+    return {
+      ...rule,
+      conflictStrength,
+    };
+  })
+  .sort((a, b) => b.conflictStrength - a.conflictStrength);
+
+const bestPassage = passageCandidates[0];
+
+if (bestPassage) {
+  const passageBonus = 15;
+
+  scores[bestPassage.mediator] += passageBonus;
+  scoreDetails[bestPassage.mediator].passage += passageBonus;
+}
+
+// 7. 최종 점수 저장
 for (const element of fiveElements) {
   scoreDetails[element].total = scores[element];
 }
-// 5. 최종 점수 순으로 정렬
+// 8. 최종 점수 순으로 정렬
 const rankedCandidates = [...fiveElements].sort(
   (a, b) => scores[b] - scores[a]
 );

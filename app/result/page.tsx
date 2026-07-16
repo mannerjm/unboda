@@ -670,11 +670,13 @@ const elementItems = [
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-1 text-xs text-stone-500">
-        <span>신강·신약: {detail.strength.toFixed(1)}</span>
-        <span>균형 보정: {detail.balance.toFixed(1)}</span>
-        <span>계절 보정: {detail.season.toFixed(1)}</span>
-        <span>과다 보정: {detail.excess.toFixed(1)}</span>
-      </div>
+  <span>신강·신약: {detail.strength.toFixed(1)}</span>
+  <span>균형 보정: {detail.balance.toFixed(1)}</span>
+  <span>계절 보정: {detail.season.toFixed(1)}</span>
+  <span>조후 보정: {detail.climate.toFixed(1)}</span>
+  <span>통관 보정: {detail.passage.toFixed(1)}</span>
+  <span>과다 보정: {detail.excess.toFixed(1)}</span>
+</div>
     </div>
   );
 })}

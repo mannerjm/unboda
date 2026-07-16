@@ -1,3 +1,5 @@
+import { buildOutputPrompt } from "./outputPrompt";
+import { buildRulePrompt } from "./rulePrompt";
 import { buildBasePrompt } from "./basePrompt";
 import { buildFortunePrompt } from "./fortunePrompt";
 import { buildInputPrompt } from "./inputPrompt";
@@ -34,5 +36,7 @@ export function buildPrompt(
       gender,
       saju
     ),
+    buildRulePrompt(),
+     buildOutputPrompt(),
   ].join("\n\n");
 }

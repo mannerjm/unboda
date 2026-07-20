@@ -250,6 +250,7 @@ const primary =
   fallbackGyeokguk ||
   "특수격 검토 필요";
 
+
 const candidates = Array.from(
   new Set([
     ...exposedHiddenStems
@@ -260,12 +261,14 @@ const candidates = Array.from(
 );
 
 const reason = specialGyeokguk
-  ? `월지 ${monthBranch}가 일간 ${dayStem} 기준 ${specialGyeokguk} 조건에 해당하여 ${specialGyeokguk}으로 판단했습니다.`
+  ? exposedGyeokguk
+    ? `월지 ${monthBranch}가 일간 ${dayStem} 기준 ${specialGyeokguk} 조건에 해당합니다. 또한 월지 지장간 중 ${exposedHiddenStem}이 ${exposedStemPosition}으로 투출되어 ${exposedGyeokguk} 조건도 확인되지만, 월지 기반 ${specialGyeokguk}을 우선하여 주 격국으로 판단했습니다.`
+    : `월지 ${monthBranch}가 일간 ${dayStem} 기준 ${specialGyeokguk} 조건에 해당하여 ${specialGyeokguk}으로 판단했습니다.`
   : exposedGyeokguk
   ? `월지 ${monthBranch}의 지장간 ${monthHiddenStems.join(
-  ", "
-)} 중 ${exposedStemDetails.join(", ")}에 투출되었습니다. ` +
-`이 중 ${exposedHiddenStem}을 우선 선택했습니다. ` +
+      ", "
+    )} 중 ${exposedStemDetails.join(", ")}에 투출되었습니다. ` +
+    `이 중 ${exposedHiddenStem}을 우선 선택했습니다. ` +
     `일간 ${dayStem} 기준 ${getTenGod(
       dayStem,
       exposedHiddenStem ?? ""

@@ -235,8 +235,61 @@ const mainGyeokguk = mainHiddenStem
 const hasDirectExposure =
   exposedGyeokguk !== "";
 
+const canConfirmMainGyeokguk =
+  !hasDirectExposure &&
+  !!mainGyeokguk &&
+  !specialGyeokguk &&
+  specialCandidates.length === 0;
+
+  const isWealthGyeokguk =
+  mainGyeokguk === "정재격" ||
+  mainGyeokguk === "편재격";
+
+const canConfirmWealthGyeokguk =
+  canConfirmMainGyeokguk &&
+  isWealthGyeokguk &&
+  drainingCount >= supportingCount;
+
+ const isOfficerGyeokguk =
+  mainGyeokguk === "정관격" ||
+  mainGyeokguk === "편관격";
+
+const canConfirmOfficerGyeokguk =
+  canConfirmMainGyeokguk &&
+  isOfficerGyeokguk &&
+  drainingCount >= supportingCount; 
+
+  const isResourceGyeokguk =
+  mainGyeokguk === "정인격" ||
+  mainGyeokguk === "편인격";
+
+const canConfirmResourceGyeokguk =
+  canConfirmMainGyeokguk &&
+  isResourceGyeokguk &&
+  supportingCount >= drainingCount;
+
+const isOutputGyeokguk =
+  mainGyeokguk === "식신격" ||
+  mainGyeokguk === "상관격";
+
+const canConfirmOutputGyeokguk =
+  canConfirmMainGyeokguk &&
+  isOutputGyeokguk &&
+  drainingCount >= supportingCount;  
+
+
+const confirmedMainGyeokguk =
+  canConfirmWealthGyeokguk ||
+  canConfirmOfficerGyeokguk ||
+  canConfirmResourceGyeokguk ||
+  canConfirmOutputGyeokguk
+    ? mainGyeokguk
+    : "";
+
 const fallbackCandidate =
-  !hasDirectExposure && mainGyeokguk
+  !hasDirectExposure &&
+  mainGyeokguk &&
+  !confirmedMainGyeokguk
     ? `${mainGyeokguk} 후보`
     : "";
 
@@ -246,6 +299,7 @@ const detectedSpecialCandidate =
 const primary =
   specialGyeokguk ||
   exposedGyeokguk ||
+  confirmedMainGyeokguk ||
   detectedSpecialCandidate ||
   "격국 미확정";
 
@@ -273,8 +327,10 @@ const reason = specialGyeokguk
       dayStem,
       exposedHiddenStem ?? ""
     )} 관계이므로 ${exposedGyeokguk}을 1차 격국으로 판단했습니다.`
-  : fallbackCandidate
-  ? `월지 ${monthBranch}에 직접 투출된 8격 성분이 없어 본기 ${mainHiddenStem}을 우선 검토했습니다. 일간 ${dayStem} 기준 ${getTenGod(
+  : confirmedMainGyeokguk
+    ? `월지 ${monthBranch}의 본기 ${mainHiddenStem}을 기준으로 일간 ${dayStem}과의 관계를 검토했습니다. 직접 투출은 없지만 건록·양인 및 특수격 조건에 해당하지 않아 ${confirmedMainGyeokguk}으로 판단했습니다.`
+    : fallbackCandidate
+    ? `월지 ${monthBranch}에 직접 투출된 8격 성분이 없어 본기 ${mainHiddenStem}을 우선 검토했습니다. 일간 ${dayStem} 기준 ${getTenGod(
       dayStem,
       mainHiddenStem
     )} 관계이므로 ${mainGyeokguk}을 확정하지 않고 ${fallbackCandidate}로 분류했습니다.`

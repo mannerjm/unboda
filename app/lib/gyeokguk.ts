@@ -190,6 +190,17 @@ const exposedHiddenStem =
   mainHiddenStem && exposedHiddenStems.includes(mainHiddenStem)
     ? mainHiddenStem
     : exposedHiddenStems[0] ?? "";
+    
+const exposedStemPosition =
+  exposedHiddenStem === yearStem
+    ? "연간"
+    : exposedHiddenStem === monthStem
+    ? "월간"
+    : exposedHiddenStem === hourStem
+    ? "시간"
+    : "";
+
+
 
 
 
@@ -215,8 +226,8 @@ const detectedSpecialCandidate =
   specialCandidates[0] ?? "";
 
 const primary =
-  exposedGyeokguk ||
   specialGyeokguk ||
+  exposedGyeokguk ||
   detectedSpecialCandidate ||
   fallbackGyeokguk ||
   "특수격 검토 필요";
@@ -230,30 +241,30 @@ const candidates = Array.from(
   ])
 );
 
-const reason = exposedGyeokguk
+const reason = specialGyeokguk
+  ? `월지 ${monthBranch}가 일간 ${dayStem} 기준 ${specialGyeokguk} 조건에 해당하여 ${specialGyeokguk}으로 판단했습니다.`
+  : exposedGyeokguk
   ? `월지 ${monthBranch}의 지장간 ${monthHiddenStems.join(
       ", "
-    )} 중 ${exposedHiddenStem}이 월간 ${monthStem}으로 투출되었습니다. ` +
+    )} 중 ${exposedHiddenStem}이 ${exposedStemPosition}으로 투출되었습니다. ` +
     `일간 ${dayStem} 기준 ${getTenGod(
       dayStem,
-       exposedHiddenStem ?? ""
+      exposedHiddenStem ?? ""
     )} 관계이므로 ${exposedGyeokguk}을 1차 격국으로 판단했습니다.`
   : fallbackGyeokguk
-? `월지 ${monthBranch}에서 직접 투출된 8격 성분이 없어 본기 ${mainHiddenStem}을 우선 검토했습니다. 일간 ${dayStem} 기준 ${getTenGod(
-    dayStem,
-    mainHiddenStem
-  )} 관계이므로 ${mainGyeokguk}을 확정하지 않고 ${fallbackGyeokguk}로 분류했습니다.`
-  : specialGyeokguk
-? `월지 ${monthBranch}가 일간 ${dayStem} 기준 ${specialGyeokguk} 조건에 해당하여 ${specialGyeokguk}으로 판단했습니다.`
-: detectedSpecialCandidate
-? `일반 8격과 건록·양인 조건으로 바로 확정되지 않았습니다. 천간의 십신 분포를 검토한 결과 생조 계열 ${supportingCount}개, 설기·재관 계열 ${drainingCount}개가 확인되어 ${detectedSpecialCandidate}로 분류했습니다. 다만 현재 단계에서는 특수격 확정이 아닌 후보 판정입니다.`
-: `월지 ${monthBranch}의 지장간 ${monthHiddenStems.join(
-    ", "
-  )}에서 일반 8격이나 건록·양인, 특수격 후보 조건으로 확정하기 어려워 추가 검토가 필요합니다.`;
+  ? `월지 ${monthBranch}에 직접 투출된 8격 성분이 없어 본기 ${mainHiddenStem}을 우선 검토했습니다. 일간 ${dayStem} 기준 ${getTenGod(
+      dayStem,
+      mainHiddenStem
+    )} 관계이므로 ${mainGyeokguk}을 확정하지 않고 ${fallbackGyeokguk}로 분류했습니다.`
+  : detectedSpecialCandidate
+  ? `일반 8격과 건록·양인 조건으로 바로 확정되지 않았습니다. 천간의 십신 분포를 검토한 결과 생조 계열 ${supportingCount}개, 설기·재관 계열 ${drainingCount}개가 확인되어 ${detectedSpecialCandidate} 후보로 분류했습니다.`
+  : `월지 ${monthBranch}의 지장간 ${monthHiddenStems.join(
+      ", "
+    )}에서 일반 8격이나 건록·양인, 특수격 후보 조건으로 확정하기 어려워 추가 검토가 필요합니다.`;
 
- const filteredCandidates = candidates.filter(
+const filteredCandidates = candidates.filter(
   (candidate) => candidate !== primary
-); 
+);
 
 return {
   primary,

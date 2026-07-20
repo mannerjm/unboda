@@ -139,29 +139,29 @@ if (
 
 
 const geonrokBranchByDayStem: Record<string, string> = {
-  갑: "寅",
-  을: "卯",
-  병: "巳",
-  정: "午",
-  무: "巳",
-  기: "午",
-  경: "申",
-  신: "酉",
-  임: "亥",
-  계: "子",
+  甲: "寅",
+  乙: "卯",
+  丙: "巳",
+  丁: "午",
+  戊: "巳",
+  己: "午",
+  庚: "申",
+  辛: "酉",
+  壬: "亥",
+  癸: "子",
 };
 
 const yanginBranchByDayStem: Record<string, string> = {
-  갑: "卯",
-  을: "寅",
-  병: "午",
-  정: "巳",
-  무: "午",
-  기: "巳",
-  경: "酉",
-  신: "申",
-  임: "子",
-  계: "亥",
+  甲: "卯",
+  乙: "寅",
+  丙: "午",
+  丁: "巳",
+  戊: "午",
+  己: "巳",
+  庚: "酉",
+  辛: "申",
+  壬: "子",
+  癸: "亥",
 };
 
 const specialGyeokguk =
@@ -170,6 +170,7 @@ const specialGyeokguk =
     : yanginBranchByDayStem[dayStem] === monthBranch
     ? "양인격"
     : "";
+
 
 // 월지 지장간 중 월간에 실제로 투출된 글자
 const visibleStems = [

@@ -185,12 +185,16 @@ const mainHiddenStem = monthHiddenStems[0] ?? "";
 const exposedHiddenStems = monthHiddenStems.filter(
   (hiddenStem) => visibleStems.includes(hiddenStem)
 );
+const hiddenStemPriority = [
+  mainHiddenStem,
+  ...monthHiddenStems.filter((stem) => stem !== mainHiddenStem),
+].filter(Boolean);
 
 const exposedHiddenStem =
-  mainHiddenStem && exposedHiddenStems.includes(mainHiddenStem)
-    ? mainHiddenStem
-    : exposedHiddenStems[0] ?? "";
-    
+  hiddenStemPriority.find((stem) =>
+    exposedHiddenStems.includes(stem)
+  ) ?? "";
+
 const exposedStemPosition =
   exposedHiddenStem === yearStem
     ? "연간"
@@ -200,6 +204,20 @@ const exposedStemPosition =
     ? "시간"
     : "";
 
+    const exposedStemDetails = exposedHiddenStems
+  .map((stem) => {
+    const position =
+      stem === yearStem
+        ? "년간"
+        : stem === monthStem
+        ? "월간"
+        : stem === hourStem
+        ? "시간"
+        : "";
+
+    return position ? `${stem}은 ${position}` : "";
+  })
+  .filter(Boolean);
 
 
 
@@ -245,8 +263,9 @@ const reason = specialGyeokguk
   ? `월지 ${monthBranch}가 일간 ${dayStem} 기준 ${specialGyeokguk} 조건에 해당하여 ${specialGyeokguk}으로 판단했습니다.`
   : exposedGyeokguk
   ? `월지 ${monthBranch}의 지장간 ${monthHiddenStems.join(
-      ", "
-    )} 중 ${exposedHiddenStem}이 ${exposedStemPosition}으로 투출되었습니다. ` +
+  ", "
+)} 중 ${exposedStemDetails.join(", ")}에 투출되었습니다. ` +
+`이 중 ${exposedHiddenStem}을 우선 선택했습니다. ` +
     `일간 ${dayStem} 기준 ${getTenGod(
       dayStem,
       exposedHiddenStem ?? ""

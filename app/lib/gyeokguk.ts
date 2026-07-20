@@ -252,7 +252,7 @@ const primary =
 
 const candidates = Array.from(
   new Set([
-    ...monthHiddenStems
+    ...exposedHiddenStems
       .map(toGyeokgukName)
       .filter((name) => name !== ""),
     ...specialCandidates,

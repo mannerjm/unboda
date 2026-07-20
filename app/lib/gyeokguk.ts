@@ -235,7 +235,7 @@ const mainGyeokguk = mainHiddenStem
 const hasDirectExposure =
   exposedGyeokguk !== "";
 
-const fallbackGyeokguk =
+const fallbackCandidate =
   !hasDirectExposure && mainGyeokguk
     ? `${mainGyeokguk} 후보`
     : "";
@@ -247,8 +247,7 @@ const primary =
   specialGyeokguk ||
   exposedGyeokguk ||
   detectedSpecialCandidate ||
-  fallbackGyeokguk ||
-  "특수격 검토 필요";
+  "격국 미확정";
 
 
 const candidates = Array.from(
@@ -256,6 +255,7 @@ const candidates = Array.from(
     ...exposedHiddenStems
       .map(toGyeokgukName)
       .filter((name) => name !== ""),
+    ...(fallbackCandidate ? [fallbackCandidate] : []),
     ...specialCandidates,
   ])
 );
@@ -273,11 +273,11 @@ const reason = specialGyeokguk
       dayStem,
       exposedHiddenStem ?? ""
     )} 관계이므로 ${exposedGyeokguk}을 1차 격국으로 판단했습니다.`
-  : fallbackGyeokguk
+  : fallbackCandidate
   ? `월지 ${monthBranch}에 직접 투출된 8격 성분이 없어 본기 ${mainHiddenStem}을 우선 검토했습니다. 일간 ${dayStem} 기준 ${getTenGod(
       dayStem,
       mainHiddenStem
-    )} 관계이므로 ${mainGyeokguk}을 확정하지 않고 ${fallbackGyeokguk}로 분류했습니다.`
+    )} 관계이므로 ${mainGyeokguk}을 확정하지 않고 ${fallbackCandidate}로 분류했습니다.`
   : detectedSpecialCandidate
   ? `일반 8격과 건록·양인 조건으로 바로 확정되지 않았습니다. 천간의 십신 분포를 검토한 결과 생조 계열 ${supportingCount}개, 설기·재관 계열 ${drainingCount}개가 확인되어 ${detectedSpecialCandidate} 후보로 분류했습니다.`
   : `월지 ${monthBranch}의 지장간 ${monthHiddenStems.join(

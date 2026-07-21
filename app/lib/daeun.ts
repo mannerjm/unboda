@@ -1,5 +1,4 @@
-import { getSolarTermsByYear } from "@fullstackfamily/manseryeok";
-
+import { calculateFourPillars } from "manseryeok";
 export type DaeunDirection = "순행" | "역행";
 export type Gender = "남성" | "여성";
 
@@ -42,42 +41,26 @@ function getDirection(
 
   return "역행";
 }
-type SolarTermLike = {
-  name: string;
-  nameHanja: string;
-  index: number;
-  longitude: number;
-  type: "jeolgi" | "junggi";
-  sajuMonth: number;
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-};
 
-function toDate(term: SolarTermLike): Date {
-  return new Date(
-    term.year,
-    term.month - 1,
-    term.day,
-    term.hour,
-    term.minute,
-    0,
-    0
-  );
-}
 
 function calculateDaeunStartAge(
   birthDate: string,
   birthTime: string,
-  direction: DaeunDirection
+  gender: Gender
 ): number {
-  void birthDate;
-  void birthTime;
-  void direction;
+  const [year, month, day] = birthDate.split("-").map(Number);
+  const [hour, minute] = birthTime.split(":").map(Number);
 
-  return 5;
+  const result = calculateFourPillars({
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    gender: gender === "남성" ? "male" : "female",
+  });
+
+  return result.luckPillars?.startAge ?? 5;
 }
 
 function moveGanji(
@@ -116,10 +99,10 @@ export function calculateDaeun(
   const step = direction === "순행" ? 1 : -1;
 
   const startAge = calculateDaeunStartAge(
-    birthDate,
-    birthTime,
-    direction
-  );
+  birthDate,
+  birthTime,
+  gender
+);
 
   const daeuns: DaeunItem[] = [];
 

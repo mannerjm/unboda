@@ -125,6 +125,41 @@ function getFiveElementStyle(
     textClass: highlighted ? style.highlighted : style.normal,
   };
 }
+function ganjiToHanja(ganji: string) {
+  const stemMap: Record<string, string> = {
+    갑: "甲",
+    을: "乙",
+    병: "丙",
+    정: "丁",
+    무: "戊",
+    기: "己",
+    경: "庚",
+    신: "辛",
+    임: "壬",
+    계: "癸",
+  };
+
+  const branchMap: Record<string, string> = {
+    자: "子",
+    축: "丑",
+    인: "寅",
+    묘: "卯",
+    진: "辰",
+    사: "巳",
+    오: "午",
+    미: "未",
+    신: "申",
+    유: "酉",
+    술: "戌",
+    해: "亥",
+  };
+
+  const stem = ganji[0] ?? "";
+  const branch = ganji[1] ?? "";
+
+  return `${stemMap[stem] ?? stem}${branchMap[branch] ?? branch}`;
+}
+
 export default function ResultPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -531,25 +566,38 @@ const elementItems = [
       </div>
     </div>
 
-    <div className="mt-6 space-y-3">
-      {sajuData.daeunAnalysis.daeuns.map(
-        (daeun: { order: number; ganji: string }) => (
+    <div className="mt-6">
+  <div className="grid grid-cols-10 gap-2">
+    {[...sajuData.daeunAnalysis.daeuns]
+      .reverse()
+      .map((daeun: { order: number; ganji: string }) => {
+        const hanja = ganjiToHanja(daeun.ganji);
+
+        return (
           <div
             key={daeun.order}
-            className="flex items-center justify-between rounded-2xl bg-stone-50 px-5 py-4"
+            className="flex min-w-0 flex-col items-center rounded-2xl bg-stone-50 px-2 py-4"
           >
-            <span className="font-semibold">
+            <span className="text-xs font-semibold text-stone-600">
               {daeun.order}대운
             </span>
 
-            <span className="text-lg font-bold">
-              {daeun.ganji}
+            <div className="mt-3 flex flex-col items-center text-2xl font-bold leading-none">
+              <span>{hanja[0]}</span>
+              <span className="mt-1">{hanja[1]}</span>
+            </div>
+
+            <span className="mt-3 text-xs text-stone-500">
+              {sajuData.daeunAnalysis.startAge +
+                (daeun.order - 1) * 10}
+              세
             </span>
           </div>
-        )
-      )}
-    </div>
+        );
+      })}
   </div>
+</div>
+</div>
 )}
 
 <section className="mt-7 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">

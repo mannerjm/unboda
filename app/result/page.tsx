@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import type { getSaju } from "../lib/manse";
+import { calculateSeun } from "../lib/seun";
 type SajuResult = ReturnType<typeof getSaju>;
 
 const titleIcons: Record<string, string> = {
@@ -165,26 +166,65 @@ export default function ResultPage() {
   const searchParams = useSearchParams();
   const [aiResult, setAiResult] = useState("");
 const [sajuData, setSajuData] = useState<SajuResult | null>(null);
-  const birthDate = searchParams.get("birthDate") || "입력 없음";
+
+const birthDate = searchParams.get("birthDate") || "입력 없음";
   const birthTime = searchParams.get("birthTime") || "입력 없음";
   const gender = searchParams.get("gender") || "입력 없음";
 
-  useEffect(() => {
-    const savedResult = sessionStorage.getItem("sajuResult");
-const savedSaju = sessionStorage.getItem("sajuData");
-    if (savedResult) {
-      setAiResult(savedResult);
-    } 
-    if (savedSaju) {
+const [selectedDaeunOrder, setSelectedDaeunOrder] = useState<number | null>(null);
+const selectedDaeunStartYear =
+  sajuData && selectedDaeunOrder
+    ? Number(birthDate.slice(0, 4)) +
+      sajuData.daeunAnalysis.startAge +
+      (selectedDaeunOrder - 1) * 10 -
+      1
+    : null;  
+const displayedSeun =
+  selectedDaeunStartYear !== null
+    ? calculateSeun(
+        Number(birthDate.slice(0, 4)),
+        selectedDaeunStartYear,
+        10
+      )
+    : sajuData?.seunAnalysis ?? null;    
+
+
+ useEffect(() => {
+  const savedResult = sessionStorage.getItem("sajuResult");
+  const savedSaju = sessionStorage.getItem("sajuData");
+
+  if (savedResult) {
+    setAiResult(savedResult);
+  }
+
+  if (savedSaju) {
     setSajuData(JSON.parse(savedSaju));
     console.log("저장된 사주 데이터:", JSON.parse(savedSaju));
-}
-    else {
-      setAiResult("AI 분석 결과를 찾을 수 없습니다.");
-    }
-  }, []);
+  } else {
+    setAiResult("AI 분석 결과를 찾을 수 없습니다.");
+  }
+}, []);
 
- if (!sajuData) {
+useEffect(() => {
+  if (!sajuData?.daeunAnalysis || selectedDaeunOrder !== null) {
+    return;
+  }
+
+  const birthYear = Number(birthDate.slice(0, 4));
+  const currentYear = new Date().getFullYear();
+  const currentAge = currentYear - birthYear + 1;
+
+  const startAge = sajuData.daeunAnalysis.startAge;
+
+  const currentDaeunOrder = Math.min(
+    10,
+    Math.max(1, Math.floor((currentAge - startAge) / 10) + 1)
+  );
+
+  setSelectedDaeunOrder(currentDaeunOrder);
+}, [sajuData, birthDate, selectedDaeunOrder]);
+
+if (!sajuData) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea]">
       <p className="text-sm text-stone-500">
@@ -575,9 +615,14 @@ const elementItems = [
 
         return (
           <div
-            key={daeun.order}
-            className="flex min-w-0 flex-col items-center rounded-2xl bg-stone-50 px-2 py-4"
-          >
+  key={daeun.order}
+  onClick={() => setSelectedDaeunOrder(daeun.order)}
+  className={`flex min-w-0 cursor-pointer flex-col items-center rounded-2xl px-2 py-4 transition ${
+    selectedDaeunOrder === daeun.order
+      ? "bg-stone-900 text-white"
+      : "bg-stone-50"
+  }`}
+>
             <span className="text-xs font-semibold text-stone-600">
               {daeun.order}대운
             </span>
@@ -598,6 +643,47 @@ const elementItems = [
   </div>
 </div>
 </div>
+)}
+{displayedSeun && (
+  <div className="mt-6 rounded-3xl border border-stone-200 bg-white p-6">
+    <p className="text-sm tracking-[0.25em] text-stone-500">
+      SEUN ANALYSIS
+    </p>
+
+    <h2 className="mt-1 text-2xl font-bold">
+      세운 분석
+    </h2>
+
+    <div className="mt-6 grid grid-cols-10 gap-2">
+      {[...displayedSeun.items]
+  .reverse()
+  .map(
+        (item: { year: number; age: number; ganji: string }) => {
+          const hanja = ganjiToHanja(item.ganji);
+
+          return (
+            <div
+              key={item.year}
+              className="flex min-w-0 flex-col items-center rounded-2xl bg-stone-50 px-2 py-4"
+            >
+              <span className="text-xs font-semibold text-stone-600">
+                {item.year}
+              </span>
+
+              <div className="mt-3 flex flex-col items-center text-2xl font-bold leading-none">
+                <span>{hanja[0]}</span>
+                <span className="mt-1">{hanja[1]}</span>
+              </div>
+
+              <span className="mt-3 text-xs text-stone-500">
+                {item.age}세
+              </span>
+            </div>
+          );
+        }
+      )}
+    </div>
+  </div>
 )}
 
 <section className="mt-7 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">

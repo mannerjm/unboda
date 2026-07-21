@@ -112,6 +112,7 @@ yongshinAnalysis: saju.yongshinAnalysis,
 gyeokgukAnalysis: saju.gyeokgukAnalysis,
 fortuneBrain: saju.fortuneBrain,
 daeunAnalysis: saju.daeunAnalysis,
+seunAnalysis: saju.seunAnalysis,
   },
 });
   } catch (error) {

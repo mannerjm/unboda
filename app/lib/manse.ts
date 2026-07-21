@@ -11,6 +11,7 @@ import {
 import { calculateWeightedElements } from "./elements";
 import { interpretElementAnalysis } from "./elementInterpretation";
 import { calculateDaeun, type Gender } from "./daeun";
+import { calculateSeun } from "./seun";
 
 const branchHiddenStem: Record<string, string> = {
   子: "癸",
@@ -483,6 +484,11 @@ const daeunAnalysis = calculateDaeun(
   birthDate,
   birthTime
 );
+const seunAnalysis = calculateSeun(
+  solarYear,
+  new Date().getFullYear(),
+  10
+);
 
   return {
      solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
@@ -571,5 +577,6 @@ yongshinAnalysis,
 gyeokgukAnalysis,
 fortuneBrain,
 daeunAnalysis,
+seunAnalysis,
 };
 }

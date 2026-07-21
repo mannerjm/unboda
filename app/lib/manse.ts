@@ -10,7 +10,7 @@ import {
 } from "@fullstackfamily/manseryeok";
 import { calculateWeightedElements } from "./elements";
 import { interpretElementAnalysis } from "./elementInterpretation";
-
+import { calculateDaeun, type Gender } from "./daeun";
 
 const branchHiddenStem: Record<string, string> = {
   子: "癸",
@@ -270,7 +270,8 @@ export function getSaju(
   birthDate: string,
   birthTime: string,
   calendarType: "양력" | "음력",
-  isLeapMonth: "평달" | "윤달"
+  isLeapMonth: "평달" | "윤달",
+  gender: Gender
 ) {
   const [year, month, day] = birthDate.split("-").map(Number);
   const [hour, minute] = birthTime.split(":").map(Number);
@@ -475,6 +476,14 @@ const elementRelations =
   relations: elementRelations,
 });
 
+const daeunAnalysis = calculateDaeun(
+  saju.yearPillar,
+  saju.monthPillar,
+  gender,
+  birthDate,
+  birthTime
+);
+
   return {
      solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
     solarDay
@@ -561,5 +570,6 @@ elementRelations,
 yongshinAnalysis,
 gyeokgukAnalysis,
 fortuneBrain,
+daeunAnalysis,
 };
 }

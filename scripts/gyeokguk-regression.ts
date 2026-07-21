@@ -30,7 +30,8 @@ for (
       birthDate,
       birthTime,
       "양력",
-      "평달"
+      "평달",
+      "남성"
     );
 
     const result = saju.gyeokgukAnalysis;

@@ -142,6 +142,7 @@ const savedSaju = sessionStorage.getItem("sajuData");
     } 
     if (savedSaju) {
     setSajuData(JSON.parse(savedSaju));
+    console.log("저장된 사주 데이터:", JSON.parse(savedSaju));
 }
     else {
       setAiResult("AI 분석 결과를 찾을 수 없습니다.");
@@ -500,6 +501,57 @@ const elementItems = [
     일주는 본인을 중심으로 보는 기둥이므로 화면에서 강조해 표시했습니다.
   </p>
 </section>
+{sajuData.daeunAnalysis && (
+  <div className="mt-6 rounded-3xl border border-stone-200 bg-white p-6">
+    <p className="text-sm tracking-[0.25em] text-stone-500">
+      DAEUN ANALYSIS
+    </p>
+
+    <h2 className="mt-1 text-2xl font-bold">
+      대운 분석
+    </h2>
+
+    <div className="mt-6 grid grid-cols-2 gap-4">
+      <div className="rounded-2xl bg-stone-50 p-5">
+        <p className="text-sm text-stone-500">
+          대운 방향
+        </p>
+        <p className="mt-2 text-lg font-bold">
+          {sajuData.daeunAnalysis.direction}
+        </p>
+      </div>
+
+      <div className="rounded-2xl bg-stone-50 p-5">
+        <p className="text-sm text-stone-500">
+          대운 시작
+        </p>
+        <p className="mt-2 text-lg font-bold">
+          {sajuData.daeunAnalysis.startAge}세
+        </p>
+      </div>
+    </div>
+
+    <div className="mt-6 space-y-3">
+      {sajuData.daeunAnalysis.daeuns.map(
+        (daeun: { order: number; ganji: string }) => (
+          <div
+            key={daeun.order}
+            className="flex items-center justify-between rounded-2xl bg-stone-50 px-5 py-4"
+          >
+            <span className="font-semibold">
+              {daeun.order}대운
+            </span>
+
+            <span className="text-lg font-bold">
+              {daeun.ganji}
+            </span>
+          </div>
+        )
+      )}
+    </div>
+  </div>
+)}
+
 <section className="mt-7 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
   <div className="mb-7 flex items-end justify-between gap-4">
     <div>
@@ -750,6 +802,7 @@ const elementItems = [
     </div>
   </div>
 </section>
+
 <section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
   <div className="mb-6">
     <p className="text-xs tracking-[0.25em] text-stone-500">

@@ -12,19 +12,20 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
   try {
     const {
-      birthDate,
-      birthTime,
-      gender,
-      calendarType,
-      isLeapMonth,
-    } = await req.json();
+  birthDate,
+  birthTime,
+  calendarType,
+  isLeapMonth,
+  gender,
+} = await req.json();
 
     const saju = getSaju(
-      birthDate,
-      birthTime,
-      calendarType,
-      isLeapMonth
-    );
+  birthDate,
+  birthTime,
+  calendarType,
+  isLeapMonth,
+  gender
+);
 
     console.log(
       "SAJU_RESULT:",
@@ -110,6 +111,7 @@ elementRelations: saju.elementRelations,
 yongshinAnalysis: saju.yongshinAnalysis,
 gyeokgukAnalysis: saju.gyeokgukAnalysis,
 fortuneBrain: saju.fortuneBrain,
+daeunAnalysis: saju.daeunAnalysis,
   },
 });
   } catch (error) {

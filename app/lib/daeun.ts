@@ -77,7 +77,6 @@ function calculateDaeunStartAge(
   void birthTime;
   void direction;
 
-  // 임시값: 추후 실제 절입 시각 기반 계산으로 교체
   return 5;
 }
 

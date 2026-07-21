@@ -3,6 +3,8 @@ import { getSaju } from "../app/lib/manse";
 const start = new Date("1990-01-01");
 const end = new Date("1995-12-31");
 
+let resourceCount = 0;
+
 for (
   let date = new Date(start);
   date <= end;
@@ -23,6 +25,8 @@ for (
     (result.primary === "정인격" || result.primary === "편인격") &&
     result.reason.includes("직접 투출은 없지만")
   ) {
+    resourceCount += 1;
+
     console.log({
       birthDate,
       primary: result.primary,
@@ -31,3 +35,5 @@ for (
     });
   }
 }
+console.log("=== 인성 출력 케이스 총 건수 ===");
+console.log(resourceCount);

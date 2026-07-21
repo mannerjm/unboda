@@ -190,3 +190,32 @@ console.table(
     .sort((a, b) => b.gap - a.gap)
     .slice(0, 10)
 );
+
+console.log("=== 최종 충돌 13건 요약 ===");
+
+console.table(
+  suspicious.map((item) => {
+    const primaryDetail = item.scoreDetails[item.primary] as {
+      strength: number;
+      balance: number;
+      season: number;
+      climate: number;
+      passage: number;
+      excess: number;
+      total: number;
+    };
+
+    return {
+      birthDate: item.birthDate,
+      birthTime: item.birthTime,
+      level: item.level,
+      dayElement: item.dayElement,
+      primary: item.primary,
+      primaryScore: item.scores[item.primary],
+      strength: primaryDetail.strength,
+      climate: primaryDetail.climate,
+      passage: primaryDetail.passage,
+      total: primaryDetail.total,
+    };
+  })
+);

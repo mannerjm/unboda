@@ -3,6 +3,8 @@ import { getSaju } from "../app/lib/manse";
 const start = new Date("1990-01-01");
 const end = new Date("2000-12-31");
 
+let outputCount = 0;
+
 for (
   let date = new Date(start);
   date <= end;
@@ -24,6 +26,8 @@ for (
     result.primary === "상관격") &&
   result.reason.includes("직접 투출은 없지만")
 ) {
+    outputCount += 1;
+
     console.log({
       birthDate,
       primary: result.primary,
@@ -32,3 +36,5 @@ for (
     });
   }
 }
+console.log("=== 출력 케이스 총 건수 ===");
+console.log(outputCount);

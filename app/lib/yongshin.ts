@@ -311,6 +311,67 @@ if (bestPassage) {
 for (const element of fiveElements) {
   scoreDetails[element].total = scores[element];
 }
+
+// 7.5 신강·신약 방향성 안전장치
+if (isWeak) {
+  const outputElement = generates[dayElement];
+  const wealthElement = controls[dayElement];
+  const officerElement = findControllingElement(dayElement);
+
+  for (const element of [
+    outputElement,
+    wealthElement,
+    officerElement,
+  ]) {
+    const detail = scoreDetails[element];
+
+    // 신약 상태에서는 조후·통관 보정이
+    // 억부 방향을 과도하게 뒤집지 못하도록 제한
+    const auxiliaryBonus =
+      detail.climate + detail.passage;
+
+    if (auxiliaryBonus > 15) {
+      const penalty = auxiliaryBonus - 15;
+
+      scores[element] -= penalty;
+      detail.total -= penalty;
+    }
+  }
+}
+// 7-6. 신약 최종 안전장치
+if (isWeak) {
+  const resourceElement = findGeneratingElement(dayElement);
+
+  const supportiveCandidates: FiveElement[] = [
+    resourceElement,
+    dayElement,
+  ];
+
+  const bestSupportive = supportiveCandidates.reduce((best, current) =>
+    scores[current] > scores[best] ? current : best
+  );
+
+  const currentTop = [...fiveElements].sort(
+    (a, b) => scores[b] - scores[a]
+  )[0];
+
+  const isHarmfulTop =
+    currentTop !== resourceElement &&
+    currentTop !== dayElement;
+
+  const scoreGap =
+    scores[currentTop] - scores[bestSupportive];
+
+  // 신약인데 식상·재성·관성이 1위라도
+  // 인성·비겁 최고점과 10점 이내면 보조 오행을 우선시
+  if (isHarmfulTop && scoreGap <= 10) {
+    const bonus = scoreGap + 0.1;
+
+    scores[bestSupportive] += bonus;
+    scoreDetails[bestSupportive].strength += bonus;
+  }
+}
+
 // 8. 최종 점수 순으로 정렬
 const rankedCandidates = [...fiveElements].sort(
   (a, b) => scores[b] - scores[a]
@@ -335,7 +396,17 @@ const primary = rankedCandidates[0] ?? dayElement;
 const secondary = rankedCandidates.slice(1, 3);
 
 
-  const primaryDetail = scoreDetails[primary];
+const primaryDetail = scoreDetails[primary];
+const isClimateDriven =
+  primaryDetail.climate >= 20;
+
+const isPassageDriven =
+  primaryDetail.passage >= 15;
+
+const exceptionalReason =
+  isWeak && (isClimateDriven || isPassageDriven)
+    ? "신약 구조이지만 조후 또는 통관 필요성이 강해 해당 오행을 우선 용신으로 판단했습니다. "
+    : "";
 const secondCandidate = secondary[0];
 const scoreGap = secondCandidate
   ? scores[primary] - scores[secondCandidate]
@@ -348,6 +419,7 @@ const objectParticle = (value: string) =>
   ["화", "수"].includes(value) ? "를" : "을";
 
 const reason =
+ exceptionalReason +
   `일간은 ${dayElement}이고 ${level}으로 판단되었습니다. ` +
   `월지 ${monthBranch}의 계절 오행은 ${seasonElement}입니다. ` +
   `${primary}${topicParticle(primary)} 신강·신약 구조, 계절 영향, 실제 오행 분포를 함께 점수화한 결과 ` +

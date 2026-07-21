@@ -60,7 +60,13 @@ function calculateDaeunStartAge(
     gender: gender === "남성" ? "male" : "female",
   });
 
-  return result.luckPillars?.startAge ?? 5;
+  const startAge = result.luckPillars?.startAge;
+
+if (startAge === undefined) {
+  throw new Error("대운 시작 나이를 계산하지 못했습니다.");
+}
+
+return startAge;
 }
 
 function moveGanji(

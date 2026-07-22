@@ -52,7 +52,7 @@ ${saju.hourPillarHanja}
 ${saju.daeunAnalysis.daeuns
   .map(
     (daeun) =>
-      `${daeun.order}대운: ${daeun.ganji} (${saju.daeunAnalysis.startAge + (daeun.order - 1) * 10}세 시작)`
+     `${daeun.order}대운: ${daeun.ganji} (${saju.daeunAnalysis.startAge + (daeun.order - 1) * 10}세 시작) / 분석: ${JSON.stringify(daeun.analysis)}`
   )
   .join("\n")}
 
@@ -60,7 +60,7 @@ ${saju.daeunAnalysis.daeuns
 ${saju.seunAnalysis.items
   .map(
     (item) =>
-      `${item.year}년: ${item.ganji} (${item.age}세)`
+    `${item.year}년: ${item.ganji} (${item.age}세) / 분석: ${JSON.stringify(item.analysis)}`
   )
   .join("\n")}
 `;

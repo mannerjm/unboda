@@ -63,5 +63,10 @@ ${saju.seunAnalysis.items
     `${item.year}년: ${item.ganji} (${item.age}세) / 분석: ${JSON.stringify(item.analysis)}`
   )
   .join("\n")}
+
+통합 운세 흐름 분석:
+${saju.fortuneFlowAnalysis
+  ? JSON.stringify(saju.fortuneFlowAnalysis, null, 2)
+  : "현재 대운 또는 세운 정보가 없어 통합 분석을 생성하지 못했습니다."}  
 `;
 }

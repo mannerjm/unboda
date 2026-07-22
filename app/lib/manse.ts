@@ -12,6 +12,8 @@ import { calculateWeightedElements } from "./elements";
 import { interpretElementAnalysis } from "./elementInterpretation";
 import { calculateDaeun, type Gender } from "./daeun";
 import { calculateSeun } from "./seun";
+import { analyzeFullFortuneFlow } from "./fortuneFlowAnalysis";
+import type { Element } from "./elements";
 
 const branchHiddenStem: Record<string, string> = {
   子: "癸",
@@ -492,6 +494,43 @@ const seunAnalysis = calculateSeun(
   10
 );
 
+const currentDaeun = daeunAnalysis.daeuns.find((daeun) => {
+  const start = daeunAnalysis.startAge + (daeun.order - 1) * 10;
+  const end = start + 9;
+  const currentAge = new Date().getFullYear() - solarYear + 1;
+
+  return currentAge >= start && currentAge <= end;
+});
+
+const currentSeun = seunAnalysis.items[0];
+
+const fortuneFlowAnalysis =
+  currentDaeun && currentSeun
+    ? analyzeFullFortuneFlow({
+        originalPillars: [
+          saju.yearPillar,
+          saju.monthPillar,
+          saju.dayPillar,
+          saju.hourPillar,
+        ].filter((pillar): pillar is string => Boolean(pillar)),
+
+        daeunGanji: currentDaeun.ganji,
+        seunGanji: currentSeun.ganji,
+
+        originalElements: elementAnalysis.percentages,
+
+        addedElements: [
+          currentDaeun.analysis.stemElement,
+          currentDaeun.analysis.branchElement,
+          currentSeun.analysis.stemElement,
+          currentSeun.analysis.branchElement,
+        ].filter((element): element is Element => Boolean(element)),
+
+        primaryYongshin: yongshinAnalysis.primary,
+        secondaryYongshin: yongshinAnalysis.secondary,
+      })
+    : null;
+
   return {
      solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
     solarDay
@@ -580,5 +619,6 @@ gyeokgukAnalysis,
 fortuneBrain,
 daeunAnalysis,
 seunAnalysis,
+fortuneFlowAnalysis,
 };
 }

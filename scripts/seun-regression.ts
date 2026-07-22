@@ -1,6 +1,6 @@
 import { calculateSeun } from "../app/lib/seun";
 
-const result = calculateSeun(1987, 2026, 10);
+const result = calculateSeun(1987, 2026, "丁", 10);
 
 console.log("세운 결과");
 console.log(result.items);

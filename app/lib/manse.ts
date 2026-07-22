@@ -480,6 +480,7 @@ const elementRelations =
 const daeunAnalysis = calculateDaeun(
   saju.yearPillar,
   saju.monthPillar,
+  saju.dayPillar,
   gender,
   birthDate,
   birthTime
@@ -487,6 +488,7 @@ const daeunAnalysis = calculateDaeun(
 const seunAnalysis = calculateSeun(
   solarYear,
   new Date().getFullYear(),
+   saju.dayPillar[0],
   10
 );
 

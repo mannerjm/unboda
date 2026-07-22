@@ -184,6 +184,7 @@ const displayedSeun =
     ? calculateSeun(
         Number(birthDate.slice(0, 4)),
         selectedDaeunStartYear,
+         sajuData!.dayStem,
         10
       )
     : sajuData?.seunAnalysis ?? null;    

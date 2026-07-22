@@ -1,3 +1,5 @@
+import type { FortuneCycleItemAnalysis } from "./fortuneCycle";
+import { analyzeFortuneCycleItem } from "./fortuneCycle";
 import { calculateFourPillars } from "manseryeok";
 export type DaeunDirection = "순행" | "역행";
 export type Gender = "남성" | "여성";
@@ -5,6 +7,7 @@ export type Gender = "남성" | "여성";
 export interface DaeunItem {
   order: number;
   ganji: string;
+  analysis: FortuneCycleItemAnalysis;
 }
 
 export interface DaeunAnalysis {
@@ -95,6 +98,7 @@ function moveGanji(
 export function calculateDaeun(
   yearPillar: string,
   monthPillar: string,
+  dayPillar: string,
   gender: Gender,
   birthDate: string,
   birthTime: string,
@@ -113,15 +117,18 @@ export function calculateDaeun(
   const daeuns: DaeunItem[] = [];
 
   for (let i = 1; i <= count; i++) {
-    daeuns.push({
-      order: i,
-      ganji: moveGanji(monthPillar, step * i),
-    });
-  }
+    const ganji = moveGanji(monthPillar, step * i);
 
-  return {
-    direction,
-    startAge,
-    daeuns,
-  };
+daeuns.push({
+  order: i,
+  ganji,
+  analysis: analyzeFortuneCycleItem(dayPillar[0], ganji),
+});
+} // ← 이게 for문을 닫는 괄호
+
+return {
+  direction,
+  startAge,
+  daeuns,
+};
 }

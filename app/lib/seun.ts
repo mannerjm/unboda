@@ -1,7 +1,9 @@
+import { analyzeFortuneCycleItem } from "./fortuneCycle";
 export interface SeunItem {
   year: number;
   age: number;
   ganji: string;
+  analysis: ReturnType<typeof analyzeFortuneCycleItem>;
 }
 
 export interface SeunAnalysis {
@@ -21,6 +23,7 @@ function getYearGanji(year: number): string {
 export function calculateSeun(
   birthYear: number,
   startYear: number,
+  dayStem: string,
   count = 10
 ): SeunAnalysis {
   const items: SeunItem[] = [];
@@ -28,11 +31,14 @@ export function calculateSeun(
   for (let i = 0; i < count; i++) {
     const year = startYear + i;
 
-    items.push({
-      year,
-      age: year - birthYear + 1,
-      ganji: getYearGanji(year),
-    });
+    const ganji = getYearGanji(year);
+
+items.push({
+  year,
+  age: year - birthYear + 1,
+  ganji,
+  analysis: analyzeFortuneCycleItem(dayStem, ganji),
+});
   }
 
   return { items };

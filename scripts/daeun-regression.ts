@@ -100,6 +100,7 @@ for (const testCase of cases) {
   const result = calculateDaeun(
   testCase.yearPillar,
   testCase.monthPillar,
+  "갑자",
   testCase.gender,
   testCase.birthDate ?? "1990-01-01",
   testCase.birthTime ?? "12:00",

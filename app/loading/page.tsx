@@ -35,6 +35,10 @@ const isLeapMonth = searchParams.get("isLeapMonth") || "평달";
           throw new Error(data.error || "AI 분석에 실패했습니다.");
         }
 
+       if (!data.result || !data.saju) {
+  throw new Error("분석 결과 데이터가 올바르지 않습니다.");
+}
+
         sessionStorage.setItem("sajuResult", data.result || "");
 sessionStorage.setItem("sajuData", JSON.stringify(data.saju || {}));
         const params = new URLSearchParams({

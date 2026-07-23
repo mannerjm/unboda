@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import type { getSaju } from "../lib/manse";
 import { calculateSeun } from "../lib/seun";
+import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
 type SajuResult = ReturnType<typeof getSaju>;
 
 const titleIcons: Record<string, string> = {
@@ -194,16 +195,18 @@ const displayedSeun =
   const savedResult = sessionStorage.getItem("sajuResult");
   const savedSaju = sessionStorage.getItem("sajuData");
 
-  if (savedResult) {
-    setAiResult(savedResult);
+  const restored = restoreStoredResult(
+    savedResult,
+    savedSaju
+  );
+
+  if (!restored.ok) {
+    setAiResult(restored.message);
+    return;
   }
 
-  if (savedSaju) {
-    setSajuData(JSON.parse(savedSaju));
-    console.log("저장된 사주 데이터:", JSON.parse(savedSaju));
-  } else {
-    setAiResult("AI 분석 결과를 찾을 수 없습니다.");
-  }
+  setAiResult(restored.result);
+  setSajuData(restored.saju);
 }, []);
 
 useEffect(() => {

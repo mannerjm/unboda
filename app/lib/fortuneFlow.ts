@@ -16,8 +16,13 @@ export interface FortuneFlowInput {
 export interface FortuneFlowRelation {
   source: "원국" | "대운";
   sourceGanji: string;
+  sourceChar: string;
+
   target: "대운" | "세운";
   targetGanji: string;
+  targetChar: string;
+
+  category: "지지";
   type: FortuneRelationType;
 }
 
@@ -40,23 +45,68 @@ function analyzeBranchRelations(
   const relations: FortuneFlowRelation[] = [];
 
   if (findBranchCombination(sourceBranch, targetBranch)) {
-    relations.push({ source, sourceGanji, target, targetGanji, type: "합" });
+    relations.push({
+      source,
+      sourceGanji,
+      sourceChar: sourceBranch,
+      target,
+      targetGanji,
+      targetChar: targetBranch,
+      category: "지지",
+      type: "합",
+    });
   }
 
   if (findBranchClash(sourceBranch, targetBranch)) {
-    relations.push({ source, sourceGanji, target, targetGanji, type: "충" });
+    relations.push({
+      source,
+      sourceGanji,
+      sourceChar: sourceBranch,
+      target,
+      targetGanji,
+      targetChar: targetBranch,
+      category: "지지",
+      type: "충",
+    });
   }
 
   if (findBranchPunishment(sourceBranch, targetBranch)) {
-    relations.push({ source, sourceGanji, target, targetGanji, type: "형" });
+    relations.push({
+      source,
+      sourceGanji,
+      sourceChar: sourceBranch,
+      target,
+      targetGanji,
+      targetChar: targetBranch,
+      category: "지지",
+      type: "형",
+    });
   }
 
   if (findBranchBreak(sourceBranch, targetBranch)) {
-    relations.push({ source, sourceGanji, target, targetGanji, type: "파" });
+    relations.push({
+      source,
+      sourceGanji,
+      sourceChar: sourceBranch,
+      target,
+      targetGanji,
+      targetChar: targetBranch,
+      category: "지지",
+      type: "파",
+    });
   }
 
   if (findBranchHarm(sourceBranch, targetBranch)) {
-    relations.push({ source, sourceGanji, target, targetGanji, type: "해" });
+    relations.push({
+      source,
+      sourceGanji,
+      sourceChar: sourceBranch,
+      target,
+      targetGanji,
+      targetChar: targetBranch,
+      category: "지지",
+      type: "해",
+    });
   }
 
   return relations;

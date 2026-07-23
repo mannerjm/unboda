@@ -101,7 +101,7 @@ const opportunities = relationAnalysis.relations
   .filter((relation) => relation.type === "합")
   .map(
     (relation) =>
-      `${relation.source} ${relation.sourceGanji}와 ${relation.target} ${relation.targetGanji}의 합`
+      `${relation.source} ${relation.sourceGanji}의 ${relation.category} ${relation.sourceChar}와 ${relation.target} ${relation.targetGanji}의 ${relation.category} ${relation.targetChar}의 ${relation.type}`
   );
 
 const cautions = relationAnalysis.relations
@@ -114,7 +114,7 @@ const cautions = relationAnalysis.relations
   )
   .map(
     (relation) =>
-      `${relation.source} ${relation.sourceGanji}와 ${relation.target} ${relation.targetGanji}의 ${relation.type}`
+     `${relation.source} ${relation.sourceGanji}의 ${relation.category} ${relation.sourceChar}와 ${relation.target} ${relation.targetGanji}의 ${relation.category} ${relation.targetChar}의 ${relation.type}`
   );
 
 const summaryParts: string[] = [];

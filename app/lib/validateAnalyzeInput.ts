@@ -28,6 +28,34 @@ export function validateAnalyzeInput(
     };
   }
 
+if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
+  return {
+    valid: false,
+    error: "birthDate는 YYYY-MM-DD 형식이어야 합니다.",
+  };
+}
+
+const [year, month, day] = birthDate.split("-").map(Number);
+const date = new Date(Date.UTC(year, month - 1, day));
+
+if (
+  date.getUTCFullYear() !== year ||
+  date.getUTCMonth() !== month - 1 ||
+  date.getUTCDate() !== day
+) {
+  return {
+    valid: false,
+    error: "birthDate가 실제로 존재하지 않는 날짜입니다.",
+  };
+}
+
+if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(birthTime)) {
+  return {
+    valid: false,
+    error: "birthTime은 HH:mm 형식이어야 합니다.",
+  };
+}
+
   if (calendarType !== "양력" && calendarType !== "음력") {
     return {
       valid: false,

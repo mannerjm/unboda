@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import { getSaju } from "@/app/lib/manse";
 import { NextResponse } from "next/server";
 import { buildPrompt } from "@/app/lib/prompt/builder";
+import { buildSajuResponse } from "@/app/lib/buildSajuResponse";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -54,64 +55,8 @@ const modularPrompt = buildPrompt({
   result:
     completion.choices[0].message.content ||
     "AI 분석 결과를 생성하지 못했습니다.",
-  saju: {
-    solarDate: saju.solarDate,
-
-    yearPillarHanja: saju.yearPillarHanja,
-    monthPillarHanja: saju.monthPillarHanja,
-    dayPillarHanja: saju.dayPillarHanja,
-    hourPillarHanja: saju.hourPillarHanja,
-
-    yearStem: saju.yearStem,
-    yearBranch: saju.yearBranch,
-    yearHiddenStems: saju.yearHiddenStems,
-    yearTenGod: saju.yearTenGod,
-    yearBranchTenGod: saju.yearBranchTenGod,
-    yearStage: saju.yearStage,
-    yearSpirit: saju.yearSpirit,
-    yearNoble: saju.yearNoble,
-    yearNobles: saju.yearNobles,
-
-    monthStem: saju.monthStem,
-    monthBranch: saju.monthBranch,
-    monthHiddenStems: saju.monthHiddenStems,
-    monthTenGod: saju.monthTenGod,
-    monthBranchTenGod: saju.monthBranchTenGod,
-    monthStage: saju.monthStage,
-    monthSpirit: saju.monthSpirit,
-    monthNoble: saju.monthNoble,
-    monthNobles: saju.monthNobles,
-
-    dayStem: saju.dayStem,
-    dayBranch: saju.dayBranch,
-    dayHiddenStems: saju.dayHiddenStems,
-    dayTenGod: saju.dayTenGod,
-     dayBranchTenGod: saju.dayBranchTenGod,
-     dayStage: saju.dayStage,
-     daySpirit: saju.daySpirit,
-     dayNoble: saju.dayNoble,
-     dayNobles: saju.dayNobles,
-
-    hourStem: saju.hourStem,
-    hourBranch: saju.hourBranch,
-    hourHiddenStems: saju.hourHiddenStems,
-    hourTenGod: saju.hourTenGod,
-     hourBranchTenGod: saju.hourBranchTenGod,
-     hourStage: saju.hourStage,
-     hourSpirit: saju.hourSpirit,
-     hourNoble: saju.hourNoble,
-     hourNobles: saju.hourNobles,
-
-     elementAnalysis: saju.elementAnalysis,
-strengthAnalysis: saju.strengthAnalysis,
-elementInterpretation: saju.elementInterpretation,
-elementRelations: saju.elementRelations,
-yongshinAnalysis: saju.yongshinAnalysis,
-gyeokgukAnalysis: saju.gyeokgukAnalysis,
-fortuneBrain: saju.fortuneBrain,
-daeunAnalysis: saju.daeunAnalysis,
-seunAnalysis: saju.seunAnalysis,
-  },
+  saju: buildSajuResponse(saju),
+  
 });
   } catch (error) {
     console.error("OpenAI 또는 만세력 오류:", error);

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import type { AnalyzeApiResponse } from "@/app/lib/analyzeApiTypes";
 
 export default function LoadingPage() {
   const router = useRouter();
@@ -29,15 +30,18 @@ const isLeapMonth = searchParams.get("isLeapMonth") || "평달";
           }),
         });
 
-        const data = await response.json();
+        const data: AnalyzeApiResponse = await response.json();
 
-        if (!response.ok) {
-          throw new Error(data.error || "AI 분석에 실패했습니다.");
-        }
+        if (!response.ok || "error" in data) {
+  throw new Error(
+    "error" in data ? data.error : "AI 분석에 실패했습니다."
+  );
+}
 
-       if (!data.result || !data.saju) {
+if (!data.result || !data.saju) {
   throw new Error("분석 결과 데이터가 올바르지 않습니다.");
 }
+
 
         sessionStorage.setItem("sajuResult", data.result || "");
 sessionStorage.setItem("sajuData", JSON.stringify(data.saju || {}));

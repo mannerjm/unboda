@@ -5,6 +5,10 @@ import { buildPrompt } from "@/app/lib/prompt/builder";
 import { buildSajuResponse } from "@/app/lib/buildSajuResponse";
 import { validateAnalyzeInput } from "@/app/lib/validateAnalyzeInput";
 import { getAnalyzeErrorStatus } from "@/app/lib/getAnalyzeErrorStatus";
+import type {
+  AnalyzeSuccessResponse,
+  AnalyzeErrorResponse,
+} from "@/app/lib/analyzeApiTypes";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -17,10 +21,14 @@ export async function POST(req: Request) {
 try {
   body = await req.json();
 } catch {
-  return NextResponse.json(
-    { error: "요청 데이터가 올바른 JSON 형식이 아닙니다." },
-    { status: 400 }
-  );
+  const errorResponse: AnalyzeErrorResponse = {
+  error: "요청 데이터가 올바른 JSON 형식이 아닙니다.",
+};
+
+return NextResponse.json(
+  errorResponse,
+  { status: 400 }
+);
 }
 
 const {
@@ -40,10 +48,14 @@ const validation = validateAnalyzeInput({
 });
 
 if (!validation.valid) {
-  return NextResponse.json(
-    { error: validation.error },
-    { status: 400 }
-  );
+  const errorResponse: AnalyzeErrorResponse = {
+  error: validation.error,
+};
+
+return NextResponse.json(
+  errorResponse,
+  { status: 400 }
+);
 }
 
     const saju = getSaju(
@@ -79,13 +91,14 @@ const modularPrompt = buildPrompt({
       ],
     });
 
-    return NextResponse.json({
+   const responseData: AnalyzeSuccessResponse = {
   result:
     completion.choices[0].message.content ||
     "AI 분석 결과를 생성하지 못했습니다.",
   saju: buildSajuResponse(saju),
+};
 
-});
+return NextResponse.json(responseData);
  } catch (error) {
   console.error("OpenAI 또는 만세력 오류:", error);
 
@@ -95,9 +108,13 @@ const modularPrompt = buildPrompt({
       : "알 수 없는 오류가 발생했습니다.";
 
 
-  return NextResponse.json(
-    { error: message },
-    { status: getAnalyzeErrorStatus(error) }
-  );
+  const errorResponse: AnalyzeErrorResponse = {
+  error: message,
+};
+
+return NextResponse.json(
+  errorResponse,
+  { status: getAnalyzeErrorStatus(error) }
+);
 }
 }

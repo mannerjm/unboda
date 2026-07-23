@@ -1,8 +1,6 @@
 import OpenAI from "openai";
 import { getSaju } from "@/app/lib/manse";
 import { NextResponse } from "next/server";
-import { buildBasePrompt } from "@/app/lib/prompt/basePrompt";
-import { buildFortunePrompt } from "@/app/lib/prompt/fortunePrompt";
 import { buildPrompt } from "@/app/lib/prompt/builder";
 
 const openai = new OpenAI({

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { buildPrompt } from "@/app/lib/prompt/builder";
 import { buildSajuResponse } from "@/app/lib/buildSajuResponse";
 import { validateAnalyzeInput } from "@/app/lib/validateAnalyzeInput";
+import { getAnalyzeErrorStatus } from "@/app/lib/getAnalyzeErrorStatus";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -11,13 +12,24 @@ const openai = new OpenAI({
 
 export async function POST(req: Request) {
   try {
-    const {
+    let body;
+
+try {
+  body = await req.json();
+} catch {
+  return NextResponse.json(
+    { error: "요청 데이터가 올바른 JSON 형식이 아닙니다." },
+    { status: 400 }
+  );
+}
+
+const {
   birthDate,
   birthTime,
   calendarType,
   isLeapMonth,
   gender,
-} = await req.json();
+} = body;
 
 const validation = validateAnalyzeInput({
   birthDate,
@@ -74,17 +86,18 @@ const modularPrompt = buildPrompt({
   saju: buildSajuResponse(saju),
 
 });
-  } catch (error) {
-    console.error("OpenAI 또는 만세력 오류:", error);
+ } catch (error) {
+  console.error("OpenAI 또는 만세력 오류:", error);
 
-    const message =
-      error instanceof Error
-        ? error.message
-        : "알 수 없는 오류가 발생했습니다.";
+  const message =
+    error instanceof Error
+      ? error.message
+      : "알 수 없는 오류가 발생했습니다.";
 
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
-  }
+
+  return NextResponse.json(
+    { error: message },
+    { status: getAnalyzeErrorStatus(error) }
+  );
+}
 }

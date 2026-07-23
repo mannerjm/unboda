@@ -3,6 +3,7 @@ import { getSaju } from "@/app/lib/manse";
 import { NextResponse } from "next/server";
 import { buildPrompt } from "@/app/lib/prompt/builder";
 import { buildSajuResponse } from "@/app/lib/buildSajuResponse";
+import { validateAnalyzeInput } from "@/app/lib/validateAnalyzeInput";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -17,6 +18,21 @@ export async function POST(req: Request) {
   isLeapMonth,
   gender,
 } = await req.json();
+
+const validation = validateAnalyzeInput({
+  birthDate,
+  birthTime,
+  calendarType,
+  isLeapMonth,
+  gender,
+});
+
+if (!validation.valid) {
+  return NextResponse.json(
+    { error: validation.error },
+    { status: 400 }
+  );
+}
 
     const saju = getSaju(
   birthDate,
@@ -56,7 +72,7 @@ const modularPrompt = buildPrompt({
     completion.choices[0].message.content ||
     "AI 분석 결과를 생성하지 못했습니다.",
   saju: buildSajuResponse(saju),
-  
+
 });
   } catch (error) {
     console.error("OpenAI 또는 만세력 오류:", error);

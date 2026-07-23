@@ -167,6 +167,8 @@ export default function ResultPage() {
   const searchParams = useSearchParams();
   const [aiResult, setAiResult] = useState("");
 const [sajuData, setSajuData] = useState<SajuResult | null>(null);
+const [isStorageChecked, setIsStorageChecked] = useState(false);
+
 
 const birthDate = searchParams.get("birthDate") || "입력 없음";
   const birthTime = searchParams.get("birthTime") || "입력 없음";
@@ -201,12 +203,14 @@ const displayedSeun =
   );
 
   if (!restored.ok) {
-    setAiResult(restored.message);
-    return;
-  }
+  setAiResult(restored.message);
+  setIsStorageChecked(true);
+  return;
+}
 
-  setAiResult(restored.result);
-  setSajuData(restored.saju);
+setAiResult(restored.result);
+setSajuData(restored.saju);
+setIsStorageChecked(true);
 }, []);
 
 useEffect(() => {
@@ -228,7 +232,7 @@ useEffect(() => {
   setSelectedDaeunOrder(currentDaeunOrder);
 }, [sajuData, birthDate, selectedDaeunOrder]);
 
-if (!sajuData) {
+if (!isStorageChecked) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea]">
       <p className="text-sm text-stone-500">
@@ -237,6 +241,18 @@ if (!sajuData) {
     </main>
   );
 }
+if (!sajuData) {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6">
+      <div className="rounded-3xl border border-stone-200 bg-white p-8 text-center shadow-sm">
+        <p className="font-semibold text-stone-900">
+          {aiResult || "AI 분석 결과를 찾을 수 없습니다."}
+        </p>
+      </div>
+    </main>
+  );
+}
+
 console.log("저장된 사주 데이터", sajuData);
 console.log("신강신약", sajuData.strengthAnalysis);
 console.log("오행해석", sajuData.elementInterpretation);

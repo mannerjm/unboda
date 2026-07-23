@@ -517,7 +517,8 @@ const fortuneFlowAnalysis =
         daeunGanji: currentDaeun.ganji,
         seunGanji: currentSeun.ganji,
 
-        originalElements: elementAnalysis.percentages,
+        originalElements: elementAnalysis.counts,
+
 
         addedElements: [
           currentDaeun.analysis.stemElement,
@@ -530,6 +531,11 @@ const fortuneFlowAnalysis =
         secondaryYongshin: yongshinAnalysis.secondary,
       })
     : null;
+
+   console.log(
+  "FORTUNE_FLOW_ANALYSIS:",
+  JSON.stringify(fortuneFlowAnalysis, null, 2)
+); 
 
   return {
      solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(

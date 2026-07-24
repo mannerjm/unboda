@@ -126,6 +126,8 @@ const modularPrompt =
 const productRecommendations =
   buildAnalysisProductRecommendations({
     fortuneBrain: recommendationAnalysis.fortuneBrain,
+    strengthAnalysis: recommendationAnalysis.strengthAnalysis,
+    elementRelations: recommendationAnalysis.elementRelations,
   });
 
    const responseData: AnalyzeSuccessResponse = {

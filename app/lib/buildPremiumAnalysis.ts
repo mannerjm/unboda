@@ -21,14 +21,14 @@ export function buildPremiumAnalysis(
 ): PremiumAnalysisResponse {
   const full = buildSajuResponse(saju);
 
-  return {
-    elementRelations: full.elementRelations,
-    fortuneBrain: full.fortuneBrain,
-    daeunAnalysis: full.daeunAnalysis,
-    seunAnalysis: full.seunAnalysis,
-    yongshinAnalysis: full.yongshinAnalysis,
-    gyeokgukAnalysis: full.gyeokgukAnalysis,
-    strengthAnalysis: full.strengthAnalysis,
-    elementAnalysis: full.elementAnalysis,
-  };
+ return {
+  elementRelations: full.elementRelations,
+  fortuneBrain: full.fortuneBrain,
+  daeunAnalysis: full.daeunAnalysis,
+  seunAnalysis: full.seunAnalysis,
+  yongshinAnalysis: full.yongshinAnalysis,
+  gyeokgukAnalysis: full.gyeokgukAnalysis,
+  strengthAnalysis: full.strengthAnalysis,
+  elementAnalysis: full.elementAnalysis,
+};
 }

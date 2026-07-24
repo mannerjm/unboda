@@ -2,6 +2,7 @@ import type { FortuneBrainResult } from "./fortuneBrain";
 import type { ElementRelationsAnalysis } from "./elementRelations";
 import type { PaidAnalysisProductId } from "./paidAnalysisProducts";
 import type { StrengthAnalysis } from "./strength";
+import type { FortuneFlowAnalysis } from "./fortuneFlow";
 
 export type AnalysisProductRecommendation = {
   productId: PaidAnalysisProductId;
@@ -14,11 +15,12 @@ export type AnalysisProductRecommendationResult = {
 };
 
 
-export type AnalysisProductRecommendationInput = {
+export interface AnalysisProductRecommendationInput {
   strengthAnalysis: StrengthAnalysis;
   fortuneBrain: FortuneBrainResult;
   elementRelations: ElementRelationsAnalysis;
-};
+  fortuneFlow: FortuneFlowAnalysis;
+}
 
 type ProductRecommendationScore = {
   score: number;

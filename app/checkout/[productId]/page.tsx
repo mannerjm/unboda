@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CheckoutAccessPanel from "./CheckoutAccessPanel";
+import { paidAnalysisProducts } from "@/app/lib/paidAnalysisProducts";
 
 type CheckoutPageProps = {
   params: Promise<{
@@ -7,27 +8,17 @@ type CheckoutPageProps = {
   }>;
 };
 
-const checkoutProducts = {
-  "career-business": {
-    title: "직업·사업운 심층 분석",
-  },
-  wealth: {
-    title: "재물운 심층 분석",
-  },
-  relationship: {
-    title: "연애·관계 심층 분석",
-  },
-} as const;
+
 
 export default async function CheckoutPage({
   params,
 }: CheckoutPageProps) {
   const { productId } = await params;
 
-  const product =
-    checkoutProducts[
-      productId as keyof typeof checkoutProducts
-    ];
+ const product =
+  paidAnalysisProducts[
+    productId as keyof typeof paidAnalysisProducts
+  ];
 
 
   if (!product) {

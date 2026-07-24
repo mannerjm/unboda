@@ -2,7 +2,10 @@ import type { FortuneBrainResult } from "./fortuneBrain";
 import type { ElementRelationsAnalysis } from "./elementRelations";
 import type { PaidAnalysisProductId } from "./paidAnalysisProducts";
 import type { StrengthAnalysis } from "./strength";
-import type { FortuneFlowAnalysis } from "./fortuneFlow";
+import { analyzeFullFortuneFlow } from "./fortuneFlowAnalysis";
+
+type FortuneFlowAnalysisResult =
+  ReturnType<typeof analyzeFullFortuneFlow>;
 
 export type AnalysisProductRecommendation = {
   productId: PaidAnalysisProductId;
@@ -19,7 +22,7 @@ export interface AnalysisProductRecommendationInput {
   strengthAnalysis: StrengthAnalysis;
   fortuneBrain: FortuneBrainResult;
   elementRelations: ElementRelationsAnalysis;
-  fortuneFlow: FortuneFlowAnalysis;
+  fortuneFlow: ReturnType<typeof analyzeFullFortuneFlow> | null;
 }
 
 type ProductRecommendationScore = {
@@ -99,9 +102,10 @@ export function buildAnalysisProductRecommendations(
   input: AnalysisProductRecommendationInput
 ): AnalysisProductRecommendationResult {
   const {
-    strengthAnalysis,
-    elementRelations,
-  } = input;
+  strengthAnalysis,
+  elementRelations,
+  fortuneFlow,
+} = input;
 
 const scores = createInitialRecommendationScores();
 
@@ -175,6 +179,17 @@ for (const relation of strongRelations) {
       "긴장과 통제가 재물 판단에 영향을 줄 수 있어 지출과 기회 흐름을 세밀하게 살펴볼 필요가 있습니다."
     );
   }
+}
+if (fortuneFlow?.currentFlow === "기회 우세") {
+  scores.career.score += 10;
+  scores.career.reasons.push(
+    "현재 운의 흐름이 기회 우세로 나타나 직업과 진로의 확장 가능성을 우선적으로 살펴볼 가치가 있습니다."
+  );
+
+  scores.business.score += 8;
+  scores.business.reasons.push(
+    "현재 흐름에서 새로운 역할이나 사업 기회를 검토할 여지가 있습니다."
+  );
 }
 
  const recommendations = Object.entries(scores)

@@ -14,7 +14,8 @@ export type PremiumAnalysisResponse = Pick<
   | "gyeokgukAnalysis"
   | "strengthAnalysis"
   | "elementAnalysis"
->;
+> &
+  Pick<SajuResult, "fortuneFlowAnalysis">;
 
 export function buildPremiumAnalysis(
   saju: SajuResult
@@ -30,5 +31,6 @@ export function buildPremiumAnalysis(
   gyeokgukAnalysis: full.gyeokgukAnalysis,
   strengthAnalysis: full.strengthAnalysis,
   elementAnalysis: full.elementAnalysis,
+  fortuneFlowAnalysis: saju.fortuneFlowAnalysis,
 };
 }

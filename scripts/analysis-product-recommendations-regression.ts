@@ -31,6 +31,7 @@ const result = buildAnalysisProductRecommendations({
   strengthAnalysis,
   fortuneBrain,
   elementRelations,
+  fortuneFlow: null,
 });
 
 assert(

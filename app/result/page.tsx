@@ -172,7 +172,8 @@ const [sajuData, setSajuData] = useState<SajuResult | null>(null);
 const [freeAnalysis, setFreeAnalysis] =
   useState<AnalyzeFreeResponse | null>(null);
 const [isStorageChecked, setIsStorageChecked] = useState(false);
-
+const [selectedPaidAnalysisId, setSelectedPaidAnalysisId] =
+  useState<string | null>(null);
 
 const birthDate = searchParams.get("birthDate") || "입력 없음";
   const birthTime = searchParams.get("birthTime") || "입력 없음";
@@ -339,6 +340,55 @@ const elementItems = [
   { key: "금", label: "금" },
   { key: "수", label: "수" },
 ] as const;
+
+const paidAnalysisProducts = [
+  {
+    id: "career-business",
+    title: "직업·사업운 심층 분석",
+    description:
+      "직업 변화, 이직, 사업 흐름과 중요한 선택 시기를 깊게 살펴봅니다.",
+    details: [
+      "직업 변화와 역할 전환이 나타나는 명리학적 이유",
+      "이직·승진·사업 변화가 강해지는 중요한 시기",
+      "기회로 활용할 수 있는 직업과 사업 흐름",
+      "무리한 이동이나 결정에 주의할 시기",
+      "현재 상황에서 고려할 현실적인 선택 방향",
+    ],
+  },
+  {
+    id: "wealth",
+    title: "재물운 심층 분석",
+    description:
+      "돈의 흐름, 기회가 커지는 시기와 지출·손실에 주의할 흐름을 분석합니다.",
+    details: [
+      "현재 재물 흐름이 형성되는 명리학적 이유",
+      "수입과 재정 변화가 강해지는 중요한 시기",
+      "재물 기회를 활용하기 좋은 흐름",
+      "지출·손실·과도한 판단에 주의할 시기",
+      "현재 재정 상황에서 살펴볼 현실적인 대응 방향",
+    ],
+  },
+  {
+    id: "relationship",
+    title: "연애·관계 심층 분석",
+    description:
+      "관계의 변화, 인연의 흐름과 현재 관계에서 살펴볼 핵심 포인트를 분석합니다.",
+    details: [
+      "현재 관계 흐름이 나타나는 명리학적 이유",
+      "새로운 인연과 관계 변화가 강해지는 시기",
+      "관계를 발전시키기 좋은 흐름",
+      "갈등과 거리감에 주의할 시기와 요인",
+      "현재 관계에서 살펴볼 현실적인 대응 방향",
+    ],
+  },
+] as const;
+
+const selectedPaidAnalysis = paidAnalysisProducts.find(
+  (product) => product.id === selectedPaidAnalysisId
+);
+function handlePaidAnalysisEntry(productId: string) {
+  console.log("Paid analysis entry:", productId);
+}
 
   return (
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
@@ -1188,7 +1238,82 @@ h3: ({ children }) => {
   )}
 </div>
         </section>
+<section className="mt-8 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+  <div className="mx-auto max-w-2xl text-center">
+    <p className="text-xs font-semibold tracking-[0.25em] text-stone-500">
+      NEXT ANALYSIS
+    </p>
 
+    <h2 className="mt-3 text-2xl font-bold text-stone-900">
+      무료 분석에서 확인한 흐름을 더 깊게 살펴보세요
+    </h2>
+
+    <p className="mt-4 text-sm leading-7 text-stone-600">
+      지금까지의 무료 분석은 당신의 사주 구조와 현재 운의 흐름을
+      이해하기 위한 핵심 분석입니다. 더 깊은 분석에서는 같은 명리
+      데이터를 바탕으로 변화의 이유와 중요한 시기, 기회와 주의 요인,
+      현실적인 대응 방향까지 살펴볼 수 있습니다.
+    </p>
+  </div>
+
+  <div className="mt-7 grid gap-4 md:grid-cols-3">
+  {paidAnalysisProducts.map((product) => (
+    <button
+  key={product.id}
+  type="button"
+  onClick={() => setSelectedPaidAnalysisId(product.id)}
+      className="rounded-2xl border border-stone-200 bg-stone-50 p-5 text-left transition hover:-translate-y-0.5 hover:border-stone-300 hover:bg-white hover:shadow-sm"
+    >
+      <p className="text-sm font-bold text-stone-900">
+        {product.title}
+      </p>
+
+      <p className="mt-3 text-sm leading-6 text-stone-600">
+        {product.description}
+      </p>
+
+      <p className="mt-5 text-sm font-semibold text-stone-900">
+        자세히 보기 →
+      </p>
+    </button>
+  ))}
+</div>
+{selectedPaidAnalysis && (
+  <div className="mt-6 rounded-2xl border border-stone-300 bg-stone-50 p-6">
+    <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
+      SELECTED ANALYSIS
+    </p>
+
+    <h3 className="mt-3 text-xl font-bold text-stone-900">
+      {selectedPaidAnalysis.title}
+    </h3>
+
+    <p className="mt-3 text-sm leading-7 text-stone-600">
+      {selectedPaidAnalysis.description}
+    </p>
+
+    <div className="mt-5 rounded-xl border border-stone-200 bg-white p-4">
+      <p className="text-sm font-semibold text-stone-900">
+        심층 분석에서 확인할 수 있는 내용
+      </p>
+
+      <ul className="mt-3 space-y-2 text-sm leading-6 text-stone-600">
+  {selectedPaidAnalysis.details.map((detail) => (
+  <li key={detail}>• {detail}</li>
+))}
+</ul>
+    </div>
+
+    <button
+  type="button"
+  onClick={() => handlePaidAnalysisEntry(selectedPaidAnalysis.id)}
+  className="mt-5 w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800"
+>
+  이 분석 자세히 보기
+</button>
+  </div>
+)}
+</section>
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
           <button
             type="button"

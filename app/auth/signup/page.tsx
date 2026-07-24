@@ -1,6 +1,17 @@
 import Link from "next/link";
+import { getSafeReturnTo } from "@/app/lib/auth";
+type SignupPageProps = {
+  searchParams: Promise<{
+    returnTo?: string;
+  }>;
+};
 
-export default function SignupPage() {
+export default async function SignupPage({
+  searchParams,
+}: SignupPageProps) {
+  const { returnTo } = await searchParams;
+ const safeReturnTo = getSafeReturnTo(returnTo);
+
   return (
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
       <div className="mx-auto w-full max-w-xl">
@@ -108,7 +119,7 @@ export default function SignupPage() {
             </p>
 
             <Link
-              href="/auth/login"
+              href={`/auth/login?returnTo=${encodeURIComponent(safeReturnTo)}`}
               className="mt-3 inline-block text-sm font-bold text-stone-900 underline"
             >
               로그인하기

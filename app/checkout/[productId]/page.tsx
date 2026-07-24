@@ -1,8 +1,5 @@
 import Link from "next/link";
-import {
-  getUserAccessPermissions,
-  type UserAccessLevel,
-} from "@/app/lib/userAccess";
+import CheckoutAccessPanel from "./CheckoutAccessPanel";
 
 type CheckoutPageProps = {
   params: Promise<{
@@ -32,8 +29,6 @@ export default async function CheckoutPage({
       productId as keyof typeof checkoutProducts
     ];
 
-  const userAccessLevel: UserAccessLevel = "guest";
-const permissions = getUserAccessPermissions(userAccessLevel);  
 
   if (!product) {
     return (
@@ -75,50 +70,8 @@ const permissions = getUserAccessPermissions(userAccessLevel);
         <p className="mt-5 text-sm leading-7 text-stone-600">
           구매를 진행하기 전에 계정 연결과 결제 단계를 확인합니다.
         </p>
-        <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
-  {userAccessLevel === "guest" ? (
-    <>
-      <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
-        ACCOUNT REQUIRED
-      </p>
-
-      <h2 className="mt-3 text-2xl font-bold text-stone-900">
-        구매한 분석을 보관하려면 계정 연결이 필요합니다
-      </h2>
-
-      <p className="mt-4 text-sm leading-7 text-stone-600">
-        회원가입은 무료 분석을 보기 위한 조건이 아닙니다.
-        유료 분석을 구매하고 이후 다시 확인할 수 있도록
-        구매 결과를 계정에 연결하는 단계입니다.
-      </p>
-
-      <div className="mt-7 grid gap-3 sm:grid-cols-2">
-        <button
-          type="button"
-          className="rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800"
-        >
-          로그인
-        </button>
-
-        <button
-          type="button"
-          className="rounded-2xl border border-stone-300 bg-white px-5 py-4 font-semibold text-stone-900 transition hover:bg-stone-50"
-        >
-          회원가입
-        </button>
-      </div>
-    </>
-  ) : (
-    <p className="text-sm text-stone-600">
-      계정이 확인되었습니다. 결제를 계속 진행할 수 있습니다.
-    </p>
-  )}
-
-  <p className="mt-5 text-xs leading-5 text-stone-500">
-    유료 분석 구매 가능 상태:{" "}
-    {permissions.canPurchasePaidAnalysis ? "가능" : "불가"}
-  </p>
-</section>
+       
+       <CheckoutAccessPanel productId={productId} />
       </div>
     </main>
   );

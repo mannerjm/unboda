@@ -1,6 +1,35 @@
+"use client";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  getSafeReturnTo,
+  saveAuthState,
+  type AuthState,
+} from "@/app/lib/auth";
+
 import Link from "next/link";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const returnTo = searchParams.get("returnTo") ?? undefined;
+  const safeReturnTo = getSafeReturnTo(returnTo);
+
+  function handleLogin() {
+    const authenticatedState: AuthState = {
+      status: "authenticated",
+      user: {
+        id: "demo-user",
+        email: "demo@unboda.com",
+        name: "운보다 사용자",
+        accessLevel: "free_member",
+      },
+    };
+
+    saveAuthState(authenticatedState);
+    router.push(safeReturnTo);
+  }
+
   return (
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
       <div className="mx-auto w-full max-w-xl">
@@ -61,6 +90,7 @@ export default function LoginPage() {
 
             <button
               type="button"
+              onClick={handleLogin}
               className="w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800"
             >
               로그인
@@ -73,7 +103,7 @@ export default function LoginPage() {
             </p>
 
             <Link
-              href="/auth/signup"
+               href={`/auth/signup?returnTo=${encodeURIComponent(safeReturnTo)}`}
               className="mt-3 inline-block text-sm font-bold text-stone-900 underline"
             >
               회원가입하기

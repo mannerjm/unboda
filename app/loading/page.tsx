@@ -56,6 +56,13 @@ sessionStorage.setItem(
 );
 
 sessionStorage.setItem(
+  "productRecommendations",
+  JSON.stringify(data.productRecommendations || {
+    recommendations: [],
+  })
+);
+
+sessionStorage.setItem(
   "analyzeRequest",
   JSON.stringify({
     birthDate,

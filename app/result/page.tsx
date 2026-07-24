@@ -7,6 +7,8 @@ import type { getSaju } from "../lib/manse";
 import { calculateSeun } from "../lib/seun";
 import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
 import type { AnalyzeFreeResponse } from "@/app/lib/analyzeApiTypes";
+import type { AnalysisProductRecommendationResult } from "@/app/lib/analysisProductRecommendations";
+import { paidAnalysisProducts as paidAnalysisProductCatalog } from "@/app/lib/paidAnalysisProducts";
 
 type SajuResult = ReturnType<typeof getSaju>;
 
@@ -171,6 +173,12 @@ function ResultPageContent() {
 const [sajuData, setSajuData] = useState<SajuResult | null>(null);
 const [freeAnalysis, setFreeAnalysis] =
   useState<AnalyzeFreeResponse | null>(null);
+
+ const [
+  productRecommendations,
+  setProductRecommendations,
+] = useState<AnalysisProductRecommendationResult | null>(null);
+
 const [isStorageChecked, setIsStorageChecked] = useState(false);
 const [selectedPaidAnalysisId, setSelectedPaidAnalysisId] =
   useState<string | null>(null);
@@ -205,6 +213,9 @@ const displayedSeun =
   const savedSaju = sessionStorage.getItem("sajuData");
   const savedFreeAnalysis = sessionStorage.getItem("freeAnalysis");
 
+  const savedProductRecommendations =
+  sessionStorage.getItem("productRecommendations");
+
   const restored = restoreStoredResult(
     savedResult,
     savedSaju
@@ -231,6 +242,16 @@ if (savedFreeAnalysis) {
     parsedFreeAnalysis
   );
 }
+
+if (savedProductRecommendations) {
+  const parsedProductRecommendations =
+    JSON.parse(
+      savedProductRecommendations
+    ) as AnalysisProductRecommendationResult;
+
+  setProductRecommendations(parsedProductRecommendations);
+}
+
 }, []);
 
 
@@ -383,9 +404,21 @@ const paidAnalysisProducts = [
   },
 ] as const;
 
-const selectedPaidAnalysis = paidAnalysisProducts.find(
+const recommendedPaidAnalysisProducts =
+  productRecommendations?.recommendations.map(
+    (recommendation) =>
+      paidAnalysisProductCatalog[recommendation.productId]
+  ) ?? [];
+
+const displayedPaidAnalysisProducts =
+  recommendedPaidAnalysisProducts.length > 0
+    ? recommendedPaidAnalysisProducts
+    : paidAnalysisProducts;
+
+const selectedPaidAnalysis = displayedPaidAnalysisProducts.find(
   (product) => product.id === selectedPaidAnalysisId
 );
+
 function handlePaidAnalysisEntry(productId: string) {
   router.push(`/paid-analysis/${productId}`);
 }
@@ -1257,7 +1290,7 @@ h3: ({ children }) => {
   </div>
 
   <div className="mt-7 grid gap-4 md:grid-cols-3">
-  {paidAnalysisProducts.map((product) => (
+  {displayedPaidAnalysisProducts.map((product) => (
     <button
   key={product.id}
   type="button"

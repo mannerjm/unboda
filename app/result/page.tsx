@@ -1,11 +1,13 @@
 "use client";
 import { calculateWeightedElements } from "../lib/elements";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import type { getSaju } from "../lib/manse";
 import { calculateSeun } from "../lib/seun";
 import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
+import type { AnalyzeFreeResponse } from "@/app/lib/analyzeApiTypes";
+
 type SajuResult = ReturnType<typeof getSaju>;
 
 const titleIcons: Record<string, string> = {
@@ -162,11 +164,13 @@ function ganjiToHanja(ganji: string) {
   return `${stemMap[stem] ?? stem}${branchMap[branch] ?? branch}`;
 }
 
-export default function ResultPage() {
+function ResultPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [aiResult, setAiResult] = useState("");
 const [sajuData, setSajuData] = useState<SajuResult | null>(null);
+const [freeAnalysis, setFreeAnalysis] =
+  useState<AnalyzeFreeResponse | null>(null);
 const [isStorageChecked, setIsStorageChecked] = useState(false);
 
 
@@ -176,26 +180,29 @@ const birthDate = searchParams.get("birthDate") || "입력 없음";
 
 const [selectedDaeunOrder, setSelectedDaeunOrder] = useState<number | null>(null);
 const selectedDaeunStartYear =
-  sajuData && selectedDaeunOrder
+  (freeAnalysis?.daeunAnalysis ?? sajuData?.daeunAnalysis) &&
+  selectedDaeunOrder
     ? Number(birthDate.slice(0, 4)) +
-      sajuData.daeunAnalysis.startAge +
+      (freeAnalysis?.daeunAnalysis.startAge ??
+        sajuData!.daeunAnalysis.startAge) +
       (selectedDaeunOrder - 1) * 10 -
       1
-    : null;  
+    : null;
+
 const displayedSeun =
   selectedDaeunStartYear !== null
     ? calculateSeun(
         Number(birthDate.slice(0, 4)),
         selectedDaeunStartYear,
-         sajuData!.dayStem,
+         freeAnalysis?.dayStem ?? sajuData!.dayStem,
         10
       )
-    : sajuData?.seunAnalysis ?? null;    
-
+    : freeAnalysis?.seunAnalysis ?? sajuData?.seunAnalysis ?? null;
 
  useEffect(() => {
   const savedResult = sessionStorage.getItem("sajuResult");
   const savedSaju = sessionStorage.getItem("sajuData");
+  const savedFreeAnalysis = sessionStorage.getItem("freeAnalysis");
 
   const restored = restoreStoredResult(
     savedResult,
@@ -211,7 +218,20 @@ const displayedSeun =
 setAiResult(restored.result);
 setSajuData(restored.saju);
 setIsStorageChecked(true);
+
+if (savedFreeAnalysis) {
+  const parsedFreeAnalysis =
+    JSON.parse(savedFreeAnalysis) as AnalyzeFreeResponse;
+
+  setFreeAnalysis(parsedFreeAnalysis);
+
+  console.log(
+    "저장된 무료 분석 데이터:",
+    parsedFreeAnalysis
+  );
+}
 }, []);
+
 
 useEffect(() => {
   if (!sajuData?.daeunAnalysis || selectedDaeunOrder !== null) {
@@ -279,22 +299,37 @@ if (
   );
 }
 
-const elementAnalysis = calculateWeightedElements(
-  [
-    sajuData.yearStem,
-    sajuData.monthStem,
-    sajuData.dayStem,
-    sajuData.hourStem,
-  ],
-  [
-    sajuData.yearBranch,
-    sajuData.monthBranch,
-    sajuData.dayBranch,
-    sajuData.hourBranch,
-  ]
-);
-const strengthAnalysis = sajuData.strengthAnalysis;
-const elementInterpretation = sajuData.elementInterpretation;
+const elementAnalysis =
+  freeAnalysis?.elementAnalysis ??
+  calculateWeightedElements(
+    [
+      sajuData.yearStem,
+      sajuData.monthStem,
+      sajuData.dayStem,
+      sajuData.hourStem,
+    ],
+    [
+      sajuData.yearBranch,
+      sajuData.monthBranch,
+      sajuData.dayBranch,
+      sajuData.hourBranch,
+    ]
+  );
+const strengthAnalysis =
+  freeAnalysis?.strengthAnalysis ?? sajuData.strengthAnalysis;
+
+const elementInterpretation =
+  freeAnalysis?.elementInterpretation ?? sajuData.elementInterpretation;
+
+ const yongshinAnalysis =
+  freeAnalysis?.yongshinAnalysis ?? sajuData.yongshinAnalysis;
+
+const gyeokgukAnalysis =
+  freeAnalysis?.gyeokgukAnalysis ?? sajuData.gyeokgukAnalysis;  
+
+const daeunAnalysis =
+  freeAnalysis?.daeunAnalysis ?? sajuData.daeunAnalysis;  
+
 const elementRelations = sajuData.elementRelations;
 
 const elementItems = [
@@ -356,52 +391,63 @@ const elementItems = [
     {[
       {
         label: "시주",
-        stem: sajuData.hourStem,
-        branch: sajuData.hourBranch,
-         tenGod: sajuData.hourTenGod,
-          branchTenGod: sajuData.hourBranchTenGod,
-          stage: sajuData.hourStage,
-           hiddenStems: sajuData.hourHiddenStems,
-           spirit: sajuData.hourSpirit,
-            noble: sajuData.hourNoble,
-              nobles: sajuData.hourNobles,
+       stem: freeAnalysis?.hourStem ?? sajuData.hourStem,
+branch: freeAnalysis?.hourBranch ?? sajuData.hourBranch,
+tenGod: freeAnalysis?.hourTenGod ?? sajuData.hourTenGod,
+branchTenGod:
+  freeAnalysis?.hourBranchTenGod ?? sajuData.hourBranchTenGod,
+  highlighted: false,
+stage: freeAnalysis?.hourStage ?? sajuData.hourStage,
+hiddenStems:
+  freeAnalysis?.hourHiddenStems ?? sajuData.hourHiddenStems,
+spirit: freeAnalysis?.hourSpirit ?? sajuData.hourSpirit,
+noble: freeAnalysis?.hourNoble ?? sajuData.hourNoble,
+nobles: freeAnalysis?.hourNobles ?? sajuData.hourNobles,
       },
       {
         label: "일주",
-        stem: sajuData.dayStem,
-        branch: sajuData.dayBranch,
-         tenGod: sajuData.dayTenGod,
-          branchTenGod: sajuData.dayBranchTenGod,
-        highlighted: true,
-        stage: sajuData.dayStage,
-          hiddenStems: sajuData.dayHiddenStems,
-            spirit: sajuData.daySpirit,
-            noble: sajuData.dayNoble,
-             nobles: sajuData.dayNobles,
+        stem: freeAnalysis?.dayStem ?? sajuData.dayStem,
+branch: freeAnalysis?.dayBranch ?? sajuData.dayBranch,
+tenGod: freeAnalysis?.dayTenGod ?? sajuData.dayTenGod,
+branchTenGod:
+  freeAnalysis?.dayBranchTenGod ?? sajuData.dayBranchTenGod,
+  highlighted: true,
+stage: freeAnalysis?.dayStage ?? sajuData.dayStage,
+hiddenStems:
+  freeAnalysis?.dayHiddenStems ?? sajuData.dayHiddenStems,
+spirit: freeAnalysis?.daySpirit ?? sajuData.daySpirit,
+noble: freeAnalysis?.dayNoble ?? sajuData.dayNoble,
+nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
       },
       {
         label: "월주",
-        stem: sajuData.monthStem,
-        branch: sajuData.monthBranch,
-          tenGod: sajuData.monthTenGod,
-           branchTenGod: sajuData.monthBranchTenGod,
-           stage: sajuData.monthStage,
-             hiddenStems: sajuData.monthHiddenStems,
-               spirit: sajuData.monthSpirit,
-                noble: sajuData.monthNoble,
-                  nobles: sajuData.monthNobles,
+       stem: freeAnalysis?.monthStem ?? sajuData.monthStem,
+  branch: freeAnalysis?.monthBranch ?? sajuData.monthBranch,
+  tenGod: freeAnalysis?.monthTenGod ?? sajuData.monthTenGod,
+  branchTenGod:
+    freeAnalysis?.monthBranchTenGod ?? sajuData.monthBranchTenGod,
+    highlighted: false,
+  stage: freeAnalysis?.monthStage ?? sajuData.monthStage,
+  hiddenStems:
+    freeAnalysis?.monthHiddenStems ?? sajuData.monthHiddenStems,
+  spirit: freeAnalysis?.monthSpirit ?? sajuData.monthSpirit,
+  noble: freeAnalysis?.monthNoble ?? sajuData.monthNoble,
+  nobles: freeAnalysis?.monthNobles ?? sajuData.monthNobles,
       },
       {
          label: "년주",
-  stem: sajuData.yearStem,
-  branch: sajuData.yearBranch,
-  tenGod: sajuData.yearTenGod,
-  branchTenGod: sajuData.yearBranchTenGod,
-  stage: sajuData.yearStage,
-    hiddenStems: sajuData.yearHiddenStems,
-     spirit: sajuData.yearSpirit,
-       noble: sajuData.yearNoble,
-        nobles: sajuData.yearNobles,
+    stem: freeAnalysis?.yearStem ?? sajuData.yearStem,
+  branch: freeAnalysis?.yearBranch ?? sajuData.yearBranch,
+  tenGod: freeAnalysis?.yearTenGod ?? sajuData.yearTenGod,
+  branchTenGod:
+    freeAnalysis?.yearBranchTenGod ?? sajuData.yearBranchTenGod,
+    highlighted: false,
+  stage: freeAnalysis?.yearStage ?? sajuData.yearStage,
+  hiddenStems:
+    freeAnalysis?.yearHiddenStems ?? sajuData.yearHiddenStems,
+  spirit: freeAnalysis?.yearSpirit ?? sajuData.yearSpirit,
+  noble: freeAnalysis?.yearNoble ?? sajuData.yearNoble,
+  nobles: freeAnalysis?.yearNobles ?? sajuData.yearNobles,
       },
     ].map((pillar) => {
   const stemStyle = getFiveElementStyle(
@@ -596,7 +642,7 @@ const elementItems = [
     일주는 본인을 중심으로 보는 기둥이므로 화면에서 강조해 표시했습니다.
   </p>
 </section>
-{sajuData.daeunAnalysis && (
+{daeunAnalysis && (
   <div className="mt-6 rounded-3xl border border-stone-200 bg-white p-6">
     <p className="text-sm tracking-[0.25em] text-stone-500">
       DAEUN ANALYSIS
@@ -612,7 +658,7 @@ const elementItems = [
           대운 방향
         </p>
         <p className="mt-2 text-lg font-bold">
-          {sajuData.daeunAnalysis.direction}
+          {daeunAnalysis.direction}
         </p>
       </div>
 
@@ -621,14 +667,14 @@ const elementItems = [
           대운 시작
         </p>
         <p className="mt-2 text-lg font-bold">
-          {sajuData.daeunAnalysis.startAge}세
+          {daeunAnalysis.startAge}세
         </p>
       </div>
     </div>
 
     <div className="mt-6">
   <div className="grid grid-cols-10 gap-2">
-    {[...sajuData.daeunAnalysis.daeuns]
+    {[...daeunAnalysis.daeuns]
       .reverse()
       .map((daeun: { order: number; ganji: string }) => {
         const hanja = ganjiToHanja(daeun.ganji);
@@ -653,8 +699,8 @@ const elementItems = [
             </div>
 
             <span className="mt-3 text-xs text-stone-500">
-              {sajuData.daeunAnalysis.startAge +
-                (daeun.order - 1) * 10}
+              {daeunAnalysis.startAge +
+  (daeun.order - 1) * 10}
               세
             </span>
           </div>
@@ -835,7 +881,7 @@ const elementItems = [
       </p>
 
       <p className="mt-2 text-lg font-bold">
-        {sajuData.yongshinAnalysis.primary}
+        {yongshinAnalysis.primary}
       </p>
     </div>
 
@@ -845,9 +891,9 @@ const elementItems = [
       </p>
 
       <p className="mt-2 text-stone-700">
-        {sajuData.yongshinAnalysis.secondary.length > 0
-          ? sajuData.yongshinAnalysis.secondary.join(", ")
-          : "없음"}
+        {yongshinAnalysis.secondary.length > 0
+  ? yongshinAnalysis.secondary.join(", ")
+  : "없음"}
       </p>
     </div>
 
@@ -857,13 +903,13 @@ const elementItems = [
   </p>
 
   <div className="mt-3 space-y-2 text-sm text-stone-700">
-    {Object.entries(sajuData.yongshinAnalysis.scores)
+    {Object.entries(yongshinAnalysis.scores)
       .sort(([, a], [, b]) => b - a)
       .map(([element, score]) => {
   const detail =
-    sajuData.yongshinAnalysis.scoreDetails[
-      element as keyof typeof sajuData.yongshinAnalysis.scoreDetails
-    ];
+  yongshinAnalysis.scoreDetails[
+    element as keyof typeof yongshinAnalysis.scoreDetails
+  ];
 
   return (
     <div
@@ -874,11 +920,11 @@ const elementItems = [
         <span>{element}</span>
         <div className="text-right">
   <div className="font-semibold">
-    보완 우선도 {
-  sajuData.yongshinAnalysis.normalizedScores[
-    element as keyof typeof sajuData.yongshinAnalysis.normalizedScores
-  ].toFixed(1)
-}
+    보완 우선도{" "}
+{yongshinAnalysis.normalizedScores[
+  element as keyof typeof yongshinAnalysis.normalizedScores
+].toFixed(1)}
+
   </div>
   <div className="text-xs text-stone-400">
     원점수 {score.toFixed(1)}
@@ -906,7 +952,7 @@ const elementItems = [
       </p>
 
       <p className="mt-2 leading-7 text-stone-700">
-        {sajuData.yongshinAnalysis.reason}
+        {yongshinAnalysis.reason}
       </p>
     </div>
   </div>
@@ -929,7 +975,7 @@ const elementItems = [
       </p>
 
       <p className="mt-2 text-lg font-bold">
-        {sajuData.gyeokgukAnalysis.primary}
+        {gyeokgukAnalysis.primary}
       </p>
     </div>
 
@@ -939,9 +985,9 @@ const elementItems = [
       </p>
 
       <p className="mt-2 text-stone-700">
-        {sajuData.gyeokgukAnalysis.candidates.length > 0
-          ? sajuData.gyeokgukAnalysis.candidates.join(", ")
-          : "없음"}
+        {gyeokgukAnalysis.candidates.length > 0
+  ? gyeokgukAnalysis.candidates.join(", ")
+  : "없음"}
       </p>
     </div>
 
@@ -951,7 +997,7 @@ const elementItems = [
       </p>
 
       <p className="mt-2 leading-7 text-stone-700">
-        {sajuData.gyeokgukAnalysis.reason}
+        {gyeokgukAnalysis.reason}
       </p>
     </div>
   </div>
@@ -1182,5 +1228,20 @@ function InfoCard({
       <p className="mb-2 text-xs text-stone-500">{label}</p>
       <p className="font-semibold text-stone-900">{value}</p>
     </div>
+  );
+}
+export default function ResultPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea]">
+          <p className="text-sm text-stone-500">
+            사주 결과를 불러오는 중입니다...
+          </p>
+        </main>
+      }
+    >
+      <ResultPageContent />
+    </Suspense>
   );
 }

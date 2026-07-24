@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { AnalyzeApiResponse } from "@/app/lib/analyzeApiTypes";
 
-export default function LoadingPage() {
+function LoadingPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams();  
 
   useEffect(() => {
     const analyzeSaju = async () => {
@@ -44,7 +44,17 @@ if (!data.result || !data.saju) {
 
 
         sessionStorage.setItem("sajuResult", data.result || "");
-sessionStorage.setItem("sajuData", JSON.stringify(data.saju || {}));
+
+sessionStorage.setItem(
+  "sajuData",
+  JSON.stringify(data.saju || {})
+);
+
+sessionStorage.setItem(
+  "freeAnalysis",
+  JSON.stringify(data.freeAnalysis || {})
+);
+
         const params = new URLSearchParams({
           birthDate,
           birthTime,
@@ -82,5 +92,20 @@ sessionStorage.setItem("sajuData", JSON.stringify(data.saju || {}));
 
       <div className="w-16 h-16 border-4 border-stone-300 border-t-stone-900 rounded-full animate-spin" />
     </main>
+  );
+}
+export default function LoadingPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea]">
+          <p className="text-sm text-stone-500">
+            사주 데이터를 준비하고 있습니다...
+          </p>
+        </main>
+      }
+    >
+      <LoadingPageContent />
+    </Suspense>
   );
 }

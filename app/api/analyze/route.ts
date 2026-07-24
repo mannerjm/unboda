@@ -5,6 +5,7 @@ import { buildPrompt } from "@/app/lib/prompt/builder";
 import { buildSajuResponse } from "@/app/lib/buildSajuResponse";
 import { validateAnalyzeInput } from "@/app/lib/validateAnalyzeInput";
 import { getAnalyzeErrorStatus } from "@/app/lib/getAnalyzeErrorStatus";
+import { buildFreeAnalysis } from "@/app/lib/buildFreeAnalysis";
 import type {
   AnalyzeSuccessResponse,
   AnalyzeErrorResponse,
@@ -96,6 +97,7 @@ const modularPrompt = buildPrompt({
     completion.choices[0].message.content ||
     "AI 분석 결과를 생성하지 못했습니다.",
   saju: buildSajuResponse(saju),
+  freeAnalysis: buildFreeAnalysis(saju),
 };
 
 return NextResponse.json(responseData);

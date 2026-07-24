@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
+import type { AnalyzeRequest } from "@/app/lib/analyzeApiTypes";
 
 type PremiumReportContentProps = {
   productId: string;
@@ -24,6 +25,21 @@ type RestoreState =
       message: string;
     };
 
+type PremiumRequestState =
+  | {
+      status: "idle";
+      request: null;
+    }
+  | {
+      status: "ready";
+      request: AnalyzeRequest;
+    }
+  | {
+      status: "error";
+      request: null;
+      message: string;
+    };
+
 export default function PremiumReportContent({
   productId,
 }: PremiumReportContentProps) {
@@ -33,6 +49,12 @@ export default function PremiumReportContent({
       result: null,
       message: null,
     });
+ 
+    const [premiumRequestState, setPremiumRequestState] =
+  useState<PremiumRequestState>({
+    status: "idle",
+    request: null,
+  });
 
   useEffect(() => {
     const savedResult =
@@ -40,28 +62,102 @@ export default function PremiumReportContent({
 
     const savedSaju =
       window.sessionStorage.getItem("sajuData");
+    
+      const savedAnalyzeRequest =
+  window.sessionStorage.getItem("analyzeRequest");
 
-    const restored = restoreStoredResult(
-      savedResult,
-      savedSaju
-    );
+  if (!savedAnalyzeRequest) {
+  setRestoreState({
+    status: "error",
+    result: null,
+    message: "유료 분석에 필요한 입력 정보를 찾을 수 없습니다.",
+  });
 
-    if (!restored.ok) {
-      setRestoreState({
-        status: "error",
-        result: null,
-        message: restored.message,
-      });
+  return;
+}
+let analyzeRequest: AnalyzeRequest;
 
-      return;
+try {
+  analyzeRequest = JSON.parse(savedAnalyzeRequest) as AnalyzeRequest;
+} catch {
+  setPremiumRequestState({
+    status: "error",
+    request: null,
+    message: "저장된 입력 정보를 불러올 수 없습니다.",
+  });
+
+  setRestoreState({
+    status: "error",
+    result: null,
+    message: "저장된 입력 정보를 불러올 수 없습니다.",
+  });
+
+  return;
+}
+setPremiumRequestState({
+  status: "ready",
+  request: analyzeRequest,
+});
+
+const restored = restoreStoredResult(
+  savedResult,
+  savedSaju
+);
+
+if (!restored.ok) {
+  setRestoreState({
+    status: "error",
+    result: null,
+    message: restored.message,
+  });
+
+  return;
+}
+
+const fetchPremiumAnalysis = async () => {
+  try {
+    const response = await fetch("/api/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...analyzeRequest,
+        productId,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || "error" in data) {
+      throw new Error(
+        "error" in data
+          ? data.error
+          : "유료 분석을 생성하지 못했습니다."
+      );
     }
 
     setRestoreState({
       status: "success",
-      result: restored.result,
+      result: data.result,
       message: null,
     });
-  }, []);
+  } catch (error) {
+    setRestoreState({
+      status: "error",
+      result: null,
+      message:
+        error instanceof Error
+          ? error.message
+          : "유료 분석을 생성하지 못했습니다.",
+    });
+  }
+};
+
+void fetchPremiumAnalysis();
+
+
+ }, [productId]);
 
   if (restoreState.status === "loading") {
     return (

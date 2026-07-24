@@ -55,6 +55,17 @@ sessionStorage.setItem(
   JSON.stringify(data.freeAnalysis || {})
 );
 
+sessionStorage.setItem(
+  "analyzeRequest",
+  JSON.stringify({
+    birthDate,
+    birthTime,
+    calendarType,
+    isLeapMonth,
+    gender,
+  })
+);
+
         const params = new URLSearchParams({
           birthDate,
           birthTime,

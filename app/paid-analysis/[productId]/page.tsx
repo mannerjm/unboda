@@ -3,6 +3,7 @@ import {
   getUserAccessPermissions,
   type UserAccessLevel,
 } from "@/app/lib/userAccess";
+import PaidAnalysisAccessPanel from "./PaidAnalysisAccessPanel";
 
 
 type PaidAnalysisPageProps = {
@@ -131,20 +132,9 @@ const permissions = getUserAccessPermissions(userAccessLevel);
       확장하는 심층 분석입니다.
     </p>
   </div>
-  <div className="mt-6">
-  {permissions.canPurchasePaidAnalysis && (
-    <Link
-  href={`/checkout/${productId}`}
-  className="block w-full rounded-2xl bg-stone-900 px-5 py-4 text-center font-semibold text-white transition hover:bg-stone-800"
->
-  로그인하고 이 분석 구매하기
-</Link>
-  )}
-
-  <p className="mt-3 text-center text-xs leading-5 text-stone-500">
-    구매한 심층 분석은 계정에 연결되어 이후 다시 확인할 수 있습니다.
-  </p>
-</div>
+  
+  <PaidAnalysisAccessPanel productId={productId} />
+  
 </section>
       </div>
     </main>

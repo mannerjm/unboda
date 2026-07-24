@@ -9,6 +9,15 @@ import {
   type AuthState,
 } from "@/app/lib/auth";
 import { getUserAccessPermissions } from "@/app/lib/userAccess";
+import {
+  createPendingOrder,
+  createPurchaseAccessFromPaidOrder,
+  markOrderAsPaid,
+} from "@/app/lib/payment";
+import {
+  saveEntitlement,
+  savePurchase,
+} from "@/app/lib/purchaseStorage";
 
 type CheckoutAccessPanelProps = {
   productId: string;
@@ -26,6 +35,34 @@ export default function CheckoutAccessPanel({
 
   const userAccessLevel = getAuthUserAccessLevel(authState);
   const permissions = getUserAccessPermissions(userAccessLevel);
+
+  function handleMockPayment() {
+  if (authState.status !== "authenticated") {
+    return;
+  }
+
+  const pendingOrder = createPendingOrder({
+    userId: authState.user.id,
+    profileId: "demo-profile",
+    productId,
+    amount: 9900,
+  });
+
+  const { order: paidOrder } = markOrderAsPaid(
+    pendingOrder,
+    `transaction-${Date.now()}`
+  );
+
+  const access =
+    createPurchaseAccessFromPaidOrder(paidOrder);
+
+    savePurchase(access.purchase);
+saveEntitlement(access.entitlement);
+
+  console.log("Mock paid order:", paidOrder);
+  console.log("Created purchase:", access.purchase);
+  console.log("Created entitlement:", access.entitlement);
+}
 
   return (
     <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
@@ -81,6 +118,7 @@ export default function CheckoutAccessPanel({
 
           <button
             type="button"
+            onClick={handleMockPayment}
             className="mt-7 w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800"
           >
             결제 계속하기

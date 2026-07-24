@@ -7,8 +7,9 @@ import {
 } from "@/app/lib/auth";
 
 import Link from "next/link";
+import { Suspense } from "react";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -112,5 +113,22 @@ export default function LoginPage() {
         </section>
       </div>
     </main>
+  );
+}
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#f7f3ea] p-5 py-14 text-stone-900">
+          <div className="mx-auto w-full max-w-xl">
+            <p className="text-sm text-stone-600">
+              로그인 페이지를 불러오는 중입니다...
+            </p>
+          </div>
+        </main>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
   );
 }

@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
-import type { AnalyzeRequest } from "@/app/lib/analyzeApiTypes";
+import type {
+  AnalyzePremiumResponse,
+  AnalyzeRequest,
+} from "@/app/lib/analyzeApiTypes";
 
 type PremiumReportContentProps = {
   productId: string;
@@ -16,8 +19,9 @@ type RestoreState =
     }
   | {
       status: "success";
-      result: any;
-      message: null;
+    result: string;
+    premiumAnalysis: AnalyzePremiumResponse;
+    message: null;
     }
   | {
       status: "error";
@@ -137,11 +141,17 @@ const fetchPremiumAnalysis = async () => {
       );
     }
 
-    setRestoreState({
-      status: "success",
-      result: data.result,
-      message: null,
-    });
+    if (!data.premiumAnalysis) {
+  throw new Error("유료 분석 데이터를 받지 못했습니다.");
+}
+
+setRestoreState({
+  status: "success",
+  result: data.result,
+  premiumAnalysis: data.premiumAnalysis,
+  message: null,
+});
+
   } catch (error) {
     setRestoreState({
       status: "error",
@@ -188,14 +198,71 @@ void fetchPremiumAnalysis();
   }
 
   return (
-    <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
-      <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
-        REPORT DATA READY
-      </p>
+  <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
 
-      <h2 className="mt-3 text-2xl font-bold text-stone-900">
-        무료 분석 결과 복원이 완료되었습니다
-      </h2>
+    <div className="rounded-2xl border border-stone-200 bg-stone-50 p-6">
+  <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
+    CORE ANALYSIS
+  </p>
+
+  <h2 className="mt-3 text-2xl font-bold text-stone-900">
+    현재 운의 핵심 구조
+  </h2>
+
+  <p className="mt-4 text-sm leading-7 text-stone-700">
+    {restoreState.premiumAnalysis.fortuneBrain.summary}
+  </p>
+
+  <div className="mt-6">
+    <h3 className="text-sm font-bold text-stone-900">
+      강점
+    </h3>
+
+    <ul className="mt-3 space-y-2 text-sm leading-6 text-stone-700">
+      {restoreState.premiumAnalysis.fortuneBrain.strengths.map(
+        (item, index) => (
+          <li key={`${item}-${index}`}>• {item}</li>
+        )
+      )}
+    </ul>
+  </div>
+
+  <div className="mt-6">
+    <h3 className="text-sm font-bold text-stone-900">
+      주의할 점
+    </h3>
+
+    <ul className="mt-3 space-y-2 text-sm leading-6 text-stone-700">
+      {restoreState.premiumAnalysis.fortuneBrain.weaknesses.map(
+        (item, index) => (
+          <li key={`${item}-${index}`}>• {item}</li>
+        )
+      )}
+    </ul>
+  </div>
+
+  <div className="mt-6">
+    <h3 className="text-sm font-bold text-stone-900">
+      현실적인 방향
+    </h3>
+
+    <ul className="mt-3 space-y-2 text-sm leading-6 text-stone-700">
+      {restoreState.premiumAnalysis.fortuneBrain.recommendations.map(
+        (item, index) => (
+          <li key={`${item}-${index}`}>• {item}</li>
+        )
+      )}
+    </ul>
+  </div>
+</div>
+
+    <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
+      REPORT DATA READY
+    </p>
+
+    <h2 className="mt-3 text-2xl font-bold text-stone-900">
+      무료 분석 결과 복원이 완료되었습니다
+    </h2>
 
       <p className="mt-4 text-sm leading-7 text-stone-600">
         현재 상품 ID는 <strong>{productId}</strong>이며,

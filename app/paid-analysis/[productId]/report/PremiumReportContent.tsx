@@ -155,7 +155,7 @@ setRestoreState({
   status: "success",
   result: data.result,
   premiumAnalysis: data.premiumAnalysis,
-  productRecommendations: data.productRecommendations,
+  productRecommendations: data.productRecommendations.recommendations,
   message: null,
 });
 

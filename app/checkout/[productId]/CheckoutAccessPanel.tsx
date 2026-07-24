@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
@@ -28,6 +28,8 @@ export default function CheckoutAccessPanel({
 }: CheckoutAccessPanelProps) {
   const [authState, setAuthState] =
     useState<AuthState>(guestAuthState);
+
+const router = useRouter();
 
   useEffect(() => {
     setAuthState(loadAuthState());
@@ -62,6 +64,8 @@ saveEntitlement(access.entitlement);
   console.log("Mock paid order:", paidOrder);
   console.log("Created purchase:", access.purchase);
   console.log("Created entitlement:", access.entitlement);
+
+  router.push(`/paid-analysis/${productId}`);
 }
 
   return (

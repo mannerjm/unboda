@@ -6,7 +6,11 @@ import { buildSajuResponse } from "@/app/lib/buildSajuResponse";
 import { validateAnalyzeInput } from "@/app/lib/validateAnalyzeInput";
 import { getAnalyzeErrorStatus } from "@/app/lib/getAnalyzeErrorStatus";
 import { buildFreeAnalysis } from "@/app/lib/buildFreeAnalysis";
+import { isPaidAnalysisProductId } from "@/app/lib/paidAnalysisProducts";
+import { buildPremiumPrompt } from "@/app/lib/prompt/premiumBuilder";
+import { buildPremiumAnalysis } from "@/app/lib/buildPremiumAnalysis";
 import type {
+  AnalyzeRequest,
   AnalyzeSuccessResponse,
   AnalyzeErrorResponse,
 } from "@/app/lib/analyzeApiTypes";
@@ -17,10 +21,10 @@ const openai = new OpenAI({
 
 export async function POST(req: Request) {
   try {
-    let body;
+   let body: AnalyzeRequest;
 
 try {
-  body = await req.json();
+  body = (await req.json()) as AnalyzeRequest;
 } catch {
   const errorResponse: AnalyzeErrorResponse = {
   error: "요청 데이터가 올바른 JSON 형식이 아닙니다.",
@@ -38,7 +42,10 @@ const {
   calendarType,
   isLeapMonth,
   gender,
+  productId,
 } = body;
+
+const isLeapMonthBoolean = isLeapMonth === "윤달";
 
 const validation = validateAnalyzeInput({
   birthDate,
@@ -58,6 +65,19 @@ return NextResponse.json(
   { status: 400 }
 );
 }
+if (
+  productId !== undefined &&
+  !isPaidAnalysisProductId(productId)
+) {
+  const errorResponse: AnalyzeErrorResponse = {
+    error: "유효하지 않은 유료 분석 상품입니다.",
+  };
+
+  return NextResponse.json(
+    errorResponse,
+    { status: 400 }
+  );
+}
 
     const saju = getSaju(
   birthDate,
@@ -73,14 +93,22 @@ return NextResponse.json(
     );
 
 
-const modularPrompt = buildPrompt({
+const promptInput = {
   calendarType,
-  isLeapMonth,
+  isLeapMonth: isLeapMonthBoolean,
   birthDate,
   birthTime,
   gender,
   saju,
-});
+};
+
+const modularPrompt =
+  productId === undefined
+    ? buildPrompt(promptInput)
+    : buildPremiumPrompt({
+        ...promptInput,
+        productId,
+      });
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
@@ -98,6 +126,10 @@ const modularPrompt = buildPrompt({
     "AI 분석 결과를 생성하지 못했습니다.",
   saju: buildSajuResponse(saju),
   freeAnalysis: buildFreeAnalysis(saju),
+  premiumAnalysis:
+    productId === undefined
+      ? undefined
+      : buildPremiumAnalysis(saju),
 };
 
 return NextResponse.json(responseData);

@@ -93,3 +93,12 @@ daeun: {
 
 export type PaidAnalysisProductId =
   keyof typeof paidAnalysisProducts;
+
+  export function isPaidAnalysisProductId(
+  value: unknown
+): value is PaidAnalysisProductId {
+  return (
+    typeof value === "string" &&
+    Object.prototype.hasOwnProperty.call(paidAnalysisProducts, value)
+  );
+}

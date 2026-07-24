@@ -9,6 +9,7 @@ import { buildFreeAnalysis } from "@/app/lib/buildFreeAnalysis";
 import { isPaidAnalysisProductId } from "@/app/lib/paidAnalysisProducts";
 import { buildPremiumPrompt } from "@/app/lib/prompt/premiumBuilder";
 import { buildPremiumAnalysis } from "@/app/lib/buildPremiumAnalysis";
+import { buildAnalysisProductRecommendations } from "@/app/lib/analysisProductRecommendations";
 import type {
   AnalyzeRequest,
   AnalyzeSuccessResponse,
@@ -119,6 +120,13 @@ const modularPrompt =
         },
       ],
     });
+   
+  const recommendationAnalysis = buildPremiumAnalysis(saju);
+
+const productRecommendations =
+  buildAnalysisProductRecommendations({
+    fortuneBrain: recommendationAnalysis.fortuneBrain,
+  });
 
    const responseData: AnalyzeSuccessResponse = {
   result:
@@ -127,9 +135,10 @@ const modularPrompt =
   saju: buildSajuResponse(saju),
   freeAnalysis: buildFreeAnalysis(saju),
   premiumAnalysis:
-    productId === undefined
-      ? undefined
-      : buildPremiumAnalysis(saju),
+  productId === undefined
+    ? undefined
+    : recommendationAnalysis,
+    productRecommendations,
 };
 
 return NextResponse.json(responseData);

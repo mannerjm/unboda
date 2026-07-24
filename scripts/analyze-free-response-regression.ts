@@ -47,10 +47,27 @@ async function main() {
     );
   }
 
+  if (
+  !data.productRecommendations ||
+  !Array.isArray(data.productRecommendations.recommendations)
+) {
+  throw new Error(
+    "API 응답에 productRecommendations.recommendations가 없습니다."
+  );
+}
+
+if (data.productRecommendations.recommendations.length !== 3) {
+  throw new Error(
+    "상품 추천 결과가 예상한 3개가 아닙니다."
+  );
+}
+
   console.log("API freeAnalysis 포함: true");
   console.log("무료 핵심 분석 포함: true");
   console.log("fortuneBrain 비노출: true");
   console.log("elementRelations 비노출: true");
+  console.log("productRecommendations 포함: true");
+  console.log("상품 추천 3개 포함: true");
 }
 
 main().catch((error) => {

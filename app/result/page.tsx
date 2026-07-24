@@ -387,7 +387,7 @@ const selectedPaidAnalysis = paidAnalysisProducts.find(
   (product) => product.id === selectedPaidAnalysisId
 );
 function handlePaidAnalysisEntry(productId: string) {
-  console.log("Paid analysis entry:", productId);
+  router.push(`/paid-analysis/${productId}`);
 }
 
   return (

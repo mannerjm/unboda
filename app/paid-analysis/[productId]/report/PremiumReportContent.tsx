@@ -5,7 +5,8 @@ import DaeunFlowCard from "./DaeunFlowCard";
 import ReportReadyCard from "./ReportReadyCard";
 import { useEffect, useState } from "react";
 import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
-
+import ProductRecommendationsCard from "./ProductRecommendationsCard";
+import type { AnalysisProductRecommendation } from "@/app/lib/analysisProductRecommendations";
 import type {
   AnalyzePremiumResponse,
   AnalyzeRequest,
@@ -22,9 +23,10 @@ type RestoreState =
       message: null;
     }
   | {
-      status: "success";
+       status: "success";
     result: string;
     premiumAnalysis: AnalyzePremiumResponse;
+    productRecommendations: AnalysisProductRecommendation[];
     message: null;
     }
   | {
@@ -153,6 +155,7 @@ setRestoreState({
   status: "success",
   result: data.result,
   premiumAnalysis: data.premiumAnalysis,
+  productRecommendations: data.productRecommendations,
   message: null,
 });
 
@@ -214,6 +217,9 @@ void fetchPremiumAnalysis();
 />
 <DaeunFlowCard
   daeunAnalysis={restoreState.premiumAnalysis.daeunAnalysis}
+/>
+<ProductRecommendationsCard
+  recommendations={restoreState.productRecommendations}
 />
    <ReportReadyCard productId={productId} />
     </section>

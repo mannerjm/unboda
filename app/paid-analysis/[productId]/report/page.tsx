@@ -1,23 +1,13 @@
 import PremiumReportContent from "./PremiumReportContent";
 import Link from "next/link";
 import ReportAccessGate from "./ReportAccessGate";
+import { paidAnalysisProducts } from "@/app/lib/paidAnalysisProducts";
 type PaidAnalysisReportPageProps = {
   params: Promise<{
     productId: string;
   }>;
 };
 
-const reportProducts = {
-  "career-business": {
-    title: "직업·사업운 심층 분석",
-  },
-  wealth: {
-    title: "재물운 심층 분석",
-  },
-  relationship: {
-    title: "연애·관계 심층 분석",
-  },
-} as const;
 
 export default async function PaidAnalysisReportPage({
   params,
@@ -25,9 +15,9 @@ export default async function PaidAnalysisReportPage({
   const { productId } = await params;
 
   const product =
-    reportProducts[
-      productId as keyof typeof reportProducts
-    ];
+  paidAnalysisProducts[
+    productId as keyof typeof paidAnalysisProducts
+  ];
 
   if (!product) {
     return (

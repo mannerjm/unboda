@@ -1,5 +1,5 @@
 import Link from "next/link";
-
+import ReportAccessGate from "./ReportAccessGate";
 type PaidAnalysisReportPageProps = {
   params: Promise<{
     productId: string;
@@ -68,20 +68,21 @@ export default async function PaidAnalysisReportPage({
         <p className="mt-5 text-sm leading-7 text-stone-600">
           구매 권한이 확인된 사용자에게 제공되는 심층 분석 결과 페이지입니다.
         </p>
+     <ReportAccessGate productId={productId}>
+  <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
+    <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
+      REPORT READY
+    </p>
 
-        <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
-          <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
-            REPORT READY
-          </p>
+    <h2 className="mt-3 text-2xl font-bold text-stone-900">
+      심층 분석 결과 영역
+    </h2>
 
-          <h2 className="mt-3 text-2xl font-bold text-stone-900">
-            심층 분석 결과 영역
-          </h2>
-
-          <p className="mt-4 text-sm leading-7 text-stone-600">
-            이 영역에는 이후 실제 유료 분석 엔진이 생성한 개인 맞춤 심층 분석 결과가 표시됩니다.
-          </p>
-        </section>
+    <p className="mt-4 text-sm leading-7 text-stone-600">
+      이 영역에는 이후 실제 유료 분석 엔진이 생성한 개인 맞춤 심층 분석 결과가 표시됩니다.
+    </p>
+  </section>
+</ReportAccessGate>
       </div>
     </main>
   );

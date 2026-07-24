@@ -4,7 +4,7 @@ import {
   type UserAccessLevel,
 } from "@/app/lib/userAccess";
 import PaidAnalysisAccessPanel from "./PaidAnalysisAccessPanel";
-
+import { paidAnalysisProducts } from "@/app/lib/paidAnalysisProducts";
 
 type PaidAnalysisPageProps = {
   params: Promise<{
@@ -12,44 +12,6 @@ type PaidAnalysisPageProps = {
   }>;
 };
 
-const paidAnalysisProducts = {
- "career-business": {
-  title: "직업·사업운 심층 분석",
-  description:
-    "직업 변화, 이직, 사업 흐름과 중요한 선택 시기를 깊게 살펴봅니다.",
-  details: [
-    "현재 직업·사업 흐름이 나타나는 명리학적 이유",
-    "이직·변화·확장에 유리한 중요한 시기",
-    "직업적 강점과 활용할 수 있는 기회",
-    "사업과 중요한 선택에서 주의할 시기와 요인",
-    "현재 상황에 맞는 현실적인 직업·사업 대응 방향",
-  ],
-},
-  wealth: {
-  title: "재물운 심층 분석",
-  description:
-    "돈의 흐름, 기회가 커지는 시기와 지출·손실에 주의할 흐름을 분석합니다.",
-  details: [
-    "현재 재물 흐름이 나타나는 명리학적 이유",
-    "수입과 재물 기회가 강해지는 중요한 시기",
-    "재물 흐름에서 활용할 수 있는 기회",
-    "지출·손실과 금전 판단에 주의할 시기와 요인",
-    "현재 상황에 맞는 현실적인 재물 관리 방향",
-  ],
-},
-  relationship: {
-  title: "연애·관계 심층 분석",
-  description:
-    "관계의 변화, 인연의 흐름과 현재 관계에서 살펴볼 핵심 포인트를 분석합니다.",
-  details: [
-    "현재 관계 흐름이 나타나는 명리학적 이유",
-    "새로운 인연과 관계 변화가 강해지는 시기",
-    "관계를 발전시키기 좋은 흐름",
-    "갈등과 거리감에 주의할 시기와 요인",
-    "현재 관계에서 살펴볼 현실적인 대응 방향",
-  ],
-},
-} as const;
 
 export default async function PaidAnalysisPage({
   params,
@@ -132,7 +94,7 @@ const permissions = getUserAccessPermissions(userAccessLevel);
       확장하는 심층 분석입니다.
     </p>
   </div>
-  
+
   <PaidAnalysisAccessPanel productId={productId} />
   
 </section>

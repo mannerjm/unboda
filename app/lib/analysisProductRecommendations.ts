@@ -30,6 +30,20 @@ type ProductRecommendationScoreMap = Record<
   ProductRecommendationScore
 >;
 
+const DEFAULT_RECOMMENDATION_ORDER: PaidAnalysisProductId[] = [
+  "career",
+  "wealth",
+  "relationship",
+  "health",
+  "business",
+  "social",
+  "job-change",
+  "marriage",
+  "study",
+  "yearly",
+  "daeun",
+];
+
 function createInitialRecommendationScores(): ProductRecommendationScoreMap {
   return {
     wealth: {
@@ -165,11 +179,26 @@ for (const relation of strongRelations) {
   .map(([productId, recommendation]) => ({
     productId: productId as PaidAnalysisProductId,
     score: recommendation.score,
-    reasons: recommendation.reasons,
+    reasons:
+      recommendation.reasons.length > 0
+        ? recommendation.reasons
+        : [
+            "전체 분석 결과와 기본 추천 우선순위를 바탕으로 함께 살펴볼 가치가 있습니다.",
+          ],
   }))
-  .sort((a, b) => b.score - a.score)
-  .slice(0, 3);
+  .sort((a, b) => {
+  const scoreDifference = b.score - a.score;
 
+  if (scoreDifference !== 0) {
+    return scoreDifference;
+  }
+
+  return (
+    DEFAULT_RECOMMENDATION_ORDER.indexOf(a.productId) -
+    DEFAULT_RECOMMENDATION_ORDER.indexOf(b.productId)
+  );
+})
+.slice(0, 3);
 return {
   recommendations,
 };

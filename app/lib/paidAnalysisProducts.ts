@@ -1,7 +1,15 @@
+export type PaidAnalysisProduct = {
+  id: string;
+  title: string;
+  shortTitle?: string;
+  description: string;
+  details: readonly string[];
+};
 export const paidAnalysisProducts = {
   wealth: {
   id: "wealth",
   title: "재물운 심층 분석",
+   shortTitle: "재물운",
   description:
     "돈의 흐름, 기회가 커지는 시기와 지출·손실에 주의할 흐름을 분석합니다.",
   details: [
@@ -16,6 +24,7 @@ export const paidAnalysisProducts = {
  relationship: {
   id: "relationship",
   title: "연애·관계 심층 분석",
+   shortTitle: "연애·관계",
   description:
     "관계의 변화, 인연의 흐름과 현재 관계에서 살펴볼 핵심 포인트를 분석합니다.",
   details: [
@@ -37,6 +46,7 @@ export const paidAnalysisProducts = {
   health: {
   id: "health",
   title: "건강운 심층 분석",
+    shortTitle: "건강운",
   description: "건강 흐름과 생활 관리 포인트를 심층적으로 분석합니다.",
   details: [],
 },
@@ -44,6 +54,7 @@ export const paidAnalysisProducts = {
 social: {
   id: "social",
   title: "인간관계 심층 분석",
+   shortTitle: "인간관계",
   description: "대인관계의 흐름과 주의할 관계 패턴을 심층적으로 분석합니다.",
   details: [],
 },
@@ -89,7 +100,7 @@ daeun: {
   description: "장기적인 운의 변화와 인생 흐름을 심층적으로 분석합니다.",
   details: [],
 },
-} as const;
+} satisfies Record<string, PaidAnalysisProduct>;
 
 export type PaidAnalysisProductId =
   keyof typeof paidAnalysisProducts;

@@ -220,6 +220,7 @@ void fetchPremiumAnalysis();
 />
 <ProductRecommendationsCard
   recommendations={restoreState.productRecommendations}
+  currentProductId={productId}
 />
    <ReportReadyCard productId={productId} />
     </section>

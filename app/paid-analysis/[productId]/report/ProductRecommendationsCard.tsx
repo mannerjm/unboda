@@ -1,12 +1,22 @@
 import type { AnalysisProductRecommendation } from "@/app/lib/analysisProductRecommendations";
-import { paidAnalysisProducts } from "@/app/lib/paidAnalysisProducts";
+import {
+  paidAnalysisProducts,
+  type PaidAnalysisProduct,
+} from "@/app/lib/paidAnalysisProducts";
+import Link from "next/link";
 interface Props {
   recommendations: AnalysisProductRecommendation[];
+  currentProductId: string;
 }
 
 export default function ProductRecommendationsCard({
   recommendations,
+  currentProductId,
 }: Props) {
+  const filteredRecommendations = recommendations.filter(
+  (recommendation) =>
+    recommendation.productId !== currentProductId
+);
   return (
     <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-6">
       <h2 className="text-xl font-bold text-stone-900">
@@ -18,9 +28,11 @@ export default function ProductRecommendationsCard({
       </p>
 
       <div className="mt-5 space-y-3">
-  {recommendations.map((recommendation, index) => {
-     const product =
-    paidAnalysisProducts[recommendation.productId];
+  {filteredRecommendations.map((recommendation, index) => {
+     const product: PaidAnalysisProduct =
+  paidAnalysisProducts[recommendation.productId];
+
+    
 
   return (
     <div
@@ -34,8 +46,12 @@ export default function ProductRecommendationsCard({
           </p>
 
           <h3 className="mt-1 text-base font-bold text-stone-900">
-  {product.title}
+{product.shortTitle ?? product.title}
 </h3>
+
+<p className="mt-2 text-sm leading-6 text-stone-600">
+  {product.description}
+</p>
         </div>
 
         <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-stone-700">
@@ -44,10 +60,18 @@ export default function ProductRecommendationsCard({
       </div>
 
       <ul className="mt-3 space-y-2 text-sm leading-6 text-stone-600">
-        {recommendation.reasons.map((reason) => (
+        {recommendation.reasons.map((reason: string) => (
           <li key={reason}>• {reason}</li>
         ))}
       </ul>
+
+      <Link
+  href={`/paid-analysis/${recommendation.productId}`}
+  className="mt-4 inline-flex rounded-xl bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-800"
+>
+  심층 분석 보기
+</Link>
+
     </div>
   );
 })}

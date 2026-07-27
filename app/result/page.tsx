@@ -1288,7 +1288,20 @@ h3: ({ children }) => {
       현실적인 대응 방향까지 살펴볼 수 있습니다.
     </p>
   </div>
+<div className="mt-8 rounded-3xl border border-stone-200 bg-stone-50 p-6 text-left sm:p-8">
+  <p className="text-xs font-semibold tracking-[0.22em] text-stone-500">
+    PERSONAL RECOMMENDATION
+  </p>
 
+  <h3 className="mt-3 text-xl font-bold leading-8 text-stone-900">
+    지금 가장 먼저 살펴볼 운의 흐름입니다
+  </h3>
+
+  <p className="mt-4 text-sm leading-7 text-stone-600">
+    현재 사주와 운의 흐름에서 중요한 변화가 감지되었습니다.
+    운보다가 분석한 핵심 변화와 그 이유를 먼저 확인해 보세요.
+  </p>
+</div>
   <div className="mt-7 grid gap-4 md:grid-cols-3">
   {displayedPaidAnalysisProducts.map((product) => (
     <button

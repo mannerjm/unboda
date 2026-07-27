@@ -3,7 +3,7 @@ import type { ElementRelationsAnalysis } from "./elementRelations";
 import type { PaidAnalysisProductId } from "./paidAnalysisProducts";
 import type { StrengthAnalysis } from "./strength";
 import { analyzeFullFortuneFlow } from "./fortuneFlowAnalysis";
-
+import { STRENGTH_RECOMMENDATION_RULES } from "./recommendationRules";
 type FortuneFlowAnalysisResult =
   ReturnType<typeof analyzeFullFortuneFlow>;
 
@@ -109,49 +109,19 @@ export function buildAnalysisProductRecommendations(
 
 const scores = createInitialRecommendationScores();
 
-  if (
-    strengthAnalysis.level === "신강" ||
-    strengthAnalysis.level === "매우 신강"
-  ) {
-    scores.career.score += 20;
-    scores.career.reasons.push(
-      "자기 주도성과 실행력이 강하게 나타나 직업 방향 점검의 우선도가 높습니다."
-    );
+const strengthRules =
+  STRENGTH_RECOMMENDATION_RULES[strengthAnalysis.level];
 
-    scores.business.score += 15;
-    scores.business.reasons.push(
-      "독립적인 판단과 추진력을 활용할 수 있는 사업 흐름을 살펴볼 필요가 있습니다."
-    );
-  }
+if (!strengthRules) {
+  throw new Error(`Unknown strength level: ${strengthAnalysis.level}`);
+}
 
-  if (
-    strengthAnalysis.level === "신약" ||
-    strengthAnalysis.level === "매우 신약"
-  ) {
-    scores.relationship.score += 20;
-    scores.relationship.reasons.push(
-      "주변 환경과 관계의 영향을 크게 받을 수 있어 관계 흐름 점검이 중요합니다."
-    );
+for (const rule of strengthRules) {
+  scores[rule.productId].score += rule.score;
+  scores[rule.productId].reasons.push(rule.reason);
+}
 
-    scores.health.score += 15;
-    scores.health.reasons.push(
-      "에너지 관리와 생활 균형을 우선적으로 살펴볼 필요가 있습니다."
-    );
-  }
-
-  if (strengthAnalysis.level === "중화") {
-    scores.yearly.score += 15;
-    scores.yearly.reasons.push(
-      "전체 구조가 비교적 균형적이므로 현재 시기별 흐름을 세밀하게 확인하는 것이 유용합니다."
-    );
-
-    scores.daeun.score += 10;
-    scores.daeun.reasons.push(
-      "장기적인 운의 변화 속에서 중요한 전환 시기를 점검할 필요가 있습니다."
-    );
-  }
-
-  const strongRelations = elementRelations.highlights.filter(
+const strongRelations = elementRelations.highlights.filter(
   (relation) => relation.strength === "강함"
 );
 

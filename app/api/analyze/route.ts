@@ -11,6 +11,7 @@ import { buildPremiumPrompt } from "@/app/lib/prompt/premiumBuilder";
 import { buildPremiumAnalysis } from "@/app/lib/buildPremiumAnalysis";
 import { buildAnalysisProductRecommendations } from "@/app/lib/analysisProductRecommendations";
 import { buildAnalysisRecommendation } from "@/app/lib/analysisRecommendationBuilder";
+import { buildMainAnalysisPrompt } from "@/app/lib/mainAnalysisPrompt";
 import {
   generateMainAnalysis,
   generateRecommendationExplanation,
@@ -113,7 +114,14 @@ const modularPrompt =
         productId,
       });
 
-    const mainAnalysis = await generateMainAnalysis(modularPrompt);
+    const mainAnalysisPrompt =
+  buildMainAnalysisPrompt({
+    sourcePrompt: modularPrompt,
+    saju,
+  });
+
+const mainAnalysis =
+  await generateMainAnalysis(mainAnalysisPrompt);
    
   const recommendationAnalysis = buildPremiumAnalysis(saju);
 

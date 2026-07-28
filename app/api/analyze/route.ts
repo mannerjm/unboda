@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+
 import { getSaju } from "@/app/lib/manse";
 import { NextResponse } from "next/server";
 import { buildPrompt } from "@/app/lib/prompt/builder";
@@ -10,17 +10,17 @@ import { isPaidAnalysisProductId } from "@/app/lib/paidAnalysisProducts";
 import { buildPremiumPrompt } from "@/app/lib/prompt/premiumBuilder";
 import { buildPremiumAnalysis } from "@/app/lib/buildPremiumAnalysis";
 import { buildAnalysisProductRecommendations } from "@/app/lib/analysisProductRecommendations";
-import { generateAnalysisRecommendation } from "@/app/lib/generateAnalysisRecommendation";
 import { buildAnalysisRecommendation } from "@/app/lib/analysisRecommendationBuilder";
+import {
+  generateMainAnalysis,
+  generateRecommendationExplanation,
+} from "@/app/lib/analysisAIService";
 import type {
   AnalyzeRequest,
   AnalyzeSuccessResponse,
   AnalyzeErrorResponse,
 } from "@/app/lib/analyzeApiTypes";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(req: Request) {
   try {
@@ -113,15 +113,7 @@ const modularPrompt =
         productId,
       });
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
-      messages: [
-        {
-          role: "user",
-           content: modularPrompt,
-        },
-      ],
-    });
+    const mainAnalysis = await generateMainAnalysis(modularPrompt);
    
   const recommendationAnalysis = buildPremiumAnalysis(saju);
 
@@ -142,14 +134,15 @@ const analysisRecommendation = buildAnalysisRecommendation({
 });
 
 const generatedRecommendation =
-  await generateAnalysisRecommendation({
-    recommendation: analysisRecommendation,
-  });
+  await generateRecommendationExplanation(
+    analysisRecommendation
+  );
 
    const responseData: AnalyzeSuccessResponse = {
   result:
-    completion.choices[0].message.content ||
-    "AI 분석 결과를 생성하지 못했습니다.",
+  mainAnalysis ||
+  "AI 분석 결과를 생성하지 못했습니다.",
+
   saju: buildSajuResponse(saju),
   freeAnalysis: buildFreeAnalysis(saju),
   premiumAnalysis:

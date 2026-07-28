@@ -2,6 +2,7 @@ import type { buildSajuResponse } from "./buildSajuResponse";
 import type { buildFreeAnalysis } from "./buildFreeAnalysis";
 import type { PaidAnalysisProductId } from "./paidAnalysisProducts";
 import type { buildPremiumAnalysis } from "./buildPremiumAnalysis";
+import type { AnalysisRecommendationOutput } from "./analysisRecommendationOutput";
 import type {
   AnalysisProductRecommendationResult,
 } from "./analysisProductRecommendations";
@@ -26,7 +27,8 @@ export type AnalyzeSuccessResponse = {
   freeAnalysis?: AnalyzeFreeResponse;
   premiumAnalysis?: AnalyzePremiumResponse;
 
-   productRecommendations: AnalysisProductRecommendationResult;
+  productRecommendations: AnalysisProductRecommendationResult;
+  recommendationExplanation: AnalysisRecommendationOutput;
 };
 
 export type AnalyzeErrorResponse = {

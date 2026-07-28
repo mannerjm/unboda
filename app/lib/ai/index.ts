@@ -3,3 +3,4 @@ export { SAJU_RULES } from "./sajuRules";
 export { RECOMMENDATION_RULES } from "./recommendationRules";
 export { buildSystemPrompt } from "./buildSystemPrompt";
 export { buildAnalysisPrompt } from "./buildAnalysisPrompt";
+export { generateAnalysisText } from "./generateAnalysisText";

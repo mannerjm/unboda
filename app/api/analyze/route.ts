@@ -10,6 +10,8 @@ import { isPaidAnalysisProductId } from "@/app/lib/paidAnalysisProducts";
 import { buildPremiumPrompt } from "@/app/lib/prompt/premiumBuilder";
 import { buildPremiumAnalysis } from "@/app/lib/buildPremiumAnalysis";
 import { buildAnalysisProductRecommendations } from "@/app/lib/analysisProductRecommendations";
+import { generateAnalysisRecommendation } from "@/app/lib/generateAnalysisRecommendation";
+import { buildAnalysisRecommendation } from "@/app/lib/analysisRecommendationBuilder";
 import type {
   AnalyzeRequest,
   AnalyzeSuccessResponse,
@@ -131,6 +133,19 @@ const productRecommendations =
   fortuneFlow: recommendationAnalysis.fortuneFlowAnalysis,
 });
 
+if (!productRecommendations.engineResult) {
+  throw new Error("Recommendation engine result is missing");
+}
+
+const analysisRecommendation = buildAnalysisRecommendation({
+  engineResult: productRecommendations.engineResult,
+});
+
+const generatedRecommendation =
+  await generateAnalysisRecommendation({
+    recommendation: analysisRecommendation,
+  });
+
    const responseData: AnalyzeSuccessResponse = {
   result:
     completion.choices[0].message.content ||
@@ -142,6 +157,7 @@ const productRecommendations =
     ? undefined
     : recommendationAnalysis,
     productRecommendations,
+    recommendationExplanation: generatedRecommendation,
 };
 
 return NextResponse.json(responseData);

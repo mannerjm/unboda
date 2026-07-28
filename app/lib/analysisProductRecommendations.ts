@@ -4,6 +4,7 @@ import type { PaidAnalysisProductId } from "./paidAnalysisProducts";
 import type { StrengthAnalysis } from "./strength";
 import { analyzeFullFortuneFlow } from "./fortuneFlowAnalysis";
 import { STRENGTH_RECOMMENDATION_RULES } from "./recommendationRules";
+import type { RecommendationEngineResult } from "./analysisRecommendation";
 type FortuneFlowAnalysisResult =
   ReturnType<typeof analyzeFullFortuneFlow>;
 
@@ -15,6 +16,7 @@ export type AnalysisProductRecommendation = {
 
 export type AnalysisProductRecommendationResult = {
   recommendations: AnalysisProductRecommendation[];
+  engineResult?: RecommendationEngineResult;
 };
 
 
@@ -186,7 +188,24 @@ if (fortuneFlow?.currentFlow === "기회 우세") {
   );
 })
 .slice(0, 3);
+
+const engineResult: RecommendationEngineResult = {
+  primary: {
+    theme: recommendations[0].productId,
+    score: recommendations[0].score,
+    confidence: 1,
+    reasons: recommendations[0].reasons,
+  },
+  secondary: recommendations.slice(1).map((recommendation) => ({
+    theme: recommendation.productId,
+    score: recommendation.score,
+    confidence: 1,
+    reasons: recommendation.reasons,
+  })),
+};
+
 return {
   recommendations,
+  engineResult,
 };
 }

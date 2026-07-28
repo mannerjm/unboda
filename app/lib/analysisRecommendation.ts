@@ -23,7 +23,7 @@ export type AnalysisRecommendation = {
 };
 
 export type RecommendationSignal = {
-  theme: "career" | "wealth" | "relationship" | "health" | "yearly" | "daeun";
+  theme: PaidAnalysisProductId;
   score: number;
   confidence: number;
   reasons: readonly string[];

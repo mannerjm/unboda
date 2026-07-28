@@ -118,6 +118,10 @@ const modularPrompt =
   buildMainAnalysisPrompt({
     sourcePrompt: modularPrompt,
     saju,
+    engineData: {
+      strengthAnalysis:
+        saju.strengthAnalysis,
+    },
   });
 
 const mainAnalysis =

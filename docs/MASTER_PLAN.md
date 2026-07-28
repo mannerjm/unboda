@@ -844,7 +844,14 @@ AI 상담은 가능한 한 다음 데이터를 기반으로 한다.
 - 직접 접근 예외 처리
 - 정상 / 오류 / 저장 / 복원 테스트
 - TypeScript 오류 0 기준 확인
-
+- AnalysisAIService 계층 분리
+- Main Analysis Prompt Builder 구축
+- Recommendation Prompt Builder 구축
+- Recommendation Output Parser 구축
+- AI Prompt Layer 표준화
+- AI 설명과 명리 계산 완전 분리
+- GPT 호출 표준화
+- AI 회귀 테스트 구축
 ---
 
 # Phase 5. 무료·회원·유료 전환 기반
@@ -855,6 +862,24 @@ AI 상담은 가능한 한 다음 데이터를 기반으로 한다.
 실제 사용자 서비스 구조로 전환한다.
 
 구현 순서:
+### Phase 5-0. 메인 AI 분석 프롬프트 설계
+
+목표:
+
+계산 엔진에서 생성된 구조화된 명리 데이터를
+GPT가 가장 잘 이해할 수 있는 표준 프롬프트로 변환한다.
+
+구현 순서:
+
+- Main Analysis Prompt Builder
+- 사주 원국 구조화
+- 오행 구조화
+- 십성 구조화
+- 신강/신약 구조화
+- 용신 구조화
+- 대운/세운 구조화
+- 추천 엔진 결과 구조화
+- 무료/유료 공통 프롬프트 설계
 
 ### Phase 5-1. 무료 / 유료 데이터 경계 정의
 

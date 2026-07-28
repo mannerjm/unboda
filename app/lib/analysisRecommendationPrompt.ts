@@ -1,4 +1,5 @@
 import type { AnalysisRecommendation } from "./analysisRecommendation";
+import { buildSystemPrompt } from "./ai";
 
 export type BuildAnalysisRecommendationPromptInput = {
   recommendation: AnalysisRecommendation;
@@ -8,6 +9,7 @@ export function buildAnalysisRecommendationPrompt(
   input: BuildAnalysisRecommendationPromptInput
 ): string {
   const { recommendation } = input;
+  
 
 const reasons = recommendation.reasons
   .map((reason) => `- ${reason.label}: ${reason.explanation}`)
@@ -23,12 +25,11 @@ const secondaryRecommendations =
         .join("\n")
     : "없음";
 
-  return `
+ return `
+
 당신은 운보다의 명리 분석 설명가입니다.
 
 아래 추천 결과는 기존 명리 엔진이 계산한 결과입니다.
-추천 순서, 추천 상품, 점수, 근거를 변경하지 마세요.
-새로운 추천을 추가하거나 기존 추천을 제거하지 마세요.
 
 반드시 아래 JSON 형식으로만 답변하세요.
 마크다운 코드 블록이나 추가 설명은 포함하지 마세요.
@@ -38,7 +39,7 @@ const secondaryRecommendations =
   "summary": "핵심 추천 이유를 설명하는 2~3문장",
   "userMeaning": "이 추천이 사용자에게 왜 중요한지 설명하는 1~2문장"
 }
-  
+
 [추천 결과]
 주요 주제: ${recommendation.primaryTheme}
 추천 상품: ${recommendation.recommendedProductId}

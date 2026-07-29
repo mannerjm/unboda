@@ -56,7 +56,10 @@ export type FreeAnalysisResponse = Pick<
   | "yongshinAnalysis"
   | "gyeokgukAnalysis"
   | "daeunAnalysis"
+  | "currentDaeun"
   | "seunAnalysis"
+  | "currentSeun"
+ | "fortuneFlowAnalysis"
 >;
 
 export function buildFreeAnalysis(
@@ -117,6 +120,9 @@ hourNobles: full.hourNobles,
     yongshinAnalysis: full.yongshinAnalysis,
     gyeokgukAnalysis: full.gyeokgukAnalysis,
     daeunAnalysis: full.daeunAnalysis,
+    currentDaeun: full.currentDaeun,
     seunAnalysis: full.seunAnalysis,
+    currentSeun: full.currentSeun,
+    fortuneFlowAnalysis: full.fortuneFlowAnalysis,
   };
 }

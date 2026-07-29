@@ -114,14 +114,14 @@ const modularPrompt =
         productId,
       });
 
-    const mainAnalysisPrompt =
+const freeAnalysis =
+  buildFreeAnalysis(saju);
+
+   const mainAnalysisPrompt =
   buildMainAnalysisPrompt({
     sourcePrompt: modularPrompt,
     saju,
-    engineData: {
-      strengthAnalysis:
-        saju.strengthAnalysis,
-    },
+    freeAnalysis,
   });
 
 const mainAnalysis =
@@ -156,7 +156,7 @@ const generatedRecommendation =
   "AI 분석 결과를 생성하지 못했습니다.",
 
   saju: buildSajuResponse(saju),
-  freeAnalysis: buildFreeAnalysis(saju),
+  freeAnalysis,
   premiumAnalysis:
   productId === undefined
     ? undefined

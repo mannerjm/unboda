@@ -624,7 +624,9 @@ yongshinAnalysis,
 gyeokgukAnalysis,
 fortuneBrain,
 daeunAnalysis,
+currentDaeun,
 seunAnalysis,
+currentSeun,
 fortuneFlowAnalysis,
 };
 }

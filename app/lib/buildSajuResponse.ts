@@ -59,6 +59,8 @@ export function buildSajuResponse(saju: SajuResult) {
     gyeokgukAnalysis: saju.gyeokgukAnalysis,
     fortuneBrain: saju.fortuneBrain,
     daeunAnalysis: saju.daeunAnalysis,
+    currentDaeun: saju.currentDaeun,
     seunAnalysis: saju.seunAnalysis,
+    currentSeun: saju.currentSeun,
   };
 }

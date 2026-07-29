@@ -9,6 +9,9 @@ import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
 import type { AnalyzeFreeResponse } from "@/app/lib/analyzeApiTypes";
 import type { AnalysisProductRecommendationResult } from "@/app/lib/analysisProductRecommendations";
 import { paidAnalysisProducts as paidAnalysisProductCatalog } from "@/app/lib/paidAnalysisProducts";
+import type {
+  AnalysisRecommendationOutput,
+} from "@/app/lib/analysisRecommendationOutput";
 
 type SajuResult = ReturnType<typeof getSaju>;
 
@@ -173,7 +176,10 @@ function ResultPageContent() {
 const [sajuData, setSajuData] = useState<SajuResult | null>(null);
 const [freeAnalysis, setFreeAnalysis] =
   useState<AnalyzeFreeResponse | null>(null);
-
+const [
+  recommendationExplanation,
+  setRecommendationExplanation,
+] = useState<AnalysisRecommendationOutput | null>(null);
  const [
   productRecommendations,
   setProductRecommendations,
@@ -212,7 +218,8 @@ const displayedSeun =
   const savedResult = sessionStorage.getItem("sajuResult");
   const savedSaju = sessionStorage.getItem("sajuData");
   const savedFreeAnalysis = sessionStorage.getItem("freeAnalysis");
-
+const savedRecommendationExplanation =
+  sessionStorage.getItem("recommendationExplanation");
   const savedProductRecommendations =
   sessionStorage.getItem("productRecommendations");
 
@@ -240,6 +247,17 @@ if (savedFreeAnalysis) {
   console.log(
     "저장된 무료 분석 데이터:",
     parsedFreeAnalysis
+  );
+}
+
+if (savedRecommendationExplanation) {
+  const parsedRecommendationExplanation =
+    JSON.parse(
+      savedRecommendationExplanation
+    ) as AnalysisRecommendationOutput;
+
+  setRecommendationExplanation(
+    parsedRecommendationExplanation
   );
 }
 
@@ -1294,13 +1312,19 @@ h3: ({ children }) => {
   </p>
 
   <h3 className="mt-3 text-xl font-bold leading-8 text-stone-900">
-    지금 가장 먼저 살펴볼 운의 흐름입니다
-  </h3>
+  {recommendationExplanation?.headline ??
+    "지금 가장 먼저 살펴볼 운의 흐름입니다"}
+</h3>
 
-  <p className="mt-4 text-sm leading-7 text-stone-600">
-    현재 사주와 운의 흐름에서 중요한 변화가 감지되었습니다.
-    운보다가 분석한 핵심 변화와 그 이유를 먼저 확인해 보세요.
-  </p>
+<p className="mt-4 text-sm leading-7 text-stone-600">
+  {recommendationExplanation?.summary ??
+    "현재 사주와 운의 흐름에서 중요한 변화가 감지되었습니다."}
+</p>
+
+<p className="mt-3 text-sm leading-7 text-stone-600">
+  {recommendationExplanation?.userMeaning ??
+    "운보다가 분석한 핵심 변화와 그 이유를 먼저 확인해 보세요."}
+</p>
 </div>
   <div className="mt-7 grid gap-4 md:grid-cols-3">
   {displayedPaidAnalysisProducts.map((product) => (

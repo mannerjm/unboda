@@ -63,6 +63,13 @@ sessionStorage.setItem(
 );
 
 sessionStorage.setItem(
+  "recommendationExplanation",
+  JSON.stringify(
+    data.recommendationExplanation ?? null
+  )
+);
+
+sessionStorage.setItem(
   "analyzeRequest",
   JSON.stringify({
     birthDate,

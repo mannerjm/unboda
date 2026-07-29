@@ -1321,32 +1321,74 @@ h3: ({ children }) => {
     "현재 사주와 운의 흐름에서 중요한 변화가 감지되었습니다."}
 </p>
 
-<p className="mt-3 text-sm leading-7 text-stone-600">
-  {recommendationExplanation?.userMeaning ??
-    "운보다가 분석한 핵심 변화와 그 이유를 먼저 확인해 보세요."}
-</p>
+
 </div>
   <div className="mt-7 grid gap-4 md:grid-cols-3">
-  {displayedPaidAnalysisProducts.map((product) => (
+  {displayedPaidAnalysisProducts.map((product, index) => {
+  const isPrimaryRecommendation = index === 0;
+
+ const recommendationReason =
+  index === 0
+    ? recommendationExplanation?.cardReasons.first
+    : index === 1
+      ? recommendationExplanation?.cardReasons.second
+      : recommendationExplanation?.cardReasons.third;
+
+  return (
     <button
-  key={product.id}
-  type="button"
-  onClick={() => setSelectedPaidAnalysisId(product.id)}
-      className="rounded-2xl border border-stone-200 bg-stone-50 p-5 text-left transition hover:-translate-y-0.5 hover:border-stone-300 hover:bg-white hover:shadow-sm"
+      key={product.id}
+      type="button"
+      onClick={() => setSelectedPaidAnalysisId(product.id)}
+      className={
+  isPrimaryRecommendation
+    ? "flex h-full flex-col rounded-2xl border-2 border-stone-900 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5"
+    : "flex h-full flex-col rounded-2xl border border-stone-200 bg-stone-50 p-5 text-left transition hover:-translate-y-0.5 hover:border-stone-300"
+}
     >
+
+     <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-stone-500">
+  {isPrimaryRecommendation
+    ? "1순위 추천"
+    : `${index + 1}순위 보조 추천`}
+</p>
       <p className="text-sm font-bold text-stone-900">
         {product.title}
       </p>
 
-      <p className="mt-3 text-sm leading-6 text-stone-600">
-        {product.description}
+  {false &&
+  isPrimaryRecommendation &&
+  recommendationExplanation?.userMeaning && (
+    <div className="mt-4 rounded-xl bg-stone-100 px-4 py-3">
+      <p className="text-xs font-semibold text-stone-500">
+        지금 이 분석이 필요한 이유
       </p>
 
-      <p className="mt-5 text-sm font-semibold text-stone-900">
-        자세히 보기 →
+      <p className="mt-2 text-sm leading-6 text-stone-700">
+        {recommendationExplanation?.userMeaning}
       </p>
-    </button>
-  ))}
+    </div>
+  )}
+
+{recommendationReason && (
+  <div className="mt-3 border-t border-stone-200 pt-3">
+    <p className="text-xs text-stone-500">
+      {isPrimaryRecommendation ? "AI 판단 근거" : "추천 이유"}
+    </p>
+
+    <p className="mt-1 text-xs leading-5 text-stone-600">
+      {recommendationReason}
+    </p>
+  </div>
+)}
+
+      <p className="mt-auto pt-5 text-sm font-semibold text-stone-900">
+  {isPrimaryRecommendation
+    ? "1순위 심층 분석 확인하기"
+    : "심층 분석 확인하기"}
+</p>
+       </button>
+  );
+})}
 </div>
 {selectedPaidAnalysis && (
   <div className="mt-6 rounded-2xl border border-stone-300 bg-stone-50 p-6">

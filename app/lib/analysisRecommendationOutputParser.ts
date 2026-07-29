@@ -36,5 +36,42 @@ if (
   );
 }
 
+if (
+  !("cardReasons" in parsed) ||
+  typeof parsed.cardReasons !== "object" ||
+  parsed.cardReasons === null
+) {
+  throw new Error(
+    "Analysis recommendation output cardReasons must be an object"
+  );
+}
+
+if (
+  !("first" in parsed.cardReasons) ||
+  typeof parsed.cardReasons.first !== "string"
+) {
+  throw new Error(
+    "Analysis recommendation output cardReasons.first must be a string"
+  );
+}
+
+if (
+  !("second" in parsed.cardReasons) ||
+  typeof parsed.cardReasons.second !== "string"
+) {
+  throw new Error(
+    "Analysis recommendation output cardReasons.second must be a string"
+  );
+}
+
+if (
+  !("third" in parsed.cardReasons) ||
+  typeof parsed.cardReasons.third !== "string"
+) {
+  throw new Error(
+    "Analysis recommendation output cardReasons.third must be a string"
+  );
+}
+
 return parsed as AnalysisRecommendationOutput;
 }

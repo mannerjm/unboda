@@ -62,5 +62,18 @@ export function buildSajuResponse(saju: SajuResult) {
     currentDaeun: saju.currentDaeun,
     seunAnalysis: saju.seunAnalysis,
     currentSeun: saju.currentSeun,
+    fortuneFlowAnalysis: saju.fortuneFlowAnalysis as
+  | {
+      summary: string;
+      opportunities: string[];
+      cautions: string[];
+      topicGuides: {
+        career: string;
+        wealth: string;
+        relationship: string;
+        health: string;
+      };
+    }
+  | null,
   };
 }

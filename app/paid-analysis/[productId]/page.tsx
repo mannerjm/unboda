@@ -5,7 +5,7 @@ import {
 } from "@/app/lib/userAccess";
 import PaidAnalysisAccessPanel from "./PaidAnalysisAccessPanel";
 import { paidAnalysisProducts } from "@/app/lib/paidAnalysisProducts";
-
+import PaidAnalysisDetailClient from "./PaidAnalysisDetailClient";
 type PaidAnalysisPageProps = {
   params: Promise<{
     productId: string;
@@ -94,6 +94,8 @@ const permissions = getUserAccessPermissions(userAccessLevel);
       확장하는 심층 분석입니다.
     </p>
   </div>
+  
+  <PaidAnalysisDetailClient productId={productId} />
 
   <PaidAnalysisAccessPanel productId={productId} />
   

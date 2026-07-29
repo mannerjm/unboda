@@ -9,7 +9,12 @@ import {
 function parseGeneratedPaidAnalysisDetail(
   value: unknown,
 ): PaidAnalysisDetailOutput {
-  return parsePaidAnalysisDetailOutput(value);
+  const parsedValue =
+    typeof value === "string"
+      ? JSON.parse(value)
+      : value;
+
+  return parsePaidAnalysisDetailOutput(parsedValue);
 }
 
 

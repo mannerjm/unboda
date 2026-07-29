@@ -8,4 +8,10 @@ export type AnalysisRecommendationOutput = {
     second: string;
     third: string;
   };
+
+  conversionGuidance: {
+    whyNow: string;
+    whatYouWillLearn: string;
+    riskOfDelay: string;
+  };
 };

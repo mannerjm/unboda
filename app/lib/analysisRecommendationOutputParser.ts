@@ -72,6 +72,38 @@ if (
     "Analysis recommendation output cardReasons.third must be a string"
   );
 }
-
+if (
+  !("conversionGuidance" in parsed) ||
+  typeof parsed.conversionGuidance !== "object" ||
+  parsed.conversionGuidance === null
+) {
+  throw new Error(
+    "Analysis recommendation output conversionGuidance must be an object"
+  );
+}
+if (
+  !("whyNow" in parsed.conversionGuidance) ||
+  typeof parsed.conversionGuidance.whyNow !== "string"
+) {
+  throw new Error(
+    "Analysis recommendation output conversionGuidance.whyNow must be a string"
+  );
+}
+if (
+  !("whatYouWillLearn" in parsed.conversionGuidance) ||
+  typeof parsed.conversionGuidance.whatYouWillLearn !== "string"
+) {
+  throw new Error(
+    "Analysis recommendation output conversionGuidance.whatYouWillLearn must be a string"
+  );
+}
+if (
+  !("riskOfDelay" in parsed.conversionGuidance) ||
+  typeof parsed.conversionGuidance.riskOfDelay !== "string"
+) {
+  throw new Error(
+    "Analysis recommendation output conversionGuidance.riskOfDelay must be a string"
+  );
+}
 return parsed as AnalysisRecommendationOutput;
 }

@@ -193,6 +193,9 @@ const birthDate = searchParams.get("birthDate") || "입력 없음";
   const birthTime = searchParams.get("birthTime") || "입력 없음";
   const gender = searchParams.get("gender") || "입력 없음";
 
+const conversionGuidance =
+  recommendationExplanation?.conversionGuidance ?? null;
+
 const [selectedDaeunOrder, setSelectedDaeunOrder] = useState<number | null>(null);
 const selectedDaeunStartYear =
   (freeAnalysis?.daeunAnalysis ?? sajuData?.daeunAnalysis) &&
@@ -1323,7 +1326,76 @@ h3: ({ children }) => {
 
 
 </div>
-  <div className="mt-7 grid gap-4 md:grid-cols-3">
+  <div className="mt-7">
+  {conversionGuidance && (
+  <section className="mb-6 rounded-3xl border border-stone-200 bg-white p-5 text-left sm:p-6">
+    <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
+      AI DEEP ANALYSIS BRIEFING
+    </p>
+
+    <h3 className="mt-2 text-xl font-bold leading-8 text-stone-900">
+      지금 확인해야 할 심층 분석 포인트
+    </h3>
+
+    <div className="mt-5">
+  {conversionGuidance?.whyNow && (
+  <div className="mb-5 rounded-2xl border border-stone-200 bg-stone-50 px-5 py-4 text-left">
+    <p className="text-xs font-semibold tracking-[0.16em] text-stone-500">
+      WHY NOW
+    </p>
+
+    <h4 className="mt-2 text-base font-bold text-stone-900">
+      왜 지금 심층 분석이 필요한가
+    </h4>
+
+    <p className="mt-2 text-sm leading-7 text-stone-600">
+      {conversionGuidance.whyNow}
+    </p>
+  </div>
+)}
+{conversionGuidance?.whatYouWillLearn && (
+  <div className="mb-5 rounded-2xl border border-stone-200 bg-white px-5 py-4 text-left">
+    <p className="text-xs font-semibold tracking-[0.16em] text-stone-500">
+      DEEP ANALYSIS
+    </p>
+
+    <h4 className="mt-2 text-base font-bold text-stone-900">
+      심층 분석에서 확인할 수 있는 내용
+    </h4>
+
+    <p className="mt-2 text-sm leading-7 text-stone-600">
+      {conversionGuidance.whatYouWillLearn}
+    </p>
+  </div>
+)} 
+{conversionGuidance?.riskOfDelay && (
+  <div className="mb-6 rounded-2xl border border-stone-300 bg-stone-100 px-5 py-4 text-left">
+    <p className="text-xs font-semibold tracking-[0.16em] text-stone-500">
+      TIMING POINT
+    </p>
+
+    <h4 className="mt-2 text-base font-bold text-stone-900">
+      지금 확인을 미루면 놓칠 수 있는 점
+    </h4>
+
+    <p className="mt-2 text-sm leading-7 text-stone-600">
+      {conversionGuidance.riskOfDelay}
+    </p>
+  </div>
+)}
+  </div>
+    </section>
+  )}
+ <div className="mt-12 mb-5 text-left">
+  <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
+    RECOMMENDED ANALYSIS
+  </p>
+
+  <h3 className="mt-2 text-2xl font-bold text-stone-900">
+    추천되는 심층 분석
+  </h3>
+</div>
+<div className="grid gap-4 md:grid-cols-3">
   {displayedPaidAnalysisProducts.map((product, index) => {
   const isPrimaryRecommendation = index === 0;
 
@@ -1425,6 +1497,7 @@ h3: ({ children }) => {
 </button>
   </div>
 )}
+</div>
 </section>
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
           <button
@@ -1447,10 +1520,12 @@ h3: ({ children }) => {
         <p className="mt-8 text-center text-xs leading-6 text-stone-500">
           본 리포트는 참고용 콘텐츠이며 중요한 건강·법률·투자 결정은
           관련 전문가와 상담해 주세요.
-        </p>
-      </div>
-    </main>
-  );
+          </p>
+    </div>
+
+  
+</main>
+);
 }
 
 function InfoCard({

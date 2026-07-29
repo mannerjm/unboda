@@ -127,7 +127,6 @@ const input = promptInput;
     const generatedDetail =
       (await response.json()) as PaidAnalysisDetailOutput;
 
-      console.log("generatedDetail", generatedDetail);
 
     if (!isCancelled) {
       setDetail(generatedDetail);
@@ -160,18 +159,87 @@ const input = promptInput;
   void isLoading;
 
   return (
-  <pre className="whitespace-pre-wrap text-xs">
-    {JSON.stringify(
-      {
-        hasPromptInput: Boolean(promptInput),
-        isLoading,
-        hasDetail: Boolean(detail),
-        errorMessage,
-        detail,
-      },
-      null,
-      2,
-    )}
-  </pre>
+  <div className="mt-6 space-y-4">
+    {detail ? (
+      <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+        <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
+          AI DEEP ANALYSIS
+        </p>
+
+        <h2 className="mt-3 text-2xl font-bold leading-tight text-stone-900">
+          {detail.headline}
+        </h2>
+        <div className="mt-5 rounded-2xl bg-stone-50 p-5">
+  <p className="text-xs font-semibold tracking-[0.18em] text-stone-500">
+    WHY THIS ANALYSIS
+  </p>
+
+  <p className="mt-2 text-sm leading-7 text-stone-700">
+    {detail.whyThisAnalysis}
+  </p>
+</div>
+<div className="mt-4 rounded-2xl border border-stone-200 p-5">
+  <p className="text-xs font-semibold tracking-[0.18em] text-stone-500">
+    CURRENT FLOW
+  </p>
+
+  <p className="mt-2 text-sm leading-7 text-stone-700">
+    {detail.currentFlow}
+  </p>
+</div>
+<div className="mt-4 rounded-2xl border border-stone-200 p-5">
+  <p className="text-xs font-semibold tracking-[0.18em] text-stone-500">
+    QUESTIONS ANSWERED
+  </p>
+
+  <ul className="mt-3 space-y-3">
+    {detail.questionsAnswered.map((question) => (
+      <li
+        key={question}
+        className="rounded-xl bg-stone-50 px-4 py-3 text-sm leading-6 text-stone-700"
+      >
+        {question}
+      </li>
+    ))}
+  </ul>
+</div>
+<div className="mt-4 rounded-2xl border border-stone-200 p-5">
+  <p className="text-xs font-semibold tracking-[0.18em] text-stone-500">
+    EXPECTED BENEFITS
+  </p>
+
+  <ul className="mt-3 space-y-3">
+    {detail.expectedBenefits.map((benefit) => (
+      <li
+        key={benefit}
+        className="rounded-xl bg-stone-50 px-4 py-3 text-sm leading-6 text-stone-700"
+      >
+        {benefit}
+      </li>
+    ))}
+  </ul>
+</div>
+<div className="mt-4 rounded-2xl bg-stone-900 p-5 text-white">
+  <p className="text-xs font-semibold tracking-[0.18em] text-stone-300">
+    WHY NOW
+  </p>
+
+  <p className="mt-2 text-sm leading-7 text-stone-100">
+    {detail.whyNow}
+  </p>
+</div>
+<div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+  <p className="text-xs font-semibold tracking-[0.18em] text-amber-700">
+    NEXT STEP
+  </p>
+
+  <p className="mt-2 text-sm font-medium leading-7 text-stone-800">
+    {detail.ctaMessage}
+  </p>
+</div>
+      </section>
+    ) : null}
+
+  </div>
 );
 }

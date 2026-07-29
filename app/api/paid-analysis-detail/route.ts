@@ -7,8 +7,6 @@ export async function POST(request: Request) {
     (await request.json()) as PaidAnalysisDetailPromptInput;
 
   const detail = await generatePaidAnalysisDetail(input);
-
-  console.log(detail);
   
   return NextResponse.json(detail);
 }

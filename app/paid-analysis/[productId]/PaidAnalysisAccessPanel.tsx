@@ -42,22 +42,37 @@ export default function PaidAnalysisAccessPanel({
 const hasAccess =
   process.env.NODE_ENV === "development" || realAccess;
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
   return (
     <section className="mt-8 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
       {hasAccess ? (
         <>
           <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
-            PURCHASED
-          </p>
+  {isDevelopment ? "DEVELOPER ACCESS" : "PURCHASED"}
+</p>
 
           <h2 className="mt-3 text-2xl font-bold text-stone-900">
-            이 심층 분석을 열람할 수 있습니다
-          </h2>
+  {isDevelopment
+    ? "개발 환경에서 심층 분석을 열람할 수 있습니다"
+    : "이 심층 분석을 열람할 수 있습니다"}
+</h2>
 
           <p className="mt-4 text-sm leading-7 text-stone-600">
-            구매 권한이 확인되었습니다.
-            이제 이 상품의 심층 분석 내용을 확인할 수 있습니다.
-          </p>
+  {isDevelopment ? (
+    <>
+      개발 전용 권한 우회가 적용되어 있습니다.
+      <br />
+      운영 환경에서는 실제 구매 권한이 필요합니다.
+    </>
+  ) : (
+    <>
+      구매 권한이 확인되었습니다.
+      <br />
+      이제 이 상품의 심층 분석 내용을 확인할 수 있습니다.
+    </>
+  )}
+</p>
 
           <Link
   href={`/paid-analysis/${productId}/report`}

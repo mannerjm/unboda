@@ -57,6 +57,9 @@ const promptInput = useMemo<PaidAnalysisDetailPromptInput | null>(
       ? {
           analysisType,
           birthData,
+          originalChart: "",
+          coreInterpretation: "",
+          fortuneTiming: "",
           sajuSummary,
           currentFortuneFlow,
           userConcern: userConcern ?? undefined,

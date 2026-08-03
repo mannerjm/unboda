@@ -27,6 +27,92 @@ function getAnalysisType(productId: string): string {
 function buildBirthData(saju: SajuResult): string {
   return JSON.stringify(saju);
 }
+function buildOriginalChart(saju: SajuResult): string {
+  return JSON.stringify(
+    {
+      solarDate: saju.solarDate,
+      year: {
+        pillar: saju.yearPillar,
+        hanja: saju.yearPillarHanja,
+        stem: saju.yearStem,
+        branch: saju.yearBranch,
+        stemTenGod: saju.yearTenGod,
+        branchTenGod: saju.yearBranchTenGod,
+        hiddenStems: saju.yearHiddenStems,
+        stage: saju.yearStage,
+        spirit: saju.yearSpirit,
+        nobles: saju.yearNobles,
+      },
+      month: {
+        pillar: saju.monthPillar,
+        hanja: saju.monthPillarHanja,
+        stem: saju.monthStem,
+        branch: saju.monthBranch,
+        stemTenGod: saju.monthTenGod,
+        branchTenGod: saju.monthBranchTenGod,
+        hiddenStems: saju.monthHiddenStems,
+        stage: saju.monthStage,
+        spirit: saju.monthSpirit,
+        nobles: saju.monthNobles,
+      },
+      day: {
+        pillar: saju.dayPillar,
+        hanja: saju.dayPillarHanja,
+        stem: saju.dayStem,
+        branch: saju.dayBranch,
+        stemTenGod: saju.dayTenGod,
+        branchTenGod: saju.dayBranchTenGod,
+        hiddenStems: saju.dayHiddenStems,
+        stage: saju.dayStage,
+        spirit: saju.daySpirit,
+        nobles: saju.dayNobles,
+      },
+      hour: {
+        pillar: saju.hourPillar,
+        hanja: saju.hourPillarHanja,
+        stem: saju.hourStem,
+        branch: saju.hourBranch,
+        stemTenGod: saju.hourTenGod,
+        branchTenGod: saju.hourBranchTenGod,
+        hiddenStems: saju.hourHiddenStems,
+        stage: saju.hourStage,
+        spirit: saju.hourSpirit,
+        nobles: saju.hourNobles,
+      },
+    },
+    null,
+    2,
+  );
+}
+function buildCoreInterpretation(saju: SajuResult): string {
+  return JSON.stringify(
+    {
+      elementAnalysis: saju.elementAnalysis,
+      elementInterpretation: saju.elementInterpretation,
+      strengthAnalysis: saju.strengthAnalysis,
+      elementRelations: saju.elementRelations,
+      yongshinAnalysis: saju.yongshinAnalysis,
+      gyeokgukAnalysis: saju.gyeokgukAnalysis,
+      fortuneBrain: saju.fortuneBrain,
+    },
+    null,
+    2,
+  );
+}
+function buildFortuneTiming(saju: SajuResult): string {
+  return JSON.stringify(
+    {
+      daeunAnalysis: saju.daeunAnalysis,
+      currentDaeun: saju.currentDaeun,
+      seunAnalysis: saju.seunAnalysis,
+      currentSeun: saju.currentSeun,
+      fortuneFlowAnalysis: saju.fortuneFlowAnalysis,
+    },
+    null,
+    2,
+  );
+}
+
 
 export default function PaidAnalysisDetailV2Client({
   productId,
@@ -53,21 +139,25 @@ const currentFortuneFlow = restoredResult;
 
 const promptInput = useMemo<PaidAnalysisDetailPromptInput | null>(
   () =>
-    birthData && sajuSummary && currentFortuneFlow
+    restoredSaju && birthData && sajuSummary && currentFortuneFlow
       ? {
           analysisType,
           birthData,
+          originalChart: buildOriginalChart(restoredSaju),
+          coreInterpretation: buildCoreInterpretation(restoredSaju),
+          fortuneTiming: buildFortuneTiming(restoredSaju),
           sajuSummary,
           currentFortuneFlow,
           userConcern: userConcern ?? undefined,
         }
       : null,
   [
-    analysisType,
-    birthData,
-    sajuSummary,
-    currentFortuneFlow,
-    userConcern,
+     analysisType,
+  restoredSaju,
+  birthData,
+  sajuSummary,
+  currentFortuneFlow,
+  userConcern,
   ],
 );
 

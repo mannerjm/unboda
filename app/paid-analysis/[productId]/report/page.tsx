@@ -1,4 +1,4 @@
-import PaidAnalysisDetailClient from "../PaidAnalysisDetailClient";
+import PaidAnalysisDetailV2Client from "../PaidAnalysisDetailV2Client";
 import Link from "next/link";
 import ReportAccessGate from "./ReportAccessGate";
 import { paidAnalysisProducts } from "@/app/lib/paidAnalysisProducts";
@@ -60,7 +60,7 @@ export default async function PaidAnalysisReportPage({
           구매 권한이 확인된 사용자에게 제공되는 심층 분석 결과 페이지입니다.
         </p>
      <ReportAccessGate productId={productId}>
-  <PaidAnalysisDetailClient productId={productId} />
+  <PaidAnalysisDetailV2Client productId={productId} />
 </ReportAccessGate>
       </div>
     </main>

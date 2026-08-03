@@ -1,8 +1,15 @@
 import { generateAnalysisText } from "./ai/generateAnalysisText";
-import type { PaidAnalysisDetailOutput } from "./paidAnalysisDetailOutput";
-import { parsePaidAnalysisDetailOutput } from "./paidAnalysisDetailOutputParser";
+import type {
+  PaidAnalysisDetailOutput,
+  PaidAnalysisDetailOutputV2,
+} from "./paidAnalysisDetailOutput";
+import {
+  parsePaidAnalysisDetailOutput,
+  parsePaidAnalysisDetailOutputV2,
+} from "./paidAnalysisDetailOutputParser";
 import {
   buildPaidAnalysisDetailPrompt,
+  buildPaidAnalysisDetailPromptV2,
   type PaidAnalysisDetailPromptInput,
 } from "./paidAnalysisDetailPrompt";
 
@@ -17,6 +24,16 @@ function parseGeneratedPaidAnalysisDetail(
   return parsePaidAnalysisDetailOutput(parsedValue);
 }
 
+function parseGeneratedPaidAnalysisDetailV2(
+  value: unknown,
+): PaidAnalysisDetailOutputV2 {
+  const parsedValue =
+    typeof value === "string"
+      ? JSON.parse(value)
+      : value;
+
+  return parsePaidAnalysisDetailOutputV2(parsedValue);
+}
 
 export async function generatePaidAnalysisDetail(
   input: PaidAnalysisDetailPromptInput,
@@ -26,4 +43,14 @@ export async function generatePaidAnalysisDetail(
   const responseText = await generateAnalysisText(prompt);
 
   return parseGeneratedPaidAnalysisDetail(responseText);
+}
+
+export async function generatePaidAnalysisDetailV2(
+  input: PaidAnalysisDetailPromptInput,
+): Promise<PaidAnalysisDetailOutputV2> {
+ const prompt = buildPaidAnalysisDetailPromptV2(input);
+
+  const responseText = await generateAnalysisText(prompt);
+
+  return parseGeneratedPaidAnalysisDetailV2(responseText);
 }

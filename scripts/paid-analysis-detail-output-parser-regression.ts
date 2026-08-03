@@ -1,4 +1,7 @@
-import { parsePaidAnalysisDetailOutput } from "../app/lib/paidAnalysisDetailOutputParser";
+import {
+  parsePaidAnalysisDetailOutput,
+  parsePaidAnalysisDetailOutputV2,
+} from "../app/lib/paidAnalysisDetailOutputParser";
 
 const result = parsePaidAnalysisDetailOutput({
   headline: "관계 흐름이 바뀌는 시점, 선택 기준을 먼저 확인하세요.",
@@ -23,3 +26,123 @@ const result = parsePaidAnalysisDetailOutput({
 });
 
 console.log("headline 검증:", result.headline.length > 0);
+
+const resultV2 = parsePaidAnalysisDetailOutputV2({
+  heroSummary: {
+    headline: "올해 관계에서는 속도보다 기준이 먼저입니다.",
+    subheadline: "관계 변화가 커지는 시기에 선택 기준을 점검합니다.",
+    keyMessage:
+      "새로운 관계를 늘리기보다 현재 관계의 역할과 경계를 정리하는 것이 중요합니다.",
+  },
+
+  causeAnalysis: {
+    summary:
+      "현재 사주 원국과 운의 흐름이 관계의 확장과 충돌을 함께 키우는 구조입니다.",
+    reasons: [
+      "현재 운에서 관계 활동성이 강해지고 있습니다.",
+      "협력 기회와 역할 충돌이 동시에 나타날 수 있습니다.",
+      "감정적 반응보다 명확한 기준이 필요한 시기입니다.",
+    ],
+  },
+
+  fortuneStructure: {
+    summary:
+      "원국의 관계 성향과 현재 운의 변화가 함께 작용하고 있습니다.",
+    items: [
+      {
+        label: "원국 균형",
+        value: "관계 자극에 민감한 구조",
+        interpretation: "상대의 반응보다 자신의 기준을 먼저 정해야 합니다.",
+      },
+      {
+        label: "대운 작용",
+        value: "협력과 확장이 커지는 흐름",
+        interpretation: "새로운 제안이 늘지만 선별이 필요합니다.",
+      },
+      {
+        label: "세운 작용",
+        value: "속도와 충돌이 함께 커지는 흐름",
+        interpretation: "빠른 결정 전에 역할과 책임을 확인해야 합니다.",
+      },
+      {
+        label: "합·충 변화",
+        value: "관계 재정비가 필요한 구조",
+        interpretation: "유지할 관계와 거리를 둘 관계를 구분해야 합니다.",
+      },
+    ],
+  },
+
+  currentSituation: {
+    summary:
+      "현재는 관계의 수보다 질과 역할을 정리해야 하는 국면입니다.",
+    opportunities: [
+      "협력 가능한 사람을 선별할 수 있습니다.",
+      "기존 관계의 역할을 재정리할 수 있습니다.",
+      "대화 기준을 명확히 세울 수 있습니다.",
+    ],
+    cautions: [
+      "호의만으로 책임 범위를 넓히지 않습니다.",
+      "감정적인 답변을 즉시 확정하지 않습니다.",
+      "구두 약속만으로 중요한 일을 진행하지 않습니다.",
+    ],
+  },
+
+  futureTimeline: [
+    {
+      period: "현재",
+      title: "관계 기준을 점검하는 시기",
+      description: "역할과 책임 범위를 먼저 확인해야 합니다.",
+    },
+    {
+      period: "앞으로 3개월",
+      title: "관계 선택이 구체화되는 시기",
+      description: "협력할 사람과 거리를 둘 사람을 구분하게 됩니다.",
+    },
+    {
+      period: "앞으로 6개월",
+      title: "관계 운영 방식이 자리 잡는 시기",
+      description: "초기에 세운 기준이 관계 안정성에 영향을 줍니다.",
+    },
+    {
+      period: "앞으로 1년",
+      title: "신뢰 관계가 재편되는 시기",
+      description: "명확한 기준을 지킨 관계가 오래 이어질 가능성이 큽니다.",
+    },
+  ],
+
+  actionGuide: [
+    "중요한 약속은 문서로 정리합니다.",
+    "관계별 역할과 책임 범위를 적어봅니다.",
+    "결정 전에 하루 이상 검토 시간을 둡니다.",
+    "갈등이 생기면 사실과 감정을 나누어 기록합니다.",
+    "신뢰할 수 있는 사람에게 판단을 검토받습니다.",
+  ],
+
+  avoidGuide: [
+    "상대의 기대만으로 책임을 떠맡지 않습니다.",
+    "감정이 높아진 상태에서 결론 내리지 않습니다.",
+    "구두 약속만 믿고 중요한 일을 진행하지 않습니다.",
+    "모든 관계를 동시에 유지하려 하지 않습니다.",
+  ],
+
+  coachMessage: {
+    title: "관계의 수보다 기준이 중요합니다.",
+    message:
+      "지금은 더 많은 사람을 만나는 것보다 어떤 관계를 유지할지 결정하는 기준을 세우는 것이 중요합니다.",
+  },
+
+  checklist: [
+    "중요한 관계의 역할이 명확한가?",
+    "구두 약속을 문서로 남겼는가?",
+    "감정과 사실을 구분해 판단했는가?",
+    "책임 범위를 서로 확인했는가?",
+    "현재 관계가 내 방향과 맞는가?",
+  ],
+
+  recommendations: [],
+});
+
+console.log(
+  "V2 headline 검증:",
+  resultV2.heroSummary.headline.length > 0,
+);

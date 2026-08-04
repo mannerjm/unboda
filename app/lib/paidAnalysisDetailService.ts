@@ -3,6 +3,7 @@ import type {
   PaidAnalysisDetailOutput,
   PaidAnalysisDetailOutputV2,
 } from "./paidAnalysisDetailOutput";
+import { validatePaidAnalysisConsistency } from "./paidAnalysisConsistencyValidator";
 import {
   parsePaidAnalysisDetailOutput,
   parsePaidAnalysisDetailOutputV2,
@@ -48,9 +49,23 @@ export async function generatePaidAnalysisDetail(
 export async function generatePaidAnalysisDetailV2(
   input: PaidAnalysisDetailPromptInput,
 ): Promise<PaidAnalysisDetailOutputV2> {
- const prompt = buildPaidAnalysisDetailPromptV2(input);
+  const prompt = buildPaidAnalysisDetailPromptV2(input);
 
   const responseText = await generateAnalysisText(prompt);
 
-  return parseGeneratedPaidAnalysisDetailV2(responseText);
+  const detail = parseGeneratedPaidAnalysisDetailV2(responseText);
+
+  const consistencyResult = validatePaidAnalysisConsistency(detail);
+
+  if (!consistencyResult.ok) {
+    const issueMessage = consistencyResult.issues
+      .map((issue) => `${issue.field}: ${issue.message}`)
+      .join(" | ");
+
+    throw new Error(
+      `심층 분석 결과의 섹션 간 일관성 검증에 실패했습니다. ${issueMessage}`,
+    );
+  }
+
+  return detail;
 }

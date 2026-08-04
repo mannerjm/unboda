@@ -134,3 +134,17 @@ const invalidResult = validatePaidAnalysisConsistency(invalidOutput);
 
 console.log("모순 리포트 거부:", !invalidResult.ok);
 console.log("모순 검출 개수:", invalidResult.issues.length);
+
+if (!validResult.ok) {
+  throw new Error("일관된 리포트가 검증을 통과하지 못했습니다.");
+}
+
+if (invalidResult.ok) {
+  throw new Error("모순 리포트가 검증에서 거부되지 않았습니다.");
+}
+
+if (invalidResult.issues.length < 1) {
+  throw new Error("모순 리포트에서 검출된 이슈가 없습니다.");
+}
+
+console.log("paid analysis consistency validator regression passed");

@@ -136,9 +136,97 @@ ctaMessage 작성 규칙:
 
 }
 
+function getPaidAnalysisProductRules(analysisType: string): string {
+  const normalizedType = analysisType.trim();
+
+  if (
+    normalizedType.includes("재물") ||
+    normalizedType.includes("투자") ||
+    normalizedType.includes("자산")
+  ) {
+    return `
+상품별 분석 규칙 — 재물운:
+
+- 수입, 지출, 축적, 투자, 자산 관리의 흐름을 중심으로 분석한다.
+- 재성만으로 재물 결과를 단정하지 않는다.
+- 식상, 관성, 비겁, 용신, 대운, 세운이 재물 흐름에 미치는 영향을 함께 본다.
+- 돈이 들어오는 가능성과 돈이 남는 구조를 구분한다.
+- 투자 확대, 현금 보존, 지출 통제, 계약 검토 중 무엇이 우선인지 설명한다.
+- 입력에 없는 투자 종목, 수익률, 금액, 확정적 손실이나 이익을 만들어내지 않는다.
+- actionGuide는 사용자가 실제로 적용할 수 있는 재무 판단 기준으로 작성한다.
+`;
+  }
+
+  if (
+    normalizedType.includes("직업") ||
+    normalizedType.includes("사업") ||
+    normalizedType.includes("이직") ||
+    normalizedType.includes("승진")
+  ) {
+    return `
+상품별 분석 규칙 — 직업·사업운:
+
+- 직업 적합성, 조직 내 역할, 이직, 승진, 사업, 협업 구조를 중심으로 분석한다.
+- 관성만으로 직업 결과를 단정하지 않는다.
+- 식상, 재성, 비겁, 인성, 용신, 대운, 세운을 함께 연결한다.
+- 현재 자리를 유지할 흐름과 이동할 흐름을 구분한다.
+- 직장, 사업, 프리랜서 등 입력에 없는 진로를 확정적으로 추천하지 않는다.
+- 기회가 나타나더라도 준비 조건과 위험 관리 기준을 함께 제시한다.
+- actionGuide는 이직, 협상, 업무 우선순위, 역량 준비 등 구체적인 행동으로 작성한다.
+`;
+  }
+
+  if (
+    normalizedType.includes("건강") ||
+    normalizedType.includes("컨디션") ||
+    normalizedType.includes("회복")
+  ) {
+    return `
+상품별 분석 규칙 — 건강운:
+
+- 오행의 과다·부족, 계절성, 강약, 생활 리듬과 회복 흐름을 중심으로 분석한다.
+- 명리 해석을 의학적 진단이나 질병 확정처럼 표현하지 않는다.
+- 특정 질환, 수술, 사고, 생명 위험을 단정하지 않는다.
+- 사용자가 느낄 수 있는 피로, 과로, 스트레스, 생활 리듬의 변화 수준으로 설명한다.
+- 건강 이상이 의심되면 전문 의료기관의 진료가 필요할 수 있음을 자연스럽게 안내한다.
+- actionGuide는 수면, 휴식, 운동, 일정 조절, 생활 기록 등 안전한 생활 관리 중심으로 작성한다.
+- 불안을 조장하거나 치료를 대신하는 표현을 사용하지 않는다.
+`;
+  }
+
+  if (
+    normalizedType.includes("관계") ||
+    normalizedType.includes("연애") ||
+    normalizedType.includes("결혼") ||
+    normalizedType.includes("인간관계")
+  ) {
+    return `
+상품별 분석 규칙 — 연애·관계운:
+
+- 관계 형성, 거리 조절, 의사소통, 역할 변화, 갈등과 협력 흐름을 중심으로 분석한다.
+- 합은 무조건 좋은 관계, 충은 무조건 나쁜 관계로 단정하지 않는다.
+- 배우자나 상대방의 성격, 의도, 외도 여부 등 입력에 없는 사실을 만들어내지 않는다.
+- 새로운 인연, 기존 관계, 협업 관계를 구분하여 설명한다.
+- 관계를 유지할 조건과 거리를 조절해야 할 조건을 구체적으로 제시한다.
+- actionGuide는 대화 순서, 경계 설정, 역할 확인, 약속 정리 등 현실적 행동으로 작성한다.
+- 이별, 결혼, 재회를 확정적으로 예언하지 않는다.
+`;
+  }
+
+  return `
+상품별 분석 규칙 — 공통 심층분석:
+
+- 분석 종류와 직접 관련된 명리 요소를 우선하여 해석한다.
+- 분석 종류와 무관한 영역으로 내용을 과도하게 확장하지 않는다.
+- 현재 사용자가 판단해야 할 기준과 실천 방향을 구체적으로 제시한다.
+`;
+}
+
 export function buildPaidAnalysisDetailPromptV2(
   input: PaidAnalysisDetailPromptInput,
 ): string {
+  const productRules = getPaidAnalysisProductRules(input.analysisType);
+
   return `
 당신은 사용자의 사주 원국과 현재 운의 흐름을 분석하여
 실제 판단과 행동에 도움을 주는 프리미엄 명리 리포트를 작성하는 전문가입니다.
@@ -314,6 +402,24 @@ ${input.userConcern ?? "없음"}
   ],
   "recommendations": []
 }
+
+리포트 일관성 원칙:
+
+- heroSummary.keyMessage를 리포트 전체의 중심 결론으로 사용한다.
+- causeAnalysis는 중심 결론이 나온 명리학적 원인을 설명한다.
+- fortuneStructure는 중심 결론을 뒷받침하는 원국·용신·대운·세운 근거만 선택한다.
+- currentSituation은 중심 결론이 현재 어떻게 나타나는지를 설명한다.
+- futureTimeline은 중심 결론이 앞으로 어떻게 변화하는지를 시간 순서대로 설명한다.
+- actionGuide는 중심 결론을 실제 행동으로 옮길 수 있는 방법을 제시한다.
+- avoidGuide는 중심 결론을 해치는 행동이나 주의사항만 제시한다.
+- coachMessage는 새로운 결론을 추가하지 않고 리포트 전체를 하나의 메시지로 정리한다.
+- checklist는 actionGuide와 coachMessage를 사용자가 바로 실천할 수 있는 체크 항목으로 변환한다.
+- 모든 섹션은 서로 다른 역할을 수행하되 같은 핵심 결론을 유지한다.
+- 같은 문장을 반복하지 말고 서로 보완되는 내용으로 작성한다.
+- 앞부분에서는 신중함을 강조하고 뒷부분에서는 무조건적인 확장을 권하는 등 서로 모순되는 내용을 작성하지 않는다.
+- 기회와 주의가 동시에 존재할 경우 각각 어떤 조건에서 해당되는지 구분하여 설명한다.
+
+${productRules}
 
 작성 원칙:
 

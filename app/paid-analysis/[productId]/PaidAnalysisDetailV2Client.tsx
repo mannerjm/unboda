@@ -13,13 +13,21 @@ type PaidAnalysisDetailV2ClientProps = {
 };
 
 function getAnalysisType(productId: string): string {
+  console.log("PRODUCT ID =", productId);
+
   switch (productId) {
-    case "wealth":
-      return "재물운 심층 분석";
+    case "health":
+      return "건강운 심층 분석";
+
     case "love":
       return "연애운 심층 분석";
+
     case "career":
       return "직업운 심층 분석";
+
+    case "money":
+      return "재물운 심층 분석";
+
     default:
       return "개인 맞춤 심층 분석";
   }

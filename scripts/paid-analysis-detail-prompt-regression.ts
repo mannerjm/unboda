@@ -143,3 +143,85 @@ console.log(
     "heroSummary는 현재 관계 판단의 핵심을 유지, 조정, 거리 두기, 확장 중 하나의 우선순위로 제시한다",
   ),
 );
+
+console.log(
+  "decisionAnchor 출력 구조 포함:",
+  prompt.includes('"decisionAnchor": {'),
+);
+
+console.log(
+  "decisionAnchor direction 규칙 포함:",
+  prompt.includes(
+    'direction은 반드시 "확대", "유지", "조정", "보류" 중 하나만 사용한다',
+  ),
+);
+
+console.log(
+  "decisionAnchor 중심 판단 규칙 포함:",
+  prompt.includes(
+    "decisionAnchor를 먼저 확정한 뒤 모든 섹션을 작성하며",
+  ),
+);
+
+if (!prompt.includes('"decisionAnchor": {')) {
+  throw new Error("decisionAnchor JSON 출력 구조가 프롬프트에 없습니다.");
+}
+
+if (
+  !prompt.includes(
+    'direction은 반드시 "확대", "유지", "조정", "보류" 중 하나만 사용한다',
+  )
+) {
+  throw new Error("decisionAnchor direction 작성 규칙이 없습니다.");
+}
+
+if (
+  !prompt.includes(
+    "decisionAnchor를 먼저 확정한 뒤 모든 섹션을 작성하며",
+  )
+) {
+  throw new Error("decisionAnchor 중심 판단 규칙이 없습니다.");
+}
+
+console.log("paid analysis decisionAnchor prompt regression passed");
+
+console.log(
+  "건강운 안전 규칙 포함:",
+  healthPrompt.includes("건강운 안전 작성 규칙:"),
+);
+
+console.log(
+  "의학적 진단 금지 규칙 포함:",
+  healthPrompt.includes(
+    "명리 해석을 의학적 진단, 질병 판정, 치료 지시처럼 작성하지 않는다",
+  ),
+);
+
+console.log(
+  "의료 진단 아님 전제 포함:",
+  healthPrompt.includes(
+    "명리 해석에 따른 생활 리듬 참고 정보이며 의료 진단이 아니다",
+  ),
+);
+
+if (!healthPrompt.includes("건강운 안전 작성 규칙:")) {
+  throw new Error("건강운 안전 작성 규칙이 프롬프트에 없습니다.");
+}
+
+if (
+  !healthPrompt.includes(
+    "명리 해석을 의학적 진단, 질병 판정, 치료 지시처럼 작성하지 않는다",
+  )
+) {
+  throw new Error("의학적 진단 금지 규칙이 없습니다.");
+}
+
+if (
+  !healthPrompt.includes(
+    "명리 해석에 따른 생활 리듬 참고 정보이며 의료 진단이 아니다",
+  )
+) {
+  throw new Error("건강운 의료 진단 아님 전제가 없습니다.");
+}
+
+console.log("paid analysis health safety prompt regression passed");

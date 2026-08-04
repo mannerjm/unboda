@@ -35,6 +35,13 @@ const resultV2 = parsePaidAnalysisDetailOutputV2({
       "새로운 관계를 늘리기보다 현재 관계의 역할과 경계를 정리하는 것이 중요합니다.",
   },
 
+  decisionAnchor: {
+  direction: "조정",
+  focus: "현재 판단 기준 정리",
+  rationale:
+    "현재 흐름에서는 무리한 확대보다 우선순위와 실행 조건을 먼저 조정하는 것이 필요합니다.",
+},
+
   causeAnalysis: {
     summary:
       "현재 사주 원국과 운의 흐름이 관계의 확장과 충돌을 함께 키우는 구조입니다.",
@@ -145,4 +152,104 @@ const resultV2 = parsePaidAnalysisDetailOutputV2({
 console.log(
   "V2 headline 검증:",
   resultV2.heroSummary.headline.length > 0,
+);
+
+let rejectedInvalidV2 = false;
+
+try {
+  parsePaidAnalysisDetailOutputV2({
+    heroSummary: {
+      headline: "테스트 제목",
+      subheadline: "테스트 부제목",
+      keyMessage: "테스트 핵심 메시지",
+    },
+     
+    decisionAnchor: {
+  direction: "조정",
+  focus: "현재 판단 기준 정리",
+  rationale:
+    "현재 흐름에서는 무리한 확대보다 우선순위와 실행 조건을 먼저 조정하는 것이 필요합니다.",
+},
+
+    causeAnalysis: {
+      summary: "테스트 원인 요약",
+      reasons: ["원인 1", "원인 2", "원인 3"],
+    },
+    fortuneStructure: {
+      summary: "테스트 구조 요약",
+      items: [
+        {
+          label: "기준 1",
+          value: "값 1",
+          interpretation: "해석 1",
+        },
+        {
+          label: "기준 2",
+          value: "값 2",
+          interpretation: "해석 2",
+        },
+        {
+          label: "기준 3",
+          value: "값 3",
+          interpretation: "해석 3",
+        },
+      ],
+    },
+    currentSituation: {
+      summary: "테스트 현재 상황",
+      opportunities: ["기회 1", "기회 2", "기회 3"],
+      cautions: ["주의 1", "주의 2", "주의 3"],
+    },
+    futureTimeline: [
+      {
+        period: "현재",
+        title: "현재 흐름",
+        description: "현재 설명",
+      },
+      {
+        period: "앞으로 3개월",
+        title: "단기 흐름",
+        description: "단기 설명",
+      },
+      {
+        period: "앞으로 6개월",
+        title: "중기 흐름",
+        description: "중기 설명",
+      },
+      {
+        period: "앞으로 1년",
+        title: "장기 흐름",
+        description: "장기 설명",
+      },
+    ],
+
+    // 고의로 1개만 넣어서 실패시킨다.
+    actionGuide: ["행동 1"],
+
+    avoidGuide: [
+      "피할 행동 1",
+      "피할 행동 2",
+      "피할 행동 3",
+      "피할 행동 4",
+    ],
+    coachMessage: {
+      title: "코치 메시지 제목",
+      message: "코치 메시지 본문",
+    },
+    checklist: [
+      "점검 1",
+      "점검 2",
+      "점검 3",
+      "점검 4",
+      "점검 5",
+    ],
+    recommendations: [],
+  });
+} catch {
+  rejectedInvalidV2 = true;
+}
+
+console.log(
+  "V2 최소 개수 미달 거부:",
+  rejectedInvalidV2,
 );

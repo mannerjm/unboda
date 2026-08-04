@@ -115,3 +115,31 @@ console.log(
   "연애·관계운 전용 규칙 포함:",
   relationshipPrompt.includes("상품별 분석 규칙 — 연애·관계운"),
 );
+
+console.log(
+  "재물운 섹션 규칙 포함:",
+  moneyPrompt.includes(
+    "heroSummary는 현재 재물 판단의 핵심을 수입, 지출, 축적, 투자 중 하나의 우선순위로 제시한다",
+  ),
+);
+
+console.log(
+  "직업·사업운 섹션 규칙 포함:",
+  careerPrompt.includes(
+    "heroSummary는 현재 직업 판단의 핵심을 유지, 이동, 승진, 사업 확장 중 하나의 우선순위로 제시한다",
+  ),
+);
+
+console.log(
+  "건강운 섹션 규칙 포함:",
+  healthPrompt.includes(
+    "heroSummary는 현재 건강 판단의 핵심을 회복, 유지, 과로 조절, 생활 리듬 재정비 중 하나의 우선순위로 제시한다",
+  ),
+);
+
+console.log(
+  "연애·관계운 섹션 규칙 포함:",
+  relationshipPrompt.includes(
+    "heroSummary는 현재 관계 판단의 핵심을 유지, 조정, 거리 두기, 확장 중 하나의 우선순위로 제시한다",
+  ),
+);

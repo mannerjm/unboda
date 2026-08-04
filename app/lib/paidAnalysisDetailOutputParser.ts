@@ -25,9 +25,15 @@ const PaidAnalysisDetailV2Schema = z.object({
     keyMessage: z.string().min(1),
   }),
 
+  decisionAnchor: z.object({
+  direction: z.enum(["확대", "유지", "조정", "보류"]),
+  focus: z.string().trim().min(1),
+  rationale: z.string().trim().min(10),
+}),
+
   causeAnalysis: z.object({
     summary: z.string().min(1),
-    reasons: z.array(z.string().min(1)).min(1),
+    reasons: z.array(z.string().min(1)).min(3),
   }),
 
   fortuneStructure: z.object({
@@ -40,13 +46,13 @@ const PaidAnalysisDetailV2Schema = z.object({
           interpretation: z.string().min(1),
         }),
       )
-      .min(1),
+      .min(3),
   }),
 
   currentSituation: z.object({
     summary: z.string().min(1),
-    opportunities: z.array(z.string().min(1)).min(1),
-    cautions: z.array(z.string().min(1)).min(1),
+    opportunities: z.array(z.string().min(1)).min(3),
+    cautions: z.array(z.string().min(1)).min(3),
   }),
 
   futureTimeline: z
@@ -57,18 +63,18 @@ const PaidAnalysisDetailV2Schema = z.object({
         description: z.string().min(1),
       }),
     )
-    .min(1),
+    .min(4),
 
-  actionGuide: z.array(z.string().min(1)).min(1),
+  actionGuide: z.array(z.string().trim().min(10)).min(5),
 
-  avoidGuide: z.array(z.string().min(1)).min(1),
+avoidGuide: z.array(z.string().trim().min(10)).min(4),
 
   coachMessage: z.object({
     title: z.string().min(1),
     message: z.string().min(1),
   }),
 
-  checklist: z.array(z.string().min(1)).min(1),
+  checklist: z.array(z.string().min(1)).min(5),
 
   recommendations: z.array(
     z.object({

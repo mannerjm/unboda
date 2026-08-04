@@ -33,6 +33,12 @@ export type PaidAnalysisDetailOutputV2 = {
     keyMessage: string;
   };
 
+  decisionAnchor: {
+    direction: "확대" | "유지" | "조정" | "보류";
+    focus: string;
+    rationale: string;
+  };
+
   causeAnalysis: {
     summary: string;
     reasons: string[];

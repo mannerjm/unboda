@@ -256,6 +256,89 @@ const input = promptInput;
   void detail;
   void isLoading;
 
+    if (errorMessage) {
+    return (
+      <main className="min-h-screen bg-[#f7f2e8]">
+        <div className="mx-auto flex min-h-screen max-w-2xl items-center justify-center px-6">
+          <div className="w-full rounded-3xl bg-white p-10 text-center shadow-sm">
+            <p className="text-sm font-semibold tracking-[0.2em] text-neutral-500">
+              UNBODA PREMIUM REPORT
+            </p>
+
+            <h1 className="mt-3 text-2xl font-bold text-neutral-900">
+              심층분석을 완성하지 못했습니다
+            </h1>
+
+            <p className="mt-4 leading-7 text-neutral-600">
+              분석을 생성하는 과정에서 문제가 발생했습니다.
+              잠시 후 다시 시도해 주세요.
+            </p>
+
+            <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+              {errorMessage}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mt-6 rounded-xl bg-neutral-900 px-6 py-3 font-semibold text-white"
+            >
+              다시 시도하기
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (isLoading || !detail) {
+    return (
+      <main className="min-h-screen bg-[#f7f2e8]">
+        <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
+          <div className="w-full rounded-3xl bg-white p-10 text-center shadow-sm">
+            <div className="mx-auto mb-6 h-12 w-12 animate-spin rounded-full border-4 border-neutral-200 border-t-neutral-900" />
+
+            <p className="text-sm font-semibold tracking-[0.2em] text-neutral-500">
+              UNBODA PREMIUM REPORT
+            </p>
+
+            <h1 className="mt-3 text-3xl font-bold text-neutral-900">
+              심층분석 결과를 만들고 있어요
+            </h1>
+
+            <p className="mt-4 leading-7 text-neutral-600">
+              사주 원국과 현재 운의 흐름을 연결하고,
+              결과의 일관성과 품질을 확인하고 있습니다.
+            </p>
+
+            <div className="mt-8 space-y-3 text-left text-neutral-700">
+              <div className="rounded-xl bg-neutral-50 px-5 py-4">
+                원국과 오행 구조 확인
+              </div>
+
+              <div className="rounded-xl bg-neutral-50 px-5 py-4">
+                대운·세운 흐름 연결
+              </div>
+
+              <div className="rounded-xl bg-neutral-50 px-5 py-4">
+                개인 맞춤 심층 리포트 작성
+              </div>
+
+              <div className="rounded-xl bg-neutral-50 px-5 py-4">
+                결과의 일관성과 안전성 검증
+              </div>
+            </div>
+
+            <p className="mt-7 text-sm text-neutral-500">
+              분석에는 잠시 시간이 걸릴 수 있습니다.
+              화면을 닫지 말고 기다려 주세요.
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
   <main className="min-h-screen bg-stone-100 px-4 py-8">
     <div className="mx-auto max-w-3xl">

@@ -1,4 +1,9 @@
 import { getMoneyPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/moneyPrompt";
+import { getCareerPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/careerPrompt";
+
+
+
+
 import {
   paidAnalysisProducts,
   type PaidAnalysisProduct,
@@ -154,36 +159,13 @@ function getPaidAnalysisProductRules(analysisType: string): string {
 }
 
   if (
-    normalizedType.includes("직업") ||
-    normalizedType.includes("사업") ||
-    normalizedType.includes("이직") ||
-    normalizedType.includes("승진")
-  ) {
-    return `
-상품별 분석 규칙 — 직업·사업운:
-
-- 직업 적합성, 조직 내 역할, 이직, 승진, 사업, 협업 구조를 중심으로 분석한다.
-- 관성만으로 직업 결과를 단정하지 않는다.
-- 식상, 재성, 비겁, 인성, 용신, 대운, 세운을 함께 연결한다.
-- 현재 자리를 유지할 흐름과 이동할 흐름을 구분한다.
-- 직장, 사업, 프리랜서 등 입력에 없는 진로를 확정적으로 추천하지 않는다.
-- 기회가 나타나더라도 준비 조건과 위험 관리 기준을 함께 제시한다.
-- actionGuide는 이직, 협상, 업무 우선순위, 역량 준비 등 구체적인 행동으로 작성한다.
-
-섹션별 작성 규칙:
-
-- heroSummary는 현재 직업 판단의 핵심을 유지, 이동, 승진, 사업 확장 중 하나의 우선순위로 제시한다.
-- causeAnalysis는 직업 흐름이 형성되는 이유를 관성뿐 아니라 식상, 재성, 비겁, 인성, 용신, 대운, 세운의 관계로 설명한다.
-- fortuneStructure의 items는 조직 적응, 역할 확장, 이동 가능성, 독립성처럼 서로 다른 직업 기준으로 구성한다.
-- currentSituation의 opportunities는 승진, 역할 확대, 이직 준비, 사업 기회 중 실제 활용 가능한 요소만 작성한다.
-- currentSituation의 cautions는 퇴사나 실패를 단정하지 않고 갈등, 준비 부족, 책임 확대, 수입 불안정 등의 조건을 설명한다.
-- futureTimeline은 각 시기마다 유지, 준비, 이동, 확장 중 무엇이 중요한지 구분한다.
-- actionGuide는 이력서 정리, 협상 기준, 업무 성과 기록, 역량 준비, 현금 흐름 점검처럼 실행 가능한 행동으로 작성한다.
-- avoidGuide는 충동 퇴사, 준비 없는 창업, 책임 회피, 감정적 갈등, 불명확한 계약처럼 피해야 할 행동을 작성한다.
-- coachMessage는 특정 직업을 단정적으로 추천하지 않고 현재 커리어 판단 기준을 정리한다.
-- checklist는 사용자가 실제로 확인할 수 있는 역할, 성과, 계약, 수입 안정성, 이동 준비 상태 중심으로 작성한다.
-`;
-  }
+  normalizedType.includes("직업") ||
+  normalizedType.includes("사업") ||
+  normalizedType.includes("이직") ||
+  normalizedType.includes("승진")
+) {
+  return getCareerPaidAnalysisPromptRules();
+}
 
   if (
     normalizedType.includes("건강") ||

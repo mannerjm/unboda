@@ -1,7 +1,7 @@
 import { getMoneyPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/moneyPrompt";
 import { getCareerPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/careerPrompt";
 import { getHealthPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/healthPrompt";
-
+import { getRelationshipPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/relationshipPrompt";
 
 
 import {
@@ -176,36 +176,13 @@ function getPaidAnalysisProductRules(analysisType: string): string {
 }
 
   if (
-    normalizedType.includes("관계") ||
-    normalizedType.includes("연애") ||
-    normalizedType.includes("결혼") ||
-    normalizedType.includes("인간관계")
-  ) {
-    return `
-상품별 분석 규칙 — 연애·관계운:
-
-- 관계 형성, 거리 조절, 의사소통, 역할 변화, 갈등과 협력 흐름을 중심으로 분석한다.
-- 합은 무조건 좋은 관계, 충은 무조건 나쁜 관계로 단정하지 않는다.
-- 배우자나 상대방의 성격, 의도, 외도 여부 등 입력에 없는 사실을 만들어내지 않는다.
-- 새로운 인연, 기존 관계, 협업 관계를 구분하여 설명한다.
-- 관계를 유지할 조건과 거리를 조절해야 할 조건을 구체적으로 제시한다.
-- actionGuide는 대화 순서, 경계 설정, 역할 확인, 약속 정리 등 현실적 행동으로 작성한다.
-- 이별, 결혼, 재회를 확정적으로 예언하지 않는다.
-
-섹션별 작성 규칙:
-
-- heroSummary는 현재 관계 판단의 핵심을 유지, 조정, 거리 두기, 확장 중 하나의 우선순위로 제시한다.
-- causeAnalysis는 관계 흐름이 형성되는 이유를 합·충·형·파·해뿐 아니라 비겁, 관성, 재성, 식상, 인성, 용신, 대운, 세운의 관계로 설명한다.
-- fortuneStructure의 items는 관계 형성, 소통 방식, 경계 설정, 역할 변화처럼 서로 다른 관계 기준으로 구성한다.
-- currentSituation의 opportunities는 새로운 인연, 기존 관계 회복, 협업 강화, 갈등 조정 중 실제 활용 가능한 요소만 작성한다.
-- currentSituation의 cautions는 이별이나 배신을 단정하지 않고 오해, 역할 불균형, 감정 소모, 경계 침범, 소통 지연 등의 조건을 설명한다.
-- futureTimeline은 각 시기마다 관계 유지, 조정, 거리 설정, 확장 중 무엇이 중요한지 구분한다.
-- actionGuide는 대화 순서 정리, 감정과 사실 구분, 역할 확인, 약속 문서화, 경계 표현처럼 실행 가능한 행동으로 작성한다.
-- avoidGuide는 감정적 단절, 상대 의도 단정, 반복 추궁, 경계 무시, 중요한 결정을 서두르는 행동을 작성한다.
-- coachMessage는 결혼, 이별, 재회를 확정하지 않고 현재 관계 판단 기준을 정리한다.
-- checklist는 사용자가 실제로 확인할 수 있는 대화 여부, 역할 합의, 경계 존중, 약속 이행, 감정 소모 수준 중심으로 작성한다.
-`;
-  }
+  normalizedType.includes("관계") ||
+  normalizedType.includes("연애") ||
+  normalizedType.includes("결혼") ||
+  normalizedType.includes("인간관계")
+) {
+  return getRelationshipPaidAnalysisPromptRules();
+}
 
   return `
 상품별 분석 규칙 — 공통 심층분석:

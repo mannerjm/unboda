@@ -4,20 +4,62 @@ export type PaidAnalysisProduct = {
   shortTitle?: string;
   description: string;
   details: readonly string[];
+
+  category?: string;
+  plugin?: string;
+  releaseLevel?: "V1" | "V2" | "V3" | "ULTIMATE";
+  analysisType?: string;
+
+  recommendedFor?: readonly string[];
+  analysisFocus?: readonly string[];
+  expectedOutcome?: readonly string[];
 };
+
 export const paidAnalysisProducts = {
   wealth: {
   id: "wealth",
   title: "재물운 심층 분석",
-   shortTitle: "재물운",
+  shortTitle: "재물운",
+  category: "MONEY",
+  plugin: "MONEY",
+  releaseLevel: "V1",
+  analysisType: "재물운 심층 분석",
+
   description:
-    "돈의 흐름, 기회가 커지는 시기와 지출·손실에 주의할 흐름을 분석합니다.",
+    "현재 재물 흐름을 수입, 지출, 축적, 계약, 투자 판단의 관점에서 심층적으로 분석합니다.",
+
   details: [
     "현재 재물 흐름이 나타나는 명리학적 이유",
-    "수입과 재물 기회가 강해지는 중요한 시기",
-    "재물 흐름에서 활용할 수 있는 기회",
-    "지출·손실과 금전 판단에 주의할 시기와 요인",
-    "현재 상황에 맞는 현실적인 재물 관리 방향",
+    "돈이 들어오는 구조와 남는 구조의 차이",
+    "지출·손실이 커지기 쉬운 조건과 반복 패턴",
+    "현재 확대·유지·조정·보류 중 필요한 판단",
+    "앞으로 3개월·6개월·1년의 재물 변화",
+    "실제 생활에서 적용할 수 있는 재물 관리 기준",
+  ],
+
+  recommendedFor: [
+    "돈을 벌어도 잘 모이지 않는 이유가 궁금한 사람",
+    "수입 확대와 지출 조정 중 무엇이 우선인지 고민하는 사람",
+    "투자·계약·사업 확장을 앞두고 판단 기준이 필요한 사람",
+    "현재 재물운의 방향과 향후 변화를 알고 싶은 사람",
+    "장기적으로 자신에게 맞는 재물 축적 방식을 알고 싶은 사람",
+  ],
+
+  analysisFocus: [
+    "재성의 강약과 실제 작용",
+    "식상과 재성의 연결 구조",
+    "비겁에 따른 경쟁·분산·손실 가능성",
+    "관성과 계약·책임 범위의 관계",
+    "대운·세운에 따른 수입과 보존 흐름",
+    "직업·사업·인간관계가 재물 흐름에 미치는 영향",
+  ],
+
+  expectedOutcome: [
+    "현재 재물 문제의 핵심 원인 이해",
+    "돈이 들어오는 경로와 새는 조건 구분",
+    "확대·유지·조정·보류 중 우선 방향 확인",
+    "시기별 재물 변화와 준비 기준 확보",
+    "실행 가능한 지출·계약·현금 흐름 관리 기준 확보",
   ],
 },
 

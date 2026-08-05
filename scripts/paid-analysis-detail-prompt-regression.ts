@@ -305,3 +305,59 @@ if (
 }
 
 console.log("paid analysis detail prompt V3 regression passed");
+
+console.log(
+  "wealth 상품 ID 포함:",
+  promptV3.includes("상품 ID:\nwealth"),
+);
+
+console.log(
+  "wealth 상품 Plugin 포함:",
+  promptV3.includes("상품 Plugin:\nMONEY"),
+);
+
+console.log(
+  "wealth 핵심 분석 초점 포함:",
+  promptV3.includes("핵심 분석 초점:"),
+);
+
+console.log(
+  "wealth 기대 결과 포함:",
+  promptV3.includes("사용자가 얻어야 하는 결과:"),
+);
+
+console.log(
+  "wealth 재물 분석 초점 실제 내용 포함:",
+  promptV3.includes("재성의 강약과 실제 작용"),
+);
+
+console.log(
+  "wealth 기대 결과 실제 내용 포함:",
+  promptV3.includes("현재 재물 문제의 핵심 원인 이해"),
+);
+
+if (!promptV3.includes("상품 ID:\nwealth")) {
+  throw new Error("V3 프롬프트에 wealth 상품 ID가 포함되지 않았습니다.");
+}
+
+if (!promptV3.includes("상품 Plugin:\nMONEY")) {
+  throw new Error("V3 프롬프트에 wealth MONEY Plugin이 포함되지 않았습니다.");
+}
+
+if (!promptV3.includes("핵심 분석 초점:")) {
+  throw new Error("V3 프롬프트에 상품 분석 초점 영역이 없습니다.");
+}
+
+if (!promptV3.includes("사용자가 얻어야 하는 결과:")) {
+  throw new Error("V3 프롬프트에 상품 기대 결과 영역이 없습니다.");
+}
+
+if (!promptV3.includes("재성의 강약과 실제 작용")) {
+  throw new Error("V3 프롬프트에 wealth 분석 초점 실제 내용이 없습니다.");
+}
+
+if (!promptV3.includes("현재 재물 문제의 핵심 원인 이해")) {
+  throw new Error("V3 프롬프트에 wealth 기대 결과 실제 내용이 없습니다.");
+}
+
+console.log("wealth product context prompt regression passed");

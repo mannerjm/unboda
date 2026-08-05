@@ -2,7 +2,7 @@ import { buildAnalysisProductRecommendations } from "../app/lib/analysisProductR
 import type { ElementRelationsAnalysis } from "../app/lib/elementRelations";
 import type { FortuneBrainResult } from "../app/lib/fortuneBrain";
 import type { StrengthAnalysis } from "../app/lib/strength";
-
+import { paidAnalysisProducts } from "../app/lib/paidAnalysisProducts";
 function assert(condition: boolean, message: string): void {
   if (!condition) {
     throw new Error(message);
@@ -183,3 +183,79 @@ assert(
 console.log("기회 우세 career 점수 30: true");
 console.log("기회 우세 business 점수 23: true");
 console.log("기회 우세 추천 이유 반영: true");
+
+const wealthProduct = paidAnalysisProducts.wealth;
+
+console.log(
+  "wealth category 연결:",
+  wealthProduct.category === "MONEY",
+);
+
+console.log(
+  "wealth plugin 연결:",
+  wealthProduct.plugin === "MONEY",
+);
+
+console.log(
+  "wealth V1 출시 단계:",
+  wealthProduct.releaseLevel === "V1",
+);
+
+console.log(
+  "wealth analysisType 연결:",
+  wealthProduct.analysisType === "재물운 심층 분석",
+);
+
+console.log(
+  "wealth details 5개 이상:",
+  (wealthProduct.details?.length ?? 0) >= 5,
+);
+
+console.log(
+  "wealth recommendedFor 5개 이상:",
+  (wealthProduct.recommendedFor?.length ?? 0) >= 5,
+);
+
+console.log(
+  "wealth analysisFocus 5개 이상:",
+  (wealthProduct.analysisFocus?.length ?? 0) >= 5,
+);
+
+console.log(
+  "wealth expectedOutcome 5개 이상:",
+  (wealthProduct.expectedOutcome?.length ?? 0) >= 5,
+);
+
+if (wealthProduct.category !== "MONEY") {
+  throw new Error("wealth 상품의 category가 MONEY가 아닙니다.");
+}
+
+if (wealthProduct.plugin !== "MONEY") {
+  throw new Error("wealth 상품의 plugin이 MONEY가 아닙니다.");
+}
+
+if (wealthProduct.releaseLevel !== "V1") {
+  throw new Error("wealth 상품의 releaseLevel이 V1이 아닙니다.");
+}
+
+if (wealthProduct.analysisType !== "재물운 심층 분석") {
+  throw new Error("wealth 상품의 analysisType이 올바르지 않습니다.");
+}
+
+if ((wealthProduct.details?.length ?? 0) < 5) {
+  throw new Error("wealth 상품의 details가 5개 미만입니다.");
+}
+
+if ((wealthProduct.recommendedFor?.length ?? 0) < 5) {
+  throw new Error("wealth 상품의 recommendedFor가 5개 미만입니다.");
+}
+
+if ((wealthProduct.analysisFocus?.length ?? 0) < 5) {
+  throw new Error("wealth 상품의 analysisFocus가 5개 미만입니다.");
+}
+
+if ((wealthProduct.expectedOutcome?.length ?? 0) < 5) {
+  throw new Error("wealth 상품의 expectedOutcome이 5개 미만입니다.");
+}
+
+console.log("wealth premium product metadata regression passed");

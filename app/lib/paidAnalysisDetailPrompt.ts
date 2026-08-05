@@ -1,3 +1,8 @@
+import {
+  paidAnalysisProducts,
+  type PaidAnalysisProduct,
+} from "./paidAnalysisProducts";
+
 export type PaidAnalysisDetailPromptInput = {
   analysisType: string;
   birthData: string;
@@ -286,17 +291,89 @@ function getPaidAnalysisProductRules(analysisType: string): string {
 `;
 }
 
+function getPaidAnalysisProductContext(analysisType: string): string {
+  const products = Object.values(
+    paidAnalysisProducts,
+  ) as PaidAnalysisProduct[];
+
+  const product = products.find(
+    (item) =>
+      item.analysisType === analysisType ||
+      item.title === analysisType,
+  );
+
+  if (!product) {
+    return `
+상품 메타데이터:
+
+- 분석 상품: ${analysisType}
+- 등록된 상세 상품 메타데이터 없음
+`;
+  }
+
+  const recommendedFor =
+    product.recommendedFor?.map((item) => `- ${item}`).join("\n") ||
+    "- 별도 정의 없음";
+
+  const analysisFocus =
+    product.analysisFocus?.map((item) => `- ${item}`).join("\n") ||
+    "- 별도 정의 없음";
+
+  const expectedOutcome =
+    product.expectedOutcome?.map((item) => `- ${item}`).join("\n") ||
+    "- 별도 정의 없음";
+
+  const details =
+    product.details.map((item) => `- ${item}`).join("\n");
+
+  return `
+상품 메타데이터:
+
+상품 ID:
+${product.id}
+
+상품명:
+${product.title}
+
+상품 카테고리:
+${product.category ?? "미정"}
+
+상품 Plugin:
+${product.plugin ?? "미정"}
+
+출시 단계:
+${product.releaseLevel ?? "미정"}
+
+상품 설명:
+${product.description}
+
+이 상품에서 제공해야 하는 내용:
+${details}
+
+이 상품이 추천되는 사용자:
+${recommendedFor}
+
+핵심 분석 초점:
+${analysisFocus}
+
+사용자가 얻어야 하는 결과:
+${expectedOutcome}
+`;
+}
+
 export function buildPaidAnalysisDetailPromptV2(
   input: PaidAnalysisDetailPromptInput,
 ): string {
   const productRules = getPaidAnalysisProductRules(input.analysisType);
-
+  const productContext = getPaidAnalysisProductContext(input.analysisType);
   return `
 당신은 사용자의 사주 원국과 현재 운의 흐름을 분석하여
 실제 판단과 행동에 도움을 주는 프리미엄 명리 리포트를 작성하는 전문가입니다.
 
 분석 종류:
 ${input.analysisType}
+
+${productContext}
 
 출생 정보:
 ${input.birthData}

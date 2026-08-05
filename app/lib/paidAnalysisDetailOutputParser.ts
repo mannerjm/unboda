@@ -1,7 +1,8 @@
 import { z } from "zod";
-import {
-  type PaidAnalysisDetailOutput,
-  type PaidAnalysisDetailOutputV2,
+import type {
+  PaidAnalysisDetailOutput,
+  PaidAnalysisDetailOutputV2,
+  PaidAnalysisDetailOutputV3,
 } from "./paidAnalysisDetailOutput";
 
 const PaidAnalysisDetailSchema = z.object({
@@ -85,6 +86,45 @@ avoidGuide: z.array(z.string().trim().min(10)).min(4),
   ),
 });
 
+const PaidAnalysisDetailV3Schema =
+  PaidAnalysisDetailV2Schema.extend({
+    aiInsight: z.object({
+      headline: z.string().trim().min(10),
+      explanation: z.string().trim().min(30),
+    }),
+
+    pastPattern: z.object({
+      summary: z.string().trim().min(20),
+      periods: z
+        .array(
+          z.object({
+            period: z.string().trim().min(1),
+            pattern: z.string().trim().min(20),
+            verificationQuestion: z.string().trim().min(10),
+          }),
+        )
+        .min(1)
+        .max(3),
+    }),
+
+    currentCoreProblem: z.object({
+      title: z.string().trim().min(5),
+      description: z.string().trim().min(20),
+      whyItMatters: z.string().trim().min(20),
+    }),
+
+    confidence: z.object({
+      level: z.enum(["높음", "중간", "낮음"]),
+      strongestEvidence: z
+        .array(z.string().trim().min(10))
+        .min(2),
+      uncertaintyFactors: z
+        .array(z.string().trim().min(10))
+        .min(1),
+      limitations: z.string().trim().min(20),
+    }),
+  });
+
 export function parsePaidAnalysisDetailOutput(
   value: unknown,
 ): PaidAnalysisDetailOutput {
@@ -95,4 +135,10 @@ export function parsePaidAnalysisDetailOutputV2(
   value: unknown,
 ): PaidAnalysisDetailOutputV2 {
   return PaidAnalysisDetailV2Schema.parse(value);
+}
+
+export function parsePaidAnalysisDetailOutputV3(
+  value: unknown,
+): PaidAnalysisDetailOutputV3 {
+  return PaidAnalysisDetailV3Schema.parse(value);
 }

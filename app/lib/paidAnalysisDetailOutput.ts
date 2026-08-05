@@ -70,3 +70,33 @@ export type PaidAnalysisDetailOutputV2 = {
 
   recommendations: PaidAnalysisRecommendation[];
 };
+
+export type PaidAnalysisDetailOutputV3 =
+  PaidAnalysisDetailOutputV2 & {
+    aiInsight: {
+      headline: string;
+      explanation: string;
+    };
+
+    pastPattern: {
+      summary: string;
+      periods: {
+        period: string;
+        pattern: string;
+        verificationQuestion: string;
+      }[];
+    };
+
+    currentCoreProblem: {
+      title: string;
+      description: string;
+      whyItMatters: string;
+    };
+
+    confidence: {
+      level: "높음" | "중간" | "낮음";
+      strongestEvidence: string[];
+      uncertaintyFactors: string[];
+      limitations: string;
+    };
+  };

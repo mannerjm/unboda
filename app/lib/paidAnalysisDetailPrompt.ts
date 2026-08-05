@@ -575,3 +575,105 @@ checklist 작성 규칙:
 - actionGuide를 그대로 복사하지 않는다.
 `;
 }
+
+export function buildPaidAnalysisDetailPromptV3(
+  input: PaidAnalysisDetailPromptInput,
+): string {
+  const v2Prompt = buildPaidAnalysisDetailPromptV2(input);
+
+  const recommendationsMarker = `"recommendations": []`;
+
+  if (!v2Prompt.includes(recommendationsMarker)) {
+    throw new Error(
+      "V3 프롬프트를 만들 수 없습니다: V2 JSON 구조에서 recommendations 필드를 찾지 못했습니다.",
+    );
+  }
+
+  const v3Fields = `"aiInsight": {
+    "headline": "표면적인 문제와 실제 핵심 원인의 차이를 보여주는 선명한 통찰",
+    "explanation": "aiInsight의 판단이 나온 명리학적 이유와 현재 현실에서의 의미를 설명"
+  },
+  "pastPattern": {
+    "summary": "현재 흐름과 연결되는 과거 반복 패턴의 요약",
+    "periods": [
+      {
+        "period": "계산 데이터로 확인 가능한 과거 시기",
+        "pattern": "당시 반복되었을 가능성이 있는 흐름을 단정하지 않고 설명",
+        "verificationQuestion": "사용자가 실제 경험 여부를 스스로 확인할 수 있는 질문"
+      }
+    ]
+  },
+  "currentCoreProblem": {
+    "title": "현재 가장 먼저 해결해야 할 핵심 문제",
+    "description": "현재 문제를 하나로 좁혀 구체적으로 설명",
+    "whyItMatters": "이 문제를 지금 다뤄야 하는 이유와 방치할 경우의 현실적 영향"
+  },
+  "confidence": {
+    "level": "높음 | 중간 | 낮음 중 하나",
+    "strongestEvidence": [
+      "현재 판단을 가장 강하게 뒷받침하는 명리 근거 1",
+      "현재 판단을 가장 강하게 뒷받침하는 명리 근거 2"
+    ],
+    "uncertaintyFactors": [
+      "입력 정보 또는 외부 환경 때문에 판단이 달라질 수 있는 요인"
+    ],
+    "limitations": "이 분석이 제공할 수 있는 범위와 대신할 수 없는 전문 판단"
+  },
+  "recommendations": []`;
+
+  const promptWithV3Json = v2Prompt.replace(
+    recommendationsMarker,
+    v3Fields,
+  );
+
+  return `${promptWithV3Json}
+
+V3 추가 섹션 작성 규칙:
+
+aiInsight 작성 규칙:
+
+- headline은 표면적인 고민과 실제 핵심 원인의 차이를 한 문장으로 보여준다.
+- 누구에게나 적용되는 일반적인 문장을 사용하지 않는다.
+- 과장하거나 사용자를 놀라게 하기 위한 표현을 사용하지 않는다.
+- explanation은 원국, 오행, 십성, 용신, 대운, 세운 중 실제 입력에서 확인되는 근거와 연결한다.
+- headline과 explanation은 decisionAnchor의 direction 및 focus와 모순되지 않아야 한다.
+
+pastPattern 작성 규칙:
+
+- summary는 현재 흐름이 과거에 어떤 방식으로 반복되었을 가능성이 있는지 설명한다.
+- periods는 반드시 1개 이상, 최대 3개까지 작성한다.
+- period는 입력 데이터로 판단 가능한 과거 시기만 사용한다.
+- 과거 사건을 사실처럼 만들어내거나 단정하지 않는다.
+- pattern에는 "가능성이 있습니다", "반복되었을 수 있습니다"와 같은 검증 가능한 표현을 사용한다.
+- verificationQuestion은 사용자가 자신의 실제 경험을 확인할 수 있는 질문으로 작성한다.
+- 사고, 질병, 이별, 실패 등의 사건을 임의로 만들어내지 않는다.
+
+currentCoreProblem 작성 규칙:
+
+- 리포트 전체에서 가장 먼저 해결해야 할 문제를 정확히 하나만 선택한다.
+- title은 짧고 구체적으로 작성한다.
+- description은 성격 결함이나 운명적 약점이 아니라 현재 판단과 행동에 영향을 주는 구조로 설명한다.
+- whyItMatters는 현재 시점에서 이 문제가 중요한 이유를 현실적인 영향과 함께 설명한다.
+- decisionAnchor의 focus와 직접 연결되어야 한다.
+
+confidence 작성 규칙:
+
+- level은 "높음", "중간", "낮음" 중 하나만 사용한다.
+- confidence는 예언 적중률이나 숫자 확률이 아니다.
+- strongestEvidence는 서로 다른 실제 명리 근거를 최소 2개 작성한다.
+- uncertaintyFactors는 사용자 정보 부족, 외부 환경, 개인 선택처럼 결과에 영향을 줄 수 있는 요인을 최소 1개 작성한다.
+- limitations는 분석이 대신할 수 없는 의료, 금융, 법률 또는 다른 전문 판단의 범위를 분명히 설명한다.
+- 근거가 부족한 경우 억지로 "높음"을 선택하지 않는다.
+
+V3 리포트 일관성 원칙:
+
+- heroSummary.keyMessage, aiInsight, currentCoreProblem, decisionAnchor는 같은 중심 결론을 유지한다.
+- causeAnalysis와 fortuneStructure는 aiInsight 및 currentCoreProblem의 근거가 되어야 한다.
+- pastPattern은 현재 결론을 강화할 수 있지만 과거 사건을 확정해서는 안 된다.
+- futureTimeline은 currentCoreProblem이 시간에 따라 어떻게 달라지는지 보여준다.
+- actionGuide와 checklist는 currentCoreProblem을 실제로 조정할 수 있는 행동이어야 한다.
+- confidence는 분석의 근거와 한계를 투명하게 설명해야 한다.
+- V3 필드를 포함한 모든 필드를 빠짐없이 반환한다.
+- 출력은 반드시 유효한 JSON 하나만 반환한다.
+`;
+}

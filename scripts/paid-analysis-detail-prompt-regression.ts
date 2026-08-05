@@ -1,5 +1,6 @@
 import {
   buildPaidAnalysisDetailPromptV2,
+   buildPaidAnalysisDetailPromptV3,
 } from "../app/lib/paidAnalysisDetailPrompt";
 2.
 
@@ -15,6 +16,8 @@ const input = {
 };
 
 const prompt = buildPaidAnalysisDetailPromptV2(input);
+
+const promptV3 = buildPaidAnalysisDetailPromptV3(input);
 
 if (!prompt.includes("재물운 심층 분석")) {
   throw new Error("analysisType이 프롬프트에 포함되지 않았습니다.");
@@ -225,3 +228,80 @@ if (
 }
 
 console.log("paid analysis health safety prompt regression passed");
+
+console.log(
+  "V3 aiInsight 출력 구조 포함:",
+  promptV3.includes('"aiInsight": {'),
+);
+
+console.log(
+  "V3 pastPattern 출력 구조 포함:",
+  promptV3.includes('"pastPattern": {'),
+);
+
+console.log(
+  "V3 currentCoreProblem 출력 구조 포함:",
+  promptV3.includes('"currentCoreProblem": {'),
+);
+
+console.log(
+  "V3 confidence 출력 구조 포함:",
+  promptV3.includes('"confidence": {'),
+);
+
+console.log(
+  "V3 과거 사건 단정 금지 규칙 포함:",
+  promptV3.includes("과거 사건을 사실처럼 만들어내거나 단정하지 않는다"),
+);
+
+console.log(
+  "V3 confidence 확률 아님 규칙 포함:",
+  promptV3.includes("예언 적중률이나 숫자 확률이 아니다"),
+);
+
+console.log(
+  "V3 중심 결론 일관성 규칙 포함:",
+  promptV3.includes(
+    "heroSummary.keyMessage, aiInsight, currentCoreProblem, decisionAnchor는 같은 중심 결론을 유지한다",
+  ),
+);
+
+if (!promptV3.includes('"aiInsight": {')) {
+  throw new Error("V3 프롬프트에 aiInsight 출력 구조가 없습니다.");
+}
+
+if (!promptV3.includes('"pastPattern": {')) {
+  throw new Error("V3 프롬프트에 pastPattern 출력 구조가 없습니다.");
+}
+
+if (!promptV3.includes('"currentCoreProblem": {')) {
+  throw new Error("V3 프롬프트에 currentCoreProblem 출력 구조가 없습니다.");
+}
+
+if (!promptV3.includes('"confidence": {')) {
+  throw new Error("V3 프롬프트에 confidence 출력 구조가 없습니다.");
+}
+
+if (
+  !promptV3.includes(
+    "과거 사건을 사실처럼 만들어내거나 단정하지 않는다",
+  )
+) {
+  throw new Error("V3 프롬프트에 과거 사건 단정 금지 규칙이 없습니다.");
+}
+
+if (
+  !promptV3.includes("예언 적중률이나 숫자 확률이 아니다")
+) {
+  throw new Error("V3 프롬프트에 confidence 의미 규칙이 없습니다.");
+}
+
+if (
+  !promptV3.includes(
+    "heroSummary.keyMessage, aiInsight, currentCoreProblem, decisionAnchor는 같은 중심 결론을 유지한다",
+  )
+) {
+  throw new Error("V3 프롬프트에 중심 결론 일관성 규칙이 없습니다.");
+}
+
+console.log("paid analysis detail prompt V3 regression passed");

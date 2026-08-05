@@ -1,3 +1,4 @@
+import { getMoneyPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/moneyPrompt";
 import {
   paidAnalysisProducts,
   type PaidAnalysisProduct,
@@ -145,35 +146,12 @@ function getPaidAnalysisProductRules(analysisType: string): string {
   const normalizedType = analysisType.trim();
 
   if (
-    normalizedType.includes("재물") ||
-    normalizedType.includes("투자") ||
-    normalizedType.includes("자산")
-  ) {
-    return `
-상품별 분석 규칙 — 재물운:
-
-- 수입, 지출, 축적, 투자, 자산 관리의 흐름을 중심으로 분석한다.
-- 재성만으로 재물 결과를 단정하지 않는다.
-- 식상, 관성, 비겁, 용신, 대운, 세운이 재물 흐름에 미치는 영향을 함께 본다.
-- 돈이 들어오는 가능성과 돈이 남는 구조를 구분한다.
-- 투자 확대, 현금 보존, 지출 통제, 계약 검토 중 무엇이 우선인지 설명한다.
-- 입력에 없는 투자 종목, 수익률, 금액, 확정적 손실이나 이익을 만들어내지 않는다.
-- actionGuide는 사용자가 실제로 적용할 수 있는 재무 판단 기준으로 작성한다.
-
-섹션별 작성 규칙:
-
-- heroSummary는 현재 재물 판단의 핵심을 수입, 지출, 축적, 투자 중 하나의 우선순위로 제시한다.
-- causeAnalysis는 재물 흐름이 형성되는 이유를 재성뿐 아니라 식상, 비겁, 관성, 용신, 대운, 세운의 관계로 설명한다.
-- fortuneStructure의 items는 수입 구조, 자산 보존, 투자 성향, 지출 위험처럼 서로 다른 재물 기준으로 구성한다.
-- currentSituation의 opportunities는 실제 활용 가능한 재물 기회만 작성한다.
-- currentSituation의 cautions는 손실 단정이 아니라 지출 확대, 무리한 투자, 계약 조건, 현금 흐름 등의 위험 조건을 설명한다.
-- futureTimeline은 각 시기마다 재물의 확대, 보존, 조정 중 무엇이 중요한지 구분한다.
-- actionGuide는 예산, 현금 보유, 계약 검토, 투자 한도, 수입원 관리처럼 실행 가능한 재무 행동으로 작성한다.
-- avoidGuide는 충동 투자, 과도한 레버리지, 불명확한 계약, 감정적 소비처럼 피해야 할 행동을 작성한다.
-- coachMessage는 돈을 많이 벌 수 있다는 식의 결론이 아니라 현재 재물 판단 기준을 정리한다.
-- checklist는 사용자가 실제로 확인할 수 있는 금액, 계약, 지출, 비상자금, 투자 기준 중심으로 작성한다.
-`;
-  }
+  normalizedType.includes("재물") ||
+  normalizedType.includes("투자") ||
+  normalizedType.includes("자산")
+) {
+  return getMoneyPaidAnalysisPromptRules();
+}
 
   if (
     normalizedType.includes("직업") ||

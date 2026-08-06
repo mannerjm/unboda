@@ -4,15 +4,18 @@ import { reviewPaidAnalysisDetail } from "./paidAnalysisSelfReview";
 import type {
   PaidAnalysisDetailOutput,
   PaidAnalysisDetailOutputV2,
+    PaidAnalysisDetailOutputV3,
 } from "./paidAnalysisDetailOutput";
 import { validatePaidAnalysisConsistency } from "./paidAnalysisConsistencyValidator";
 import {
   parsePaidAnalysisDetailOutput,
   parsePaidAnalysisDetailOutputV2,
+   parsePaidAnalysisDetailOutputV3,
 } from "./paidAnalysisDetailOutputParser";
 import {
   buildPaidAnalysisDetailPrompt,
   buildPaidAnalysisDetailPromptV2,
+    buildPaidAnalysisDetailPromptV3,
   type PaidAnalysisDetailPromptInput,
 } from "./paidAnalysisDetailPrompt";
 
@@ -38,6 +41,17 @@ function parseGeneratedPaidAnalysisDetailV2(
   return parsePaidAnalysisDetailOutputV2(parsedValue);
 }
 
+function parseGeneratedPaidAnalysisDetailV3(
+  value: unknown,
+): PaidAnalysisDetailOutputV3 {
+  const parsedValue =
+    typeof value === "string"
+      ? JSON.parse(value)
+      : value;
+
+  return parsePaidAnalysisDetailOutputV3(parsedValue);
+}
+
 export async function generatePaidAnalysisDetail(
   input: PaidAnalysisDetailPromptInput,
 ): Promise<PaidAnalysisDetailOutput> {
@@ -50,14 +64,14 @@ export async function generatePaidAnalysisDetail(
 
 export async function generatePaidAnalysisDetailV2(
   input: PaidAnalysisDetailPromptInput,
-): Promise<PaidAnalysisDetailOutputV2> {
+): Promise<PaidAnalysisDetailOutputV3> {
 
   console.log("PAID ANALYSIS V2 INPUT:", {
   analysisType: input.analysisType,
   userConcern: input.userConcern,
 });
 
-  const prompt = buildPaidAnalysisDetailPromptV2(input);
+  const prompt = buildPaidAnalysisDetailPromptV3(input);
 
   console.log("HEALTH RULE INCLUDED:", prompt.includes("상품별 분석 규칙 - 건강운"));
 console.log("CAREER RULE INCLUDED:", prompt.includes("상품별 분석 규칙 - 직업·사업운"));
@@ -68,7 +82,7 @@ console.log(
 
   const responseText = await generateAnalysisText(prompt);
 
-  const detail = parseGeneratedPaidAnalysisDetailV2(responseText);
+  const detail = parseGeneratedPaidAnalysisDetailV3(responseText);
 
   const consistencyResult = validatePaidAnalysisConsistency(detail);
 

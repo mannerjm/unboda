@@ -3,7 +3,7 @@ import type { PaidAnalysisDetailPromptInput } from "@/app/lib/paidAnalysisDetail
 import { useEffect, useMemo, useState } from "react";
 import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
 import { getSaju } from "@/app/lib/manse";
-import type { PaidAnalysisDetailOutputV2 } from "@/app/lib/paidAnalysisDetailOutput";
+import type { PaidAnalysisDetailOutputV3 } from "@/app/lib/paidAnalysisDetailOutput";
 
 
 type SajuResult = ReturnType<typeof getSaju>;
@@ -26,7 +26,8 @@ function getAnalysisType(productId: string): string {
       return "직업운 심층 분석";
 
     case "money":
-      return "재물운 심층 분석";
+case "wealth":
+  return "재물운 심층 분석";
 
     default:
       return "개인 맞춤 심층 분석";
@@ -129,7 +130,7 @@ export default function PaidAnalysisDetailV2Client({
   const [restoredSaju, setRestoredSaju] = useState<SajuResult | null>(null);
   const [userConcern, setUserConcern] = useState<string | null>(null);
   const [detail, setDetail] =
-  useState<PaidAnalysisDetailOutputV2 | null>(null);
+  useState<PaidAnalysisDetailOutputV3 | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
  
@@ -188,8 +189,12 @@ void detail;
     );
 
     if (!restored.ok) {
-      return;
-    }
+  setErrorMessage(
+    "사주 분석 정보를 찾을 수 없습니다. 사주를 다시 조회한 뒤 심층분석을 진행해 주세요.",
+  );
+  setIsLoading(false);
+  return;
+}
 
     setRestoredResult(restored.result);
     setRestoredSaju(restored.saju);
@@ -222,8 +227,8 @@ const input = promptInput;
       );
     }
 
-    const generatedDetail =
-  (await response.json()) as PaidAnalysisDetailOutputV2;
+   const generatedDetail =
+  (await response.json()) as PaidAnalysisDetailOutputV3;
 
 
     if (!isCancelled) {
@@ -653,6 +658,73 @@ const input = promptInput;
         ))}
       </ul>
     </div>
+    {detail.confidence ? (
+    <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
+  <div className="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <p className="text-xs font-semibold tracking-[0.18em] text-stone-500">
+        분석 신뢰도와 한계
+      </p>
+
+      <h3 className="mt-2 text-xl font-bold text-stone-950">
+        Confidence &amp; Limits
+      </h3>
+    </div>
+
+    <span className="rounded-full border border-stone-300 bg-stone-50 px-3 py-1 text-sm font-semibold text-stone-800">
+      신뢰도 {detail.confidence.level}
+    </span>
+  </div>
+
+  <div className="mt-6 grid gap-4 md:grid-cols-2">
+    <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5">
+      <p className="text-sm font-bold text-emerald-800">
+        판단을 뒷받침하는 핵심 근거
+      </p>
+
+      <ul className="mt-4 space-y-3">
+        {detail.confidence.strongestEvidence.map((item, index) => (
+          <li
+            key={`${item}-${index}`}
+            className="flex gap-3 text-sm leading-7 text-stone-700"
+          >
+            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
+      <p className="text-sm font-bold text-amber-800">
+        결과가 달라질 수 있는 변수
+      </p>
+
+      <ul className="mt-4 space-y-3">
+        {detail.confidence.uncertaintyFactors.map((item, index) => (
+          <li
+            key={`${item}-${index}`}
+            className="flex gap-3 text-sm leading-7 text-stone-700"
+          >
+            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <div className="mt-4 rounded-2xl bg-stone-100 px-5 py-4">
+    <p className="text-sm font-bold text-stone-800">
+      해석의 한계
+    </p>
+
+    <p className="mt-2 text-sm leading-7 text-stone-600">
+      {detail.confidence.limitations}
+    </p>
+  </div>
+</div>
+) : null}
   </section>
 ) : null}
       </div>

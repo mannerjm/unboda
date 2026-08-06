@@ -147,42 +147,50 @@ ctaMessage 작성 규칙:
 
 }
 
+function combineCommonRules(productRules: string): string {
+  return `
+${getCommonPaidAnalysisPromptRules()}
+
+${productRules}
+`;
+}
+
 function getPaidAnalysisProductRules(analysisType: string): string {
   const normalizedType = analysisType.trim();
 
   if (
-  normalizedType.includes("재물") ||
-  normalizedType.includes("투자") ||
-  normalizedType.includes("자산")
-) {
-  return getMoneyPaidAnalysisPromptRules();
-}
+    normalizedType.includes("재물") ||
+    normalizedType.includes("투자") ||
+    normalizedType.includes("자산")
+  ) {
+    return combineCommonRules(getMoneyPaidAnalysisPromptRules());
+  }
 
   if (
-  normalizedType.includes("직업") ||
-  normalizedType.includes("사업") ||
-  normalizedType.includes("이직") ||
-  normalizedType.includes("승진")
-) {
-  return getCareerPaidAnalysisPromptRules();
-}
+    normalizedType.includes("직업") ||
+    normalizedType.includes("사업") ||
+    normalizedType.includes("이직") ||
+    normalizedType.includes("승진")
+  ) {
+    return combineCommonRules(getCareerPaidAnalysisPromptRules());
+  }
 
   if (
-  normalizedType.includes("건강") ||
-  normalizedType.includes("컨디션") ||
-  normalizedType.includes("회복")
-) {
-    return getHealthPaidAnalysisPromptRules();
-}
+    normalizedType.includes("건강") ||
+    normalizedType.includes("컨디션") ||
+    normalizedType.includes("회복")
+  ) {
+    return combineCommonRules(getHealthPaidAnalysisPromptRules());
+  }
 
   if (
-  normalizedType.includes("관계") ||
-  normalizedType.includes("연애") ||
-  normalizedType.includes("결혼") ||
-  normalizedType.includes("인간관계")
-) {
-  return getRelationshipPaidAnalysisPromptRules();
-}
+    normalizedType.includes("관계") ||
+    normalizedType.includes("연애") ||
+    normalizedType.includes("결혼") ||
+    normalizedType.includes("인간관계")
+  ) {
+    return combineCommonRules(getRelationshipPaidAnalysisPromptRules());
+  }
 
   return getCommonPaidAnalysisPromptRules();
 }

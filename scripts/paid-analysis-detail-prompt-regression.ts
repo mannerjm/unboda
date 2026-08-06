@@ -79,6 +79,23 @@ console.log(
   ),
 );
 
+console.log(
+  "공통 Writer 규칙 포함:",
+  prompt.includes("분석 종류와 직접 관련된 명리 요소를 우선하여 해석한다."),
+);
+
+console.log(
+  "불필요한 확장 금지 포함:",
+  prompt.includes("분석 종류와 무관한 영역으로 내용을 과도하게 확장하지 않는다."),
+);
+
+console.log(
+  "실행 방향 제시 포함:",
+  prompt.includes("현재 사용자가 판단해야 할 기준과 실천 방향을 구체적으로 제시한다."),
+);
+
+
+
 const moneyPrompt = buildPaidAnalysisDetailPromptV2({
   ...input,
   analysisType: "재물운 심층 분석",
@@ -98,6 +115,14 @@ const relationshipPrompt = buildPaidAnalysisDetailPromptV2({
   ...input,
   analysisType: "연애·관계운 심층 분석",
 });
+
+console.log(
+  "상품별 공통 규칙 적용:",
+  moneyPrompt.includes("분석 종류와 직접 관련된 명리 요소를 우선하여 해석한다.") &&
+  careerPrompt.includes("분석 종류와 직접 관련된 명리 요소를 우선하여 해석한다.") &&
+  healthPrompt.includes("분석 종류와 직접 관련된 명리 요소를 우선하여 해석한다.") &&
+  relationshipPrompt.includes("분석 종류와 직접 관련된 명리 요소를 우선하여 해석한다."),
+);
 
 console.log(
   "재물운 전용 규칙 포함:",

@@ -251,12 +251,12 @@ console.log(
 
 console.log(
   "V3 과거 사건 단정 금지 규칙 포함:",
-  promptV3.includes("과거 사건을 사실처럼 만들어내거나 단정하지 않는다"),
+  promptV3.includes("절대로 임의로 만들어내지 않는다."),
 );
 
 console.log(
   "V3 confidence 확률 아님 규칙 포함:",
-  promptV3.includes("예언 적중률이나 숫자 확률이 아니다"),
+  promptV3.includes("예언 성공 확률이 아니다."),
 );
 
 console.log(
@@ -283,15 +283,13 @@ if (!promptV3.includes('"confidence": {')) {
 }
 
 if (
-  !promptV3.includes(
-    "과거 사건을 사실처럼 만들어내거나 단정하지 않는다",
-  )
+  !promptV3.includes("절대로 임의로 만들어내지 않는다.")
 ) {
   throw new Error("V3 프롬프트에 과거 사건 단정 금지 규칙이 없습니다.");
 }
 
 if (
-  !promptV3.includes("예언 적중률이나 숫자 확률이 아니다")
+  !promptV3.includes("예언 성공 확률이 아니다.")
 ) {
   throw new Error("V3 프롬프트에 confidence 의미 규칙이 없습니다.");
 }

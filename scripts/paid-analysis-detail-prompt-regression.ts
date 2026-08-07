@@ -192,6 +192,46 @@ console.log(
 );
 
 console.log(
+  "공통 명리→현실 5단계 연결 규칙 포함:",
+  moneyPrompt.includes(
+    '명리 근거 → 운의 작용 → 현실에서 나타날 수 있는 현상 → 현재 판단 → 행동 방향',
+  ),
+);
+
+console.log(
+  "재물운 심층 연결 규칙 포함:",
+  moneyPrompt.includes("재물운 심층 연결 규칙"),
+);
+
+console.log(
+  "재물 일반 조언 우선 작성 금지 포함:",
+  moneyPrompt.includes(
+    "일반적인 재무관리 조언을 먼저 제시하지 않는다",
+  ),
+);
+
+console.log(
+  "재물 핵심 문제 우선 선정 포함:",
+  moneyPrompt.includes(
+    "현금흐름, 지출, 계약, 투자, 축적 중 무엇이 핵심 문제인지 하나를 우선 선정",
+  ),
+);
+
+console.log(
+  "재물 원국·현재 운 구분 포함:",
+  moneyPrompt.includes(
+    "원국의 구조와 현재 운의 작용을 구분하여 설명한다",
+  ),
+);
+
+console.log(
+  "재물 행동 조언 반복 방지 포함:",
+  moneyPrompt.includes(
+    "동일한 조언이 여러 섹션에서 반복되지 않도록 각 섹션의 역할을 구분한다",
+  ),
+);
+
+console.log(
   "직업·사업운 섹션 규칙 포함:",
   careerPrompt.includes(
     "heroSummary는 현재 직업 판단의 핵심을 유지, 이동, 승진, 사업 확장 중 하나의 우선순위로 제시한다",

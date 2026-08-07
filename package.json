@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:paid-money": "npx tsx scripts/paid-analysis-detail-prompt-regression.ts && npx tsx scripts/paid-analysis-money-output-quality-regression.ts && npx tsx scripts/paid-analysis-self-review-regression.ts && npx tsx scripts/paid-analysis-health-safety-validator-regression.ts"
+    "test:paid-money": "npx tsx scripts/paid-analysis-detail-prompt-regression.ts && npx tsx scripts/paid-analysis-money-output-quality-regression.ts && npx tsx scripts/paid-analysis-self-review-regression.ts && npx tsx scripts/paid-analysis-health-safety-validator-regression.ts",
+    "test:paid-career": "npx tsx scripts/paid-analysis-detail-prompt-regression.ts && npx tsx scripts/paid-analysis-career-output-quality-regression.ts && npx tsx scripts/paid-analysis-self-review-regression.ts && npx tsx scripts/paid-analysis-health-safety-validator-regression.ts"
   },
   "dependencies": {
     "@fullstackfamily/manseryeok": "^1.0.8",

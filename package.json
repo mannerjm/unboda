@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:paid-money": "npx tsx scripts/paid-analysis-detail-prompt-regression.ts && npx tsx scripts/paid-analysis-money-output-quality-regression.ts && npx tsx scripts/paid-analysis-self-review-regression.ts && npx tsx scripts/paid-analysis-health-safety-validator-regression.ts"
   },
   "dependencies": {
     "@fullstackfamily/manseryeok": "^1.0.8",

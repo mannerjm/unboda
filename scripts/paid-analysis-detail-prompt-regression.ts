@@ -152,6 +152,46 @@ console.log(
 );
 
 console.log(
+  "재물운 명리 현실 번역 규칙 포함:",
+  moneyPrompt.includes("재물 명리 → 현실 언어 번역 규칙"),
+);
+
+console.log(
+  "재성 단순 재물량 단정 금지 포함:",
+  moneyPrompt.includes(
+    '재성의 강약을 곧바로 "돈이 많다·적다", "부자가 된다·돈을 잃는다"로 번역하지 않는다',
+  ),
+);
+
+console.log(
+  "합충형해파 단순 손익 단정 금지 포함:",
+  moneyPrompt.includes(
+    "합은 무조건적인 기회나 이익으로, 충·형·해·파는 무조건적인 손실이나 악재로 단정하지 않는다",
+  ),
+);
+
+console.log(
+  "재물 현실 연결 구조 포함:",
+  moneyPrompt.includes(
+    '"근거 → 재정적 의미 → 현실에서 확인할 항목 → 판단 또는 행동"',
+  ),
+);
+
+console.log(
+  "미확인 실제 재무정보 추정 금지 포함:",
+  moneyPrompt.includes(
+    "사용자의 실제 소득, 자산, 부채, 고정비, 계약 조건 등 확인되지 않은 정보는 추정하여 사실처럼 작성하지 않는다",
+  ),
+);
+
+console.log(
+  "임의 재무 숫자 확정 금지 포함:",
+  moneyPrompt.includes(
+    "실제 재무 정보가 없는 경우 특정 비상금 비율, 투자 비중, 손절 비율, 금액 또는 기간을 개인 맞춤 기준인 것처럼 임의로 확정하지 않는다",
+  ),
+);
+
+console.log(
   "직업·사업운 섹션 규칙 포함:",
   careerPrompt.includes(
     "heroSummary는 현재 직업 판단의 핵심을 유지, 이동, 승진, 사업 확장 중 하나의 우선순위로 제시한다",

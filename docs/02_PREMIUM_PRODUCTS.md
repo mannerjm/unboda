@@ -134,6 +134,22 @@ Plugin: MONEY
 계약운
 상속운
 평생 재물 흐름
+
+### V1 대표 상품 상세 정의
+
+#### 재물운 심층 분석
+
+```ts
+{
+  id: "wealth",
+  title: "재물운 심층 분석",
+  shortTitle: "재물운",
+  category: "MONEY",
+  plugin: "MONEY",
+  releaseLevel: "V1",
+  analysisType: "재물운 심층 분석"
+}
+
 4-2. 직업·커리어
 
 Plugin: CAREER
@@ -450,3 +466,25 @@ Release Note
 상품 추가·수정·중단 내역은 08_RELEASE_NOTE.md에 기록한다.
 
 출시 순서와 목표 일정은 09_PRODUCT_ROADMAP.md에서 관리한다.
+
+# 3. Premium Product Writer 원칙
+
+모든 Premium 상품은 동일한 Core Decision Engine과
+공통 Premium Writer 기준을 사용한다.
+
+다만 상품마다 사용자가 해결하려는 문제가 다르므로
+상품별 Product Plugin은 다음을 독립적으로 정의한다.
+
+- 핵심 분석 질문
+- 우선적으로 사용할 명리 근거
+- 현재 핵심 문제의 판단 기준
+- 기회와 위험의 판단 기준
+- 행동 전략
+- 금지해야 할 단정 표현
+- 상품별 현실 언어
+
+공통 Writer는 글의 품질과 설명 방식을 통일하고,
+Product Plugin은 분석의 내용과 전문성을 차별화한다.
+
+따라서 모든 상품이 같은 문체를 사용할 수는 있지만
+같은 내용의 리포트처럼 보여서는 안 된다.

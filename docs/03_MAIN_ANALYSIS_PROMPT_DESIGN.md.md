@@ -235,3 +235,77 @@ AI는 가장 비싼 상품을 임의로 추천하지 않는다.
 8. 중복 sourcePrompt 제거 검토
 9. 무료 / 유료 프롬프트 분리
 10. 구조화된 AI 출력 설계
+
+# 9. Premium Prompt Layer 구조
+
+Premium Prompt는 다음 계층으로 구성한다.
+
+Engine Data
+↓
+Common Analysis Rules
+↓
+Premium Writer Rules
+↓
+Product Plugin Rules
+↓
+Product Context
+↓
+Output Schema
+↓
+Self Review / Validator
+
+## 9-1. Engine Data
+
+명리 계산 결과의 원본이다.
+
+AI는 Engine Data를 임의로 변경하거나
+새로운 계산 결과를 만들어내지 않는다.
+
+## 9-2. Common Analysis Rules
+
+모든 상품이 반드시 따라야 하는 공통 분석 원칙이다.
+
+- 계산과 해석 분리
+- 근거 없는 생성 금지
+- 과도한 영역 확장 금지
+- 현재 판단 기준 제시
+- 불안 조장 금지
+
+## 9-3. Premium Writer Rules
+
+엔진의 분석 결과를 사용자가 이해할 수 있는 현실 언어로 변환한다.
+
+Premium Writer는 새로운 명리 판단을 생성하는 엔진이 아니다.
+
+이미 계산된 근거와 Product Plugin의 분석 방향을
+더 명확하고 읽기 쉬운 언어로 전달하는 표현 계층이다.
+
+## 9-4. Product Plugin Rules
+
+재물, 직업, 건강, 연애 등
+상품별 전문 분석 기준을 정의한다.
+
+공통 Writer보다 상품별 분석 규칙이 우선한다.
+
+## 9-5. Output Schema
+
+AI는 정의된 JSON 구조를 반드시 따른다.
+
+Writer 품질을 높이기 위해
+Output Schema를 임의로 변경하지 않는다.
+
+## 9-6. 핵심 원칙
+
+Premium Writer는 Engine을 대체하지 않는다.
+
+Premium Writer는 Product Plugin을 대체하지 않는다.
+
+Premium Writer의 역할은
+
+명리 근거
+→ 의미
+→ 현실에서 나타나는 모습
+→ 판단 기준
+→ 행동
+
+으로 연결하는 것이다.

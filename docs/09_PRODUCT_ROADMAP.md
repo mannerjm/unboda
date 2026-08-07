@@ -24,26 +24,44 @@
 
 현재 단계:
 
-Premium Decision Engine V3 설계 완료
+Stage 3. 재물운 Premium 품질 고도화
 
-완료된 기반:
+완료된 공통 기반:
 
-- V2 Prompt Builder
-- 상품별 Prompt 규칙
-- 상품별 섹션 작성 규칙
-- Decision Anchor
-- Output Parser
+- Premium Decision Engine V3
+- Output V3 타입
+- Prompt V3
+- Parser V3
+- AI Insight
+- Past Pattern
+- Current Core Problem
+- Confidence & Limits
 - Consistency Validator
 - Self Review
 - Health Safety Validator
+- 상품별 Prompt Plugin
+- Common Premium Writer Rules
+- 공통 Writer와 Product Plugin 결합
+- V3 UI
 - 회귀 테스트
-- 유료 리포트 로딩 UX
-- 건강운 실제 AI 출력 검증
 
 현재 핵심 과제:
 
-기존 V2 리포트 구조를 Premium Decision Engine V3 기준으로 확장한다.
+재물운 실제 AI 출력이
+15,000원 Premium Value Criteria를 안정적으로 충족하도록 고도화한다.
 
+핵심 개선 영역:
+
+- 명리 전문용어의 현실 언어 번역
+- AI Insight 통찰력 강화
+- 운의 구조 설명 가독성 개선
+- 반복 표현 감소
+- 행동 전략 구체화
+- Coach Message 품질 향상
+
+재물운 완료 후:
+
+Stage 4 직업운으로 이동한다.
 ---
 
 # 2. V1 출시 상품
@@ -164,6 +182,11 @@ MONEY
 - 수익률·대박·손실 확정 없음
 - 행동 전략이 구체적임
 - 명리 근거가 충분함
+- Common Premium Writer 기준 통과
+- 명리 용어가 현실 언어로 충분히 번역됨
+- AI Insight가 단순 요약이 아닌 새로운 통찰을 제공함
+- 실제 출력 최소 5건 품질 검증
+- 15,000원 Premium Value Criteria 통과
 
 ---
 

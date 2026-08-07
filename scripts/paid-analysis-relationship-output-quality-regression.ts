@@ -1,4 +1,5 @@
 import type { PaidAnalysisDetailOutputV2 } from "../app/lib/paidAnalysisDetailOutput";
+import { getRelationshipPaidAnalysisPromptRules } from "../app/lib/paidAnalysisPromptPlugins/relationshipPrompt";
 
 const completedRelationshipChecklistExpressions = [
   "확인했다",
@@ -264,6 +265,44 @@ if (groundedActionMatches.length !== 0) {
 if (genericActionMatches.length !== 3) {
   throw new Error(
     `일반적인 관계 조언을 모두 탐지하지 못했습니다: ${genericActionMatches.join(" | ")}`,
+  );
+}
+
+const relationshipPromptRules =
+  getRelationshipPaidAnalysisPromptRules();
+
+const premiumQualityRuleExpressions = [
+  "타고난 관계 구조",
+  "반복 관계 패턴",
+  "현재 운의 변화",
+  "현재 핵심 문제",
+  "향후 변곡점",
+  "선택 시나리오",
+  "행동 기준",
+  "상대방 정보가 없는 경우",
+  "현재 연애 상태가 입력되지 않은 경우",
+  "같은 명리 근거와 같은 조언을 여러 섹션에서 표현만 바꾸어 반복하지 않는다",
+  "R&R",
+  "SLA",
+  "KPI",
+];
+
+const missingPremiumQualityRules =
+  premiumQualityRuleExpressions.filter(
+    (expression) =>
+      !relationshipPromptRules.includes(expression),
+  );
+
+console.log(
+  "관계 5만원급 품질 규칙 포함:",
+  missingPremiumQualityRules.length === 0,
+);
+
+if (missingPremiumQualityRules.length !== 0) {
+  throw new Error(
+    `연애·관계 5만원급 품질 규칙이 누락되었습니다: ${missingPremiumQualityRules.join(
+      " | ",
+    )}`,
   );
 }
 

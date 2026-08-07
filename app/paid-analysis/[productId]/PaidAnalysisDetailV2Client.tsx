@@ -20,7 +20,10 @@ function getAnalysisType(productId: string): string {
       return "건강운 심층 분석";
 
     case "love":
-      return "연애운 심층 분석";
+  return "연애운 심층 분석";
+
+case "relationship":
+  return "연애·관계 심층 분석";
 
     case "career":
       return "직업운 심층 분석";

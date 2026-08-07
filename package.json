@@ -11,6 +11,7 @@
     "test:paid-career": "npx tsx scripts/paid-analysis-detail-prompt-regression.ts && npx tsx scripts/paid-analysis-career-output-quality-regression.ts && npx tsx scripts/paid-analysis-self-review-regression.ts && npx tsx scripts/paid-analysis-health-safety-validator-regression.ts",
     "test:paid-relationship": "npx tsx scripts/paid-analysis-detail-prompt-regression.ts && npx tsx scripts/paid-analysis-relationship-output-quality-regression.ts && npx tsx scripts/paid-analysis-self-review-regression.ts && npx tsx scripts/paid-analysis-health-safety-validator-regression.ts",
     "test:paid-health": "npx tsx scripts/paid-analysis-detail-prompt-regression.ts && npx tsx scripts/paid-analysis-health-output-quality-regression.ts && npx tsx scripts/paid-analysis-self-review-regression.ts && npx tsx scripts/paid-analysis-health-safety-validator-regression.ts",
+    "test:paid-product-id-mapping": "npx tsx scripts/paid-analysis-product-id-mapping-regression.ts",
     "test:paid-all": "npm run test:paid-money && npm run test:paid-career && npm run test:paid-relationship && npm run test:paid-health"
   },
   "dependencies": {

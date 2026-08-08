@@ -66,7 +66,7 @@ const PaidAnalysisDetailV2Schema = z.object({
     )
     .min(4),
 
-  actionGuide: z.array(z.string().trim().min(10)).min(5),
+  actionGuide: z.array(z.string().trim().min(10)).min(2),
 
 avoidGuide: z.array(z.string().trim().min(10)).min(4),
 

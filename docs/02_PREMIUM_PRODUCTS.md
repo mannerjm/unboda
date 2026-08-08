@@ -488,3 +488,77 @@ Product Plugin은 분석의 내용과 전문성을 차별화한다.
 
 따라서 모든 상품이 같은 문체를 사용할 수는 있지만
 같은 내용의 리포트처럼 보여서는 안 된다.
+
+
+---------------------------------------------------
+
+Premium 상품을 크게 두 종류로 구분한다.
+
+1) Topic Analysis
+특정 문제나 관심사를 깊게 분석하는 상품이다.
+
+예:
+- 연애·관계 심층 분석
+- 인간관계 심층 분석
+- 재물운 심층 분석
+- 직업운 심층 분석
+- 이직운 심층 분석
+- 사업운 심층 분석
+- 건강운 심층 분석
+- 결혼운 심층 분석
+- 학업운 심층 분석
+- 투자 관련 분석
+- 현재 관계 지속성
+- 직장 내 인간관계
+- 번아웃 위험
+등
+
+최종적으로 약 50개의 세부 심층분석 Topic을 제공할 수 있도록 확장 가능한 구조로 설계한다.
+
+
+2) Period Analysis
+특정 기간의 운 흐름 전체를 종합적으로 분석하는 상품이다.
+
+예:
+- 올해 세운 종합 분석
+- 내년 세운 종합 분석
+- 이번 달 월운 종합 분석
+- 다음 달 월운 종합 분석
+- 앞으로 12개월 월별 흐름 분석
+- 10년 대운 종합 분석
+
+
+상품 타입에 다음 개념을 추가한다.
+
+type PremiumProductKind =
+  | "TOPIC"
+  | "PERIOD";
+
+type PremiumProduct = {
+  id: string;
+  title: string;
+  shortTitle?: string;
+  category: PremiumProductCategory;
+  plugin: PremiumProductPlugin;
+  kind: PremiumProductKind;
+  releaseLevel: "V1" | "V2" | "V3" | "ULTIMATE";
+  description: string;
+  details: readonly string[];
+  analysisType: string;
+};
+
+
+중요한 상품 관리 원칙:
+
+추천용 상품과 사용자가 직접 선택하는 상품을 별도로 관리하지 않는다.
+
+하나의 Product Registry를 기준으로 아래 기능이 모두 동작해야 한다.
+
+Product Registry
+→ AI Recommendation Top 3
+→ User Browse / Direct Selection
+→ Payment
+→ Prompt Builder
+→ Premium Report
+
+AI 추천과 사용자 직접 선택은 동일한 productId를 사용한다.

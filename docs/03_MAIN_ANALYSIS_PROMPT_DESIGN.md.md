@@ -309,3 +309,25 @@ Premium Writer의 역할은
 → 행동
 
 으로 연결하는 것이다.
+
+현재 구현 상태를 실제 코드 진행 상황에 맞게 업데이트한다.
+
+이미 구현된 기능을 "앞으로 구현할 기능"으로 표시하지 않는다.
+
+현재 구현 상태에 최소한 다음 내용을 반영한다.
+
+- Engine First 구조
+- 사주 원국 분석
+- 대운 연결
+- 세운 연결
+- Premium V3 Prompt
+- Product Plugin 구조
+- Output Parser
+- Consistency Validator
+- Self Review
+- Safety Validator
+- Premium Regression Test
+- Relationship Premium 품질 검증
+
+과거 구현 계획 중 이미 완료된 내용은
+삭제하거나 Historical / Completed 영역으로 이동한다.

@@ -1,3 +1,4 @@
+import { evaluateRelationshipPremiumQuality } from "./paidAnalysisRelationshipPremiumQuality";
 import { validatePaidAnalysisHealthSafety } from "./paidAnalysisHealthSafetyValidator";
 import { generateAnalysisText } from "./ai/generateAnalysisText";
 import { reviewPaidAnalysisDetail } from "./paidAnalysisSelfReview";
@@ -75,9 +76,10 @@ export async function generatePaidAnalysisDetailV2(
 
   console.log("HEALTH RULE INCLUDED:", prompt.includes("상품별 분석 규칙 - 건강운"));
 console.log("CAREER RULE INCLUDED:", prompt.includes("상품별 분석 규칙 - 직업·사업운"));
+
 console.log(
-  "RELATIONSHIP RULE INCLUDED:",
-  prompt.includes("상품별 분석 규칙 - 연애·관계운"),
+  "RELATIONSHIP PREMIUM RULE INCLUDED:",
+  prompt.includes("연애·관계 5만원급 심층 분석 품질 규칙"),
 );
 
   const responseText = await generateAnalysisText(prompt);
@@ -122,6 +124,57 @@ if (isHealthAnalysis) {
 
     throw new Error(
       `건강운 심층 분석 결과의 안전 검증에 실패했습니다. ${issueMessage}`,
+    );
+  }
+}
+
+const isRelationshipAnalysis =
+  input.analysisType.includes("연애") ||
+  input.analysisType.includes("관계");
+
+if (isRelationshipAnalysis) {
+  const relationshipPremiumResult =
+    evaluateRelationshipPremiumQuality({
+      pastPatternSummary:
+        detail.pastPattern.summary,
+
+      pastPatternVerificationQuestion:
+        detail.pastPattern.periods[0]?.verificationQuestion ?? "",
+
+      currentCoreProblemTitle:
+        detail.currentCoreProblem.title,
+
+      currentCoreProblemDescription:
+        detail.currentCoreProblem.description,
+
+      currentCoreProblemWhyItMatters:
+        detail.currentCoreProblem.whyItMatters,
+
+      futureTimelineTexts:
+        detail.futureTimeline.map(
+          (item) =>
+            `${item.period} ${item.title} ${item.description}`,
+        ),
+
+      actionGuide:
+        detail.actionGuide,
+    });
+
+  if (!relationshipPremiumResult.ok) {
+    const failedChecks = Object.entries(
+      relationshipPremiumResult.checks,
+    )
+      .filter(([, passed]) => !passed)
+      .map(([check]) => check);
+
+    const issueMessage = [
+      ...failedChecks,
+      ...relationshipPremiumResult.businessMatches,
+      ...relationshipPremiumResult.genericAdviceMatches,
+    ].join(" | ");
+
+    throw new Error(
+      `연애·관계 심층 분석 결과가 5만원급 품질 기준을 충족하지 못했습니다. ${issueMessage}`,
     );
   }
 }

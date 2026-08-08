@@ -24,44 +24,67 @@
 
 현재 단계:
 
-Stage 3. 재물운 Premium 품질 고도화
+Stage 5.
+Premium 대표상품 품질 동결 및 Product Catalog 확장 준비
 
-완료된 공통 기반:
 
+완료 또는 상당 부분 완료:
+
+- 명리 핵심 분석 엔진
+- 원국/대운/세운 연결
 - Premium Decision Engine V3
-- Output V3 타입
-- Prompt V3
-- Parser V3
-- AI Insight
-- Past Pattern
-- Current Core Problem
-- Confidence & Limits
+- Premium Output V3
+- Product Prompt Plugin 구조
+- Output Parser
 - Consistency Validator
 - Self Review
 - Health Safety Validator
-- 상품별 Prompt Plugin
-- Common Premium Writer Rules
-- 공통 Writer와 Product Plugin 결합
-- V3 UI
-- 회귀 테스트
+- 명리 정확성 관련 회귀 테스트
+- Premium 품질 회귀 테스트 구조
+- Relationship Premium Quality Regression
+- Relationship Output Quality Regression
+- 실제 관계 심층분석 반복 출력 검증
+- 관계 심층분석 Premium V1 품질 개선
+
 
 현재 핵심 과제:
 
-재물운 실제 AI 출력이
-15,000원 Premium Value Criteria를 안정적으로 충족하도록 고도화한다.
+- 대표 Premium 상품 V1 품질 동결
+- 전체 Premium Product Registry 정의
+- 약 50개 Topic Analysis 정의
+- Period Analysis 상품 정의
+- AI 추천 Top 3와 직접선택 UI를 공통 Product Registry에 연결
+- 구매/권한/리포트 생성 흐름 최종 검증
 
-핵심 개선 영역:
 
-- 명리 전문용어의 현실 언어 번역
-- AI Insight 통찰력 강화
-- 운의 구조 설명 가독성 개선
-- 반복 표현 감소
-- 행동 전략 구체화
-- Coach Message 품질 향상
+기존 "V1 핵심 상품 11개"는 전체 판매 상품 목록이라는 의미가 아니라
+Premium 품질을 검증하는 "대표 분석 상품"으로 재정의한다.
 
-재물운 완료 후:
+문서 제목 또는 설명을 다음 의미로 수정한다.
 
-Stage 4 직업운으로 이동한다.
+"V1 대표 분석 상품"
+
+대표 상품은 Premium Engine과 Report 품질을 검증하기 위한 기준 상품이다.
+
+예:
+
+1. 건강운 심층 분석
+2. 재물운 심층 분석
+3. 직업운 심층 분석
+4. 연애·관계 심층 분석
+5. 인간관계 심층 분석
+6. 사업운 심층 분석
+7. 이직운 심층 분석
+8. 결혼운 심층 분석
+9. 올해 세운 종합 분석
+10. 10년 대운 종합 분석
+11. 학업운 심층 분석
+
+이 목록은 전체 판매 상품 수를 제한하지 않는다.
+
+대표 상품 품질 기준이 안정화된 뒤
+동일한 Core Decision Engine과 Product Plugin 구조를 이용하여
+세부 Topic Analysis와 Period Analysis로 확장한다.
 ---
 
 # 2. V1 출시 상품
@@ -509,3 +532,68 @@ Parser V3 설계
 UI 추가 섹션 설계
 건강운에 우선 적용
 실제 출력 검증
+
+==================================================
+다음 개발 단계
+==================================================
+
+문서 수정 후 바로 50개의 Prompt를 각각 구현하지 않는다.
+
+다음 순서로 진행한다.
+
+
+STEP 1
+문서와 실제 코드 구조의 현재 상태를 일치시킨다.
+
+
+STEP 2
+Premium Product Registry 구조를 확정한다.
+
+
+STEP 3
+Topic Analysis 약 50개 목록을 정의한다.
+
+각 Topic은 최소한 다음 정보를 가진다.
+
+- id
+- title
+- category
+- kind
+- analysisType
+- plugin
+- description
+- releaseLevel
+
+
+STEP 4
+Period Analysis 상품을 별도로 정의한다.
+
+최소 후보:
+
+- 올해 세운 종합
+- 내년 세운 종합
+- 이번 달 월운 종합
+- 다음 달 월운 종합
+- 앞으로 12개월 월별 흐름
+- 10년 대운 종합
+
+
+STEP 5
+Recommendation Engine이 Product Registry의 실제 상품 ID만 추천하도록 연결한다.
+
+
+STEP 6
+무료 결과 화면에
+
+"AI 추천 Top 3"
+
+와
+
+"원하는 분석 직접 선택"
+
+두 진입점을 함께 제공한다.
+
+
+STEP 7
+대표 Premium 상품의 품질 기준을 확정한 뒤
+동일한 구조로 Topic/Period 상품을 단계적으로 확장한다.

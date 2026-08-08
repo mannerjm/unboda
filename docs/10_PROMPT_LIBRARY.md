@@ -119,3 +119,27 @@ Prompt의 목적,
 변경 원칙을 관리한다.
 
 긴 Prompt 원문을 문서와 코드 양쪽에 중복 저장하지 않는다.
+
+기존 원칙:
+
+"실제 Prompt 구현은 코드가 Source of Truth이다."
+
+이 원칙은 반드시 유지한다.
+
+
+Product Prompt Plugin 영역에 Period Analysis를 담당하는 FORTUNE 계열을 명확하게 기록한다.
+
+예:
+
+## FORTUNE
+
+역할:
+
+- 세운 종합
+- 월운 종합
+- 대운 종합
+- 기간 흐름 분석
+
+Period Analysis 역시
+Core Decision Engine을 새로 만드는 방식이 아니라
+공통 Core Engine + Product Plugin 구조를 사용한다.

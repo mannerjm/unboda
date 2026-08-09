@@ -1,6 +1,9 @@
 import Link from "next/link";
 import CheckoutAccessPanel from "./CheckoutAccessPanel";
-import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
+import {
+  getCanonicalPremiumProductId,
+  getPremiumProduct,
+} from "@/app/lib/premiumProductRegistry";
 
 type CheckoutPageProps = {
   params: Promise<{
@@ -13,9 +16,9 @@ type CheckoutPageProps = {
 export default async function CheckoutPage({
   params,
 }: CheckoutPageProps) {
-  const { productId } = await params;
-
- const product = getPremiumProduct(productId);
+ const { productId } = await params;
+const canonicalProductId = getCanonicalPremiumProductId(productId);
+const product = getPremiumProduct(canonicalProductId);
 
 
   if (!product) {
@@ -41,7 +44,7 @@ export default async function CheckoutPage({
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
       <div className="mx-auto max-w-2xl">
         <Link
-          href={`/paid-analysis/${productId}`}
+          href={`/paid-analysis/${canonicalProductId}`}
           className="text-sm font-semibold text-stone-600 transition hover:text-stone-900"
         >
           ← 상품 설명으로 돌아가기
@@ -59,7 +62,7 @@ export default async function CheckoutPage({
           구매를 진행하기 전에 계정 연결과 결제 단계를 확인합니다.
         </p>
        
-       <CheckoutAccessPanel productId={productId} />
+       <CheckoutAccessPanel productId={canonicalProductId} />
       </div>
     </main>
   );

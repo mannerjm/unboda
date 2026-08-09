@@ -4,6 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
 import { getSaju } from "@/app/lib/manse";
 import type { PaidAnalysisDetailOutputV3 } from "@/app/lib/paidAnalysisDetailOutput";
+import {
+  getCanonicalPremiumProductId,
+  getPremiumProduct,
+} from "@/app/lib/premiumProductRegistry";
 
 
 type SajuResult = ReturnType<typeof getSaju>;
@@ -15,26 +19,13 @@ type PaidAnalysisDetailV2ClientProps = {
 function getAnalysisType(productId: string): string {
   console.log("PRODUCT ID =", productId);
 
-  switch (productId) {
-    case "health":
-      return "건강운 심층 분석";
+  const canonicalProductId =
+    getCanonicalPremiumProductId(productId);
 
-    case "love":
-  return "연애운 심층 분석";
+  const registryProduct =
+    getPremiumProduct(canonicalProductId);
 
-case "relationship":
-  return "연애·관계 심층 분석";
-
-    case "career":
-      return "직업운 심층 분석";
-
-    case "money":
-case "wealth":
-  return "재물운 심층 분석";
-
-    default:
-      return "개인 맞춤 심층 분석";
-  }
+  return registryProduct?.analysisType ?? "개인 맞춤 심층 분석";
 }
 function buildBirthData(saju: SajuResult): string {
   return JSON.stringify(saju);

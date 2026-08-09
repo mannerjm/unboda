@@ -2,7 +2,15 @@ import { getMoneyPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/mon
 import { getCareerPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/careerPrompt";
 import { getHealthPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/healthPrompt";
 import { getRelationshipPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/relationshipPrompt";
+import { getFortunePaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/fortunePrompt";
 import { getCommonPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/commonPrompt";
+import {
+  getCanonicalPremiumProductId,
+  getPremiumProduct,
+  type PremiumProductPlugin,
+} from "./premiumProductRegistry";
+
+
 
 import {
   paidAnalysisProducts,
@@ -10,6 +18,7 @@ import {
 } from "./paidAnalysisProducts";
 
 export type PaidAnalysisDetailPromptInput = {
+  productId?: string;
   analysisType: string;
   birthData: string;
 
@@ -155,9 +164,52 @@ ${productRules}
 `;
 }
 
-function getPaidAnalysisProductRules(analysisType: string): string {
-  const normalizedType = analysisType.trim();
+function getPremiumPluginFromProductId(
+  productId?: string,
+): PremiumProductPlugin | undefined {
+  if (!productId) {
+    return undefined;
+  }
 
+  const canonicalProductId =
+    getCanonicalPremiumProductId(productId);
+
+  return getPremiumProduct(canonicalProductId)?.plugin;
+}
+
+function getPaidAnalysisProductRules(
+  analysisType: string,
+  productId?: string,
+): string {
+  const normalizedType = analysisType.trim();
+  const premiumPlugin =
+  getPremiumPluginFromProductId(productId);
+
+switch (premiumPlugin) {
+  case "MONEY":
+    return combineCommonRules(
+      getMoneyPaidAnalysisPromptRules(),
+    );
+
+  case "CAREER":
+    return combineCommonRules(
+      getCareerPaidAnalysisPromptRules(),
+    );
+
+  case "HEALTH":
+    return combineCommonRules(
+      getHealthPaidAnalysisPromptRules(),
+    );
+
+  case "RELATIONSHIP":
+    return combineCommonRules(
+      getRelationshipPaidAnalysisPromptRules(),
+    );
+      case "FORTUNE":
+    return combineCommonRules(
+      getFortunePaidAnalysisPromptRules(),
+    );
+}
   if (
     normalizedType.includes("재물") ||
     normalizedType.includes("투자") ||
@@ -195,7 +247,38 @@ function getPaidAnalysisProductRules(analysisType: string): string {
   return getCommonPaidAnalysisPromptRules();
 }
 
-function getPaidAnalysisProductContext(analysisType: string): string {
+function getPaidAnalysisProductContext(
+  analysisType: string,
+  productId?: string,
+): string {
+  if (productId) {
+  const canonicalProductId =
+    getCanonicalPremiumProductId(productId);
+
+  const registryProduct =
+    getPremiumProduct(canonicalProductId);
+
+  if (registryProduct) {
+    const details =
+      registryProduct.details?.map((item) => `- ${item}`).join("\n") ||
+      "- 별도 정의 없음";
+
+    return `
+상품 메타데이터:
+
+- 상품 ID: ${registryProduct.id}
+- 분석 상품: ${registryProduct.title}
+- 카테고리: ${registryProduct.category}
+- Plugin: ${registryProduct.plugin}
+- 상품 유형: ${registryProduct.kind}
+- 출시 레벨: ${registryProduct.releaseLevel}
+- 설명: ${registryProduct.description}
+
+상세 분석 포인트:
+${details}
+`;
+  }
+}
   const products = Object.values(
     paidAnalysisProducts,
   ) as PaidAnalysisProduct[];
@@ -268,8 +351,14 @@ ${expectedOutcome}
 export function buildPaidAnalysisDetailPromptV2(
   input: PaidAnalysisDetailPromptInput,
 ): string {
-  const productRules = getPaidAnalysisProductRules(input.analysisType);
-  const productContext = getPaidAnalysisProductContext(input.analysisType);
+  const productRules = getPaidAnalysisProductRules(
+  input.analysisType,
+  input.productId,
+);
+  const productContext = getPaidAnalysisProductContext(
+  input.analysisType,
+  input.productId,
+);
   return `
 당신은 사용자의 사주 원국과 현재 운의 흐름을 분석하여
 실제 판단과 행동에 도움을 주는 프리미엄 명리 리포트를 작성하는 전문가입니다.

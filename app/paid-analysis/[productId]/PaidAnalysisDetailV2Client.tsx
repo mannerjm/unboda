@@ -144,7 +144,8 @@ const promptInput = useMemo<PaidAnalysisDetailPromptInput | null>(
   () =>
     restoredSaju && birthData && sajuSummary && currentFortuneFlow
       ? {
-          analysisType,
+         productId,  
+        analysisType,
           birthData,
           originalChart: buildOriginalChart(restoredSaju),
           coreInterpretation: buildCoreInterpretation(restoredSaju),

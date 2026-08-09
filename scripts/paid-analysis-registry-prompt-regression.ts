@@ -64,4 +64,55 @@ if (!annualPrompt.includes("Plugin: FORTUNE")) {
   );
 }
 
+const careerPrompt = buildPaidAnalysisDetailPromptV2({
+  productId: "career",
+  analysisType: "직업운 심층 분석",
+  birthData: "test-birth-data",
+  originalChart: "test-original-chart",
+  coreInterpretation: "test-core-interpretation",
+  fortuneTiming: "test-fortune-timing",
+  sajuSummary: "test-saju-summary",
+  currentFortuneFlow: "test-current-fortune-flow",
+});
+
+if (!careerPrompt.includes("Plugin: CAREER")) {
+  throw new Error(
+    "career Prompt에 Registry CAREER plugin metadata가 포함되지 않았습니다.",
+  );
+}
+
+const healthPrompt = buildPaidAnalysisDetailPromptV2({
+  productId: "health",
+  analysisType: "건강운 심층 분석",
+  birthData: "test-birth-data",
+  originalChart: "test-original-chart",
+  coreInterpretation: "test-core-interpretation",
+  fortuneTiming: "test-fortune-timing",
+  sajuSummary: "test-saju-summary",
+  currentFortuneFlow: "test-current-fortune-flow",
+});
+
+if (!healthPrompt.includes("Plugin: HEALTH")) {
+  throw new Error(
+    "health Prompt에 Registry HEALTH plugin metadata가 포함되지 않았습니다.",
+  );
+}
+
+const relationshipPrompt = buildPaidAnalysisDetailPromptV2({
+  productId: "relationship",
+  analysisType: "연애·관계 심층 분석",
+  birthData: "test-birth-data",
+  originalChart: "test-original-chart",
+  coreInterpretation: "test-core-interpretation",
+  fortuneTiming: "test-fortune-timing",
+  sajuSummary: "test-saju-summary",
+  currentFortuneFlow: "test-current-fortune-flow",
+});
+
+if (!relationshipPrompt.includes("Plugin: RELATIONSHIP")) {
+  throw new Error(
+    "relationship Prompt에 Registry RELATIONSHIP plugin metadata가 포함되지 않았습니다.",
+  );
+}
+
 console.log("paid analysis registry prompt regression passed");

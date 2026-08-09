@@ -14,6 +14,7 @@ import {
   createPurchaseAccessFromPaidOrder,
   markOrderAsPaid,
 } from "@/app/lib/payment";
+import { getProductPricing } from "@/app/lib/productPricing";
 import {
   saveEntitlement,
   savePurchase,
@@ -43,11 +44,13 @@ const router = useRouter();
     return;
   }
 
+  const pricing = getProductPricing(productId);
+
   const pendingOrder = createPendingOrder({
     userId: authState.user.id,
     profileId: "demo-profile",
     productId,
-    amount: 9900,
+    amount: pricing.amount,
   });
 
   const { order: paidOrder } = markOrderAsPaid(

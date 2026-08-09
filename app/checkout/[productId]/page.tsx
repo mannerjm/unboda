@@ -1,6 +1,6 @@
 import Link from "next/link";
 import CheckoutAccessPanel from "./CheckoutAccessPanel";
-import { paidAnalysisProducts } from "@/app/lib/paidAnalysisProducts";
+import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 
 type CheckoutPageProps = {
   params: Promise<{
@@ -15,10 +15,7 @@ export default async function CheckoutPage({
 }: CheckoutPageProps) {
   const { productId } = await params;
 
- const product =
-  paidAnalysisProducts[
-    productId as keyof typeof paidAnalysisProducts
-  ];
+ const product = getPremiumProduct(productId);
 
 
   if (!product) {

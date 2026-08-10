@@ -20,6 +20,11 @@ import {
   type PaidAnalysisDetailPromptInput,
 } from "./paidAnalysisDetailPrompt";
 
+import {
+  getCanonicalPremiumProductId,
+  getPremiumProduct,
+} from "./premiumProductRegistry";
+
 function parseGeneratedPaidAnalysisDetail(
   value: unknown,
 ): PaidAnalysisDetailOutput {
@@ -72,6 +77,14 @@ export async function generatePaidAnalysisDetailV2(
   userConcern: input.userConcern,
 });
 
+const canonicalProductId = input.productId
+  ? getCanonicalPremiumProductId(input.productId)
+  : undefined;
+
+const registryProduct = canonicalProductId
+  ? getPremiumProduct(canonicalProductId)
+  : undefined;
+  
   const prompt = buildPaidAnalysisDetailPromptV3(input);
 
   console.log("HEALTH RULE INCLUDED:", prompt.includes("상품별 분석 규칙 - 건강운"));
@@ -109,9 +122,11 @@ if (!selfReview.passed) {
 }
 
 const isHealthAnalysis =
-  input.analysisType.includes("건강") ||
-  input.analysisType.includes("컨디션") ||
-  input.analysisType.includes("회복");
+  registryProduct?.plugin === "HEALTH" ||
+  (!registryProduct &&
+    (input.analysisType.includes("건강") ||
+      input.analysisType.includes("컨디션") ||
+      input.analysisType.includes("회복")));
 
 if (isHealthAnalysis) {
   const healthSafetyResult =
@@ -129,8 +144,10 @@ if (isHealthAnalysis) {
 }
 
 const isRelationshipAnalysis =
-  input.analysisType.includes("연애") ||
-  input.analysisType.includes("관계");
+  registryProduct?.plugin === "RELATIONSHIP" ||
+  (!registryProduct &&
+    (input.analysisType.includes("연애") ||
+      input.analysisType.includes("관계")));
 
 if (isRelationshipAnalysis) {
   const relationshipPremiumResult =

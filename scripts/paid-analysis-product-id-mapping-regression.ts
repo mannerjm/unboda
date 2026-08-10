@@ -508,4 +508,50 @@ console.log(
   "canonical productId checkout/access/report 경로 검증 완료",
 );
 
+const paidAnalysisDetailServicePath = path.join(
+  process.cwd(),
+  "app",
+  "lib",
+  "paidAnalysisDetailService.ts",
+);
+
+const paidAnalysisDetailServiceSource = fs.readFileSync(
+  paidAnalysisDetailServicePath,
+  "utf8",
+);
+
+if (
+  !paidAnalysisDetailServiceSource.includes(
+    "getCanonicalPremiumProductId(input.productId)",
+  )
+) {
+  throw new Error(
+    "PaidAnalysisDetailService에서 productId canonical 변환이 누락되었습니다.",
+  );
+}
+
+if (
+  !paidAnalysisDetailServiceSource.includes(
+    'registryProduct?.plugin === "HEALTH"',
+  )
+) {
+  throw new Error(
+    "PaidAnalysisDetailService의 건강 분석 분기가 Registry HEALTH plugin을 사용하지 않습니다.",
+  );
+}
+
+if (
+  !paidAnalysisDetailServiceSource.includes(
+    'registryProduct?.plugin === "RELATIONSHIP"',
+  )
+) {
+  throw new Error(
+    "PaidAnalysisDetailService의 관계 분석 분기가 Registry RELATIONSHIP plugin을 사용하지 않습니다.",
+  );
+}
+
+console.log(
+  "paid analysis service registry plugin 분기 검증 완료",
+);
+
 console.log("paid analysis product id mapping regression passed");

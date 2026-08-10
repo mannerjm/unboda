@@ -122,11 +122,7 @@ if (!selfReview.passed) {
 }
 
 const isHealthAnalysis =
-  registryProduct?.plugin === "HEALTH" ||
-  (!registryProduct &&
-    (input.analysisType.includes("건강") ||
-      input.analysisType.includes("컨디션") ||
-      input.analysisType.includes("회복")));
+  registryProduct?.plugin === "HEALTH";
 
 if (isHealthAnalysis) {
   const healthSafetyResult =
@@ -144,10 +140,7 @@ if (isHealthAnalysis) {
 }
 
 const isRelationshipAnalysis =
-  registryProduct?.plugin === "RELATIONSHIP" ||
-  (!registryProduct &&
-    (input.analysisType.includes("연애") ||
-      input.analysisType.includes("관계")));
+  registryProduct?.plugin === "RELATIONSHIP";
 
 if (isRelationshipAnalysis) {
   const relationshipPremiumResult =

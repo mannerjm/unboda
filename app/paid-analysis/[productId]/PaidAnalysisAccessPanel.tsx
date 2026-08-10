@@ -1,4 +1,5 @@
 "use client";
+import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
@@ -30,13 +31,15 @@ export default function PaidAnalysisAccessPanel({
     setEntitlements(loadEntitlements());
   }, []);
 
+const canonicalProductId = getCanonicalPremiumProductId(productId);
+
  const realAccess =
   authState.status === "authenticated" &&
   hasActiveEntitlement(
     entitlements,
     authState.user.id,
     "demo-profile",
-    productId
+    canonicalProductId
   );
 
 const hasAccess =
@@ -75,7 +78,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
 </p>
 
           <Link
-  href={`/paid-analysis/${productId}/report`}
+  href={`/paid-analysis/${canonicalProductId}/report`}
   className="mt-7 block w-full rounded-2xl bg-stone-900 px-5 py-4 text-center font-semibold text-white transition hover:bg-stone-800"
 >
   심층 분석 열기

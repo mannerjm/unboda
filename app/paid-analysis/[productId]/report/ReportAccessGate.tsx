@@ -1,5 +1,5 @@
 "use client";
-
+import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
@@ -45,15 +45,17 @@ export default function ReportAccessGate({
       </section>
     );
   }
+const canonicalProductId =
+  getCanonicalPremiumProductId(productId);
 
  const realAccess =
   authState.status === "authenticated" &&
-  hasActiveEntitlement(
-    entitlements,
-    authState.user.id,
-    "demo-profile",
-    productId
-  );
+ hasActiveEntitlement(
+  entitlements,
+  authState.user.id,
+  "demo-profile",
+  canonicalProductId
+);
 
 const hasAccess =
   process.env.NODE_ENV === "development" || realAccess;
@@ -75,7 +77,7 @@ const hasAccess =
         </p>
 
         <Link
-          href={`/paid-analysis/${productId}`}
+          href={`/paid-analysis/${canonicalProductId}`}
           className="mt-7 block w-full rounded-2xl bg-stone-900 px-5 py-4 text-center font-semibold text-white transition hover:bg-stone-800"
         >
           상품 설명으로 돌아가기

@@ -397,4 +397,115 @@ console.log(
   annualCurrentFromUnifiedRegistry.id,
 );
 
+const checkoutPagePath = path.join(
+  process.cwd(),
+  "app",
+  "checkout",
+  "[productId]",
+  "page.tsx",
+);
+
+const checkoutPageSource = fs.readFileSync(checkoutPagePath, "utf8");
+
+if (
+  !checkoutPageSource.includes(
+    "getCanonicalPremiumProductId(productId)",
+  )
+) {
+  throw new Error(
+    "CheckoutPage에서 productId를 canonical productId로 변환하지 않습니다.",
+  );
+}
+
+if (
+  !checkoutPageSource.includes(
+    "getPremiumProduct(canonicalProductId)",
+  )
+) {
+  throw new Error(
+    "CheckoutPage가 canonical productId로 Premium Product를 조회하지 않습니다.",
+  );
+}
+
+if (
+  !checkoutPageSource.includes(
+    "productId={canonicalProductId}",
+  )
+) {
+  throw new Error(
+    "CheckoutAccessPanel에 canonical productId가 전달되지 않습니다.",
+  );
+}
+
+const paidAnalysisAccessPanelPath = path.join(
+  process.cwd(),
+  "app",
+  "paid-analysis",
+  "[productId]",
+  "PaidAnalysisAccessPanel.tsx",
+);
+
+const paidAnalysisAccessPanelSource = fs.readFileSync(
+  paidAnalysisAccessPanelPath,
+  "utf8",
+);
+
+if (
+  !paidAnalysisAccessPanelSource.includes(
+    "getCanonicalPremiumProductId(productId)",
+  )
+) {
+  throw new Error(
+    "PaidAnalysisAccessPanel에서 canonical productId 변환이 누락되었습니다.",
+  );
+}
+
+if (
+  !paidAnalysisAccessPanelSource.includes(
+    "canonicalProductId",
+  )
+) {
+  throw new Error(
+    "PaidAnalysisAccessPanel이 canonical productId를 사용하지 않습니다.",
+  );
+}
+
+const reportAccessGatePath = path.join(
+  process.cwd(),
+  "app",
+  "paid-analysis",
+  "[productId]",
+  "report",
+  "ReportAccessGate.tsx",
+);
+
+const reportAccessGateSource = fs.readFileSync(
+  reportAccessGatePath,
+  "utf8",
+);
+
+if (
+  !reportAccessGateSource.includes(
+    "getCanonicalPremiumProductId(productId)",
+  )
+) {
+  throw new Error(
+    "ReportAccessGate에서 canonical productId 변환이 누락되었습니다.",
+  );
+}
+
+if (
+  !reportAccessGateSource.includes(
+    "canonicalProductId",
+  )
+) {
+  throw new Error(
+    "ReportAccessGate가 canonical productId를 사용하지 않습니다.",
+  );
+}
+
+console.log(
+  "canonical productId checkout/access/report 경로 검증 완료",
+);
+
 console.log("paid analysis product id mapping regression passed");

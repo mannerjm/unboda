@@ -4,7 +4,7 @@ import {
   type UserAccessLevel,
 } from "@/app/lib/userAccess";
 import PaidAnalysisAccessPanel from "./PaidAnalysisAccessPanel";
-import { paidAnalysisProducts } from "@/app/lib/paidAnalysisProducts";
+import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 
 type PaidAnalysisPageProps = {
   params: Promise<{
@@ -18,10 +18,7 @@ export default async function PaidAnalysisPage({
 }: PaidAnalysisPageProps) {
   const { productId } = await params;
 
-  const product =
-    paidAnalysisProducts[
-      productId as keyof typeof paidAnalysisProducts
-    ];
+const product = getPremiumProduct(productId);
 
   const userAccessLevel: UserAccessLevel = "guest";
 const permissions = getUserAccessPermissions(userAccessLevel);
@@ -73,7 +70,7 @@ const permissions = getUserAccessPermissions(userAccessLevel);
   </h2>
 
   <div className="mt-6 grid gap-3">
-    {product.details.map((item) => (
+    {(product.details ?? []).map((item) => (
       <div
         key={item}
         className="rounded-2xl border border-stone-200 bg-stone-50 px-5 py-4 text-sm leading-6 text-stone-700"

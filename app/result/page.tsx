@@ -8,7 +8,7 @@ import { calculateSeun } from "../lib/seun";
 import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
 import type { AnalyzeFreeResponse } from "@/app/lib/analyzeApiTypes";
 import type { AnalysisProductRecommendationResult } from "@/app/lib/analysisProductRecommendations";
-import { paidAnalysisProducts as paidAnalysisProductCatalog } from "@/app/lib/paidAnalysisProducts";
+import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import type {
   AnalysisRecommendationOutput,
 } from "@/app/lib/analysisRecommendationOutput";
@@ -426,10 +426,11 @@ const paidAnalysisProducts = [
 ] as const;
 
 const recommendedPaidAnalysisProducts =
-  productRecommendations?.recommendations.map(
-    (recommendation) =>
-      paidAnalysisProductCatalog[recommendation.productId]
-  ) ?? [];
+  productRecommendations?.recommendations
+    .map((recommendation) =>
+      getPremiumProduct(recommendation.productId)
+    )
+    .filter((product): product is NonNullable<typeof product> => Boolean(product)) ?? [];
 
 const displayedPaidAnalysisProducts =
   recommendedPaidAnalysisProducts.length > 0
@@ -1482,7 +1483,7 @@ h3: ({ children }) => {
       </p>
 
       <ul className="mt-3 space-y-2 text-sm leading-6 text-stone-600">
-  {selectedPaidAnalysis.details.map((detail) => (
+  {(selectedPaidAnalysis.details ?? []).map((detail) => (
   <li key={detail}>• {detail}</li>
 ))}
 </ul>

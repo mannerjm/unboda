@@ -1,8 +1,5 @@
 import type { AnalysisProductRecommendation } from "@/app/lib/analysisProductRecommendations";
-import {
-  paidAnalysisProducts,
-  type PaidAnalysisProduct,
-} from "@/app/lib/paidAnalysisProducts";
+import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import Link from "next/link";
 interface Props {
   recommendations: AnalysisProductRecommendation[];
@@ -29,10 +26,11 @@ export default function ProductRecommendationsCard({
 
       <div className="mt-5 space-y-3">
   {filteredRecommendations.map((recommendation, index) => {
-     const product: PaidAnalysisProduct =
-  paidAnalysisProducts[recommendation.productId];
+     const product = getPremiumProduct(recommendation.productId);
 
-    
+  if (!product) {
+    return null;
+  }
 
   return (
     <div

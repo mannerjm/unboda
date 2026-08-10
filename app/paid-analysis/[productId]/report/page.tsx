@@ -1,7 +1,7 @@
 import PaidAnalysisDetailV2Client from "../PaidAnalysisDetailV2Client";
 import Link from "next/link";
 import ReportAccessGate from "./ReportAccessGate";
-import { paidAnalysisProducts } from "@/app/lib/paidAnalysisProducts";
+import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 type PaidAnalysisReportPageProps = {
   params: Promise<{
     productId: string;
@@ -14,10 +14,7 @@ export default async function PaidAnalysisReportPage({
 }: PaidAnalysisReportPageProps) {
   const { productId } = await params;
 
-  const product =
-  paidAnalysisProducts[
-    productId as keyof typeof paidAnalysisProducts
-  ];
+const product = getPremiumProduct(productId);
 
   if (!product) {
     return (

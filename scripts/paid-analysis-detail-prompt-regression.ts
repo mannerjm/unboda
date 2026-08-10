@@ -19,6 +19,16 @@ const prompt = buildPaidAnalysisDetailPromptV2(input);
 
 const promptV3 = buildPaidAnalysisDetailPromptV3(input);
 
+const missingProductIdPrompt = buildPaidAnalysisDetailPromptV2({
+  ...input,
+  productId: undefined,
+});
+
+const unknownProductIdPrompt = buildPaidAnalysisDetailPromptV2({
+  ...input,
+  productId: "unsupported-product-id",
+});
+
 if (!prompt.includes("재물운 심층 분석")) {
   throw new Error("analysisType이 프롬프트에 포함되지 않았습니다.");
 }
@@ -531,4 +541,13 @@ if (!promptV3.includes("현재 재물 문제의 핵심 원인 이해")) {
   throw new Error("V3 프롬프트에 wealth 기대 결과 실제 내용이 없습니다.");
 }
 
+if (!missingProductIdPrompt.includes("이 상품이 추천되는 사용자:")) {
+  throw new Error("missing productId fallback did not include legacy compatibility metadata.");
+}
+
+if (!unknownProductIdPrompt.includes("이 상품이 추천되는 사용자:")) {
+  throw new Error("unknown productId fallback did not include legacy compatibility metadata.");
+}
+
+console.log("missing and unknown productId fallback prompt regression passed");
 console.log("wealth product context prompt regression passed");

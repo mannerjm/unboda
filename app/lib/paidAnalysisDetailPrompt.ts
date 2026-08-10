@@ -12,6 +12,7 @@ import {
 
 
 
+
 import {
   paidAnalysisProducts,
   type PaidAnalysisProduct,
@@ -247,38 +248,49 @@ switch (premiumPlugin) {
   return getCommonPaidAnalysisPromptRules();
 }
 
-function getPaidAnalysisProductContext(
+type ResolvedProductContext = {
+  source: "registry" | "legacy";
+  id: string;
+  title: string;
+  description: string;
+  details?: readonly string[];
+  category?: string;
+  plugin?: string;
+  releaseLevel?: string;
+  analysisType?: string;
+  kind?: string;
+  recommendedFor?: readonly string[];
+  analysisFocus?: readonly string[];
+  expectedOutcome?: readonly string[];
+};
+
+function resolveProductContextForPrompt(
   analysisType: string,
   productId?: string,
-): string {
+): ResolvedProductContext | undefined {
   if (productId) {
-  const canonicalProductId =
-    getCanonicalPremiumProductId(productId);
+    const canonicalProductId =
+      getCanonicalPremiumProductId(productId);
 
-  const registryProduct =
-    getPremiumProduct(canonicalProductId);
+    const registryProduct =
+      getPremiumProduct(canonicalProductId);
 
-  if (registryProduct) {
-    const details =
-      registryProduct.details?.map((item) => `- ${item}`).join("\n") ||
-      "- 별도 정의 없음";
-
-    return `
-상품 메타데이터:
-
-- 상품 ID: ${registryProduct.id}
-- 분석 상품: ${registryProduct.title}
-- 카테고리: ${registryProduct.category}
-- Plugin: ${registryProduct.plugin}
-- 상품 유형: ${registryProduct.kind}
-- 출시 레벨: ${registryProduct.releaseLevel}
-- 설명: ${registryProduct.description}
-
-상세 분석 포인트:
-${details}
-`;
+    if (registryProduct) {
+      return {
+        source: "registry",
+        id: registryProduct.id,
+        title: registryProduct.title,
+        description: registryProduct.description,
+        details: registryProduct.details,
+        category: registryProduct.category,
+        plugin: registryProduct.plugin,
+        releaseLevel: registryProduct.releaseLevel,
+        analysisType: registryProduct.analysisType,
+        kind: registryProduct.kind,
+      };
+    }
   }
-}
+
   const products = Object.values(
     paidAnalysisProducts,
   ) as PaidAnalysisProduct[];
@@ -290,6 +302,35 @@ ${details}
   );
 
   if (!product) {
+    return undefined;
+  }
+
+  return {
+    source: "legacy",
+    id: product.id,
+    title: product.title,
+    description: product.description,
+    details: product.details,
+    category: product.category,
+    plugin: product.plugin,
+    releaseLevel: product.releaseLevel,
+    analysisType: product.analysisType,
+    recommendedFor: product.recommendedFor,
+    analysisFocus: product.analysisFocus,
+    expectedOutcome: product.expectedOutcome,
+  };
+}
+
+function getPaidAnalysisProductContext(
+  analysisType: string,
+  productId?: string,
+): string {
+  const productContext = resolveProductContextForPrompt(
+    analysisType,
+    productId,
+  );
+
+  if (!productContext) {
     return `
 상품 메타데이터:
 
@@ -298,41 +339,63 @@ ${details}
 `;
   }
 
+  if (productContext.source === "registry") {
+    const details =
+      productContext.details?.map((item) => `- ${item}`).join("\n") ||
+      "- 별도 정의 없음";
+
+    return `
+상품 메타데이터:
+
+- 상품 ID: ${productContext.id}
+- 분석 상품: ${productContext.title}
+- 카테고리: ${productContext.category}
+- Plugin: ${productContext.plugin}
+- 상품 유형: ${productContext.kind}
+- 출시 레벨: ${productContext.releaseLevel}
+- 설명: ${productContext.description}
+
+상세 분석 포인트:
+${details}
+`;
+  }
+
   const recommendedFor =
-    product.recommendedFor?.map((item) => `- ${item}`).join("\n") ||
+    productContext.recommendedFor?.map((item) => `- ${item}`).join("\n") ||
     "- 별도 정의 없음";
 
   const analysisFocus =
-    product.analysisFocus?.map((item) => `- ${item}`).join("\n") ||
+    productContext.analysisFocus?.map((item) => `- ${item}`).join("\n") ||
     "- 별도 정의 없음";
 
   const expectedOutcome =
-    product.expectedOutcome?.map((item) => `- ${item}`).join("\n") ||
+    productContext.expectedOutcome?.map((item) => `- ${item}`).join("\n") ||
     "- 별도 정의 없음";
 
   const details =
-    product.details.map((item) => `- ${item}`).join("\n");
+    productContext.details?.map((item) => `- ${item}`).join("\n") ||
+    "- 별도 정의 없음";
 
   return `
 상품 메타데이터:
 
 상품 ID:
-${product.id}
+${productContext.id}
 
 상품명:
-${product.title}
+${productContext.title}
 
 상품 카테고리:
-${product.category ?? "미정"}
+${productContext.category ?? "미정"}
 
 상품 Plugin:
-${product.plugin ?? "미정"}
+${productContext.plugin ?? "미정"}
 
 출시 단계:
-${product.releaseLevel ?? "미정"}
+${productContext.releaseLevel ?? "미정"}
 
 상품 설명:
-${product.description}
+${productContext.description}
 
 이 상품에서 제공해야 하는 내용:
 ${details}

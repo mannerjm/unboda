@@ -6,7 +6,7 @@ import { buildSajuResponse } from "@/app/lib/buildSajuResponse";
 import { validateAnalyzeInput } from "@/app/lib/validateAnalyzeInput";
 import { getAnalyzeErrorStatus } from "@/app/lib/getAnalyzeErrorStatus";
 import { buildFreeAnalysis } from "@/app/lib/buildFreeAnalysis";
-import { isPaidAnalysisProductId } from "@/app/lib/paidAnalysisProducts";
+import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { buildPremiumPrompt } from "@/app/lib/prompt/premiumBuilder";
 import { buildPremiumAnalysis } from "@/app/lib/buildPremiumAnalysis";
 import { buildAnalysisProductRecommendations } from "@/app/lib/analysisProductRecommendations";
@@ -71,7 +71,7 @@ return NextResponse.json(
 }
 if (
   productId !== undefined &&
-  !isPaidAnalysisProductId(productId)
+  !getPremiumProduct(productId)
 ) {
   const errorResponse: AnalyzeErrorResponse = {
     error: "유효하지 않은 유료 분석 상품입니다.",

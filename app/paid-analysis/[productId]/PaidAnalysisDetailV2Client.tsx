@@ -534,7 +534,7 @@ const input = promptInput;
       </p>
 
       <h3 className="mt-2 text-xl font-bold text-stone-950">
-        시기별 변화 타임라인
+        앞으로 확인할 변화 신호
       </h3>
 
       <div className="mt-5 space-y-4">

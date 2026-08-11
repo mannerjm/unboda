@@ -1,17 +1,16 @@
 
 import { getSaju } from "@/app/lib/manse";
 import { NextResponse } from "next/server";
-import { buildPrompt } from "@/app/lib/prompt/builder";
 import { buildSajuResponse } from "@/app/lib/buildSajuResponse";
 import { validateAnalyzeInput } from "@/app/lib/validateAnalyzeInput";
 import { getAnalyzeErrorStatus } from "@/app/lib/getAnalyzeErrorStatus";
 import { buildFreeAnalysis } from "@/app/lib/buildFreeAnalysis";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
-import { buildPremiumPrompt } from "@/app/lib/prompt/premiumBuilder";
 import { buildPremiumAnalysis } from "@/app/lib/buildPremiumAnalysis";
 import { buildAnalysisProductRecommendations } from "@/app/lib/analysisProductRecommendations";
 import { buildAnalysisRecommendation } from "@/app/lib/analysisRecommendationBuilder";
 import { buildMainAnalysisPrompt } from "@/app/lib/mainAnalysisPrompt";
+import { buildMainAnalysisCompactFacts } from "../../lib/mainAnalysisCompactFacts";
 import {
   generateMainAnalysis,
   generateRecommendationExplanation,
@@ -21,24 +20,22 @@ import type {
   AnalyzeSuccessResponse,
   AnalyzeErrorResponse,
 } from "@/app/lib/analyzeApiTypes";
-
-
 export async function POST(req: Request) {
   try {
-   let body: AnalyzeRequest;
+    let body: AnalyzeRequest;
 
-try {
-  body = (await req.json()) as AnalyzeRequest;
-} catch {
-  const errorResponse: AnalyzeErrorResponse = {
-  error: "요청 데이터가 올바른 JSON 형식이 아닙니다.",
-};
+    try {
+      body = (await req.json()) as AnalyzeRequest;
+    } catch {
+      const errorResponse: AnalyzeErrorResponse = {
+        error: "요청 데이터가 올바른 JSON 형식이 아닙니다.",
+      };
 
-return NextResponse.json(
-  errorResponse,
-  { status: 400 }
-);
-}
+      return NextResponse.json(
+        errorResponse,
+        { status: 400 }
+      );
+    }
 
 const {
   birthDate,
@@ -61,13 +58,13 @@ const validation = validateAnalyzeInput({
 
 if (!validation.valid) {
   const errorResponse: AnalyzeErrorResponse = {
-  error: validation.error,
-};
+    error: validation.error,
+  };
 
-return NextResponse.json(
-  errorResponse,
-  { status: 400 }
-);
+  return NextResponse.json(
+    errorResponse,
+    { status: 400 }
+  );
 }
 if (
   productId !== undefined &&
@@ -83,7 +80,7 @@ if (
   );
 }
 
-    const saju = getSaju(
+const saju = getSaju(
   birthDate,
   birthTime,
   calendarType,
@@ -91,51 +88,27 @@ if (
   gender
 );
 
-    console.log(
-      "SAJU_RESULT:",
-      JSON.stringify(saju, null, 2)
-    );
-
-
-const promptInput = {
-  calendarType,
-  isLeapMonth: isLeapMonthBoolean,
-  birthDate,
-  birthTime,
-  gender,
-  saju,
-};
-
-const modularPrompt =
-  productId === undefined
-    ? buildPrompt(promptInput)
-    : buildPremiumPrompt({
-        ...promptInput,
-        productId,
-      });
-
 const freeAnalysis =
   buildFreeAnalysis(saju);
 
-   const mainAnalysisPrompt =
-  buildMainAnalysisPrompt({
-    sourcePrompt: modularPrompt,
-    saju,
-    freeAnalysis,
-  });
+const compactFacts = buildMainAnalysisCompactFacts({
+  saju,
+  freeAnalysis,
+});
 
-const mainAnalysis =
-  await generateMainAnalysis(mainAnalysisPrompt);
-   
-  const recommendationAnalysis = buildPremiumAnalysis(saju);
+const mainAnalysisPrompt = buildMainAnalysisPrompt({
+  compactFacts,
+});
+
+const recommendationAnalysis = buildPremiumAnalysis(saju);
 
 const productRecommendations =
   buildAnalysisProductRecommendations({
-  fortuneBrain: recommendationAnalysis.fortuneBrain,
-  strengthAnalysis: recommendationAnalysis.strengthAnalysis,
-  elementRelations: recommendationAnalysis.elementRelations,
-  fortuneFlow: recommendationAnalysis.fortuneFlowAnalysis,
-});
+    fortuneBrain: recommendationAnalysis.fortuneBrain,
+    strengthAnalysis: recommendationAnalysis.strengthAnalysis,
+    elementRelations: recommendationAnalysis.elementRelations,
+    fortuneFlow: recommendationAnalysis.fortuneFlowAnalysis,
+  });
 
 if (!productRecommendations.engineResult) {
   throw new Error("Recommendation engine result is missing");
@@ -144,13 +117,12 @@ if (!productRecommendations.engineResult) {
 const analysisRecommendation = buildAnalysisRecommendation({
   engineResult: productRecommendations.engineResult,
 });
+const mainAnalysis = await generateMainAnalysis(mainAnalysisPrompt);
+const generatedRecommendation = await generateRecommendationExplanation(
+  analysisRecommendation
+);
 
-const generatedRecommendation =
-  await generateRecommendationExplanation(
-    analysisRecommendation
-  );
-
-   const responseData: AnalyzeSuccessResponse = {
+const responseData: AnalyzeSuccessResponse = {
   result:
   mainAnalysis ||
   "AI 분석 결과를 생성하지 못했습니다.",
@@ -165,7 +137,9 @@ const generatedRecommendation =
     recommendationExplanation: generatedRecommendation,
 };
 
-return NextResponse.json(responseData);
+const response = NextResponse.json(responseData);
+
+return response;
  } catch (error) {
   console.error("OpenAI 또는 만세력 오류:", error);
 

@@ -411,6 +411,25 @@ ${expectedOutcome}
 `;
 }
 
+function isCareerAnalysis(
+  analysisType: string,
+  productId?: string,
+): boolean {
+  const normalizedType = analysisType.trim();
+  const premiumPlugin = getPremiumPluginFromProductId(productId);
+
+  if (premiumPlugin === "CAREER") {
+    return true;
+  }
+
+  return (
+    normalizedType.includes("직업") ||
+    normalizedType.includes("사업") ||
+    normalizedType.includes("이직") ||
+    normalizedType.includes("승진")
+  );
+}
+
 export function buildPaidAnalysisDetailPromptV2(
   input: PaidAnalysisDetailPromptInput,
 ): string {
@@ -422,6 +441,76 @@ export function buildPaidAnalysisDetailPromptV2(
   input.analysisType,
   input.productId,
 );
+  const futureTimelineExample = isCareerAnalysis(
+    input.analysisType,
+    input.productId,
+  )
+    ? `    {
+      "period": "현재 흐름",
+      "title": "현재 흐름의 핵심",
+      "description": "현재 전달된 명리 데이터에서 직접 확인되는 흐름을 해석하고, 지금 우선적으로 확인할 판단 기준을 설명한다."
+    },
+    {
+      "period": "다음 변화의 조건",
+      "title": "다음 변화의 조건",
+      "description": "미래 사건을 단정하지 않고, 현재 흐름이 변화할 때 확인해야 할 조건과 신호를 설명한다."
+    },
+    {
+      "period": "중기적으로 확인할 신호",
+      "title": "중기적으로 확인할 신호",
+      "description": "특정 시점의 사건을 예측하지 말고, 중기적으로 사용자가 관찰해야 할 신호와 판단 기준을 설명한다."
+    },
+    {
+      "period": "장기적으로 준비할 방향",
+      "title": "장기적으로 준비할 방향",
+      "description": "장기 미래를 단정하지 않고, 현재 근거에서 도출할 수 있는 준비 방향과 대응 기준을 설명한다."
+    }`
+    : `    {
+      "period": "현재",
+      "title": "현재 흐름의 핵심",
+      "description": "현재 시기에 나타나는 변화와 대응 방향"
+    },
+    {
+      "period": "앞으로 3개월",
+      "title": "단기 흐름의 핵심",
+      "description": "앞으로 3개월 동안 확인할 변화와 대응 방향"
+    },
+    {
+      "period": "앞으로 6개월",
+      "title": "중기 흐름의 핵심",
+      "description": "앞으로 6개월 동안 확인할 변화와 대응 방향"
+    },
+    {
+      "period": "앞으로 1년",
+      "title": "장기 흐름의 핵심",
+      "description": "앞으로 1년 동안 이어질 흐름과 준비 방향"
+    }`;
+
+  const futureTimelineRuleText = isCareerAnalysis(
+    input.analysisType,
+    input.productId,
+  )
+    ? `- futureTimeline은 시간 순서형 예측이 아니라, 현재 근거에서 확인할 조건과 신호의 흐름으로 설명한다.
+- 각 항목은 특정 날짜나 시점을 단정하지 않고, 현재 흐름이 어떻게 바뀔 수 있는지 확인할 기준과 준비 방향을 제시한다.
+`
+    : "";
+
+  const futureTimelineSectionRules = isCareerAnalysis(
+    input.analysisType,
+    input.productId,
+  )
+    ? `- 현재 흐름, 다음 변화의 조건, 중기적으로 확인할 신호, 장기적으로 준비할 방향의 정확히 4개 항목을 작성한다.
+- 제공된 입력만으로 특정 월이나 날짜를 확정할 수 없다면 임의의 날짜를 만들지 않는다.
+- 각 항목은 실제로 확인할 수 있는 조건, 신호, 판단 기준, 준비 행동을 함께 제시한다.
+- 오행의 향후 증감이나 계산된 미래 시점을 암시하는 표현은 쓰지 않는다.
+- 모든 시기를 무조건 좋거나 나쁘다고 단정하지 않는다.
+`
+    : `- 현재, 앞으로 3개월, 앞으로 6개월, 앞으로 1년의 정확히 4개 항목을 작성한다.
+- 제공된 입력만으로 특정 월이나 날짜를 확정할 수 없다면 임의의 날짜를 만들지 않는다.
+- 각 시기의 변화, 판단 기준, 준비 행동을 함께 제시한다.
+- 모든 시기를 무조건 좋거나 나쁘다고 단정하지 않는다.
+`;
+
   return `
 당신은 사용자의 사주 원국과 현재 운의 흐름을 분석하여
 실제 판단과 행동에 도움을 주는 프리미엄 명리 리포트를 작성하는 전문가입니다.
@@ -558,24 +647,24 @@ ${input.userConcern ?? "없음"}
   },
   "futureTimeline": [
     {
-      "period": "현재",
+      "period": "현재 흐름",
       "title": "현재 흐름의 핵심",
-      "description": "현재 시기에 나타나는 변화와 대응 방향"
+      "description": "현재 전달된 명리 데이터에서 직접 확인되는 흐름을 해석하고, 지금 우선적으로 확인할 판단 기준을 설명한다."
     },
     {
-      "period": "앞으로 3개월",
-      "title": "단기 흐름의 핵심",
-      "description": "앞으로 3개월 동안 확인할 변화와 대응 방향"
+      "period": "다음 변화의 조건",
+      "title": "다음 변화의 조건",
+      "description": "미래 사건을 단정하지 않고, 현재 흐름이 변화할 때 확인해야 할 조건과 신호를 설명한다."
     },
     {
-      "period": "앞으로 6개월",
-      "title": "중기 흐름의 핵심",
-      "description": "앞으로 6개월 동안 확인할 변화와 대응 방향"
+      "period": "중기적으로 확인할 신호",
+      "title": "중기적으로 확인할 신호",
+      "description": "특정 시점의 사건을 예측하지 말고, 중기적으로 사용자가 관찰해야 할 신호와 판단 기준을 설명한다."
     },
     {
-      "period": "앞으로 1년",
-      "title": "장기 흐름의 핵심",
-      "description": "앞으로 1년 동안 이어질 흐름과 준비 방향"
+      "period": "장기적으로 준비할 방향",
+      "title": "장기적으로 준비할 방향",
+      "description": "장기 미래를 단정하지 않고, 현재 근거에서 도출할 수 있는 준비 방향과 대응 기준을 설명한다."
     }
   ],
   "actionGuide": [
@@ -610,8 +699,7 @@ ${input.userConcern ?? "없음"}
 - causeAnalysis는 중심 결론이 나온 명리학적 원인을 설명한다.
 - fortuneStructure는 중심 결론을 뒷받침하는 원국·용신·대운·세운 근거만 선택한다.
 - currentSituation은 중심 결론이 현재 어떻게 나타나는지를 설명한다.
-- futureTimeline은 중심 결론이 앞으로 어떻게 변화하는지를 시간 순서대로 설명한다.
-- actionGuide는 중심 결론을 실제 행동으로 옮길 수 있는 방법을 제시한다.
+${futureTimelineRuleText}- actionGuide는 중심 결론을 실제 행동으로 옮길 수 있는 방법을 제시한다.
 - avoidGuide는 중심 결론을 해치는 행동이나 주의사항만 제시한다.
 - coachMessage는 새로운 결론을 추가하지 않고 리포트 전체를 하나의 메시지로 정리한다.
 - checklist는 actionGuide와 coachMessage를 사용자가 바로 실천할 수 있는 체크 항목으로 변환한다.
@@ -634,6 +722,9 @@ ${productRules}
 - 같은 의미를 여러 섹션에서 반복하지 않는다.
 - 명리 용어를 사용할 때는 일반 사용자가 이해할 수 있도록 현실적인 의미를 함께 설명한다.
 - 지나치게 추상적인 표현보다 관계, 돈, 직업, 계약, 일정, 선택처럼 구체적인 상황을 다룬다.
+- 실제 입력 데이터에 직업·조직 정보가 없다면 R&R, 승인 단계, 승인 담당자, 산출물, 프로젝트, 계약·규정, 평가자, 보고 체계, 조직 프로세스 같은 특정 업무 환경을 사실처럼 가정하지 않는다.
+- 현실 직업 정보가 없는 경우에는 책임 범위, 의사결정 권한, 완료 기준, 흐름 안정성, 확인 경로, 관찰할 신호처럼 공통적이고 근거 있는 판단 기준으로 표현한다.
+- 근거 없는 현실 구체성은 금지하고, 근거 있는 현실 구체성만 허용한다.
 - recommendations는 현재 단계에서는 반드시 빈 배열로 반환한다.
 
 heroSummary 작성 규칙:
@@ -677,10 +768,7 @@ currentSituation 작성 규칙:
 
 futureTimeline 작성 규칙:
 
-- 현재, 앞으로 3개월, 앞으로 6개월, 앞으로 1년의 정확히 4개 항목을 작성한다.
-- 제공된 입력만으로 특정 월이나 날짜를 확정할 수 없다면 임의의 날짜를 만들지 않는다.
-- 각 시기의 변화, 판단 기준, 준비 행동을 함께 제시한다.
-- 모든 시기를 무조건 좋거나 나쁘다고 단정하지 않는다.
+${futureTimelineSectionRules}
 
 actionGuide 작성 규칙:
 
@@ -693,6 +781,10 @@ actionGuide 작성 규칙:
 - 행동은 구체적으로 작성하되 숫자·기간·횟수를 한 항목에 과도하게 넣어 업무 체크리스트처럼 만들지 않는다.
 - "이행률", "지표", "프로토콜" 같은 관리·평가 용어보다 사용자가 일상에서 자연스럽게 이해할 수 있는 관계 언어를 우선한다.
 - 입력 정보나 분석 근거에 없는 "24시간", "48시간", "몇 회", "몇 %" 같은 정밀한 수치를 임의의 정답처럼 만들지 않는다. 기간이 필요하면 "이번 주", "당분간", "다음 몇 주"처럼 행동을 점검하기 위한 현실적인 범위로 표현한다.
+- 각 섹션은 서로 다른 역할을 맡는다. heroSummary는 판단 우선순위, decisionAnchor는 기준, causeAnalysis는 원인, fortuneStructure는 구조 해석, currentSituation은 현재 신호, futureTimeline은 변화 조건과 방향, actionGuide는 실행 행동, avoidGuide는 회피 행동, checklist는 검증 질문으로 역할을 분리한다.
+- 동일한 핵심 명사구나 동일 의미 문장을 3개 이상 섹션에서 반복하지 않는다.
+- 이미 actionGuide에서 다룬 내용을 checklist에서 다시 서술하지 않는다.
+- coachMessage나 aiInsight는 앞 내용을 단순 요약하지 않고, 전체 분석을 관통하는 상위 통찰 1개만 제공한다.
 
 avoidGuide 작성 규칙:
 
@@ -705,12 +797,14 @@ coachMessage 작성 규칙:
 - title은 현재 사용자에게 가장 필요한 조언을 간결하게 작성한다.
 - message는 운을 단정하기보다 사용자가 선택 기준을 세울 수 있도록 안내한다.
 - 과도한 위로나 판매 문구는 사용하지 않는다.
+- 앞 섹션의 핵심 문장을 그대로 반복하지 않고, 전체 분석을 관통하는 상위 통찰 1개만 제공한다.
 
 checklist 작성 규칙:
 
 - 지금 바로 점검할 수 있는 항목을 정확히 5개 작성한다.
 - 각 항목은 체크박스 하나로 확인할 수 있는 구체적인 문장으로 작성한다.
 - actionGuide를 그대로 복사하지 않는다.
+- checklist는 실행 지시보다 "확인한다", "비교한다", "문구를 점검한다", "권한을 확인한다"처럼 결정 전 검증 질문/확인 항목으로 작성한다.
 `;
 }
 

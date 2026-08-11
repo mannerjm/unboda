@@ -46,7 +46,15 @@ app/lib/paidAnalysisPromptPlugins/careerPrompt.ts
 
 역할:
 
-직업·사업 관련 분석 규칙
+- 직업운
+- 이직
+- 승진
+- 역할 변화
+- 조직 적응
+- 커리어 판단
+
+사업 운영, 매출, 사업 확장 분석은
+BUSINESS Plugin의 책임으로 분리한다.
 
 ## HEALTH
 
@@ -133,13 +141,50 @@ Product Prompt Plugin 영역에 Period Analysis를 담당하는 FORTUNE 계열�
 
 ## FORTUNE
 
+구현 위치:
+
+현재 실제 구현 파일 기준으로 기록
+
 역할:
 
-- 세운 종합
+- 올해 세운 종합
+- 내년 세운 종합
 - 월운 종합
+- 12개월 흐름
 - 대운 종합
-- 기간 흐름 분석
+- 기간 변화 분석
+
+FORTUNE Plugin은
+Topic Analysis가 아니라
+Period Analysis를 중심으로 한다.
 
 Period Analysis 역시
-Core Decision Engine을 새로 만드는 방식이 아니라
-공통 Core Engine + Product Plugin 구조를 사용한다.
+Core Premium Engine을 재사용하지만,
+시간축과 Output Schema는
+Topic Analysis와 다르게 구성할 수 있다.
+
+# Product Context
+
+동일 Plugin을 사용하는 상품 간 차이는
+Product Context에서 정의한다.
+
+예:
+
+CAREER Plugin
+- career
+- job-change
+- promotion
+
+LOVE Plugin
+- love
+- marriage
+- reunion
+
+FORTUNE Plugin
+- yearly
+- monthly
+- twelve-month
+- daewoon
+
+Product Plugin이 분석 철학을 정의하고,
+Product Context가 개별 상품의 핵심 질문과 범위를 정의한다.

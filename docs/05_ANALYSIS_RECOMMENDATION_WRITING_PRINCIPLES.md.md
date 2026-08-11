@@ -80,3 +80,35 @@ Premium Writer는 추천 순서를 임의로 변경하지 않는다.
 추천 Top 3는 Product Registry에 존재하는 실제 상품만 추천한다.
 
 존재하지 않는 상품명이나 임시 상품을 AI가 새로 만들어 추천해서는 안 된다.
+
+추천 Top 3와 전체 Product Catalog는
+동일한 Premium Product Registry를 Source of Truth로 사용한다.
+
+추천 영역에서 사용하는 productId와
+직접 선택 영역에서 사용하는 productId는
+동일한 canonical productId여야 한다.
+
+Recommendation Engine은
+Registry에 존재하지 않는 상품을 생성하거나
+임시 이름으로 추천하지 않는다.
+
+추천 대상은 Topic Analysis에 한정되지 않는다.
+
+현재 명리 흐름상 기간 전체 분석이 더 필요하다면
+Period Analysis 상품도 추천할 수 있다.
+
+예:
+
+- 올해 세운 종합
+- 다음 달 월운
+- 12개월 흐름
+- 현재 대운 분석
+
+단, Recommendation Engine은
+실제 Registry에 등록된 상품만 추천한다.
+
+추천 설명은 Premium Report의 핵심 결론을 미리 생성하지 않는다.
+
+추천 설명의 목적은
+"왜 이 주제를 지금 확인할 가치가 있는가"까지이며,
+실제 원인 분석·미래 흐름·행동 전략은 Premium Writer가 담당한다.

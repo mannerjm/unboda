@@ -64,34 +64,105 @@ Product ID는 전체 서비스에서 유일해야 한다.
 모든 상품은 Premium Decision Engine에서 생성할 수 있어야 한다.
 모든 상품은 하나 이상의 Product Plugin에 연결되어야 한다.
 단순히 카드만 존재하고 실제 분석 엔진이 없는 상품은 출시하지 않는다.
-3. Premium Decision Engine 구조
 
-운보다의 모든 심층분석은 다음 구조를 따른다.
+## 3. Premium Decision Engine 구조
 
-Core Decision Engine
+운보다의 Premium 심층분석은 동일한 출력 섹션을 강제하지 않는다.
+
+모든 Premium 상품은 공통된 품질 원칙과 판단 구조를 공유하되,
+실제 Output Schema와 리포트 섹션은 분석 목적에 따라 달라질 수 있다.
+
+기본 구조:
+
+Core Premium Rules
 +
 Product Plugin
 +
 Product Context
 +
 User Context
-3-1. Core Decision Engine
++
+Product-specific Output Schema
 
-모든 상품이 공통으로 사용하는 영역:
+공통으로 유지해야 하는 것은 다음과 같다.
 
-Executive Summary
-AI Insight
-명리학적 근거
-현재 핵심 문제
-미래 시나리오
-AI Decision
-Action Plan
-Avoid Guide
-Checklist
-AI Coach
+- 계산 엔진의 명리 사실을 근거로 사용할 것
+- 계산되지 않은 명리 사실을 AI가 임의로 생성하지 않을 것
+- 사용자 입력에 없는 현실 상황을 현재 사실처럼 가정하지 않을 것
+- 핵심 결론과 명리 근거가 연결될 것
+- 판단 기준과 행동 방향을 제공할 것
+- 과도한 단정과 공포 표현을 사용하지 않을 것
+- 분석의 신뢰도와 한계를 명확하게 표현할 것
+- 무료 분석과 불필요하게 같은 내용을 반복하지 않을 것
+
+중요:
+
+공통 Premium Engine을 사용한다는 것은
+모든 상품이 동일한 리포트 섹션을 가져야 한다는 의미가 아니다.
+
+예:
+
+- Career Analysis:
+  원인 → 명리 구조 → 현재 상황 → 변화 조건 → 행동 판단
+
+- Yearly Analysis:
+  연간 핵심 테마 → 연간 구조 → 상·하반기 흐름 → 분야별 흐름 → 변곡 조건
+
+- Monthly Analysis:
+  월 핵심 흐름 → 이전 달 대비 변화 → 초·중·후반 흐름 → 분야별 흐름 → 행동 조건
+
+따라서 공통되는 것은 Premium 분석의 품질 기준이며,
+Output Schema는 Product Plugin과 분석 목적에 따라 달라질 수 있다.
+
+### 3-1. Core Premium Rules
+
+모든 Premium 상품이 공통으로 준수하는 것은
+고정된 섹션 목록이 아니라 분석 품질과 판단 구조다.
+
+공통 분석 흐름:
+
+1. 핵심 판단
+2. 명리 근거
+3. 현재 적용 해석
+4. 변화 조건 또는 흐름
+5. 행동 방향
+6. 판단 전 확인 기준
+7. 분석 신뢰도와 한계
+
+실제 섹션명과 JSON 구조는 상품별 Product Plugin이 결정한다.
+
+예를 들어 Career 상품은 다음과 같은 구조를 사용할 수 있다.
+
+- heroSummary
+- decisionAnchor
+- causeAnalysis
+- fortuneStructure
+- currentSituation
+- futureTimeline
+- actionGuide
+- avoidGuide
+- checklist
+- coachMessage
+- confidence
+
+중요 원칙:
+
+- 모든 상품에 Executive Summary, AI Insight, AI Decision, AI Coach 등의 섹션을 강제하지 않는다.
+- 동일한 의미를 여러 섹션에서 반복하지 않는다.
+- 요약 섹션은 짧게 유지하고, 분석 근거와 행동 가이드는 서로 역할을 분리한다.
+- checklist는 actionGuide를 문장만 바꿔 반복하지 않고 판단 전 확인 조건을 제공한다.
+- futureTimeline은 계산되지 않은 미래 사건을 예언하지 않고 변화 조건, 확인 신호, 준비 방향을 설명한다.
+- 상품별 분석 목적에 따라 필요한 섹션만 사용한다.
+
 3-2. Product Plugin
 
-상품별로 해석 기준과 행동 기준을 바꾸는 모듈이다.
+상품별 분석 목적, 해석 기준, 행동 기준, 출력 섹션 구조를 정의하는 모듈이다.
+
+Product Plugin은 공통 Premium 품질 규칙을 유지하면서,
+각 상품에 필요한 데이터 사용 방식과 Output Schema를 결정한다.
+
+따라서 Career, 재물, 연애, 건강, 학업, 사업, 종합운은
+동일한 섹션 구성을 강제로 공유하지 않는다.
 
 초기 Plugin:
 
@@ -103,21 +174,36 @@ HEALTH
 STUDY
 BUSINESS
 FORTUNE
-3-3. Cross Plugin Intelligence
+### 3-3. Cross Plugin Intelligence
 
-분석 중 현재 상품 외의 다른 영역이 핵심 원인으로 확인될 수 있다.
+Premium 분석은 현재 상품의 분석 목적을 우선 완결한다.
+
+분석 과정에서 현재 상품만으로 설명하기 어려운 핵심 원인이
+다른 분석 영역과 명확하게 연결되는 경우,
+관련 Product Plugin을 보조 관점으로 참조하거나
+추가 심층분석을 제안할 수 있다.
 
 예:
 
-재물운
-→ 수입 문제의 핵심 원인이 직업 변화에 있음
-→ CAREER 연계 분석 제안
-건강운
-→ 생활 습관보다 인간관계 스트레스 영향이 큼
-→ RELATIONSHIP 연계 분석 제안
+재물 분석
+→ 현재 재물 흐름의 핵심 변수가 직업·수입 구조의 변화와 연결됨
+→ 현재 재물 분석 안에서 해당 연결 관계를 먼저 설명
+→ 추가적인 직업 판단이 필요한 경우 CAREER 심층분석 제안
 
-연계 추천은 가장 비싼 상품이 아니라
-현재 문제를 더 정확하게 이해하는 데 필요한 분석을 기준으로 한다.
+건강 분석
+→ 현재 건강 흐름의 부담 요인이 관계·생활환경과 연결됨
+→ 현재 건강 분석 안에서 해당 연결 관계를 먼저 설명
+→ 관계 영역의 독립적인 심층 판단이 필요한 경우 RELATIONSHIP 분석 제안
+
+핵심 원칙:
+
+- Cross Plugin은 현재 분석을 다른 상품으로 대체하지 않는다.
+- 현재 구매한 상품의 질문과 분석 목적을 먼저 충분히 완결한다.
+- 다른 영역은 현재 분석을 설명하는 보조 근거로 사용할 수 있다.
+- 추가 상품 추천은 실제로 독립적인 추가 분석 가치가 있을 때만 제공한다.
+- 단순 키워드 일치만으로 다른 상품을 추천하지 않는다.
+- 가장 비싼 상품이나 상위 상품을 우선 추천하지 않는다.
+- 사용자가 이미 구매했거나 조회 가능한 분석은 신규 구매보다 기존 결과 조회를 우선한다.
 
 4. 상품 카테고리
 4-1. 재물·자산

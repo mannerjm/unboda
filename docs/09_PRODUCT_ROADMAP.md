@@ -45,7 +45,12 @@ Premium 대표상품 품질 동결 및 Product Catalog 확장 준비
 - Relationship Output Quality Regression
 - 실제 관계 심층분석 반복 출력 검증
 - 관계 심층분석 Premium V1 품질 개선
-
+- Career Premium 실제 OpenAI 생성 검증
+- Career futureTimeline 비예측형 구조 적용
+- Career 현실 직업정보 hallucination 제한
+- Career section overlap 개선
+- Career actionGuide / checklist 역할 분리
+- Career Product ID regression 검증
 
 현재 핵심 과제:
 
@@ -215,29 +220,29 @@ MONEY
 
 ## Stage 4. 직업운
 
-Plugin:
+상태:
 
-CAREER
+대표 상품 품질 검증 완료 / 추가 고도화 가능
 
-핵심 목표:
-
-- 유지, 이동, 승진, 역할 확대 구분
-- 조직 적응과 독립성 분석
-- 이직 준비 조건 제시
-- 충동 퇴사 방지
-
-필요 작업:
+완료:
 
 - Career Prompt Plugin 강화
-- Career Safety Validator
-- 실제 AI 출력 검증
-- 직업운과 이직운의 범위 분리
+- 실제 OpenAI 출력 검증
+- 명리 grounding 검증
+- 현실 직업정보 hallucination 제한
+- futureTimeline 구조 개선
+- 섹션 간 중복 개선
+- actionGuide / checklist 역할 분리
+- Product ID mapping regression
+- Career output quality regression
+- 실제 결과 화면 검증
 
-완료 기준:
+남은 작업:
 
-- 특정 직업 단정 없음
-- 합격·승진 확정 없음
-- 현재 행동 기준이 구체적임
+- Career Safety / Consistency 정책 최종 정리
+- 다양한 사주 케이스 반복 품질 검증
+- 이직운 Product Context와 범위 분리
+- Analysis Asset 장기 저장 연결
 
 ---
 
@@ -520,80 +525,49 @@ AI 상담 시작률
 
 현재 최우선 작업:
 
-Premium Decision Engine V3의 공통 Output 구조 설계
+# 8. 현재 다음 작업
+
+현재 최우선 작업:
+
+Premium Product Catalog와 Product Registry 확장
+
+현재 Core Premium 구조와
+Career 대표 상품의 실제 생성 품질 검증까지 진행되었다.
+
+다음 단계는
+동일한 기반 구조를 사용하여
+판매 가능한 전체 Premium 상품 체계를 정의하는 것이다.
 
 구현 순서:
 
-현재 V2 Output과 V3 기준 비교
-유지할 필드와 신규 필드 구분
-Output V3 타입 설계
-Prompt V3 JSON 구조 설계
-Parser V3 설계
-UI 추가 섹션 설계
-건강운에 우선 적용
-실제 출력 검증
-
-==================================================
-다음 개발 단계
-==================================================
-
-문서 수정 후 바로 50개의 Prompt를 각각 구현하지 않는다.
-
-다음 순서로 진행한다.
-
-
 STEP 1
-문서와 실제 코드 구조의 현재 상태를 일치시킨다.
-
+Premium Product Registry 구조 확정
 
 STEP 2
-Premium Product Registry 구조를 확정한다.
-
+Topic Analysis 상품 목록 정의
 
 STEP 3
-Topic Analysis 약 50개 목록을 정의한다.
-
-각 Topic은 최소한 다음 정보를 가진다.
-
-- id
-- title
-- category
-- kind
-- analysisType
-- plugin
-- description
-- releaseLevel
-
+Period Analysis 상품 목록 정의
 
 STEP 4
-Period Analysis 상품을 별도로 정의한다.
-
-최소 후보:
-
-- 올해 세운 종합
-- 내년 세운 종합
-- 이번 달 월운 종합
-- 다음 달 월운 종합
-- 앞으로 12개월 월별 흐름
-- 10년 대운 종합
-
+각 상품의
+productId / kind / category / plugin /
+analysisType / releaseLevel을 Registry에 등록
 
 STEP 5
-Recommendation Engine이 Product Registry의 실제 상품 ID만 추천하도록 연결한다.
-
+Recommendation Engine이
+Registry의 canonical productId만 사용하도록 연결
 
 STEP 6
 무료 결과 화면에
-
-"AI 추천 Top 3"
-
-와
-
-"원하는 분석 직접 선택"
-
-두 진입점을 함께 제공한다.
-
+AI 추천 Top 3와
+전체 Premium 직접 선택 Catalog를 동시에 노출
 
 STEP 7
-대표 Premium 상품의 품질 기준을 확정한 뒤
-동일한 구조로 Topic/Period 상품을 단계적으로 확장한다.
+구매한 상품의 접근 권한,
+저장된 Analysis Asset,
+결과 조회 경로 연결
+
+STEP 8
+Career를 기준으로
+다음 대표 상품의 Premium 품질을 순차 검증

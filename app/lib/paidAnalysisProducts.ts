@@ -46,40 +46,37 @@ function createPaidAnalysisProductFromRegistry(
     details: registryProduct.details ?? [],
   };
 
-  if (options.includeShortTitle) {
+  if (options.includeShortTitle || registryProduct.shortTitle) {
     product.shortTitle = registryProduct.shortTitle;
   }
 
-  if (options.includeCategory) {
+  if (options.includeCategory || registryProduct.category) {
     product.category = registryProduct.category.toUpperCase();
   }
 
-  if (options.includePlugin) {
+  if (options.includePlugin || registryProduct.plugin) {
     product.plugin = registryProduct.plugin;
   }
 
-  if (options.includeReleaseLevel) {
+  if (options.includeReleaseLevel || registryProduct.releaseLevel) {
     product.releaseLevel = registryProduct.releaseLevel;
   }
 
-  if (options.includeAnalysisType) {
+  if (options.includeAnalysisType || registryProduct.analysisType) {
     product.analysisType = registryProduct.analysisType;
   }
 
   product.description = registryProduct.description;
   product.details = registryProduct.details ?? [];
 
-  if (compatibilityMetadata.recommendedFor) {
-    product.recommendedFor = compatibilityMetadata.recommendedFor;
-  }
+  product.recommendedFor =
+    registryProduct.recommendedFor ?? compatibilityMetadata.recommendedFor;
 
-  if (compatibilityMetadata.analysisFocus) {
-    product.analysisFocus = compatibilityMetadata.analysisFocus;
-  }
+  product.analysisFocus =
+    registryProduct.analysisFocus ?? compatibilityMetadata.analysisFocus;
 
-  if (compatibilityMetadata.expectedOutcome) {
-    product.expectedOutcome = compatibilityMetadata.expectedOutcome;
-  }
+  product.expectedOutcome =
+    registryProduct.expectedOutcome ?? compatibilityMetadata.expectedOutcome;
 
   return product;
 }
@@ -145,6 +142,7 @@ export const paidAnalysisProducts = {
     },
     legacyCompatibilityMetadata.health,
   ),
+  // TODO: legacy compatibility entry retained until the registry covers this product explicitly.
   social: {
     id: "social",
     title: "인간관계 심층 분석",
@@ -158,6 +156,7 @@ export const paidAnalysisProducts = {
       "관계를 정리하고 유지하는 현실적인 기준",
     ],
   },
+  // TODO: legacy compatibility entry retained until the registry covers this product explicitly.
   marriage: {
     id: "marriage",
     title: "결혼운 심층 분석",
@@ -170,6 +169,7 @@ export const paidAnalysisProducts = {
       "안정적인 결혼을 위한 현실적인 준비",
     ],
   },
+  // TODO: legacy compatibility entry retained until the registry covers this product explicitly.
   study: {
     id: "study",
     title: "학업운 심층 분석",
@@ -182,6 +182,7 @@ export const paidAnalysisProducts = {
       "학습 전략과 현실적인 준비 방향",
     ],
   },
+  // TODO: legacy compatibility entry retained until the registry covers this product explicitly.
   business: {
     id: "business",
     title: "사업운 심층 분석",
@@ -194,6 +195,7 @@ export const paidAnalysisProducts = {
       "사업 운영 전략과 현실적인 대응",
     ],
   },
+  // TODO: legacy compatibility entry retained until the registry covers this product explicitly.
   "job-change": {
     id: "job-change",
     title: "이직운 심층 분석",
@@ -206,6 +208,7 @@ export const paidAnalysisProducts = {
       "커리어 변화의 현실적인 방향",
     ],
   },
+  // TODO: legacy compatibility entry retained until the registry covers this product explicitly.
   yearly: {
     id: "yearly",
     title: "올해운 심층 분석",
@@ -218,6 +221,7 @@ export const paidAnalysisProducts = {
       "올해 운을 활용하는 현실적인 전략",
     ],
   },
+  // TODO: legacy compatibility entry retained until the registry covers this product explicitly.
   daeun: {
     id: "daeun",
     title: "대운 심층 분석",

@@ -1,9 +1,21 @@
 import type { AnalysisRecommendationOutput } from "./analysisRecommendationOutput";
 
+function extractJsonPayload(value: string): string {
+  const trimmed = value.trim();
+
+  if (!trimmed.startsWith("```")) {
+    return trimmed;
+  }
+
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+
+  return fenced?.[1]?.trim() ?? trimmed;
+}
+
 export function parseAnalysisRecommendationOutput(
   value: string
 ): AnalysisRecommendationOutput {
-const parsed: unknown = JSON.parse(value);
+const parsed: unknown = JSON.parse(extractJsonPayload(value));
 
 if (typeof parsed !== "object" || parsed === null) {
   throw new Error("Analysis recommendation output must be an object");

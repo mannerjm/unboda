@@ -81,6 +81,33 @@ if (wealthRegistryProduct.kind !== "TOPIC") {
   );
 }
 
+if (
+  !("recommendedFor" in wealthRegistryProduct) ||
+  !wealthRegistryProduct.recommendedFor?.length
+) {
+  throw new Error(
+    "Premium Product Registry의 wealth에 recommendedFor 메타데이터가 없습니다.",
+  );
+}
+
+if (
+  !("analysisFocus" in wealthRegistryProduct) ||
+  !wealthRegistryProduct.analysisFocus?.length
+) {
+  throw new Error(
+    "Premium Product Registry의 wealth에 analysisFocus 메타데이터가 없습니다.",
+  );
+}
+
+if (
+  !("expectedOutcome" in wealthRegistryProduct) ||
+  !wealthRegistryProduct.expectedOutcome?.length
+) {
+  throw new Error(
+    "Premium Product Registry의 wealth에 expectedOutcome 메타데이터가 없습니다.",
+  );
+}
+
 console.log(
   "wealth Registry 연결:",
   wealthRegistryProduct.analysisType,

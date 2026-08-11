@@ -25,11 +25,35 @@ const secondaryRecommendations =
         .join("\n")
     : "없음";
 
+const recommendationContext =
+  recommendation.recommendationContext && recommendation.recommendationContext.length > 0
+    ? recommendation.recommendationContext
+        .map((item) => {
+          const evidenceText =
+            item.evidence && item.evidence.length > 0
+              ? item.evidence
+                  .map((entry) => `${entry.signal}(${entry.source}:${entry.contribution})`)
+                  .join(", ")
+              : "없음";
+
+          return `- ${item.productId}: score=${item.score ?? "-"}; evidence=${evidenceText}`;
+        })
+        .join("\n")
+    : "없음";
+
  return `
 
 당신은 운보다의 명리 분석 설명가입니다.
 
 아래 추천 결과는 기존 명리 엔진이 계산한 결과입니다.
+
+중요 규칙:
+- 이미 결정된 Top 3와 순서를 변경하지 마세요.
+- 상품을 새로 추가하거나 다른 productId로 바꾸지 마세요.
+- 제공된 recommendationContext의 productId를 그대로 사용하세요.
+- evidence에 포함된 근거만 사용하세요.
+- evidence에 없는 현실 상황을 새로 추가하지 마세요.
+- Registry 밖의 상품을 생성하지 마세요.
 
 반드시 아래 JSON 형식으로만 답변하세요.
 마크다운 코드 블록이나 추가 설명은 포함하지 마세요.
@@ -37,16 +61,25 @@ const secondaryRecommendations =
 {
   "headline": "사용자가 바로 이해할 수 있는 한 문장",
   "summary": "핵심 추천 이유를 설명하는 2~3문장",
-  "userMeaning": "이 추천이 사용자에게 왜 중요한지 설명하는 1~2문장"
+  "userMeaning": "이 추천이 사용자에게 왜 중요한지 설명하는 1~2문장",
   "cardReasons": {
-  "first": "1순위 상품을 추천하는 이유를 한 문장으로",
-  "second": "2순위 상품을 추천하는 이유를 한 문장으로",
-  "third": "3순위 상품을 추천하는 이유를 한 문장으로"
-},
-"conversionGuidance": {
-  "whyNow": "왜 지금 이 심층 분석이 필요한지",
-  "whatYouWillLearn": "심층 분석을 통해 무엇을 알게 되는지",
-  "riskOfDelay": "지금 확인하지 않으면 놓칠 수 있는 점"
+    "first": "1순위 상품을 추천하는 이유를 한 문장으로",
+    "second": "2순위 상품을 추천하는 이유를 한 문장으로",
+    "third": "3순위 상품을 추천하는 이유를 한 문장으로"
+  },
+  "conversionGuidance": {
+    "whyNow": "왜 지금 이 심층 분석이 필요한지",
+    "whatYouWillLearn": "심층 분석을 통해 무엇을 알게 되는지",
+    "riskOfDelay": "지금 확인하지 않으면 놓칠 수 있는 점"
+  },
+  "recommendationItems": [
+    {
+      "productId": "career-job-change",
+      "headline": "추천 상품별 한 줄 설명",
+      "summary": "추천 상품별 핵심 설명",
+      "userMeaning": "사용자에게 의미 있는 설명"
+    }
+  ]
 }
 
 cardReasons.first는 1순위 추천 상품의 추천 이유를 작성합니다.
@@ -96,6 +129,9 @@ ${reasons}
 
 보조 추천 목록:
 ${secondaryRecommendations}
+
+추천 컨텍스트:
+${recommendationContext}
 
 `.trim();
 }

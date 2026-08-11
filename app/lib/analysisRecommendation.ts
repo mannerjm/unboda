@@ -1,14 +1,29 @@
-import type { PaidAnalysisProductId } from "./paidAnalysisProducts";
-
 export type AnalysisRecommendationReason = {
   id: string;
   label: string;
   explanation: string;
 };
 
+export type RecommendationEvidenceItem = {
+  signal: string;
+  source: string;
+  contribution: number;
+};
+
 export type SecondaryAnalysisRecommendation = {
-  productId: PaidAnalysisProductId;
+  productId: string;
   reason: string;
+};
+
+export type RecommendationProductContext = {
+  productId: string;
+  title?: string;
+  category?: string;
+  plugin?: string;
+  analysisFocus?: readonly string[];
+  expectedOutcome?: readonly string[];
+  score?: number;
+  evidence?: readonly RecommendationEvidenceItem[];
 };
 
 export type AnalysisRecommendation = {
@@ -17,13 +32,14 @@ export type AnalysisRecommendation = {
   summary: string;
   userMeaning: string;
   reasons: readonly AnalysisRecommendationReason[];
-  recommendedProductId: PaidAnalysisProductId;
+  recommendedProductId: string;
   recommendedReason: string;
   secondaryRecommendations: readonly SecondaryAnalysisRecommendation[];
+  recommendationContext?: readonly RecommendationProductContext[];
 };
 
 export type RecommendationSignal = {
-  theme: PaidAnalysisProductId;
+  theme: string;
   score: number;
   confidence: number;
   reasons: readonly string[];

@@ -6,7 +6,12 @@ import { generateAnalysisRecommendation } from "./generateAnalysisRecommendation
 export async function generateMainAnalysis(
   prompt: string
 ): Promise<string> {
-  return generateAnalysisText(prompt);
+  try {
+    return await generateAnalysisText(prompt);
+  } catch (error) {
+    console.error("[generateMainAnalysis] failed", error);
+    return "AI 분석 결과를 생성하지 못했습니다.";
+  }
 }
 
 export async function generateRecommendationExplanation(

@@ -287,6 +287,9 @@ function resolveProductContextForPrompt(
         releaseLevel: registryProduct.releaseLevel,
         analysisType: registryProduct.analysisType,
         kind: registryProduct.kind,
+        recommendedFor: registryProduct.recommendedFor,
+        analysisFocus: registryProduct.analysisFocus,
+        expectedOutcome: registryProduct.expectedOutcome,
       };
     }
   }

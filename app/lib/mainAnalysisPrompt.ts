@@ -1,4 +1,4 @@
-﻿import type { MainAnalysisCompactFacts } from "./mainAnalysisCompactFacts";
+﻿import type { MainAnalysisCompactFacts } from "./mainAnalysisCompactFacts.ts";
 
 export type BuildMainAnalysisPromptInput = {
   compactFacts: MainAnalysisCompactFacts;

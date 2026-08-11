@@ -36,6 +36,31 @@ export type PremiumProductReleaseLevel =
 export type PremiumProductRiskLevel =
   AnalysisTopicRiskLevel;
 
+export type RecommendationSignalKey =
+  | "career_change"
+  | "career_stability"
+  | "career_independence"
+  | "wealth_growth"
+  | "wealth_risk"
+  | "wealth_control"
+  | "relationship_new"
+  | "relationship_commitment"
+  | "relationship_conflict"
+  | "relationship_recovery"
+  | "social_support"
+  | "health_recovery"
+  | "health_stress"
+  | "business_growth"
+  | "business_control"
+  | "growth_learning"
+  | "growth_transition";
+
+export type RecommendationProfile = {
+  weights: Partial<Record<RecommendationSignalKey, number>>;
+  requiredSignals?: readonly RecommendationSignalKey[];
+  excludedSignals?: readonly RecommendationSignalKey[];
+};
+
 export type PremiumProductDefinition = {
   id: string;
 
@@ -54,10 +79,18 @@ export type PremiumProductDefinition = {
   description: string;
 
   details?: readonly string[];
-  
+
   riskLevel?: PremiumProductRiskLevel;
 
   analysisType: string;
+
+  recommendedFor?: readonly string[];
+
+  analysisFocus?: readonly string[];
+
+  expectedOutcome?: readonly string[];
+
+  recommendationProfile?: RecommendationProfile;
 };
 
 function createTopicPremiumProduct(
@@ -77,7 +110,368 @@ function createTopicPremiumProduct(
     riskLevel: topic.riskLevel,
 
     analysisType: topic.title,
+
+    recommendationProfile: createTopicRecommendationProfile(topic.id),
   };
+}
+
+function createTopicRecommendationProfile(
+  topicId: string,
+): RecommendationProfile | undefined {
+  const profileMap: Record<string, RecommendationProfile> = {
+    "career-job-change": {
+      weights: {
+        career_change: 1.4,
+        career_stability: 0.8,
+      },
+      requiredSignals: ["career_change"],
+    },
+    "career-promotion": {
+      weights: {
+        career_stability: 1.2,
+        career_independence: 0.6,
+      },
+      requiredSignals: ["career_stability"],
+    },
+    "career-independence": {
+      weights: {
+        career_independence: 1.4,
+        wealth_control: 0.5,
+      },
+      requiredSignals: ["career_independence"],
+    },
+    "career-job-fit": {
+      weights: {
+        career_stability: 1.0,
+        career_change: 0.4,
+      },
+      requiredSignals: ["career_stability"],
+    },
+    "career-organization-fit": {
+      weights: {
+        career_stability: 1.1,
+        relationship_commitment: 0.4,
+      },
+      requiredSignals: ["career_stability"],
+    },
+    "career-leadership": {
+      weights: {
+        career_independence: 0.9,
+        career_stability: 0.7,
+      },
+      requiredSignals: ["career_independence"],
+    },
+    "career-specialization": {
+      weights: {
+        growth_learning: 1.0,
+        career_stability: 0.5,
+      },
+      requiredSignals: ["growth_learning"],
+    },
+    "career-burnout-risk": {
+      weights: {
+        health_stress: 1.1,
+        career_stability: 0.6,
+      },
+      requiredSignals: ["health_stress"],
+    },
+    "money-wealth-accumulation": {
+      weights: {
+        wealth_growth: 1.4,
+        wealth_control: 0.7,
+      },
+      requiredSignals: ["wealth_growth"],
+    },
+    "money-leak-risk": {
+      weights: {
+        wealth_risk: 1.4,
+        wealth_control: 1.0,
+      },
+      requiredSignals: ["wealth_risk"],
+    },
+    "money-investment-style": {
+      weights: {
+        wealth_growth: 0.9,
+        wealth_risk: 1.1,
+      },
+      requiredSignals: ["wealth_risk"],
+    },
+    "money-side-income": {
+      weights: {
+        wealth_growth: 1.0,
+        business_growth: 0.5,
+      },
+      requiredSignals: ["wealth_growth"],
+    },
+    "money-business-income": {
+      weights: {
+        business_growth: 1.1,
+        wealth_growth: 0.7,
+      },
+      requiredSignals: ["business_growth"],
+    },
+    "money-saving-discipline": {
+      weights: {
+        wealth_control: 1.2,
+        wealth_risk: 0.6,
+      },
+      requiredSignals: ["wealth_control"],
+    },
+    "money-income-expansion": {
+      weights: {
+        wealth_growth: 1.1,
+        career_change: 0.4,
+      },
+      requiredSignals: ["wealth_growth"],
+    },
+    "money-financial-turning-point": {
+      weights: {
+        wealth_risk: 1.0,
+        wealth_growth: 0.8,
+      },
+      requiredSignals: ["wealth_risk"],
+    },
+    "relationship-current": {
+      weights: {
+        relationship_commitment: 1.2,
+        relationship_conflict: 0.6,
+      },
+      requiredSignals: ["relationship_commitment"],
+    },
+    "relationship-new-connection": {
+      weights: {
+        relationship_new: 1.4,
+        relationship_recovery: 0.4,
+      },
+      requiredSignals: ["relationship_new"],
+    },
+    "relationship-conflict": {
+      weights: {
+        relationship_conflict: 1.4,
+        relationship_recovery: 1.0,
+      },
+      requiredSignals: ["relationship_conflict"],
+    },
+    "relationship-marriage": {
+      weights: {
+        relationship_commitment: 1.3,
+        relationship_recovery: 0.5,
+      },
+      requiredSignals: ["relationship_commitment"],
+    },
+    "relationship-partner-pattern": {
+      weights: {
+        relationship_commitment: 1.1,
+        relationship_conflict: 0.5,
+      },
+      requiredSignals: ["relationship_commitment"],
+    },
+    "relationship-boundary": {
+      weights: {
+        relationship_conflict: 1.0,
+        relationship_recovery: 0.7,
+      },
+      requiredSignals: ["relationship_conflict"],
+    },
+    "relationship-reunion": {
+      weights: {
+        relationship_recovery: 1.1,
+        relationship_new: 0.5,
+      },
+      requiredSignals: ["relationship_recovery"],
+    },
+    "relationship-intimacy": {
+      weights: {
+        relationship_commitment: 0.9,
+        relationship_new: 0.6,
+      },
+      requiredSignals: ["relationship_commitment"],
+    },
+    "social-helper": {
+      weights: {
+        social_support: 1.1,
+        relationship_recovery: 0.5,
+      },
+      requiredSignals: ["social_support"],
+    },
+    "social-friendship": {
+      weights: {
+        social_support: 1.2,
+        relationship_recovery: 0.4,
+      },
+      requiredSignals: ["social_support"],
+    },
+    "social-family": {
+      weights: {
+        social_support: 1.0,
+        relationship_commitment: 0.4,
+      },
+      requiredSignals: ["social_support"],
+    },
+    "social-workplace": {
+      weights: {
+        social_support: 0.9,
+        career_stability: 0.5,
+      },
+      requiredSignals: ["social_support"],
+    },
+    "social-conflict": {
+      weights: {
+        relationship_conflict: 1.0,
+        social_support: 0.6,
+      },
+      requiredSignals: ["relationship_conflict"],
+    },
+    "social-network-expansion": {
+      weights: {
+        relationship_new: 1.0,
+        social_support: 0.6,
+      },
+      requiredSignals: ["relationship_new"],
+    },
+    "health-energy": {
+      weights: {
+        health_recovery: 1.2,
+        health_stress: 0.8,
+      },
+      requiredSignals: ["health_recovery"],
+    },
+    "health-stress": {
+      weights: {
+        health_stress: 1.4,
+        health_recovery: 0.7,
+      },
+      requiredSignals: ["health_stress"],
+    },
+    "health-burnout": {
+      weights: {
+        health_stress: 1.2,
+        health_recovery: 0.6,
+      },
+      requiredSignals: ["health_stress"],
+    },
+    "health-routine": {
+      weights: {
+        health_recovery: 1.0,
+        health_stress: 0.5,
+      },
+      requiredSignals: ["health_recovery"],
+    },
+    "health-balance": {
+      weights: {
+        health_recovery: 0.8,
+        wealth_control: 0.4,
+      },
+      requiredSignals: ["health_recovery"],
+    },
+    "business-startup": {
+      weights: {
+        business_growth: 1.3,
+        business_control: 0.6,
+      },
+      requiredSignals: ["business_growth"],
+    },
+    "business-partnership": {
+      weights: {
+        business_control: 1.0,
+        relationship_commitment: 0.5,
+      },
+      requiredSignals: ["business_control"],
+    },
+    "business-growth": {
+      weights: {
+        business_growth: 1.2,
+        wealth_growth: 0.5,
+      },
+      requiredSignals: ["business_growth"],
+    },
+    "business-decision": {
+      weights: {
+        business_control: 1.2,
+        wealth_risk: 0.5,
+      },
+      requiredSignals: ["business_control"],
+    },
+    "business-performance": {
+      weights: {
+        business_growth: 1.0,
+        career_stability: 0.4,
+      },
+      requiredSignals: ["business_growth"],
+    },
+    "growth-study": {
+      weights: {
+        growth_learning: 1.3,
+        growth_transition: 0.5,
+      },
+      requiredSignals: ["growth_learning"],
+    },
+    "growth-exam": {
+      weights: {
+        growth_learning: 1.1,
+        career_stability: 0.4,
+      },
+      requiredSignals: ["growth_learning"],
+    },
+    "growth-skill": {
+      weights: {
+        growth_learning: 1.2,
+        growth_transition: 0.4,
+      },
+      requiredSignals: ["growth_learning"],
+    },
+    "growth-self-development": {
+      weights: {
+        growth_transition: 1.1,
+        growth_learning: 0.6,
+      },
+      requiredSignals: ["growth_transition"],
+    },
+    "change-moving": {
+      weights: {
+        growth_transition: 0.9,
+        career_change: 0.4,
+      },
+      requiredSignals: ["growth_transition"],
+    },
+    "change-overseas": {
+      weights: {
+        growth_transition: 1.0,
+        relationship_new: 0.4,
+      },
+      requiredSignals: ["growth_transition"],
+    },
+    "change-transition": {
+      weights: {
+        growth_transition: 1.2,
+        career_change: 0.6,
+      },
+      requiredSignals: ["growth_transition"],
+    },
+    "life-current-turning-point": {
+      weights: {
+        growth_transition: 1.1,
+        career_change: 0.5,
+      },
+      requiredSignals: ["growth_transition"],
+    },
+    "life-long-term-direction": {
+      weights: {
+        growth_transition: 0.9,
+        career_stability: 0.4,
+      },
+      requiredSignals: ["growth_transition"],
+    },
+    "life-priority": {
+      weights: {
+        wealth_control: 0.8,
+        health_recovery: 0.5,
+      },
+      requiredSignals: ["wealth_control"],
+    },
+  };
+
+  return profileMap[topicId];
 }
 
 export const TOPIC_PREMIUM_PRODUCTS: PremiumProductDefinition[] =
@@ -176,6 +570,31 @@ export const PREMIUM_PRODUCT_REGISTRY = {
     ],
 
     analysisType: "재물운 심층 분석",
+
+    recommendedFor: [
+      "돈을 벌어도 잘 모이지 않는 이유가 궁금한 사람",
+      "수입 확대와 지출 조정 중 무엇이 우선인지 고민하는 사람",
+      "투자·계약·사업 확장을 앞두고 판단 기준이 필요한 사람",
+      "현재 재물운의 방향과 향후 변화를 알고 싶은 사람",
+      "장기적으로 자신에게 맞는 재물 축적 방식을 알고 싶은 사람",
+    ],
+
+    analysisFocus: [
+      "재성의 강약과 실제 작용",
+      "식상과 재성의 연결 구조",
+      "비겁에 따른 경쟁·분산·손실 가능성",
+      "관성과 계약·책임 범위의 관계",
+      "대운·세운에 따른 수입과 보존 흐름",
+      "직업·사업·인간관계가 재물 흐름에 미치는 영향",
+    ],
+
+    expectedOutcome: [
+      "현재 재물 문제의 핵심 원인 이해",
+      "돈이 들어오는 경로와 새는 조건 구분",
+      "확대·유지·조정·보류 중 우선 방향 확인",
+      "시기별 재물 변화와 준비 기준 확보",
+      "실행 가능한 지출·계약·현금 흐름 관리 기준 확보",
+    ],
 },
     career: {
   id: "career",

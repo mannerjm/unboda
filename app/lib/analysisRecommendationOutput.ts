@@ -1,3 +1,10 @@
+export type RecommendationExplanationItem = {
+  productId: string;
+  headline: string;
+  summary: string;
+  userMeaning: string;
+};
+
 export type AnalysisRecommendationOutput = {
   headline: string;
   summary: string;
@@ -14,4 +21,6 @@ export type AnalysisRecommendationOutput = {
     whatYouWillLearn: string;
     riskOfDelay: string;
   };
+
+  recommendationItems?: readonly RecommendationExplanationItem[];
 };

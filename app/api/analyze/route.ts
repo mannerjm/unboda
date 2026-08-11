@@ -117,10 +117,10 @@ if (!productRecommendations.engineResult) {
 const analysisRecommendation = buildAnalysisRecommendation({
   engineResult: productRecommendations.engineResult,
 });
-const mainAnalysis = await generateMainAnalysis(mainAnalysisPrompt);
-const generatedRecommendation = await generateRecommendationExplanation(
-  analysisRecommendation
-);
+const [mainAnalysis, generatedRecommendation] = await Promise.all([
+  generateMainAnalysis(mainAnalysisPrompt),
+  generateRecommendationExplanation(analysisRecommendation),
+]);
 
 const responseData: AnalyzeSuccessResponse = {
   result:

@@ -1,4 +1,4 @@
-import { openAIClient } from "./openAIClient";
+import { getOpenAIClient } from "./openAIClient";
 
 export type AnalysisTextCallType =
   | "main-analysis"
@@ -31,7 +31,7 @@ export async function generateAnalysisText(
 
   try {
     response = await Promise.race([
-      openAIClient.responses.create({
+      getOpenAIClient().responses.create({
         model: "gpt-5",
         input: prompt,
         max_output_tokens: maxOutputTokens,

@@ -129,7 +129,7 @@ export function buildMainAnalysisCompactFacts(input: {
 
   const flowRelations = hasRelations(fortuneFlowAnalysis)
     ? toStringArray(
-        fortuneFlowAnalysis.relations?.map((relation) => relation.description),
+        fortuneFlowAnalysis.relations?.map((relation) => relation.description ?? null),
       )
     : [];
 

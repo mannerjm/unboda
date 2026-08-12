@@ -1,11 +1,8 @@
 "use client";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  getSafeReturnTo,
-  saveAuthState,
-  type AuthState,
-} from "@/app/lib/auth";
-
+import { getSafeReturnTo } from "@/app/lib/auth";
+import { createClient } from "@/app/lib/supabase/client";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -15,20 +12,38 @@ function LoginPageContent() {
 
   const returnTo = searchParams.get("returnTo") ?? undefined;
   const safeReturnTo = getSafeReturnTo(returnTo);
+  const urlError = searchParams.get("error");
 
-  function handleLogin() {
-    const authenticatedState: AuthState = {
-      status: "authenticated",
-      user: {
-        id: "demo-user",
-        email: "demo@unboda.com",
-        name: "운보다 사용자",
-        accessLevel: "free_member",
-      },
-    };
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    urlError === "auth_failed" ? "인증에 실패했습니다. 다시 시도해 주세요." : null,
+  );
 
-    saveAuthState(authenticatedState);
+  async function handleLogin() {
+    if (!email || !password) {
+      setErrorMessage("이메일과 비밀번호를 입력해 주세요.");
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    setIsLoading(false);
+
+    if (error) {
+      setErrorMessage(error.message === "Invalid login credentials"
+        ? "이메일 또는 비밀번호가 올바르지 않습니다."
+        : error.message);
+      return;
+    }
+
     router.push(safeReturnTo);
+    router.refresh();
   }
 
   return (
@@ -54,7 +69,7 @@ function LoginPageContent() {
         </p>
 
         <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); void handleLogin(); }}>
             <div>
               <label
                 htmlFor="email"
@@ -68,7 +83,10 @@ function LoginPageContent() {
                 name="email"
                 type="email"
                 placeholder="example@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="mt-3 w-full rounded-2xl border border-stone-300 bg-white px-4 py-4 text-sm outline-none transition focus:border-stone-900"
+                required
               />
             </div>
 
@@ -85,16 +103,25 @@ function LoginPageContent() {
                 name="password"
                 type="password"
                 placeholder="비밀번호를 입력해 주세요"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="mt-3 w-full rounded-2xl border border-stone-300 bg-white px-4 py-4 text-sm outline-none transition focus:border-stone-900"
+                required
               />
             </div>
 
+            {errorMessage && (
+              <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {errorMessage}
+              </p>
+            )}
+
             <button
-              type="button"
-              onClick={handleLogin}
-              className="w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800"
+              type="submit"
+              disabled={isLoading}
+              className="w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:opacity-60"
             >
-              로그인
+              {isLoading ? "로그인 중..." : "로그인"}
             </button>
           </form>
 

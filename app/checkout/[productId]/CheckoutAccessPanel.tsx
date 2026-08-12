@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import {
   getAuthUserAccessLevel,
   guestAuthState,
-  loadAuthState,
   type AuthState,
 } from "@/app/lib/auth";
+import { createClient } from "@/app/lib/supabase/client";
 import { getUserAccessPermissions } from "@/app/lib/userAccess";
 import {
   createPendingOrder,
@@ -33,7 +33,20 @@ export default function CheckoutAccessPanel({
 const router = useRouter();
 
   useEffect(() => {
-    setAuthState(loadAuthState());
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setAuthState({
+          status: "authenticated",
+          user: {
+            id: user.id,
+            email: user.email ?? "",
+            name: "",
+            accessLevel: "free_member",
+          },
+        });
+      }
+    });
   }, []);
 
   const userAccessLevel = getAuthUserAccessLevel(authState);

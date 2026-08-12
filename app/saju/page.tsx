@@ -17,6 +17,7 @@ const [isLeapMonth, setIsLeapMonth] = useState("평달");
   birthTime,
   gender,
   calendarType,
+  isLeapMonth,
     });
 
     router.push(`/loading?${params.toString()}`);

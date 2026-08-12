@@ -43,50 +43,27 @@ export function getSafeReturnTo(
   return returnTo?.startsWith("/") ? returnTo : fallback;
 }
 
-const AUTH_STORAGE_KEY = "unboda-auth-state";
+// ---------------------------------------------------------------------------
+// localStorage-based auth functions REMOVED in Phase 3A.
+// Authentication is now handled by Supabase Auth (see app/lib/supabase/).
+// These stubs prevent import errors in any code not yet migrated.
+// ---------------------------------------------------------------------------
 
-export function saveAuthState(authState: AuthState): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.localStorage.setItem(
-    AUTH_STORAGE_KEY,
-    JSON.stringify(authState)
-  );
+/** @deprecated Use Supabase browser client directly. */
+export function saveAuthState(_authState: AuthState): void {
+  // no-op: localStorage auth is no longer the source of truth
 }
 
+/** @deprecated Use createClient().auth.getUser() from app/lib/supabase/client.ts */
 export function loadAuthState(): AuthState {
-  if (typeof window === "undefined") {
-    return guestAuthState;
-  }
-
-  const stored = window.localStorage.getItem(AUTH_STORAGE_KEY);
-
-  if (!stored) {
-    return guestAuthState;
-  }
-
-  try {
-    const parsed = JSON.parse(stored) as AuthState;
-
-    if (
-      parsed.status === "authenticated" &&
-      parsed.user
-    ) {
-      return parsed;
-    }
-
-    return guestAuthState;
-  } catch {
-    return guestAuthState;
-  }
+  // Always returns guest; components must switch to Supabase session
+  return guestAuthState;
 }
 
+/** @deprecated Use createClient().auth.signOut() from app/lib/supabase/client.ts */
 export function clearAuthState(): void {
-  if (typeof window === "undefined") {
-    return;
+  // no-op: handled by Supabase signOut
+  if (typeof window !== "undefined") {
+    window.localStorage.removeItem("unboda-auth-state");
   }
-
-  window.localStorage.removeItem(AUTH_STORAGE_KEY);
 }

@@ -2,11 +2,8 @@
 import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  guestAuthState,
-  loadAuthState,
-  type AuthState,
-} from "@/app/lib/auth";
+import { guestAuthState, type AuthState } from "@/app/lib/auth";
+import { createClient } from "@/app/lib/supabase/client";
 import { loadEntitlements } from "@/app/lib/purchaseStorage";
 import {
   hasActiveEntitlement,
@@ -27,7 +24,20 @@ export default function PaidAnalysisAccessPanel({
     useState<Entitlement[]>([]);
 
   useEffect(() => {
-    setAuthState(loadAuthState());
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setAuthState({
+          status: "authenticated",
+          user: {
+            id: user.id,
+            email: user.email ?? "",
+            name: "",
+            accessLevel: "free_member",
+          },
+        });
+      }
+    });
     setEntitlements(loadEntitlements());
   }, []);
 
@@ -98,6 +108,13 @@ const isDevelopment = process.env.NODE_ENV === "development";
             구매를 완료하면 이 계정과 프로필에
             해당 심층 분석의 열람 권한이 연결됩니다.
           </p>
+
+          <Link
+            href={`/checkout/${canonicalProductId}`}
+            className="mt-7 block w-full rounded-2xl bg-stone-900 px-5 py-4 text-center font-semibold text-white transition hover:bg-stone-800"
+          >
+            이 분석 구매하기
+          </Link>
         </>
       )}
     </section>

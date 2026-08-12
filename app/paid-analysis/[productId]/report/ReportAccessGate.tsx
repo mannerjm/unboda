@@ -2,11 +2,8 @@
 import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  guestAuthState,
-  loadAuthState,
-  type AuthState,
-} from "@/app/lib/auth";
+import { guestAuthState, type AuthState } from "@/app/lib/auth";
+import { createClient } from "@/app/lib/supabase/client";
 import { loadEntitlements } from "@/app/lib/purchaseStorage";
 import {
   hasActiveEntitlement,
@@ -31,9 +28,22 @@ export default function ReportAccessGate({
   const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
-    setAuthState(loadAuthState());
-    setEntitlements(loadEntitlements());
-    setIsChecked(true);
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setAuthState({
+          status: "authenticated",
+          user: {
+            id: user.id,
+            email: user.email ?? "",
+            name: "",
+            accessLevel: "free_member",
+          },
+        });
+      }
+      setEntitlements(loadEntitlements());
+      setIsChecked(true);
+    });
   }, []);
 
   if (!isChecked) {

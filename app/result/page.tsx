@@ -383,48 +383,6 @@ const elementItems = [
   { key: "수", label: "수" },
 ] as const;
 
-const paidAnalysisProducts = [
-  {
-    id: "career-business",
-    title: "직업·사업운 심층 분석",
-    description:
-      "직업 변화, 이직, 사업 흐름과 중요한 선택 시기를 깊게 살펴봅니다.",
-    details: [
-      "직업 변화와 역할 전환이 나타나는 명리학적 이유",
-      "이직·승진·사업 변화가 강해지는 중요한 시기",
-      "기회로 활용할 수 있는 직업과 사업 흐름",
-      "무리한 이동이나 결정에 주의할 시기",
-      "현재 상황에서 고려할 현실적인 선택 방향",
-    ],
-  },
-  {
-    id: "wealth",
-    title: "재물운 심층 분석",
-    description:
-      "돈의 흐름, 기회가 커지는 시기와 지출·손실에 주의할 흐름을 분석합니다.",
-    details: [
-      "현재 재물 흐름이 형성되는 명리학적 이유",
-      "수입과 재정 변화가 강해지는 중요한 시기",
-      "재물 기회를 활용하기 좋은 흐름",
-      "지출·손실·과도한 판단에 주의할 시기",
-      "현재 재정 상황에서 살펴볼 현실적인 대응 방향",
-    ],
-  },
-  {
-    id: "relationship",
-    title: "연애·관계 심층 분석",
-    description:
-      "관계의 변화, 인연의 흐름과 현재 관계에서 살펴볼 핵심 포인트를 분석합니다.",
-    details: [
-      "현재 관계 흐름이 나타나는 명리학적 이유",
-      "새로운 인연과 관계 변화가 강해지는 시기",
-      "관계를 발전시키기 좋은 흐름",
-      "갈등과 거리감에 주의할 시기와 요인",
-      "현재 관계에서 살펴볼 현실적인 대응 방향",
-    ],
-  },
-] as const;
-
 const recommendedPaidAnalysisProducts =
   productRecommendations?.recommendations
     .map((recommendation) =>
@@ -432,10 +390,15 @@ const recommendedPaidAnalysisProducts =
     )
     .filter((product): product is NonNullable<typeof product> => Boolean(product)) ?? [];
 
+// fallback uses canonical registry products — no dead IDs
+const fallbackPaidAnalysisProducts = ["career", "wealth", "relationship"]
+  .map((id) => getPremiumProduct(id))
+  .filter((product): product is NonNullable<typeof product> => Boolean(product));
+
 const displayedPaidAnalysisProducts =
   recommendedPaidAnalysisProducts.length > 0
     ? recommendedPaidAnalysisProducts
-    : paidAnalysisProducts;
+    : fallbackPaidAnalysisProducts;
 
 const selectedPaidAnalysis = displayedPaidAnalysisProducts.find(
   (product) => product.id === selectedPaidAnalysisId

@@ -137,7 +137,7 @@ export function buildMainAnalysisCompactFacts(input: {
     yearPillar: input.saju.yearPillar,
     monthPillar: input.saju.monthPillar,
     dayPillar: input.saju.dayPillar,
-    hourPillar: input.saju.hourPillar,
+    hourPillar: toCompactString(input.saju.hourPillar),
     strengthLevel: toCompactString(strengthAnalysis?.level),
     strengthSummary: toCompactString(strengthAnalysis?.summary),
     strengthDetail: toCompactString(strengthAnalysis?.summary),

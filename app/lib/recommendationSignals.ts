@@ -21,17 +21,17 @@ function pushSignal(
 }
 
 function hasConflictRelation(
-  relationHighlights: ReadonlyArray<{ type: string; strength: string }>,
+  relations: ReadonlyArray<{ type: string }>,
 ): boolean {
-  return relationHighlights.some((entry) =>
+  return relations.some((entry) =>
     entry.type === "충" || entry.type === "형" || entry.type === "파" || entry.type === "해",
   );
 }
 
 function hasSupportiveRelation(
-  relationHighlights: ReadonlyArray<{ type: string; strength: string }>,
+  relations: ReadonlyArray<{ type: string }>,
 ): boolean {
-  return relationHighlights.some((entry) => entry.type === "합");
+  return relations.some((entry) => entry.type === "합");
 }
 
 function hasGrowthRelation(
@@ -46,6 +46,7 @@ export function normalizeRecommendationSignals(input: {
   weakestElements: readonly string[];
   flowLabel: string | null | undefined;
   relationHighlights: ReadonlyArray<{ type: string; strength: string }>;
+  fortuneFlowRelations: ReadonlyArray<{ type: string }>;
 }): RecommendationSignalBundle {
   const signals: NormalizedRecommendationSignal[] = [];
 
@@ -145,21 +146,21 @@ export function normalizeRecommendationSignals(input: {
     });
   }
 
-  if (hasConflictRelation(input.relationHighlights)) {
+  if (hasConflictRelation(input.fortuneFlowRelations)) {
     pushSignal(signals, {
       key: "relationship_conflict",
       score: 1.0,
       reason: "충·형·파·해와 같은 갈등 관계가 확인되어 관계 리스크를 살펴볼 필요가 있습니다.",
-      source: "elementRelations",
+      source: "fortuneFlowAnalysis",
     });
   }
 
-  if (hasSupportiveRelation(input.relationHighlights)) {
+  if (hasSupportiveRelation(input.fortuneFlowRelations)) {
     pushSignal(signals, {
       key: "relationship_recovery",
       score: 0.8,
       reason: "합으로 연결되는 관계는 회복과 재정립이 가능한 흐름으로 해석됩니다.",
-      source: "elementRelations",
+      source: "fortuneFlowAnalysis",
     });
   }
 
@@ -173,14 +174,14 @@ export function normalizeRecommendationSignals(input: {
   }
 
   if (
-    hasConflictRelation(input.relationHighlights) &&
+    hasConflictRelation(input.fortuneFlowRelations) &&
     (input.weakestElements.includes("금") || input.weakestElements.includes("수"))
   ) {
     pushSignal(signals, {
       key: "business_control",
       score: 0.75,
       reason: "갈등 관계와 약한 오행이 겹쳐 관리·통제 중심의 사업 판단이 중요합니다.",
-      source: "elementRelations",
+      source: "fortuneFlowAnalysis",
     });
   }
 

@@ -37,6 +37,7 @@ function runScenario(label: string, saju: ReturnType<typeof getSaju>) {
       type: entry.type,
       strength: entry.strength,
     })),
+    fortuneFlowRelations: premiumAnalysis.fortuneFlowAnalysis?.relations ?? [],
   });
 
   const topicCandidates = topicProducts.filter(
@@ -63,6 +64,7 @@ function runScenario(label: string, saju: ReturnType<typeof getSaju>) {
     fortuneBrain: premiumAnalysis.fortuneBrain,
     elementRelations: premiumAnalysis.elementRelations,
     fortuneFlow: premiumAnalysis.fortuneFlowAnalysis,
+    elementAnalysis: premiumAnalysis.elementAnalysis,
   });
 
   assert(topicAware.recommendations.length <= 3, `${label}: topic-aware recommendations should be capped at 3`);
@@ -74,6 +76,7 @@ function runScenario(label: string, saju: ReturnType<typeof getSaju>) {
     fortuneBrain: premiumAnalysis.fortuneBrain,
     elementRelations: premiumAnalysis.elementRelations,
     fortuneFlow: premiumAnalysis.fortuneFlowAnalysis,
+    elementAnalysis: premiumAnalysis.elementAnalysis,
   });
 
   assert(fallback.recommendations.length > 0, `${label}: legacy fallback recommendations should exist`);

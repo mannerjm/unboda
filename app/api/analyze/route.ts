@@ -108,6 +108,7 @@ const productRecommendations =
     strengthAnalysis: recommendationAnalysis.strengthAnalysis,
     elementRelations: recommendationAnalysis.elementRelations,
     fortuneFlow: recommendationAnalysis.fortuneFlowAnalysis,
+    elementAnalysis: recommendationAnalysis.elementAnalysis,
   });
 
 if (!productRecommendations.engineResult) {

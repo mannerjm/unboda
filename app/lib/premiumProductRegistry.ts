@@ -289,31 +289,31 @@ function createTopicRecommendationProfile(
     },
     "social-helper": {
       weights: {
-        social_support: 1.1,
-        relationship_recovery: 0.5,
+        relationship_new: 1.1,
+        career_change: 0.5,
       },
-      requiredSignals: ["social_support"],
+      requiredSignals: ["relationship_new"],
     },
     "social-friendship": {
       weights: {
-        social_support: 1.2,
-        relationship_recovery: 0.4,
+        relationship_commitment: 1.1,
+        relationship_new: 0.5,
       },
-      requiredSignals: ["social_support"],
+      requiredSignals: ["relationship_commitment"],
     },
     "social-family": {
       weights: {
-        social_support: 1.0,
-        relationship_commitment: 0.4,
+        relationship_commitment: 1.0,
+        career_stability: 0.5,
       },
-      requiredSignals: ["social_support"],
+      requiredSignals: ["relationship_commitment"],
     },
     "social-workplace": {
       weights: {
-        social_support: 0.9,
-        career_stability: 0.5,
+        career_stability: 1.1,
+        relationship_new: 0.4,
       },
-      requiredSignals: ["social_support"],
+      requiredSignals: ["career_stability"],
     },
     "social-conflict": {
       weights: {

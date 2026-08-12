@@ -1,6 +1,7 @@
 import type { FortuneBrainResult } from "./fortuneBrain";
 import type { ElementRelationsAnalysis } from "./elementRelations";
 import type { StrengthAnalysis } from "./strength";
+import type { ElementAnalysis } from "./elements";
 import { analyzeFullFortuneFlow } from "./fortuneFlowAnalysis";
 import { STRENGTH_RECOMMENDATION_RULES } from "./recommendationRules";
 import type { RecommendationEngineResult } from "./analysisRecommendation";
@@ -36,6 +37,7 @@ export interface AnalysisProductRecommendationInput {
   fortuneBrain: FortuneBrainResult;
   elementRelations: ElementRelationsAnalysis;
   fortuneFlow: ReturnType<typeof analyzeFullFortuneFlow> | null;
+  elementAnalysis: ElementAnalysis;
 }
 
 type ProductRecommendationScore = {
@@ -125,15 +127,14 @@ export function buildTopicAwareRecommendations(
 ): AnalysisProductRecommendationResult {
   const normalizedSignals = normalizeRecommendationSignals({
     strengthLevel: input.strengthAnalysis.level,
-    strongestElements: input.strengthAnalysis.dayElement
-      ? [input.strengthAnalysis.dayElement]
-      : [],
-    weakestElements: [],
+    strongestElements: input.elementAnalysis.strongest,
+    weakestElements: input.elementAnalysis.weakest,
     flowLabel: input.fortuneFlow?.currentFlow,
     relationHighlights: input.elementRelations.highlights.map((entry) => ({
       type: entry.type,
       strength: entry.strength,
     })),
+    fortuneFlowRelations: input.fortuneFlow?.relations ?? [],
   });
 
   const topicCandidates = TOPIC_PREMIUM_PRODUCTS.filter(

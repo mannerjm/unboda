@@ -2,12 +2,19 @@ import { buildAnalysisProductRecommendations } from "../app/lib/analysisProductR
 import type { ElementRelationsAnalysis } from "../app/lib/elementRelations";
 import type { FortuneBrainResult } from "../app/lib/fortuneBrain";
 import type { StrengthAnalysis } from "../app/lib/strength";
+import type { ElementAnalysis } from "../app/lib/elements";
+import { TOPIC_PREMIUM_PRODUCTS } from "../app/lib/premiumProductRegistry";
 import { paidAnalysisProducts } from "../app/lib/paidAnalysisProducts";
+
 function assert(condition: boolean, message: string): void {
   if (!condition) {
     throw new Error(message);
   }
 }
+
+const canonicalTopicIds = new Set(
+  TOPIC_PREMIUM_PRODUCTS.filter((p) => p.kind === "TOPIC").map((p) => p.id),
+);
 
 const strengthAnalysis = {
   level: "신강",
@@ -27,162 +34,133 @@ const elementRelations: ElementRelationsAnalysis = {
   summary: "회귀 테스트용 오행 관계 요약",
 };
 
+// neutral: no strongest/weakest so only 신강 strength signals emit
+const elementAnalysis: ElementAnalysis = {
+  counts: { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 },
+  percentages: { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 },
+  total: 0,
+  strongest: [],
+  weakest: [],
+};
+
+// --- Test 1: 신강 + no fortuneFlow ---
+// Expected: career_stability(1.0) / relationship_commitment(0.8) / growth_learning(0.7) emit.
+// Top topic: career-organization-fit (career_stability:1.1 + relationship_commitment:0.4*0.8 = 1.42)
 const result = buildAnalysisProductRecommendations({
   strengthAnalysis,
   fortuneBrain,
   elementRelations,
   fortuneFlow: null,
+  elementAnalysis,
 });
 
-assert(
-  result.recommendations.length === 3,
-  "추천 결과가 정확히 3개가 아닙니다."
-);
+assert(result.recommendations.length === 3, "추천 결과가 정확히 3개가 아닙니다.");
 
 assert(
   result.recommendations.every(
     (item, index, recommendations) =>
-      index === 0 ||
-      recommendations[index - 1].score >= item.score
+      index === 0 || recommendations[index - 1].score >= item.score,
   ),
-  "추천 결과가 점수 내림차순으로 정렬되지 않았습니다."
+  "추천 결과가 점수 내림차순으로 정렬되지 않았습니다.",
 );
 
 assert(
-  result.recommendations.every(
-    (item) => item.reasons.length > 0
-  ),
-  "추천 결과 중 추천 이유가 없는 항목이 있습니다."
-);
-
-const recommendedProductIds =
-  result.recommendations.map((item) => item.productId);
-
-assert(
-  recommendedProductIds[0] === "career",
-  "신강 테스트에서 career가 첫 번째 추천이 아닙니다."
+  result.recommendations.every((item) => item.reasons.length > 0),
+  "추천 결과 중 추천 이유가 없는 항목이 있습니다.",
 );
 
 assert(
-  recommendedProductIds[1] === "business",
-  "신강 테스트에서 business가 두 번째 추천이 아닙니다."
+  result.recommendations.every((item) => canonicalTopicIds.has(item.productId)),
+  "추천 결과에 registry에 없는 productId가 포함되어 있습니다.",
 );
 
 assert(
-  recommendedProductIds[2] === "wealth",
-  "동점 기본 순서에 따라 wealth가 세 번째 추천이어야 합니다."
+  result.recommendations[0].productId === "career-organization-fit",
+  "신강 + no fortuneFlow: 첫 번째 추천은 career-organization-fit이어야 합니다.",
+);
+
+assert(
+  result.recommendations[0].score === 1.42,
+  "신강 + no fortuneFlow: career-organization-fit 점수가 1.42이어야 합니다.",
 );
 
 console.log("추천 결과 3개: true");
 console.log("점수 내림차순: true");
 console.log("추천 이유 존재: true");
-console.log("신강 추천 순서: career → business → wealth");
-console.table(result.recommendations);
+console.log("canonical topic ID 검증: true");
+console.log("신강 top topic: career-organization-fit (1.42)");
 
-const opportunityFlowResult =
-  buildAnalysisProductRecommendations({
-    strengthAnalysis,
-    fortuneBrain,
-    elementRelations,
-    fortuneFlow: {
-      relations: [],
-      elementFlow: {
-    original: {
-  목: 0,
-  화: 0,
-  토: 0,
-  금: 0,
-  수: 0,
-},
-adjusted: {
-  목: 0,
-  화: 0,
-  토: 0,
-  금: 0,
-  수: 0,
-},
-changes: {
-  목: 0,
-  화: 0,
-  토: 0,
-  금: 0,
-  수: 0,
-},
-    strongest: [],
-    weakest: [],
-},
-      yongshinFlow: {
-  primary: "목",
-  secondary: [],
-  primaryActive: false,
-  secondaryActive: [],
-  activationScore: 0,
-  level: "보통",
-},
-      currentFlow: "기회 우세",
-      opportunityScore: 1,
-      cautionScore: 0,
-      daeunFlow: "무호적",
-      seunFlow: "무호적",
-      opportunities: [],
-      cautions: [],
-      summary: "회귀 테스트",
-      topicGuides: {
-        career: "회귀 테스트",
-        wealth: "회귀 테스트",
-        relationship: "회귀 테스트",
-        health: "회귀 테스트",
-      },
+// --- Test 2: 신강 + 기회 우세 fortune flow ---
+// Expected: career_change(1.1) / growth_transition(0.9) additionally emit.
+// Top topic: career-job-change (career_change:1.4*1.1 + career_stability:0.8*1.0 = 2.34)
+// Ranking must differ from Test 1 (fortune flow influences results).
+const opportunityFlowResult = buildAnalysisProductRecommendations({
+  strengthAnalysis,
+  fortuneBrain,
+  elementRelations,
+  elementAnalysis,
+  fortuneFlow: {
+    relations: [],
+    elementFlow: {
+      original: { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 },
+      adjusted: { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 },
+      changes: { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 },
+      strongest: [],
+      weakest: [],
     },
-  });
-
-const opportunityCareer =
-  opportunityFlowResult.recommendations.find(
-    (item) => item.productId === "career"
-  );
-
-const opportunityBusiness =
-  opportunityFlowResult.recommendations.find(
-    (item) => item.productId === "business"
-  );
+    yongshinFlow: {
+      primary: "목",
+      secondary: [],
+      primaryActive: false,
+      secondaryActive: [],
+      activationScore: 0,
+      level: "보통",
+    },
+    currentFlow: "기회 우세",
+    opportunityScore: 1,
+    cautionScore: 0,
+    daeunFlow: "중립",
+    seunFlow: "중립",
+    opportunities: [],
+    cautions: [],
+    summary: "회귀 테스트",
+    topicGuides: {
+      career: "회귀 테스트",
+      wealth: "회귀 테스트",
+      relationship: "회귀 테스트",
+      health: "회귀 테스트",
+    },
+  },
+});
 
 assert(
-  opportunityCareer !== undefined,
-  "기회 우세 결과에 career 추천이 없습니다."
+  opportunityFlowResult.recommendations.length === 3,
+  "기회 우세 결과가 정확히 3개가 아닙니다.",
 );
 
 assert(
-  opportunityBusiness !== undefined,
-  "기회 우세 결과에 business 추천이 없습니다."
+  opportunityFlowResult.recommendations.every((item) => canonicalTopicIds.has(item.productId)),
+  "기회 우세 결과에 registry에 없는 productId가 포함되어 있습니다.",
 );
 
 assert(
-  opportunityCareer?.score === 30,
-  "기회 우세에서 career 점수가 10점 증가하지 않았습니다."
+  opportunityFlowResult.recommendations[0].productId === "career-job-change",
+  "기회 우세 + 신강: 첫 번째 추천은 career-job-change이어야 합니다.",
 );
 
 assert(
-  opportunityBusiness?.score === 23,
-  "기회 우세에서 business 점수가 8점 증가하지 않았습니다."
+  opportunityFlowResult.recommendations[0].score === 2.34,
+  "기회 우세 + 신강: career-job-change 점수가 2.34이어야 합니다.",
 );
 
+// fortune flow가 ranking에 실제 영향을 주는지 확인
 assert(
-  opportunityCareer!.reasons.some((reason) =>
-    reason.includes("기회 우세")
-  ),
-  "career 추천 이유에 운 흐름 설명이 추가되지 않았습니다."
+  opportunityFlowResult.recommendations[0].productId !== result.recommendations[0].productId,
+  "기회 우세 flow가 추천 순위에 영향을 주어야 합니다.",
 );
 
-assert(
-  opportunityBusiness!.reasons.some((reason) =>
-    reason.includes("새로운 역할이나 사업 기회")
-  ),
-  "business 추천 이유에 운 흐름 설명이 추가되지 않았습니다."
-);
-
-console.log("기회 우세 career 점수 30: true");
-console.log("기회 우세 business 점수 23: true");
-console.log("기회 우세 추천 이유 반영: true");
+console.log("기회 우세 top topic: career-job-change (2.34)");
+console.log("fortune flow ranking 영향 확인: true");
 
 const wealthProduct = paidAnalysisProducts.wealth;
 

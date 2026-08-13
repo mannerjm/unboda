@@ -183,20 +183,33 @@ function compactText(value: string, maxLength: number): string {
   return `${normalizedValue.slice(0, maxLength).trimEnd()}…`;
 }
 
-function compressCareerDetailStructure(
+export function compressCareerDetailStructure(
   detail: PaidAnalysisDetailOutputV3,
+  plugin?: string,
 ): PaidAnalysisDetailOutputV3 {
   const focusText = normalizeText(detail.decisionAnchor.focus);
-  const focus = focusText || "현재 흐름의 핵심 기준";
+  const focus = focusText || "현재 흘름의 핵심 기준";
   const actionSources = detail.actionGuide
     .map((item) => compactText(item, 108))
     .filter(Boolean);
 
-  const actionFallbacks = [
+  const careerActionFallbacks = [
     "핵심 결정을 앞두고 우선순위를 한 줄로 정리한다.",
-    "현재 흐름에서 가장 먼저 조정할 부분을 구체적으로 정리한다.",
+    "현재 흘름에서 가장 먼저 조정할 부분을 구체적으로 정리한다.",
     "결정 이후 부담과 이익을 함께 비교해본다.",
   ];
+
+  // 관계 상품에 커리어 문구가 주입되면 관계 품질 게이트의 actionGuide 검사가 무조건 실패한다.
+  const relationshipActionFallbacks = [
+    "갈등이 생겼을 때 감정을 해석하기 전에 상대에게 사실을 먼저 확인한다.",
+    "연락과 약속의 일관성이 달라지는 시점을 기록해 관계 흘름을 확인한다.",
+    "서로의 경계와 기대 수준을 대화로 확인한 뒤 다음 단계를 판단한다.",
+  ];
+
+  const actionFallbacks =
+    plugin === "RELATIONSHIP"
+      ? relationshipActionFallbacks
+      : careerActionFallbacks;
 
   detail.actionGuide = [
     ...(actionSources.length >= 1 ? actionSources.slice(0, 1) : []),
@@ -299,7 +312,10 @@ export async function generatePaidAnalysisDetailV2(
     throw error;
   }
 
-  const compressedDetail = compressCareerDetailStructure(detail);
+  const compressedDetail = compressCareerDetailStructure(
+    detail,
+    registryProduct?.plugin,
+  );
 
   const consistencyResult = validatePaidAnalysisConsistency(compressedDetail);
 
@@ -387,6 +403,11 @@ if (isRelationshipAnalysis) {
     evaluateRelationshipPremiumQuality({
       pastPatternSummary:
         compressedDetail.pastPattern.summary,
+
+      pastPatternPeriodPatterns:
+        compressedDetail.pastPattern.periods.map(
+          (item) => item.pattern,
+        ),
 
       pastPatternVerificationQuestion:
         compressedDetail.pastPattern.periods[0]?.verificationQuestion ?? "",

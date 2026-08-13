@@ -1,5 +1,6 @@
 export type RelationshipPremiumQualityInput = {
   pastPatternSummary: string;
+  pastPatternPeriodPatterns?: readonly string[];
   pastPatternVerificationQuestion: string;
   currentCoreProblemTitle: string;
   currentCoreProblemDescription: string;
@@ -42,6 +43,28 @@ const relationshipSignalExpressions = [
   "만남",
 "공동 계획",
 "서로",
+];
+
+// pastPattern 전용 사전. 다른 체크의 기준을 바꾸지 않도록 분리해서 관리한다.
+const relationshipPatternCoreExpressions = [
+  ...relationshipSignalExpressions,
+  "서운",
+  "오해",
+  "소통",
+  "신뢰",
+  "가까워",
+  "멀어",
+  "물러",
+  "회피",
+  "다툼",
+  "충돌",
+];
+
+// 단독으로는 근거가 약한 표현. 최소 2개가 모일 때만 관계 패턴으로 인정한다.
+const relationshipPatternSupportingExpressions = [
+  "표현",
+  "반응",
+  "마음",
 ];
 
 const conditionalExpressions = [
@@ -119,12 +142,25 @@ export function evaluateRelationshipPremiumQuality(
     genericAdviceExpressions,
   );
 
+  const pastPatternTexts = [
+    input.pastPatternSummary,
+    ...(input.pastPatternPeriodPatterns ?? []),
+  ];
+
+  const pastPatternCoreMatches = findMatchedExpressions(
+    pastPatternTexts,
+    relationshipPatternCoreExpressions,
+  );
+
+  const pastPatternSupportingMatches = findMatchedExpressions(
+    pastPatternTexts,
+    relationshipPatternSupportingExpressions,
+  );
+
   const pastPatternConnected =
     input.pastPatternSummary.length >= 20 &&
-    containsAny(
-      input.pastPatternSummary,
-      relationshipSignalExpressions,
-    );
+    (pastPatternCoreMatches.length >= 1 ||
+      pastPatternSupportingMatches.length >= 2);
 
   const verificationQuestionIsConcrete =
     input.pastPatternVerificationQuestion.length >= 15 &&

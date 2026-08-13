@@ -101,20 +101,21 @@ assert(
 );
 console.log("6. Server getCurrentUser() helper exists and uses getUser() ✓");
 
-// --- 7. Client components use Supabase browser client (not localStorage) ---
+// --- 7. Access gate resolves identity from the Supabase server session ---
+// (Phase 3B moved this panel from a browser-client component to a server component.)
 const accessPanelTs = readFileSync(
   join(process.cwd(), "app/paid-analysis/[productId]/PaidAnalysisAccessPanel.tsx"),
   "utf-8",
 );
 assert(
-  accessPanelTs.includes("createClient") && accessPanelTs.includes("supabase/client"),
-  "PaidAnalysisAccessPanel must use Supabase browser client",
+  accessPanelTs.includes("getCurrentUser") && accessPanelTs.includes("supabase/auth"),
+  "PaidAnalysisAccessPanel must resolve the user from the Supabase server session",
 );
 assert(
   !accessPanelTs.includes("loadAuthState"),
   "PaidAnalysisAccessPanel must not use loadAuthState",
 );
-console.log("7. PaidAnalysisAccessPanel uses Supabase browser client ✓");
+console.log("7. PaidAnalysisAccessPanel uses Supabase server session ✓");
 
 // --- 8. getSafeReturnTo validates redirect destination ---
 assert(getSafeReturnTo("/checkout/foo") === "/checkout/foo", "relative paths allowed");

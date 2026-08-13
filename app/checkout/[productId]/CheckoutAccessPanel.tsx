@@ -9,16 +9,7 @@ import {
 } from "@/app/lib/auth";
 import { createClient } from "@/app/lib/supabase/client";
 import { getUserAccessPermissions } from "@/app/lib/userAccess";
-import {
-  createPendingOrder,
-  createPurchaseAccessFromPaidOrder,
-  markOrderAsPaid,
-} from "@/app/lib/payment";
-import { getProductPricing } from "@/app/lib/productPricing";
-import {
-  saveEntitlement,
-  savePurchase,
-} from "@/app/lib/purchaseStorage";
+import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 
 type CheckoutAccessPanelProps = {
   productId: string;
@@ -29,6 +20,11 @@ export default function CheckoutAccessPanel({
 }: CheckoutAccessPanelProps) {
   const [authState, setAuthState] =
     useState<AuthState>(guestAuthState);
+
+  const [isPaying, setIsPaying] = useState(false);
+
+  const [errorMessage, setErrorMessage] =
+    useState<string | null>(null);
 
 const router = useRouter();
 
@@ -52,37 +48,56 @@ const router = useRouter();
   const userAccessLevel = getAuthUserAccessLevel(authState);
   const permissions = getUserAccessPermissions(userAccessLevel);
 
-  function handleMockPayment() {
-  if (authState.status !== "authenticated") {
-    return;
+  const canonicalProductId = getCanonicalPremiumProductId(productId);
+
+  async function handleMockPayment() {
+    if (authState.status !== "authenticated" || isPaying) {
+      return;
+    }
+
+    setIsPaying(true);
+    setErrorMessage(null);
+
+    try {
+      // The server derives userId and amount itself; only productId is sent.
+      const orderResponse = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: canonicalProductId }),
+      });
+
+      if (!orderResponse.ok) {
+        throw new Error(
+          `주문 생성에 실패했습니다. (${orderResponse.status})`,
+        );
+      }
+
+      const { order } = (await orderResponse.json()) as {
+        order: { id: string };
+      };
+
+      const confirmResponse = await fetch(
+        `/api/orders/${order.id}/mock-confirm`,
+        { method: "POST" },
+      );
+
+      if (!confirmResponse.ok) {
+        throw new Error(
+          `결제 확인에 실패했습니다. (${confirmResponse.status})`,
+        );
+      }
+
+      router.push(`/paid-analysis/${canonicalProductId}`);
+      router.refresh();
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "결제를 완료하지 못했습니다.",
+      );
+      setIsPaying(false);
+    }
   }
-
-  const pricing = getProductPricing(productId);
-
-  const pendingOrder = createPendingOrder({
-    userId: authState.user.id,
-    profileId: "demo-profile",
-    productId,
-    amount: pricing.amount,
-  });
-
-  const { order: paidOrder } = markOrderAsPaid(
-    pendingOrder,
-    `transaction-${Date.now()}`
-  );
-
-  const access =
-    createPurchaseAccessFromPaidOrder(paidOrder);
-
-    savePurchase(access.purchase);
-saveEntitlement(access.entitlement);
-
-  console.log("Mock paid order:", paidOrder);
-  console.log("Created purchase:", access.purchase);
-  console.log("Created entitlement:", access.entitlement);
-
-  router.push(`/paid-analysis/${productId}`);
-}
 
   return (
     <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
@@ -139,10 +154,17 @@ saveEntitlement(access.entitlement);
           <button
             type="button"
             onClick={handleMockPayment}
-            className="mt-7 w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800"
+            disabled={isPaying}
+            className="mt-7 w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
           >
-            결제 계속하기
+            {isPaying ? "결제 처리 중..." : "결제 계속하기"}
           </button>
+
+          {errorMessage ? (
+            <p className="mt-4 text-sm leading-6 text-red-600">
+              {errorMessage}
+            </p>
+          ) : null}
         </>
       )}
 

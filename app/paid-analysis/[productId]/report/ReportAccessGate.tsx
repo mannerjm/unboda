@@ -1,74 +1,24 @@
-"use client";
 import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { guestAuthState, type AuthState } from "@/app/lib/auth";
-import { createClient } from "@/app/lib/supabase/client";
-import { loadEntitlements } from "@/app/lib/purchaseStorage";
-import {
-  hasActiveEntitlement,
-  type Entitlement,
-} from "@/app/lib/userAccess";
+import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { hasActiveEntitlement } from "@/app/lib/purchases/server";
 
 type ReportAccessGateProps = {
   productId: string;
   children: React.ReactNode;
 };
 
-export default function ReportAccessGate({
+export default async function ReportAccessGate({
   productId,
   children,
 }: ReportAccessGateProps) {
-  const [authState, setAuthState] =
-    useState<AuthState>(guestAuthState);
+  const canonicalProductId = getCanonicalPremiumProductId(productId);
 
-  const [entitlements, setEntitlements] =
-    useState<Entitlement[]>([]);
+  const user = await getCurrentUser();
 
-  const [isChecked, setIsChecked] = useState(false);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setAuthState({
-          status: "authenticated",
-          user: {
-            id: user.id,
-            email: user.email ?? "",
-            name: "",
-            accessLevel: "free_member",
-          },
-        });
-      }
-      setEntitlements(loadEntitlements());
-      setIsChecked(true);
-    });
-  }, []);
-
-  if (!isChecked) {
-    return (
-      <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 text-center shadow-sm sm:p-9">
-        <p className="text-sm text-stone-600">
-          구매 권한을 확인하는 중입니다...
-        </p>
-      </section>
-    );
-  }
-const canonicalProductId =
-  getCanonicalPremiumProductId(productId);
-
- const realAccess =
-  authState.status === "authenticated" &&
- hasActiveEntitlement(
-  entitlements,
-  authState.user.id,
-  "demo-profile",
-  canonicalProductId
-);
-
-const hasAccess =
-  process.env.NODE_ENV === "development" || realAccess;
+  const hasAccess = user
+    ? await hasActiveEntitlement(user.id, canonicalProductId)
+    : false;
 
   if (!hasAccess) {
     return (
@@ -83,7 +33,7 @@ const hasAccess =
 
         <p className="mt-4 text-sm leading-7 text-stone-600">
           로그인 상태와 해당 상품의 구매 권한을 확인해 주세요.
-          구매가 완료된 계정과 프로필에만 심층 분석 열람 권한이 연결됩니다.
+          구매가 완료된 계정에만 심층 분석 열람 권한이 연결됩니다.
         </p>
 
         <Link

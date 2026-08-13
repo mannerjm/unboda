@@ -1,98 +1,47 @@
-"use client";
 import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { guestAuthState, type AuthState } from "@/app/lib/auth";
-import { createClient } from "@/app/lib/supabase/client";
-import { loadEntitlements } from "@/app/lib/purchaseStorage";
-import {
-  hasActiveEntitlement,
-  type Entitlement,
-} from "@/app/lib/userAccess";
+import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { hasActiveEntitlement } from "@/app/lib/purchases/server";
 
 type PaidAnalysisAccessPanelProps = {
   productId: string;
 };
 
-export default function PaidAnalysisAccessPanel({
+export default async function PaidAnalysisAccessPanel({
   productId,
 }: PaidAnalysisAccessPanelProps) {
-  const [authState, setAuthState] =
-    useState<AuthState>(guestAuthState);
+  const canonicalProductId = getCanonicalPremiumProductId(productId);
 
-  const [entitlements, setEntitlements] =
-    useState<Entitlement[]>([]);
+  const user = await getCurrentUser();
 
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setAuthState({
-          status: "authenticated",
-          user: {
-            id: user.id,
-            email: user.email ?? "",
-            name: "",
-            accessLevel: "free_member",
-          },
-        });
-      }
-    });
-    setEntitlements(loadEntitlements());
-  }, []);
-
-const canonicalProductId = getCanonicalPremiumProductId(productId);
-
- const realAccess =
-  authState.status === "authenticated" &&
-  hasActiveEntitlement(
-    entitlements,
-    authState.user.id,
-    "demo-profile",
-    canonicalProductId
-  );
-
-const hasAccess =
-  process.env.NODE_ENV === "development" || realAccess;
-
-const isDevelopment = process.env.NODE_ENV === "development";
+  const hasAccess = user
+    ? await hasActiveEntitlement(user.id, canonicalProductId)
+    : false;
 
   return (
     <section className="mt-8 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
       {hasAccess ? (
         <>
           <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
-  {isDevelopment ? "DEVELOPER ACCESS" : "PURCHASED"}
-</p>
+            PURCHASED
+          </p>
 
           <h2 className="mt-3 text-2xl font-bold text-stone-900">
-  {isDevelopment
-    ? "개발 환경에서 심층 분석을 열람할 수 있습니다"
-    : "이 심층 분석을 열람할 수 있습니다"}
-</h2>
+            이 심층 분석을 열람할 수 있습니다
+          </h2>
 
           <p className="mt-4 text-sm leading-7 text-stone-600">
-  {isDevelopment ? (
-    <>
-      개발 전용 권한 우회가 적용되어 있습니다.
-      <br />
-      운영 환경에서는 실제 구매 권한이 필요합니다.
-    </>
-  ) : (
-    <>
-      구매 권한이 확인되었습니다.
-      <br />
-      이제 이 상품의 심층 분석 내용을 확인할 수 있습니다.
-    </>
-  )}
-</p>
+            구매 권한이 확인되었습니다.
+            <br />
+            이제 이 상품의 심층 분석 내용을 확인할 수 있습니다.
+          </p>
 
           <Link
-  href={`/paid-analysis/${canonicalProductId}/report`}
-  className="mt-7 block w-full rounded-2xl bg-stone-900 px-5 py-4 text-center font-semibold text-white transition hover:bg-stone-800"
->
-  심층 분석 열기
-</Link>
+            href={`/paid-analysis/${canonicalProductId}/report`}
+            className="mt-7 block w-full rounded-2xl bg-stone-900 px-5 py-4 text-center font-semibold text-white transition hover:bg-stone-800"
+          >
+            심층 분석 열기
+          </Link>
         </>
       ) : (
         <>
@@ -105,7 +54,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
           </h2>
 
           <p className="mt-4 text-sm leading-7 text-stone-600">
-            구매를 완료하면 이 계정과 프로필에
+            구매를 완료하면 이 계정에
             해당 심층 분석의 열람 권한이 연결됩니다.
           </p>
 

@@ -7,7 +7,9 @@ export async function generateMainAnalysis(
   prompt: string
 ): Promise<string> {
   try {
-    return await generateAnalysisText(prompt);
+    return await generateAnalysisText(prompt, {
+      callType: "main-analysis",
+    });
   } catch (error) {
     console.error("[generateMainAnalysis] failed", error);
     return "AI 분석 결과를 생성하지 못했습니다.";

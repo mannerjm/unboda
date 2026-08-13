@@ -107,6 +107,8 @@ function createTopicPremiumProduct(
 
     description: topic.shortDescription,
 
+    details: topic.details,
+
     riskLevel: topic.riskLevel,
 
     analysisType: topic.title,
@@ -497,6 +499,25 @@ export const TOPIC_PREMIUM_PRODUCTS: PremiumProductDefinition[] =
 
 export const PERIOD_PREMIUM_PRODUCTS: PremiumProductDefinition[] =
   PERIOD_ANALYSIS_PRODUCTS.map(createPeriodPremiumProduct);
+
+const PREMIUM_CATEGORY_LABELS: Record<PremiumProductCategory, string> = {
+  money: "재물운",
+  career: "직업운",
+  relationship: "관계운",
+  social: "대인관계운",
+  health: "건강운",
+  business: "사업운",
+  growth: "성장운",
+  change: "변화운",
+  life: "종합운",
+  period: "시기운",
+};
+
+export function getPremiumCategoryLabel(
+  category: PremiumProductCategory,
+): string {
+  return PREMIUM_CATEGORY_LABELS[category];
+}
 
 export function getPremiumPluginByCategory(
   category: PremiumProductCategory,

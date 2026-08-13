@@ -20,6 +20,8 @@ export type AnalysisTopicDefinition = {
   title: string;
   shortDescription: string;
   riskLevel: AnalysisTopicRiskLevel;
+  // Paid report preview points. Optional while topics are filled in per category.
+  details?: readonly string[];
 };
 
 export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
@@ -29,14 +31,26 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     category: "money",
     title: "재물이 쌓이는 구조",
     shortDescription: "돈을 벌고 남기고 축적하는 방식과 현재 재물 흐름을 분석합니다.",
-    riskLevel: "sensitive",
-  },
+    riskLevel: "sensitive",    details: [
+      "돈이 들어오는 구조와 남는 구조가 갈리는 명리적 원인",
+      "수입 구조·자산 보존·투자 성향·지출 위험으로 나눠 본 현재 재물 구조",
+      "지금 확대·유지·조정·보류 중 무엇이 우선인지에 대한 판단 기준",
+      "시기별로 수입·보존·조정·준비 중 무엇이 중요해지는지",
+      "축적을 방해하는 행동과 지금 직접 점검할 확인 항목",
+    ],  },
   {
     id: "money-leak-risk",
     category: "money",
     title: "돈이 새는 구조와 손실 위험",
     shortDescription: "지출·손실·충동 판단이 커지기 쉬운 조건과 관리 기준을 분석합니다.",
     riskLevel: "sensitive",
+    details: [
+      "지출과 손실이 커지기 쉬운 명리적 조건과 반복 패턴",
+      "경쟁·공동 부담·고정비처럼 돈의 통제 범위가 달라지는 구조",
+      "현재 운에서 커지는 지출·계약·현금 흘름의 위험 조건",
+      "손실을 키우기 쉬운 반응과 피해야 할 행동",
+      "지금부터 직접 확인할 지출·계약 점검 항목",
+    ],
   },
   {
     id: "money-investment-style",
@@ -44,6 +58,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "투자 성향과 위험 관리",
     shortDescription: "투자 판단 스타일과 과도한 위험을 피하기 위한 기준을 분석합니다.",
     riskLevel: "high_sensitivity",
+    details: [
+      "투자 판단이 흔들리기 쉬운 조건과 그 명리적 배경",
+      "위험을 키우는 조건과 통제 가능한 범위의 구분",
+      "확대·유지·조정·보류 중 현재 필요한 판단 방향",
+      "시기별로 달라지는 위험 부담과 준비 기준",
+      "충동적 판단과 손실 만회성 결정에서 피해야 할 행동",
+    ],
   },
   {
     id: "money-side-income",
@@ -51,6 +72,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "부업·추가 수입 가능성",
     shortDescription: "본업 외 수입원을 만들 때 맞는 방식과 현실적인 조건을 분석합니다.",
     riskLevel: "sensitive",
+    details: [
+      "본업 외 수입이 만들어지는 명리적 조건",
+      "활동과 성과가 실제 수입으로 연결되는 구조",
+      "추가 수입을 시도하기 좋은 시기와 부담이 커지는 시기",
+      "시간·체력·고정비 측면에서 확인해야 할 위험 조건",
+      "지금 검토할 수입원 관리 기준",
+    ],
   },
   {
     id: "money-business-income",
@@ -58,6 +86,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "사업 수입 구조",
     shortDescription: "고정 수입보다 사업·성과형 수입이 맞는지와 변동성을 분석합니다.",
     riskLevel: "sensitive",
+    details: [
+      "고정 수입형과 성과형 중 어느 구조에 가까운지에 대한 명리적 근거",
+      "수입 변동성이 커지는 조건과 보존이 필요한 구간",
+      "계약과 책임 범위가 재정 흘름에 미치는 영향",
+      "시기별 수입·보존·조정·준비의 우선순위",
+      "변동성 관리를 위해 확인할 점검 항목",
+    ],
   },
   {
     id: "money-saving-discipline",
@@ -65,6 +100,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "저축과 자산 관리 습관",
     shortDescription: "돈을 유지하는 힘과 생활 속 자산 관리 패턴을 분석합니다.",
     riskLevel: "sensitive",
+    details: [
+      "돈을 유지하는 힘이 강해지거나 약해지는 명리적 구조",
+      "저축 기준이 무너지기 쉬운 생활·관계 조건",
+      "현재 운에서 보존과 확대 중 무엇이 우선인지",
+      "지출 통제를 위해 조정할 행동과 피해야 할 행동",
+      "직접 확인할 현금 흘름 점검 항목",
+    ],
   },
   {
     id: "money-income-expansion",
@@ -72,14 +114,26 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "소득 확장 시기와 방식",
     shortDescription: "수입을 늘리기 좋은 조건과 확장 시 주의점을 분석합니다.",
     riskLevel: "sensitive",
+    details: [
+      "수입을 늘릴 수 있는 명리적 조건과 확장의 한계",
+      "확장과 함께 커지는 책임·고정비·계약 부담",
+      "확대·유지·조정·보류 중 현재 필요한 방향",
+      "시기별로 확장과 준비 중 무엇이 유리한지",
+      "확장 전에 확인할 점검 항목",
+    ],
   },
   {
     id: "money-financial-turning-point",
     category: "money",
     title: "재정 전환점",
     shortDescription: "현재 운에서 돈의 흐름이 바뀌는 지점과 대응 기준을 분석합니다.",
-    riskLevel: "sensitive",
-  },
+    riskLevel: "sensitive",    details: [
+      "재정 흘름이 바뀜 수 있는 지점이 나타나는 명리적 근거",
+      "대운·세운과 합·충·형·해·파로 확인하는 변화 조건",
+      "전환 구간에서 커지는 기회 요인과 위험 요인",
+      "전환 시점에 필요한 확대·유지·조정·보류 판단",
+      "변화를 확인하기 위해 관찰할 기준",
+    ],  },
 
   // 직업·커리어 8
   {
@@ -146,6 +200,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "현재 관계의 지속성과 조정",
     shortDescription: "현재 관계의 핵심 문제와 이어갈 기준·조정 기준을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "현재 관계 흘름을 만드는 원국 구조와 현재 운의 작용",
+      "관계에서 반복되기 쉬운 패턴과 그 촉발 조건",
+      "연락 빈도·약속 변경·갈등 후 대화 재개처럼 지금 확인할 현실 신호",
+      "조건에 따라 관계 흘름이 달라질 수 있는 시기와 관찰 기준",
+      "지금 조정할 행동과 피해야 할 반응",
+    ],
   },
   {
     id: "relationship-new-connection",
@@ -153,20 +214,39 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "새 인연 가능성과 만남 방식",
     shortDescription: "새로운 관계가 형성되기 쉬운 조건과 확인 기준을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "새로운 인연이 형성되기 쉬운 명리적 조건",
+      "만남의 속도와 관계의 안정성을 혼동하지 않기 위한 판단 기준",
+      "현재 운에서 접점이 늘거나 줄어드는 요인",
+      "조건에 따라 달라지는 관계 진행 시나리오와 확인 신호",
+      "초기 관계에서 피해야 할 반응",
+    ],
   },
   {
     id: "relationship-marriage",
     category: "relationship",
     title: "결혼·장기 관계 흐름",
     shortDescription: "장기 관계에서 중요하게 작용하는 기준과 시기 흐름을 분석합니다.",
-    riskLevel: "standard",
-  },
+    riskLevel: "standard",    details: [
+      "장기 관계에서 안정과 마찰이 나타나는 명리적 구조",
+      "역할 분담과 생활 조건이 관계에 미치는 영향",
+      "현재 운에서 관계 결정의 압력이 커지는 조건",
+      "조건에 따라 달라지는 관계 진행 시나리오와 판단 기준",
+      "결정을 서두르기 전에 확인할 관찰 항목",
+    ],  },
   {
     id: "relationship-partner-pattern",
     category: "relationship",
     title: "배우자·파트너 패턴",
     shortDescription: "어떤 관계 특성과 역할 배분에서 안정감을 느끼는지 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "어떤 관계 특성에서 안정감을 느끼는지에 대한 명리적 근거",
+      "반복되기 쉬운 파트너 선택 패턴과 촉발 조건",
+      "현재 운에서 강화되는 관계 기대와 부담",
+      "역할 불균형·말과 행동의 차이처럼 확인할 현실 신호",
+      "과거 경험으로 패턴을 검증할 질문",
+    ],
   },
   {
     id: "relationship-conflict",
@@ -174,6 +254,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "갈등 패턴과 회복 방식",
     shortDescription: "갈등이 생기는 구조와 관계를 다시 회복하는 방식을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "갈등이 반복되는 원국 구조와 촉발 조건",
+      "현재 운에서 갈등을 키우거나 완화하는 요인",
+      "갈등 후 대화 재개·거리 변화·감정 소모처럼 확인할 현실 신호",
+      "조건에 따라 회복 가능성이 달라지는 시기와 판단 기준",
+      "회복을 위해 취할 행동과 피해야 할 반응",
+    ],
   },
   {
     id: "relationship-boundary",
@@ -181,6 +268,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "거리 조절과 경계",
     shortDescription: "가까워질수록 생길 수 있는 경계 문제와 조절 방식을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "가까워질수록 경계 문제가 생기는 명리적 구조",
+      "경계가 무너지기 쉬운 상황과 반복되는 반응",
+      "경계 침범·역할 불균형·감정 소모처럼 확인할 현실 신호",
+      "조건에 따라 거리감이 달라지는 시기와 관찰 기준",
+      "거리 조절을 위해 취할 행동과 피해야 할 반응",
+    ],
   },
   {
     id: "relationship-reunion",
@@ -188,6 +282,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "재회 가능성과 판단 기준",
     shortDescription: "재회를 단정하지 않고 다시 연결될 조건과 현실적 판단 기준을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "관계가 끊기고 다시 이어지는 흘름의 명리적 구조",
+      "감정과 조건을 구분해 재회를 판단하는 기준",
+      "현재 운에서 접점과 마찰이 커지는 요인",
+      "조건에 따라 달라지는 관계 시나리오와 확인할 신호",
+      "판단을 서두르거나 미룰 때 피해야 할 반응",
+    ],
   },
   {
     id: "relationship-intimacy",
@@ -195,6 +296,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "친밀감 형성 속도",
     shortDescription: "관계가 가까워지는 속도와 감정 소모 패턴을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "친밀감이 형성되는 속도와 방식의 명리적 배경",
+      "빠른 친밀감과 관계의 안정성을 구분하는 판단 기준",
+      "현재 운에서 표현과 거리감에 영향을 주는 요인",
+      "연락의 일관성·약속 변경처럼 확인할 현실 신호",
+      "속도 조절을 위해 취할 행동과 피해야 할 반응",
+    ],
   },
 
   // 인간관계 6
@@ -248,6 +356,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "체력과 에너지 관리",
     shortDescription: "생활 리듬과 피로가 쌓이기 쉬운 패턴을 명리적 관점에서 분석합니다.",
     riskLevel: "high_sensitivity",
+    details: [
+      "체력 소모와 회복력이 갈리는 오행 과다·부족과 강약 구조",
+      "체력 소모·회복력·생활 리듬·스트레스 민감도로 나눠 본 현재 상태",
+      "현재 운에서 피로가 누적되기 쉬운 조건",
+      "시기별로 회복·유지·과로 방지 중 무엇이 중요한지",
+      "수면·휴식·활동량에서 조정할 행동과 직접 관찰할 항목",
+    ],
   },
   {
     id: "health-stress",
@@ -255,6 +370,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "스트레스와 회복 패턴",
     shortDescription: "스트레스가 커지는 조건과 회복을 돕는 생활 기준을 분석합니다.",
     riskLevel: "high_sensitivity",
+    details: [
+      "긴장이 높아지고 회복이 늦어지는 명리적 구조",
+      "현재 운에서 스트레스를 키우는 생활·관계 조건",
+      "수면 시간·피로도·회복 속도처럼 직접 관찰할 신호",
+      "시기별로 회복·유지·과로 방지 중 무엇이 우선인지",
+      "휴식 간격과 일정 밀도에서 조정할 행동과 피해야 할 습관",
+    ],
   },
   {
     id: "health-burnout",
@@ -262,6 +384,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "과로·번아웃 위험",
     shortDescription: "과도한 활동과 회복 부족이 반복되기 쉬운 흐름을 분석합니다.",
     riskLevel: "high_sensitivity",
+    details: [
+      "과로가 누적되기 쉬운 오행 과다·부족과 일간 강약의 구조",
+      "현재 운에서 일정 밀도와 감정 소모가 커지는 조건",
+      "회복 지연·집중력 저하처럼 미리 확인할 생활 신호",
+      "시기별로 속도를 늦추거나 점검이 필요한 구간",
+      "수면 희생과 반복되는 과로처럼 피해야 할 행동",
+    ],
   },
   {
     id: "health-routine",
@@ -269,6 +398,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "생활 습관과 리듬",
     shortDescription: "수면·활동·휴식 리듬을 조절하는 데 참고할 수 있는 흐름을 분석합니다.",
     riskLevel: "high_sensitivity",
+    details: [
+      "생활 리듬이 흔들리는 명리적 배경과 계절성",
+      "리듬이 무너지기 쉬운 조건과 반복되는 패턴",
+      "식사 간격·수면 시간·활동량처럼 기록으로 확인할 항목",
+      "시기별로 재정비와 유지 중 무엇이 필요한지",
+      "무리 없이 적용할 수 있는 생활 관리 행동",
+    ],
   },
   {
     id: "health-balance",
@@ -276,6 +412,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "몸과 생활 균형 점검",
     shortDescription: "특정 질병을 진단하지 않고 생활 균형이 흔들리기 쉬운 시기를 분석합니다.",
     riskLevel: "high_sensitivity",
+    details: [
+      "활동과 회복의 균형이 무너지는 명리적 구조",
+      "일·관계·생활에서 부담이 몰리는 조건",
+      "피로도·스트레스 체감·회복 속도로 확인할 균형 신호",
+      "시기별로 조정이 필요한 구간과 점검 기준",
+      "균형 회복을 위해 조정할 행동과 피해야 할 습관",
+    ],
   },
 
   // 사업·성취 5

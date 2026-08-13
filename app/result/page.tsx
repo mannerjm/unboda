@@ -8,7 +8,10 @@ import { calculateSeun } from "../lib/seun";
 import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
 import type { AnalyzeFreeResponse } from "@/app/lib/analyzeApiTypes";
 import type { AnalysisProductRecommendationResult } from "@/app/lib/analysisProductRecommendations";
-import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
+import {
+  getPremiumCategoryLabel,
+  getPremiumProduct,
+} from "@/app/lib/premiumProductRegistry";
 import type {
   AnalysisRecommendationOutput,
 } from "@/app/lib/analysisRecommendationOutput";
@@ -1386,6 +1389,8 @@ h3: ({ children }) => {
   {isPrimaryRecommendation
     ? "1순위 추천"
     : `${index + 1}순위 보조 추천`}
+  {" · "}
+  {getPremiumCategoryLabel(product.category)}
 </p>
       <p className="text-sm font-bold text-stone-900">
         {product.title}
@@ -1430,6 +1435,10 @@ h3: ({ children }) => {
   <div className="mt-6 rounded-2xl border border-stone-300 bg-stone-50 p-6">
     <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
       SELECTED ANALYSIS
+    </p>
+
+    <p className="mt-3 inline-flex rounded-full bg-stone-900 px-3 py-1 text-xs font-semibold text-white">
+      {getPremiumCategoryLabel(selectedPaidAnalysis.category)}
     </p>
 
     <h3 className="mt-3 text-xl font-bold text-stone-900">

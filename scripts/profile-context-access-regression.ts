@@ -1,0 +1,65 @@
+import { readFileSync } from "fs";
+import { join } from "path";
+
+function assert(condition: boolean, message: string): void {
+  if (!condition) throw new Error(`FAIL: ${message}`);
+}
+
+function read(relativePath: string): string {
+  return readFileSync(join(process.cwd(), relativePath), "utf-8");
+}
+
+const checkoutPage = read("app/checkout/[productId]/page.tsx");
+const checkoutPanel = read("app/checkout/[productId]/CheckoutAccessPanel.tsx");
+const paidPage = read("app/paid-analysis/[productId]/page.tsx");
+const accessPanel = read("app/paid-analysis/[productId]/PaidAnalysisAccessPanel.tsx");
+const reportPage = read("app/paid-analysis/[productId]/report/page.tsx");
+const reportGate = read("app/paid-analysis/[productId]/report/ReportAccessGate.tsx");
+const detailClient = read("app/paid-analysis/[productId]/PaidAnalysisDetailV2Client.tsx");
+const detailRoute = read("app/api/paid-analysis-detail-v2/route.ts");
+const ordersRoute = read("app/api/orders/route.ts");
+const purchaseServer = read("app/lib/purchases/server.ts");
+const selector = read("app/components/ProfileSelector.tsx");
+
+assert(selector.includes('fetch("/api/profiles")'), "selector must load profiles through the Profile API");
+assert(!selector.includes("localStorage") && !selector.includes("sessionStorage"), "selector must not persist profile ownership in browser storage");
+assert(!selector.includes("profiles[0]") && !selector.includes("relationshipType === \"self\""), "selector must not auto-select self or first profile");
+assert(selector.includes("?profileId=${profile.id}"), "selector must navigate using profileId query context");
+console.log("1. selector requires explicit URL-backed profile selection ✓");
+
+assert(checkoutPage.includes("searchParams") && checkoutPage.includes("currentProfileId={profileId}"), "checkout page must read and render profileId query context");
+assert(checkoutPanel.includes("profileId?: string") && checkoutPanel.includes("disabled={isPaying || !profileId}"), "checkout must require selected profileId before payment");
+assert(checkoutPanel.includes("JSON.stringify({ productId: canonicalProductId, profileId })"), "checkout must send selected profileId to orders API");
+assert(checkoutPanel.includes("?profileId=${profileId}"), "checkout success navigation must preserve profileId");
+assert(ordersRoute.includes("getUserProfile(rawProfileId, user.id)"), "orders API must ownership-verify profileId");
+console.log("2. checkout requires and preserves selected profileId ✓");
+
+for (const [name, source] of [["paid page", paidPage], ["report page", reportPage]] as const) {
+  assert(source.includes("searchParams"), `${name} must read profileId query context`);
+}
+for (const [name, source] of [["access panel", accessPanel], ["report gate", reportGate]] as const) {
+  assert(source.includes("isProfileId(profileId)"), `${name} must reject missing/invalid profileId`);
+  assert(source.includes("getUserProfile(profileId, user.id)"), `${name} must verify profile ownership`);
+  assert(source.includes("hasActiveEntitlementForProfile"), `${name} must use strict profile entitlement lookup`);
+  assert(source.includes("notFound()"), `${name} must return 404 for invalid/foreign profile`);
+}
+assert(reportGate.includes("?profileId=${profileId}"), "report gate return link must preserve profileId");
+console.log("3. paid access and report gate are profile-scoped ✓");
+
+assert(reportPage.includes("<PaidAnalysisDetailV2Client productId={productId} profileId={profileId}"), "report page must pass profileId to the detail client");
+assert(detailClient.includes("profileId?: string") && detailClient.includes("profileId,") && detailClient.includes("body: JSON.stringify(input)"), "detail client must retain and send profileId");
+assert(detailRoute.includes("isProfileId(input.profileId)"), "detail API must reject missing/invalid profileId");
+assert(detailRoute.includes("getUserProfile(input.profileId, user.id)"), "detail API must verify profile ownership");
+assert(detailRoute.includes("hasActiveEntitlementForProfile"), "detail API must use strict profile entitlement lookup");
+const entitlementIndex = detailRoute.indexOf("hasActiveEntitlementForProfile");
+const generateIndex = detailRoute.indexOf("generatePaidAnalysisDetailV2(");
+assert(entitlementIndex !== -1 && generateIndex !== -1 && entitlementIndex < generateIndex, "detail entitlement check must precede OpenAI generation");
+assert(detailRoute.includes("status: 400") && detailRoute.includes("status: 404") && detailRoute.includes("status: 403"), "detail API must distinguish invalid, foreign, and no-entitlement requests");
+console.log("4. detail API verifies profile entitlement before OpenAI ✓");
+
+assert(!purchaseServer.includes("export async function hasActiveEntitlement("), "account-wide entitlement accessor must be removed");
+assert(!purchaseServer.includes("export async function getActiveEntitlement("), "account-wide entitlement lookup must be removed");
+assert(!accessPanel.includes("hasActiveEntitlement(user.id") && !reportGate.includes("hasActiveEntitlement(user.id") && !detailRoute.includes("hasActiveEntitlement(user.id"), "paid-analysis boundaries must not retain account-wide access calls");
+console.log("5. account-wide paid-analysis entitlement fallback removed ✓");
+
+console.log("\nprofile-context-access-regression passed ✓");

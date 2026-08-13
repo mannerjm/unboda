@@ -136,8 +136,13 @@ assert(
   "purchase creation must be idempotent via onConflict order_id",
 );
 assert(
-  purchasesServer.includes('onConflict: "user_id,resource_id,resource_type"'),
-  "entitlement grant must be idempotent via unique (user_id, resource_id, resource_type)",
+  purchasesServer.includes('onConflict: "user_id,profile_id,resource_id,resource_type"'),
+  "entitlement grant must be idempotent via unique (user_id, profile_id, resource_id, resource_type)",
+);
+assert(
+  purchasesServer.includes("profile_id: order.profileId") &&
+    purchasesServer.includes("profile_id: input.profileId"),
+  "purchase and entitlement persistence must retain the verified order/profile scope",
 );
 assert(
   purchasesServer.includes("resolvePurchasableProduct"),
@@ -278,19 +283,23 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const integrationUserId = process.env.PHASE3B_TEST_USER_ID;
 const otherUserId = process.env.PHASE3B_TEST_OTHER_USER_ID;
+const integrationProfileId = process.env.PHASE3B_TEST_PROFILE_ID;
+const otherProfileId = process.env.PHASE3B_TEST_OTHER_PROFILE_ID;
 
 const missingEnv = [
   supabaseUrl ? null : "NEXT_PUBLIC_SUPABASE_URL",
   serviceRoleKey ? null : "SUPABASE_SERVICE_ROLE_KEY",
   integrationUserId ? null : "PHASE3B_TEST_USER_ID",
   otherUserId ? null : "PHASE3B_TEST_OTHER_USER_ID",
+  integrationProfileId ? null : "PHASE3B_TEST_PROFILE_ID",
+  otherProfileId ? null : "PHASE3B_TEST_OTHER_PROFILE_ID",
 ].filter((name): name is string => name !== null);
 
 async function runIntegration(): Promise<void> {
   const {
     createPendingOrder,
     confirmMockPayment,
-    hasActiveEntitlement,
+    hasActiveEntitlementForProfile,
     listUserEntitlements,
   } = await import("../app/lib/purchases/server");
 
@@ -298,9 +307,11 @@ async function runIntegration(): Promise<void> {
 
   const order = await createPendingOrder({
     userId: integrationUserId!,
+    profileId: integrationProfileId!,
     productId,
   });
   assert(order.status === "pending", "new order must start as pending");
+  assert(order.profileId === integrationProfileId, "new order must retain its profileId");
   assert(order.productId === productId, "order must store the canonical productId");
   assert(
     order.amount === getProductPricing(productId).amount,
@@ -310,7 +321,11 @@ async function runIntegration(): Promise<void> {
   const first = await confirmMockPayment(order.id, integrationUserId!);
   assert(first !== null, "owner must be able to confirm the mock payment");
   assert(first!.order.status === "paid", "confirmed order must be paid");
+  assert(first!.purchase.profileId === integrationProfileId, "purchase must inherit the order profileId");
   assert(first!.entitlement.resourceId === productId, "entitlement must use the canonical productId");
+  assert(first!.entitlement.profileId === integrationProfileId, "entitlement must inherit the order profileId");
+  assert(first!.entitlement.purchaseId === first!.purchase.id, "purchase entitlement must record its purchaseId");
+  assert(first!.entitlement.source === "purchase", "purchase entitlement source must be purchase");
 
   const second = await confirmMockPayment(order.id, integrationUserId!);
   assert(second !== null, "repeat confirm must stay successful");
@@ -324,15 +339,15 @@ async function runIntegration(): Promise<void> {
   assert(foreign === null, "another user must not be able to confirm someone else's order");
 
   assert(
-    await hasActiveEntitlement(integrationUserId!, productId),
+    await hasActiveEntitlementForProfile(integrationUserId!, integrationProfileId!, productId),
     "owner must have an active entitlement after payment",
   );
   assert(
-    !(await hasActiveEntitlement(otherUserId!, productId)),
+    !(await hasActiveEntitlementForProfile(otherUserId!, otherProfileId!, productId)),
     "another user must not inherit the entitlement",
   );
   assert(
-    !(await hasActiveEntitlement(integrationUserId!, "not-a-real-product")),
+    !(await hasActiveEntitlementForProfile(integrationUserId!, integrationProfileId!, "not-a-real-product")),
     "invalid productId must never resolve to an entitlement",
   );
 

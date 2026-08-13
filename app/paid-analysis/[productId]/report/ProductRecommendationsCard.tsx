@@ -4,11 +4,13 @@ import Link from "next/link";
 interface Props {
   recommendations: AnalysisProductRecommendation[];
   currentProductId: string;
+  profileId?: string;
 }
 
 export default function ProductRecommendationsCard({
   recommendations,
   currentProductId,
+  profileId,
 }: Props) {
   const filteredRecommendations = recommendations.filter(
   (recommendation) =>
@@ -64,7 +66,7 @@ export default function ProductRecommendationsCard({
       </ul>
 
       <Link
-  href={`/paid-analysis/${recommendation.productId}`}
+  href={`/paid-analysis/${recommendation.productId}${profileId ? `?profileId=${profileId}` : ""}`}
   className="mt-4 inline-flex rounded-xl bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-800"
 >
   심층 분석 보기

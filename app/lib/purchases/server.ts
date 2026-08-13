@@ -11,6 +11,7 @@ import {
 type OrderRow = {
   id: string;
   user_id: string;
+  profile_id: string;
   product_id: string;
   amount: number;
   status: string;
@@ -23,6 +24,7 @@ type OrderRow = {
 type PurchaseRow = {
   id: string;
   user_id: string;
+  profile_id: string;
   product_id: string;
   order_id: string;
   purchased_at: string;
@@ -31,9 +33,12 @@ type PurchaseRow = {
 type EntitlementRow = {
   id: string;
   user_id: string;
+  profile_id: string;
   resource_id: string;
   resource_type: string;
   is_active: boolean;
+  purchase_id: string | null;
+  source: "purchase" | "subscription" | "credit" | "grant";
   created_at: string;
 };
 
@@ -41,6 +46,7 @@ function toOrderRecord(row: OrderRow): OrderRecord {
   return {
     id: row.id,
     userId: row.user_id,
+    profileId: row.profile_id,
     productId: row.product_id,
     amount: row.amount,
     status: row.status as PaymentStatus,
@@ -55,6 +61,7 @@ function toPurchaseRecord(row: PurchaseRow): PurchaseRecord {
   return {
     id: row.id,
     userId: row.user_id,
+    profileId: row.profile_id,
     productId: row.product_id,
     orderId: row.order_id,
     purchasedAt: row.purchased_at,
@@ -65,9 +72,12 @@ function toEntitlementRecord(row: EntitlementRow): EntitlementRecord {
   return {
     id: row.id,
     userId: row.user_id,
+    profileId: row.profile_id,
     resourceId: row.resource_id,
     resourceType: row.resource_type,
     isActive: row.is_active,
+    purchaseId: row.purchase_id,
+    source: row.source,
     createdAt: row.created_at,
   };
 }
@@ -81,6 +91,7 @@ export class InvalidProductError extends Error {
 
 export async function createPendingOrder(input: {
   userId: string;
+  profileId: string;
   productId: string;
 }): Promise<OrderRecord> {
   const resolved = resolvePurchasableProduct(input.productId);
@@ -95,6 +106,7 @@ export async function createPendingOrder(input: {
     .from("orders")
     .insert({
       user_id: input.userId,
+      profile_id: input.profileId,
       product_id: resolved.productId,
       amount: resolved.amount,
       status: "pending" satisfies PaymentStatus,
@@ -174,6 +186,7 @@ export async function createPurchaseFromPaidOrder(
   const { error } = await supabase.from("purchases").upsert(
     {
       user_id: order.userId,
+      profile_id: order.profileId,
       product_id: order.productId,
       order_id: order.id,
       purchased_at: order.paidAt ?? new Date().toISOString(),
@@ -200,11 +213,17 @@ export async function createPurchaseFromPaidOrder(
   return toPurchaseRecord(data);
 }
 
-/** Idempotent: unique (user_id, resource_id, resource_type). */
+/**
+ * Idempotent per user/profile/resource/type. A repeat purchase keeps one active
+ * entitlement while updating its purchase_id to the most recent purchase.
+ */
 export async function grantEntitlement(input: {
   userId: string;
+  profileId: string;
   resourceId: string;
   resourceType?: string;
+  purchaseId: string | null;
+  source?: "purchase" | "subscription" | "credit" | "grant";
 }): Promise<EntitlementRecord> {
   const resolved = resolvePurchasableProduct(input.resourceId);
 
@@ -213,24 +232,29 @@ export async function grantEntitlement(input: {
   }
 
   const resourceType = input.resourceType ?? PAID_ANALYSIS_RESOURCE_TYPE;
+  const source = input.source ?? "purchase";
   const supabase = createAdminClient();
 
   const { error } = await supabase.from("entitlements").upsert(
     {
       user_id: input.userId,
+      profile_id: input.profileId,
       resource_id: resolved.productId,
       resource_type: resourceType,
       is_active: true,
+      purchase_id: input.purchaseId,
+      source,
     },
-    { onConflict: "user_id,resource_id,resource_type", ignoreDuplicates: true },
+    { onConflict: "user_id,profile_id,resource_id,resource_type" },
   );
 
   if (error) {
     throw new Error(`이용 권한 생성에 실패했습니다: ${error.message}`);
   }
 
-  const entitlement = await getActiveEntitlement(
+  const entitlement = await getActiveEntitlementForProfile(
     input.userId,
+    input.profileId,
     resolved.productId,
     resourceType,
   );
@@ -242,8 +266,9 @@ export async function grantEntitlement(input: {
   return entitlement;
 }
 
-export async function getActiveEntitlement(
+export async function getActiveEntitlementForProfile(
   userId: string,
+  profileId: string,
   productId: string,
   resourceType: string = PAID_ANALYSIS_RESOURCE_TYPE,
 ): Promise<EntitlementRecord | null> {
@@ -259,6 +284,7 @@ export async function getActiveEntitlement(
     .from("entitlements")
     .select("*")
     .eq("user_id", userId)
+    .eq("profile_id", profileId)
     .eq("resource_id", resolved.productId)
     .eq("resource_type", resourceType)
     .eq("is_active", true)
@@ -271,11 +297,12 @@ export async function getActiveEntitlement(
   return toEntitlementRecord(data);
 }
 
-export async function hasActiveEntitlement(
+export async function hasActiveEntitlementForProfile(
   userId: string,
+  profileId: string,
   productId: string,
 ): Promise<boolean> {
-  return (await getActiveEntitlement(userId, productId)) !== null;
+  return (await getActiveEntitlementForProfile(userId, profileId, productId)) !== null;
 }
 
 export async function listUserEntitlements(
@@ -326,7 +353,10 @@ export async function confirmMockPayment(
 
   const entitlement = await grantEntitlement({
     userId: paidOrder.userId,
+    profileId: paidOrder.profileId,
     resourceId: paidOrder.productId,
+    purchaseId: purchase.id,
+    source: "purchase",
   });
 
   return { order: paidOrder, purchase, entitlement };

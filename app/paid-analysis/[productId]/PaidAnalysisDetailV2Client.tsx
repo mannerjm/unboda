@@ -14,6 +14,7 @@ type SajuResult = ReturnType<typeof getSaju>;
 
 type PaidAnalysisDetailV2ClientProps = {
   productId: string;
+  profileId?: string;
 };
 
 function getAnalysisType(productId: string): string {
@@ -119,6 +120,7 @@ function buildFortuneTiming(saju: SajuResult): string {
 
 export default function PaidAnalysisDetailV2Client({
   productId,
+  profileId,
 }: PaidAnalysisDetailV2ClientProps) {
   const [restoredResult, setRestoredResult] = useState<string | null>(null);
   const [restoredSaju, setRestoredSaju] = useState<SajuResult | null>(null);
@@ -145,6 +147,7 @@ const promptInput = useMemo<PaidAnalysisDetailPromptInput | null>(
     restoredSaju && birthData && sajuSummary && currentFortuneFlow
       ? {
          productId,  
+        profileId,
         analysisType,
           birthData,
           originalChart: buildOriginalChart(restoredSaju),
@@ -162,6 +165,7 @@ const promptInput = useMemo<PaidAnalysisDetailPromptInput | null>(
   sajuSummary,
   currentFortuneFlow,
   userConcern,
+  profileId,
   ],
 );
 
@@ -344,7 +348,7 @@ const input = promptInput;
     <div className="mx-auto max-w-3xl">
       <div className="mb-10">
   <a
-    href={`/paid-analysis/${productId}`}
+    href={`/paid-analysis/${productId}?profileId=${profileId}`}
     className="text-sm font-semibold text-stone-600 transition hover:text-stone-900"
   >
     ← 상품 설명으로 돌아가기

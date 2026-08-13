@@ -7,7 +7,13 @@ import type {
 } from "@/app/lib/paidAnalysisDetailPrompt";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { resolvePurchasableProduct } from "@/app/lib/purchases/products";
-import { hasActiveEntitlement } from "@/app/lib/purchases/server";
+import { hasActiveEntitlementForProfile } from "@/app/lib/purchases/server";
+import { getUserProfile } from "@/app/lib/profiles/server";
+import { isProfileId } from "@/app/lib/profiles/types";
+
+type PaidAnalysisDetailRequest = PaidAnalysisDetailPromptInput & {
+  profileId?: unknown;
+};
 
 export async function POST(request: Request) {
   // Auth + entitlement must resolve BEFORE any OpenAI call is made.
@@ -20,10 +26,10 @@ export async function POST(request: Request) {
     );
   }
 
-  let input: PaidAnalysisDetailPromptInput;
+  let input: PaidAnalysisDetailRequest;
 
   try {
-    input = (await request.json()) as PaidAnalysisDetailPromptInput;
+    input = (await request.json()) as PaidAnalysisDetailRequest;
   } catch {
     return NextResponse.json(
       { error: "잘못된 요청 형식입니다." },
@@ -40,10 +46,41 @@ export async function POST(request: Request) {
     );
   }
 
+  if (!isProfileId(input.profileId)) {
+    return NextResponse.json(
+      { error: "유효한 프로필을 선택해 주세요." },
+      { status: 400 },
+    );
+  }
+
+  let profile;
+
+  try {
+    profile = await getUserProfile(input.profileId, user.id);
+  } catch (error) {
+    console.error("[paid-analysis-detail-v2] profile lookup failed", error);
+
+    return NextResponse.json(
+      { error: "프로필을 조회하지 못했습니다." },
+      { status: 500 },
+    );
+  }
+
+  if (!profile) {
+    return NextResponse.json(
+      { error: "프로필을 찾을 수 없습니다." },
+      { status: 404 },
+    );
+  }
+
   let entitled = false;
 
   try {
-    entitled = await hasActiveEntitlement(user.id, resolved.productId);
+    entitled = await hasActiveEntitlementForProfile(
+      user.id,
+      profile.id,
+      resolved.productId,
+    );
   } catch (error) {
     console.error("[paid-analysis-detail-v2] entitlement check failed", error);
 

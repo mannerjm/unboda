@@ -1,23 +1,38 @@
 import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { hasActiveEntitlement } from "@/app/lib/purchases/server";
+import { getUserProfile } from "@/app/lib/profiles/server";
+import { isProfileId } from "@/app/lib/profiles/types";
+import { hasActiveEntitlementForProfile } from "@/app/lib/purchases/server";
 
 type ReportAccessGateProps = {
   productId: string;
+  profileId?: string;
   children: React.ReactNode;
 };
 
 export default async function ReportAccessGate({
   productId,
+  profileId,
   children,
 }: ReportAccessGateProps) {
   const canonicalProductId = getCanonicalPremiumProductId(productId);
 
   const user = await getCurrentUser();
 
-  const hasAccess = user
-    ? await hasActiveEntitlement(user.id, canonicalProductId)
+  if (!profileId || !isProfileId(profileId)) {
+    notFound();
+  }
+
+  const profile = user ? await getUserProfile(profileId, user.id) : null;
+
+  if (user && !profile) {
+    notFound();
+  }
+
+  const hasAccess = user && profile
+    ? await hasActiveEntitlementForProfile(user.id, profile.id, canonicalProductId)
     : false;
 
   if (!hasAccess) {
@@ -37,7 +52,7 @@ export default async function ReportAccessGate({
         </p>
 
         <Link
-          href={`/paid-analysis/${canonicalProductId}`}
+          href={`/paid-analysis/${canonicalProductId}?profileId=${profileId}`}
           className="mt-7 block w-full rounded-2xl bg-stone-900 px-5 py-4 text-center font-semibold text-white transition hover:bg-stone-800"
         >
           상품 설명으로 돌아가기

@@ -6,13 +6,16 @@ type PaidAnalysisReportPageProps = {
   params: Promise<{
     productId: string;
   }>;
+  searchParams: Promise<{ profileId?: string }>;
 };
 
 
 export default async function PaidAnalysisReportPage({
   params,
+  searchParams,
 }: PaidAnalysisReportPageProps) {
   const { productId } = await params;
+  const { profileId } = await searchParams;
 
 const product = getPremiumProduct(productId);
 
@@ -37,8 +40,8 @@ const product = getPremiumProduct(productId);
 
   return (
       <main className="min-h-screen bg-[#f7f3ea] text-stone-900">
-    <ReportAccessGate productId={productId}>
-      <PaidAnalysisDetailV2Client productId={productId} />
+    <ReportAccessGate productId={productId} profileId={profileId}>
+      <PaidAnalysisDetailV2Client productId={productId} profileId={profileId} />
     </ReportAccessGate>
   </main>
 );

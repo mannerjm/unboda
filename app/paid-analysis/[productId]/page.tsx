@@ -5,18 +5,22 @@ import {
 } from "@/app/lib/userAccess";
 import PaidAnalysisAccessPanel from "./PaidAnalysisAccessPanel";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
+import ProfileSelector from "@/app/components/ProfileSelector";
 
 type PaidAnalysisPageProps = {
   params: Promise<{
     productId: string;
   }>;
+  searchParams: Promise<{ profileId?: string }>;
 };
 
 
 export default async function PaidAnalysisPage({
   params,
+  searchParams,
 }: PaidAnalysisPageProps) {
   const { productId } = await params;
+  const { profileId } = await searchParams;
 
 const product = getPremiumProduct(productId);
 
@@ -92,7 +96,12 @@ const permissions = getUserAccessPermissions(userAccessLevel);
     </p>
   </div>
 
-  <PaidAnalysisAccessPanel productId={productId} />
+  <ProfileSelector
+    productId={productId}
+    currentProfileId={profileId}
+    destination="paid-analysis"
+  />
+  <PaidAnalysisAccessPanel productId={productId} profileId={profileId} />
   
 </section>
       </div>

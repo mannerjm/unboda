@@ -1,21 +1,36 @@
 import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { hasActiveEntitlement } from "@/app/lib/purchases/server";
+import { getUserProfile } from "@/app/lib/profiles/server";
+import { isProfileId } from "@/app/lib/profiles/types";
+import { hasActiveEntitlementForProfile } from "@/app/lib/purchases/server";
 
 type PaidAnalysisAccessPanelProps = {
   productId: string;
+  profileId?: string;
 };
 
 export default async function PaidAnalysisAccessPanel({
   productId,
+  profileId,
 }: PaidAnalysisAccessPanelProps) {
   const canonicalProductId = getCanonicalPremiumProductId(productId);
 
   const user = await getCurrentUser();
 
-  const hasAccess = user
-    ? await hasActiveEntitlement(user.id, canonicalProductId)
+  if (!profileId || !isProfileId(profileId)) {
+    notFound();
+  }
+
+  const profile = user ? await getUserProfile(profileId, user.id) : null;
+
+  if (user && !profile) {
+    notFound();
+  }
+
+  const hasAccess = user && profile
+    ? await hasActiveEntitlementForProfile(user.id, profile.id, canonicalProductId)
     : false;
 
   return (
@@ -37,7 +52,7 @@ export default async function PaidAnalysisAccessPanel({
           </p>
 
           <Link
-            href={`/paid-analysis/${canonicalProductId}/report`}
+            href={`/paid-analysis/${canonicalProductId}/report?profileId=${profileId}`}
             className="mt-7 block w-full rounded-2xl bg-stone-900 px-5 py-4 text-center font-semibold text-white transition hover:bg-stone-800"
           >
             심층 분석 열기
@@ -59,7 +74,7 @@ export default async function PaidAnalysisAccessPanel({
           </p>
 
           <Link
-            href={`/checkout/${canonicalProductId}`}
+            href={`/checkout/${canonicalProductId}?profileId=${profileId}`}
             className="mt-7 block w-full rounded-2xl bg-stone-900 px-5 py-4 text-center font-semibold text-white transition hover:bg-stone-800"
           >
             이 분석 구매하기

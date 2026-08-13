@@ -138,9 +138,9 @@ const accessPanelSource = readFileSync(
   "utf-8",
 );
 assert(
-  accessPanelSource.includes("`/checkout/${canonicalProductId}`"),
-  "PaidAnalysisAccessPanel must link to /checkout/${canonicalProductId} for non-access users",
+  accessPanelSource.includes("`/checkout/${canonicalProductId}?profileId=${profileId}`"),
+  "PaidAnalysisAccessPanel must preserve profileId in the non-access checkout CTA",
 );
-console.log("E. PaidAnalysisAccessPanel has checkout CTA for non-access users ✓");
+console.log("E. PaidAnalysisAccessPanel has profile-scoped checkout CTA for non-access users ✓");
 
 console.log("\ne2e-purchase-funnel-regression passed ✓");

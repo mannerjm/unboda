@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { resolvePurchasableProduct } from "@/app/lib/purchases/products";
 import { createPendingOrder } from "@/app/lib/purchases/server";
+import { getUserProfile } from "@/app/lib/profiles/server";
+import { isProfileId } from "@/app/lib/profiles/types";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -24,7 +26,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const rawProductId = (body as { productId?: unknown } | null)?.productId;
+  const requestBody = body as {
+    productId?: unknown;
+    profileId?: unknown;
+  } | null;
+  const rawProductId = requestBody?.productId;
+  const rawProfileId = requestBody?.profileId;
   const resolved = resolvePurchasableProduct(rawProductId);
 
   if (!resolved.ok) {
@@ -34,10 +41,38 @@ export async function POST(request: Request) {
     );
   }
 
+  if (!isProfileId(rawProfileId)) {
+    return NextResponse.json(
+      { error: "유효한 프로필을 선택해 주세요." },
+      { status: 400 },
+    );
+  }
+
+  let profile;
+
+  try {
+    profile = await getUserProfile(rawProfileId, user.id);
+  } catch (error) {
+    console.error("[orders] profile lookup failed", error);
+
+    return NextResponse.json(
+      { error: "프로필을 조회하지 못했습니다." },
+      { status: 500 },
+    );
+  }
+
+  if (!profile) {
+    return NextResponse.json(
+      { error: "프로필을 찾을 수 없습니다." },
+      { status: 404 },
+    );
+  }
+
   try {
     // amount comes from the server-side pricing source, never from the client
     const order = await createPendingOrder({
       userId: user.id,
+      profileId: profile.id,
       productId: resolved.productId,
     });
 

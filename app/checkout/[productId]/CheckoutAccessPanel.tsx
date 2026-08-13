@@ -13,10 +13,12 @@ import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 
 type CheckoutAccessPanelProps = {
   productId: string;
+  profileId?: string;
 };
 
 export default function CheckoutAccessPanel({
   productId,
+  profileId,
 }: CheckoutAccessPanelProps) {
   const [authState, setAuthState] =
     useState<AuthState>(guestAuthState);
@@ -51,7 +53,7 @@ const router = useRouter();
   const canonicalProductId = getCanonicalPremiumProductId(productId);
 
   async function handleMockPayment() {
-    if (authState.status !== "authenticated" || isPaying) {
+    if (authState.status !== "authenticated" || !profileId || isPaying) {
       return;
     }
 
@@ -59,11 +61,11 @@ const router = useRouter();
     setErrorMessage(null);
 
     try {
-      // The server derives userId and amount itself; only productId is sent.
+      // The server derives userId and amount; it verifies the requested profile.
       const orderResponse = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: canonicalProductId }),
+        body: JSON.stringify({ productId: canonicalProductId, profileId }),
       });
 
       if (!orderResponse.ok) {
@@ -87,7 +89,7 @@ const router = useRouter();
         );
       }
 
-      router.push(`/paid-analysis/${canonicalProductId}`);
+      router.push(`/paid-analysis/${canonicalProductId}?profileId=${profileId}`);
       router.refresh();
     } catch (error) {
       setErrorMessage(
@@ -120,7 +122,7 @@ const router = useRouter();
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
             <Link
               href={`/auth/login?returnTo=${encodeURIComponent(
-                `/checkout/${productId}`
+                `/checkout/${productId}${profileId ? `?profileId=${profileId}` : ""}`
               )}`}
               className="rounded-2xl bg-stone-900 px-5 py-4 text-center font-semibold text-white transition hover:bg-stone-800"
             >
@@ -129,7 +131,7 @@ const router = useRouter();
 
             <Link
               href={`/auth/signup?returnTo=${encodeURIComponent(
-                `/checkout/${productId}`
+                `/checkout/${productId}${profileId ? `?profileId=${profileId}` : ""}`
               )}`}
               className="rounded-2xl border border-stone-300 bg-white px-5 py-4 text-center font-semibold text-stone-900 transition hover:bg-stone-50"
             >
@@ -154,10 +156,10 @@ const router = useRouter();
           <button
             type="button"
             onClick={handleMockPayment}
-            disabled={isPaying}
+            disabled={isPaying || !profileId}
             className="mt-7 w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
           >
-            {isPaying ? "결제 처리 중..." : "결제 계속하기"}
+            {isPaying ? "결제 처리 중..." : profileId ? "결제 계속하기" : "분석 대상을 선택해 주세요"}
           </button>
 
           {errorMessage ? (

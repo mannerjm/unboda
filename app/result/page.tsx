@@ -20,6 +20,7 @@ import {
   parseFreeAnalysisAIInterpretation,
   type FreeAnalysisAIInterpretation,
 } from "@/app/lib/freeAnalysisAIInterpretation";
+import ProfileSelector from "@/app/components/ProfileSelector";
 
 type SajuResult = ReturnType<typeof getSaju>;
 
@@ -224,10 +225,13 @@ const [
 const [isStorageChecked, setIsStorageChecked] = useState(false);
 const [selectedPaidAnalysisId, setSelectedPaidAnalysisId] =
   useState<string | null>(null);
+const [profileSelectionProductId, setProfileSelectionProductId] =
+  useState<string | null>(null);
 
 const birthDate = searchParams.get("birthDate") || "입력 없음";
   const birthTime = searchParams.get("birthTime") || "입력 없음";
   const gender = searchParams.get("gender") || "입력 없음";
+const currentProfileId = searchParams.get("profileId") ?? undefined;
 
 const conversionGuidance =
   recommendationExplanation?.conversionGuidance ?? null;
@@ -457,7 +461,7 @@ const selectedPaidAnalysis = displayedPaidAnalysisProducts.find(
 );
 
 function handlePaidAnalysisEntry(productId: string) {
-  router.push(`/paid-analysis/${productId}`);
+  setProfileSelectionProductId(productId);
 }
 
   return (
@@ -1539,6 +1543,13 @@ h3: ({ children }) => {
   이 분석 자세히 보기
 </button>
   </div>
+)}
+{profileSelectionProductId && (
+  <ProfileSelector
+    productId={profileSelectionProductId}
+    currentProfileId={currentProfileId}
+    destination="paid-analysis"
+  />
 )}
 </div>
 </section>

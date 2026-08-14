@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ProfileDto } from "@/app/lib/profiles/types";
+import { MAX_PROFILES_PER_USER, type ProfileDto } from "@/app/lib/profiles/types";
 
 type ProfileSelectorProps = {
   productId: string;
@@ -51,7 +51,7 @@ export default function ProfileSelector({
       <h2 className="mt-2 text-lg font-bold text-stone-900">
         분석할 대상을 선택하세요
       </h2>
-      <div className="mt-4 grid gap-2">
+      <div className="mt-4 grid max-h-80 gap-2 overflow-y-auto pr-1">
         {profiles.map((profile) => (
           <button
             key={profile.id}
@@ -68,6 +68,9 @@ export default function ProfileSelector({
       </div>
       {!isLoading && profiles.length === 0 ? (
         <p className="mt-4 text-sm text-stone-600">등록된 Profile이 없습니다.</p>
+      ) : null}
+      {!isLoading && profiles.length >= MAX_PROFILES_PER_USER ? (
+        <p className="mt-4 text-xs text-stone-500">계정당 최대 {MAX_PROFILES_PER_USER}개의 Profile을 사용할 수 있습니다.</p>
       ) : null}
       {!isLoading && profiles.length > 0 && !selectedExists ? (
         <p className="mt-4 text-sm text-stone-600">계속하려면 분석 대상을 선택해 주세요.</p>

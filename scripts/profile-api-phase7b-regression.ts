@@ -3,6 +3,7 @@ import { join } from "path";
 import {
   fromProfileDbCalendarType,
   fromProfileDbGender,
+  MAX_PROFILES_PER_USER,
   mergeProfileInput,
   type ProfileDto,
   toProfileDbCalendarType,
@@ -134,7 +135,11 @@ assert(itemRoute.includes("ownership lookup failed") && itemRoute.includes("stat
 assert(!server.includes(".update(toProfileInsert"), "UPDATE must not include user_id in its payload");
 assert(server.includes("createAdminClient"), "profile writes must use the server-only admin client");
 assert(server.includes("profiles_one_self_per_user_idx"), "self-profile conflict must be detected from the DB constraint");
-console.log("7. API auth, ownership, spoofing, admin-write, and self-conflict contracts present ✓");
+assert(MAX_PROFILES_PER_USER === 10, "profile cap must be centralized at 10");
+assert(server.includes('select("id", { count: "exact", head: true })'), "server creation must count existing user profiles");
+assert(server.includes("ProfileLimitError") && server.includes("MAX_PROFILES_PER_USER"), "server creation must reject requests at the profile cap");
+assert(listRoute.includes("error instanceof ProfileLimitError") && listRoute.includes("status: 409"), "POST must return 409 when the profile cap is reached");
+console.log("7. API auth, ownership, spoofing, admin-write, self-conflict, and profile-cap contracts present ✓");
 
 const migration = read("supabase/migrations/002_profiles.sql");
 assert(/for select\s+to authenticated\s+using \(auth\.uid\(\) = user_id\)/.test(migration), "profiles migration must grant only self-scoped SELECT");

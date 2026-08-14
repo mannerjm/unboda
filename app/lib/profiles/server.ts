@@ -4,6 +4,7 @@ import {
   fromProfileDbGender,
   toProfileDbCalendarType,
   toProfileDbGender,
+  MAX_PROFILES_PER_USER,
   type ProfileDto,
   type ProfileInput,
 } from "./types";
@@ -82,6 +83,13 @@ export function isProfilesSelfConflict(error: { code?: string; message?: string 
   );
 }
 
+export class ProfileLimitError extends Error {
+  constructor() {
+    super(`프로필은 계정당 최대 ${MAX_PROFILES_PER_USER}개까지 만들 수 있습니다.`);
+    this.name = "ProfileLimitError";
+  }
+}
+
 export async function listUserProfiles(userId: string): Promise<ProfileDto[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
@@ -125,6 +133,19 @@ export async function createUserProfile(
   userId: string,
 ): Promise<ProfileDto> {
   const supabase = createAdminClient();
+  const { count, error: countError } = await supabase
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  if (countError) {
+    throw new Error(`프로필 수를 확인하지 못했습니다: ${countError.message}`);
+  }
+
+  if ((count ?? 0) >= MAX_PROFILES_PER_USER) {
+    throw new ProfileLimitError();
+  }
+
   const { data, error } = await supabase
     .from("profiles")
     .insert(toProfileInsert(input, userId))

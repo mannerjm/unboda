@@ -10,6 +10,7 @@ export type ProfileAppGender = "남성" | "여성";
 export type ProfileDbGender = "male" | "female";
 export type ProfileAppCalendarType = "양력" | "음력";
 export type ProfileDbCalendarType = "solar" | "lunar";
+export const MAX_PROFILES_PER_USER = 10;
 
 export type ProfileInput = {
   label: string;

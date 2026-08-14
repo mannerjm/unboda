@@ -1,6 +1,11 @@
 import Link from "next/link";
 import CheckoutAccessPanel from "./CheckoutAccessPanel";
 import ProfileSelector from "@/app/components/ProfileSelector";
+import ProfileTargetControl from "@/app/components/ProfileTargetControl";
+import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { getUserProfile } from "@/app/lib/profiles/server";
+import { isProfileId } from "@/app/lib/profiles/types";
+import { notFound } from "next/navigation";
 import {
   getCanonicalPremiumProductId,
   getPremiumProduct,
@@ -21,6 +26,19 @@ export default async function CheckoutPage({
 }: CheckoutPageProps) {
  const { productId } = await params;
  const { profileId } = await searchParams;
+ const user = await getCurrentUser();
+
+ if (profileId && !isProfileId(profileId)) {
+   notFound();
+ }
+
+ const profile = user && profileId
+   ? await getUserProfile(profileId, user.id)
+   : null;
+
+ if (user && profileId && !profile) {
+   notFound();
+ }
 const canonicalProductId = getCanonicalPremiumProductId(productId);
 const product = getPremiumProduct(canonicalProductId);
 
@@ -66,11 +84,21 @@ const product = getPremiumProduct(canonicalProductId);
           구매를 진행하기 전에 계정 연결과 결제 단계를 확인합니다.
         </p>
        
-       <ProfileSelector
-         productId={canonicalProductId}
-         currentProfileId={profileId}
-         destination="checkout"
-       />
+       {profile ? (
+         <ProfileTargetControl
+           productId={canonicalProductId}
+           destination="checkout"
+           label="결제 대상"
+           targetLabel={profile.relationshipType}
+           profile={profile}
+         />
+       ) : (
+         <ProfileSelector
+           productId={canonicalProductId}
+           currentProfileId={profileId}
+           destination="checkout"
+         />
+       )}
        <CheckoutAccessPanel productId={canonicalProductId} profileId={profileId} />
       </div>
     </main>

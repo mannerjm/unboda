@@ -6,6 +6,11 @@ import {
 import PaidAnalysisAccessPanel from "./PaidAnalysisAccessPanel";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import ProfileSelector from "@/app/components/ProfileSelector";
+import ProfileTargetControl from "@/app/components/ProfileTargetControl";
+import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { getUserProfile } from "@/app/lib/profiles/server";
+import { isProfileId } from "@/app/lib/profiles/types";
+import { notFound } from "next/navigation";
 
 type PaidAnalysisPageProps = {
   params: Promise<{
@@ -21,6 +26,19 @@ export default async function PaidAnalysisPage({
 }: PaidAnalysisPageProps) {
   const { productId } = await params;
   const { profileId } = await searchParams;
+  const user = await getCurrentUser();
+
+  if (profileId && !isProfileId(profileId)) {
+    notFound();
+  }
+
+  const profile = user && profileId
+    ? await getUserProfile(profileId, user.id)
+    : null;
+
+  if (user && profileId && !profile) {
+    notFound();
+  }
 
 const product = getPremiumProduct(productId);
 
@@ -96,12 +114,22 @@ const permissions = getUserAccessPermissions(userAccessLevel);
     </p>
   </div>
 
-  <ProfileSelector
-    productId={productId}
-    currentProfileId={profileId}
-    destination="paid-analysis"
-  />
-  <PaidAnalysisAccessPanel productId={productId} profileId={profileId} />
+  {profile ? (
+    <ProfileTargetControl
+      productId={productId}
+      destination="paid-analysis"
+      label="분석 대상"
+      targetLabel={profile.relationshipType}
+      profile={profile}
+    />
+  ) : (
+    <ProfileSelector
+      productId={productId}
+      currentProfileId={profileId}
+      destination="paid-analysis"
+    />
+  )}
+  {profileId ? <PaidAnalysisAccessPanel productId={productId} profileId={profileId} /> : null}
   
 </section>
       </div>

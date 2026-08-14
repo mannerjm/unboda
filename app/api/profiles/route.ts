@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { createUserProfile, isProfilesSelfConflict, listUserProfiles } from "@/app/lib/profiles/server";
-import { validateProfileInput } from "@/app/lib/profiles/types";
+import {
+  createUserProfile,
+  isProfilesSelfConflict,
+  listUserProfiles,
+  ProfileLimitError,
+} from "@/app/lib/profiles/server";
+import { MAX_PROFILES_PER_USER, validateProfileInput } from "@/app/lib/profiles/types";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -44,6 +49,13 @@ export async function POST(request: Request) {
     const profile = await createUserProfile(validation.value, user.id);
     return NextResponse.json({ profile }, { status: 201 });
   } catch (error) {
+    if (error instanceof ProfileLimitError) {
+      return NextResponse.json(
+        { error: `프로필은 계정당 최대 ${MAX_PROFILES_PER_USER}개까지 만들 수 있습니다.` },
+        { status: 409 },
+      );
+    }
+
     if (isProfilesSelfConflict(error as { code?: string; message?: string })) {
       return NextResponse.json({ error: "본인 프로필은 계정당 하나만 만들 수 있습니다." }, { status: 409 });
     }

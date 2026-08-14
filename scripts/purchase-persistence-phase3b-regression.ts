@@ -158,7 +158,7 @@ assert(detailRoute.includes("status: 400"), "detail route must return 400 for an
 assert(detailRoute.includes("status: 403"), "detail route must return 403 without entitlement");
 
 const authIndex = detailRoute.indexOf("getCurrentUser");
-const entitlementIndex = detailRoute.indexOf("hasActiveEntitlement");
+const entitlementIndex = detailRoute.indexOf("getActiveEntitlementForProfile");
 const generateIndex = detailRoute.indexOf("generatePaidAnalysisDetailV2(");
 assert(authIndex !== -1 && entitlementIndex !== -1 && generateIndex !== -1, "detail route markers present");
 assert(

@@ -1,7 +1,5 @@
 import Link from "next/link";
 import CheckoutAccessPanel from "./CheckoutAccessPanel";
-import ProfileSelector from "@/app/components/ProfileSelector";
-import ProfileTargetControl from "@/app/components/ProfileTargetControl";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
@@ -85,20 +83,11 @@ const product = getPremiumProduct(canonicalProductId);
         </p>
        
        {profile ? (
-         <ProfileTargetControl
-           productId={canonicalProductId}
-           destination="checkout"
-           label="결제 대상"
-           targetLabel={profile.relationshipType}
-           profile={profile}
-         />
-       ) : (
-         <ProfileSelector
-           productId={canonicalProductId}
-           currentProfileId={profileId}
-           destination="checkout"
-         />
-       )}
+         <div className="mt-6 border border-stone-200 bg-white p-5">
+           <p className="text-xs font-semibold tracking-[0.18em] text-stone-500">결제 대상</p>
+           <p className="mt-2 font-semibold text-stone-900">{profile.label}</p>
+         </div>
+       ) : null}
        <CheckoutAccessPanel productId={canonicalProductId} profileId={profileId} />
       </div>
     </main>

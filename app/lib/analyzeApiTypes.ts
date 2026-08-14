@@ -12,18 +12,29 @@ export type AnalyzeFreeResponse = ReturnType<typeof buildFreeAnalysis>;
 export type AnalyzePremiumResponse =
   ReturnType<typeof buildPremiumAnalysis>;
 
-export type AnalyzeRequest = {
+export type AnalyzeProfileMetadata = {
+  id: string;
   birthDate: string;
   birthTime: string;
-  calendarType: "양력" | "음력";
-  isLeapMonth: "평달" | "윤달";
   gender: "남성" | "여성";
+  calendarType: "양력" | "음력";
+  isLeapMonth: boolean;
+};
+
+export type AnalyzeRequest = {
+  birthDate?: string;
+  birthTime?: string;
+  calendarType?: "양력" | "음력";
+  isLeapMonth?: "평달" | "윤달";
+  gender?: "남성" | "여성";
+  profileId?: string;
   productId?: PaidAnalysisProductId;
 };
 
 export type AnalyzeSuccessResponse = {
   result: string;
   saju: AnalyzeSajuResponse;
+  profile: AnalyzeProfileMetadata;
   freeAnalysis?: AnalyzeFreeResponse;
   premiumAnalysis?: AnalyzePremiumResponse;
 

@@ -6,6 +6,7 @@ import { analyzeFullFortuneFlow } from "./fortuneFlowAnalysis";
 import { STRENGTH_RECOMMENDATION_RULES } from "./recommendationRules";
 import type { RecommendationEngineResult } from "./analysisRecommendation";
 import {
+  PREMIUM_PRODUCT_LOOKUP,
   TOPIC_PREMIUM_PRODUCTS,
   type RecommendationSignalKey,
 } from "./premiumProductRegistry";
@@ -193,7 +194,31 @@ export function buildTopicAwareRecommendations(
       items.findIndex((entry) => entry.productId === recommendation.productId) === index,
   );
 
-  const topRecommendations = uniqueRecommendations.slice(0, 3);
+  const topRecommendations: AnalysisProductRecommendation[] = [];
+  const selectedCategories = new Set<string>();
+
+  for (const recommendation of uniqueRecommendations) {
+    const category = PREMIUM_PRODUCT_LOOKUP[recommendation.productId]?.category;
+
+    if (category && selectedCategories.has(category)) {
+      continue;
+    }
+
+    topRecommendations.push(recommendation);
+    if (category) selectedCategories.add(category);
+    if (topRecommendations.length === 3) break;
+  }
+
+  for (const recommendation of uniqueRecommendations) {
+    if (topRecommendations.some((selected) => selected.productId === recommendation.productId)) {
+      continue;
+    }
+
+    topRecommendations.push(recommendation);
+    if (topRecommendations.length === 3) break;
+  }
+
+  topRecommendations.splice(3);
 
   if (topRecommendations.length >= 3) {
     const engineResult: RecommendationEngineResult = {

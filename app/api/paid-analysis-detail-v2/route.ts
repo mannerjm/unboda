@@ -2,16 +2,20 @@ import { NextResponse } from "next/server";
 import {
   generatePaidAnalysisDetailV2,
 } from "@/app/lib/paidAnalysisDetailService";
-import type {
-  PaidAnalysisDetailPromptInput,
-} from "@/app/lib/paidAnalysisDetailPrompt";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { resolvePurchasableProduct } from "@/app/lib/purchases/products";
-import { hasActiveEntitlementForProfile } from "@/app/lib/purchases/server";
+import { getActiveEntitlementForProfile } from "@/app/lib/purchases/server";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
+import {
+  claimPaidReport,
+  completePaidReport,
+  failPaidReport,
+} from "@/app/lib/paidReports/server";
+import { buildPaidAnalysisInputFromProfile } from "@/app/lib/paidAnalysisProfileInput";
 
-type PaidAnalysisDetailRequest = PaidAnalysisDetailPromptInput & {
+type PaidAnalysisDetailRequest = {
+  productId?: unknown;
   profileId?: unknown;
 };
 
@@ -73,10 +77,10 @@ export async function POST(request: Request) {
     );
   }
 
-  let entitled = false;
+  let entitlement;
 
   try {
-    entitled = await hasActiveEntitlementForProfile(
+    entitlement = await getActiveEntitlementForProfile(
       user.id,
       profile.id,
       resolved.productId,
@@ -90,21 +94,67 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!entitled) {
+  if (!entitlement) {
     return NextResponse.json(
       { error: "이 심층 분석의 구매 권한이 없습니다." },
       { status: 403 },
     );
   }
 
+  let claim;
+
   try {
-    const detail = await generatePaidAnalysisDetailV2({
-      ...input,
+    claim = await claimPaidReport({
+      userId: user.id,
+      profileId: profile.id,
       productId: resolved.productId,
+      purchaseId: entitlement.purchaseId,
+    });
+  } catch (error) {
+    console.error("[paid-analysis-detail-v2] report claim failed", error);
+
+    return NextResponse.json(
+      { error: "유료 분석 생성 상태를 준비하지 못했습니다." },
+      { status: 500 },
+    );
+  }
+
+  if (claim.state === "completed" && claim.report.content) {
+    return NextResponse.json(claim.report.content);
+  }
+
+  if (claim.state === "generating") {
+    return NextResponse.json(
+      { status: "generating" },
+      { status: 202 },
+    );
+  }
+
+  try {
+    const paidInput = buildPaidAnalysisInputFromProfile(profile, resolved.productId);
+    const detail = await generatePaidAnalysisDetailV2(paidInput);
+    await completePaidReport({
+      reportId: claim.report.id,
+      userId: user.id,
+      profileId: profile.id,
+      productId: resolved.productId,
+      content: detail,
     });
 
     return NextResponse.json(detail);
   } catch (error) {
+    try {
+      await failPaidReport({
+        reportId: claim.report.id,
+        userId: user.id,
+        profileId: profile.id,
+        productId: resolved.productId,
+        errorCode: "generation_failed",
+      });
+    } catch (persistenceError) {
+      console.error("[paid-analysis-detail-v2] report failure persistence failed", persistenceError);
+    }
+
     const message =
       error instanceof Error
         ? error.message

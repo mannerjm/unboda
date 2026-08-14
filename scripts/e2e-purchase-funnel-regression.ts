@@ -105,32 +105,29 @@ assert(
 );
 console.log("C. result fallback dead ID removed; fallback IDs all exist in registry ✓");
 
-// --- D. isLeapMonth passes from saju page to loading page ---
+// --- D. active Profile ID passes from saju to loading and server analysis ---
 const sajuPageSource = readFileSync(
   join(process.cwd(), "app/saju/page.tsx"),
   "utf-8",
 );
-// URLSearchParams must include isLeapMonth
 assert(
-  sajuPageSource.includes("isLeapMonth,") || sajuPageSource.includes("isLeapMonth:"),
-  "saju/page.tsx URLSearchParams must include isLeapMonth",
+  sajuPageSource.includes("/loading?profileId=${activeProfile.id}"),
+  "saju/page.tsx must start analysis with the active profileId",
 );
 
 const loadingPageSource = readFileSync(
   join(process.cwd(), "app/loading/page.tsx"),
   "utf-8",
 );
-// loading page must read isLeapMonth from searchParams
 assert(
-  loadingPageSource.includes('searchParams.get("isLeapMonth")'),
-  "loading/page.tsx must read isLeapMonth from searchParams",
+  loadingPageSource.includes('searchParams.get("profileId")'),
+  "loading/page.tsx must read profileId from searchParams",
 );
-// loading page must include isLeapMonth in the POST body
 assert(
-  loadingPageSource.includes("isLeapMonth") && loadingPageSource.includes('"Content-Type"'),
-  "loading/page.tsx must include isLeapMonth in the analyze POST payload",
+  loadingPageSource.includes("JSON.stringify({ profileId })"),
+  "loading/page.tsx must include profileId in the analyze POST payload",
 );
-console.log("D. isLeapMonth flows from saju → loading → /api/analyze ✓");
+console.log("D. active Profile flows from saju → loading → /api/analyze ✓");
 
 // --- E. PaidAnalysisAccessPanel has checkout CTA ---
 const accessPanelSource = readFileSync(

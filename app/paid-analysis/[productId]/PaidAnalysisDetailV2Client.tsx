@@ -1,16 +1,11 @@
 "use client";
-import type { PaidAnalysisDetailPromptInput } from "@/app/lib/paidAnalysisDetailPrompt";
-import { useEffect, useMemo, useState } from "react";
-import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
-import { getSaju } from "@/app/lib/manse";
+import { useEffect, useState } from "react";
 import type { PaidAnalysisDetailOutputV3 } from "@/app/lib/paidAnalysisDetailOutput";
 import {
   getCanonicalPremiumProductId,
   getPremiumProduct,
 } from "@/app/lib/premiumProductRegistry";
 
-
-type SajuResult = ReturnType<typeof getSaju>;
 
 type PaidAnalysisDetailV2ClientProps = {
   productId: string;
@@ -28,103 +23,10 @@ function getAnalysisType(productId: string): string {
 
   return registryProduct?.analysisType ?? "개인 맞춤 심층 분석";
 }
-function buildBirthData(saju: SajuResult): string {
-  return JSON.stringify(saju);
-}
-function buildOriginalChart(saju: SajuResult): string {
-  return JSON.stringify(
-    {
-      solarDate: saju.solarDate,
-      year: {
-        pillar: saju.yearPillar,
-        hanja: saju.yearPillarHanja,
-        stem: saju.yearStem,
-        branch: saju.yearBranch,
-        stemTenGod: saju.yearTenGod,
-        branchTenGod: saju.yearBranchTenGod,
-        hiddenStems: saju.yearHiddenStems,
-        stage: saju.yearStage,
-        spirit: saju.yearSpirit,
-        nobles: saju.yearNobles,
-      },
-      month: {
-        pillar: saju.monthPillar,
-        hanja: saju.monthPillarHanja,
-        stem: saju.monthStem,
-        branch: saju.monthBranch,
-        stemTenGod: saju.monthTenGod,
-        branchTenGod: saju.monthBranchTenGod,
-        hiddenStems: saju.monthHiddenStems,
-        stage: saju.monthStage,
-        spirit: saju.monthSpirit,
-        nobles: saju.monthNobles,
-      },
-      day: {
-        pillar: saju.dayPillar,
-        hanja: saju.dayPillarHanja,
-        stem: saju.dayStem,
-        branch: saju.dayBranch,
-        stemTenGod: saju.dayTenGod,
-        branchTenGod: saju.dayBranchTenGod,
-        hiddenStems: saju.dayHiddenStems,
-        stage: saju.dayStage,
-        spirit: saju.daySpirit,
-        nobles: saju.dayNobles,
-      },
-      hour: {
-        pillar: saju.hourPillar,
-        hanja: saju.hourPillarHanja,
-        stem: saju.hourStem,
-        branch: saju.hourBranch,
-        stemTenGod: saju.hourTenGod,
-        branchTenGod: saju.hourBranchTenGod,
-        hiddenStems: saju.hourHiddenStems,
-        stage: saju.hourStage,
-        spirit: saju.hourSpirit,
-        nobles: saju.hourNobles,
-      },
-    },
-    null,
-    2,
-  );
-}
-function buildCoreInterpretation(saju: SajuResult): string {
-  return JSON.stringify(
-    {
-      elementAnalysis: saju.elementAnalysis,
-      elementInterpretation: saju.elementInterpretation,
-      strengthAnalysis: saju.strengthAnalysis,
-      elementRelations: saju.elementRelations,
-      yongshinAnalysis: saju.yongshinAnalysis,
-      gyeokgukAnalysis: saju.gyeokgukAnalysis,
-      fortuneBrain: saju.fortuneBrain,
-    },
-    null,
-    2,
-  );
-}
-function buildFortuneTiming(saju: SajuResult): string {
-  return JSON.stringify(
-    {
-      daeunAnalysis: saju.daeunAnalysis,
-      currentDaeun: saju.currentDaeun,
-      seunAnalysis: saju.seunAnalysis,
-      currentSeun: saju.currentSeun,
-      fortuneFlowAnalysis: saju.fortuneFlowAnalysis,
-    },
-    null,
-    2,
-  );
-}
-
-
 export default function PaidAnalysisDetailV2Client({
   productId,
   profileId,
 }: PaidAnalysisDetailV2ClientProps) {
-  const [restoredResult, setRestoredResult] = useState<string | null>(null);
-  const [restoredSaju, setRestoredSaju] = useState<SajuResult | null>(null);
-  const [userConcern, setUserConcern] = useState<string | null>(null);
   const [detail, setDetail] =
   useState<PaidAnalysisDetailOutputV3 | null>(null);
 
@@ -132,84 +34,25 @@ export default function PaidAnalysisDetailV2Client({
  
   const [errorMessage, setErrorMessage] =
   useState<string | null>(null);
+  const [isGeneratingElsewhere, setIsGeneratingElsewhere] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   const analysisType = getAnalysisType(productId);
 
-const birthData = restoredSaju
-  ? buildBirthData(restoredSaju)
-  : null;
-
-const sajuSummary = restoredResult;
-const currentFortuneFlow = restoredResult;
-
-const promptInput = useMemo<PaidAnalysisDetailPromptInput | null>(
-  () =>
-    restoredSaju && birthData && sajuSummary && currentFortuneFlow
-      ? {
-         productId,  
-        profileId,
-        analysisType,
-          birthData,
-          originalChart: buildOriginalChart(restoredSaju),
-          coreInterpretation: buildCoreInterpretation(restoredSaju),
-          fortuneTiming: buildFortuneTiming(restoredSaju),
-          sajuSummary,
-          currentFortuneFlow,
-          userConcern: userConcern ?? undefined,
-        }
-      : null,
-  [
-     analysisType,
-  restoredSaju,
-  birthData,
-  sajuSummary,
-  currentFortuneFlow,
-  userConcern,
-  profileId,
-  ],
-);
-
 void analysisType;
-void birthData;
-void sajuSummary;
-void currentFortuneFlow;
-void userConcern;
 void detail;
 
   useEffect(() => {
-  const savedResult = sessionStorage.getItem("sajuResult");
-  const savedSaju = sessionStorage.getItem("sajuData");
-  const savedRecommendationExplanation =
-    sessionStorage.getItem("recommendationExplanation");
-
-    const restored = restoreStoredResult(
-      savedResult,
-      savedSaju,
-    );
-
-    if (!restored.ok) {
-  setErrorMessage(
-    "사주 분석 정보를 찾을 수 없습니다. 사주를 다시 조회한 뒤 심층분석을 진행해 주세요.",
-  );
-  setIsLoading(false);
-  return;
-}
-
-    setRestoredResult(restored.result);
-    setRestoredSaju(restored.saju);
-    setUserConcern(savedRecommendationExplanation);
-  }, []);
-
-  useEffect(() => {
-  if (!promptInput) {
+  if (!profileId) {
+    setErrorMessage("분석 대상을 확인하지 못했습니다.");
     return;
   }
-const input = promptInput;
   let isCancelled = false;
 
   async function loadDetail() {
   setIsLoading(true);
   setErrorMessage(null);
+  setIsGeneratingElsewhere(false);
 
   try {
     const response = await fetch("/api/paid-analysis-detail-v2", {
@@ -217,8 +60,15 @@ const input = promptInput;
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(input),
+      body: JSON.stringify({ productId, profileId }),
     });
+
+    if (response.status === 202) {
+      if (!isCancelled) {
+        setIsGeneratingElsewhere(true);
+      }
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(
@@ -253,10 +103,8 @@ const input = promptInput;
   return () => {
     isCancelled = true;
   };
-}, [promptInput]);
+}, [productId, profileId, retryCount]);
 
-  void restoredResult;
-  void restoredSaju;
   void detail;
   void isLoading;
 
@@ -288,6 +136,27 @@ const input = promptInput;
               className="mt-6 rounded-xl bg-neutral-900 px-6 py-3 font-semibold text-white"
             >
               다시 시도하기
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (isGeneratingElsewhere) {
+    return (
+      <main className="min-h-screen bg-[#f7f2e8]">
+        <div className="mx-auto flex min-h-screen max-w-2xl items-center justify-center px-6">
+          <div className="w-full rounded-3xl bg-white p-10 text-center shadow-sm">
+            <p className="text-sm font-semibold tracking-[0.2em] text-neutral-500">UNBODA PREMIUM REPORT</p>
+            <h1 className="mt-3 text-2xl font-bold text-neutral-900">심층분석 결과를 만들고 있어요</h1>
+            <p className="mt-4 leading-7 text-neutral-600">다른 요청에서 같은 분석을 생성 중입니다. 잠시 후 결과 확인을 다시 시도해 주세요.</p>
+            <button
+              type="button"
+              onClick={() => setRetryCount((count) => count + 1)}
+              className="mt-6 rounded-xl bg-neutral-900 px-6 py-3 font-semibold text-white"
+            >
+              결과 다시 확인하기
             </button>
           </div>
         </div>

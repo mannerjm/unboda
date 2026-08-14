@@ -6,7 +6,11 @@ import ReactMarkdown from "react-markdown";
 import type { getSaju } from "../lib/manse";
 import { calculateSeun } from "../lib/seun";
 import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
-import type { AnalyzeFreeResponse } from "@/app/lib/analyzeApiTypes";
+import type {
+  AnalyzeFreeResponse,
+  AnalyzeProfileMetadata,
+  AnalyzeSuccessResponse,
+} from "@/app/lib/analyzeApiTypes";
 import type { AnalysisProductRecommendationResult } from "@/app/lib/analysisProductRecommendations";
 import {
   getPremiumCategoryLabel,
@@ -23,6 +27,10 @@ import {
 import ProfileSelector from "@/app/components/ProfileSelector";
 
 type SajuResult = ReturnType<typeof getSaju>;
+
+function formatProfileBirthDate(birthDate: string): string {
+  return birthDate.replace(/-/g, ".");
+}
 
 const titleIcons: Record<string, string> = {
   "한눈에 보는 핵심": "✨",
@@ -213,6 +221,7 @@ function ResultPageContent() {
 const [sajuData, setSajuData] = useState<SajuResult | null>(null);
 const [freeAnalysis, setFreeAnalysis] =
   useState<AnalyzeFreeResponse | null>(null);
+const [profile, setProfile] = useState<AnalyzeProfileMetadata | null>(null);
 const [
   recommendationExplanation,
   setRecommendationExplanation,
@@ -228,10 +237,10 @@ const [selectedPaidAnalysisId, setSelectedPaidAnalysisId] =
 const [profileSelectionProductId, setProfileSelectionProductId] =
   useState<string | null>(null);
 
-const birthDate = searchParams.get("birthDate") || "입력 없음";
-  const birthTime = searchParams.get("birthTime") || "입력 없음";
-  const gender = searchParams.get("gender") || "입력 없음";
 const currentProfileId = searchParams.get("profileId") ?? undefined;
+const birthDate = profile ? formatProfileBirthDate(profile.birthDate) : "입력 없음";
+const birthTime = profile?.birthTime ?? "입력 없음";
+const gender = profile?.gender ?? "입력 없음";
 
 const conversionGuidance =
   recommendationExplanation?.conversionGuidance ?? null;
@@ -273,63 +282,51 @@ const displayedSeun =
       )
     : freeAnalysis?.seunAnalysis ?? sajuData?.seunAnalysis ?? null;
 
- useEffect(() => {
-  const savedResult = sessionStorage.getItem("sajuResult");
-  const savedSaju = sessionStorage.getItem("sajuData");
-  const savedFreeAnalysis = sessionStorage.getItem("freeAnalysis");
-const savedRecommendationExplanation =
-  sessionStorage.getItem("recommendationExplanation");
-  const savedProductRecommendations =
-  sessionStorage.getItem("productRecommendations");
+useEffect(() => {
+  if (!currentProfileId) {
+    setAiResult("분석할 프로필을 찾을 수 없습니다.");
+    setIsStorageChecked(true);
+    return;
+  }
 
-  const restored = restoreStoredResult(
-    savedResult,
-    savedSaju
-  );
+  void fetch(`/api/free-analysis/${currentProfileId}`)
+    .then(async (response) => {
+      const body = await response.json() as {
+        analysis?: AnalyzeSuccessResponse;
+        error?: string;
+      };
 
-  if (!restored.ok) {
-  setAiResult(restored.message);
-  setIsStorageChecked(true);
-  return;
-}
+      if (!response.ok || !body.analysis) {
+        throw new Error(body.error ?? "이 프로필의 분석 결과를 찾을 수 없습니다. 다시 분석해 주세요.");
+      }
 
-setAiResult(restored.result);
-setSajuData(restored.saju);
-setIsStorageChecked(true);
+      const saved = body.analysis;
+    const restored = restoreStoredResult(saved.result, JSON.stringify(saved.saju));
 
-if (savedFreeAnalysis) {
-  const parsedFreeAnalysis =
-    JSON.parse(savedFreeAnalysis) as AnalyzeFreeResponse;
+    if (!restored.ok || saved.profile?.id !== currentProfileId) {
+      throw new Error("이 프로필의 분석 결과를 찾을 수 없습니다. 다시 분석해 주세요.");
+    }
 
-  setFreeAnalysis(parsedFreeAnalysis);
-
-  console.log(
-    "저장된 무료 분석 데이터:",
-    parsedFreeAnalysis
-  );
-}
-
-if (savedRecommendationExplanation) {
-  const parsedRecommendationExplanation =
-    JSON.parse(
-      savedRecommendationExplanation
-    ) as AnalysisRecommendationOutput;
-
-  setRecommendationExplanation(
-    parsedRecommendationExplanation
-  );
-}
-
-if (savedProductRecommendations) {
-  const parsedProductRecommendations =
-    JSON.parse(
-      savedProductRecommendations
-    ) as AnalysisProductRecommendationResult;
-
-  setProductRecommendations(parsedProductRecommendations);
-}
-
-}, []);
+    sessionStorage.setItem(
+      `freeAnalysisResult:${currentProfileId}`,
+      JSON.stringify(saved),
+    );
+    setAiResult(restored.result);
+    setSajuData(restored.saju);
+    setProfile(saved.profile);
+    setFreeAnalysis(saved.freeAnalysis ?? null);
+    setRecommendationExplanation(saved.recommendationExplanation);
+    setProductRecommendations(saved.productRecommendations);
+    })
+    .catch((error) => {
+      setAiResult(
+        error instanceof Error
+          ? error.message
+          : "분석 결과를 불러오지 못했습니다. 다시 분석해 주세요.",
+      );
+    })
+    .finally(() => setIsStorageChecked(true));
+}, [currentProfileId]);
 
 
 useEffect(() => {
@@ -412,23 +409,18 @@ const elementAnalysis =
       sajuData.monthBranch,
       sajuData.dayBranch,
       sajuData.hourBranch,
-    ]
+    ],
   );
 const strengthAnalysis =
   freeAnalysis?.strengthAnalysis ?? sajuData.strengthAnalysis;
-
 const elementInterpretation =
   freeAnalysis?.elementInterpretation ?? sajuData.elementInterpretation;
-
- const yongshinAnalysis =
+const yongshinAnalysis =
   freeAnalysis?.yongshinAnalysis ?? sajuData.yongshinAnalysis;
-
 const gyeokgukAnalysis =
-  freeAnalysis?.gyeokgukAnalysis ?? sajuData.gyeokgukAnalysis;  
-
+  freeAnalysis?.gyeokgukAnalysis ?? sajuData.gyeokgukAnalysis;
 const daeunAnalysis =
-  freeAnalysis?.daeunAnalysis ?? sajuData.daeunAnalysis;  
-
+  freeAnalysis?.daeunAnalysis ?? sajuData.daeunAnalysis;
 const elementRelations = sajuData.elementRelations;
 
 const elementItems = [
@@ -441,16 +433,11 @@ const elementItems = [
 
 const recommendedPaidAnalysisProducts =
   productRecommendations?.recommendations
-    .map((recommendation) =>
-      getPremiumProduct(recommendation.productId)
-    )
+    .map((recommendation) => getPremiumProduct(recommendation.productId))
     .filter((product): product is NonNullable<typeof product> => Boolean(product)) ?? [];
-
-// fallback uses canonical registry products — no dead IDs
 const fallbackPaidAnalysisProducts = ["career", "wealth", "relationship"]
   .map((id) => getPremiumProduct(id))
   .filter((product): product is NonNullable<typeof product> => Boolean(product));
-
 const displayedPaidAnalysisProducts =
   recommendedPaidAnalysisProducts.length > 0
     ? recommendedPaidAnalysisProducts
@@ -488,10 +475,11 @@ function handlePaidAnalysisEntry(productId: string) {
             입력 정보
           </p>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-4">
             <InfoCard label="생년월일" value={birthDate} />
             <InfoCard label="태어난 시간" value={birthTime} />
             <InfoCard label="성별" value={gender} />
+            <InfoCard label="달력" value={profile?.calendarType ?? "입력 없음"} />
           </div>
         </section>
 <section className="mb-8 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">

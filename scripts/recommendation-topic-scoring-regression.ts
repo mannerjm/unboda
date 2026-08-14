@@ -1,7 +1,11 @@
 import { buildPremiumAnalysis } from "../app/lib/buildPremiumAnalysis";
 import { getSaju } from "../app/lib/manse";
 import { buildFreeAnalysis } from "../app/lib/buildFreeAnalysis";
-import { TOPIC_PREMIUM_PRODUCTS, type RecommendationSignalKey } from "../app/lib/premiumProductRegistry";
+import {
+  PREMIUM_PRODUCT_LOOKUP,
+  TOPIC_PREMIUM_PRODUCTS,
+  type RecommendationSignalKey,
+} from "../app/lib/premiumProductRegistry";
 import { normalizeRecommendationSignals } from "../app/lib/recommendationSignals";
 import { buildTopicAwareRecommendations, buildAnalysisProductRecommendations } from "../app/lib/analysisProductRecommendations";
 
@@ -70,6 +74,13 @@ function runScenario(label: string, saju: ReturnType<typeof getSaju>) {
   assert(topicAware.recommendations.length <= 3, `${label}: topic-aware recommendations should be capped at 3`);
   assert(topicAware.recommendations.every((item) => item.evidence && item.evidence.length > 0), `${label}: topic-aware recommendations need evidence`);
   assert(topicAware.recommendations.every((item) => topicProducts.some((product) => product.id === item.productId)), `${label}: topic-aware recommendations should use canonical registry topics`);
+  const categories = topicAware.recommendations.map(
+    (item) => PREMIUM_PRODUCT_LOOKUP[item.productId]?.category,
+  );
+  assert(
+    new Set(categories).size === categories.length,
+    `${label}: topic-aware recommendations should use distinct categories when available`,
+  );
 
   const fallback = buildAnalysisProductRecommendations({
     strengthAnalysis: premiumAnalysis.strengthAnalysis,

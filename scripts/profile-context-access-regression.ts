@@ -21,7 +21,6 @@ const detailRoute = read("app/api/paid-analysis-detail-v2/route.ts");
 const ordersRoute = read("app/api/orders/route.ts");
 const purchaseServer = read("app/lib/purchases/server.ts");
 const selector = read("app/components/ProfileSelector.tsx");
-const targetControl = read("app/components/ProfileTargetControl.tsx");
 
 assert(selector.includes('fetch("/api/profiles")'), "selector must load profiles through the Profile API");
 assert(!selector.includes("localStorage") && !selector.includes("sessionStorage"), "selector must not persist profile ownership in browser storage");
@@ -39,12 +38,10 @@ console.log("2. result requires explicit Profile selection before paid-analysis 
 
 for (const [name, source] of [["paid page", paidPage], ["checkout page", checkoutPage]] as const) {
   assert(source.includes("getUserProfile(profileId, user.id)"), `${name} must server-verify selected profile ownership`);
-  assert(source.includes("<ProfileTargetControl") && source.includes("profile={profile}"), `${name} must show a compact verified target`);
-  assert(source.includes("<ProfileSelector") && source.includes("profile ? ("), `${name} must show the selector only when no verified profile is selected`);
+  assert(source.includes("분석 대상") || source.includes("결제 대상"), `${name} must show the verified active target`);
+  assert(!source.includes("<ProfileSelector") && !source.includes("ProfileTargetControl"), `${name} must not expose an intermediate profile selector or change control`);
 }
-assert(targetControl.includes("대상 변경") && targetControl.includes("setIsChanging"), "compact target control must expand selection only on change action");
-assert(targetControl.includes("ProfileSelector"), "compact target control must reuse the existing selector");
-assert(checkoutPage.includes("searchParams") && checkoutPage.includes("currentProfileId={profileId}"), "checkout page must read and preserve profileId query context");
+assert(checkoutPage.includes("searchParams") && checkoutPage.includes("profileId"), "checkout page must read and preserve profileId query context");
 assert(checkoutPanel.includes("profileId?: string") && checkoutPanel.includes("disabled={isPaying || !profileId}"), "checkout must require selected profileId before payment");
 assert(checkoutPanel.includes("JSON.stringify({ productId: canonicalProductId, profileId })"), "checkout must send selected profileId to orders API");
 assert(checkoutPanel.includes("?profileId=${profileId}"), "checkout success navigation must preserve profileId");
@@ -64,11 +61,12 @@ assert(reportGate.includes("?profileId=${profileId}"), "report gate return link 
 console.log("4. paid access and report gate are profile-scoped ✓");
 
 assert(reportPage.includes("<PaidAnalysisDetailV2Client productId={productId} profileId={profileId}"), "report page must pass profileId to the detail client");
-assert(detailClient.includes("profileId?: string") && detailClient.includes("profileId,") && detailClient.includes("body: JSON.stringify(input)"), "detail client must retain and send profileId");
+assert(detailClient.includes("profileId?: string") && detailClient.includes("JSON.stringify({ productId, profileId })"), "detail client must send only productId and profileId");
+assert(!detailClient.includes("sessionStorage"), "detail client must not use free-analysis sessionStorage as report input");
 assert(detailRoute.includes("isProfileId(input.profileId)"), "detail API must reject missing/invalid profileId");
 assert(detailRoute.includes("getUserProfile(input.profileId, user.id)"), "detail API must verify profile ownership");
-assert(detailRoute.includes("hasActiveEntitlementForProfile"), "detail API must use strict profile entitlement lookup");
-const entitlementIndex = detailRoute.indexOf("hasActiveEntitlementForProfile");
+assert(detailRoute.includes("getActiveEntitlementForProfile"), "detail API must use strict profile entitlement lookup");
+const entitlementIndex = detailRoute.indexOf("getActiveEntitlementForProfile");
 const generateIndex = detailRoute.indexOf("generatePaidAnalysisDetailV2(");
 assert(entitlementIndex !== -1 && generateIndex !== -1 && entitlementIndex < generateIndex, "detail entitlement check must precede OpenAI generation");
 assert(detailRoute.includes("status: 400") && detailRoute.includes("status: 404") && detailRoute.includes("status: 403"), "detail API must distinguish invalid, foreign, and no-entitlement requests");

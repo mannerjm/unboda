@@ -5,8 +5,6 @@ import {
 } from "@/app/lib/userAccess";
 import PaidAnalysisAccessPanel from "./PaidAnalysisAccessPanel";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
-import ProfileSelector from "@/app/components/ProfileSelector";
-import ProfileTargetControl from "@/app/components/ProfileTargetControl";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
@@ -115,20 +113,11 @@ const permissions = getUserAccessPermissions(userAccessLevel);
   </div>
 
   {profile ? (
-    <ProfileTargetControl
-      productId={productId}
-      destination="paid-analysis"
-      label="분석 대상"
-      targetLabel={profile.relationshipType}
-      profile={profile}
-    />
-  ) : (
-    <ProfileSelector
-      productId={productId}
-      currentProfileId={profileId}
-      destination="paid-analysis"
-    />
-  )}
+    <div className="mt-6 border border-stone-200 bg-white p-5">
+      <p className="text-xs font-semibold tracking-[0.18em] text-stone-500">분석 대상</p>
+      <p className="mt-2 font-semibold text-stone-900">{profile.label}</p>
+    </div>
+  ) : null}
   {profileId ? <PaidAnalysisAccessPanel productId={productId} profileId={profileId} /> : null}
   
 </section>

@@ -22,7 +22,9 @@ export async function generateAnalysisText(
   const callType = options?.callType;
   const maxOutputTokens = resolveMaxOutputTokens(callType);
   const timeoutMs =
-    callType === "main-analysis" || callType === "paid-analysis-detail"
+    callType === "main-analysis" ||
+    callType === "recommendation-analysis" ||
+    callType === "paid-analysis-detail"
       ? 120000
       : 45000;
 

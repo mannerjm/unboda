@@ -4,33 +4,46 @@ import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { AnalyzeApiResponse } from "@/app/lib/analyzeApiTypes";
 
+async function waitForFreeAnalysis(profileId: string): Promise<AnalyzeApiResponse> {
+  for (let attempt = 0; attempt < 120; attempt += 1) {
+    const response = await fetch(`/api/free-analysis/${profileId}`);
+
+    if (response.status === 202) {
+      await new Promise<void>((resolve) => window.setTimeout(resolve, 1000));
+      continue;
+    }
+
+    const body = await response.json() as { analysis?: AnalyzeApiResponse; error?: string };
+    if (response.ok && body.analysis) return body.analysis;
+    throw new Error(body.error ?? "저장된 무료 분석 결과를 불러오지 못했습니다.");
+  }
+
+  throw new Error("무료 분석 결과 생성 시간이 초과되었습니다.");
+}
+
 function LoadingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();  
 
   useEffect(() => {
     const analyzeSaju = async () => {
-      const birthDate = searchParams.get("birthDate") || "";
-      const birthTime = searchParams.get("birthTime") || "";
-      const gender = searchParams.get("gender") || "";
-const calendarType = searchParams.get("calendarType") || "양력";
-const isLeapMonth = searchParams.get("isLeapMonth") || "평달";
+      const profileId = searchParams.get("profileId") || "";
       try {
         const response = await fetch("/api/analyze", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            birthDate,
-            birthTime,
-            gender,
-             calendarType,
-              isLeapMonth,
-          }),
+          body: JSON.stringify({ profileId }),
         });
 
-        const data: AnalyzeApiResponse = await response.json();
+        let data: AnalyzeApiResponse;
+
+        if (response.status === 202) {
+          data = await waitForFreeAnalysis(profileId);
+        } else {
+          data = await response.json() as AnalyzeApiResponse;
+        }
 
         if (!response.ok || "error" in data) {
   throw new Error(
@@ -42,50 +55,13 @@ if (!data.result || !data.saju) {
   throw new Error("분석 결과 데이터가 올바르지 않습니다.");
 }
 
-
-        sessionStorage.setItem("sajuResult", data.result || "");
-
-sessionStorage.setItem(
-  "sajuData",
-  JSON.stringify(data.saju || {})
-);
-
-sessionStorage.setItem(
-  "freeAnalysis",
-  JSON.stringify(data.freeAnalysis || {})
-);
-
-sessionStorage.setItem(
-  "productRecommendations",
-  JSON.stringify(data.productRecommendations || {
-    recommendations: [],
-  })
-);
-
-sessionStorage.setItem(
-  "recommendationExplanation",
-  JSON.stringify(
-    data.recommendationExplanation ?? null
-  )
-);
-
-sessionStorage.setItem(
-  "analyzeRequest",
-  JSON.stringify({
-    birthDate,
-    birthTime,
-    calendarType,
-    isLeapMonth,
-    gender,
-  })
-);
+        sessionStorage.setItem(
+          `freeAnalysisResult:${data.profile.id}`,
+          JSON.stringify(data),
+        );
 
         const params = new URLSearchParams({
-          birthDate,
-          birthTime,
-          gender,
-           calendarType,
-             isLeapMonth,
+           profileId: data.profile.id,
         });
 
         router.push(`/result?${params.toString()}`);

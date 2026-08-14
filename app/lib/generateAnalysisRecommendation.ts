@@ -72,6 +72,23 @@ export function buildDeterministicRecommendationExplanation(
   recommendation: AnalysisRecommendation
 ): AnalysisRecommendationOutput {
   const fallbackItems = buildRecommendationExplanationItems(recommendation);
+  const primaryItem = fallbackItems[0];
+  const primaryTitle = primaryItem?.headline.replace(" 심층 분석이 현재 우선 추천됩니다.", "")
+    ?? getRecommendationProductDisplayName(recommendation.recommendedProductId);
+  const primaryContext = (recommendation.recommendationContext ?? []).find(
+    (item) => item.productId === recommendation.recommendedProductId,
+  );
+  const rawEvidenceText = (primaryContext?.evidence ?? [])
+    .slice(0, 2)
+    .map((item) => item.signal)
+    .join(" ");
+  const formattedEvidenceText = formatRecommendationEvidence(rawEvidenceText);
+  const evidenceText = formattedEvidenceText === "현재 사주와 운의 흐름을 바탕으로 우선 점검이 필요합니다."
+    ? rawEvidenceText || "현재 추천 신호"
+    : formattedEvidenceText;
+  const focusText = primaryContext?.analysisFocus?.slice(0, 2).join("과 ")
+    || "핵심 흐름과 대응 방향";
+  const outcomeText = primaryContext?.expectedOutcome?.[0] || "판단 기준";
   const firstReason = fallbackItems[0]?.summary ?? recommendation.recommendedReason;
   const secondReason = fallbackItems[1]?.summary ?? recommendation.secondaryRecommendations[0]?.reason ?? recommendation.recommendedReason;
   const thirdReason = fallbackItems[2]?.summary ?? recommendation.secondaryRecommendations[1]?.reason ?? recommendation.recommendedReason;
@@ -86,9 +103,9 @@ export function buildDeterministicRecommendationExplanation(
       third: thirdReason,
     },
     conversionGuidance: {
-      whyNow: "현재 추천 순위에 따라 핵심 확인 포인트를 먼저 살펴보는 것이 좋습니다.",
-      whatYouWillLearn: "이 심층 분석을 통해 추천 상품의 핵심 흐름과 확인 포인트를 이해할 수 있습니다.",
-      riskOfDelay: "이 분석을 미루면 현재 추천 순위의 핵심 체크 포인트를 놓칠 수 있습니다.",
+      whyNow: `${primaryTitle}에서 ${evidenceText} 신호가 보여 지금 우선 확인할 필요가 있습니다.`,
+      whatYouWillLearn: `${primaryTitle} 심층 분석으로 ${focusText}을 중심으로 ${outcomeText}에 관한 판단 기준을 확인할 수 있습니다.`,
+      riskOfDelay: `${primaryTitle} 판단을 미루면 ${evidenceText}에 맞춘 준비 시점을 놓칠 수 있습니다.`,
     },
     recommendationItems: fallbackItems,
   };
@@ -219,7 +236,9 @@ export async function generateAnalysisRecommendation(
   const prompt = buildAnalysisRecommendationRequest(input);
 
   try {
-    const outputText = await generateAnalysisText(prompt);
+    const outputText = await generateAnalysisText(prompt, {
+      callType: "recommendation-analysis",
+    });
 
     if (!isNonEmptyString(outputText)) {
       return buildDeterministicRecommendationExplanation(input.recommendation);

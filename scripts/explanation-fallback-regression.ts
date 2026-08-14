@@ -88,6 +88,35 @@ const fallback = buildDeterministicRecommendationExplanation(baseRecommendation)
 assert(fallback.recommendationItems?.[0]?.productId === "career-job-change", "fallback should preserve the primary product id");
 assert(fallback.recommendationItems?.[1]?.productId === "money-investment", "fallback should preserve the secondary product id");
 assert(fallback.recommendationItems?.[2]?.productId === "relationship-boundary", "fallback should preserve the tertiary product id");
+assert(fallback.conversionGuidance.whyNow.includes("커리어 전환"), "fallback briefing should name the current primary product");
+assert(fallback.conversionGuidance.whyNow.includes("직업 전환 흐름"), "fallback briefing should use primary recommendation evidence");
+assert(fallback.conversionGuidance.whatYouWillLearn.includes("직무 방향"), "fallback briefing should use primary product analysis focus");
+
+const wealthRecommendation: AnalysisRecommendation = {
+  ...baseRecommendation,
+  primaryTheme: "money-leak-risk",
+  headline: "재물 지출 흐름을 점검할 시점입니다.",
+  summary: "지출 변동 신호가 강해 재물 흐름을 먼저 살펴볼 필요가 있습니다.",
+  recommendedProductId: "money-leak-risk",
+  recommendedReason: "지출 변동 신호가 강해 재물 흐름을 점검할 시점입니다.",
+  recommendationContext: [
+    {
+      productId: "money-leak-risk",
+      title: "돈이 새는 구조와 손실 위험",
+      analysisFocus: ["지출 구조", "손실 위험"],
+      expectedOutcome: ["지출 관리 기준"],
+      score: 3.4,
+      evidence: [
+        { signal: "지출 변동 신호", source: "recommendationEngine", contribution: 1.3 },
+      ],
+    },
+    ...baseRecommendation.recommendationContext!.slice(1),
+  ],
+};
+const wealthFallback = buildDeterministicRecommendationExplanation(wealthRecommendation);
+assert(wealthFallback.conversionGuidance.whyNow.includes("돈이 새는 구조와 손실 위험"), "fallback briefing should follow a different Profile's primary product");
+assert(wealthFallback.conversionGuidance.whyNow.includes("지출 변동 신호"), "fallback briefing should follow a different Profile's primary evidence");
+assert(!wealthFallback.conversionGuidance.whyNow.includes("직업 전환 흐름"), "fallback briefing must not reuse another recommendation's evidence");
 
 const mergedValid = mergeAnalysisRecommendationOutput({
   recommendation: baseRecommendation,

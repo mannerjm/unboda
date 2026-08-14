@@ -15,6 +15,11 @@ import {
 import type {
   AnalysisRecommendationOutput,
 } from "@/app/lib/analysisRecommendationOutput";
+import { formatRecommendationPresentationText } from "@/app/lib/recommendationDisplay";
+import {
+  parseFreeAnalysisAIInterpretation,
+  type FreeAnalysisAIInterpretation,
+} from "@/app/lib/freeAnalysisAIInterpretation";
 
 type SajuResult = ReturnType<typeof getSaju>;
 
@@ -51,6 +56,34 @@ function formatUnbodaMessage(text: string) {
     .join("\n");
 
   return `${beforeMessage}\n\n${quotedMessage}`;
+}
+
+function AISummarySectionCard({
+  title,
+  text,
+}: {
+  title: string;
+  text: string;
+}) {
+  return (
+    <section className="rounded-2xl border border-stone-200 bg-[#f7f3ea] p-5">
+      <h3 className="text-sm font-semibold text-stone-900">{title}</h3>
+      <div className="mt-3 text-sm leading-7 text-stone-700">
+        <ReactMarkdown
+          components={{
+            h1: ({ children }) => <p className="mb-3 font-semibold text-stone-900">{children}</p>,
+            h2: ({ children }) => <p className="mb-3 font-semibold text-stone-900">{children}</p>,
+            h3: ({ children }) => <p className="mb-3 font-semibold text-stone-900">{children}</p>,
+            p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
+            ul: ({ children }) => <ul className="mb-3 space-y-2 pl-5 last:mb-0">{children}</ul>,
+            li: ({ children }) => <li className="list-disc">{children}</li>,
+          }}
+        >
+          {text}
+        </ReactMarkdown>
+      </div>
+    </section>
+  );
 }
 type FiveElement = "wood" | "fire" | "earth" | "metal" | "water";
 
@@ -198,6 +231,22 @@ const birthDate = searchParams.get("birthDate") || "입력 없음";
 
 const conversionGuidance =
   recommendationExplanation?.conversionGuidance ?? null;
+
+const aiInterpretation: FreeAnalysisAIInterpretation =
+  parseFreeAnalysisAIInterpretation(aiResult);
+const aiSummary = aiInterpretation.summary?.replace(/^#{1,6}\s+/gm, "").trim();
+const aiSummarySections = [
+  { title: "한눈에 보는 핵심", text: aiInterpretation.overview },
+  { title: "원국과 신강·신약", text: aiInterpretation.strength },
+  { title: "오행 분석", text: aiInterpretation.fiveElements },
+  { title: "용신 해석", text: aiInterpretation.yongshin },
+  { title: "격국 해석", text: aiInterpretation.gyeokguk },
+  { title: "현재 대운", text: aiInterpretation.daeun },
+  { title: "현재 세운", text: aiInterpretation.seun },
+  { title: "재물 흐름", text: aiInterpretation.wealth },
+  { title: "관계 흐름", text: aiInterpretation.relationship },
+  { title: "건강·생활 리듬", text: aiInterpretation.health },
+].filter((section): section is { title: string; text: string } => Boolean(section.text));
 
 const [selectedDaeunOrder, setSelectedDaeunOrder] = useState<number | null>(null);
 const selectedDaeunStartYear =
@@ -548,18 +597,6 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
       }`}
     >
       <p className="text-sm font-semibold">{pillar.label}</p>
-
-      {pillar.tenGod && (
-        <p
-          className={`mt-1 text-xs ${
-            pillar.highlighted
-              ? "text-white/60"
-              : "text-stone-500"
-          }`}
-        >
-          {pillar.tenGod}
-        </p>
-      )}
     </div>
 
     <div className="flex min-h-[125px] flex-col items-center justify-center px-2 py-4">
@@ -571,6 +608,16 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
         }`}
       >
         천간
+      </p>
+
+      <p
+        className={`mb-1 text-xs ${
+          pillar.highlighted
+            ? "text-white/70"
+            : "text-stone-500"
+        }`}
+      >
+        {pillar.tenGod || ""}
       </p>
 
       <p
@@ -1175,13 +1222,28 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
                 AI ANALYSIS
               </p>
               <h2 className="mt-1 text-2xl font-bold">
-                운보다 AI 분석
+                운보다 AI 종합 해석
               </h2>
             </div>
           </div>
 
-          <div className="text-[16px] leading-9 text-stone-700">
-  {aiResult ? (
+          {aiSummarySections.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {aiSummarySections.map((section) => (
+                <AISummarySectionCard
+                  key={section.title}
+                  title={section.title}
+                  text={section.text}
+                />
+              ))}
+            </div>
+          ) : null}
+
+          {aiSummary ? (
+            <div className="mt-4 rounded-2xl border border-stone-200 bg-stone-50 p-6 text-[16px] leading-8 text-stone-700">
+              <h3 className="text-sm font-semibold text-stone-900">종합 조언</h3>
+              <div className="mt-3">
+          {aiSummary ? (
     <ReactMarkdown
       components={{
         h1: ({ children }) => {
@@ -1252,12 +1314,16 @@ h3: ({ children }) => {
         ),
       }}
     >
-      {formatUnbodaMessage(aiResult)}
+      {formatUnbodaMessage(aiSummary)}
     </ReactMarkdown>
   ) : (
-    "분석 결과를 불러오는 중입니다..."
+    null
   )}
-</div>
+              </div>
+            </div>
+          ) : aiSummarySections.length === 0 ? (
+            <p className="text-sm text-stone-600">분석 결과를 불러오는 중입니다...</p>
+          ) : null}
         </section>
 <section className="mt-8 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
   <div className="mx-auto max-w-2xl text-center">
@@ -1282,13 +1348,17 @@ h3: ({ children }) => {
   </p>
 
   <h3 className="mt-3 text-xl font-bold leading-8 text-stone-900">
-  {recommendationExplanation?.headline ??
-    "지금 가장 먼저 살펴볼 운의 흐름입니다"}
+  {formatRecommendationPresentationText(
+    recommendationExplanation?.headline ??
+      "지금 가장 먼저 살펴볼 운의 흐름입니다",
+  )}
 </h3>
 
 <p className="mt-4 text-sm leading-7 text-stone-600">
-  {recommendationExplanation?.summary ??
-    "현재 사주와 운의 흐름에서 중요한 변화가 감지되었습니다."}
+  {formatRecommendationPresentationText(
+    recommendationExplanation?.summary ??
+      "현재 사주와 운의 흐름에서 중요한 변화가 감지되었습니다.",
+  )}
 </p>
 
 
@@ -1316,7 +1386,7 @@ h3: ({ children }) => {
     </h4>
 
     <p className="mt-2 text-sm leading-7 text-stone-600">
-      {conversionGuidance.whyNow}
+      {formatRecommendationPresentationText(conversionGuidance.whyNow)}
     </p>
   </div>
 )}
@@ -1331,7 +1401,7 @@ h3: ({ children }) => {
     </h4>
 
     <p className="mt-2 text-sm leading-7 text-stone-600">
-      {conversionGuidance.whatYouWillLearn}
+      {formatRecommendationPresentationText(conversionGuidance.whatYouWillLearn)}
     </p>
   </div>
 )} 
@@ -1346,7 +1416,7 @@ h3: ({ children }) => {
     </h4>
 
     <p className="mt-2 text-sm leading-7 text-stone-600">
-      {conversionGuidance.riskOfDelay}
+      {formatRecommendationPresentationText(conversionGuidance.riskOfDelay)}
     </p>
   </div>
 )}
@@ -1417,7 +1487,7 @@ h3: ({ children }) => {
     </p>
 
     <p className="mt-1 text-xs leading-5 text-stone-600">
-      {recommendationReason}
+      {formatRecommendationPresentationText(recommendationReason)}
     </p>
   </div>
 )}

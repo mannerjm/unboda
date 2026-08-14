@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  formatBirthDateInput,
+  getBirthDateDigits,
+} from "@/app/lib/birthDateInput";
+import { validateAnalyzeInput } from "@/app/lib/validateAnalyzeInput";
 
 export default function SajuPage() {
   const router = useRouter();
@@ -11,7 +16,22 @@ export default function SajuPage() {
   const [gender, setGender] = useState("남성");
 const [calendarType, setCalendarType] = useState("양력");
 const [isLeapMonth, setIsLeapMonth] = useState("평달");
+  const [validationMessage, setValidationMessage] = useState("");
   const startAnalysis = () => {
+    const validation = validateAnalyzeInput({
+      birthDate,
+      birthTime,
+      gender,
+      calendarType,
+      isLeapMonth,
+    });
+
+    if (!validation.valid) {
+      setValidationMessage(validation.error);
+      return;
+    }
+
+    setValidationMessage("");
     const params = new URLSearchParams({
       birthDate,
   birthTime,
@@ -62,9 +82,34 @@ const [isLeapMonth, setIsLeapMonth] = useState("평달");
 )}
 
 <input
-  type="date"
+  type="text"
   value={birthDate}
-  onChange={(e) => setBirthDate(e.target.value)}
+  onChange={(e) => setBirthDate(formatBirthDateInput(e.target.value))}
+  onKeyDown={(e) => {
+    const cursor = e.currentTarget.selectionStart;
+    const hasSelection = cursor !== e.currentTarget.selectionEnd;
+
+    if (hasSelection || cursor === null) return;
+
+    const digits = getBirthDateDigits(birthDate);
+
+    if (e.key === "Backspace" && (cursor === 5 || cursor === 8)) {
+      e.preventDefault();
+      setBirthDate(formatBirthDateInput(digits.slice(0, -1)));
+    }
+
+    if (e.key === "Delete" && (cursor === 4 || cursor === 7)) {
+      e.preventDefault();
+      const digitIndex = cursor === 4 ? 4 : 6;
+      setBirthDate(formatBirthDateInput(
+        `${digits.slice(0, digitIndex)}${digits.slice(digitIndex + 1)}`,
+      ));
+    }
+  }}
+  inputMode="numeric"
+  maxLength={10}
+  placeholder="YYYY-MM-DD"
+  aria-label="생년월일"
   className="w-full rounded-xl border p-4"
 />
         
@@ -91,6 +136,9 @@ const [isLeapMonth, setIsLeapMonth] = useState("평달");
         >
           운보다 AI로 분석하기
         </button>
+        {validationMessage ? (
+          <p className="text-sm text-red-600">{validationMessage}</p>
+        ) : null}
       </div>
     </main>
   );

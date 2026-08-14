@@ -13,6 +13,10 @@ import type {
   BuildAnalysisRecommendationPromptInput,
 } from "./analysisRecommendationPrompt";
 import type { AnalysisRecommendation } from "./analysisRecommendation";
+import {
+  formatRecommendationEvidence,
+  getRecommendationProductDisplayName,
+} from "./recommendationDisplay";
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
@@ -32,7 +36,7 @@ function buildRecommendationExplanationItems(
 
   return rankedProductIds.slice(0, 3).map((productId, index) => {
     const context = contextMap.get(productId);
-    const title = context?.title ?? productId;
+    const title = context?.title ?? getRecommendationProductDisplayName(productId);
     const evidenceSignals = (context?.evidence ?? [])
       .slice(0, 2)
       .map((entry) => entry.signal)
@@ -40,9 +44,7 @@ function buildRecommendationExplanationItems(
     const focusSignals = (context?.analysisFocus ?? []).slice(0, 2);
     const outcomeSignals = (context?.expectedOutcome ?? []).slice(0, 2);
 
-    const evidenceText = evidenceSignals.length > 0
-      ? evidenceSignals.join(", ")
-      : "현재 추천 근거";
+    const evidenceText = formatRecommendationEvidence(evidenceSignals.join(" "));
     const focusText = focusSignals.length > 0
       ? focusSignals.join(", ")
       : "핵심 흐름";
@@ -54,7 +56,7 @@ function buildRecommendationExplanationItems(
       ? `${title} 심층 분석이 현재 우선 추천됩니다.`
       : `${title} 심층 분석은 현재 추천 순위에 맞춰 확인할 가치가 있습니다.`;
 
-    const summary = `${title}는 ${evidenceText}를 기준으로 현재 추천 순위에 맞춰 우선 점검할 가치가 있습니다.`;
+    const summary = `${title}는 ${evidenceText}`;
     const userMeaning = `이 분석을 통해 사용자는 ${focusText}를 중심으로 ${outcomeText}를 확인할 수 있습니다.`;
 
     return {

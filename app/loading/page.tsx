@@ -115,7 +115,19 @@ sessionStorage.setItem(
         AI 분석 결과를 만들고 있습니다.
       </p>
 
-      <div className="w-16 h-16 border-4 border-stone-300 border-t-stone-900 rounded-full animate-spin" />
+      <p className="mb-3 text-base font-semibold text-stone-800">
+        분석에는 약 1~2분 정도 소요될 수 있습니다.
+      </p>
+
+      <p className="text-sm leading-7 text-stone-600">
+        잠시만 기다려 주세요. 분석이 완료되면 결과 화면으로 자동 이동합니다.
+      </p>
+
+      <p className="mt-3 text-xs leading-6 text-stone-500">
+        분석 중에는 이 페이지를 닫거나 새로고침하지 않는 것을 권장합니다.
+      </p>
+
+      <div className="mt-8 w-16 h-16 border-4 border-stone-300 border-t-stone-900 rounded-full animate-spin" />
     </main>
   );
 }

@@ -1,20 +1,8 @@
 
-import { getSaju } from "@/app/lib/manse";
 import { NextResponse } from "next/server";
-import { buildSajuResponse } from "@/app/lib/buildSajuResponse";
 import { validateAnalyzeInput } from "@/app/lib/validateAnalyzeInput";
 import { getAnalyzeErrorStatus } from "@/app/lib/getAnalyzeErrorStatus";
-import { buildFreeAnalysis } from "@/app/lib/buildFreeAnalysis";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
-import { buildPremiumAnalysis } from "@/app/lib/buildPremiumAnalysis";
-import { buildAnalysisProductRecommendations } from "@/app/lib/analysisProductRecommendations";
-import { buildAnalysisRecommendation } from "@/app/lib/analysisRecommendationBuilder";
-import { buildMainAnalysisPrompt } from "@/app/lib/mainAnalysisPrompt";
-import { buildMainAnalysisCompactFacts } from "../../lib/mainAnalysisCompactFacts";
-import {
-  generateMainAnalysis,
-  generateRecommendationExplanation,
-} from "@/app/lib/analysisAIService";
 import type {
   AnalyzeRequest,
   AnalyzeSuccessResponse,
@@ -29,6 +17,7 @@ import {
   failFreeAnalysisResult,
   type FreeAnalysisResultRecord,
 } from "@/app/lib/freeAnalysisResults/server";
+import { buildFreeAnalysisResponse } from "@/app/lib/freeAnalysisPipeline/server";
 export async function POST(req: Request) {
   let claimedFreeResult: FreeAnalysisResultRecord | null = null;
 
@@ -120,71 +109,18 @@ if (productId === undefined) {
   claimedFreeResult = claim.record;
 }
 
-const saju = getSaju(
-  resolvedBirthDate,
-  resolvedBirthTime,
-  resolvedCalendarType,
-  resolvedIsLeapMonth,
-  resolvedGender,
-);
-
-const freeAnalysis =
-  buildFreeAnalysis(saju);
-
-const compactFacts = buildMainAnalysisCompactFacts({
-  saju,
-  freeAnalysis,
-});
-
-const mainAnalysisPrompt = buildMainAnalysisPrompt({
-  compactFacts,
-});
-
-const recommendationAnalysis = buildPremiumAnalysis(saju);
-
-const productRecommendations =
-  buildAnalysisProductRecommendations({
-    fortuneBrain: recommendationAnalysis.fortuneBrain,
-    strengthAnalysis: recommendationAnalysis.strengthAnalysis,
-    elementRelations: recommendationAnalysis.elementRelations,
-    fortuneFlow: recommendationAnalysis.fortuneFlowAnalysis,
-    elementAnalysis: recommendationAnalysis.elementAnalysis,
-  });
-
-if (!productRecommendations.engineResult) {
-  throw new Error("Recommendation engine result is missing");
-}
-
-const analysisRecommendation = buildAnalysisRecommendation({
-  engineResult: productRecommendations.engineResult,
-});
-const [mainAnalysis, generatedRecommendation] = await Promise.all([
-  generateMainAnalysis(mainAnalysisPrompt),
-  generateRecommendationExplanation(analysisRecommendation),
-]);
-
-const responseData: AnalyzeSuccessResponse = {
-  result:
-  mainAnalysis ||
-  "AI 분석 결과를 생성하지 못했습니다.",
-
-  saju: buildSajuResponse(saju),
+const responseData: AnalyzeSuccessResponse = await buildFreeAnalysisResponse({
   profile: {
     id: profile.id,
-    birthDate: profile.birthDate,
-    birthTime: profile.birthTime,
-    gender: profile.gender,
-    calendarType: profile.calendarType,
-    isLeapMonth: profile.isLeapMonth,
+    label: profile.label,
+    birthDate: resolvedBirthDate,
+    birthTime: resolvedBirthTime,
+    gender: resolvedGender,
+    calendarType: resolvedCalendarType,
+    isLeapMonth: resolvedIsLeapMonth === "윤달",
   },
-  freeAnalysis,
-  premiumAnalysis:
-  productId === undefined
-    ? undefined
-    : recommendationAnalysis,
-    productRecommendations,
-    recommendationExplanation: generatedRecommendation,
-};
+  includePremiumAnalysis: productId !== undefined,
+});
 
 if (claimedFreeResult) {
   await completeFreeAnalysisResult({

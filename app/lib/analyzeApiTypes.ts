@@ -14,6 +14,8 @@ export type AnalyzePremiumResponse =
 
 export type AnalyzeProfileMetadata = {
   id: string;
+  // Display-only; never participates in Profile identity/fingerprint matching.
+  label?: string;
   birthDate: string;
   birthTime: string;
   gender: "남성" | "여성";

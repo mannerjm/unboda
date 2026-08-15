@@ -37,6 +37,7 @@ const STALE_GENERATING_MS = 5 * 60 * 1000;
 export function toAnalyzeProfileMetadata(profile: ProfileDto): AnalyzeProfileMetadata {
   return {
     id: profile.id,
+    label: profile.label,
     birthDate: profile.birthDate,
     birthTime: profile.birthTime,
     gender: profile.gender,
@@ -89,6 +90,30 @@ export async function getFreeAnalysisResult(
   }
 
   return data ? toRecord(data) : null;
+}
+
+export type FreeAnalysisResultSummary = {
+  profileId: string;
+  status: FreeAnalysisResultStatus;
+};
+
+export async function listUserFreeAnalysisResults(
+  userId: string,
+): Promise<FreeAnalysisResultSummary[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("free_analysis_results")
+    .select("profile_id, status")
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(`무료 분석 결과 목록을 조회하지 못했습니다: ${error.message}`);
+  }
+
+  return (data ?? []).map((row: { profile_id: string; status: FreeAnalysisResultStatus }) => ({
+    profileId: row.profile_id,
+    status: row.status,
+  }));
 }
 
 export type FreeAnalysisResultClaim =

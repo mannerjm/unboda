@@ -142,6 +142,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "직업 적성",
     shortDescription: "타고난 업무 방식과 잘 맞는 역할·환경을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "타고난 기질이 업무 방식과 역할 선택에 드러나는 명리적 근거",
+      "혼자 집중하는 일과 사람을 상대하는 일 중 강점이 살아나는 방향",
+      "체계적인 조직과 유연한 환경 중 나에게 맞는 근무 조건",
+      "현재 운에서 강화되거나 약해지는 업무 역량과 관심 분야",
+      "적성을 실제 업무 선택에 반영할 때 확인할 기준",
+    ],
   },
   {
     id: "career-job-change",
@@ -149,6 +156,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "이직과 이동",
     shortDescription: "현재 직장을 유지할지 이동할지 판단하는 기준을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "현재 직장을 유지할지 이동할지 판단할 때 우선 확인해야 할 기준",
+      "이직·부서 이동·직무 전환에 유리한 시기와 신중해야 할 시기",
+      "현재 운의 흐름에서 커리어 변화가 기회로 작용하는 조건",
+      "새로운 조직이나 역할을 선택할 때 나에게 맞는 방향과 환경",
+      "이직 이후 안정적으로 자리 잡기 위해 준비해야 할 핵심 포인트",
+    ],
   },
   {
     id: "career-promotion",
@@ -156,6 +170,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "승진과 책임 확대",
     shortDescription: "권한·책임이 커지는 시기의 기회와 부담을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "권한과 책임이 커지는 흐름이 나타나는 명리적 조건",
+      "승진·역할 확대가 기회로 작용하는 시기와 부담이 커지는 시기",
+      "책임 확대와 함께 커지는 경쟁·주목·업무량의 균형",
+      "확대된 역할에서 강점을 살리기 위해 준비할 부분",
+      "과도한 책임을 맡기 전에 점검할 현실적 조건",
+    ],
   },
   {
     id: "career-organization-fit",
@@ -163,6 +184,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "조직 적응과 직장 관계",
     shortDescription: "조직 안에서 강점이 살아나는 방식과 갈등 포인트를 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "조직 안에서 강점이 드러나는 위치와 역할의 명리적 근거",
+      "상사·동료와의 관계에서 반복되기 쉬운 마찰 지점",
+      "현재 운에서 조직 적응이 수월해지거나 어려워지는 조건",
+      "체계와 자율성 중 적응력이 높아지는 근무 환경",
+      "조직 내 갈등을 줄이기 위해 조정할 소통 방식",
+    ],
   },
   {
     id: "career-leadership",
@@ -170,6 +198,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "리더십과 관리 역할",
     shortDescription: "사람을 이끌고 조율하는 역할이 맞는지와 주의점을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "사람을 이끄는 역할에서 강점이 드러나는 명리적 구조",
+      "지시형·조율형 등 관리 방식 중 자연스럽게 맞는 유형",
+      "현재 운에서 리더십 발휘가 수월해지거나 부담이 커지는 조건",
+      "팀을 이끌 때 반복되기 쉬운 소통 방식과 주의할 습관",
+      "관리 역할을 맡기 전후 점검할 역량과 준비 사항",
+    ],
   },
   {
     id: "career-independence",
@@ -177,6 +212,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "독립·프리랜서 적합성",
     shortDescription: "조직 밖에서 일할 때 필요한 조건과 위험을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "조직에 속하지 않고 일할 때 강점이 살아나는 명리적 조건",
+      "독립 초기 안정성과 수입 변동성 사이에서 확인할 균형",
+      "현재 운에서 독립이 기회로 작용하는 시기와 신중해야 할 시기",
+      "자기 관리와 일정 조율에서 스스로 점검할 습관",
+      "독립을 준비하며 미리 확보해야 할 현실적 조건",
+    ],
   },
   {
     id: "career-specialization",
@@ -184,6 +226,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "전문성 강화 방향",
     shortDescription: "어떤 능력을 깊게 키울수록 성과가 커지는지 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "깊이 파고들수록 성과가 커지는 역량 분야의 명리적 근거",
+      "넓게 확장하는 방향과 한 분야를 깊게 다지는 방향의 비교",
+      "현재 운에서 전문성 강화가 유리해지는 시기",
+      "전문성이 실제 평가·기회로 연결되는 조건",
+      "강화 방향을 정할 때 우선 점검할 기준",
+    ],
   },
   {
     id: "career-burnout-risk",
@@ -191,6 +240,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "커리어 소진 위험",
     shortDescription: "과도한 책임·경쟁·변화 속에서 소진되기 쉬운 패턴을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "업무에서 소진이 누적되기 쉬운 명리적 조건",
+      "책임·경쟁·변화가 겹칠 때 부담이 커지는 상황",
+      "현재 운에서 소진 위험이 높아지는 시기와 완화되는 시기",
+      "의욕 저하·집중력 저하처럼 미리 확인할 업무 신호",
+      "소진을 줄이기 위해 업무 강도와 일정을 조정하는 기준",
+    ],
   },
 
   // 연애·결혼 8
@@ -312,6 +368,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "귀인과 도움을 주는 사람",
     shortDescription: "도움을 얻기 쉬운 관계 유형과 신뢰 기준을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "도움이 실제로 연결되는 관계의 명리적 근거",
+      "어떤 사람에게 도움을 받기 쉬운지에 대한 유형별 특징",
+      "현재 운에서 귀인을 만나기 유리한 시기와 상황",
+      "실제 도움과 입에 그치는 관심을 구분하는 판단 기준",
+      "도움을 주고받는 관계를 유지하기 위해 확인할 행동",
+    ],
   },
   {
     id: "social-friendship",
@@ -319,6 +382,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "친구 관계",
     shortDescription: "친구 관계에서 반복되는 역할과 거리 조절 패턴을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "친구 관계에서 반복되는 역할과 거리감의 명리적 배경",
+      "오래 이어지는 관계와 금방 멀어지는 관계를 구분하는 패턴",
+      "현재 운에서 친밀함이 커지거나 약해지는 관계 조건",
+      "연락 빈도·모임 참여처럼 관계 온도를 확인할 현실 신호",
+      "상호 부담을 맞추기 위해 조정할 거리와 행동",
+    ],
   },
   {
     id: "social-family",
@@ -326,6 +396,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "가족 관계",
     shortDescription: "가족 안에서 맡기 쉬운 역할과 갈등 구조를 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "가족 구조 안에서 맡기 쉬운 역할의 명리적 근거",
+      "세대와 역할 차이에서 반복되는 기대와 마찰 지점",
+      "현재 운에서 가족 관계가 가까워지거나 거리가 생기는 조건",
+      "연락 빈도·역할 분담처럼 확인할 수 있는 관계 신호",
+      "가족 관계에서 갈등을 줄이기 위해 조정할 대화 방식",
+    ],
   },
   {
     id: "social-workplace",
@@ -333,6 +410,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "직장 인간관계",
     shortDescription: "상사·동료·협업 관계에서 나타나는 강점과 주의점을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "상사·동료 관계에서 강점이 드러나는 명리적 배경",
+      "협업과 경쟁 사이에서 반복되는 역할과 거리감",
+      "현재 운에서 직장 관계가 원만해지거나 마찰이 생기는 조건",
+      "회의·보고·비공식 대화처럼 확인할 수 있는 관계 신호",
+      "직장 내 관계를 원만하게 유지하기 위해 조정할 행동",
+    ],
   },
   {
     id: "social-conflict",
@@ -340,6 +424,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "대인 갈등과 거리 조절",
     shortDescription: "반복되는 갈등 유형과 관계를 조절하는 기준을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "대인관계에서 갈등이 반복되는 명리적 구조",
+      "갈등을 촉발하는 상황과 반복되는 감정 반응",
+      "현재 운에서 갈등이 커지거나 완화되는 조건",
+      "대화 단절·거리 변화처럼 확인할 수 있는 현실 신호",
+      "갈등을 줄이고 관계를 조절하기 위해 취할 행동",
+    ],
   },
   {
     id: "social-network-expansion",
@@ -347,6 +438,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "새로운 인맥과 관계 확장",
     shortDescription: "새 사람과 연결될 때 강점이 살아나는 환경과 조건을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "새로운 인연이 늘어나기 쉬운 명리적 조건",
+      "넓은 관계와 깊은 관계 중 현재 더 맞는 확장 방식",
+      "현재 운에서 새로운 접점이 늘어나는 시기와 환경",
+      "모임·협업 자리처럼 관계 확장이 실제로 이듬되는 상황",
+      "새 관계를 맺을 때 확인할 신뢰 판단 기준",
+    ],
   },
 
   // 건강·생활 5
@@ -428,6 +526,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "창업 적합성과 준비",
     shortDescription: "창업 시 강점이 살아나는 방식과 먼저 준비할 조건을 분석합니다.",
     riskLevel: "sensitive",
+    details: [
+      "창업을 시도할 때 강점이 드러나는 명리적 조건",
+      "혼자 이끌기와 팀으로 운영하기 중 더 안정감을 주는 구조",
+      "현재 운에서 창업이 기회로 작용하는 시기와 신중해야 할 시기",
+      "초기 자금·인력·일정 부담을 미리 확인할 현실적 조건",
+      "창업 직후 안정적으로 자리 잡기 위해 점검할 항목",
+    ],
   },
   {
     id: "business-partnership",
@@ -435,6 +540,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "동업과 파트너십",
     shortDescription: "동업 시 역할·권한·책임 배분에서 주의할 지점을 분석합니다.",
     riskLevel: "sensitive",
+    details: [
+      "동업에서 역할이 나뉘어지는 방식의 명리적 근거",
+      "권한과 책임이 불균형해지기 쉬운 구조적 조건",
+      "현재 운에서 파트너십이 안정되거나 마찰이 생기는 조건",
+      "이익 배분·의사결정 방식처럼 미리 합의해야 할 항목",
+      "파트너십 유지를 위해 정기적으로 점검할 신뢰 기준",
+    ],
   },
   {
     id: "business-growth",
@@ -442,6 +554,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "사업 확장과 속도 조절",
     shortDescription: "확장하기 좋은 조건과 무리한 성장 위험을 분석합니다.",
     riskLevel: "sensitive",
+    details: [
+      "사업이 확장하기 좋은 조건이 나타나는 명리적 근거",
+      "확장과 함께 커지는 고정비·인력·관리 부담",
+      "현재 운에서 확대·유지·조정 중 무엇이 우선인지",
+      "속도를 높일 때와 닮추어야 할 때를 구분하는 현실 신호",
+      "무리한 확장을 피하기 위해 미리 점검할 항목",
+    ],
   },
   {
     id: "business-decision",
@@ -449,6 +568,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "사업 의사결정 방식",
     shortDescription: "중요한 사업 판단에서 강점과 편향이 나타나는 방식을 분석합니다.",
     riskLevel: "sensitive",
+    details: [
+      "중요한 사업 판단을 내릴 때 드러나는 사고 습관의 명리적 근거",
+      "신중한 판단과 결단이 필요한 판단 사이의 그 사람만의 기준",
+      "현재 운에서 판단이 흔들리기 쉬운 조건과 시기",
+      "정보 부족·시간 압박 상황에서 반복되는 판단 패턴",
+      "중요한 결정 전에 점검할 확인 절차와 기준",
+    ],
   },
   {
     id: "business-performance",
@@ -456,6 +582,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "성과가 나는 구조",
     shortDescription: "성과가 커지는 역할·환경·운 흐름을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "성과가 자연스럽게 커지는 역할과 환경의 명리적 근거",
+      "혼자 이끄는 일과 협업으로 하는 일 중 성과가 더 잘 나타나는 방식",
+      "현재 운에서 성과가 늘어나기 좋은 시기와 조건",
+      "집중력·성과물처럼 직접 확인할 수 있는 업무 신호",
+      "성과를 유지하기 위해 점검할 업무 환경과 습관",
+    ],
   },
 
   // 학업·성장 4
@@ -465,6 +598,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "학습 방식과 집중력",
     shortDescription: "어떤 학습 방식에서 집중과 이해가 잘 살아나는지 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "집중과 이해가 잘 살아나는 학습 방식의 명리적 근거",
+      "혼자 하는 학습과 함께 하는 학습 중 더 잘 맞는 방식",
+      "현재 운에서 집중력이 높아지거나 흔들리는 조건",
+      "학습 지속 시간·반복 학습처럼 직접 확인할 집중 신호",
+      "학습 효율을 높이기 위해 조정할 환경과 습관",
+    ],
   },
   {
     id: "growth-exam",
@@ -472,6 +612,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "시험·자격 준비",
     shortDescription: "시험 준비 과정에서 강점과 흔들리기 쉬운 지점을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "시험·자격 준비 과정에서 강점이 드러나는 명리적 근거",
+      "장기 준비와 단기 집중 중 더 효과가 큰 준비 방식",
+      "현재 운에서 집중력이 높아지거나 흔들리는 시기",
+      "모의고사 점수·학습 지속시간처럼 직접 확인할 준비 신호",
+      "시험을 앞두고 조정할 학습 계획과 생활 리듬",
+    ],
   },
   {
     id: "growth-skill",
@@ -479,6 +626,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "전문기술과 역량 개발",
     shortDescription: "어떤 역량을 키울 때 장기 경쟁력이 높아지는지 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "장기 경쟁력이 높아지는 역량 분야의 명리적 근거",
+      "넓게 익히는 기술과 깊게 파는 기술 중 더 유리한 방향",
+      "현재 운에서 역량 개발이 유리해지는 시기",
+      "실무 적용·포트폴리오처럼 직접 확인할 성장 지표",
+      "역량 개발 우선순위를 정할 때 확인할 기준",
+    ],
   },
   {
     id: "growth-self-development",
@@ -486,6 +640,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "자기계발 방향",
     shortDescription: "현재 시점에서 투자할 가치가 큰 성장 방향을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "현 시점에서 자기계발이 효과를 내는 방향의 명리적 근거",
+      "안정을 다지는 공부와 변화를 대비하는 공부 중 더 맞는 방향",
+      "현재 운에서 자기계발에 유리한 시기와 여유가 생기는 조건",
+      "읽기·강의 수강·실천처럼 직접 확인할 성장 신호",
+      "자기계발을 지속하기 위해 조정할 시간과 우선순위",
+    ],
   },
 
   // 이동·변화 3
@@ -495,6 +656,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "이사와 생활 환경 변화",
     shortDescription: "환경 이동이 생활 리듬과 선택에 미칠 수 있는 영향을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "환경 이동이 생활 리듬에 영향을 주는 명리적 근거",
+      "이사·거주지 변경에 유리한 시기와 신중해야 할 시기",
+      "현재 운에서 이동이 안정으로 연결되는 조건",
+      "새 환경에 적응할 때 미리 점검할 생활·관계 변화 요소",
+      "이사 이후 생활 리듬을 안정시키기 위해 확인할 항목",
+    ],
   },
   {
     id: "change-overseas",
@@ -502,6 +670,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "해외·장거리 이동",
     shortDescription: "해외나 장거리 환경에서 기회와 부담이 나타나는 방식을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "해외·장거리 환경이 기회로 작용하는 명리적 조건",
+      "익숙한 환경을 떠날 때 커지는 적응 부담과 기회 요소",
+      "현재 운에서 장거리 이동이 유리해지는 시기와 신중해야 할 시기",
+      "언어·문화·관곈 단절처럼 미리 점검할 현실적 조건",
+      "장거리 이동 이후 안정적으로 자리 잡기 위해 준비할 부분",
+    ],
   },
   {
     id: "change-transition",
@@ -509,6 +684,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "큰 변화와 전환기",
     shortDescription: "현재 삶의 구조를 바꾸기 좋은지와 먼저 점검할 기준을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "현재 찾아온 변화가 일시적인 흔들림인지 큰 전환의 시작인지 확인",
+      "변화를 받아들이거나 속도를 조절해야 하는 시기와 판단 기준",
+      "직업·관계·생활환경 변화가 서로 어떤 영향을 주고받는지 분석",
+      "새로운 선택을 할 때 얻을 수 있는 기회와 함께 점검해야 할 위험 요소",
+      "전환기를 지나 다음 단계에 안정적으로 정착하기 위한 대응 방향",
+    ],
   },
 
   // 인생 종합 3
@@ -518,6 +700,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "지금 가장 중요한 인생 전환점",
     shortDescription: "현재 운에서 무엇을 가장 먼저 조정해야 하는지 종합적으로 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "현재 운에서 가장 크게 작용하는 전환점의 명리적 근거",
+      "일·관계·재물·건강 중 지금 우선적으로 조정이 필요한 영역",
+      "전환점에서 함께 커지는 기회 요소와 부담 요소",
+      "지금 확인할 수 있는 생활·감정의 변화 신호",
+      "우선순위를 조정할 때 점검할 판단 기준",
+    ],
   },
   {
     id: "life-long-term-direction",
@@ -525,6 +714,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "장기 인생 방향",
     shortDescription: "타고난 구조와 현재 운을 연결해 장기적으로 집중할 방향을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "타고난 구조에서 반복적으로 나타나는 장기 지향점의 명리적 근거",
+      "단기 성과와 장기 방향 중 현재 더 비중을 둘 부분",
+      "앞으로의 운 흐름에서 장기 방향이 힘을 받는 시기",
+      "지금까지의 선택을 돌아보며 일관성을 확인할 기준",
+      "장기 방향을 구체화할 때 단계별로 점검할 항목",
+    ],
   },
   {
     id: "life-priority",
@@ -532,5 +728,12 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     title: "지금의 우선순위",
     shortDescription: "재물·일·관계·건강 중 현재 가장 먼저 다룰 영역을 분석합니다.",
     riskLevel: "standard",
+    details: [
+      "지금 어느 영역이 가장 먼저 앱력을 받는지에 대한 명리적 근거",
+      "재물·일·관계·건강 중 현재 변화가 큰 영역의 구분",
+      "여러 영역이 동시에 양법을 요구할 때 우선순위를 정하는 기준",
+      "우선순위를 정할 때 참고할 수 있는 생활·감정 신호",
+      "우선순위를 실행으로 옥길 때 점검할 행동 계획",
+    ],
   },
 ];

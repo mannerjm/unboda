@@ -1,18 +1,75 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ProfileDto } from "@/app/lib/profiles/types";
+import type { ProfileDto, ProfileInput, ProfileRelationshipType } from "@/app/lib/profiles/types";
+import { createClient } from "@/app/lib/supabase/client";
+import { GUEST_BIRTH_DATE_MIN, getGuestBirthDateMax } from "@/app/lib/guestFreeAnalyses/date";
 
 function formatProfileBirthDate(birthDate: string): string {
   return birthDate.replace(/-/g, ".");
 }
+
+const relationshipLabels: Record<ProfileDto["relationshipType"], string> = {
+  self: "본인",
+  spouse: "배우자",
+  child: "자녀",
+  parent: "부모",
+  sibling: "형제자매",
+  other: "기타",
+};
+
+function formatProfileDetails(profile: ProfileDto): string {
+  const leapMonthSuffix = profile.calendarType === "음력" && profile.isLeapMonth ? " · 윤달" : "";
+  return `${formatProfileBirthDate(profile.birthDate)} · ${profile.birthTime} · ${profile.gender} · ${profile.calendarType}${leapMonthSuffix}`;
+}
+
+type FreeAnalysisResultStatus = "generating" | "completed" | "failed";
+
+const freeAnalysisStatusLabels: Record<FreeAnalysisResultStatus, string> = {
+  generating: "분석 생성 중",
+  completed: "무료 분석 완료",
+  failed: "분석 실패",
+};
+
+function formatFreeAnalysisStatusLabel(status: FreeAnalysisResultStatus | undefined): string {
+  return status ? freeAnalysisStatusLabels[status] : "무료 분석 없음";
+}
+
+const relationshipOptions: Array<{ value: ProfileRelationshipType; label: string }> = [
+  { value: "self", label: "본인" },
+  { value: "spouse", label: "배우자" },
+  { value: "child", label: "자녀" },
+  { value: "parent", label: "부모" },
+  { value: "sibling", label: "형제자매" },
+  { value: "other", label: "기타" },
+];
+
+const emptyProfileInput: ProfileInput = {
+  label: "",
+  relationshipType: "other",
+  birthDate: "",
+  birthTime: "12:00",
+  gender: "남성",
+  calendarType: "양력",
+  isLeapMonth: false,
+};
 
 export default function MyPage() {
   const router = useRouter();
   const [profiles, setProfiles] = useState<ProfileDto[]>([]);
   const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [freeAnalysisStatusById, setFreeAnalysisStatusById] = useState<Record<string, FreeAnalysisResultStatus>>({});
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
+  const [formInput, setFormInput] = useState<ProfileInput>(emptyProfileInput);
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const confirmedActiveProfileIdRef = useRef<string | null>(null);
+  const pendingActiveProfileIdRef = useRef<string | null>(null);
+  const isPersistingActiveProfileRef = useRef(false);
 
   useEffect(() => {
     void Promise.all([fetch("/api/profiles"), fetch("/api/profiles/active")])
@@ -26,22 +83,160 @@ export default function MyPage() {
 
         setProfiles(profilesBody.profiles ?? []);
         setActiveProfileId(activeBody.profile?.id ?? null);
+        confirmedActiveProfileIdRef.current = activeBody.profile?.id ?? null;
       })
       .catch(() => setMessage("로그인 상태를 확인한 뒤 다시 시도해 주세요."));
   }, []);
 
-  async function activate(profileId: string) {
-    const response = await fetch("/api/profiles/active", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profileId }),
-    });
-    if (!response.ok) {
-      setMessage("활성 프로필을 변경하지 못했습니다.");
-      return;
-    }
+  useEffect(() => {
+    void fetch("/api/mypage/summary")
+      .then(async (response) => {
+        const body = await response.json() as { freeAnalysisResults?: Array<{ profileId: string; status: FreeAnalysisResultStatus }> };
+        if (!response.ok) return;
+        const statusById: Record<string, FreeAnalysisResultStatus> = {};
+        for (const item of body.freeAnalysisResults ?? []) statusById[item.profileId] = item.status;
+        setFreeAnalysisStatusById(statusById);
+      })
+      .catch(() => {});
+  }, []);
+
+  function activate(profileId: string) {
+    if (profileId === activeProfileId) return;
+
+    // Every click updates the UI immediately and is never blocked by an in-flight PUT.
     setActiveProfileId(profileId);
     setMessage(null);
+    pendingActiveProfileIdRef.current = profileId;
+    void persistPendingActiveProfile();
+  }
+
+  // Serializes PUT /api/profiles/active: only one request runs at a time. Clicks that
+  // happen while a request is in flight update pendingActiveProfileIdRef and are picked
+  // up by this same call once it finishes, skipping any intermediate selections.
+  async function persistPendingActiveProfile() {
+    if (isPersistingActiveProfileRef.current) return;
+
+    const profileId = pendingActiveProfileIdRef.current;
+    if (profileId === null || profileId === confirmedActiveProfileIdRef.current) return;
+
+    isPersistingActiveProfileRef.current = true;
+    try {
+      const response = await fetch("/api/profiles/active", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profileId }),
+      });
+
+      if (response.ok) {
+        confirmedActiveProfileIdRef.current = profileId;
+      } else if (pendingActiveProfileIdRef.current === profileId) {
+        // Still the user's latest desired selection: surface the failure and roll back.
+        pendingActiveProfileIdRef.current = confirmedActiveProfileIdRef.current;
+        setActiveProfileId(confirmedActiveProfileIdRef.current);
+        setMessage("활성 프로필을 변경하지 못했습니다.");
+      }
+    } catch {
+      if (pendingActiveProfileIdRef.current === profileId) {
+        pendingActiveProfileIdRef.current = confirmedActiveProfileIdRef.current;
+        setActiveProfileId(confirmedActiveProfileIdRef.current);
+        setMessage("활성 프로필을 변경하지 못했습니다.");
+      }
+    } finally {
+      isPersistingActiveProfileRef.current = false;
+      if (pendingActiveProfileIdRef.current !== confirmedActiveProfileIdRef.current) {
+        void persistPendingActiveProfile();
+      }
+    }
+  }
+
+  async function signOut() {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    const { error } = await createClient().auth.signOut();
+    if (error) {
+      setMessage("로그아웃하지 못했습니다. 다시 시도해 주세요.");
+      setIsSigningOut(false);
+      return;
+    }
+    router.replace("/");
+    router.refresh();
+  }
+
+  async function reloadMypageData() {
+    const [profilesResponse, activeResponse, summaryResponse] = await Promise.all([
+      fetch("/api/profiles"),
+      fetch("/api/profiles/active"),
+      fetch("/api/mypage/summary"),
+    ]);
+
+    const profilesBody = await profilesResponse.json() as { profiles?: ProfileDto[] };
+    const activeBody = await activeResponse.json() as { profile?: ProfileDto | null };
+    const summaryBody = await summaryResponse.json() as { freeAnalysisResults?: Array<{ profileId: string; status: FreeAnalysisResultStatus }> };
+
+    if (profilesResponse.ok) setProfiles(profilesBody.profiles ?? []);
+    if (activeResponse.ok) setActiveProfileId(activeBody.profile?.id ?? null);
+    if (summaryResponse.ok) {
+      const statusById: Record<string, FreeAnalysisResultStatus> = {};
+      for (const item of summaryBody.freeAnalysisResults ?? []) statusById[item.profileId] = item.status;
+      setFreeAnalysisStatusById(statusById);
+    }
+  }
+
+  function openCreateForm() {
+    setEditingProfileId(null);
+    setFormInput(emptyProfileInput);
+    setFormError(null);
+    setIsFormOpen(true);
+  }
+
+  function openEditForm(profile: ProfileDto) {
+    setEditingProfileId(profile.id);
+    setFormInput({
+      label: profile.label,
+      relationshipType: profile.relationshipType,
+      birthDate: profile.birthDate,
+      birthTime: profile.birthTime,
+      gender: profile.gender,
+      calendarType: profile.calendarType,
+      isLeapMonth: profile.isLeapMonth,
+    });
+    setFormError(null);
+    setIsFormOpen(true);
+  }
+
+  function closeForm() {
+    setIsFormOpen(false);
+    setEditingProfileId(null);
+    setFormInput(emptyProfileInput);
+    setFormError(null);
+  }
+
+  async function submitForm() {
+    setIsSubmittingForm(true);
+    setFormError(null);
+    const fallback = editingProfileId
+      ? "프로필을 수정하지 못했습니다. 다시 시도해 주세요."
+      : "프로필을 등록하지 못했습니다. 다시 시도해 주세요.";
+
+    try {
+      const response = await fetch(
+        editingProfileId ? `/api/profiles/${editingProfileId}` : "/api/profiles",
+        {
+          method: editingProfileId ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formInput),
+        },
+      );
+      const body = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(body.error ?? fallback);
+
+      closeForm();
+      await reloadMypageData();
+    } catch (submitError) {
+      setFormError(submitError instanceof Error ? submitError.message : fallback);
+    } finally {
+      setIsSubmittingForm(false);
+    }
   }
 
   return (
@@ -50,38 +245,146 @@ export default function MyPage() {
         <p className="text-xs font-semibold tracking-[0.25em] text-stone-500">MY PROFILE</p>
         <h1 className="mt-3 text-3xl font-bold">사주 분석 대상</h1>
         <p className="mt-4 text-sm leading-7 text-stone-600">여기서 선택한 사람을 기준으로 무료 사주와 유료 심층분석이 진행됩니다.</p>
+        <button
+          type="button"
+          onClick={openCreateForm}
+          className="mt-4 rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50"
+        >
+          인원 추가
+        </button>
+        {isFormOpen ? (
+          <form
+            className="mt-4 space-y-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm"
+            onSubmit={(event) => { event.preventDefault(); void submitForm(); }}
+          >
+            <p className="text-base font-bold">{editingProfileId ? "프로필 수정" : "인원 추가"}</p>
+            <label className="block text-sm font-semibold">이름 또는 구분
+              <input value={formInput.label} onChange={(event) => setFormInput({ ...formInput, label: event.target.value })} placeholder="이름 또는 구분" className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required />
+            </label>
+            <label className="block text-sm font-semibold">관계
+              <select value={formInput.relationshipType} onChange={(event) => setFormInput({ ...formInput, relationshipType: event.target.value as ProfileRelationshipType })} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required>
+                {relationshipOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </label>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-semibold">생년월일
+                <input type="date" min={GUEST_BIRTH_DATE_MIN} max={getGuestBirthDateMax()} value={formInput.birthDate} onChange={(event) => setFormInput({ ...formInput, birthDate: event.target.value })} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required />
+              </label>
+              <label className="block text-sm font-semibold">태어난 시간
+                <input type="time" value={formInput.birthTime} onChange={(event) => setFormInput({ ...formInput, birthTime: event.target.value })} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required />
+              </label>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-semibold">성별
+                <select value={formInput.gender} onChange={(event) => setFormInput({ ...formInput, gender: event.target.value as ProfileInput["gender"] })} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required>
+                  <option value="남성">남성</option>
+                  <option value="여성">여성</option>
+                </select>
+              </label>
+              <label className="block text-sm font-semibold">달력
+                <select value={formInput.calendarType} onChange={(event) => setFormInput({ ...formInput, calendarType: event.target.value as ProfileInput["calendarType"], isLeapMonth: event.target.value === "양력" ? false : formInput.isLeapMonth })} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required>
+                  <option value="양력">양력</option>
+                  <option value="음력">음력</option>
+                </select>
+              </label>
+            </div>
+            {formInput.calendarType === "음력" ? (
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={formInput.isLeapMonth} onChange={(event) => setFormInput({ ...formInput, isLeapMonth: event.target.checked })} /> 윤달
+              </label>
+            ) : null}
+            {editingProfileId ? (
+              <p className="text-xs leading-6 text-stone-500">
+                출생 정보가 변경되면 기존 무료 분석은 다시 분석이 필요할 수 있습니다.
+                이미 구매한 심층 분석이 있다면 기존 리포트 내용과 새 출생 정보가 달라질 수 있습니다.
+              </p>
+            ) : null}
+            {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
+            <div className="flex gap-2">
+              <button type="submit" disabled={isSubmittingForm} className="flex-1 rounded-xl bg-stone-900 px-5 py-3 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400">
+                {isSubmittingForm ? "저장 중..." : editingProfileId ? "수정 저장" : "등록하기"}
+              </button>
+              <button type="button" onClick={closeForm} disabled={isSubmittingForm} className="rounded-xl border border-stone-300 bg-white px-5 py-3 font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed">
+                취소
+              </button>
+            </div>
+          </form>
+        ) : null}
         <div className="mt-8 grid max-h-96 gap-3 overflow-y-auto pr-1">
           {profiles.map((profile) => (
-            <button
+            <div
               key={profile.id}
-              type="button"
-              onClick={() => void activate(profile.id)}
               className={profile.id === activeProfileId
                 ? "border border-stone-900 bg-stone-900 p-5 text-left text-white"
                 : "border border-stone-200 bg-white p-5 text-left"}
             >
-              <span className="flex items-center justify-between gap-3">
-                <span className="font-semibold">{profile.label}</span>
-                {profile.id === activeProfileId ? (
-                  <span className="border border-white/30 bg-white/10 px-2 py-1 text-xs font-semibold text-white">현재 선택</span>
-                ) : null}
-              </span>
-              <span className={profile.id === activeProfileId
-                ? "mt-2 block text-sm text-white/75"
-                : "mt-2 block text-sm text-stone-500"}
+              <button
+                type="button"
+                onClick={() => void activate(profile.id)}
+                className="block w-full text-left"
               >
-                {formatProfileBirthDate(profile.birthDate)}
+                <span className="flex items-center justify-between gap-3">
+                  <span className="text-lg font-bold">{profile.label}</span>
+                  {profile.id === activeProfileId ? (
+                    <span className="border border-white/30 bg-white/10 px-2 py-1 text-xs font-semibold text-white">현재 선택</span>
+                  ) : null}
+                </span>
+                <span className={profile.id === activeProfileId
+                  ? "mt-1 block text-sm text-white/75"
+                  : "mt-1 block text-sm text-stone-500"}
+                >
+                  {relationshipLabels[profile.relationshipType]}
+                </span>
+                <span className={profile.id === activeProfileId
+                  ? "mt-2 block text-sm text-white/75"
+                  : "mt-2 block text-sm text-stone-500"}
+                >
+                  {formatProfileDetails(profile)}
+                </span>
+              </button>
+              <span className={profile.id === activeProfileId
+                ? "mt-3 block text-xs text-white/60"
+                : "mt-3 block text-xs text-stone-400"}
+              >
+                {formatFreeAnalysisStatusLabel(freeAnalysisStatusById[profile.id])}
               </span>
-            </button>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => openEditForm(profile)}
+                  className={profile.id === activeProfileId
+                    ? "rounded-lg border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10"
+                    : "rounded-lg border border-stone-300 px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50"}
+                >
+                  수정
+                </button>
+              </div>
+            </div>
           ))}
         </div>
         <button
           type="button"
-          onClick={() => router.push("/saju")}
+          onClick={() => {
+            if (activeProfileId && freeAnalysisStatusById[activeProfileId] === "completed") {
+              router.push(`/result?profileId=${activeProfileId}`);
+              return;
+            }
+            router.push("/saju");
+          }}
           disabled={!activeProfileId}
           className="mt-6 w-full rounded-xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
         >
-          선택한 프로필로 사주 조회하기
+          {activeProfileId && freeAnalysisStatusById[activeProfileId] === "completed"
+            ? "선택한 프로필의 무료 분석 결과 보기"
+            : "선택한 프로필로 사주 조회하기"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void signOut()}
+          disabled={isSigningOut}
+          className="mt-4 w-full text-center text-sm text-stone-400 underline-offset-4 transition hover:text-stone-600 hover:underline disabled:cursor-not-allowed disabled:text-stone-300"
+        >
+          {isSigningOut ? "로그아웃 중..." : "로그아웃"}
         </button>
         {message ? <p className="mt-4 text-sm text-red-600">{message}</p> : null}
       </div>

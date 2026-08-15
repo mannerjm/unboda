@@ -11,6 +11,7 @@ function read(path: string): string {
 
 const migration = read("supabase/migrations/010_guest_free_analyses.sql");
 const grantMigration = read("supabase/migrations/011_guest_free_analyses_service_role_grant.sql");
+const rpcUpgradeMigration = read("supabase/migrations/012_guest_transfer_rpc_fingerprint_signature.sql");
 const profilesMigration = read("supabase/migrations/002_profiles.sql");
 const activeProfilesMigration = read("supabase/migrations/006_active_profiles.sql");
 const freeResultsMigration = read("supabase/migrations/008_free_analysis_results.sql");
@@ -62,11 +63,11 @@ for (const column of ["user_id uuid not null", "profile_id uuid not null", "prof
 }
 console.log("2. existing profiles, self constraint, active Profile, and free-result schema mappings present ✓");
 
-assert(migration.includes("create or replace function public.complete_guest_analysis_transfer") && migration.includes("p_profile_fingerprint text"), "transfer RPC must accept the canonical server fingerprint");
+assert(rpcUpgradeMigration.includes("drop function if exists public.complete_guest_analysis_transfer(uuid, text, uuid)") && rpcUpgradeMigration.includes("p_profile_fingerprint text"), "production RPC upgrade must replace the original three-argument signature");
 assert(migration.includes("security definer") && migration.includes("set search_path = public"), "transfer RPC must be security definer with public search path");
 assert(migration.includes("revoke all on function public.complete_guest_analysis_transfer") && migration.includes("from public, anon, authenticated"), "transfer RPC must be revoked from browser roles");
 assert(grantMigration.includes("grant execute on function public.complete_guest_analysis_transfer") && grantMigration.includes("to service_role"), "transfer RPC execute must be granted only to service_role");
-assert(migration.includes("public.complete_guest_analysis_transfer(uuid, text, uuid, text)") && grantMigration.includes("public.complete_guest_analysis_transfer(uuid, text, uuid, text)"), "RPC privileges must target the exact overloaded-function signature");
+assert(rpcUpgradeMigration.includes("public.complete_guest_analysis_transfer(uuid, text, uuid, text)") && rpcUpgradeMigration.includes("to service_role"), "production RPC privileges must target the exact overloaded-function signature");
 assert(!grantMigration.includes("to authenticated") && !grantMigration.includes("to anon"), "grant migration must not expose guest transfer to browser roles");
 console.log("3. transfer RPC service-role-only security contract present ✓");
 
@@ -76,7 +77,7 @@ assert(migration.includes("order by (ap.profile_id is not null) desc, p.created_
 assert(migration.includes("SELF_PROFILE_CONFLICT"), "second differing self Profile must return a typed conflict");
 assert(migration.includes("'already_transferred'"), "same-user repeated transfer must be idempotent");
 assert(migration.includes("GUEST_ANALYSIS_ALREADY_CONSUMED"), "other-user repeated transfer must be rejected");
-assert(migration.includes("p_profile_fingerprint <> v_guest.profile_fingerprint") && !migration.includes("digest("), "transfer must compare the existing server-generated fingerprint without reimplementing hashing in SQL");
+assert(rpcUpgradeMigration.includes("p_profile_fingerprint <> v_guest.profile_fingerprint") && !rpcUpgradeMigration.includes("digest("), "transfer must compare the existing server-generated fingerprint without reimplementing hashing in SQL");
 console.log("4. Profile reuse, self conflict, and idempotency contracts present ✓");
 
 assert(migration.includes("v_existing_result.status = 'completed'") && migration.includes("Do not overwrite"), "completed authenticated free results must remain canonical");

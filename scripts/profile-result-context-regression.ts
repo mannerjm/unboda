@@ -11,12 +11,14 @@ function read(path: string): string {
 
 const analyzeRoute = read("app/api/analyze/route.ts");
 const analyzeTypes = read("app/lib/analyzeApiTypes.ts");
+const analysisPipeline = read("app/lib/freeAnalysisPipeline/server.ts");
 const loadingPage = read("app/loading/page.tsx");
 const resultPage = read("app/result/page.tsx");
 
 assert(analyzeRoute.includes("getUserProfile(body.profileId, user.id)"), "analyze API must verify Profile ownership");
 assert(analyzeRoute.includes("birthDate = profile.birthDate") && analyzeRoute.includes("birthTime = profile.birthTime"), "getSaju input must derive from verified Profile data");
-assert(analyzeRoute.includes("profile: {") && analyzeRoute.includes("calendarType: profile.calendarType"), "analyze response must include verified Profile metadata");
+assert(analyzeRoute.includes("buildFreeAnalysisResponse") && analyzeRoute.includes("birthDate: resolvedBirthDate"), "analyze API must pass verified Profile metadata to the shared response pipeline");
+assert(analysisPipeline.includes("profile: input.profile"), "shared analysis pipeline must return the verified Profile metadata");
 assert(analyzeTypes.includes("export type AnalyzeProfileMetadata") && analyzeTypes.includes("profile: AnalyzeProfileMetadata"), "analyze response metadata must be typed");
 
 assert(loadingPage.includes("freeAnalysisResult:${data.profile.id}"), "loading must persist the API response by verified Profile ID");

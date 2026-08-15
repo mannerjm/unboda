@@ -1,6 +1,6 @@
 "use client";
 import { calculateWeightedElements } from "../lib/elements";
-import { Suspense, useEffect, useState } from "react";
+import { createContext, Suspense, useContext, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import type { getSaju } from "../lib/manse";
@@ -27,6 +27,13 @@ import {
 import ProfileSelector from "@/app/components/ProfileSelector";
 
 type SajuResult = ReturnType<typeof getSaju>;
+
+type ResultViewerContextValue = {
+  analysis: AnalyzeSuccessResponse;
+  onProductSelected?: (productId: string) => void;
+};
+
+export const ResultViewerContext = createContext<ResultViewerContextValue | null>(null);
 
 function formatProfileBirthDate(birthDate: string): string {
   return birthDate.replace(/-/g, ".");
@@ -214,9 +221,10 @@ function ganjiToHanja(ganji: string) {
   return `${stemMap[stem] ?? stem}${branchMap[branch] ?? branch}`;
 }
 
-function ResultPageContent() {
+export function ResultPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const providedResult = useContext(ResultViewerContext);
   const [aiResult, setAiResult] = useState("");
 const [sajuData, setSajuData] = useState<SajuResult | null>(null);
 const [freeAnalysis, setFreeAnalysis] =
@@ -237,7 +245,8 @@ const [selectedPaidAnalysisId, setSelectedPaidAnalysisId] =
 const [profileSelectionProductId, setProfileSelectionProductId] =
   useState<string | null>(null);
 
-const currentProfileId = searchParams.get("profileId") ?? undefined;
+const currentProfileId = searchParams.get("profileId") ?? providedResult?.analysis.profile.id;
+const profileLabel = profile?.label?.trim() || "분석 대상";
 const birthDate = profile ? formatProfileBirthDate(profile.birthDate) : "입력 없음";
 const birthTime = profile?.birthTime ?? "입력 없음";
 const gender = profile?.gender ?? "입력 없음";
@@ -283,6 +292,23 @@ const displayedSeun =
     : freeAnalysis?.seunAnalysis ?? sajuData?.seunAnalysis ?? null;
 
 useEffect(() => {
+  if (providedResult) {
+    const provided = providedResult.analysis;
+    const restored = restoreStoredResult(provided.result, JSON.stringify(provided.saju));
+    if (!restored.ok) {
+      setAiResult(restored.message);
+    } else {
+      setAiResult(restored.result);
+      setSajuData(restored.saju);
+      setProfile(provided.profile);
+      setFreeAnalysis(provided.freeAnalysis ?? null);
+      setRecommendationExplanation(provided.recommendationExplanation);
+      setProductRecommendations(provided.productRecommendations);
+    }
+    setIsStorageChecked(true);
+    return;
+  }
+
   if (!currentProfileId) {
     setAiResult("분석할 프로필을 찾을 수 없습니다.");
     setIsStorageChecked(true);
@@ -326,7 +352,7 @@ useEffect(() => {
       );
     })
     .finally(() => setIsStorageChecked(true));
-}, [currentProfileId]);
+}, [currentProfileId, providedResult]);
 
 
 useEffect(() => {
@@ -448,6 +474,10 @@ const selectedPaidAnalysis = displayedPaidAnalysisProducts.find(
 );
 
 function handlePaidAnalysisEntry(productId: string) {
+  if (providedResult?.onProductSelected) {
+    providedResult.onProductSelected(productId);
+    return;
+  }
   setProfileSelectionProductId(productId);
 }
 
@@ -475,7 +505,8 @@ function handlePaidAnalysisEntry(productId: string) {
             입력 정보
           </p>
 
-          <div className="grid gap-4 sm:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-5">
+            <InfoCard label="이름 또는 구분" value={profileLabel} />
             <InfoCard label="생년월일" value={birthDate} />
             <InfoCard label="태어난 시간" value={birthTime} />
             <InfoCard label="성별" value={gender} />
@@ -1558,6 +1589,16 @@ h3: ({ children }) => {
             리포트 인쇄하기
           </button>
         </div>
+
+        {!providedResult && (
+          <button
+            type="button"
+            onClick={() => router.push("/mypage")}
+            className="mt-3 w-full rounded-2xl border border-stone-300 bg-white px-5 py-4 font-semibold transition hover:bg-stone-50"
+          >
+            마이페이지에서 관리하기
+          </button>
+        )}
 
         <p className="mt-8 text-center text-xs leading-6 text-stone-500">
           본 리포트는 참고용 콘텐츠이며 중요한 건강·법률·투자 결정은

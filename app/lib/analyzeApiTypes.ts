@@ -39,6 +39,18 @@ export type AnalyzeSuccessResponse = {
   profile: AnalyzeProfileMetadata;
   freeAnalysis?: AnalyzeFreeResponse;
   premiumAnalysis?: AnalyzePremiumResponse;
+  // Tracks the main-analysis AI call's own success/failure, kept separate from
+  // the user-facing `result` fallback string so callers never need to compare
+  // against fallback copy to detect a degraded generation.
+  generationMeta?: {
+    mainAnalysisStatus: "completed" | "failed";
+    // Absent/undefined is equivalent to "idle"; only "generating" marks an
+    // in-flight retry claim (used as an atomic lock, never as a display value).
+    mainAnalysisRetryStatus?: "idle" | "generating";
+    // Absent/undefined is equivalent to 0. Counts only claim-won retry
+    // attempts (see claimMainAnalysisRetry), never raw button clicks.
+    mainAnalysisRetryCount?: number;
+  };
 
   productRecommendations: AnalysisProductRecommendationResult;
   recommendationExplanation: AnalysisRecommendationOutput;
@@ -51,3 +63,7 @@ export type AnalyzeErrorResponse = {
 export type AnalyzeApiResponse =
   | AnalyzeSuccessResponse
   | AnalyzeErrorResponse;
+
+// Shared by server claim logic and the client retry UI so the cap only lives
+// in one place. Safe for client bundles: this file has no server-only imports.
+export const MAX_MAIN_ANALYSIS_RETRY_COUNT = 2;

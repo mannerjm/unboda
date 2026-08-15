@@ -8,7 +8,7 @@ import { buildAnalysisProductRecommendations } from "../analysisProductRecommend
 import { buildAnalysisRecommendation } from "../analysisRecommendationBuilder";
 import { buildMainAnalysisPrompt } from "../mainAnalysisPrompt";
 import { buildMainAnalysisCompactFacts } from "../mainAnalysisCompactFacts";
-import { generateMainAnalysis, generateRecommendationExplanation } from "../analysisAIService";
+import { generateMainAnalysis, generateRecommendationExplanation, type MainAnalysisGenerationResult } from "../analysisAIService";
 import type { AnalyzeProfileMetadata, AnalyzeSuccessResponse } from "../analyzeApiTypes";
 
 export async function buildFreeAnalysisResponse(input: {
@@ -41,13 +41,16 @@ export async function buildFreeAnalysisResponse(input: {
   const recommendation = buildAnalysisRecommendation({
     engineResult: productRecommendations.engineResult,
   });
-  const [result, recommendationExplanation] = await Promise.all([
+  const [mainAnalysis, recommendationExplanation] = await Promise.all([
     generateMainAnalysis(buildMainAnalysisPrompt({ compactFacts })),
     generateRecommendationExplanation(recommendation),
   ]);
 
   return {
-    result: result || "AI 분석 결과를 생성하지 못했습니다.",
+    result: mainAnalysis.text,
+    generationMeta: {
+      mainAnalysisStatus: mainAnalysis.status,
+    },
     saju: buildSajuResponse(saju),
     profile: input.profile,
     freeAnalysis,
@@ -55,4 +58,31 @@ export async function buildFreeAnalysisResponse(input: {
     productRecommendations,
     recommendationExplanation,
   };
+}
+
+/**
+ * Regenerates only the main-analysis AI text from an already-stored response.
+ * Recomputes `getSaju()` locally (no OpenAI cost) to rebuild the compact facts,
+ * reuses the stored `freeAnalysis` as-is, and calls the AI exactly once.
+ * Does not touch recommendations, premium analysis, or issue any other AI call.
+ * Carries no auth/ownership concerns; callers must verify ownership first.
+ */
+export async function regenerateMainAnalysis(
+  content: Pick<AnalyzeSuccessResponse, "profile" | "freeAnalysis">,
+): Promise<MainAnalysisGenerationResult> {
+  if (!content.freeAnalysis) {
+    throw new Error("저장된 무료 분석 결과가 없어 다시 생성할 수 없습니다.");
+  }
+
+  const isLeapMonth = content.profile.isLeapMonth ? "윤달" : "평달";
+  const saju = getSaju(
+    content.profile.birthDate,
+    content.profile.birthTime,
+    content.profile.calendarType,
+    isLeapMonth,
+    content.profile.gender,
+  );
+  const compactFacts = buildMainAnalysisCompactFacts({ saju, freeAnalysis: content.freeAnalysis });
+
+  return generateMainAnalysis(buildMainAnalysisPrompt({ compactFacts }));
 }

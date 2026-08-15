@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { AnalyzeSuccessResponse } from "@/app/lib/analyzeApiTypes";
-import { ResultPageContent, ResultViewerContext } from "@/app/result/page";
+import { ResultPageContent, ResultViewerContext, type RetryMainAnalysisResult } from "@/app/result/page";
 
 export default function GuestResultPage() {
   const [analysis, setAnalysis] = useState<AnalyzeSuccessResponse | null>(null);
@@ -37,12 +37,17 @@ export default function GuestResultPage() {
     setIntentSaved(true);
   }
 
+  async function retryMainAnalysis(): Promise<RetryMainAnalysisResult> {
+    const response = await fetch("/api/guest-free-analysis/retry-main-analysis", { method: "POST" });
+    return response.json() as Promise<RetryMainAnalysisResult>;
+  }
+
   if (error && !analysis) return <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6"><p className="text-sm text-stone-700">{error}</p></main>;
   if (!analysis) return <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea]"><p className="text-sm text-stone-600">무료 분석 결과를 불러오는 중입니다...</p></main>;
 
   return (
     <>
-      <ResultViewerContext.Provider value={{ analysis, onProductSelected: (productId) => void selectProduct(productId) }}>
+      <ResultViewerContext.Provider value={{ analysis, onProductSelected: (productId) => void selectProduct(productId), onRetryMainAnalysis: retryMainAnalysis }}>
         <ResultPageContent />
       </ResultViewerContext.Provider>
       {intentSaved && selectedProductId ? <main className="bg-[#f7f3ea] px-5 pb-14 text-stone-900"><div className="mx-auto w-full max-w-3xl"><section className="rounded-3xl border border-stone-300 bg-white p-6 shadow-sm">

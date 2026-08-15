@@ -3,6 +3,7 @@ import type {
   AnalyzeProfileMetadata,
   AnalyzeSuccessResponse,
 } from "../analyzeApiTypes";
+import { MAX_MAIN_ANALYSIS_RETRY_COUNT } from "../analyzeApiTypes";
 import { createAdminClient } from "../supabase/admin";
 import type { ProfileDto } from "../profiles/types";
 
@@ -33,6 +34,11 @@ type FreeAnalysisResultRow = {
 };
 
 const STALE_GENERATING_MS = 5 * 60 * 1000;
+
+// Same staleness bound used for a stuck initial generation: main-analysis is
+// bounded by the same 120s OpenAI timeout, so a stuck retry lock is stale for
+// the same reason and can reuse the same threshold.
+export const STALE_RETRY_LOCK_MS = STALE_GENERATING_MS;
 
 export function toAnalyzeProfileMetadata(profile: ProfileDto): AnalyzeProfileMetadata {
   return {
@@ -252,4 +258,100 @@ export async function failFreeAnalysisResult(input: {
   if (error) {
     throw new Error(`무료 분석 실패 상태를 저장하지 못했습니다: ${error.message}`);
   }
+}
+
+/**
+ * Atomically claims the right to retry main-analysis for a completed row whose
+ * generationMeta.mainAnalysisStatus is "failed". The single conditional UPDATE
+ * itself is the claim: it only affects a row whose retry lock is missing,
+ * "idle", or a stale "generating" lock left over from a crashed attempt.
+ * Also enforces MAX_MAIN_ANALYSIS_RETRY_COUNT and advances the count in the
+ * same update, so a claim win and "1 retry attempt used" are the same event.
+ */
+export type MainAnalysisRetryClaimResult<TRecord = FreeAnalysisResultRecord> =
+  | { state: "claimed"; record: TRecord }
+  | { state: "in_progress" }
+  | { state: "limit_exceeded" };
+
+export async function claimMainAnalysisRetry(
+  record: FreeAnalysisResultRecord,
+): Promise<MainAnalysisRetryClaimResult> {
+  if (record.status !== "completed" || !record.content) return { state: "in_progress" };
+  if (record.content.generationMeta?.mainAnalysisStatus !== "failed") return { state: "in_progress" };
+
+  const retryCount = record.content.generationMeta?.mainAnalysisRetryCount ?? 0;
+  if (retryCount >= MAX_MAIN_ANALYSIS_RETRY_COUNT) {
+    return { state: "limit_exceeded" };
+  }
+
+  const nextContent: AnalyzeSuccessResponse = {
+    ...record.content,
+    generationMeta: {
+      ...record.content.generationMeta,
+      mainAnalysisRetryStatus: "generating",
+      mainAnalysisRetryCount: retryCount + 1,
+    },
+  };
+  const staleBefore = new Date(Date.now() - STALE_RETRY_LOCK_MS).toISOString();
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("free_analysis_results")
+    .update({ content: nextContent })
+    .eq("id", record.id)
+    .eq("user_id", record.userId)
+    .eq("profile_id", record.profileId)
+    .eq("status", "completed")
+    .eq("content->generationMeta->>mainAnalysisStatus", "failed")
+    .or(
+      `content->generationMeta->>mainAnalysisRetryStatus.is.null,content->generationMeta->>mainAnalysisRetryStatus.eq.idle,and(content->generationMeta->>mainAnalysisRetryStatus.eq.generating,updated_at.lt.${staleBefore})`,
+    )
+    .select("*")
+    .maybeSingle<FreeAnalysisResultRow>();
+
+  if (error) {
+    throw new Error(`AI 해석 재생성을 시작하지 못했습니다: ${error.message}`);
+  }
+
+  return data ? { state: "claimed", record: toRecord(data) } : { state: "in_progress" };
+}
+
+/**
+ * Writes back only `result` and `generationMeta` after a retry attempt,
+ * preserving every other stored field (saju/profile/freeAnalysis/etc.) and
+ * releasing the retry lock regardless of outcome.
+ */
+export async function completeMainAnalysisRetry(input: {
+  record: FreeAnalysisResultRecord;
+  result: string;
+  mainAnalysisStatus: "completed" | "failed";
+}): Promise<AnalyzeSuccessResponse> {
+  if (!input.record.content) {
+    throw new Error("재생성할 기존 분석 결과가 없습니다.");
+  }
+
+  const nextContent: AnalyzeSuccessResponse = {
+    ...input.record.content,
+    result: input.mainAnalysisStatus === "completed" ? input.result : input.record.content.result,
+    generationMeta: {
+      ...input.record.content.generationMeta,
+      mainAnalysisStatus: input.mainAnalysisStatus,
+      mainAnalysisRetryStatus: "idle",
+    },
+  };
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("free_analysis_results")
+    .update({ content: nextContent })
+    .eq("id", input.record.id)
+    .eq("user_id", input.record.userId)
+    .eq("profile_id", input.record.profileId)
+    .eq("content->generationMeta->>mainAnalysisRetryStatus", "generating");
+
+  if (error) {
+    throw new Error(`AI 해석 재생성 결과를 저장하지 못했습니다: ${error.message}`);
+  }
+
+  return nextContent;
 }

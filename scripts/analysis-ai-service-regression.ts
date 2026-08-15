@@ -32,7 +32,7 @@ async function run(): Promise<void> {
 
   console.log(
     "메인 분석 생성:",
-    Boolean(mainAnalysis)
+    Boolean(mainAnalysis.text) && (mainAnalysis.status === "completed" || mainAnalysis.status === "failed")
   );
 
   console.log(

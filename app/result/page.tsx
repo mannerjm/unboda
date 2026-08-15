@@ -11,6 +11,7 @@ import type {
   AnalyzeProfileMetadata,
   AnalyzeSuccessResponse,
 } from "@/app/lib/analyzeApiTypes";
+import { MAX_MAIN_ANALYSIS_RETRY_COUNT } from "@/app/lib/analyzeApiTypes";
 import type { AnalysisProductRecommendationResult } from "@/app/lib/analysisProductRecommendations";
 import {
   getPremiumCategoryLabel,
@@ -28,9 +29,14 @@ import ProfileSelector from "@/app/components/ProfileSelector";
 
 type SajuResult = ReturnType<typeof getSaju>;
 
+export type RetryMainAnalysisResult =
+  | { result: string; generationMeta?: AnalyzeSuccessResponse["generationMeta"] }
+  | { error: string; code?: string };
+
 type ResultViewerContextValue = {
   analysis: AnalyzeSuccessResponse;
   onProductSelected?: (productId: string) => void;
+  onRetryMainAnalysis?: () => Promise<RetryMainAnalysisResult>;
 };
 
 export const ResultViewerContext = createContext<ResultViewerContextValue | null>(null);
@@ -238,6 +244,9 @@ const [
   productRecommendations,
   setProductRecommendations,
 ] = useState<AnalysisProductRecommendationResult | null>(null);
+const [generationMeta, setGenerationMeta] = useState<AnalyzeSuccessResponse["generationMeta"]>(undefined);
+const [isRetryingMainAnalysis, setIsRetryingMainAnalysis] = useState(false);
+const [retryMessage, setRetryMessage] = useState<string | null>(null);
 
 const [isStorageChecked, setIsStorageChecked] = useState(false);
 const [selectedPaidAnalysisId, setSelectedPaidAnalysisId] =
@@ -304,6 +313,7 @@ useEffect(() => {
       setFreeAnalysis(provided.freeAnalysis ?? null);
       setRecommendationExplanation(provided.recommendationExplanation);
       setProductRecommendations(provided.productRecommendations);
+      setGenerationMeta(provided.generationMeta);
     }
     setIsStorageChecked(true);
     return;
@@ -343,6 +353,7 @@ useEffect(() => {
     setFreeAnalysis(saved.freeAnalysis ?? null);
     setRecommendationExplanation(saved.recommendationExplanation);
     setProductRecommendations(saved.productRecommendations);
+    setGenerationMeta(saved.generationMeta);
     })
     .catch((error) => {
       setAiResult(
@@ -479,6 +490,44 @@ function handlePaidAnalysisEntry(productId: string) {
     return;
   }
   setProfileSelectionProductId(productId);
+}
+
+async function retryMainAnalysis() {
+  if (isRetryingMainAnalysis) return;
+  setIsRetryingMainAnalysis(true);
+  setRetryMessage(null);
+  try {
+    const body: RetryMainAnalysisResult = providedResult?.onRetryMainAnalysis
+      ? await providedResult.onRetryMainAnalysis()
+      : await fetch(`/api/free-analysis/${currentProfileId}/retry-main-analysis`, { method: "POST" })
+          .then((response) => response.json() as Promise<RetryMainAnalysisResult>);
+
+    if ("error" in body || !body.result) {
+      const message = "error" in body ? body.error : undefined;
+      const code = "code" in body ? body.code : undefined;
+
+      if (code === "RETRY_LIMIT_EXCEEDED") {
+        // Force the local count to the cap so the JSX permanently switches to
+        // the limit-exceeded message instead of re-enabling the button.
+        setGenerationMeta((previous) => (previous ? { ...previous, mainAnalysisRetryCount: MAX_MAIN_ANALYSIS_RETRY_COUNT } : previous));
+        return;
+      }
+
+      setRetryMessage(
+        code === "RETRY_IN_PROGRESS"
+          ? "이미 AI 해석을 다시 생성하는 중입니다."
+          : message ?? "AI 해석을 다시 생성하지 못했습니다.",
+      );
+      return;
+    }
+
+    setAiResult(body.result);
+    setGenerationMeta(body.generationMeta);
+  } catch {
+    setRetryMessage("AI 해석을 다시 생성하지 못했습니다.");
+  } finally {
+    setIsRetryingMainAnalysis(false);
+  }
 }
 
   return (
@@ -1250,19 +1299,44 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
             </div>
           </div>
 
-          {aiSummarySections.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {aiSummarySections.map((section) => (
-                <AISummarySectionCard
-                  key={section.title}
-                  title={section.title}
-                  text={section.text}
-                />
-              ))}
+          {generationMeta?.mainAnalysisStatus === "failed" ? (
+            <div className="mt-4 rounded-2xl border border-stone-200 bg-stone-50 p-6 text-center">
+              {(generationMeta.mainAnalysisRetryCount ?? 0) < MAX_MAIN_ANALYSIS_RETRY_COUNT ? (
+                <>
+                  <p className="text-sm leading-7 text-stone-700">
+                    AI 종합 해석을 생성하지 못했습니다.<br />다시 시도할 수 있습니다.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void retryMainAnalysis()}
+                    disabled={isRetryingMainAnalysis}
+                    className="mt-4 rounded-xl bg-stone-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
+                  >
+                    {isRetryingMainAnalysis ? "다시 생성하는 중..." : "AI 해석 다시 생성"}
+                  </button>
+                  {retryMessage ? <p className="mt-3 text-sm text-red-600">{retryMessage}</p> : null}
+                </>
+              ) : (
+                <p className="text-sm leading-7 text-stone-700">
+                  AI 해석을 다시 생성하지 못했습니다.<br />재시도 가능 횟수를 모두 사용했습니다.
+                </p>
+              )}
             </div>
-          ) : null}
+          ) : (
+            <>
+              {aiSummarySections.length > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {aiSummarySections.map((section) => (
+                    <AISummarySectionCard
+                      key={section.title}
+                      title={section.title}
+                      text={section.text}
+                    />
+                  ))}
+                </div>
+              ) : null}
 
-          {aiSummary ? (
+              {aiSummary ? (
             <div className="mt-4 rounded-2xl border border-stone-200 bg-stone-50 p-6 text-[16px] leading-8 text-stone-700">
               <h3 className="text-sm font-semibold text-stone-900">종합 조언</h3>
               <div className="mt-3">
@@ -1344,9 +1418,11 @@ h3: ({ children }) => {
   )}
               </div>
             </div>
-          ) : aiSummarySections.length === 0 ? (
-            <p className="text-sm text-stone-600">분석 결과를 불러오는 중입니다...</p>
-          ) : null}
+              ) : aiSummarySections.length === 0 ? (
+                <p className="text-sm text-stone-600">분석 결과를 불러오는 중입니다...</p>
+              ) : null}
+            </>
+          )}
         </section>
 <section className="mt-8 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
   <div className="mx-auto max-w-2xl text-center">

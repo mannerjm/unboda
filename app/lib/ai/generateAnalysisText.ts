@@ -15,6 +15,29 @@ export function resolveMaxOutputTokens(
   return 3200;
 }
 
+// Narrows an unknown thrown value to loggable OpenAI SDK error fields without
+// dumping the full error/response object (which may carry request payloads).
+function extractOpenAIErrorMeta(error: unknown): {
+  name?: string;
+  status?: unknown;
+  code?: unknown;
+  type?: unknown;
+  message: string;
+} {
+  if (error instanceof Error) {
+    const maybeSdkError = error as Error & { status?: unknown; code?: unknown; type?: unknown };
+    return {
+      name: maybeSdkError.name,
+      status: maybeSdkError.status,
+      code: maybeSdkError.code,
+      type: maybeSdkError.type,
+      message: maybeSdkError.message,
+    };
+  }
+
+  return { message: "unknown-openai-error" };
+}
+
 export async function generateAnalysisText(
   prompt: string,
   options?: { callType?: AnalysisTextCallType },
@@ -28,13 +51,15 @@ export async function generateAnalysisText(
       ? 120000
       : 45000;
 
+  const model = "gpt-5";
+  const promptLength = prompt.length;
   const startedAt = Date.now();
   let response;
 
   try {
     response = await Promise.race([
       getOpenAIClient().responses.create({
-        model: "gpt-5",
+        model,
         input: prompt,
         max_output_tokens: maxOutputTokens,
         reasoning: {
@@ -48,23 +73,35 @@ export async function generateAnalysisText(
       }),
     ]);
   } catch (error) {
-    const details =
-      error instanceof Error
-        ? error.message
-        : "unknown-openai-error";
+    const errorMeta = extractOpenAIErrorMeta(error);
 
     console.error("[generateAnalysisText] failed", {
       callType,
+      model,
+      promptLength,
+      maxOutputTokens,
       timeoutMs,
+      startedAt: new Date(startedAt).toISOString(),
+      finishedAt: new Date().toISOString(),
       elapsedMs: Date.now() - startedAt,
-      details,
+      errorName: errorMeta.name,
+      errorStatus: errorMeta.status,
+      errorCode: errorMeta.code,
+      errorType: errorMeta.type,
+      details: errorMeta.message,
     });
 
-    throw new Error(`OpenAI 응답 생성에 실패했습니다. ${details}`);
+    throw new Error(`OpenAI 응답 생성에 실패했습니다. ${errorMeta.message}`);
   }
 
   console.info("[generateAnalysisText] success", {
     callType,
+    model,
+    promptLength,
+    maxOutputTokens,
+    timeoutMs,
+    startedAt: new Date(startedAt).toISOString(),
+    finishedAt: new Date().toISOString(),
     elapsedMs: Date.now() - startedAt,
     responseLength: response.output_text?.length ?? 0,
   });

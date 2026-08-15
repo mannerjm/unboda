@@ -1,9 +1,12 @@
 import "server-only";
 
 import type { AnalyzeSuccessResponse } from "../analyzeApiTypes";
+import { MAX_MAIN_ANALYSIS_RETRY_COUNT } from "../analyzeApiTypes";
 import {
   getProfileFingerprint,
   toAnalyzeProfileMetadata,
+  STALE_RETRY_LOCK_MS,
+  type MainAnalysisRetryClaimResult,
 } from "../freeAnalysisResults/server";
 import type { ProfileDto, ProfileInput } from "../profiles/types";
 import { createAdminClient } from "../supabase/admin";
@@ -146,6 +149,93 @@ export async function failGuestFreeAnalysis(record: GuestFreeAnalysisRecord): Pr
     .eq("status", "generating");
 
   if (error) throw new Error(`비회원 무료 분석 실패 상태를 저장하지 못했습니다: ${error.message}`);
+}
+
+/**
+ * Atomically claims the right to retry main-analysis for a completed guest row
+ * whose generationMeta.mainAnalysisStatus is "failed". Mirrors
+ * claimMainAnalysisRetry() for the member table exactly, including the
+ * MAX_MAIN_ANALYSIS_RETRY_COUNT cap and count increment in the same UPDATE.
+ */
+export async function claimGuestMainAnalysisRetry(
+  record: GuestFreeAnalysisRecord,
+): Promise<MainAnalysisRetryClaimResult<GuestFreeAnalysisRecord>> {
+  if (record.status !== "completed" || !record.content) return { state: "in_progress" };
+  if (record.content.generationMeta?.mainAnalysisStatus !== "failed") return { state: "in_progress" };
+
+  const retryCount = record.content.generationMeta?.mainAnalysisRetryCount ?? 0;
+  if (retryCount >= MAX_MAIN_ANALYSIS_RETRY_COUNT) {
+    return { state: "limit_exceeded" };
+  }
+
+  const nextContent: AnalyzeSuccessResponse = {
+    ...record.content,
+    generationMeta: {
+      ...record.content.generationMeta,
+      mainAnalysisRetryStatus: "generating",
+      mainAnalysisRetryCount: retryCount + 1,
+    },
+  };
+  const staleBefore = new Date(Date.now() - STALE_RETRY_LOCK_MS).toISOString();
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("guest_free_analyses")
+    .update({ content: nextContent })
+    .eq("id", record.id)
+    .eq("secret_hash", record.secretHash)
+    .eq("status", "completed")
+    .eq("content->generationMeta->>mainAnalysisStatus", "failed")
+    .or(
+      `content->generationMeta->>mainAnalysisRetryStatus.is.null,content->generationMeta->>mainAnalysisRetryStatus.eq.idle,and(content->generationMeta->>mainAnalysisRetryStatus.eq.generating,updated_at.lt.${staleBefore})`,
+    )
+    .select("*")
+    .maybeSingle<GuestFreeAnalysisRow>();
+
+  if (error) {
+    throw new Error(`AI 해석 재생성을 시작하지 못했습니다: ${error.message}`);
+  }
+
+  return data ? { state: "claimed", record: toRecord(data) } : { state: "in_progress" };
+}
+
+/**
+ * Writes back only `result` and `generationMeta` after a guest retry attempt,
+ * preserving every other stored field and releasing the retry lock regardless
+ * of outcome.
+ */
+export async function completeGuestMainAnalysisRetry(input: {
+  record: GuestFreeAnalysisRecord;
+  result: string;
+  mainAnalysisStatus: "completed" | "failed";
+}): Promise<AnalyzeSuccessResponse> {
+  if (!input.record.content) {
+    throw new Error("재생성할 기존 분석 결과가 없습니다.");
+  }
+
+  const nextContent: AnalyzeSuccessResponse = {
+    ...input.record.content,
+    result: input.mainAnalysisStatus === "completed" ? input.result : input.record.content.result,
+    generationMeta: {
+      ...input.record.content.generationMeta,
+      mainAnalysisStatus: input.mainAnalysisStatus,
+      mainAnalysisRetryStatus: "idle",
+    },
+  };
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("guest_free_analyses")
+    .update({ content: nextContent })
+    .eq("id", input.record.id)
+    .eq("secret_hash", input.record.secretHash)
+    .eq("content->generationMeta->>mainAnalysisRetryStatus", "generating");
+
+  if (error) {
+    throw new Error(`AI 해석 재생성 결과를 저장하지 못했습니다: ${error.message}`);
+  }
+
+  return nextContent;
 }
 
 export async function setGuestSelectedProduct(

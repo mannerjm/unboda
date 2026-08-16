@@ -8,6 +8,7 @@ import {
 import {
   PERIOD_ANALYSIS_PRODUCTS,
   type PeriodAnalysisProductDefinition,
+  type PeriodAnalysisProductType,
 } from "./analysisPeriodProducts";
 // app/lib/premiumProductRegistry.ts
 
@@ -73,6 +74,9 @@ export type PremiumProductDefinition = {
   plugin: PremiumProductPlugin;
 
   kind: PremiumProductKind;
+
+  /** Only set for kind === "PERIOD"; analysisPeriodProducts stays the source of truth. */
+  periodType?: PeriodAnalysisProductType;
 
   releaseLevel: PremiumProductReleaseLevel;
 
@@ -489,6 +493,7 @@ export const TOPIC_PREMIUM_PRODUCTS: PremiumProductDefinition[] =
     category: "period",
     plugin: "FORTUNE",
     kind: "PERIOD",
+    periodType: period.type,
     releaseLevel: "V2",
 
     description: period.shortDescription,

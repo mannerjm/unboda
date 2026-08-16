@@ -26,6 +26,7 @@ import {
   type FreeAnalysisAIInterpretation,
 } from "@/app/lib/freeAnalysisAIInterpretation";
 import ProfileSelector from "@/app/components/ProfileSelector";
+import PremiumCatalogSection from "@/app/components/PremiumCatalogSection";
 
 type SajuResult = ReturnType<typeof getSaju>;
 
@@ -1648,6 +1649,10 @@ h3: ({ children }) => {
 )}
 </div>
 </section>
+        <PremiumCatalogSection
+          profileId={currentProfileId}
+          recommendedProductIds={displayedPaidAnalysisProducts.map((product) => product.id)}
+        />
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
           <button
             type="button"

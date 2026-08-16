@@ -282,9 +282,9 @@ console.log(
   TOPIC_PREMIUM_PRODUCTS.length,
 );
 
-if (ALL_PREMIUM_PRODUCTS.length !== 59) {
+if (ALL_PREMIUM_PRODUCTS.length !== 62) {
   throw new Error(
-    `전체 Premium Product 개수가 59개가 아닙니다. 현재: ${ALL_PREMIUM_PRODUCTS.length}`,
+    `전체 Premium Product 개수가 62개가 아닙니다. 현재: ${ALL_PREMIUM_PRODUCTS.length}`,
   );
 }
 
@@ -343,9 +343,9 @@ console.log(
   firstTopicFromUnifiedRegistry.id,
 );
 
-if (PERIOD_PREMIUM_PRODUCTS.length !== 5) {
+if (PERIOD_PREMIUM_PRODUCTS.length !== 8) {
   throw new Error(
-    `Period Premium Product 개수가 5개가 아닙니다. 현재: ${PERIOD_PREMIUM_PRODUCTS.length}`,
+    `Period Premium Product 개수가 8개가 아닙니다. 현재: ${PERIOD_PREMIUM_PRODUCTS.length}`,
   );
 }
 
@@ -388,7 +388,7 @@ for (const product of PERIOD_PREMIUM_PRODUCTS) {
 }
 
 console.log(
-  "5개 Period Premium 변환 검증 완료:",
+  "8개 Period Premium 변환 검증 완료:",
   PERIOD_PREMIUM_PRODUCTS.length,
 );
 

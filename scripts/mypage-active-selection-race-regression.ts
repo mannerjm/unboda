@@ -86,7 +86,9 @@ assert(cardSection.includes("onClick={(event) => selectFromCardClick(event, prof
 assert(cardSection.includes("구매한 심층 분석") && cardSection.includes("formatFreeAnalysisStatusLabel(freeAnalysisStatusById[profile.id])"), "the free analysis and paid analysis blocks must live inside that same clickable card");
 assert(source.includes('event.target.closest("button, a, input, select, textarea")'), "clicks originating from an interactive element must not reach the card handler");
 assert(source.includes("if (!(event.target instanceof HTMLElement)) return;"), "the card handler must guard against non-element click targets");
-assert(source.includes('onClick={() => void activate(profile.id)}') && source.includes('className="block w-full text-left"'), "the header button must remain as the keyboard-accessible selection control");
+assert(source.includes('onClick={() => void activate(profile.id)}') && /block w-full rounded-2xl text-left/.test(source), "the header button must remain as the keyboard-accessible selection control");
+assert(/onClick={\(\) => void activate\(profile\.id\)}[\s\S]{0,300}?FocusRing}/.test(source), "the header selection button must keep a visible keyboard focus style");
+assert(source.includes('const focusRing = "focus-visible:outline-none focus-visible:ring-2'), "the shared focus ring must stay visible for keyboard users");
 assert(/^profiles\.map\(\(profile\) => \(\s*<div/.test(cardSection), "the clickable card container must be a div, never a button wrapping other controls");
 const headerButton = cardSection.slice(
   cardSection.indexOf("onClick={() => void activate(profile.id)}"),

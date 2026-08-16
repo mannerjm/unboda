@@ -11,7 +11,7 @@ assert(source.includes("사주 분석 대상"), "mypage must use the user-facing
 assert(source.includes("여기서 선택한 사람을 기준으로 무료 사주와 유료 심층분석이 진행됩니다."), "mypage must use the updated guidance copy");
 assert(source.includes("formatProfileBirthDate(profile.birthDate)"), "mypage must render the stored profile birth date");
 assert(!source.includes("{profile.relationshipType}"), "mypage must not render internal relationship type values");
-assert(source.includes("현재 선택") && source.includes("profile.id === activeProfileId"), "only the active Profile must render the selected badge");
+assert(source.includes("현재 분석 대상") && source.includes("profile.id === activeProfileId"), "only the active Profile must render the selected badge");
 assert(source.includes('method: "PUT"') && source.includes('body: JSON.stringify({ profileId })'), "profile click must preserve the active profile API update contract");
 assert(source.includes('fetch("/api/profiles/active")'), "mypage reload must preserve active profile state from the server");
 assert(!source.includes("← 사주 조회"), "mypage must not show a top-level saju navigation link");

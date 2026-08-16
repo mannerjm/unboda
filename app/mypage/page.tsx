@@ -88,6 +88,64 @@ const paidReportActionLabels: Record<PaidReportStatus, string> = {
   failed: "다시 생성하기",
 };
 
+type StatusTone = "neutral" | "positive" | "warning" | "critical";
+
+const freeAnalysisStatusTones: Record<FreeAnalysisResultStatus, StatusTone> = {
+  none: "neutral",
+  generating: "neutral",
+  completed: "positive",
+  failed: "critical",
+  stale: "warning",
+};
+
+const freeAnalysisStatusHints: Partial<Record<FreeAnalysisResultStatus, string>> = {
+  stale: "출생 정보가 바뀌어 저장된 결과를 열 수 없습니다. 변경된 정보로 다시 분석해 주세요.",
+  failed: "분석이 완료되지 않았습니다. 다시 분석해 주세요.",
+};
+
+const paidReportStatusTones: Record<PaidReportStatus, StatusTone> = {
+  none: "neutral",
+  generating: "neutral",
+  completed: "positive",
+  failed: "critical",
+};
+
+const statusToneClasses: Record<StatusTone, string> = {
+  neutral: "border-stone-200 bg-stone-50 text-stone-600",
+  positive: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  warning: "border-amber-200 bg-amber-50 text-amber-800",
+  critical: "border-red-200 bg-red-50 text-red-700",
+};
+
+const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
+const activeFocusRing = `${focusRing} focus-visible:ring-white focus-visible:ring-offset-stone-900`;
+const restingFocusRing = `${focusRing} focus-visible:ring-stone-900 focus-visible:ring-offset-[#f7f3ea]`;
+
+// The active card is charcoal, so tone colors would drop below contrast on it.
+function statusBadgeClass(isActive: boolean, tone: StatusTone): string {
+  return `inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
+    isActive ? "border-white/25 bg-white/10 text-white" : statusToneClasses[tone]
+  }`;
+}
+
+function cardActionClass(isActive: boolean): string {
+  return isActive
+    ? `rounded-full border border-white/30 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 ${activeFocusRing}`
+    : `rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400 ${restingFocusRing}`;
+}
+
+function deleteActionClass(isActive: boolean): string {
+  return isActive
+    ? `rounded-full border border-white/30 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 ${activeFocusRing}`
+    : `rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400 ${restingFocusRing}`;
+}
+
+function subCardClass(isActive: boolean): string {
+  return isActive
+    ? "mt-5 rounded-2xl border border-white/20 bg-white/5 p-4"
+    : "mt-5 rounded-2xl border border-stone-200 bg-stone-50/60 p-4";
+}
+
 type SummaryBody = {
   freeAnalysisResults?: Array<{ profileId: string; status: FreeAnalysisResultStatus }>;
   profileDeletability?: Array<{ profileId: string; deletable: boolean; reason?: ProfileDeleteReason }>;
@@ -99,6 +157,7 @@ type ProfileDeletabilityState = { deletable: boolean; reason?: ProfileDeleteReas
 export default function MyPage() {
   const router = useRouter();
   const [profiles, setProfiles] = useState<ProfileDto[]>([]);
+  const [isProfilesLoaded, setIsProfilesLoaded] = useState(false);
   const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -131,7 +190,8 @@ export default function MyPage() {
         setActiveProfileId(activeBody.profile?.id ?? null);
         confirmedActiveProfileIdRef.current = activeBody.profile?.id ?? null;
       })
-      .catch(() => setMessage("로그인 상태를 확인한 뒤 다시 시도해 주세요."));
+      .catch(() => setMessage("로그인 상태를 확인한 뒤 다시 시도해 주세요."))
+      .finally(() => setIsProfilesLoaded(true));
   }, []);
 
   useEffect(() => {
@@ -358,49 +418,60 @@ export default function MyPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
-      <div className="mx-auto max-w-2xl">
-        <p className="text-xs font-semibold tracking-[0.25em] text-stone-500">MY PROFILE</p>
-        <h1 className="mt-3 text-3xl font-bold">사주 분석 대상</h1>
-        <p className="mt-4 text-sm leading-7 text-stone-600">여기서 선택한 사람을 기준으로 무료 사주와 유료 심층분석이 진행됩니다.</p>
-        <button
-          type="button"
-          onClick={openCreateForm}
-          className="mt-4 rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50"
-        >
-          인원 추가
-        </button>
+    <main className="min-h-screen bg-[#f7f3ea] px-5 py-12 text-stone-900 sm:py-16">
+      <div className="mx-auto w-full max-w-3xl">
+        <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.25em] text-stone-500">MY PROFILE</p>
+            <h1 className="mt-3 text-3xl font-bold sm:text-4xl">사주 분석 대상</h1>
+            <p className="mt-4 max-w-xl text-sm leading-7 text-stone-600">여기서 선택한 사람을 기준으로 무료 사주와 유료 심층분석이 진행됩니다.</p>
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
+            {profiles.length > 0 ? (
+              <span className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-500">
+                {profiles.length}명 등록
+              </span>
+            ) : null}
+            <button
+              type="button"
+              onClick={openCreateForm}
+              className={`rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 ${restingFocusRing}`}
+            >
+              인원 추가
+            </button>
+          </div>
+        </header>
         {isFormOpen ? (
           <form
-            className="mt-4 space-y-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm"
+            className="mt-8 space-y-5 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
             onSubmit={(event) => { event.preventDefault(); void submitForm(); }}
           >
             <p className="text-base font-bold">{editingProfileId ? "프로필 수정" : "인원 추가"}</p>
             <label className="block text-sm font-semibold">이름 또는 구분
-              <input value={formInput.label} onChange={(event) => setFormInput({ ...formInput, label: event.target.value })} placeholder="이름 또는 구분" className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required />
+              <input value={formInput.label} onChange={(event) => setFormInput({ ...formInput, label: event.target.value })} placeholder="이름 또는 구분" className={`mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 font-normal ${restingFocusRing}`} required />
             </label>
             <label className="block text-sm font-semibold">관계
-              <select value={formInput.relationshipType} onChange={(event) => setFormInput({ ...formInput, relationshipType: event.target.value as ProfileRelationshipType })} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required>
+              <select value={formInput.relationshipType} onChange={(event) => setFormInput({ ...formInput, relationshipType: event.target.value as ProfileRelationshipType })} className={`mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 font-normal ${restingFocusRing}`} required>
                 {relationshipOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
               </select>
             </label>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-semibold">생년월일
-                <input type="date" min={GUEST_BIRTH_DATE_MIN} max={getGuestBirthDateMax()} value={formInput.birthDate} onChange={(event) => setFormInput({ ...formInput, birthDate: event.target.value })} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required />
+                <input type="date" min={GUEST_BIRTH_DATE_MIN} max={getGuestBirthDateMax()} value={formInput.birthDate} onChange={(event) => setFormInput({ ...formInput, birthDate: event.target.value })} className={`mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 font-normal ${restingFocusRing}`} required />
               </label>
               <label className="block text-sm font-semibold">태어난 시간
-                <input type="time" value={formInput.birthTime} onChange={(event) => setFormInput({ ...formInput, birthTime: event.target.value })} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required />
+                <input type="time" value={formInput.birthTime} onChange={(event) => setFormInput({ ...formInput, birthTime: event.target.value })} className={`mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 font-normal ${restingFocusRing}`} required />
               </label>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-semibold">성별
-                <select value={formInput.gender} onChange={(event) => setFormInput({ ...formInput, gender: event.target.value as ProfileInput["gender"] })} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required>
+                <select value={formInput.gender} onChange={(event) => setFormInput({ ...formInput, gender: event.target.value as ProfileInput["gender"] })} className={`mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 font-normal ${restingFocusRing}`} required>
                   <option value="남성">남성</option>
                   <option value="여성">여성</option>
                 </select>
               </label>
               <label className="block text-sm font-semibold">달력
-                <select value={formInput.calendarType} onChange={(event) => setFormInput({ ...formInput, calendarType: event.target.value as ProfileInput["calendarType"], isLeapMonth: event.target.value === "양력" ? false : formInput.isLeapMonth })} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required>
+                <select value={formInput.calendarType} onChange={(event) => setFormInput({ ...formInput, calendarType: event.target.value as ProfileInput["calendarType"], isLeapMonth: event.target.value === "양력" ? false : formInput.isLeapMonth })} className={`mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 font-normal ${restingFocusRing}`} required>
                   <option value="양력">양력</option>
                   <option value="음력">음력</option>
                 </select>
@@ -408,85 +479,118 @@ export default function MyPage() {
             </div>
             {formInput.calendarType === "음력" ? (
               <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={formInput.isLeapMonth} onChange={(event) => setFormInput({ ...formInput, isLeapMonth: event.target.checked })} /> 윤달
+                <input type="checkbox" checked={formInput.isLeapMonth} onChange={(event) => setFormInput({ ...formInput, isLeapMonth: event.target.checked })} className={restingFocusRing} /> 윤달
               </label>
             ) : null}
             {editingProfileId ? (
-              <p className="text-xs leading-6 text-stone-500">
+              <p className="rounded-xl bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-500">
                 출생 정보가 변경되면 기존 무료 분석은 다시 분석이 필요할 수 있습니다.
                 이미 구매한 심층 분석이 있다면 기존 리포트 내용과 새 출생 정보가 달라질 수 있습니다.
               </p>
             ) : null}
             {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
-            <div className="flex gap-2">
-              <button type="submit" disabled={isSubmittingForm} className="flex-1 rounded-xl bg-stone-900 px-5 py-3 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button type="submit" disabled={isSubmittingForm} className={`flex-1 rounded-xl bg-stone-900 px-5 py-3 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400 ${restingFocusRing}`}>
                 {isSubmittingForm ? "저장 중..." : editingProfileId ? "수정 저장" : "등록하기"}
               </button>
-              <button type="button" onClick={closeForm} disabled={isSubmittingForm} className="rounded-xl border border-stone-300 bg-white px-5 py-3 font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed">
+              <button type="button" onClick={closeForm} disabled={isSubmittingForm} className={`rounded-xl border border-stone-300 bg-white px-5 py-3 font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed ${restingFocusRing}`}>
                 취소
               </button>
             </div>
           </form>
         ) : null}
-        <div className="mt-8 grid max-h-96 gap-3 overflow-y-auto pr-1">
+        {isProfilesLoaded && profiles.length === 0 && !isFormOpen ? (
+          <section className="mt-8 rounded-3xl border border-dashed border-stone-300 bg-white/70 p-8 text-center">
+            <p className="text-base font-bold">아직 등록된 분석 대상이 없습니다</p>
+            <p className="mt-3 text-sm leading-7 text-stone-600">
+              본인이나 가족의 출생 정보를 등록하면 무료 사주와 심층 분석을 이어서 볼 수 있습니다.
+            </p>
+            <button
+              type="button"
+              onClick={openCreateForm}
+              className={`mt-6 rounded-xl bg-stone-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 ${restingFocusRing}`}
+            >
+              첫 분석 대상 추가
+            </button>
+          </section>
+        ) : null}
+        <div className="mt-8 space-y-4">
           {profiles.map((profile) => (
             <div
               key={profile.id}
               onClick={(event) => selectFromCardClick(event, profile.id)}
               className={profile.id === activeProfileId
-                ? "border border-stone-900 bg-stone-900 p-5 text-left text-white"
-                : "cursor-pointer border border-stone-200 bg-white p-5 text-left"}
+                ? "rounded-3xl border border-stone-900 bg-stone-900 p-6 text-left text-white shadow-md sm:p-7"
+                : "cursor-pointer rounded-3xl border border-stone-200 bg-white p-6 text-left shadow-sm transition hover:border-stone-300 hover:shadow-md sm:p-7"}
             >
               <button
                 type="button"
                 onClick={() => void activate(profile.id)}
-                className="block w-full text-left"
+                className={profile.id === activeProfileId
+                  ? `block w-full rounded-2xl text-left ${activeFocusRing}`
+                  : `block w-full rounded-2xl text-left ${restingFocusRing}`}
               >
-                <span className="flex items-center justify-between gap-3">
-                  <span className="text-lg font-bold">{profile.label}</span>
+                <span className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-xl font-bold">{profile.label}</span>
                   {profile.id === activeProfileId ? (
-                    <span className="border border-white/30 bg-white/10 px-2 py-1 text-xs font-semibold text-white">현재 선택</span>
+                    <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold text-white">현재 분석 대상</span>
                   ) : null}
                 </span>
                 <span className={profile.id === activeProfileId
-                  ? "mt-1 block text-sm text-white/75"
-                  : "mt-1 block text-sm text-stone-500"}
+                  ? "mt-2 block text-sm text-white/70"
+                  : "mt-2 block text-sm text-stone-500"}
                 >
                   {relationshipLabels[profile.relationshipType]}
                 </span>
                 <span className={profile.id === activeProfileId
-                  ? "mt-2 block text-sm text-white/75"
-                  : "mt-2 block text-sm text-stone-500"}
+                  ? "mt-1 block text-sm text-white/70"
+                  : "mt-1 block text-sm text-stone-500"}
                 >
                   {formatProfileDetails(profile)}
                 </span>
               </button>
-              <span className={profile.id === activeProfileId
-                ? "mt-3 block text-xs text-white/60"
-                : "mt-3 block text-xs text-stone-400"}
-              >
-                {formatFreeAnalysisStatusLabel(freeAnalysisStatusById[profile.id])}
-              </span>
-              {(paidAnalysisByProfileId[profile.id] ?? []).length > 0 ? (
-                <div className={profile.id === activeProfileId
-                  ? "mt-3 border-t border-white/20 pt-3"
-                  : "mt-3 border-t border-stone-200 pt-3"}
-                >
+              <div className={subCardClass(profile.id === activeProfileId)}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className={profile.id === activeProfileId
-                    ? "text-xs font-semibold text-white/80"
-                    : "text-xs font-semibold text-stone-600"}
+                    ? "text-xs font-semibold tracking-[0.14em] text-white/70"
+                    : "text-xs font-semibold tracking-[0.14em] text-stone-500"}
+                  >
+                    무료 사주
+                  </p>
+                  <span className={statusBadgeClass(
+                    profile.id === activeProfileId,
+                    freeAnalysisStatusTones[freeAnalysisStatusById[profile.id] ?? "none"],
+                  )}
+                  >
+                    {formatFreeAnalysisStatusLabel(freeAnalysisStatusById[profile.id])}
+                  </span>
+                </div>
+                {freeAnalysisStatusHints[freeAnalysisStatusById[profile.id] ?? "none"] ? (
+                  <p className={profile.id === activeProfileId
+                    ? "mt-2 text-xs leading-5 text-white/60"
+                    : "mt-2 text-xs leading-5 text-stone-500"}
+                  >
+                    {freeAnalysisStatusHints[freeAnalysisStatusById[profile.id] ?? "none"]}
+                  </p>
+                ) : null}
+              </div>
+              {(paidAnalysisByProfileId[profile.id] ?? []).length > 0 ? (
+                <div className={subCardClass(profile.id === activeProfileId)}>
+                  <p className={profile.id === activeProfileId
+                    ? "text-xs font-semibold tracking-[0.14em] text-white/70"
+                    : "text-xs font-semibold tracking-[0.14em] text-stone-500"}
                   >
                     구매한 심층 분석
                   </p>
-                  <ul className="mt-2 space-y-2">
+                  <ul className={profile.id === activeProfileId
+                    ? "mt-3 divide-y divide-white/10"
+                    : "mt-3 divide-y divide-stone-200"}
+                  >
                     {(paidAnalysisByProfileId[profile.id] ?? []).map((item) => (
-                      <li key={item.productId} className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-sm">
-                          <span className="font-semibold">{item.productName}</span>
-                          <span className={profile.id === activeProfileId
-                            ? "ml-2 text-xs text-white/70"
-                            : "ml-2 text-xs text-stone-500"}
-                          >
+                      <li key={item.productId} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                        <span className="min-w-0">
+                          <span className="block text-sm font-semibold">{item.productName}</span>
+                          <span className={`mt-1.5 ${statusBadgeClass(profile.id === activeProfileId, paidReportStatusTones[item.reportStatus])}`}>
                             {paidReportStatusLabels[item.reportStatus]}
                           </span>
                         </span>
@@ -495,8 +599,8 @@ export default function MyPage() {
                             type="button"
                             disabled
                             className={profile.id === activeProfileId
-                              ? "rounded-lg border border-white/20 px-3 py-1.5 text-xs font-semibold text-white/50"
-                              : "rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-semibold text-stone-400"}
+                              ? "shrink-0 rounded-full border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-white/50"
+                              : "shrink-0 rounded-full border border-stone-200 px-3.5 py-1.5 text-xs font-semibold text-stone-400"}
                           >
                             {paidReportActionLabels[item.reportStatus]}
                           </button>
@@ -504,8 +608,8 @@ export default function MyPage() {
                           <Link
                             href={`/paid-analysis/${item.productId}/report?profileId=${profile.id}`}
                             className={profile.id === activeProfileId
-                              ? "rounded-lg border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10"
-                              : "rounded-lg border border-stone-300 px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50"}
+                              ? `shrink-0 ${cardActionClass(true)}`
+                              : `shrink-0 ${cardActionClass(false)}`}
                           >
                             {paidReportActionLabels[item.reportStatus]}
                           </Link>
@@ -515,13 +619,14 @@ export default function MyPage() {
                   </ul>
                 </div>
               ) : null}
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className={profile.id === activeProfileId
+                ? "mt-5 flex flex-wrap gap-2 border-t border-white/15 pt-4"
+                : "mt-5 flex flex-wrap gap-2 border-t border-stone-200 pt-4"}
+              >
                 <button
                   type="button"
                   onClick={() => openEditForm(profile)}
-                  className={profile.id === activeProfileId
-                    ? "rounded-lg border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10"
-                    : "rounded-lg border border-stone-300 px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50"}
+                  className={cardActionClass(profile.id === activeProfileId)}
                 >
                   수정
                 </button>
@@ -530,7 +635,7 @@ export default function MyPage() {
                     type="button"
                     onClick={() => void clearActiveSelection()}
                     disabled={isClearingActiveProfile}
-                    className="rounded-lg border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                    className={cardActionClass(true)}
                   >
                     {isClearingActiveProfile ? "해제 중..." : "분석 대상 선택 해제"}
                   </button>
@@ -539,25 +644,23 @@ export default function MyPage() {
                   type="button"
                   onClick={() => { setMessage(null); setPendingDeleteProfileId(profile.id); }}
                   disabled={deletabilityById[profile.id]?.deletable === false}
-                  className={profile.id === activeProfileId
-                    ? "rounded-lg border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
-                    : "rounded-lg border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400"}
+                  className={deleteActionClass(profile.id === activeProfileId)}
                 >
                   삭제
                 </button>
               </div>
               {getDeleteBlockMessage(profile.id) ? (
                 <p className={profile.id === activeProfileId
-                  ? "mt-2 text-xs leading-5 text-white/70"
-                  : "mt-2 text-xs leading-5 text-stone-500"}
+                  ? "mt-3 rounded-xl bg-white/10 px-3 py-2 text-xs leading-5 text-white/70"
+                  : "mt-3 rounded-xl bg-stone-50 px-3 py-2 text-xs leading-5 text-stone-500"}
                 >
                   {getDeleteBlockMessage(profile.id)}
                 </p>
               ) : null}
               {pendingDeleteProfileId === profile.id ? (
                 <div className={profile.id === activeProfileId
-                  ? "mt-3 border border-white/30 bg-white/10 p-3"
-                  : "mt-3 border border-red-200 bg-red-50 p-3"}
+                  ? "mt-3 rounded-2xl border border-white/30 bg-white/10 p-4"
+                  : "mt-3 rounded-2xl border border-red-200 bg-red-50 p-4"}
                 >
                   <p className={profile.id === activeProfileId
                     ? "text-xs leading-6 text-white"
@@ -565,12 +668,12 @@ export default function MyPage() {
                   >
                     프로필을 삭제하면 저장된 무료 분석 결과도 함께 삭제되며 복구할 수 없습니다.
                   </p>
-                  <div className="mt-3 flex gap-2">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => void deleteProfile(profile.id)}
                       disabled={isDeletingProfile}
-                      className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-stone-400"
+                      className={`rounded-full bg-red-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-stone-400 ${restingFocusRing}`}
                     >
                       {isDeletingProfile ? "삭제 중..." : "삭제 확인"}
                     </button>
@@ -578,9 +681,7 @@ export default function MyPage() {
                       type="button"
                       onClick={() => setPendingDeleteProfileId(null)}
                       disabled={isDeletingProfile}
-                      className={profile.id === activeProfileId
-                        ? "rounded-lg border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed"
-                        : "rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed"}
+                      className={cardActionClass(profile.id === activeProfileId)}
                     >
                       취소
                     </button>
@@ -590,33 +691,42 @@ export default function MyPage() {
             </div>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            if (activeProfileId && freeAnalysisStatusById[activeProfileId] === "completed") {
-              router.push(`/result?profileId=${activeProfileId}`);
-              return;
-            }
-            router.push("/saju");
-          }}
-          disabled={!activeProfileId}
-          className="mt-6 w-full rounded-xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
-        >
-          {activeProfileId && freeAnalysisStatusById[activeProfileId] === "completed"
-            ? "선택한 프로필의 무료 분석 결과 보기"
-            : activeProfileId && freeAnalysisStatusById[activeProfileId] === "stale"
-              ? "변경된 출생 정보로 다시 분석하기"
-              : "선택한 프로필로 사주 조회하기"}
-        </button>
+        {profiles.length > 0 ? (
+          <section className="mt-10 flex flex-col gap-4 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-7">
+            <p className="text-sm leading-6 text-stone-600">
+              {activeProfileId
+                ? "선택한 분석 대상으로 이어서 진행합니다."
+                : "먼저 위에서 분석 대상을 선택해 주세요."}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                if (activeProfileId && freeAnalysisStatusById[activeProfileId] === "completed") {
+                  router.push(`/result?profileId=${activeProfileId}`);
+                  return;
+                }
+                router.push("/saju");
+              }}
+              disabled={!activeProfileId}
+              className={`w-full shrink-0 rounded-xl bg-stone-900 px-6 py-4 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400 sm:w-auto sm:py-3 ${restingFocusRing}`}
+            >
+              {activeProfileId && freeAnalysisStatusById[activeProfileId] === "completed"
+                ? "선택한 프로필의 무료 분석 결과 보기"
+                : activeProfileId && freeAnalysisStatusById[activeProfileId] === "stale"
+                  ? "변경된 출생 정보로 다시 분석하기"
+                  : "선택한 프로필로 사주 조회하기"}
+            </button>
+          </section>
+        ) : null}
+        {message ? <p className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{message}</p> : null}
         <button
           type="button"
           onClick={() => void signOut()}
           disabled={isSigningOut}
-          className="mt-4 w-full text-center text-sm text-stone-400 underline-offset-4 transition hover:text-stone-600 hover:underline disabled:cursor-not-allowed disabled:text-stone-300"
+          className={`mt-8 w-full rounded-lg py-2 text-center text-sm text-stone-400 underline-offset-4 transition hover:text-stone-600 hover:underline disabled:cursor-not-allowed disabled:text-stone-300 ${restingFocusRing}`}
         >
           {isSigningOut ? "로그아웃 중..." : "로그아웃"}
         </button>
-        {message ? <p className="mt-4 text-sm text-red-600">{message}</p> : null}
       </div>
     </main>
   );

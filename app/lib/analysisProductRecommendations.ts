@@ -8,6 +8,8 @@ import type { RecommendationEngineResult } from "./analysisRecommendation";
 import {
   PREMIUM_PRODUCT_LOOKUP,
   TOPIC_PREMIUM_PRODUCTS,
+  getCanonicalPremiumProductId,
+  getPremiumProduct,
   type RecommendationSignalKey,
 } from "./premiumProductRegistry";
 import { normalizeRecommendationSignals } from "./recommendationSignals";
@@ -62,6 +64,114 @@ const DEFAULT_RECOMMENDATION_ORDER: string[] = [
   "yearly",
   "daeun",
 ];
+
+/**
+ * The legacy strength/relation rules still score themes that were never real
+ * products. Each theme maps to the closest canonical registry product so the
+ * fallback keeps its meaning instead of emitting an unbuyable id.
+ */
+const LEGACY_THEME_TO_CANONICAL_PRODUCT_ID: Record<string, string> = {
+  business: "business-growth",
+  social: "social-helper",
+  marriage: "relationship-marriage",
+  study: "growth-study",
+  "job-change": "career-job-change",
+  yearly: "life-current-turning-point",
+  daeun: "change-transition",
+};
+
+/** Registry-backed products used to top the list back up to exactly three. */
+const CANONICAL_BACKFILL_PRODUCT_IDS: readonly string[] = [
+  "career",
+  "wealth",
+  "relationship",
+  "health",
+];
+
+const CANONICAL_BACKFILL_REASON =
+  "전체 분석 결과와 기본 추천 우선순위를 바탕으로 함께 살펴볼 가치가 있습니다.";
+
+const TOP_RECOMMENDATION_COUNT = 3;
+
+function resolveCanonicalRecommendationProductId(
+  productId: string,
+): string | null {
+  const canonicalProductId =
+    LEGACY_THEME_TO_CANONICAL_PRODUCT_ID[productId]
+    ?? getCanonicalPremiumProductId(productId);
+
+  return getPremiumProduct(canonicalProductId) ? canonicalProductId : null;
+}
+
+/**
+ * Single integrity boundary for the engine: every emitted productId resolves in
+ * the premium registry, duplicates are dropped, and the list is always exactly
+ * three items long.
+ */
+function toCanonicalRecommendations(
+  recommendations: readonly AnalysisProductRecommendation[],
+): AnalysisProductRecommendation[] {
+  const canonicalRecommendations: AnalysisProductRecommendation[] = [];
+
+  for (const recommendation of recommendations) {
+    const productId = resolveCanonicalRecommendationProductId(recommendation.productId);
+
+    if (!productId) {
+      continue;
+    }
+
+    if (canonicalRecommendations.some((entry) => entry.productId === productId)) {
+      continue;
+    }
+
+    canonicalRecommendations.push({ ...recommendation, productId });
+
+    if (canonicalRecommendations.length === TOP_RECOMMENDATION_COUNT) {
+      return canonicalRecommendations;
+    }
+  }
+
+  for (const productId of CANONICAL_BACKFILL_PRODUCT_IDS) {
+    if (canonicalRecommendations.length === TOP_RECOMMENDATION_COUNT) {
+      break;
+    }
+
+    if (
+      !getPremiumProduct(productId)
+      || canonicalRecommendations.some((entry) => entry.productId === productId)
+    ) {
+      continue;
+    }
+
+    canonicalRecommendations.push({
+      productId,
+      score: 0,
+      reasons: [CANONICAL_BACKFILL_REASON],
+      evidence: [],
+    });
+  }
+
+  return canonicalRecommendations;
+}
+
+function buildRecommendationEngineResult(
+  recommendations: readonly AnalysisProductRecommendation[],
+): RecommendationEngineResult {
+  return {
+    primary: {
+      theme: recommendations[0].productId,
+      score: recommendations[0].score,
+      confidence: 1,
+      reasons: recommendations[0].reasons,
+    },
+    secondary: recommendations.slice(1).map((recommendation) => ({
+      theme: recommendation.productId,
+      score: recommendation.score,
+      confidence: 1,
+      reasons: recommendation.reasons,
+    })),
+  };
+}
 
 function createInitialRecommendationScores(): ProductRecommendationScoreMap {
   return {
@@ -221,24 +331,9 @@ export function buildTopicAwareRecommendations(
   topRecommendations.splice(3);
 
   if (topRecommendations.length >= 3) {
-    const engineResult: RecommendationEngineResult = {
-      primary: {
-        theme: topRecommendations[0].productId,
-        score: topRecommendations[0].score,
-        confidence: 1,
-        reasons: topRecommendations[0].reasons,
-      },
-      secondary: topRecommendations.slice(1).map((recommendation) => ({
-        theme: recommendation.productId,
-        score: recommendation.score,
-        confidence: 1,
-        reasons: recommendation.reasons,
-      })),
-    };
-
     return {
       recommendations: topRecommendations,
-      engineResult,
+      engineResult: buildRecommendationEngineResult(topRecommendations),
     };
   }
 
@@ -253,7 +348,14 @@ export function buildAnalysisProductRecommendations(
   const topicAwareResult = buildTopicAwareRecommendations(input);
 
   if (topicAwareResult.recommendations.length >= 3 && topicAwareResult.engineResult) {
-    return topicAwareResult;
+    const canonicalRecommendations = toCanonicalRecommendations(
+      topicAwareResult.recommendations,
+    );
+
+    return {
+      recommendations: canonicalRecommendations,
+      engineResult: buildRecommendationEngineResult(canonicalRecommendations),
+    };
   }
 
   const {
@@ -326,7 +428,7 @@ export function buildAnalysisProductRecommendations(
         recommendation.reasons.length > 0
           ? recommendation.reasons
           : [
-              "전체 분석 결과와 기본 추천 우선순위를 바탕으로 함께 살펴볼 가치가 있습니다.",
+              CANONICAL_BACKFILL_REASON,
             ],
       evidence: recommendation.evidence,
     }))
@@ -341,26 +443,12 @@ export function buildAnalysisProductRecommendations(
         DEFAULT_RECOMMENDATION_ORDER.indexOf(a.productId) -
         DEFAULT_RECOMMENDATION_ORDER.indexOf(b.productId)
       );
-    })
-    .slice(0, 3);
+    });
 
-  const engineResult: RecommendationEngineResult = {
-    primary: {
-      theme: recommendations[0].productId,
-      score: recommendations[0].score,
-      confidence: 1,
-      reasons: recommendations[0].reasons,
-    },
-    secondary: recommendations.slice(1).map((recommendation) => ({
-      theme: recommendation.productId,
-      score: recommendation.score,
-      confidence: 1,
-      reasons: recommendation.reasons,
-    })),
-  };
+  const canonicalRecommendations = toCanonicalRecommendations(recommendations);
 
   return {
-    recommendations,
-    engineResult,
+    recommendations: canonicalRecommendations,
+    engineResult: buildRecommendationEngineResult(canonicalRecommendations),
   };
 }

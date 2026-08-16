@@ -19,7 +19,7 @@ assert(!summaryRoute.includes("profileId") || summaryRoute.includes("user.id"), 
 console.log("1. mypage summary route enforces server-side user ownership ✓");
 
 assert(repository.includes("export async function listUserFreeAnalysisResults") && repository.includes('.eq("user_id", userId)'), "free analysis summary lookup must filter by user_id in Postgres, not in the client");
-assert(repository.includes('.select("profile_id, status")'), "free analysis summary lookup must stay read-only and minimal");
+assert(repository.includes('.select("profile_id, status, profile_fingerprint")'), "free analysis summary lookup must stay read-only and minimal");
 console.log("2. listUserFreeAnalysisResults is a scoped, read-only server function ✓");
 
 assert(myPage.includes('fetch("/api/mypage/summary")'), "mypage must fetch the new read-only summary endpoint");

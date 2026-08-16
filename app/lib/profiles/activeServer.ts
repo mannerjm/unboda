@@ -27,3 +27,11 @@ export async function setActiveProfile(userId: string, profileId: string): Promi
   if (error) throw new Error(`활성 프로필을 변경하지 못했습니다: ${error.message}`);
   return profile;
 }
+
+/** Clears only this user's selection row. Profiles themselves are never touched. */
+export async function clearActiveProfile(userId: string): Promise<void> {
+  const supabase = createAdminClient();
+  const { error } = await supabase.from("active_profiles").delete().eq("user_id", userId);
+
+  if (error) throw new Error(`활성 프로필 선택을 해제하지 못했습니다: ${error.message}`);
+}

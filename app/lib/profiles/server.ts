@@ -5,6 +5,8 @@ import {
   toProfileDbCalendarType,
   toProfileDbGender,
   MAX_PROFILES_PER_USER,
+  type ProfileDeletability,
+  type ProfileDeleteReason,
   type ProfileDto,
   type ProfileInput,
 } from "./types";
@@ -88,6 +90,87 @@ export class ProfileLimitError extends Error {
     super(`프로필은 계정당 최대 ${MAX_PROFILES_PER_USER}개까지 만들 수 있습니다.`);
     this.name = "ProfileLimitError";
   }
+}
+
+/** Raised when Postgres rejects the delete with 23503, i.e. a foreign key the preflight did not cover. */
+export class ProfileInUseError extends Error {
+  constructor() {
+    super("다른 데이터가 연결되어 있어 프로필을 삭제할 수 없습니다.");
+    this.name = "ProfileInUseError";
+  }
+}
+
+// Every table that references public.profiles with a purchase meaning. All four
+// are checked because the DB blocks the delete on each one independently.
+const PURCHASE_SCOPED_TABLES = ["orders", "purchases", "entitlements", "paid_reports"] as const;
+
+/**
+ * One pass over every table that can block a delete for this user, so the
+ * per-profile answer and the mypage list answer come from the same rules.
+ */
+export async function listProfileDeleteBlockers(
+  userId: string,
+): Promise<Map<string, ProfileDeleteReason>> {
+  const supabase = createAdminClient();
+  const blockers = new Map<string, ProfileDeleteReason>();
+  // Reasons are recorded in priority order: a purchase can never be resolved by
+  // the user, while an active selection can, so it must not mask the others.
+  const block = (profileId: string | null, reason: ProfileDeleteReason) => {
+    if (profileId && !blockers.has(profileId)) blockers.set(profileId, reason);
+  };
+
+  const purchaseScoped = await Promise.all(
+    PURCHASE_SCOPED_TABLES.map((table) =>
+      supabase.from(table).select("profile_id").eq("user_id", userId),
+    ),
+  );
+
+  for (const { data, error } of purchaseScoped) {
+    if (error) {
+      throw new Error(`프로필 삭제 가능 여부를 확인하지 못했습니다: ${error.message}`);
+    }
+
+    for (const row of (data ?? []) as Array<{ profile_id: string }>) {
+      block(row.profile_id, "PROFILE_HAS_PURCHASE");
+    }
+  }
+
+  const { data: transfers, error: transferError } = await supabase
+    .from("guest_free_analyses")
+    .select("resolved_profile_id")
+    .eq("transferred_user_id", userId)
+    .not("resolved_profile_id", "is", null);
+
+  if (transferError) {
+    throw new Error(`비회원 분석 이전 이력을 확인하지 못했습니다: ${transferError.message}`);
+  }
+
+  for (const row of (transfers ?? []) as Array<{ resolved_profile_id: string | null }>) {
+    block(row.resolved_profile_id, "PROFILE_HAS_TRANSFER_HISTORY");
+  }
+
+  const { data: active, error: activeError } = await supabase
+    .from("active_profiles")
+    .select("profile_id")
+    .eq("user_id", userId)
+    .maybeSingle<{ profile_id: string }>();
+
+  if (activeError) {
+    throw new Error(`활성 프로필을 확인하지 못했습니다: ${activeError.message}`);
+  }
+
+  block(active?.profile_id ?? null, "PROFILE_IS_ACTIVE");
+
+  return blockers;
+}
+
+export async function getProfileDeletability(
+  profileId: string,
+  userId: string,
+): Promise<ProfileDeletability> {
+  const reason = (await listProfileDeleteBlockers(userId)).get(profileId);
+
+  return reason ? { deletable: false, reason } : { deletable: true };
 }
 
 export async function listUserProfiles(userId: string): Promise<ProfileDto[]> {
@@ -202,6 +285,10 @@ export async function deleteUserProfile(
     .maybeSingle<{ id: string }>();
 
   if (error) {
+    if (error.code === "23503") {
+      throw new ProfileInUseError();
+    }
+
     throw new Error(`프로필을 삭제하지 못했습니다: ${error.message}`);
   }
 

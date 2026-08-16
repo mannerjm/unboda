@@ -28,6 +28,24 @@ export type ProfileDto = ProfileInput & {
   updatedAt: string;
 };
 
+export type ProfileDeleteReason =
+  | "PROFILE_HAS_PURCHASE"
+  | "PROFILE_IS_ACTIVE"
+  | "PROFILE_HAS_TRANSFER_HISTORY";
+
+export type ProfileDeletability =
+  | { deletable: true }
+  | { deletable: false; reason: ProfileDeleteReason };
+
+/** PROFILE_IN_USE is the backstop for a foreign key the preflight did not model. */
+export const profileDeleteBlockMessages: Record<ProfileDeleteReason | "PROFILE_IN_USE", string> = {
+  PROFILE_HAS_PURCHASE: "구매 내역이 연결된 프로필은 삭제할 수 없습니다.",
+  PROFILE_IS_ACTIVE:
+    "현재 분석 대상으로 선택된 프로필입니다. 다른 프로필을 선택하거나 분석 대상 선택을 해제한 후 삭제해 주세요.",
+  PROFILE_HAS_TRANSFER_HISTORY: "비회원 분석 이전 이력이 연결된 프로필은 삭제할 수 없습니다.",
+  PROFILE_IN_USE: "다른 데이터가 연결되어 있어 프로필을 삭제할 수 없습니다.",
+};
+
 export function isProfileId(value: unknown): value is string {
   return typeof value === "string" &&
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);

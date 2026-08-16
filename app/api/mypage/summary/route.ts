@@ -1,14 +1,36 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { listUserFreeAnalysisResults } from "@/app/lib/freeAnalysisResults/server";
+import {
+  listUserFreeAnalysisResults,
+  resolveProfileFreeAnalysisStatus,
+} from "@/app/lib/freeAnalysisResults/server";
+import { listProfileDeleteBlockers, listUserProfiles } from "@/app/lib/profiles/server";
+import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
 
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
 
   try {
-    const freeAnalysisResults = await listUserFreeAnalysisResults(user.id);
-    return NextResponse.json({ freeAnalysisResults });
+    const [profiles, summaries, deleteBlockers, paidAnalysis] = await Promise.all([
+      listUserProfiles(user.id),
+      listUserFreeAnalysisResults(user.id),
+      listProfileDeleteBlockers(user.id),
+      listUserPaidAnalysisSummaries(user.id),
+    ]);
+    const freeAnalysisResults = profiles.map((profile) => ({
+      profileId: profile.id,
+      status: resolveProfileFreeAnalysisStatus(profile, summaries),
+    }));
+    // UX hint only: DELETE /api/profiles/[profileId] re-checks the same rules.
+    const profileDeletability = profiles.map((profile) => {
+      const reason = deleteBlockers.get(profile.id);
+      return reason
+        ? { profileId: profile.id, deletable: false, reason }
+        : { profileId: profile.id, deletable: true };
+    });
+
+    return NextResponse.json({ freeAnalysisResults, profileDeletability, paidAnalysis });
   } catch (error) {
     console.error("[mypage-summary] list failed", error);
     return NextResponse.json({ error: "요약 정보를 불러오지 못했습니다." }, { status: 500 });

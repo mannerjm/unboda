@@ -2,11 +2,17 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import {
   deleteUserProfile,
+  getProfileDeletability,
   getUserProfile,
   isProfilesSelfConflict,
+  ProfileInUseError,
   updateUserProfile,
 } from "@/app/lib/profiles/server";
-import { mergeProfileInput } from "@/app/lib/profiles/types";
+import {
+  isProfileId,
+  mergeProfileInput,
+  profileDeleteBlockMessages,
+} from "@/app/lib/profiles/types";
 
 type RouteContext = {
   params: Promise<{ profileId: string }>;
@@ -74,7 +80,32 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
   const { profileId } = await context.params;
 
+  if (!isProfileId(profileId)) {
+    return NextResponse.json(
+      { error: "유효한 프로필을 선택해 주세요.", code: "INVALID_PROFILE_ID" },
+      { status: 400 },
+    );
+  }
+
   try {
+    // A missing profile and another user's profile are both 404: ownership is
+    // never disclosed. The preflight then re-checks the same rules the mypage
+    // summary showed, because that hint may be stale by now.
+    const profile = await getUserProfile(profileId, user.id);
+
+    if (!profile) {
+      return NextResponse.json({ error: "프로필을 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    const deletability = await getProfileDeletability(profileId, user.id);
+
+    if (!deletability.deletable) {
+      return NextResponse.json(
+        { error: profileDeleteBlockMessages[deletability.reason], code: deletability.reason },
+        { status: 409 },
+      );
+    }
+
     const deleted = await deleteUserProfile(profileId, user.id);
 
     if (!deleted) {
@@ -83,6 +114,13 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
+    if (error instanceof ProfileInUseError) {
+      return NextResponse.json(
+        { error: profileDeleteBlockMessages.PROFILE_IN_USE, code: "PROFILE_IN_USE" },
+        { status: 409 },
+      );
+    }
+
     console.error("[profiles] delete failed", error);
     return NextResponse.json({ error: "프로필을 삭제하지 못했습니다." }, { status: 500 });
   }

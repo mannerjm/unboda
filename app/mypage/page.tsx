@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { ProfileDto, ProfileInput, ProfileRelationshipType } from "@/app/lib/profiles/types";
+import type {
+  ProfileDeleteReason,
+  ProfileDto,
+  ProfileInput,
+  ProfileRelationshipType,
+} from "@/app/lib/profiles/types";
+import { profileDeleteBlockMessages } from "@/app/lib/profiles/types";
 import { createClient } from "@/app/lib/supabase/client";
 import { GUEST_BIRTH_DATE_MIN, getGuestBirthDateMax } from "@/app/lib/guestFreeAnalyses/date";
 
@@ -24,12 +31,14 @@ function formatProfileDetails(profile: ProfileDto): string {
   return `${formatProfileBirthDate(profile.birthDate)} · ${profile.birthTime} · ${profile.gender} · ${profile.calendarType}${leapMonthSuffix}`;
 }
 
-type FreeAnalysisResultStatus = "generating" | "completed" | "failed";
+type FreeAnalysisResultStatus = "none" | "generating" | "completed" | "failed" | "stale";
 
 const freeAnalysisStatusLabels: Record<FreeAnalysisResultStatus, string> = {
+  none: "무료 분석 없음",
   generating: "분석 생성 중",
   completed: "무료 분석 완료",
   failed: "분석 실패",
+  stale: "재분석 필요",
 };
 
 function formatFreeAnalysisStatusLabel(status: FreeAnalysisResultStatus | undefined): string {
@@ -55,6 +64,38 @@ const emptyProfileInput: ProfileInput = {
   isLeapMonth: false,
 };
 
+type PaidReportStatus = "none" | "generating" | "completed" | "failed";
+
+type PaidAnalysisSummary = {
+  profileId: string;
+  productId: string;
+  productName: string;
+  reportStatus: PaidReportStatus;
+};
+
+const paidReportStatusLabels: Record<PaidReportStatus, string> = {
+  none: "아직 생성되지 않음",
+  generating: "생성 중",
+  completed: "분석 완료",
+  failed: "생성 실패",
+};
+
+// "none"/"failed" start a real generation, so they must never read as a plain view action.
+const paidReportActionLabels: Record<PaidReportStatus, string> = {
+  none: "심층 분석 생성하기",
+  generating: "생성 중",
+  completed: "리포트 보기",
+  failed: "다시 생성하기",
+};
+
+type SummaryBody = {
+  freeAnalysisResults?: Array<{ profileId: string; status: FreeAnalysisResultStatus }>;
+  profileDeletability?: Array<{ profileId: string; deletable: boolean; reason?: ProfileDeleteReason }>;
+  paidAnalysis?: PaidAnalysisSummary[];
+};
+
+type ProfileDeletabilityState = { deletable: boolean; reason?: ProfileDeleteReason };
+
 export default function MyPage() {
   const router = useRouter();
   const [profiles, setProfiles] = useState<ProfileDto[]>([]);
@@ -62,6 +103,11 @@ export default function MyPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [freeAnalysisStatusById, setFreeAnalysisStatusById] = useState<Record<string, FreeAnalysisResultStatus>>({});
+  const [deletabilityById, setDeletabilityById] = useState<Record<string, ProfileDeletabilityState>>({});
+  const [paidAnalysisByProfileId, setPaidAnalysisByProfileId] = useState<Record<string, PaidAnalysisSummary[]>>({});
+  const [pendingDeleteProfileId, setPendingDeleteProfileId] = useState<string | null>(null);
+  const [isDeletingProfile, setIsDeletingProfile] = useState(false);
+  const [isClearingActiveProfile, setIsClearingActiveProfile] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
   const [formInput, setFormInput] = useState<ProfileInput>(emptyProfileInput);
@@ -91,14 +137,30 @@ export default function MyPage() {
   useEffect(() => {
     void fetch("/api/mypage/summary")
       .then(async (response) => {
-        const body = await response.json() as { freeAnalysisResults?: Array<{ profileId: string; status: FreeAnalysisResultStatus }> };
+        const body = await response.json() as SummaryBody;
         if (!response.ok) return;
-        const statusById: Record<string, FreeAnalysisResultStatus> = {};
-        for (const item of body.freeAnalysisResults ?? []) statusById[item.profileId] = item.status;
-        setFreeAnalysisStatusById(statusById);
+        applySummaryBody(body);
       })
       .catch(() => {});
   }, []);
+
+  function applySummaryBody(body: SummaryBody) {
+    const statusById: Record<string, FreeAnalysisResultStatus> = {};
+    for (const item of body.freeAnalysisResults ?? []) statusById[item.profileId] = item.status;
+    setFreeAnalysisStatusById(statusById);
+
+    const deletableById: Record<string, ProfileDeletabilityState> = {};
+    for (const item of body.profileDeletability ?? []) {
+      deletableById[item.profileId] = { deletable: item.deletable, reason: item.reason };
+    }
+    setDeletabilityById(deletableById);
+
+    const paidByProfileId: Record<string, PaidAnalysisSummary[]> = {};
+    for (const item of body.paidAnalysis ?? []) {
+      (paidByProfileId[item.profileId] ??= []).push(item);
+    }
+    setPaidAnalysisByProfileId(paidByProfileId);
+  }
 
   function activate(profileId: string) {
     if (profileId === activeProfileId) return;
@@ -171,14 +233,62 @@ export default function MyPage() {
 
     const profilesBody = await profilesResponse.json() as { profiles?: ProfileDto[] };
     const activeBody = await activeResponse.json() as { profile?: ProfileDto | null };
-    const summaryBody = await summaryResponse.json() as { freeAnalysisResults?: Array<{ profileId: string; status: FreeAnalysisResultStatus }> };
+    const summaryBody = await summaryResponse.json() as SummaryBody;
 
     if (profilesResponse.ok) setProfiles(profilesBody.profiles ?? []);
     if (activeResponse.ok) setActiveProfileId(activeBody.profile?.id ?? null);
-    if (summaryResponse.ok) {
-      const statusById: Record<string, FreeAnalysisResultStatus> = {};
-      for (const item of summaryBody.freeAnalysisResults ?? []) statusById[item.profileId] = item.status;
-      setFreeAnalysisStatusById(statusById);
+    if (summaryResponse.ok) applySummaryBody(summaryBody);
+  }
+
+  // The summary flag is only a hint; the server re-checks every rule on DELETE.
+  async function deleteProfile(profileId: string) {
+    if (isDeletingProfile) return;
+    setIsDeletingProfile(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch(`/api/profiles/${profileId}`, { method: "DELETE" });
+
+      if (response.status !== 204) {
+        const body = await response.json().catch(() => ({})) as { error?: string };
+        setMessage(body.error ?? "프로필을 삭제하지 못했습니다.");
+      }
+
+      setPendingDeleteProfileId(null);
+      await reloadMypageData();
+    } catch {
+      setMessage("프로필을 삭제하지 못했습니다.");
+    } finally {
+      setIsDeletingProfile(false);
+    }
+  }
+
+  function getDeleteBlockMessage(profileId: string): string | null {
+    const state = deletabilityById[profileId];
+    return state && !state.deletable && state.reason ? profileDeleteBlockMessages[state.reason] : null;
+  }
+
+  async function clearActiveSelection() {
+    if (isClearingActiveProfile) return;
+    setIsClearingActiveProfile(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch("/api/profiles/active", { method: "DELETE" });
+
+      if (response.status !== 204) {
+        setMessage("분석 대상 선택을 해제하지 못했습니다.");
+        return;
+      }
+
+      setActiveProfileId(null);
+      confirmedActiveProfileIdRef.current = null;
+      pendingActiveProfileIdRef.current = null;
+      await reloadMypageData();
+    } catch {
+      setMessage("분석 대상 선택을 해제하지 못했습니다.");
+    } finally {
+      setIsClearingActiveProfile(false);
     }
   }
 
@@ -348,6 +458,54 @@ export default function MyPage() {
               >
                 {formatFreeAnalysisStatusLabel(freeAnalysisStatusById[profile.id])}
               </span>
+              {(paidAnalysisByProfileId[profile.id] ?? []).length > 0 ? (
+                <div className={profile.id === activeProfileId
+                  ? "mt-3 border-t border-white/20 pt-3"
+                  : "mt-3 border-t border-stone-200 pt-3"}
+                >
+                  <p className={profile.id === activeProfileId
+                    ? "text-xs font-semibold text-white/80"
+                    : "text-xs font-semibold text-stone-600"}
+                  >
+                    구매한 심층 분석
+                  </p>
+                  <ul className="mt-2 space-y-2">
+                    {(paidAnalysisByProfileId[profile.id] ?? []).map((item) => (
+                      <li key={item.productId} className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="text-sm">
+                          <span className="font-semibold">{item.productName}</span>
+                          <span className={profile.id === activeProfileId
+                            ? "ml-2 text-xs text-white/70"
+                            : "ml-2 text-xs text-stone-500"}
+                          >
+                            {paidReportStatusLabels[item.reportStatus]}
+                          </span>
+                        </span>
+                        {item.reportStatus === "generating" ? (
+                          <button
+                            type="button"
+                            disabled
+                            className={profile.id === activeProfileId
+                              ? "rounded-lg border border-white/20 px-3 py-1.5 text-xs font-semibold text-white/50"
+                              : "rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-semibold text-stone-400"}
+                          >
+                            {paidReportActionLabels[item.reportStatus]}
+                          </button>
+                        ) : (
+                          <Link
+                            href={`/paid-analysis/${item.productId}/report?profileId=${profile.id}`}
+                            className={profile.id === activeProfileId
+                              ? "rounded-lg border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10"
+                              : "rounded-lg border border-stone-300 px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50"}
+                          >
+                            {paidReportActionLabels[item.reportStatus]}
+                          </Link>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -358,7 +516,68 @@ export default function MyPage() {
                 >
                   수정
                 </button>
+                {profile.id === activeProfileId ? (
+                  <button
+                    type="button"
+                    onClick={() => void clearActiveSelection()}
+                    disabled={isClearingActiveProfile}
+                    className="rounded-lg border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isClearingActiveProfile ? "해제 중..." : "분석 대상 선택 해제"}
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => { setMessage(null); setPendingDeleteProfileId(profile.id); }}
+                  disabled={deletabilityById[profile.id]?.deletable === false}
+                  className={profile.id === activeProfileId
+                    ? "rounded-lg border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    : "rounded-lg border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400"}
+                >
+                  삭제
+                </button>
               </div>
+              {getDeleteBlockMessage(profile.id) ? (
+                <p className={profile.id === activeProfileId
+                  ? "mt-2 text-xs leading-5 text-white/70"
+                  : "mt-2 text-xs leading-5 text-stone-500"}
+                >
+                  {getDeleteBlockMessage(profile.id)}
+                </p>
+              ) : null}
+              {pendingDeleteProfileId === profile.id ? (
+                <div className={profile.id === activeProfileId
+                  ? "mt-3 border border-white/30 bg-white/10 p-3"
+                  : "mt-3 border border-red-200 bg-red-50 p-3"}
+                >
+                  <p className={profile.id === activeProfileId
+                    ? "text-xs leading-6 text-white"
+                    : "text-xs leading-6 text-red-800"}
+                  >
+                    프로필을 삭제하면 저장된 무료 분석 결과도 함께 삭제되며 복구할 수 없습니다.
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void deleteProfile(profile.id)}
+                      disabled={isDeletingProfile}
+                      className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-stone-400"
+                    >
+                      {isDeletingProfile ? "삭제 중..." : "삭제 확인"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPendingDeleteProfileId(null)}
+                      disabled={isDeletingProfile}
+                      className={profile.id === activeProfileId
+                        ? "rounded-lg border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed"
+                        : "rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed"}
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
+              ) : null}
             </div>
           ))}
         </div>
@@ -376,7 +595,9 @@ export default function MyPage() {
         >
           {activeProfileId && freeAnalysisStatusById[activeProfileId] === "completed"
             ? "선택한 프로필의 무료 분석 결과 보기"
-            : "선택한 프로필로 사주 조회하기"}
+            : activeProfileId && freeAnalysisStatusById[activeProfileId] === "stale"
+              ? "변경된 출생 정보로 다시 분석하기"
+              : "선택한 프로필로 사주 조회하기"}
         </button>
         <button
           type="button"

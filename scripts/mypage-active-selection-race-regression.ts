@@ -22,8 +22,8 @@ assert(source.includes("if (pendingActiveProfileIdRef.current !== confirmedActiv
 assert(source.includes("confirmedActiveProfileIdRef.current = profileId;"), "a successful PUT must advance the confirmed active profile ref");
 assert(source.includes("pendingActiveProfileIdRef.current === profileId") && source.includes("setActiveProfileId(confirmedActiveProfileIdRef.current);"), "rollback on failure must only apply when the failed attempt is still the latest desired selection");
 assert(source.includes("confirmedActiveProfileIdRef.current = activeBody.profile?.id ?? null;"), "the confirmed active profile ref must be synced from the server's initial active profile on load");
-const reloadMypageDataMentions = source.match(/reloadMypageData\(\)/g) ?? [];
-assert(reloadMypageDataMentions.length === 2, "activation must not add a new call to the full profiles/summary reload beyond the existing create/edit-form usage");
+const activationSection = source.slice(source.indexOf("function activate("), source.indexOf("async function signOut("));
+assert(activationSection.length > 0 && !activationSection.includes("reloadMypageData()"), "activation must not trigger the full profiles/summary reload; only explicit mutations may");
 console.log("1. serialized single-PUT persistence structure present ✓");
 
 // --- Behavioral simulation: A -> B -> C -> A rapid clicks -----------------------

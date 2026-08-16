@@ -1,4 +1,10 @@
 import type { PaidAnalysisDetailOutputV3 } from "../paidAnalysisDetailOutput";
+import {
+  getCanonicalPremiumProductId,
+  getPremiumProduct,
+} from "../premiumProductRegistry";
+import { listUserEntitlements } from "../purchases/server";
+import { PAID_ANALYSIS_RESOURCE_TYPE } from "../purchases/types";
 import { createAdminClient } from "../supabase/admin";
 
 export type PaidReportStatus = "generating" | "completed" | "failed";
@@ -68,6 +74,80 @@ export async function getPaidReport(
   }
 
   return data ? toPaidReportRecord(data) : null;
+}
+
+export type PaidReportSummary = {
+  profileId: string;
+  productId: string;
+  status: PaidReportStatus;
+};
+
+export async function listUserPaidReports(userId: string): Promise<PaidReportSummary[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("paid_reports")
+    .select("profile_id, product_id, status")
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(`유료 분석 결과 목록을 조회하지 못했습니다: ${error.message}`);
+  }
+
+  return (data ?? []).map((row: {
+    profile_id: string;
+    product_id: string;
+    status: PaidReportStatus;
+  }) => ({
+    profileId: row.profile_id,
+    productId: row.product_id,
+    status: row.status,
+  }));
+}
+
+export type PaidAnalysisSummary = {
+  profileId: string;
+  productId: string;
+  productName: string;
+  reportStatus: PaidReportStatus | "none";
+};
+
+function paidReportKey(profileId: string, productId: string): string {
+  return `${profileId}|${productId}`;
+}
+
+/**
+ * Active entitlements decide what the account may open; paid_reports only adds
+ * the generation state. Two queries total, regardless of profile count.
+ */
+export async function listUserPaidAnalysisSummaries(
+  userId: string,
+): Promise<PaidAnalysisSummary[]> {
+  const [entitlements, reports] = await Promise.all([
+    listUserEntitlements(userId),
+    listUserPaidReports(userId),
+  ]);
+
+  const statusByKey = new Map<string, PaidReportStatus>();
+  for (const report of reports) {
+    statusByKey.set(
+      paidReportKey(report.profileId, getCanonicalPremiumProductId(report.productId)),
+      report.status,
+    );
+  }
+
+  return entitlements
+    .filter((entitlement) => entitlement.resourceType === PAID_ANALYSIS_RESOURCE_TYPE)
+    .map((entitlement) => {
+      const productId = getCanonicalPremiumProductId(entitlement.resourceId);
+      const product = getPremiumProduct(productId);
+
+      return {
+        profileId: entitlement.profileId,
+        productId,
+        productName: product?.title ?? productId,
+        reportStatus: statusByKey.get(paidReportKey(entitlement.profileId, productId)) ?? "none",
+      };
+    });
 }
 
 export type PaidReportClaim =

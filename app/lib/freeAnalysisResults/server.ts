@@ -101,6 +101,7 @@ export async function getFreeAnalysisResult(
 export type FreeAnalysisResultSummary = {
   profileId: string;
   status: FreeAnalysisResultStatus;
+  profileFingerprint: string;
 };
 
 export async function listUserFreeAnalysisResults(
@@ -109,17 +110,41 @@ export async function listUserFreeAnalysisResults(
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("free_analysis_results")
-    .select("profile_id, status")
+    .select("profile_id, status, profile_fingerprint")
     .eq("user_id", userId);
 
   if (error) {
     throw new Error(`무료 분석 결과 목록을 조회하지 못했습니다: ${error.message}`);
   }
 
-  return (data ?? []).map((row: { profile_id: string; status: FreeAnalysisResultStatus }) => ({
+  return (data ?? []).map((row: {
+    profile_id: string;
+    status: FreeAnalysisResultStatus;
+    profile_fingerprint: string;
+  }) => ({
     profileId: row.profile_id,
     status: row.status,
+    profileFingerprint: row.profile_fingerprint,
   }));
+}
+
+/**
+ * "stale" means the stored result was generated from birth inputs the Profile no
+ * longer has, which is exactly what GET /api/free-analysis/[profileId] answers
+ * with 404. Listing it as completed would advertise a result that cannot open.
+ */
+export type ProfileFreeAnalysisStatus = FreeAnalysisResultStatus | "none" | "stale";
+
+export function resolveProfileFreeAnalysisStatus(
+  profile: ProfileDto,
+  summaries: FreeAnalysisResultSummary[],
+): ProfileFreeAnalysisStatus {
+  const summary = summaries.find((item) => item.profileId === profile.id);
+
+  if (!summary) return "none";
+  if (summary.status !== "completed") return summary.status;
+
+  return summary.profileFingerprint === getProfileFingerprint(profile) ? "completed" : "stale";
 }
 
 export type FreeAnalysisResultClaim =

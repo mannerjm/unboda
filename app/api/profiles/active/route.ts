@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { getActiveProfile, setActiveProfile } from "@/app/lib/profiles/activeServer";
+import {
+  clearActiveProfile,
+  getActiveProfile,
+  setActiveProfile,
+} from "@/app/lib/profiles/activeServer";
 import { isProfileId } from "@/app/lib/profiles/types";
 
 export async function GET() {
@@ -34,5 +38,19 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error("[active-profile] set failed", error);
     return NextResponse.json({ error: "활성 프로필을 변경하지 못했습니다." }, { status: 500 });
+  }
+}
+
+// Idempotent: clearing an already empty selection is still a success.
+export async function DELETE() {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+
+  try {
+    await clearActiveProfile(user.id);
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error("[active-profile] clear failed", error);
+    return NextResponse.json({ error: "분석 대상 선택을 해제하지 못했습니다." }, { status: 500 });
   }
 }

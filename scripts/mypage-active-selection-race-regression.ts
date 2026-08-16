@@ -79,6 +79,39 @@ async function simulate() {
   console.log(`2. rapid A -> B -> C -> A: UI history ${JSON.stringify(uiHistory)}, persisted PUT calls ${JSON.stringify(persistedCalls)}, final confirmed "${confirmed}" ✓`);
 }
 
+// --- Whole-card click target -------------------------------------------------
+
+const cardSection = source.slice(source.indexOf("profiles.map((profile) => ("));
+assert(cardSection.includes("onClick={(event) => selectFromCardClick(event, profile.id)}"), "the profile card container must select the profile on click");
+assert(cardSection.includes("구매한 심층 분석") && cardSection.includes("formatFreeAnalysisStatusLabel(freeAnalysisStatusById[profile.id])"), "the free analysis and paid analysis blocks must live inside that same clickable card");
+assert(source.includes('event.target.closest("button, a, input, select, textarea")'), "clicks originating from an interactive element must not reach the card handler");
+assert(source.includes("if (!(event.target instanceof HTMLElement)) return;"), "the card handler must guard against non-element click targets");
+assert(source.includes('onClick={() => void activate(profile.id)}') && source.includes('className="block w-full text-left"'), "the header button must remain as the keyboard-accessible selection control");
+assert(/^profiles\.map\(\(profile\) => \(\s*<div/.test(cardSection), "the clickable card container must be a div, never a button wrapping other controls");
+const headerButton = cardSection.slice(
+  cardSection.indexOf("onClick={() => void activate(profile.id)}"),
+  cardSection.indexOf("</button>"),
+);
+assert(headerButton.length > 0 && !/<(button|Link|a\s)/.test(headerButton), "the header selection button must not contain another interactive element");
+assert(!/href={`\/paid-analysis\/\$\{item\.productId\}\/report\?profileId=\$\{profile\.id\}`}[\s\S]{0,200}?activate\(/.test(cardSection), "the report link must navigate only, never change the active profile");
+for (const action of ["openEditForm(profile)", "clearActiveSelection()", "setPendingDeleteProfileId(profile.id)", "deleteProfile(profile.id)", "setPendingDeleteProfileId(null)"]) {
+  assert(cardSection.includes(action), `${action} must stay on its own button`);
+  assert(!cardSection.includes(`${action}; void activate(`), `${action} must not also trigger selection`);
+}
+console.log("3. the whole card selects the profile while every button and link keeps its own action ✓");
+
+// Mirrors selectFromCardClick's guard against the tags a card can contain.
+function reachesCardSelection(tagName: string): boolean {
+  return !["BUTTON", "A", "INPUT", "SELECT", "TEXTAREA"].includes(tagName);
+}
+for (const tagName of ["DIV", "P", "SPAN", "LI", "UL"]) {
+  assert(reachesCardSelection(tagName), `a click on <${tagName.toLowerCase()}> inside the card must select the profile`);
+}
+for (const tagName of ["BUTTON", "A", "INPUT", "SELECT", "TEXTAREA"]) {
+  assert(!reachesCardSelection(tagName), `a click on <${tagName.toLowerCase()}> must not select the profile`);
+}
+console.log("4. non-interactive targets select, interactive targets do not ✓");
+
 void simulate()
   .then(() => console.log("\nmypage-active-selection-race-regression passed ✓"))
   .catch((error) => {

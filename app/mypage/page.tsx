@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type {
@@ -170,6 +170,14 @@ export default function MyPage() {
     setMessage(null);
     pendingActiveProfileIdRef.current = profileId;
     void persistPendingActiveProfile();
+  }
+
+  // Mouse users may click anywhere on the card; the header button stays the
+  // keyboard control, so nothing here is nested inside another interactive element.
+  function selectFromCardClick(event: MouseEvent<HTMLDivElement>, profileId: string) {
+    if (!(event.target instanceof HTMLElement)) return;
+    if (event.target.closest("button, a, input, select, textarea")) return;
+    activate(profileId);
   }
 
   // Serializes PUT /api/profiles/active: only one request runs at a time. Clicks that
@@ -424,9 +432,10 @@ export default function MyPage() {
           {profiles.map((profile) => (
             <div
               key={profile.id}
+              onClick={(event) => selectFromCardClick(event, profile.id)}
               className={profile.id === activeProfileId
                 ? "border border-stone-900 bg-stone-900 p-5 text-left text-white"
-                : "border border-stone-200 bg-white p-5 text-left"}
+                : "cursor-pointer border border-stone-200 bg-white p-5 text-left"}
             >
               <button
                 type="button"

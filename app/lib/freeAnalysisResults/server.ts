@@ -102,6 +102,9 @@ export type FreeAnalysisResultSummary = {
   profileId: string;
   status: FreeAnalysisResultStatus;
   profileFingerprint: string;
+  // Read from the stored content in the same query; "failed" means the row is
+  // complete but its AI main analysis still needs a retry.
+  mainAnalysisStatus?: "completed" | "failed" | null;
 };
 
 export async function listUserFreeAnalysisResults(
@@ -110,7 +113,9 @@ export async function listUserFreeAnalysisResults(
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("free_analysis_results")
-    .select("profile_id, status, profile_fingerprint")
+    .select(
+      "profile_id, status, profile_fingerprint, main_analysis_status:content->generationMeta->>mainAnalysisStatus",
+    )
     .eq("user_id", userId);
 
   if (error) {
@@ -121,10 +126,15 @@ export async function listUserFreeAnalysisResults(
     profile_id: string;
     status: FreeAnalysisResultStatus;
     profile_fingerprint: string;
+    main_analysis_status: string | null;
   }) => ({
     profileId: row.profile_id,
     status: row.status,
     profileFingerprint: row.profile_fingerprint,
+    mainAnalysisStatus:
+      row.main_analysis_status === "failed" || row.main_analysis_status === "completed"
+        ? row.main_analysis_status
+        : null,
   }));
 }
 
@@ -132,8 +142,14 @@ export async function listUserFreeAnalysisResults(
  * "stale" means the stored result was generated from birth inputs the Profile no
  * longer has, which is exactly what GET /api/free-analysis/[profileId] answers
  * with 404. Listing it as completed would advertise a result that cannot open.
+ * "needs_retry" is derived, never a stored status: the row stays "completed" and
+ * only its AI main analysis has to be regenerated from the result screen.
  */
-export type ProfileFreeAnalysisStatus = FreeAnalysisResultStatus | "none" | "stale";
+export type ProfileFreeAnalysisStatus =
+  | FreeAnalysisResultStatus
+  | "none"
+  | "stale"
+  | "needs_retry";
 
 export function resolveProfileFreeAnalysisStatus(
   profile: ProfileDto,
@@ -144,7 +160,11 @@ export function resolveProfileFreeAnalysisStatus(
   if (!summary) return "none";
   if (summary.status !== "completed") return summary.status;
 
-  return summary.profileFingerprint === getProfileFingerprint(profile) ? "completed" : "stale";
+  if (summary.profileFingerprint === getProfileFingerprint(profile)) {
+    return summary.mainAnalysisStatus === "failed" ? "needs_retry" : "completed";
+  }
+
+  return "stale";
 }
 
 export type FreeAnalysisResultClaim =

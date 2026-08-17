@@ -31,7 +31,7 @@ function formatProfileDetails(profile: ProfileDto): string {
   return `${formatProfileBirthDate(profile.birthDate)} · ${profile.birthTime} · ${profile.gender} · ${profile.calendarType}${leapMonthSuffix}`;
 }
 
-type FreeAnalysisResultStatus = "none" | "generating" | "completed" | "failed" | "stale";
+type FreeAnalysisResultStatus = "none" | "generating" | "completed" | "failed" | "stale" | "needs_retry";
 
 const freeAnalysisStatusLabels: Record<FreeAnalysisResultStatus, string> = {
   none: "무료 분석 없음",
@@ -39,6 +39,7 @@ const freeAnalysisStatusLabels: Record<FreeAnalysisResultStatus, string> = {
   completed: "무료 분석 완료",
   failed: "분석 실패",
   stale: "재분석 필요",
+  needs_retry: "AI 해석 재생성 필요",
 };
 
 function formatFreeAnalysisStatusLabel(status: FreeAnalysisResultStatus | undefined): string {
@@ -96,11 +97,13 @@ const freeAnalysisStatusTones: Record<FreeAnalysisResultStatus, StatusTone> = {
   completed: "positive",
   failed: "critical",
   stale: "warning",
+  needs_retry: "warning",
 };
 
 const freeAnalysisStatusHints: Partial<Record<FreeAnalysisResultStatus, string>> = {
   stale: "출생 정보가 바뀌어 저장된 결과를 열 수 없습니다. 변경된 정보로 다시 분석해 주세요.",
   failed: "분석이 완료되지 않았습니다. 다시 분석해 주세요.",
+  needs_retry: "사주·오행·대운·추천 결과는 그대로 저장되어 있습니다. 결과 화면에서 AI 종합 해석만 다시 생성하면 됩니다.",
 };
 
 const paidReportStatusTones: Record<PaidReportStatus, StatusTone> = {
@@ -701,7 +704,10 @@ export default function MyPage() {
             <button
               type="button"
               onClick={() => {
-                if (activeProfileId && freeAnalysisStatusById[activeProfileId] === "completed") {
+                const status = activeProfileId ? freeAnalysisStatusById[activeProfileId] : undefined;
+
+                // needs_retry keeps its own stored result; retry lives on that screen.
+                if (activeProfileId && (status === "completed" || status === "needs_retry")) {
                   router.push(`/result?profileId=${activeProfileId}`);
                   return;
                 }
@@ -712,9 +718,11 @@ export default function MyPage() {
             >
               {activeProfileId && freeAnalysisStatusById[activeProfileId] === "completed"
                 ? "선택한 프로필의 무료 분석 결과 보기"
-                : activeProfileId && freeAnalysisStatusById[activeProfileId] === "stale"
-                  ? "변경된 출생 정보로 다시 분석하기"
-                  : "선택한 프로필로 사주 조회하기"}
+                : activeProfileId && freeAnalysisStatusById[activeProfileId] === "needs_retry"
+                  ? "저장된 결과 열고 AI 해석 다시 생성하기"
+                  : activeProfileId && freeAnalysisStatusById[activeProfileId] === "stale"
+                    ? "변경된 출생 정보로 다시 분석하기"
+                    : "선택한 프로필로 사주 조회하기"}
             </button>
           </section>
         ) : null}

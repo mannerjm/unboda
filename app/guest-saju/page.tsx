@@ -29,6 +29,7 @@ export default function GuestSajuPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSavedResult, setHasSavedResult] = useState(false);
+  const [savedResultNeedsRetry, setSavedResultNeedsRetry] = useState(false);
 
   // Read-only probe: a saved guest result must never trigger a new generation here.
   useEffect(() => {
@@ -37,8 +38,14 @@ export default function GuestSajuPage() {
     void fetch("/api/guest-free-analysis")
       .then(async (response) => {
         if (!response.ok) return;
-        const body = (await response.json()) as { analysis?: unknown };
-        if (!isCancelled && body.analysis) setHasSavedResult(true);
+        const body = (await response.json()) as {
+          analysis?: { generationMeta?: { mainAnalysisStatus?: string } };
+        };
+        if (isCancelled || !body.analysis) return;
+        setHasSavedResult(true);
+        setSavedResultNeedsRetry(
+          body.analysis.generationMeta?.mainAnalysisStatus === "failed",
+        );
       })
       .catch(() => undefined);
 
@@ -74,13 +81,21 @@ export default function GuestSajuPage() {
         {hasSavedResult ? (
           <section className="mt-6 rounded-3xl border border-stone-300 bg-white p-6 shadow-sm">
             <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">SAVED RESULT</p>
-            <h2 className="mt-2 text-lg font-bold">저장된 무료 사주 결과가 있습니다</h2>
-            <p className="mt-2 text-sm leading-6 text-stone-600">새로 분석하지 않고 이전 결과를 그대로 다시 볼 수 있습니다.</p>
+            <h2 className="mt-2 text-lg font-bold">
+              {savedResultNeedsRetry
+                ? "저장된 결과가 있습니다 · AI 해석 재생성 필요"
+                : "저장된 무료 사주 결과가 있습니다"}
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-stone-600">
+              {savedResultNeedsRetry
+                ? "사주·오행·대운·추천 결과는 그대로 있고, AI 종합 해석만 결과 화면에서 다시 생성하면 됩니다."
+                : "새로 분석하지 않고 이전 결과를 그대로 다시 볼 수 있습니다."}
+            </p>
             <Link
               href="/guest-result"
               className="mt-4 inline-flex rounded-xl bg-stone-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-800"
             >
-              저장된 결과 다시 보기
+              {savedResultNeedsRetry ? "저장된 결과 열고 AI 해석 다시 생성하기" : "저장된 결과 다시 보기"}
             </Link>
             <p className="mt-4 text-xs leading-5 text-stone-500">아래 폼으로 새 출생 정보를 제출하면 새 무료 분석을 시작합니다.</p>
           </section>

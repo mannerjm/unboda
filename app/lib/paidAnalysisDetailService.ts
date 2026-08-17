@@ -10,6 +10,7 @@ import type {
     PaidAnalysisDetailOutputV3,
 } from "./paidAnalysisDetailOutput";
 import { validatePaidAnalysisConsistency } from "./paidAnalysisConsistencyValidator";
+import { getPaidAnalysisCompressionPolicy } from "./paidAnalysisCompressionPolicy";
 import {
   parsePaidAnalysisDetailOutput,
   parsePaidAnalysisDetailOutputV2,
@@ -169,14 +170,14 @@ function normalizeText(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }
 
-function compactText(value: string, maxLength: number): string {
+function compactText(value: string, maxLength: number | null): string {
   const normalizedValue = normalizeText(value);
 
   if (!normalizedValue) {
     return "";
   }
 
-  if (normalizedValue.length <= maxLength) {
+  if (maxLength === null || normalizedValue.length <= maxLength) {
     return normalizedValue;
   }
 
@@ -186,37 +187,23 @@ function compactText(value: string, maxLength: number): string {
 export function compressCareerDetailStructure(
   detail: PaidAnalysisDetailOutputV3,
   plugin?: string,
+  kind?: string,
 ): PaidAnalysisDetailOutputV3 {
+  const policy = getPaidAnalysisCompressionPolicy(plugin, kind);
   const focusText = normalizeText(detail.decisionAnchor.focus);
   const focus = focusText || "현재 흘름의 핵심 기준";
   const actionSources = detail.actionGuide
-    .map((item) => compactText(item, 108))
+    .map((item) => compactText(item, policy.actionGuideMaxLength))
     .filter(Boolean);
 
-  const careerActionFallbacks = [
-    "핵심 결정을 앞두고 우선순위를 한 줄로 정리한다.",
-    "현재 흘름에서 가장 먼저 조정할 부분을 구체적으로 정리한다.",
-    "결정 이후 부담과 이익을 함께 비교해본다.",
-  ];
-
-  // 관계 상품에 커리어 문구가 주입되면 관계 품질 게이트의 actionGuide 검사가 무조건 실패한다.
-  const relationshipActionFallbacks = [
-    "갈등이 생겼을 때 감정을 해석하기 전에 상대에게 사실을 먼저 확인한다.",
-    "연락과 약속의 일관성이 달라지는 시점을 기록해 관계 흘름을 확인한다.",
-    "서로의 경계와 기대 수준을 대화로 확인한 뒤 다음 단계를 판단한다.",
-  ];
-
-  const actionFallbacks =
-    plugin === "RELATIONSHIP"
-      ? relationshipActionFallbacks
-      : careerActionFallbacks;
+  const actionFallbacks = policy.actionFallbacks;
 
   detail.actionGuide = [
     ...(actionSources.length >= 1 ? actionSources.slice(0, 1) : []),
     ...(actionSources.length >= 2 ? actionSources.slice(1, 2) : []),
     ...(actionSources.length >= 3 ? actionSources.slice(2, 3) : []),
     ...actionFallbacks.slice(actionSources.length),
-  ].slice(0, 3);
+  ].slice(0, policy.actionGuideMaxItems);
 
   const timelineTitle = detail.futureTimeline[0]?.title || "현재 흐름";
   const decisionQuestions = [
@@ -228,7 +215,7 @@ export function compressCareerDetailStructure(
   ];
 
   const existingChecklist = detail.checklist
-    .map((item) => compactText(item, 112))
+    .map((item) => compactText(item, policy.checklistMaxLength))
     .filter(Boolean);
 
   detail.checklist = [
@@ -236,16 +223,16 @@ export function compressCareerDetailStructure(
     ...(existingChecklist.length >= 2 ? existingChecklist.slice(1, 2) : []),
     ...(existingChecklist.length >= 3 ? existingChecklist.slice(2, 3) : []),
     ...decisionQuestions.slice(existingChecklist.length),
-  ].slice(0, 5);
+  ].slice(0, policy.checklistMaxItems);
 
   detail.avoidGuide = detail.avoidGuide
-    .map((item) => compactText(item, 112))
+    .map((item) => compactText(item, policy.avoidGuideMaxLength))
     .filter(Boolean)
-    .slice(0, 4);
+    .slice(0, policy.avoidGuideMaxItems);
 
   detail.futureTimeline = detail.futureTimeline.map((item) => ({
     ...item,
-    description: compactText(item.description, 92),
+    description: compactText(item.description, policy.timelineDescriptionMaxLength),
   }));
 
   return detail;
@@ -315,6 +302,7 @@ export async function generatePaidAnalysisDetailV2(
   const compressedDetail = compressCareerDetailStructure(
     detail,
     registryProduct?.plugin,
+    registryProduct?.kind,
   );
 
   const consistencyResult = validatePaidAnalysisConsistency(compressedDetail);

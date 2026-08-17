@@ -42,7 +42,10 @@ assert(memberPersistence.includes("export const STALE_RETRY_LOCK_MS = STALE_GENE
 console.log("3. atomic claim covers missing/idle/stale-generating via a single conditional UPDATE, reusing the existing staleness threshold ✓");
 
 // --- 4. status column untouched: retry never flips completed -> generating ---
-assert(!memberPersistence.includes('status: "generating"') || memberPersistence.match(/status: "generating"/g)!.length <= 2, "claimMainAnalysisRetry/completeMainAnalysisRetry must never set the top-level status column to generating");
+const memberRetryLifecycle = memberPersistence.slice(memberPersistence.indexOf("export async function claimMainAnalysisRetry"));
+const guestRetryLifecycle = guestPersistence.slice(guestPersistence.indexOf("export async function claimGuestMainAnalysisRetry"));
+assert(!memberRetryLifecycle.includes('status: "generating"'), "claimMainAnalysisRetry/completeMainAnalysisRetry must never set the top-level status column to generating");
+assert(!guestRetryLifecycle.includes('status: "generating"'), "claimGuestMainAnalysisRetry/completeGuestMainAnalysisRetry must never set the top-level status column to generating");
 assert(memberPersistence.includes('.eq("status", "completed")'), "the member claim must keep operating only on rows whose top-level status is completed");
 assert(guestPersistence.includes('.eq("status", "completed")'), "the guest claim must keep operating only on rows whose top-level status is completed");
 console.log("4. top-level status column stays completed throughout the retry lifecycle ✓");

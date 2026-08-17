@@ -1318,9 +1318,28 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
                   {retryMessage ? <p className="mt-3 text-sm text-red-600">{retryMessage}</p> : null}
                 </>
               ) : (
-                <p className="text-sm leading-7 text-stone-700">
-                  AI 해석을 다시 생성하지 못했습니다.<br />재시도 가능 횟수를 모두 사용했습니다.
-                </p>
+                <>
+                  <p className="text-sm leading-7 text-stone-700">
+                    AI 해석을 다시 생성하지 못했습니다.<br />재시도 가능 횟수를 모두 사용했습니다.
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-stone-600">
+                    아래 사주·오행·대운·추천 결과는 그대로 확인할 수 있고,
+                    <br />새 무료 분석을 시작하면 AI 해석을 처음부터 다시 만듭니다.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        providedResult
+                          ? "/guest-saju"
+                          : `/loading?profileId=${currentProfileId}`,
+                      )
+                    }
+                    className="mt-4 rounded-xl bg-stone-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-800"
+                  >
+                    {providedResult ? "새 무료 사주 조회하기" : "새 무료 분석 시작하기"}
+                  </button>
+                </>
               )}
             </div>
           ) : (

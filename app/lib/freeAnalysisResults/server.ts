@@ -172,6 +172,18 @@ export type FreeAnalysisResultClaim =
   | { state: "completed"; record: FreeAnalysisResultRecord }
   | { state: "generating"; record: FreeAnalysisResultRecord };
 
+/**
+ * A completed row whose main analysis failed and whose retry budget is gone:
+ * the retry API can no longer fix it, so a fresh generation is the only way out.
+ */
+export function isMainAnalysisRetryExhausted(
+  content: AnalyzeSuccessResponse | null,
+): boolean {
+  if (content?.generationMeta?.mainAnalysisStatus !== "failed") return false;
+
+  return (content.generationMeta.mainAnalysisRetryCount ?? 0) >= MAX_MAIN_ANALYSIS_RETRY_COUNT;
+}
+
 export async function claimFreeAnalysisResult(input: {
   userId: string;
   profile: ProfileDto;
@@ -194,7 +206,31 @@ export async function claimFreeAnalysisResult(input: {
       throw new Error(`오래된 무료 분석 결과를 정리하지 못했습니다: ${error.message}`);
     }
   } else if (existing?.status === "completed" && existing.content) {
-    return { state: "completed", record: existing };
+    if (!isMainAnalysisRetryExhausted(existing.content)) {
+      return { state: "completed", record: existing };
+    }
+
+    // The conditional UPDATE is the claim: the loser sees status "generating".
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("free_analysis_results")
+      .update({ status: "generating" satisfies FreeAnalysisResultStatus, error_code: null })
+      .eq("id", existing.id)
+      .eq("user_id", input.userId)
+      .eq("profile_id", input.profile.id)
+      .eq("profile_fingerprint", fingerprint)
+      .eq("status", "completed")
+      .eq("content->generationMeta->>mainAnalysisStatus", "failed")
+      .select("*")
+      .maybeSingle<FreeAnalysisResultRow>();
+
+    if (error) {
+      throw new Error(`무료 분석 재생성을 시작하지 못했습니다: ${error.message}`);
+    }
+
+    return data
+      ? { state: "claimed", record: toRecord(data) }
+      : { state: "generating", record: existing };
   } else if (existing?.status === "generating") {
     const staleBefore = new Date(Date.now() - STALE_GENERATING_MS).toISOString();
     const supabase = createAdminClient();

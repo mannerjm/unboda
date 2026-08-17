@@ -11,6 +11,7 @@ function read(path: string): string {
 
 const cookie = read("app/lib/guestFreeAnalyses/cookie.ts");
 const repository = read("app/lib/guestFreeAnalyses/server.ts");
+const guestInput = read("app/lib/guestFreeAnalyses/input.ts");
 const pipeline = read("app/lib/freeAnalysisPipeline/server.ts");
 const authenticatedAnalyze = read("app/api/analyze/route.ts");
 const guestRoute = read("app/api/guest-free-analysis/route.ts");
@@ -35,7 +36,9 @@ assert(pipeline.includes('import "server-only"') && pipeline.includes("getSaju("
 assert(authenticatedAnalyze.includes("buildFreeAnalysisResponse") && authenticatedAnalyze.includes("includePremiumAnalysis: productId !== undefined"), "authenticated analyze route must preserve its pipeline and premium response behavior");
 console.log("3. existing authenticated analysis pipeline is reused without behavior loss ✓");
 
-assert(guestRoute.includes("validateProfileInput") && guestRoute.includes("createGuestFreeAnalysis") && guestRoute.includes("buildFreeAnalysisResponse") && guestRoute.includes("completeGuestFreeAnalysis"), "guest create route must validate, generate, and persist the result");
+assert(guestRoute.includes("validateGuestProfileInput") && guestInput.includes("validateProfileInput(input)"), "guest create route must validate through the guest wrapper around the canonical profile validator");
+assert(guestRoute.includes("createGuestFreeAnalysis") && guestRoute.includes("buildFreeAnalysisResponse") && guestRoute.includes("completeGuestFreeAnalysis"), "guest create route must generate and persist the result");
+assert(guestRoute.includes("{ analysis: content }"), "guest create route must return the generated analysis to the caller");
 assert(guestRoute.includes("failGuestFreeAnalysis") && guestRoute.includes("GUEST_ANALYSIS_COOKIE_NAME"), "guest create route must fail safely and set only the credential cookie");
 assert(guestRoute.includes("record.status !== \"completed\"") && guestRoute.includes("isUsableGuestFreeAnalysis"), "guest restore must reject expired, consumed, or unfinished rows");
 assert(!guestRoute.includes("secretHash:") || guestRoute.includes("hashGuestAnalysisSecret"), "guest route must pass only a hash to the database layer");

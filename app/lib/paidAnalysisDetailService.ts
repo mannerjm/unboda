@@ -216,13 +216,13 @@ export function compressCareerDetailStructure(
 
   const existingChecklist = detail.checklist
     .map((item) => compactText(item, policy.checklistMaxLength))
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, policy.checklistMaxItems);
 
+  // Fallbacks only top the list up; the schema requires the full item count.
   detail.checklist = [
-    ...(existingChecklist.length >= 1 ? existingChecklist.slice(0, 1) : []),
-    ...(existingChecklist.length >= 2 ? existingChecklist.slice(1, 2) : []),
-    ...(existingChecklist.length >= 3 ? existingChecklist.slice(2, 3) : []),
-    ...decisionQuestions.slice(existingChecklist.length),
+    ...existingChecklist,
+    ...decisionQuestions.slice(existingChecklist.length, policy.checklistMaxItems),
   ].slice(0, policy.checklistMaxItems);
 
   detail.avoidGuide = detail.avoidGuide

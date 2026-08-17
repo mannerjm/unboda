@@ -5,6 +5,10 @@ import { getRelationshipPaidAnalysisPromptRules } from "./paidAnalysisPromptPlug
 import { getFortunePaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/fortunePrompt";
 import { getCommonPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/commonPrompt";
 import {
+  formatReferencePeriodForPrompt,
+  type ReferencePeriodSnapshot,
+} from "./analysisReferencePeriod";
+import {
   getCanonicalPremiumProductId,
   getPremiumProduct,
   type PremiumProductPlugin,
@@ -30,6 +34,9 @@ export type PaidAnalysisDetailPromptInput = {
   sajuSummary: string;
   currentFortuneFlow: string;
   userConcern?: string;
+
+  /** Only set for PERIOD products. */
+  referencePeriod?: ReferencePeriodSnapshot;
 };
 
 export function buildPaidAnalysisDetailPrompt(
@@ -543,7 +550,10 @@ ${input.currentFortuneFlow}
 
 사용자 고민:
 ${input.userConcern ?? "없음"}
-
+${input.referencePeriod ? `
+[기간 기준 고정]
+${formatReferencePeriodForPrompt(input.referencePeriod)}
+` : ""}
 명리 추론 순서:
 
 1. 원국 구조 확인

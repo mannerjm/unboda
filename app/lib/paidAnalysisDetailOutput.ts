@@ -1,3 +1,5 @@
+import type { ReferencePeriodSnapshot } from "./analysisReferencePeriod";
+
 export type PaidAnalysisDetailOutput = {
   headline: string;
   whyThisAnalysis: string;
@@ -73,6 +75,9 @@ export type PaidAnalysisDetailOutputV2 = {
 
 export type PaidAnalysisDetailOutputV3 =
   PaidAnalysisDetailOutputV2 & {
+    /** Only present for PERIOD products; frozen when the report is generated. */
+    referencePeriod?: ReferencePeriodSnapshot;
+
     aiInsight: {
       headline: string;
       explanation: string;

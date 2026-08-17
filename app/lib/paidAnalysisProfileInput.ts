@@ -1,5 +1,6 @@
 import { buildFreeAnalysis } from "./buildFreeAnalysis";
 import type { PaidAnalysisDetailPromptInput } from "./paidAnalysisDetailPrompt";
+import { buildReferencePeriodSnapshot } from "./analysisReferencePeriod";
 import { getPremiumProduct } from "./premiumProductRegistry";
 import type { ProfileDto } from "./profiles/types";
 import { getSaju } from "./manse";
@@ -7,6 +8,7 @@ import { getSaju } from "./manse";
 export function buildPaidAnalysisInputFromProfile(
   profile: ProfileDto,
   productId: string,
+  anchorDate?: string,
 ): PaidAnalysisDetailPromptInput {
   const product = getPremiumProduct(productId);
 
@@ -22,6 +24,15 @@ export function buildPaidAnalysisInputFromProfile(
     profile.gender,
   );
   const freeAnalysis = buildFreeAnalysis(saju);
+  const referencePeriod = buildReferencePeriodSnapshot({
+    productId,
+    anchorDate,
+    fortune: {
+      daeunOrder: freeAnalysis.currentDaeun?.order,
+      daeunGanji: freeAnalysis.currentDaeun?.ganji,
+      seunGanji: freeAnalysis.currentSeun?.ganji,
+    },
+  });
 
   return {
     productId,
@@ -54,5 +65,6 @@ export function buildPaidAnalysisInputFromProfile(
       gyeokguk: freeAnalysis.gyeokgukAnalysis,
     }),
     currentFortuneFlow: JSON.stringify(freeAnalysis.fortuneFlowAnalysis),
+    ...(referencePeriod ? { referencePeriod } : {}),
   };
 }

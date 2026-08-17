@@ -454,5 +454,8 @@ if (isRelationshipAnalysis) {
   }
 }
 
-  return compressedDetail;
+  // Frozen once, at generation time; readers must never recompute it.
+  return input.referencePeriod
+    ? { ...compressedDetail, referencePeriod: input.referencePeriod }
+    : compressedDetail;
 }

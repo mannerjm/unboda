@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ReferencePeriodSnapshotSchema } from "./analysisReferencePeriod";
 import type {
   PaidAnalysisDetailOutput,
   PaidAnalysisDetailOutputV2,
@@ -88,6 +89,9 @@ avoidGuide: z.array(z.string().trim().min(10)).min(4),
 
 const PaidAnalysisDetailV3Schema =
   PaidAnalysisDetailV2Schema.extend({
+    // Absent on model output and on reports stored before P0-8E.
+    referencePeriod: ReferencePeriodSnapshotSchema.optional(),
+
     aiInsight: z.object({
       headline: z.string().trim().min(10),
       explanation: z.string().trim().min(30),

@@ -231,6 +231,12 @@ void detail;
     {analysisType}
   </h1>
 
+  {detail.referencePeriod ? (
+    <p className="mt-3 inline-flex rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold text-stone-700">
+      분석 기준 · {detail.referencePeriod.labelSnapshot}
+    </p>
+  ) : null}
+
   <p className="mt-5 text-sm leading-7 text-stone-600">
     구매 권한이 확인된 사용자에게 제공되는 심층 분석 결과 페이지입니다.
   </p>

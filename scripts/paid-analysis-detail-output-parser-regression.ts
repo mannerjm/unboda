@@ -1,8 +1,8 @@
 import {
   parsePaidAnalysisDetailOutput,
   parsePaidAnalysisDetailOutputV2,
-  parsePaidAnalysisDetailOutputV3,
 } from "../app/lib/paidAnalysisDetailOutputParser";
+import { parseGeneratedPaidAnalysisDetailV3 } from "../app/lib/paidAnalysisDetailService";
 
 const result = parsePaidAnalysisDetailOutput({
   headline: "관계 흐름이 바뀌는 시점, 선택 기준을 먼저 확인하세요.",
@@ -360,7 +360,8 @@ const malformedJsonResponse = [
   "```",
 ].join("\n");
 
-const repairedResult = parsePaidAnalysisDetailOutputV3(malformedJsonResponse);
+// 모델 raw 출력 복구 케이스라 JSON 추출·복구까지 담당하는 파서를 사용한다.
+const repairedResult = parseGeneratedPaidAnalysisDetailV3(malformedJsonResponse);
 
 if (repairedResult.heroSummary.headline !== "현재 가장 중요한 판단") {
   throw new Error("V3 파싱 복구가 예상과 다릅니다.");

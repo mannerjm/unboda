@@ -160,7 +160,7 @@ function parseGeneratedPaidAnalysisDetailV2(
   return parseGeneratedJson(value, parsePaidAnalysisDetailOutputV2);
 }
 
-function parseGeneratedPaidAnalysisDetailV3(
+export function parseGeneratedPaidAnalysisDetailV3(
   value: unknown,
 ): PaidAnalysisDetailOutputV3 {
   return parseGeneratedJson(value, parsePaidAnalysisDetailOutputV3);

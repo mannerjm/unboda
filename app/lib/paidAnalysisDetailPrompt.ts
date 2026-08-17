@@ -9,6 +9,12 @@ import {
   type ReferencePeriodSnapshot,
 } from "./analysisReferencePeriod";
 import {
+  buildPeriodTimelineConsistencyRule,
+  buildPeriodTimelineSectionRules,
+  formatPeriodStrategyForPrompt,
+  getPeriodAnalysisStrategy,
+} from "./analysisPeriodStrategy";
+import {
   getCanonicalPremiumProductId,
   getPremiumProduct,
   type PremiumProductPlugin,
@@ -451,6 +457,8 @@ export function buildPaidAnalysisDetailPromptV2(
   input.analysisType,
   input.productId,
 );
+  // Null for every TOPIC/legacy product, so their prompt text stays unchanged.
+  const periodStrategy = getPeriodAnalysisStrategy(input.productId);
   const futureTimelineExample = isCareerAnalysis(
     input.analysisType,
     input.productId,
@@ -496,7 +504,9 @@ export function buildPaidAnalysisDetailPromptV2(
       "description": "앞으로 1년 동안 이어질 흐름과 준비 방향"
     }`;
 
-  const futureTimelineRuleText = isCareerAnalysis(
+  const futureTimelineRuleText = periodStrategy
+    ? buildPeriodTimelineConsistencyRule(periodStrategy)
+    : isCareerAnalysis(
     input.analysisType,
     input.productId,
   )
@@ -505,7 +515,9 @@ export function buildPaidAnalysisDetailPromptV2(
 `
     : "";
 
-  const futureTimelineSectionRules = isCareerAnalysis(
+  const futureTimelineSectionRules = periodStrategy
+    ? buildPeriodTimelineSectionRules(periodStrategy)
+    : isCareerAnalysis(
     input.analysisType,
     input.productId,
   )
@@ -553,6 +565,9 @@ ${input.userConcern ?? "없음"}
 ${input.referencePeriod ? `
 [기간 기준 고정]
 ${formatReferencePeriodForPrompt(input.referencePeriod)}
+` : ""}${periodStrategy ? `
+[기간별 분석 전략]
+${formatPeriodStrategyForPrompt(periodStrategy)}
 ` : ""}
 명리 추론 순서:
 

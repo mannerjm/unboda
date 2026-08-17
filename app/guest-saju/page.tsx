@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ProfileInput, ProfileRelationshipType } from "@/app/lib/profiles/types";
 import { GUEST_BIRTH_DATE_MIN, getGuestBirthDateMax } from "@/app/lib/guestFreeAnalyses/date";
@@ -27,6 +28,24 @@ export default function GuestSajuPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasSavedResult, setHasSavedResult] = useState(false);
+
+  // Read-only probe: a saved guest result must never trigger a new generation here.
+  useEffect(() => {
+    let isCancelled = false;
+
+    void fetch("/api/guest-free-analysis")
+      .then(async (response) => {
+        if (!response.ok) return;
+        const body = (await response.json()) as { analysis?: unknown };
+        if (!isCancelled && body.analysis) setHasSavedResult(true);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   async function submit() {
     setIsSubmitting(true);
@@ -52,6 +71,20 @@ export default function GuestSajuPage() {
         <p className="text-xs font-semibold tracking-[0.25em] text-stone-500">FREE SAJU</p>
         <h1 className="mt-3 text-3xl font-bold">무료 사주 조회</h1>
         <p className="mt-4 text-sm leading-7 text-stone-600">로그인 없이 출생 정보를 바탕으로 무료 분석을 확인할 수 있습니다.</p>
+        {hasSavedResult ? (
+          <section className="mt-6 rounded-3xl border border-stone-300 bg-white p-6 shadow-sm">
+            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">SAVED RESULT</p>
+            <h2 className="mt-2 text-lg font-bold">저장된 무료 사주 결과가 있습니다</h2>
+            <p className="mt-2 text-sm leading-6 text-stone-600">새로 분석하지 않고 이전 결과를 그대로 다시 볼 수 있습니다.</p>
+            <Link
+              href="/guest-result"
+              className="mt-4 inline-flex rounded-xl bg-stone-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-800"
+            >
+              저장된 결과 다시 보기
+            </Link>
+            <p className="mt-4 text-xs leading-5 text-stone-500">아래 폼으로 새 출생 정보를 제출하면 새 무료 분석을 시작합니다.</p>
+          </section>
+        ) : null}
         <form className="mt-8 space-y-5 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
           <label className="block text-sm font-semibold">이름 또는 구분
             <input value={input.label} onChange={(event) => setInput({ ...input, label: event.target.value })} placeholder="이름 또는 구분" className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3" required />

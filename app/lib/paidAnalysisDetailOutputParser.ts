@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ReferencePeriodSnapshotSchema } from "./analysisReferencePeriod";
+import { PeriodAnalysisBlockSchema } from "./analysisPeriodOutput";
 import type {
   PaidAnalysisDetailOutput,
   PaidAnalysisDetailOutputV2,
@@ -91,6 +92,9 @@ const PaidAnalysisDetailV3Schema =
   PaidAnalysisDetailV2Schema.extend({
     // Absent on model output and on reports stored before P0-8E.
     referencePeriod: ReferencePeriodSnapshotSchema.optional(),
+
+    // PERIOD-only; a missing block must never fail the whole report.
+    periodAnalysis: PeriodAnalysisBlockSchema.optional(),
 
     aiInsight: z.object({
       headline: z.string().trim().min(10),

@@ -15,6 +15,10 @@ import {
   getPeriodAnalysisStrategy,
 } from "./analysisPeriodStrategy";
 import {
+  buildPeriodAnalysisJsonContract,
+  buildPeriodAnalysisPromptRules,
+} from "./analysisPeriodOutput";
+import {
   getCanonicalPremiumProductId,
   getPremiumProduct,
   type PremiumProductPlugin,
@@ -886,8 +890,20 @@ export function buildPaidAnalysisDetailPromptV3(
     v3Fields,
   );
 
-  return `${promptWithV3Json}
+  // PERIOD-only: the JSON contract and rules never appear for TOPIC/legacy products.
+  const periodStrategy = getPeriodAnalysisStrategy(input.productId);
+  const promptWithPeriodJson = periodStrategy
+    ? promptWithV3Json.replace(
+        recommendationsMarker,
+        `${buildPeriodAnalysisJsonContract(periodStrategy)}${recommendationsMarker}`,
+      )
+    : promptWithV3Json;
+  const periodRules = periodStrategy
+    ? `\n${buildPeriodAnalysisPromptRules(periodStrategy)}`
+    : "";
 
+  return `${promptWithPeriodJson}
+${periodRules}
 V3 추가 섹션 작성 규칙:
 
 aiInsight 작성 규칙:

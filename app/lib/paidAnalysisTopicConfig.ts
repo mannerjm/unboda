@@ -867,28 +867,28 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     productId: "relationship-new-connection",
     engine: "RELATIONSHIP",
     userQuestion:
-      "새로운 관계가 시작될 가능성과 초기 접점을 어떻게 만들고 검증할 것인가?",
+      "새로운 인연이 형성되기 쉬운 접점·초기 상호작용 조건은 무엇이며, 초기 신뢰와 관계 진입 가능성을 높이기 위해 무엇을 관찰하고 어떻게 접근해야 하는가?",
     analysisFocus: [
-      "새로운 접점이 생기는 조건",
-      "첫 연락·만남에서 신뢰를 확인하는 방식",
-      "초기 관계의 일관성을 검증하는 기준",
+      "새로운 접점이 자연스럽게 이어지는 활동·환경·상호작용 조건",
+      "첫 접촉에서 접근이 이어지거나 멈추는 초기 반응과 신뢰 진입 조건",
+      "새로운 상호작용을 관계 탐색으로 계속할지 검토하는 관찰 기준",
     ],
     requiredInsights: [
       {
         id: "connection-opportunity-pattern",
-        prompt: "새로운 관계의 접점이 늘어나는 조건과 그 기회를 실제 만남으로 구분하는 기준을 설명한다.",
+        prompt: "새로운 접점이 자연스럽게 이어지는 활동·환경·상호작용 조건과 실제 탐색 기회를 구분한다.",
       },
       {
         id: "initial-contact-style",
-        prompt: "첫 연락·만남·공동 활동에서 신뢰를 만들거나 흐리게 하는 초기 상호작용 방식을 구분한다.",
+        prompt: "첫 연락·만남·공동 활동에서 접근이 이어지거나 멈추는 초기 상호작용 방식을 구분한다.",
       },
       {
         id: "early-trust-signal",
-        prompt: "초기에 반복 확인할 수 있는 약속·반응·일관성 신호를 제시한다.",
+        prompt: "초기 신뢰 진입 전에 반복 확인할 응답·약속·관심 표현의 일관성 신호를 제시한다.",
       },
       {
         id: "new-connection-action",
-        prompt: "새로운 접점을 만들고 초기 신뢰를 검증할 수 있는 행동을 제시한다.",
+        prompt: "새로운 접점에 접근하고 초기 탐색을 계속·보류할 수 있는 구체 행동과 검토 기준을 제시한다.",
       },
     ],
     excludedFocus: [
@@ -906,11 +906,11 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       },
     ],
     evidenceFocus: [
-      "fortune_flow",
-      "seun",
       "element_relations",
       "fortune_brain",
       "strength",
+      "element_balance",
+      "yongshin",
     ],
     decisionCriteria: {
       확대: "새로운 접점과 교류를 넓히는 방향",
@@ -920,15 +920,20 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     },
     decisionType: "exploration",
     actionFocus: [
-      "새로운 접점이 생기는 환경과 초기 반응을 기록하는 행동",
-      "첫 연락·만남에서 신뢰를 검증하는 행동",
-      "초기 관계의 일관성을 확인하는 행동",
+      "새로운 접점이 자연스럽게 이어진 활동·환경·초기 반응을 같은 기준으로 기록하는 행동",
+      "첫 연락·만남·공동 활동에서 접근이 이어지는 신호와 멈춰야 할 신호를 구분하는 행동",
+      "초기 신뢰 진입 전 응답·약속·관심 표현의 일관성을 검토하는 행동",
+      "새로운 상호작용을 계속 탐색하거나 보류할 다음 접근·검토 기준을 문장화하는 행동",
     ],
     prohibitedClaims: [
       "특정 상대의 마음이나 의도 확정",
       "반드시 새 인연이 생긴다는 보장",
       "만남이나 연애 시작 시점 단정",
       "결혼 결과 보장",
+      "정확한 사람·장소·행사·직장·날짜에서 만난다는 예측",
+      "현재 특정 상대의 행동을 관계 지속·조정 결론으로 해석",
+      "친밀감 심화·갈등 수습·경계 처방을 초기 접점의 중심 결론으로 제시",
+      "반복 파트너 선택·공동생활 준비·재접촉 판단을 중심 결론으로 제시",
     ],
   },
   {

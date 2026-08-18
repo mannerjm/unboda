@@ -137,6 +137,11 @@ assert(
   "intimacy prompt must not carry connection-only required insight",
 );
 assert(connectionPrompt !== intimacyPrompt, "connection and intimacy prompts must differ");
+assert(
+  connectionPrompt.includes("초기 신뢰 진입 전") &&
+    connectionPrompt.includes("계속·보류"),
+  "connection prompt must retain acquisition and early-entry review ownership",
+);
 
 const relationshipRules = getPaidAnalysisEngineRules("RELATIONSHIP");
 assert(

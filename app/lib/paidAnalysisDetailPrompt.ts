@@ -23,6 +23,7 @@ import {
   getPremiumProduct,
   type PremiumProductPlugin,
 } from "./premiumProductRegistry";
+import type { PaidAnalysisEvidenceFacts } from "./paidAnalysisEvidenceFacts";
 
 
 
@@ -47,6 +48,9 @@ export type PaidAnalysisDetailPromptInput = {
 
   /** Only set for PERIOD products. */
   referencePeriod?: ReferencePeriodSnapshot;
+
+  /** V4 only: deterministic values the evidence resolver will quote. */
+  evidenceFacts?: PaidAnalysisEvidenceFacts;
 };
 
 export function buildPaidAnalysisDetailPrompt(
@@ -1232,7 +1236,60 @@ const V4_EVIDENCE_KEY_GUIDE = `- strength: 신강·신약 판단 (coreInterpreta
 - element_balance: 오행 분포와 균형 (coreInterpretation의 elementAnalysis)
 - fortune_flow: 현재 운 흐름의 기회·주의 구조 (currentFortuneFlow)
 - daeun: 현재 대운 (fortuneTiming의 currentDaeun)
-- seun: 현재 세운 (fortuneTiming의 currentSeun)`;
+- seun: 현재 세운 (fortuneTiming의 currentSeun)
+- element_relations: 오행 사이의 생조·설기·극 관계
+- fortune_brain: 계산된 강점 축과 취약 축`;
+
+/** Compact, so the resolver's source data does not blow up the input tokens. */
+function formatEvidenceFactsForPrompt(
+  facts: PaidAnalysisEvidenceFacts,
+): string {
+  const lines: string[] = [];
+
+  if (facts.strength) {
+    lines.push(`- strength: ${facts.strength.level}`);
+  }
+
+  if (facts.yongshin) {
+    lines.push(`- yongshin: ${facts.yongshin.primary}`);
+  }
+
+  if (facts.gyeokguk) {
+    lines.push(`- gyeokguk: ${facts.gyeokguk.primary}`);
+  }
+
+  if (facts.elementBalance) {
+    lines.push(
+      `- element_balance: 강 ${facts.elementBalance.strongest.join("·")} / 약 ${facts.elementBalance.weakest.join("·")}`,
+    );
+  }
+
+  if (facts.fortuneFlow) {
+    lines.push(`- fortune_flow: ${facts.fortuneFlow.currentFlow}`);
+  }
+
+  if (facts.daeun) {
+    lines.push(`- daeun: ${facts.daeun.ganji}`);
+  }
+
+  if (facts.seun) {
+    lines.push(`- seun: ${facts.seun.ganji}`);
+  }
+
+  if (facts.elementRelations && facts.elementRelations.items.length > 0) {
+    lines.push(
+      `- element_relations: ${facts.elementRelations.items
+        .map((item) => `${item.source}→${item.target} ${item.type}`)
+        .join(", ")}`,
+    );
+  }
+
+  if (facts.fortuneBrain) {
+    lines.push(`- fortune_brain: ${facts.fortuneBrain.structure}`);
+  }
+
+  return lines.join("\n");
+}
 
 export function buildPaidAnalysisDetailPromptV4(
   input: PaidAnalysisDetailPromptInput,
@@ -1262,6 +1319,13 @@ ${buildPeriodAnalysisJsonContract(periodStrategy)}`
 
   const periodRules = periodStrategy
     ? `\n${buildPeriodAnalysisPromptRules(periodStrategy)}`
+    : "";
+
+  const evidenceFactsBlock = input.evidenceFacts
+    ? `
+[선택 가능한 결정론 근거 요약]
+${formatEvidenceFactsForPrompt(input.evidenceFacts)}
+`
     : "";
 
   return `
@@ -1303,7 +1367,7 @@ ${formatReferencePeriodForPrompt(input.referencePeriod)}
 ` : ""}${periodStrategy ? `
 [기간별 분석 전략]
 ${formatPeriodStrategyForPrompt(periodStrategy)}
-` : ""}
+` : ""}${evidenceFactsBlock}
 출력은 반드시 유효한 JSON 하나만 반환하세요.
 마크다운, 코드 블록, 설명 문장, JSON 앞뒤의 부가 문구는 절대 포함하지 마세요.
 
@@ -1428,7 +1492,8 @@ evidence 작성 규칙:
 
 - evidenceKey는 아래 목록 중에서만 선택한다. 목록에 없는 근거를 만들어내지 않는다.
 ${V4_EVIDENCE_KEY_GUIDE}
-- 수치, 퍼센트, 점수를 직접 만들어 쓰지 않는다. 계산 값은 서버가 표시한다.
+- 위 [선택 가능한 결정론 근거 요약]에 나타난 항목을 우선 선택한다.
+- 수치, 퍼센트, 점수, 간지, 관계 기호를 직접 만들어 쓰지 않는다. 실제 계산 값은 서버가 붙인다.
 - meaning과 linkage에는 명리 용어를 최소화하고 현실 언어를 사용한다.
 - 같은 evidenceKey를 두 번 사용하지 않는다.
 

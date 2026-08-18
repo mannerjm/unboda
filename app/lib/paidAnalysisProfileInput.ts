@@ -1,5 +1,6 @@
 import { buildFreeAnalysis } from "./buildFreeAnalysis";
 import type { PaidAnalysisDetailPromptInput } from "./paidAnalysisDetailPrompt";
+import { buildPaidAnalysisEvidenceFacts } from "./paidAnalysisEvidenceFacts";
 import { buildReferencePeriodSnapshot } from "./analysisReferencePeriod";
 import { getPremiumProduct } from "./premiumProductRegistry";
 import type { ProfileDto } from "./profiles/types";
@@ -65,6 +66,7 @@ export function buildPaidAnalysisInputFromProfile(
       gyeokguk: freeAnalysis.gyeokgukAnalysis,
     }),
     currentFortuneFlow: JSON.stringify(freeAnalysis.fortuneFlowAnalysis),
+    evidenceFacts: buildPaidAnalysisEvidenceFacts({ saju, freeAnalysis }),
     ...(referencePeriod ? { referencePeriod } : {}),
   };
 }

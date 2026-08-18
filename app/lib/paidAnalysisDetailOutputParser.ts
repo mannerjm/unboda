@@ -7,6 +7,7 @@ import type {
   PaidAnalysisDetailOutputV2,
   PaidAnalysisDetailOutputV3,
   PaidAnalysisDetailOutputV4,
+  ResolvedPaidAnalysisDetailV4,
   StoredPaidAnalysisDetail,
 } from "./paidAnalysisDetailOutput";
 
@@ -154,6 +155,18 @@ export function parsePaidAnalysisDetailOutputV3(
   return PaidAnalysisDetailV3Schema.parse(value);
 }
 
+const PaidAnalysisEvidenceKeySchema = z.enum([
+  "strength",
+  "yongshin",
+  "gyeokguk",
+  "element_balance",
+  "fortune_flow",
+  "daeun",
+  "seun",
+  "element_relations",
+  "fortune_brain",
+]);
+
 const PaidAnalysisSituationItemV4Schema = z.object({
   situation: z.string().trim().min(10),
   implication: z.string().trim().min(10),
@@ -195,15 +208,7 @@ const PaidAnalysisDetailV4Schema = z.object({
   evidence: z
     .array(
       z.object({
-        evidenceKey: z.enum([
-          "strength",
-          "yongshin",
-          "gyeokguk",
-          "element_balance",
-          "fortune_flow",
-          "daeun",
-          "seun",
-        ]),
+        evidenceKey: PaidAnalysisEvidenceKeySchema,
         meaning: z.string().trim().min(10),
         linkage: z.string().trim().min(10),
       }),
@@ -275,6 +280,28 @@ export function parsePaidAnalysisDetailOutputV4(
   return PaidAnalysisDetailV4Schema.parse(value);
 }
 
+// Stored and rendered reports must carry the server-resolved fact, never a bare key.
+const ResolvedPaidAnalysisDetailV4Schema = PaidAnalysisDetailV4Schema.extend({
+  evidence: z
+    .array(
+      z.object({
+        evidenceKey: PaidAnalysisEvidenceKeySchema,
+        label: z.string().trim().min(1),
+        fact: z.string().trim().min(1),
+        meaning: z.string().trim().min(10),
+        linkage: z.string().trim().min(10),
+      }),
+    )
+    .min(3)
+    .max(4),
+});
+
+export function parseResolvedPaidAnalysisDetailV4(
+  value: unknown,
+): ResolvedPaidAnalysisDetailV4 {
+  return ResolvedPaidAnalysisDetailV4Schema.parse(value);
+}
+
 /** Reads both the legacy V3 rows already in paid_reports and new V4 rows. */
 export function parseStoredPaidAnalysisDetail(
   value: unknown,
@@ -285,7 +312,7 @@ export function parseStoredPaidAnalysisDetail(
       : undefined;
 
   if (schemaVersion === PAID_ANALYSIS_DETAIL_SCHEMA_VERSION_V4) {
-    return parsePaidAnalysisDetailOutputV4(value);
+    return parseResolvedPaidAnalysisDetailV4(value);
   }
 
   return parsePaidAnalysisDetailOutputV3(value);

@@ -120,8 +120,8 @@ export type PaidAnalysisDecisionDirection =
   | "보류";
 
 /**
- * Evidence the model may cite. Restricted to facts that are actually present in
- * PaidAnalysisDetailPromptInput today; elementRelations/fortuneBrain join in Step 4B.
+ * Evidence the model may cite. Every key must have a deterministic resolver in
+ * paidAnalysisEvidenceResolver; the model never supplies the observed value itself.
  */
 export type PaidAnalysisEvidenceKey =
   | "strength"
@@ -130,7 +130,9 @@ export type PaidAnalysisEvidenceKey =
   | "element_balance"
   | "fortune_flow"
   | "daeun"
-  | "seun";
+  | "seun"
+  | "element_relations"
+  | "fortune_brain";
 
 /** The model supplies interpretation only; the server resolves the observed fact. */
 export type PaidAnalysisEvidenceItemV4 = {
@@ -238,16 +240,30 @@ export type PaidAnalysisDetailOutputV4 = {
   periodAnalysis?: PeriodAnalysisBlock;
 };
 
+/** Server-resolved evidence: the observed fact comes from the saju engine. */
+export type ResolvedPaidAnalysisEvidence = PaidAnalysisEvidenceItemV4 & {
+  label: string;
+  fact: string;
+};
+
+/** The only V4 shape that is ever stored or rendered. */
+export type ResolvedPaidAnalysisDetailV4 = Omit<
+  PaidAnalysisDetailOutputV4,
+  "evidence"
+> & {
+  evidence: ResolvedPaidAnalysisEvidence[];
+};
+
 /** What paid_reports.content may hold after the V4 rollout. */
 export type StoredPaidAnalysisDetail =
   | PaidAnalysisDetailOutputV3
-  | PaidAnalysisDetailOutputV4;
+  | ResolvedPaidAnalysisDetailV4;
 
 export function isPaidAnalysisDetailV4(
   value: StoredPaidAnalysisDetail,
-): value is PaidAnalysisDetailOutputV4 {
+): value is ResolvedPaidAnalysisDetailV4 {
   return (
-    (value as PaidAnalysisDetailOutputV4).schemaVersion ===
+    (value as ResolvedPaidAnalysisDetailV4).schemaVersion ===
     PAID_ANALYSIS_DETAIL_SCHEMA_VERSION_V4
   );
 }

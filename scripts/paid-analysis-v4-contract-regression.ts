@@ -234,7 +234,7 @@ assertParseFails(
     ...buildValidV4(),
     evidence: [
       ...evidenceItems.slice(0, 2),
-      { evidenceKey: "element_relations", meaning: sentence("x"), linkage: sentence("y") },
+      { evidenceKey: "ten_god", meaning: sentence("x"), linkage: sentence("y") },
     ],
   },
   "evidenceKey outside the allowed list must be rejected",
@@ -343,8 +343,25 @@ parsePaidAnalysisDetailOutputV3(legacyV3);
 const storedLegacy = parseStoredPaidAnalysisDetail(legacyV3);
 assert(!isPaidAnalysisDetailV4(storedLegacy), "legacy V3 must not be read as V4");
 
-const storedV4 = parseStoredPaidAnalysisDetail(buildValidV4());
+const storedV4 = parseStoredPaidAnalysisDetail({
+  ...buildValidV4(),
+  // Stored reports always carry the server-resolved fact.
+  evidence: (buildValidV4().evidence as Record<string, unknown>[]).map(
+    (item) => ({ ...item, label: "근거", fact: "결정론 계산 값" }),
+  ),
+});
 assert(isPaidAnalysisDetailV4(storedV4), "V4 payload must be read as V4");
+
+let unresolvedStoredRejected = false;
+try {
+  parseStoredPaidAnalysisDetail(buildValidV4());
+} catch {
+  unresolvedStoredRejected = true;
+}
+assert(
+  unresolvedStoredRejected,
+  "unresolved V4 evidence must not be accepted as a stored report",
+);
 
 // 12. fields dropped from V4 are not required
 const v4Keys = Object.keys(buildValidV4());

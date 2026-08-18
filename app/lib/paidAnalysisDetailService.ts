@@ -12,8 +12,10 @@ import type {
   PaidAnalysisDetailOutputV2,
     PaidAnalysisDetailOutputV3,
   PaidAnalysisDetailOutputV4,
+  ResolvedPaidAnalysisDetailV4,
   StoredPaidAnalysisDetail,
 } from "./paidAnalysisDetailOutput";
+import { resolvePaidAnalysisDetailV4 } from "./paidAnalysisEvidenceResolver";
 import {
   validatePaidAnalysisConsistency,
   validatePaidAnalysisConsistencyV4,
@@ -24,6 +26,7 @@ import {
   parsePaidAnalysisDetailOutputV2,
    parsePaidAnalysisDetailOutputV3,
   parsePaidAnalysisDetailOutputV4,
+  parseResolvedPaidAnalysisDetailV4,
   parseStoredPaidAnalysisDetail,
 } from "./paidAnalysisDetailOutputParser";
 import {
@@ -478,7 +481,7 @@ if (isRelationshipAnalysis) {
  */
 export async function generatePaidAnalysisDetailV4(
   input: PaidAnalysisDetailPromptInput,
-): Promise<PaidAnalysisDetailOutputV4> {
+): Promise<ResolvedPaidAnalysisDetailV4> {
   const canonicalProductId = input.productId
     ? getCanonicalPremiumProductId(input.productId)
     : undefined;
@@ -533,8 +536,16 @@ export async function generatePaidAnalysisDetailV4(
     );
   }
 
+  const resolvedDetail = resolvePaidAnalysisDetailV4(
+    detail,
+    input.evidenceFacts ?? {},
+  );
+
+  // Guarantees the UI never receives evidence without a deterministic fact.
+  parseResolvedPaidAnalysisDetailV4(resolvedDetail);
+
   // Frozen once, at generation time; readers must never recompute it.
   return input.referencePeriod
-    ? { ...detail, referencePeriod: input.referencePeriod }
-    : detail;
+    ? { ...resolvedDetail, referencePeriod: input.referencePeriod }
+    : resolvedDetail;
 }

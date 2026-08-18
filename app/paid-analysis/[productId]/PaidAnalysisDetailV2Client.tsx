@@ -1,11 +1,17 @@
 "use client";
 import { useEffect, useState } from "react";
-import type { PaidAnalysisDetailOutputV3 } from "@/app/lib/paidAnalysisDetailOutput";
+import type {
+  PaidAnalysisDetailOutputV3,
+  ResolvedPaidAnalysisDetailV4,
+  StoredPaidAnalysisDetail,
+} from "@/app/lib/paidAnalysisDetailOutput";
+import { isPaidAnalysisDetailV4 } from "@/app/lib/paidAnalysisDetailOutput";
 import {
   getCanonicalPremiumProductId,
   getPremiumProduct,
 } from "@/app/lib/premiumProductRegistry";
 import PeriodTimelineSection from "./PeriodTimelineSection";
+import PaidAnalysisV4Report from "./PaidAnalysisV4Report";
 
 
 type PaidAnalysisDetailV2ClientProps = {
@@ -30,6 +36,9 @@ export default function PaidAnalysisDetailV2Client({
 }: PaidAnalysisDetailV2ClientProps) {
   const [detail, setDetail] =
   useState<PaidAnalysisDetailOutputV3 | null>(null);
+
+  const [v4Detail, setV4Detail] =
+  useState<ResolvedPaidAnalysisDetailV4 | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
  
@@ -78,11 +87,17 @@ void detail;
     }
 
    const generatedDetail =
-  (await response.json()) as PaidAnalysisDetailOutputV3;
+  (await response.json()) as StoredPaidAnalysisDetail;
 
 
     if (!isCancelled) {
-      setDetail(generatedDetail);
+      if (isPaidAnalysisDetailV4(generatedDetail)) {
+        setV4Detail(generatedDetail);
+        setDetail(null);
+      } else {
+        setDetail(generatedDetail);
+        setV4Detail(null);
+      }
     }
   } catch (error) {
     if (!isCancelled) {
@@ -108,6 +123,12 @@ void detail;
 
   void detail;
   void isLoading;
+
+  if (v4Detail) {
+    return (
+      <PaidAnalysisV4Report detail={v4Detail} analysisType={analysisType} />
+    );
+  }
 
     if (errorMessage) {
     return (

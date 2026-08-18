@@ -655,6 +655,142 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "특정 시점 예측",
     ],
   },
+  {
+    productId: "relationship-conflict",
+    engine: "RELATIONSHIP",
+    userQuestion:
+      "반복되는 갈등에서 무엇이 충돌을 키우며, 회복 가능한지 어떻게 확인하고 재발을 줄여야 하는가?",
+    analysisFocus: [
+      "반복 갈등의 촉발 조건",
+      "충돌 뒤 갈등을 키우거나 완화하는 반응",
+      "회복 신호와 재발 방지 기준",
+    ],
+    requiredInsights: [
+      {
+        id: "conflict-trigger-pattern",
+        prompt: "반복되는 갈등을 시작시키는 상황·말·행동의 촉발 조건을 구분한다.",
+      },
+      {
+        id: "conflict-response-pattern",
+        prompt: "충돌이 일어난 뒤 갈등을 키우거나 완화하는 반응 순서를 설명한다.",
+      },
+      {
+        id: "repair-signal",
+        prompt: "대화 재개, 책임 인정, 행동 변화처럼 회복 가능성을 확인할 수 있는 관찰 신호를 제시한다.",
+      },
+      {
+        id: "conflict-recovery-action",
+        prompt: "갈등 후 수습과 재발 방지를 검증할 수 있는 구체 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "relationship-type-boundary-design",
+        prompt: "관계 유형별로 적용하는 장기 거리와 허용 기준의 운영 설계",
+      },
+      {
+        id: "role-responsibility-boundary",
+        prompt: "특정 갈등 사건과 무관한 일반 역할·책임 범위의 설계",
+      },
+      {
+        id: "marriage-or-reunion-decision",
+        prompt: "결혼·재회·현재 관계 지속 여부 같은 결과 판단",
+      },
+    ],
+    evidenceFocus: [
+      "element_relations",
+      "fortune_brain",
+      "strength",
+      "fortune_flow",
+      "seun",
+    ],
+    decisionCriteria: {
+      확대: "회복을 위한 대화와 조정 시도를 넓히는 방향",
+      유지: "현재 갈등 대응 방식을 그대로 유지하는 방향",
+      조정: "충돌 반응과 수습 방식을 다시 정리하는 방향",
+      보류: "갈등 결론을 미루고 회복 신호를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "갈등 촉발 상황과 직후 반응을 같은 형식으로 기록하는 행동",
+      "충돌 뒤 대화 재개·책임 인정·행동 변화 여부를 비교하는 행동",
+      "회복 신호와 재발 조건을 분리해 다음 수습 기준을 정하는 행동",
+    ],
+    prohibitedClaims: [
+      "상대의 감정이나 의도 단정",
+      "화해나 회복 결과 보장",
+      "결혼·이별·재회 결과 판단",
+      "특정 시점 예측",
+    ],
+  },
+  {
+    productId: "relationship-boundary",
+    engine: "RELATIONSHIP",
+    userQuestion:
+      "관계를 유지하면서 어떤 거리·역할·허용 기준을 세워야 감정 소모와 과도한 개입을 줄일 수 있는가?",
+    analysisFocus: [
+      "과도한 허용과 개입이 관계 부담으로 바뀌는 조건",
+      "역할·책임·감정 노동의 허용 범위",
+      "거리와 개인 공간을 조정하는 기준",
+    ],
+    requiredInsights: [
+      {
+        id: "boundary-overload-pattern",
+        prompt: "과도한 허용·개입·감정 노동이 관계 부담으로 바뀌는 조건을 구분한다.",
+      },
+      {
+        id: "role-responsibility-boundary",
+        prompt: "관계 안에서 맡을 역할과 책임의 범위를 명확히 하는 기준을 설명한다.",
+      },
+      {
+        id: "distance-permission-standard",
+        prompt: "연락·시간·개인 공간에서 허용할 범위와 거절할 기준을 제시한다.",
+      },
+      {
+        id: "boundary-adjustment-action",
+        prompt: "경계 침범이나 과부하 신호가 반복될 때 거리·역할·허용 기준을 조정하는 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "conflict-trigger-pattern",
+        prompt: "특정 갈등 사건의 촉발 조건과 충돌 반응을 분석하는 방식",
+      },
+      {
+        id: "repair-signal",
+        prompt: "갈등 직후 수습·화해·회복 여부를 판정하는 방식",
+      },
+      {
+        id: "marriage-or-reunion-decision",
+        prompt: "결혼·재회·현재 관계 지속 여부 같은 결과 판단",
+      },
+    ],
+    evidenceFocus: [
+      "element_relations",
+      "strength",
+      "fortune_brain",
+      "daeun",
+      "fortune_flow",
+    ],
+    decisionCriteria: {
+      확대: "허용 범위와 관계 운영 기준을 넓히는 방향",
+      유지: "현재 거리와 역할 기준을 그대로 유지하는 방향",
+      조정: "허용·거절·역할·거리 기준을 다시 정리하는 방향",
+      보류: "새로운 역할 부담을 미루고 과부하 신호를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "허용·거절·연락·시간·감정 노동 기준을 문장으로 정리하는 행동",
+      "역할과 책임이 한쪽으로 과도하게 쏠리는지 구분하는 행동",
+      "경계 침범·과부하 신호가 반복되면 거리와 역할 기준을 조정하는 행동",
+    ],
+    prohibitedClaims: [
+      "상대의 감정이나 의도 단정",
+      "관계가 반드시 안정된다는 보장",
+      "결혼·이별·재회 결과 판단",
+      "특정 시점 예측",
+    ],
+  },
 ];
 
 const LAUNCH_TOPIC_CONFIG_MAP = new Map(

@@ -421,6 +421,78 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     ],
   },
   {
+    productId: "money-leak-risk",
+    engine: "MONEY",
+    userQuestion:
+      "내 돈이 반복적으로 빠져나가거나 손실 노출이 커지는 구조는 무엇이며, 손실을 키우는 지출·계약·충동 판단 신호를 어떻게 감지하고 줄여야 하는가?",
+    analysisFocus: [
+      "지출·계약·공동 부담에서 손실 노출이 커지는 구조",
+      "충동·손실 만회·조건 누락처럼 손실을 키우는 관찰 신호",
+      "고정비·현금 흐름·공동 부담에서 재정 통제력이 약해지는 조건",
+    ],
+    requiredInsights: [
+      {
+        id: "loss-leak-pattern",
+        prompt: "지출·계약·공동 부담에서 반복되는 손실 노출 구조와 통제 범위가 약해지는 지점을 구분한다.",
+      },
+      {
+        id: "spending-risk-signal",
+        prompt: "충동 지출, 손실 만회성 판단, 계약 조건 누락처럼 손실을 키우기 전에 확인할 관찰 신호를 제시한다.",
+      },
+      {
+        id: "financial-vulnerability-condition",
+        prompt: "경쟁·공동 부담·고정비·현금 흐름 압박이 재정 통제력을 약화시키는 조건을 설명한다.",
+      },
+      {
+        id: "leak-reduction-action",
+        prompt: "손실 노출을 줄이기 위해 지출·계약·공동 부담에서 적용할 점검 순서와 구체 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "wealth-accumulation-profile",
+        prompt: "잔여분·보존선·축적 여력을 설계하는 자산 축적 분석",
+      },
+      {
+        id: "saving-discipline-routine",
+        prompt: "저축 습관, 예산 유지, 정기 자산관리 루틴을 중심으로 하는 분석",
+      },
+      {
+        id: "investment-or-income-expansion",
+        prompt: "투자 상품·포트폴리오·새 수입원·사업 수입·소득 확대를 중심으로 하는 분석",
+      },
+    ],
+    evidenceFocus: [
+      "element_relations",
+      "fortune_brain",
+      "strength",
+      "element_balance",
+      "fortune_flow",
+    ],
+    decisionCriteria: {
+      확대: "새 지출·계약·공동 부담을 늘리기 전에 손실 노출과 통제 조건을 점검하는 방향",
+      유지: "현재 지출·계약 기준을 유지하며 손실 신호를 관찰하는 방향",
+      조정: "통제 범위가 약한 지출·계약·공동 부담 조건을 다시 정리하는 방향",
+      보류: "손실 노출이 큰 지출·계약·투자 판단을 미루고 조건을 재검토하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "손실이 발생한 지출·계약·공동 부담을 같은 기준으로 기록하는 행동",
+      "충동·손실 만회·조건 누락 신호를 분리해 확인하는 행동",
+      "고정비·공동 부담·계약 조건에서 통제 가능한 범위를 정리하는 행동",
+      "손실 노출이 커질 때 중단·재검토할 기준을 문장화하는 행동",
+    ],
+    prohibitedClaims: [
+      "특정 투자 손실·수익 보장",
+      "종목·코인·부동산 매수·매도 추천",
+      "특정 금액의 손실 예언",
+      "특정 월·연도의 파산·손실 시점 단정",
+      "대출·투자 실행을 강제하는 결론",
+      "사주만으로 실제 소비·부채 사실을 단정",
+      "재정 성공·실패를 운명처럼 확정",
+    ],
+  },
+  {
     productId: "relationship",
     engine: "RELATIONSHIP",
     userQuestion:

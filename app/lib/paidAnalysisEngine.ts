@@ -14,6 +14,7 @@ const PRODUCT_ENGINE_MAP: Record<string, PaidAnalysisEngine> = {
   "career-specialization": "CAREER",
   wealth: "MONEY",
   "money-wealth-accumulation": "MONEY",
+  "money-leak-risk": "MONEY",
   relationship: "RELATIONSHIP",
   "relationship-current": "RELATIONSHIP",
   "relationship-marriage": "RELATIONSHIP",

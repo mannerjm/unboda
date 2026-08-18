@@ -19,7 +19,7 @@ function assert(condition: boolean, message: string): void {
 
 const LAUNCH_PRODUCT_IDS = getLaunchProductIds();
 
-assert(LAUNCH_PRODUCT_IDS.length === 17, "Launch set must contain 17 products");
+assert(LAUNCH_PRODUCT_IDS.length === 18, "Launch set must contain 18 products");
 
 for (const productId of [
   "career",
@@ -29,6 +29,7 @@ for (const productId of [
   "wealth",
   "money-wealth-accumulation",
   "money-leak-risk",
+  "money-saving-discipline",
   "relationship",
   "relationship-current",
   "relationship-marriage",
@@ -63,6 +64,7 @@ const EXPECTED_ENGINES: Record<string, string> = {
   wealth: "MONEY",
   "money-wealth-accumulation": "MONEY",
   "money-leak-risk": "MONEY",
+  "money-saving-discipline": "MONEY",
   relationship: "RELATIONSHIP",
   "relationship-current": "RELATIONSHIP",
   "relationship-marriage": "RELATIONSHIP",
@@ -191,6 +193,8 @@ assert(
 assertDifferentConfigs("wealth", "money-wealth-accumulation");
 assertDifferentConfigs("wealth", "money-leak-risk");
 assertDifferentConfigs("money-wealth-accumulation", "money-leak-risk");
+assertDifferentConfigs("money-wealth-accumulation", "money-saving-discipline");
+assertDifferentConfigs("money-leak-risk", "money-saving-discipline");
 assert(
   configOf("money-leak-risk").requiredInsights.length === 4,
   "money-leak-risk must carry four required insights",
@@ -198,6 +202,14 @@ assert(
 assert(
   (configOf("money-leak-risk").excludedFocus?.length ?? 0) === 3,
   "money-leak-risk must carry three excluded focus items",
+);
+assert(
+  configOf("money-saving-discipline").requiredInsights.length === 4,
+  "money-saving-discipline must carry four required insights",
+);
+assert(
+  (configOf("money-saving-discipline").excludedFocus?.length ?? 0) === 3,
+  "money-saving-discipline must carry three excluded focus items",
 );
 
 // RELATIONSHIP differentiation.
@@ -243,6 +255,7 @@ for (const productId of [
   "wealth",
   "money-wealth-accumulation",
   "money-leak-risk",
+  "money-saving-discipline",
   "relationship",
   "relationship-current",
   "relationship-marriage",
@@ -291,6 +304,7 @@ const specializationPrompt = promptFor("career-specialization");
 const wealthPrompt = promptFor("wealth");
 const accumulationPrompt = promptFor("money-wealth-accumulation");
 const leakRiskPrompt = promptFor("money-leak-risk");
+const savingDisciplinePrompt = promptFor("money-saving-discipline");
 const relationshipPrompt = promptFor("relationship");
 const relationshipCurrentPrompt = promptFor("relationship-current");
 const marriagePrompt = promptFor("relationship-marriage");
@@ -335,6 +349,7 @@ for (const prompt of [
   wealthPrompt,
   accumulationPrompt,
   leakRiskPrompt,
+  savingDisciplinePrompt,
   relationshipPrompt,
   relationshipCurrentPrompt,
   marriagePrompt,
@@ -363,6 +378,8 @@ const promptPairs: [string, string][] = [
   [wealthPrompt, accumulationPrompt],
   [wealthPrompt, leakRiskPrompt],
   [accumulationPrompt, leakRiskPrompt],
+  [accumulationPrompt, savingDisciplinePrompt],
+  [leakRiskPrompt, savingDisciplinePrompt],
   [relationshipPrompt, relationshipCurrentPrompt],
   [relationshipPrompt, marriagePrompt],
   [relationshipPrompt, partnerPatternPrompt],

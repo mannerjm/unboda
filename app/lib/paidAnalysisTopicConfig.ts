@@ -493,6 +493,78 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     ],
   },
   {
+    productId: "money-saving-discipline",
+    engine: "MONEY",
+    userQuestion:
+      "저축·예산·정기 자산관리 기준이 왜 반복해서 무너지며, 월·주 단위로 유지 가능한 관리 루틴과 재설정 기준을 어떻게 만들 것인가?",
+    analysisFocus: [
+      "저축·예산 기준이 유지되거나 무너지는 반복 조건",
+      "변동지출 한도와 실제 사용이 어긋나는 관찰 신호",
+      "자동화·정기 점검·기록을 지속 가능한 관리 순서로 만드는 조건",
+    ],
+    requiredInsights: [
+      {
+        id: "saving-rule-continuity",
+        prompt: "월·주 단위 저축·예산 기준이 유지되거나 무너지는 반복 조건을 구분한다.",
+      },
+      {
+        id: "variable-spending-control",
+        prompt: "변동지출에서 사전에 정한 한도와 실제 사용이 어긋나는 관찰 신호를 제시한다.",
+      },
+      {
+        id: "routine-automation-readiness",
+        prompt: "자동 이체·정기 점검·잔액 확인·기록이 지속 가능한 반복 구조가 되는 조건을 설명한다.",
+      },
+      {
+        id: "reset-discipline-action",
+        prompt: "저축·예산 기준이 깨졌을 때 다음 주기에서 재설정할 구체 행동과 검토 기준을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "accumulation-preservation-capacity",
+        prompt: "잔여분 배분·보존선·축적 여력·자산 축적 구조를 설계하는 분석",
+      },
+      {
+        id: "loss-exposure-early-warning",
+        prompt: "손실 노출·계약·공동 부담·통제 실패와 조기 경고 위험 감소를 중심으로 하는 분석",
+      },
+      {
+        id: "investment-or-income-expansion",
+        prompt: "투자 상품·포트폴리오·새 수입원·사업 수입·소득 확대를 중심으로 하는 분석",
+      },
+    ],
+    evidenceFocus: [
+      "element_relations",
+      "fortune_brain",
+      "strength",
+      "element_balance",
+      "yongshin",
+    ],
+    decisionCriteria: {
+      확대: "새 저축·관리 규칙을 늘리기 전에 현재 루틴의 유지 조건을 점검하는 방향",
+      유지: "현재 저축·예산·정기 점검 순서를 유지하며 지속 신호를 관찰하는 방향",
+      조정: "한도·재검토일·자동화 순서를 다시 정리하는 방향",
+      보류: "새 관리 도구나 규칙을 늘리기보다 현재 루틴을 재설정하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "월·주 단위 저축·예산 기준을 한도와 재검토일로 문장화하는 행동",
+      "변동지출을 기준 내·초과·보류 항목으로 기록하는 행동",
+      "자동 이체·정기 점검·잔액 확인을 반복 가능한 순서로 설정하는 행동",
+      "기준 유지에 실패했을 때 다음 주기에서 한도와 규칙을 재설정하는 행동",
+    ],
+    prohibitedClaims: [
+      "특정 저축액·자산 증가 보장",
+      "부자가 되는 시기 단정",
+      "특정 투자 상품·종목·코인·부동산 추천",
+      "사주만으로 실제 소비·부채 사실 단정",
+      "특정 월·연도 자산 증가 예언",
+      "금융 성공·실패 확정",
+      "대출·투자·저축 상품 실행 강제",
+    ],
+  },
+  {
     productId: "relationship",
     engine: "RELATIONSHIP",
     userQuestion:

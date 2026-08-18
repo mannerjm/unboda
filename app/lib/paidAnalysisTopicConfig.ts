@@ -38,24 +38,42 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     productId: "career",
     engine: "CAREER",
     userQuestion:
-      "현재 커리어 전체에서 무엇을 확대·유지·조정·보류해야 하는가?",
+      "현재 커리어 포트폴리오에서 어떤 운영 구조가 안정적이며, 어떤 책임·업무 패턴을 먼저 안정화·재조정·우선화해야 하는가?",
     analysisFocus: [
-      "지금 맡은 역할이 타고난 작동 방식과 얼마나 맞는지",
-      "커리어에서 반복되는 강점과 반복되는 문제의 구조",
-      "앞으로 역할이 달라질 수 있는 조건",
+      "커리어 책임과 업무 패턴에 에너지·성과가 배분되는 운영 구조",
+      "반복되는 과부하·분산·우선순위 충돌이 생기는 조건",
+      "좁은 적합성·이동·전문성 결정 전에 안정화할 운영 우선순위",
     ],
     requiredInsights: [
       {
-        id: "overall-career-pattern",
-        prompt: "현재 커리어에서 반복되는 강점과 문제의 구조를 설명한다.",
+        id: "career-operating-structure",
+        prompt: "현재 맡은 책임·업무·운영 방식에서 에너지와 성과가 배분되는 구조를 설명한다.",
       },
       {
-        id: "current-career-direction",
-        prompt: "현재 역할과 업무 경계에서 조정할 방향을 제시한다.",
+        id: "career-capacity-strain",
+        prompt: "반복되는 과부하·분산·책임 충돌이 커리어 운영을 약화시키는 조건과 관찰 신호를 구분한다.",
       },
       {
-        id: "career-adjustment-action",
-        prompt: "현실의 업무 조건을 점검하고 조정할 행동을 제시한다.",
+        id: "career-priority-stability",
+        prompt: "현재 커리어 포트폴리오에서 안정화·재조정·우선화가 필요한 책임과 운영 우선순위를 설명한다.",
+      },
+      {
+        id: "career-operating-review-action",
+        prompt: "커리어 운영 기준을 검토하고 다음 주기에서 재배분할 구체 행동과 점검 기준을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "role-environment-fit-diagnosis",
+        prompt: "직업·역할·업무 방식·조직 환경 중 무엇이 맞는지 상세 적합성을 진단하는 분석",
+      },
+      {
+        id: "stay-move-transition-decision",
+        prompt: "현재 자리에 남을지 이동할지, 퇴사·이직·전환 준비를 판단하는 분석",
+      },
+      {
+        id: "specialization-path-recognition",
+        prompt: "선택할 전문 분야·깊이와 넓이·인정 경로를 설계하는 분석",
       },
     ],
     evidenceFocus: [
@@ -73,14 +91,17 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     },
     decisionType: "exploration",
     actionFocus: [
-      "현재 역할과 실제 업무의 차이를 점검하는 행동",
-      "반복 소진 업무를 유형별로 분류하는 행동",
-      "강점이 쓰이는 업무 비중을 조정하는 행동",
+      "책임·업무·성과·에너지 사용을 같은 기준으로 기록하는 행동",
+      "반복 과부하와 분산이 생기는 업무 조합을 분류하는 행동",
+      "다음 검토 주기에서 줄일 책임·유지할 운영 기준·우선화할 항목을 재배분하는 행동",
     ],
     prohibitedClaims: [
       "특정 직업이나 직무를 정답처럼 제시",
       "연봉 수준 예측",
       "이직 시기를 날짜로 단정",
+      "현재 자리를 떠나거나 유지해야 한다는 결론",
+      "특정 조직 환경이나 역할이 맞는다고 단정",
+      "선택할 전문 분야나 인정 경로를 확정",
     ],
   },
   {

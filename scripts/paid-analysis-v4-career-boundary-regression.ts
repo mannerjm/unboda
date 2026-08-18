@@ -176,12 +176,12 @@ assert(
   "career-job-change must retain the decisionCheck count rule",
 );
 assert(
-  careerPrompt.includes("현재 커리어에서 반복되는 강점과 문제의 구조"),
-  "general career must retain its required career-pattern insight",
+  careerPrompt.includes("에너지와 성과가 배분되는 구조"),
+  "general career must retain its portfolio operating-structure insight",
 );
 assert(
-  careerPrompt.includes("현재 역할과 업무 경계에서 조정할 방향"),
-  "general career must retain its current-direction insight",
+  careerPrompt.includes("안정화·재조정·우선화가 필요한 책임과 운영 우선순위"),
+  "general career must retain its priority-stability insight",
 );
 
 const jobFitMetadata = [

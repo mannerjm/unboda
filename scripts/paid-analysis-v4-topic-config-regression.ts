@@ -174,6 +174,7 @@ function assertDifferentConfigs(left: string, right: string): void {
 // CAREER differentiation.
 assertDifferentConfigs("career", "career-job-change");
 assertDifferentConfigs("career", "career-job-fit");
+assertDifferentConfigs("career", "career-specialization");
 assertDifferentConfigs("career-job-change", "career-job-fit");
 assertDifferentConfigs("career-job-fit", "career-specialization");
 assert(
@@ -187,6 +188,14 @@ assert(
 assert(
   (configOf("career-job-change").excludedFocus?.length ?? 0) === 3,
   "career-job-change must carry three excluded focus items",
+);
+assert(
+  configOf("career").requiredInsights.length === 4,
+  "career must carry four portfolio-operation required insights",
+);
+assert(
+  (configOf("career").excludedFocus?.length ?? 0) === 3,
+  "career must carry three sibling boundary exclusions",
 );
 
 // MONEY differentiation.

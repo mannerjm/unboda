@@ -20,6 +20,7 @@ const PRODUCT_ENGINE_MAP: Record<string, PaidAnalysisEngine> = {
   "relationship-intimacy": "RELATIONSHIP",
   "relationship-conflict": "RELATIONSHIP",
   "relationship-boundary": "RELATIONSHIP",
+  "relationship-reunion": "RELATIONSHIP",
   "daeun-current": "PERIOD",
 };
 

@@ -791,6 +791,74 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "특정 시점 예측",
     ],
   },
+  {
+    productId: "relationship-reunion",
+    engine: "RELATIONSHIP",
+    userQuestion:
+      "단절된 관계와 다시 연결을 시도하기 전에 어떤 변화와 조건을 확인해야 하는가?",
+    analysisFocus: [
+      "단절에 이르게 된 맥락과 이전 문제",
+      "상호적인 재접점과 행동 변화 evidence",
+      "재연결 시도와 보류를 가르는 기준",
+    ],
+    requiredInsights: [
+      {
+        id: "separation-context",
+        prompt: "단절에 이르게 된 상황과 이전 관계에서 반복된 문제가 현재에도 남아 있는지 구분한다.",
+      },
+      {
+        id: "recontact-signal",
+        prompt: "상호적인 재접점, 일관된 연락, 구체적인 대화 제안처럼 다시 연결을 검토할 수 있는 관찰 신호를 제시한다.",
+      },
+      {
+        id: "behavior-change-evidence",
+        prompt: "말이나 감정 표현이 아니라 이전 문제와 관련된 실제 행동 변화가 반복되는지 확인하는 기준을 설명한다.",
+      },
+      {
+        id: "reconnection-decision-action",
+        prompt: "재연결을 시도하거나 보류하기 전에 확인할 조건과 중단 기준을 포함한 구체 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "current-relationship-routine-decision",
+        prompt: "현재 유지 중인 관계의 일반 지속·조정 운영을 판단하는 분석",
+      },
+      {
+        id: "general-conflict-repair",
+        prompt: "단절 이전 특정 갈등의 화해·수습 자체를 중심으로 하는 분석",
+      },
+      {
+        id: "marriage-or-longterm-outcome",
+        prompt: "결혼이나 장기 관계 결과를 보장하거나 결정하는 판단",
+      },
+    ],
+    evidenceFocus: [
+      "fortune_flow",
+      "seun",
+      "element_relations",
+      "fortune_brain",
+      "strength",
+    ],
+    decisionCriteria: {
+      확대: "재연결을 위한 대화와 확인 시도를 넓히는 방향",
+      유지: "현재 재접점과 거리 상태를 그대로 유지하는 방향",
+      조정: "재연결 조건과 상호 책임의 기준을 다시 정리하는 방향",
+      보류: "재연결 시도를 미루고 행동 변화와 상호성을 관찰하는 방향",
+    },
+    decisionType: "decision",
+    actionFocus: [
+      "단절에 이르게 된 맥락과 이전 문제를 분리해 기록하는 행동",
+      "상호 재접점과 행동 변화 evidence를 확인하는 행동",
+      "재연결 시도와 보류의 기준 및 중단 조건을 문장화하는 행동",
+    ],
+    prohibitedClaims: [
+      "상대의 마음이나 의도 단정",
+      "재회 가능성이나 관계 결과 보장",
+      "결혼이나 장기 관계 결과 판단",
+      "특정 재접점 시점 예측",
+    ],
+  },
 ];
 
 const LAUNCH_TOPIC_CONFIG_MAP = new Map(

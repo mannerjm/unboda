@@ -24,6 +24,14 @@ import {
   type PremiumProductPlugin,
 } from "./premiumProductRegistry";
 import type { PaidAnalysisEvidenceFacts } from "./paidAnalysisEvidenceFacts";
+import {
+  getPaidAnalysisEngine,
+  getPaidAnalysisEngineRules,
+} from "./paidAnalysisEngine";
+import {
+  formatTopicConfigForPrompt,
+  resolvePaidAnalysisLaunchSpecialization,
+} from "./paidAnalysisTopicConfig";
 
 
 
@@ -1304,6 +1312,18 @@ export function buildPaidAnalysisDetailPromptV4(
   );
   const periodStrategy = getPeriodAnalysisStrategy(input.productId);
 
+  const specialization = resolvePaidAnalysisLaunchSpecialization(
+    input.productId,
+  );
+  const engine = getPaidAnalysisEngine(input.productId);
+  const engineRulesBlock = engine
+    ? `\n${getPaidAnalysisEngineRules(engine)}\n`
+    : "";
+  const topicConfigBlock =
+    specialization.kind === "topic"
+      ? `\n${formatTopicConfigForPrompt(specialization.config)}\n`
+      : "";
+
   const timelineRules = periodStrategy
     ? `${buildPeriodTimelineSectionRules(periodStrategy)}
 ${buildPeriodTimelineConsistencyRule(periodStrategy)}`
@@ -1367,7 +1387,7 @@ ${formatReferencePeriodForPrompt(input.referencePeriod)}
 ` : ""}${periodStrategy ? `
 [기간별 분석 전략]
 ${formatPeriodStrategyForPrompt(periodStrategy)}
-` : ""}${evidenceFactsBlock}
+` : ""}${evidenceFactsBlock}${engineRulesBlock}${topicConfigBlock}
 출력은 반드시 유효한 JSON 하나만 반환하세요.
 마크다운, 코드 블록, 설명 문장, JSON 앞뒤의 부가 문구는 절대 포함하지 마세요.
 

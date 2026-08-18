@@ -1,0 +1,363 @@
+import { getCanonicalPremiumProductId } from "./premiumProductRegistry";
+import { getPeriodAnalysisStrategy } from "./analysisPeriodStrategy";
+import { getPaidAnalysisEngine, type PaidAnalysisEngine } from "./paidAnalysisEngine";
+import type {
+  PaidAnalysisDecisionDirection,
+  PaidAnalysisEvidenceKey,
+} from "./paidAnalysisDetailOutput";
+
+/** decision products ask the model for decisionCheck; exploration products must not. */
+export type PaidAnalysisDecisionType = "decision" | "exploration";
+
+/**
+ * Only the values that specialise the AI contract. Product metadata (title, price,
+ * description) stays in premiumProductRegistry / analysisTopics and is never copied here.
+ */
+export type PaidAnalysisTopicConfig = {
+  productId: string;
+  engine: PaidAnalysisEngine;
+  userQuestion: string;
+  analysisFocus: string[];
+  evidenceFocus: PaidAnalysisEvidenceKey[];
+  decisionCriteria: Record<PaidAnalysisDecisionDirection, string>;
+  decisionType: PaidAnalysisDecisionType;
+  actionFocus: string[];
+  prohibitedClaims: string[];
+};
+
+const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
+  {
+    productId: "career",
+    engine: "CAREER",
+    userQuestion:
+      "현재 커리어 전체에서 무엇을 확대·유지·조정·보류해야 하는가?",
+    analysisFocus: [
+      "지금 맡은 역할이 타고난 작동 방식과 얼마나 맞는지",
+      "커리어에서 반복되는 강점과 반복되는 문제의 구조",
+      "앞으로 역할이 달라질 수 있는 조건",
+    ],
+    evidenceFocus: [
+      "fortune_brain",
+      "strength",
+      "gyeokguk",
+      "element_relations",
+      "fortune_flow",
+    ],
+    decisionCriteria: {
+      확대: "역할과 책임의 범위를 넓히는 방향",
+      유지: "현재 역할과 조직을 그대로 유지하는 방향",
+      조정: "역할 비중과 업무 경계를 다시 정리하는 방향",
+      보류: "커리어 전반의 큰 결정을 미루고 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "현재 역할과 실제 업무의 차이를 점검하는 행동",
+      "반복 소진 업무를 유형별로 분류하는 행동",
+      "강점이 쓰이는 업무 비중을 조정하는 행동",
+    ],
+    prohibitedClaims: [
+      "특정 직업이나 직무를 정답처럼 제시",
+      "연봉 수준 예측",
+      "이직 시기를 날짜로 단정",
+    ],
+  },
+  {
+    productId: "career-job-change",
+    engine: "CAREER",
+    userQuestion: "지금 이동할 것인가, 남을 것인가?",
+    analysisFocus: [
+      "잔류와 이동을 가르는 판단 조건",
+      "변화가 기회로 작용하기 시작하는 신호",
+      "이동 이후 자리를 잡기 위해 필요한 조건",
+    ],
+    evidenceFocus: [
+      "strength",
+      "fortune_flow",
+      "element_relations",
+      "daeun",
+      "fortune_brain",
+    ],
+    decisionCriteria: {
+      확대: "이동을 준비하고 지원·협상을 추진하는 방향",
+      유지: "현재 자리를 유지하며 성과를 쌓는 방향",
+      조정: "현재 직무·역할·근무 조건을 재협상하는 방향",
+      보류: "이동 결정을 유예하고 조건을 관찰하는 방향",
+    },
+    decisionType: "decision",
+    actionFocus: [
+      "이동 판단 기준을 문서로 정리하는 행동",
+      "현재 조직에서 재협상 가능한 조건을 확인하는 행동",
+      "이동 후 정착 조건을 미리 점검하는 행동",
+    ],
+    prohibitedClaims: [
+      "이직 시기를 특정 연도나 월로 단정",
+      "합격이나 채용 결과 확정",
+      "특정 회사 추천",
+    ],
+  },
+  {
+    productId: "career-job-fit",
+    engine: "CAREER",
+    userQuestion:
+      "나는 어떤 방식으로 일할 때 강점이 가장 잘 작동하는가?",
+    analysisFocus: [
+      "강점이 살아나는 역할 유형",
+      "혼자 집중하는 일과 사람을 상대하는 일 중 유리한 방향",
+      "체계적인 조직과 유연한 환경 중 맞는 근무 조건",
+    ],
+    evidenceFocus: [
+      "gyeokguk",
+      "fortune_brain",
+      "strength",
+      "element_relations",
+      "element_balance",
+    ],
+    decisionCriteria: {
+      확대: "강점이 작동하는 업무 영역을 넓히는 방향",
+      유지: "현재 일하는 방식을 그대로 유지하는 방향",
+      조정: "업무 유형의 비중을 다시 배분하는 방향",
+      보류: "새로운 역할 시도를 미루고 현재 방식을 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "최근 업무를 강점 유형별로 분류하는 행동",
+      "집중형 업무와 대인형 업무의 성과 차이를 확인하는 행동",
+      "근무 환경 조건을 기준표로 정리하는 행동",
+    ],
+    prohibitedClaims: [
+      "직업명을 나열해 정답처럼 제시",
+      "적성을 고정된 운명으로 단정",
+      "이직 여부를 결론으로 제시",
+    ],
+  },
+  {
+    productId: "wealth",
+    engine: "MONEY",
+    userQuestion:
+      "재물 구조 전반에서 지금 무엇을 확대·유지·조정·보류해야 하는가?",
+    analysisFocus: [
+      "돈이 들어오는 수입 구조",
+      "돈이 남는 보존 구조",
+      "손실과 분산이 커지는 조건",
+    ],
+    evidenceFocus: [
+      "element_relations",
+      "strength",
+      "fortune_flow",
+      "fortune_brain",
+      "yongshin",
+    ],
+    decisionCriteria: {
+      확대: "수입과 활동 범위를 넓히는 방향",
+      유지: "현재 재물 구조를 그대로 유지하는 방향",
+      조정: "지출과 계약 구조를 다시 정리하는 방향",
+      보류: "새로운 재무 결정을 유예하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "수입 경로와 지출 경로를 구분해 기록하는 행동",
+      "회수 가능한 지출과 회수 불가한 지출을 나누는 행동",
+      "계약과 약정 조건을 점검하는 행동",
+    ],
+    prohibitedClaims: [
+      "3개월·6개월·1년처럼 계산 근거가 없는 기간 약속",
+      "수익률이나 금액 제시",
+      "특정 투자 상품 추천",
+    ],
+  },
+  {
+    productId: "money-wealth-accumulation",
+    engine: "MONEY",
+    userQuestion:
+      "왜 돈이 들어와도 쌓이지 않으며 무엇을 조정해야 하는가?",
+    analysisFocus: [
+      "축적을 막는 구조적 원인",
+      "보존과 확대 중 지금 우선해야 할 것",
+      "지출과 분산이 반복되는 지점",
+    ],
+    evidenceFocus: [
+      "element_relations",
+      "strength",
+      "fortune_brain",
+      "element_balance",
+      "fortune_flow",
+    ],
+    decisionCriteria: {
+      확대: "축적을 해치지 않는 범위에서 수입원과 저축 여력을 넓히는 방향",
+      유지: "현재 축적 방식을 그대로 유지하는 방향",
+      조정: "보존 구조를 다시 설계하는 방향",
+      보류: "새로운 축적 시도를 미루고 지출 구조를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "최근 지출을 구조 유형별로 분류하는 행동",
+      "남는 돈이 사라지는 지점을 특정하는 행동",
+      "보존 한도를 먼저 정하는 행동",
+    ],
+    prohibitedClaims: [
+      "투자·계약 전반의 판단을 결론으로 제시",
+      "저축 상품이나 금액 제시",
+      "축적 결과를 보장",
+    ],
+  },
+  {
+    productId: "relationship",
+    engine: "RELATIONSHIP",
+    userQuestion:
+      "관계 전반에서 지금 무엇을 유지하고 무엇을 조정해야 하는가?",
+    analysisFocus: [
+      "관계에서 반복되는 패턴",
+      "관계 변화가 강해지는 촉발 조건",
+      "갈등과 거리감이 커지는 지점",
+    ],
+    evidenceFocus: [
+      "fortune_flow",
+      "element_relations",
+      "strength",
+      "daeun",
+      "fortune_brain",
+    ],
+    decisionCriteria: {
+      확대: "관계의 접점과 교류를 넓히는 방향",
+      유지: "현재 관계 방식을 그대로 유지하는 방향",
+      조정: "거리와 경계를 다시 설정하는 방향",
+      보류: "관계에 대한 결정을 미루고 신호를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "반복 갈등이 시작되는 상황을 기록하는 행동",
+      "관계별로 유지하는 거리 기준을 정리하는 행동",
+      "감정 소모가 커지는 조건을 확인하는 행동",
+    ],
+    prohibitedClaims: [
+      "상대의 감정이나 의도 단정",
+      "결혼·이별 시점 제시",
+      "관계 결과 보장",
+    ],
+  },
+  {
+    productId: "relationship-current",
+    engine: "RELATIONSHIP",
+    userQuestion:
+      "현재 관계를 이어갈지 조정할지 판단하려면 무엇을 확인해야 하는가?",
+    analysisFocus: [
+      "현재 관계에서 반복되는 패턴과 촉발 조건",
+      "연락 빈도·약속 변경·대화 재개처럼 확인 가능한 신호",
+      "관계를 이어갈지 조정할지 가르는 기준",
+    ],
+    evidenceFocus: [
+      "fortune_flow",
+      "element_relations",
+      "strength",
+      "seun",
+      "daeun",
+    ],
+    decisionCriteria: {
+      확대: "관계를 한 단계 진전시키는 방향",
+      유지: "현재 관계를 그대로 이어가는 방향",
+      조정: "관계의 거리와 규칙을 다시 정하는 방향",
+      보류: "관계에 대한 결론을 유예하고 신호를 관찰하는 방향",
+    },
+    decisionType: "decision",
+    actionFocus: [
+      "관찰할 신호 세 가지를 정해 일정 기간 확인하는 행동",
+      "갈등 직후가 아닌 시점에 대화 조건을 설계하는 행동",
+      "이어갈 기준과 조정할 기준을 각각 문장으로 적는 행동",
+    ],
+    prohibitedClaims: [
+      "상대가 어떤 마음인지 단정",
+      "재회나 이별 보장",
+      "특정 날짜에 상황이 달라진다는 예측",
+    ],
+  },
+];
+
+const LAUNCH_TOPIC_CONFIG_MAP = new Map(
+  LAUNCH_TOPIC_CONFIGS.map((config) => [config.productId, config]),
+);
+
+/** PERIOD products are specialised by analysisPeriodStrategy, not by a topic config. */
+const PERIOD_LAUNCH_PRODUCT_IDS = ["daeun-current"];
+
+export type PaidAnalysisLaunchSpecialization =
+  | { kind: "topic"; config: PaidAnalysisTopicConfig }
+  | { kind: "period"; productId: string; engine: PaidAnalysisEngine }
+  | { kind: "none" };
+
+export function getPaidAnalysisTopicConfig(
+  productId?: string,
+): PaidAnalysisTopicConfig | undefined {
+  if (!productId) {
+    return undefined;
+  }
+
+  return LAUNCH_TOPIC_CONFIG_MAP.get(getCanonicalPremiumProductId(productId));
+}
+
+export function getLaunchProductIds(): string[] {
+  return [
+    ...LAUNCH_TOPIC_CONFIGS.map((config) => config.productId),
+    ...PERIOD_LAUNCH_PRODUCT_IDS,
+  ];
+}
+
+/**
+ * Tells callers whether a product has Launch-level specialisation. Products outside
+ * the Launch set resolve to "none" so nothing pretends to be specialised.
+ */
+export function resolvePaidAnalysisLaunchSpecialization(
+  productId?: string,
+): PaidAnalysisLaunchSpecialization {
+  const config = getPaidAnalysisTopicConfig(productId);
+
+  if (config) {
+    return { kind: "topic", config };
+  }
+
+  if (!productId) {
+    return { kind: "none" };
+  }
+
+  const canonicalProductId = getCanonicalPremiumProductId(productId);
+  const engine = getPaidAnalysisEngine(canonicalProductId);
+
+  if (
+    engine === "PERIOD" &&
+    PERIOD_LAUNCH_PRODUCT_IDS.includes(canonicalProductId) &&
+    getPeriodAnalysisStrategy(canonicalProductId)
+  ) {
+    return { kind: "period", productId: canonicalProductId, engine };
+  }
+
+  return { kind: "none" };
+}
+
+export function formatTopicConfigForPrompt(
+  config: PaidAnalysisTopicConfig,
+): string {
+  const decisionLines = (
+    Object.entries(config.decisionCriteria) as [
+      PaidAnalysisDecisionDirection,
+      string,
+    ][]
+  ).map(([direction, meaning]) => `  - ${direction}: ${meaning}`);
+
+  const decisionCheckRule =
+    config.decisionType === "decision"
+      ? "- 이 상품은 의사결정형이다. decisionCheck에 예 또는 아니오로 답할 수 있는 확인 질문을 3개 이상 5개 이하로 작성한다."
+      : "- 이 상품은 탐색형이다. decisionCheck 필드를 출력하지 않는다.";
+
+  return `[상품 전문화 계약]
+- 이 리포트가 답해야 하는 단 하나의 질문: ${config.userQuestion}
+- 분석 초점:
+${config.analysisFocus.map((item) => `  - ${item}`).join("\n")}
+- evidence는 다음 key를 우선 선택한다: ${config.evidenceFocus.join(", ")}
+  (해당 근거를 확인할 수 없을 때만 허용된 다른 key를 사용하고, 없는 근거를 만들지 않는다.)
+- direction 4값은 이 상품에서 다음을 뜻한다.
+${decisionLines.join("\n")}
+- action은 다음 방향으로 작성한다.
+${config.actionFocus.map((item) => `  - ${item}`).join("\n")}
+- 이 상품에서 절대 작성하면 안 되는 것:
+${config.prohibitedClaims.map((item) => `  - ${item}`).join("\n")}
+${decisionCheckRule}`;
+}

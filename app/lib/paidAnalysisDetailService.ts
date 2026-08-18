@@ -17,6 +17,15 @@ import type {
 } from "./paidAnalysisDetailOutput";
 import { resolvePaidAnalysisDetailV4 } from "./paidAnalysisEvidenceResolver";
 import {
+  reviewEvidenceLinkage,
+  validateActionStructure,
+  validateMoneySafety,
+  validateTopicTimelineDates,
+  type PaidAnalysisQualityIssue,
+} from "./paidAnalysisV4QualityValidators";
+import { getPaidAnalysisEngine } from "./paidAnalysisEngine";
+import { resolvePaidAnalysisLaunchSpecialization } from "./paidAnalysisTopicConfig";
+import {
   validatePaidAnalysisConsistency,
   validatePaidAnalysisConsistencyV4,
 } from "./paidAnalysisConsistencyValidator";
@@ -495,6 +504,8 @@ export async function generatePaidAnalysisDetailV4(
     canonicalProductId,
     plugin: registryProduct?.plugin,
     analysisType: input.analysisType,
+    specialization: resolvePaidAnalysisLaunchSpecialization(input.productId)
+      .kind,
   });
 
   const prompt = buildPaidAnalysisDetailPromptV4(input);
@@ -540,6 +551,37 @@ export async function generatePaidAnalysisDetailV4(
     detail,
     input.evidenceFacts ?? {},
   );
+
+  const qualityIssues: PaidAnalysisQualityIssue[] = [
+    ...validateTopicTimelineDates(detail, input.productId).issues,
+    ...validateActionStructure(detail).issues,
+    ...(getPaidAnalysisEngine(input.productId) === "MONEY"
+      ? validateMoneySafety(detail).issues
+      : []),
+  ];
+
+  if (qualityIssues.length > 0) {
+    const issueMessage = qualityIssues
+      .map((issue) => `${issue.field}: ${issue.message}`)
+      .join(" | ");
+
+    console.error("[paid-analysis-detail-v4] quality-failed", { issueMessage });
+
+    throw new Error(
+      `심층 분석 결과가 품질 기준을 충족하지 못했습니다. ${issueMessage}`,
+    );
+  }
+
+  const linkageWarnings = reviewEvidenceLinkage(resolvedDetail);
+
+  if (linkageWarnings.length > 0) {
+    // Metadata only: report text must never reach the logs.
+    console.warn("[paid-analysis-detail-v4] evidence-linkage-warning", {
+      productId: input.productId,
+      warningCount: linkageWarnings.length,
+      fields: linkageWarnings.map((warning) => warning.field),
+    });
+  }
 
   // Guarantees the UI never receives evidence without a deterministic fact.
   parseResolvedPaidAnalysisDetailV4(resolvedDetail);

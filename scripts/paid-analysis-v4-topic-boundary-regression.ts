@@ -66,17 +66,9 @@ assert(
 );
 
 const wealthExcluded = ids(wealth.excludedFocus ?? []);
-const accumulationRequired = ids(accumulation.requiredInsights);
 assert(
-  [...wealthExcluded].filter((id) => accumulationRequired.has(id)).length >= 2,
-  "wealth must yield its accumulation boundary to accumulation required insights",
-);
-
-const accumulationExcluded = ids(accumulation.excludedFocus ?? []);
-const wealthRequired = ids(wealth.requiredInsights);
-assert(
-  [...accumulationExcluded].filter((id) => wealthRequired.has(id)).length >= 2,
-  "accumulation must yield broad operating judgments to wealth required insights",
+  wealthExcluded.has("accumulation-preservation-allocation"),
+  "wealth must yield preservation and allocation to accumulation",
 );
 
 const basePromptInput = {
@@ -158,6 +150,7 @@ for (const removedBoundaryPromise of [
   "돈을 벌어도 잘 모이지 않는 이유",
   "장기적으로 자신에게 맞는 재물 축적 방식",
   "돈이 들어오는 구조와 남는 구조의 차이",
+  "대운·세운에 따른 수입과 보존 흐름",
 ]) {
   assert(
     !wealthMetadata.includes(removedBoundaryPromise),

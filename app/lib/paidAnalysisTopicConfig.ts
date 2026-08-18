@@ -312,49 +312,49 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     productId: "wealth",
     engine: "MONEY",
     userQuestion:
-      "재물 구조 전반에서 지금 무엇을 확대·유지·조정·보류해야 하는가?",
+      "현재 내 재정 구조에서 수입·지출·책임·활동·계약이 어떤 방식으로 연결되어 있고, 돈의 흐름을 안정적으로 운영하기 위해 무엇을 우선 조정·점검해야 하는가?",
     analysisFocus: [
-      "수입 경로의 질과 지속 가능성",
-      "유출 구조와 활동 비용의 통제 가능성",
-      "현재 재물 운영에서 위험 분산과 방향을 판단하는 기준",
+      "수입·지출·책임·활동·계약이 연결되는 재정 운영 구조",
+      "여러 돈 운영 차원 사이에서 비용·책임·통제 압력이 불균형해지는 조건",
+      "축적·손실 통제·저축 루틴 이전에 우선 점검할 재정 운영 순서",
     ],
     requiredInsights: [
       {
-        id: "income-path-quality",
-        prompt: "수입 경로가 비용과 책임을 제외하고도 지속 가능한지 설명한다.",
+        id: "money-operating-structure",
+        prompt: "수입·지출·책임·활동·계약이 현재 재정 운영에서 연결되는 구조를 설명한다.",
       },
       {
-        id: "outflow-control",
-        prompt: "지출과 활동 비용 중 사용자가 통제할 수 있는 구조를 구분한다.",
+        id: "money-flow-coordination",
+        prompt: "수입 흐름·반복 지출·활동 비용·책임 부담이 서로 조율되거나 충돌하는 조건을 구분한다.",
       },
       {
-        id: "activity-contract-efficiency",
-        prompt: "활동이나 계약이 비용과 책임 대비 효율적인지 판단 기준을 제시한다.",
+        id: "money-operating-pressure",
+        prompt: "활동·계약·책임이 겹칠 때 재정 운영의 통제와 우선순위가 약해지는 조건과 관찰 신호를 설명한다.",
       },
       {
-        id: "overall-money-direction",
-        prompt: "현재 재물 운영 전체에서 확대·유지·조정·보류 중 하나의 방향을 정한다.",
+        id: "money-operating-review-action",
+        prompt: "현재 재정 운영에서 먼저 점검·조정·유지할 차원을 정하는 구체 검토 순서와 행동을 제시한다.",
       },
     ],
     excludedFocus: [
       {
-        id: "accumulation-leak-pattern",
-        prompt: "반복 누수의 상세 원인을 진단하는 분석",
+        id: "accumulation-preservation-allocation",
+        prompt: "잔여분·보존선·축적 여력·자산 축적 구조와 남는 돈의 배분을 설계하는 분석",
       },
       {
-        id: "preservation-capacity-design",
-        prompt: "보존선·잔여분·저축 여력을 설계하는 분석",
+        id: "loss-exposure-early-warning",
+        prompt: "손실 노출·손실 확대·조기 경고 신호와 계약·공동 부담 위험 통제를 중심으로 하는 분석",
       },
       {
-        id: "income-allocation-routine",
-        prompt: "수입 직후 배분 루틴과 축적 실패 패턴을 다루는 분석",
+        id: "saving-routine-continuity",
+        prompt: "저축·예산 규칙·자동 이체·정기 점검·변동지출 습관의 유지와 재설정을 중심으로 하는 분석",
       },
     ],
     evidenceFocus: [
       "element_relations",
-      "strength",
-      "fortune_flow",
       "fortune_brain",
+      "strength",
+      "element_balance",
       "yongshin",
     ],
     decisionCriteria: {
@@ -365,14 +365,19 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     },
     decisionType: "exploration",
     actionFocus: [
-      "수입 경로별 비용과 책임을 비교하는 행동",
-      "활동과 계약의 비용 대비 효율을 점검하는 행동",
-      "재물 운영의 위험 분산 기준을 정리하는 행동",
+      "수입·지출·책임·활동·계약을 같은 기준으로 연결해 기록하는 행동",
+      "비용·책임·통제 압력이 겹치는 재정 운영 조합을 분류하는 행동",
+      "다음 검토 주기에서 먼저 조정할 운영 차원·유지할 기준·확인할 신호를 우선순위로 정리하는 행동",
     ],
     prohibitedClaims: [
       "3개월·6개월·1년처럼 계산 근거가 없는 기간 약속",
       "수익률이나 금액 제시",
       "특정 투자 상품 추천",
+      "정확한 수입·자산·부채·지출 사실을 사주만으로 단정",
+      "재물 증가·금융 성공을 보장",
+      "특정 손실 금액이나 파산 시점을 예언",
+      "대출·투자 실행을 지시",
+      "축적 구조·손실 경고·저축 루틴을 중심 결론으로 제시",
     ],
   },
   {

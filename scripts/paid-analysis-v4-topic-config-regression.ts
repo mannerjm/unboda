@@ -176,6 +176,14 @@ assert(
   configOf("career-job-change").decisionType !== configOf("career-job-fit").decisionType,
   "career-job-change and career-job-fit must have different decisionType",
 );
+assert(
+  configOf("career-job-change").requiredInsights.length === 4,
+  "career-job-change must carry four decision required insights",
+);
+assert(
+  (configOf("career-job-change").excludedFocus?.length ?? 0) === 3,
+  "career-job-change must carry three excluded focus items",
+);
 
 // MONEY differentiation.
 assertDifferentConfigs("wealth", "money-wealth-accumulation");

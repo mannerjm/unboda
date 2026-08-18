@@ -91,7 +91,38 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "변화가 기회로 작용하기 시작하는 신호",
       "이동 이후 자리를 잡기 위해 필요한 조건",
     ],
-    requiredInsights: [],
+    requiredInsights: [
+      {
+        id: "stay-move-decision-criteria",
+        prompt: "현재 직무·조직 조건에서 유지·준비·이동을 가르는 관찰 기준을 구분한다.",
+      },
+      {
+        id: "change-readiness-signal",
+        prompt: "일시적 불만과 실제 이동 준비 신호를 구분하고, 변화가 기회로 작용할 조건을 설명한다.",
+      },
+      {
+        id: "transition-risk-condition",
+        prompt: "이동 뒤 역할·환경·보상·정착에서 확인해야 할 위험 조건과 준비 부족 신호를 제시한다.",
+      },
+      {
+        id: "job-change-preparation-action",
+        prompt: "유지·재협상·준비·이동 중 다음 행동을 판단 기준과 함께 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "overall-job-fit-profile",
+        prompt: "직업·역할 자체의 적합성과 업무 방식 전반을 종합 프로필로 판단하는 분석",
+      },
+      {
+        id: "specialization-or-promotion-path",
+        prompt: "전문성 축적 로드맵이나 현재 조직 안의 승진·책임 확대 경로를 중심으로 하는 분석",
+      },
+      {
+        id: "organization-or-independence-profile",
+        prompt: "조직 문화 적합성이나 독립·프리랜서 전환 적합성을 종합적으로 판단하는 분석",
+      },
+    ],
     evidenceFocus: [
       "strength",
       "fortune_flow",
@@ -115,6 +146,10 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "이직 시기를 특정 연도나 월로 단정",
       "합격이나 채용 결과 확정",
       "특정 회사 추천",
+      "반드시 퇴사하거나 이직해야 한다는 단정",
+      "이직 성공이나 연봉 상승 보장",
+      "현재 회사에 남으면 실패한다는 단정",
+      "사주만으로 특정 직장 선택을 확정",
     ],
   },
   {

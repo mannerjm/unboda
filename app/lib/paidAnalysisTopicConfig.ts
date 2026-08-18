@@ -519,6 +519,142 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "특정 날짜에 상황이 달라진다는 예측",
     ],
   },
+  {
+    productId: "relationship-new-connection",
+    engine: "RELATIONSHIP",
+    userQuestion:
+      "새로운 관계가 시작될 가능성과 초기 접점을 어떻게 만들고 검증할 것인가?",
+    analysisFocus: [
+      "새로운 접점이 생기는 조건",
+      "첫 연락·만남에서 신뢰를 확인하는 방식",
+      "초기 관계의 일관성을 검증하는 기준",
+    ],
+    requiredInsights: [
+      {
+        id: "connection-opportunity-pattern",
+        prompt: "새로운 관계의 접점이 늘어나는 조건과 그 기회를 실제 만남으로 구분하는 기준을 설명한다.",
+      },
+      {
+        id: "initial-contact-style",
+        prompt: "첫 연락·만남·공동 활동에서 신뢰를 만들거나 흐리게 하는 초기 상호작용 방식을 구분한다.",
+      },
+      {
+        id: "early-trust-signal",
+        prompt: "초기에 반복 확인할 수 있는 약속·반응·일관성 신호를 제시한다.",
+      },
+      {
+        id: "new-connection-action",
+        prompt: "새로운 접점을 만들고 초기 신뢰를 검증할 수 있는 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "intimacy-pace-pattern",
+        prompt: "형성된 관계 안에서 친밀감의 속도와 안정성을 설계하는 분석",
+      },
+      {
+        id: "emotional-opening-boundary",
+        prompt: "감정 개방의 깊이와 장기적인 정서 경계를 조절하는 분석",
+      },
+      {
+        id: "marriage-or-longterm-decision",
+        prompt: "결혼이나 장기 관계 결과를 결정하는 판단",
+      },
+    ],
+    evidenceFocus: [
+      "fortune_flow",
+      "seun",
+      "element_relations",
+      "fortune_brain",
+      "strength",
+    ],
+    decisionCriteria: {
+      확대: "새로운 접점과 교류를 넓히는 방향",
+      유지: "현재 접점 형성 방식을 그대로 유지하는 방향",
+      조정: "초기 상호작용과 신뢰 확인 방식을 다시 정리하는 방향",
+      보류: "새로운 관계 시작을 미루고 초기 신호를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "새로운 접점이 생기는 환경과 초기 반응을 기록하는 행동",
+      "첫 연락·만남에서 신뢰를 검증하는 행동",
+      "초기 관계의 일관성을 확인하는 행동",
+    ],
+    prohibitedClaims: [
+      "특정 상대의 마음이나 의도 확정",
+      "반드시 새 인연이 생긴다는 보장",
+      "만남이나 연애 시작 시점 단정",
+      "결혼 결과 보장",
+    ],
+  },
+  {
+    productId: "relationship-intimacy",
+    engine: "RELATIONSHIP",
+    userQuestion:
+      "관계가 시작된 뒤 친밀감이 깊어질 때 어떤 속도와 방식이 안정적인가?",
+    analysisFocus: [
+      "친밀감의 속도와 관계 안정성",
+      "감정 개방과 개인 경계의 균형",
+      "가까워질수록 커지는 감정 소모 반응",
+    ],
+    requiredInsights: [
+      {
+        id: "intimacy-pace-pattern",
+        prompt: "친밀감이 깊어지는 속도와 관계 안정성이 어긋나는 조건을 설명한다.",
+      },
+      {
+        id: "emotional-opening-boundary",
+        prompt: "감정 개방과 개인 경계 사이에서 안정적인 속도를 구분한다.",
+      },
+      {
+        id: "closeness-stress-response",
+        prompt: "가까워질수록 감정 소모·불안·회피가 커지는 반응을 관찰 가능한 신호로 설명한다.",
+      },
+      {
+        id: "intimacy-adjustment-action",
+        prompt: "친밀감의 속도와 감정 거리를 조정하는 구체 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "connection-opportunity-pattern",
+        prompt: "새로운 인연의 발생 가능성과 접점 기회를 평가하는 분석",
+      },
+      {
+        id: "initial-contact-style",
+        prompt: "새 관계의 첫 연락·만남·접점을 만들고 획득하는 방식",
+      },
+      {
+        id: "marriage-or-longterm-decision",
+        prompt: "결혼이나 장기 관계 결과를 결정하는 판단",
+      },
+    ],
+    evidenceFocus: [
+      "element_relations",
+      "fortune_brain",
+      "strength",
+      "fortune_flow",
+      "seun",
+    ],
+    decisionCriteria: {
+      확대: "친밀감 표현과 교류의 범위를 넓히는 방향",
+      유지: "현재 친밀감의 속도와 감정 거리를 그대로 유지하는 방향",
+      조정: "친밀감의 속도와 개인 경계의 비중을 다시 정리하는 방향",
+      보류: "감정 개방을 미루고 관계의 안정 신호를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "친밀감의 속도와 감정 개방 수준을 기록하는 행동",
+      "가까워질수록 생기는 감정 소모 반응을 확인하는 행동",
+      "친밀감과 개인 경계를 조정하는 행동",
+    ],
+    prohibitedClaims: [
+      "상대의 애정이나 의도 단정",
+      "관계가 반드시 깊어진다는 보장",
+      "결혼·이별·재회 결과 판단",
+      "특정 시점 예측",
+    ],
+  },
 ];
 
 const LAUNCH_TOPIC_CONFIG_MAP = new Map(

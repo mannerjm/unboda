@@ -19,7 +19,7 @@ function assert(condition: boolean, message: string): void {
 
 const LAUNCH_PRODUCT_IDS = getLaunchProductIds();
 
-assert(LAUNCH_PRODUCT_IDS.length === 9, "Launch set must contain 9 products");
+assert(LAUNCH_PRODUCT_IDS.length === 11, "Launch set must contain 11 products");
 
 for (const productId of [
   "career",
@@ -30,6 +30,8 @@ for (const productId of [
   "money-wealth-accumulation",
   "relationship",
   "relationship-current",
+  "relationship-new-connection",
+  "relationship-intimacy",
   "daeun-current",
 ]) {
   assert(
@@ -56,6 +58,8 @@ const EXPECTED_ENGINES: Record<string, string> = {
   "money-wealth-accumulation": "MONEY",
   relationship: "RELATIONSHIP",
   "relationship-current": "RELATIONSHIP",
+  "relationship-new-connection": "RELATIONSHIP",
+  "relationship-intimacy": "RELATIONSHIP",
   "daeun-current": "PERIOD",
 };
 
@@ -173,7 +177,14 @@ assert(
   "relationship and relationship-current must have different decisionType",
 );
 
-for (const productId of ["relationship", "relationship-current"]) {
+assertDifferentConfigs("relationship-new-connection", "relationship-intimacy");
+
+for (const productId of [
+  "relationship",
+  "relationship-current",
+  "relationship-new-connection",
+  "relationship-intimacy",
+]) {
   assert(
     configOf(productId).requiredInsights.length === 4,
     `${productId} must carry four relationship required insights`,
@@ -194,6 +205,8 @@ for (const productId of [
   "money-wealth-accumulation",
   "relationship",
   "relationship-current",
+  "relationship-new-connection",
+  "relationship-intimacy",
 ]) {
   const config = configOf(productId);
   const block = formatTopicConfigForPrompt(config);
@@ -234,6 +247,8 @@ const wealthPrompt = promptFor("wealth");
 const accumulationPrompt = promptFor("money-wealth-accumulation");
 const relationshipPrompt = promptFor("relationship");
 const relationshipCurrentPrompt = promptFor("relationship-current");
+const connectionPrompt = promptFor("relationship-new-connection");
+const intimacyPrompt = promptFor("relationship-intimacy");
 const daeunPrompt = promptFor("daeun-current");
 
 assert(
@@ -270,6 +285,8 @@ for (const prompt of [
   accumulationPrompt,
   relationshipPrompt,
   relationshipCurrentPrompt,
+  connectionPrompt,
+  intimacyPrompt,
 ]) {
   assert(
     prompt.includes("[상품 전문화 계약]"),
@@ -288,6 +305,7 @@ const promptPairs: [string, string][] = [
   [jobFitPrompt, specializationPrompt],
   [wealthPrompt, accumulationPrompt],
   [relationshipPrompt, relationshipCurrentPrompt],
+  [connectionPrompt, intimacyPrompt],
 ];
 
 for (const [left, right] of promptPairs) {
@@ -383,6 +401,8 @@ for (const productId of [
   "wealth",
   "money-wealth-accumulation",
   "relationship",
+  "relationship-new-connection",
+  "relationship-intimacy",
 ]) {
   const prompt = promptFor(productId);
 

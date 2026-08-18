@@ -16,6 +16,8 @@ const PRODUCT_ENGINE_MAP: Record<string, PaidAnalysisEngine> = {
   "money-wealth-accumulation": "MONEY",
   relationship: "RELATIONSHIP",
   "relationship-current": "RELATIONSHIP",
+  "relationship-new-connection": "RELATIONSHIP",
+  "relationship-intimacy": "RELATIONSHIP",
   "daeun-current": "PERIOD",
 };
 

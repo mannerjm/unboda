@@ -85,6 +85,7 @@ export type PaidAnalysisV4DiagnosticArtifact = {
 
 export type PaidAnalysisV4DiagnosticArtifactStore = {
   artifactDirectory: string;
+  getProductPath: (productId: string) => string;
   writeManifest: (manifest: PaidAnalysisV4DiagnosticManifest) => Promise<string>;
   writeProduct: (productId: string, artifact: PaidAnalysisV4DiagnosticArtifact) => Promise<string>;
 };
@@ -133,13 +134,16 @@ export async function createPaidAnalysisV4DiagnosticArtifactStore(
 
   return {
     artifactDirectory,
+    getProductPath(productId) {
+      return path.join(artifactDirectory, `${runId}-${productId}.json`);
+    },
     async writeManifest(manifest) {
       const filePath = path.join(artifactDirectory, `${runId}-manifest.json`);
       await writeJsonAtomically(filePath, manifest);
       return filePath;
     },
     async writeProduct(productId, artifact) {
-      const filePath = path.join(artifactDirectory, `${runId}-${productId}.json`);
+      const filePath = this.getProductPath(productId);
       await writeJsonAtomically(filePath, artifact);
       return filePath;
     },
@@ -323,10 +327,14 @@ async function finalizeProduct(
 ): Promise<PaidAnalysisV4DiagnosticManifest> {
   envelope.finishedAt = new Date().toISOString();
   envelope.durationMs = Date.now() - startedMs;
+  envelope.artifactPath = options.artifactStore.getProductPath(envelope.productId);
   artifact.envelope = envelope;
 
   try {
-    envelope.artifactPath = await options.artifactStore.writeProduct(envelope.productId, artifact);
+    const writtenArtifactPath = await options.artifactStore.writeProduct(envelope.productId, artifact);
+    if (writtenArtifactPath !== envelope.artifactPath) {
+      throw new Error("artifact store returned a path different from its deterministic product path");
+    }
   } catch (error) {
     const details = safeError(error);
     envelope.errorStage = "ARTIFACT_WRITE";

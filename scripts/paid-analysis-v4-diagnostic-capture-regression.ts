@@ -46,15 +46,30 @@ function validOutput(): PaidAnalysisDetailOutputV4 {
   };
 }
 
+function schemaInvalidOutput(): PaidAnalysisDetailOutputV4 {
+  const output = validOutput();
+  output.action[0].action = "노력하세요";
+  return output;
+}
+
 async function main(): Promise<void> {
 const baseDirectory = path.join(os.tmpdir(), "unboda-v4-capture-regression");
 const runId = "capture-regression";
 const store = await createPaidAnalysisV4DiagnosticArtifactStore(runId, baseDirectory);
 const payload = JSON.stringify(validOutput());
+const schemaInvalidPayload = JSON.stringify(schemaInvalidOutput());
 let attempt = 0;
+let productWriteCount = 0;
+const trackingStore: PaidAnalysisV4DiagnosticArtifactStore = {
+  ...store,
+  async writeProduct(productId, artifact) {
+    productWriteCount += 1;
+    return store.writeProduct(productId, artifact);
+  },
+};
 const manifest = await runPaidAnalysisV4DiagnosticCapture({
   runId,
-  productIds: ["career-specialization", "money-leak-risk", "relationship-conflict", "relationship-current", "relationship-current"],
+  productIds: ["career-specialization", "money-leak-risk", "relationship-conflict", "relationship-current", "relationship-partner-pattern"],
   model: "test-model",
   reasoningSetting: "low",
   outputLimit: 4800,
@@ -66,10 +81,10 @@ const manifest = await runPaidAnalysisV4DiagnosticCapture({
     if (attempt === 2) throw new Error("network timeout");
     if (attempt === 3) return { requestId: "req-empty", responseStatus: "completed", rawOutput: "" };
     if (attempt === 4) return { requestId: "req-malformed", responseStatus: "completed", rawOutput: "{bad json" };
-    if (attempt === 5) return { requestId: "req-schema", responseStatus: "completed", rawOutput: "{}" };
+    if (attempt === 5) return { requestId: "req-schema", responseStatus: "completed", rawOutput: schemaInvalidPayload };
     return { requestId: "req-success", responseStatus: "completed", rawOutput: payload };
   },
-  artifactStore: store,
+  artifactStore: trackingStore,
 });
 
 assert(manifest.products.length === 5, "all attempted products must remain in manifest");
@@ -78,13 +93,26 @@ assert(manifest.products[1].errorStage === "REQUEST", "request rejection must be
 assert(manifest.products[1].errorName === "REQUEST_TIMEOUT", "timeout rejection must be identified");
 assert(manifest.products[2].errorStage === "TEXT_EXTRACTION", "empty text must be classified");
 assert(manifest.products[3].errorStage === "STRUCTURED_PARSE", "malformed output must be classified");
-assert(manifest.products[4].errorStage === "STRUCTURED_PARSE", "schema-invalid output must be classified");
+assert(manifest.products[4].errorStage === "SCHEMA_VALIDATE", "schema-invalid output must be classified");
 assert(Boolean(manifest.products[0].artifactPath), "completed product artifact must be durable before later failures");
 assert(manifest.artifactCount >= 5, "each product must produce an artifact when writing succeeds");
+assert(productWriteCount === manifest.products.length, "normal capture must write each product artifact exactly once");
+
+for (const product of manifest.products) {
+  const expectedPath = store.getProductPath(product.productId);
+  assert(product.artifactPath === expectedPath, "manifest must use the deterministic product artifact path");
+  const persistedArtifact = JSON.parse(await readFile(expectedPath, "utf8"));
+  assert(persistedArtifact.envelope.artifactPath === expectedPath, "serialized artifact must preserve its self path");
+  assert(persistedArtifact.envelope.productId === product.productId, "serialized artifact must match its manifest product");
+}
 
 const manifestPath = path.join(store.artifactDirectory, `${runId}-manifest.json`);
 const persistedManifest = JSON.parse(await readFile(manifestPath, "utf8"));
 assert(persistedManifest.products.length === 5, "manifest must remain recoverable");
+for (const product of persistedManifest.products) {
+  const persistedArtifact = JSON.parse(await readFile(product.artifactPath, "utf8"));
+  assert(persistedArtifact.envelope.artifactPath === product.artifactPath, "reopened artifact self path must equal manifest path");
+}
 assert(!JSON.stringify(persistedManifest).includes("OPENAI_API_KEY"), "manifest must not contain secret field names");
 
 const failingStore: PaidAnalysisV4DiagnosticArtifactStore = {

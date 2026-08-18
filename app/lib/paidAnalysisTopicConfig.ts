@@ -5,6 +5,7 @@ import type {
   PaidAnalysisDecisionDirection,
   PaidAnalysisEvidenceKey,
 } from "./paidAnalysisDetailOutput";
+import type { PaidAnalysisPremiumDepthContract } from "./paidAnalysisV4QualityValidators";
 
 /** decision products ask the model for decisionCheck; exploration products must not. */
 export type PaidAnalysisDecisionType = "decision" | "exploration";
@@ -1207,6 +1208,35 @@ export function getLaunchProductIds(): string[] {
     ...LAUNCH_TOPIC_CONFIGS.map((config) => config.productId),
     ...PERIOD_LAUNCH_PRODUCT_IDS,
   ];
+}
+
+/**
+ * Derives static reasoning responsibilities from the existing product contract.
+ * The generator must expand each responsibility through the V4 output sections.
+ */
+export function getPaidAnalysisPremiumDepthContract(
+  config: PaidAnalysisTopicConfig,
+): PaidAnalysisPremiumDepthContract {
+  return {
+    productId: config.productId,
+    requiredInsightIds: config.requiredInsights.map((item) => item.id),
+    evidenceFocus: config.evidenceFocus,
+    actionFocus: config.actionFocus,
+    positiveOwnership: [
+      config.userQuestion,
+      ...config.analysisFocus,
+      ...config.requiredInsights.map((item) => item.prompt),
+      ...config.actionFocus,
+    ],
+    insightOwnership: config.requiredInsights.map((insight, index) => ({
+      insightId: insight.id,
+      evidenceKey: config.evidenceFocus[index % config.evidenceFocus.length],
+      mechanism: insight.prompt,
+      observableCondition: `${insight.prompt} ${config.analysisFocus[index % config.analysisFocus.length]}`,
+      actionResponsibility: `${config.actionFocus[index % config.actionFocus.length]} (${insight.id})`,
+    })),
+    timingMode: "contextual",
+  };
 }
 
 /**

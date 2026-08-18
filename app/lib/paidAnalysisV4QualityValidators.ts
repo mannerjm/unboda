@@ -1,4 +1,5 @@
 import type {
+  PaidAnalysisEvidenceKey,
   PaidAnalysisDetailOutputV4,
   ResolvedPaidAnalysisDetailV4,
 } from "./paidAnalysisDetailOutput";
@@ -13,6 +14,149 @@ export type PaidAnalysisQualityResult = {
   ok: boolean;
   issues: PaidAnalysisQualityIssue[];
 };
+
+export type PaidAnalysisPremiumDepthInsight = {
+  insightId: string;
+  evidenceKey: PaidAnalysisEvidenceKey;
+  mechanism: string;
+  observableCondition: string;
+  actionResponsibility: string;
+};
+
+export type PaidAnalysisPremiumDepthContract = {
+  productId: string;
+  requiredInsightIds: readonly string[];
+  evidenceFocus: readonly PaidAnalysisEvidenceKey[];
+  actionFocus: readonly string[];
+  positiveOwnership: readonly string[];
+  insightOwnership: readonly PaidAnalysisPremiumDepthInsight[];
+  timingMode: "contextual" | "period";
+  temporalEvidence?: readonly PaidAnalysisEvidenceKey[];
+};
+
+function normalizeOwnershipText(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+const GENERIC_ACTION_ONLY = new Set([
+  "기록하세요",
+  "확인하세요",
+  "점검하세요",
+  "대화하세요",
+  "천천히 하세요",
+  "신중하세요",
+]);
+
+/**
+ * Validates the static reasoning responsibilities that a V4 topic must make
+ * available to the eventual generator and self-review layer.
+ */
+export function validatePremiumDepthContract(
+  contract: PaidAnalysisPremiumDepthContract,
+): PaidAnalysisQualityResult {
+  const issues: PaidAnalysisQualityIssue[] = [];
+  const requiredIds = contract.requiredInsightIds.map(normalizeOwnershipText);
+  const ownershipIds = contract.insightOwnership.map((item) => item.insightId);
+
+  if (requiredIds.length === 0) {
+    issues.push({ field: "requiredInsightIds", message: "필수 통찰이 없습니다." });
+  }
+
+  if (new Set(requiredIds).size !== requiredIds.length) {
+    issues.push({ field: "requiredInsightIds", message: "필수 통찰 ID가 중복됩니다." });
+  }
+
+  if (
+    ownershipIds.length !== requiredIds.length ||
+    ownershipIds.some((id) => !requiredIds.includes(id))
+  ) {
+    issues.push({ field: "insightOwnership", message: "모든 필수 통찰에 정확히 하나의 깊이 책임이 필요합니다." });
+  }
+
+  if (contract.positiveOwnership.length === 0) {
+    issues.push({ field: "positiveOwnership", message: "긍정적 분석 소유권이 없습니다." });
+  }
+
+  if (contract.actionFocus.length === 0) {
+    issues.push({ field: "actionFocus", message: "상품별 행동 책임이 없습니다." });
+  } else if (
+    contract.actionFocus.every((action) =>
+      GENERIC_ACTION_ONLY.has(normalizeOwnershipText(action)),
+    )
+  ) {
+    issues.push({ field: "actionFocus", message: "상품의 행동 초점이 일반 행동 문구만으로 구성되었습니다." });
+  }
+
+  const mechanisms = new Set<string>();
+  const responsibilities = new Set<string>();
+
+  for (const [index, insight] of contract.insightOwnership.entries()) {
+    const prefix = `insightOwnership[${index}]`;
+    const mechanism = normalizeOwnershipText(insight.mechanism);
+    const observableCondition = normalizeOwnershipText(insight.observableCondition);
+    const actionResponsibility = normalizeOwnershipText(insight.actionResponsibility);
+
+    if (!contract.evidenceFocus.includes(insight.evidenceKey)) {
+      issues.push({ field: `${prefix}.evidenceKey`, message: "통찰의 근거 key가 상품 evidenceFocus에 없습니다." });
+    }
+
+    if (!mechanism || !observableCondition || !actionResponsibility) {
+      issues.push({ field: prefix, message: "통찰마다 mechanism, observable condition, action responsibility가 필요합니다." });
+      continue;
+    }
+
+    if (GENERIC_ACTION_ONLY.has(actionResponsibility)) {
+      issues.push({ field: `${prefix}.actionResponsibility`, message: "통찰 책임이 일반 행동 문구만으로 구성되었습니다." });
+    }
+
+    if (mechanisms.has(mechanism)) {
+      issues.push({ field: `${prefix}.mechanism`, message: "서로 다른 통찰이 같은 mechanism으로 붕괴됩니다." });
+    }
+    mechanisms.add(mechanism);
+
+    const responsibilityKey = `${observableCondition}|${actionResponsibility}`;
+    if (responsibilities.has(responsibilityKey)) {
+      issues.push({ field: prefix, message: "서로 다른 통찰이 같은 observable/action 책임으로 붕괴됩니다." });
+    }
+    responsibilities.add(responsibilityKey);
+  }
+
+  if (contract.timingMode === "period") {
+    if (!contract.temporalEvidence || contract.temporalEvidence.length === 0) {
+      issues.push({ field: "temporalEvidence", message: "기간 상품에는 의미 있는 temporal evidence가 필요합니다." });
+    }
+  } else if (contract.temporalEvidence && contract.temporalEvidence.length > 0) {
+    issues.push({ field: "temporalEvidence", message: "비기간 상품은 event-date ownership을 가질 수 없습니다." });
+  }
+
+  return { ok: issues.length === 0, issues };
+}
+
+/** Excluded focus cannot be the only distinction between neighboring products. */
+export function validatePremiumDepthSiblingDistinction(
+  left: PaidAnalysisPremiumDepthContract,
+  right: PaidAnalysisPremiumDepthContract,
+): PaidAnalysisQualityResult {
+  const leftOwnership = left.positiveOwnership.map(normalizeOwnershipText).join("|");
+  const rightOwnership = right.positiveOwnership.map(normalizeOwnershipText).join("|");
+
+  const tokenSet = (value: string): Set<string> =>
+    new Set(value.split(/[\s|·,./()]+/).filter((token) => token.length >= 2));
+  const leftTokens = tokenSet(leftOwnership);
+  const rightTokens = tokenSet(rightOwnership);
+  const sharedTokenCount = [...leftTokens].filter((token) => rightTokens.has(token)).length;
+  const maxTokenCount = Math.max(leftTokens.size, rightTokens.size, 1);
+  const ownershipOverlap = sharedTokenCount / maxTokenCount;
+
+  if (leftOwnership === rightOwnership || ownershipOverlap >= 0.85) {
+    return {
+      ok: false,
+      issues: [{ field: "positiveOwnership", message: "제외 범위와 무관하게 두 상품의 긍정적 분석 소유권이 실질적으로 같습니다." }],
+    };
+  }
+
+  return { ok: true, issues: [] };
+}
 
 /** Explicit calendar references. TOPIC products have no period data to back them. */
 const CONCRETE_DATE_PATTERNS: RegExp[] = [

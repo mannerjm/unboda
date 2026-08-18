@@ -78,6 +78,10 @@ for (const productId of LAUNCH_PRODUCT_IDS) {
 
     assert(config.userQuestion.trim().length > 0, `${productId} needs a userQuestion`);
     assert(config.analysisFocus.length >= 3, `${productId} needs 3+ analysisFocus`);
+    assert(
+      Array.isArray(config.requiredInsights),
+      `${productId} needs a requiredInsights contract`,
+    );
     assert(config.evidenceFocus.length >= 3, `${productId} needs 3+ evidenceFocus`);
     assert(
       config.prohibitedClaims.length > 0,

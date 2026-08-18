@@ -30,13 +30,13 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     id: "money-wealth-accumulation",
     category: "money",
     title: "재물이 쌓이는 구조",
-    shortDescription: "돈을 벌고 남기고 축적하는 방식과 현재 재물 흐름을 분석합니다.",
+    shortDescription: "돈이 들어와도 남지 않는 반복 누수와 보존 여력을 분석합니다.",
     riskLevel: "sensitive",    details: [
       "돈이 들어오는 구조와 남는 구조가 갈리는 명리적 원인",
-      "수입 구조·자산 보존·투자 성향·지출 위험으로 나눠 본 현재 재물 구조",
+      "수입 이후 잔여분이 사라지는 경로와 보존선이 흔들리는 조건",
       "지금 확대·유지·조정·보류 중 무엇이 우선인지에 대한 판단 기준",
       "시기별로 수입·보존·조정·준비 중 무엇이 중요해지는지",
-      "축적을 방해하는 행동과 지금 직접 점검할 확인 항목",
+      "반복 누수를 줄이고 축적 여력을 만드는 생활 관리 행동",
     ],  },
   {
     id: "money-leak-risk",

@@ -9,6 +9,11 @@ import type {
 /** decision products ask the model for decisionCheck; exploration products must not. */
 export type PaidAnalysisDecisionType = "decision" | "exploration";
 
+export type PaidAnalysisTopicInsight = {
+  id: string;
+  prompt: string;
+};
+
 /**
  * Only the values that specialise the AI contract. Product metadata (title, price,
  * description) stays in premiumProductRegistry / analysisTopics and is never copied here.
@@ -18,6 +23,8 @@ export type PaidAnalysisTopicConfig = {
   engine: PaidAnalysisEngine;
   userQuestion: string;
   analysisFocus: string[];
+  requiredInsights: PaidAnalysisTopicInsight[];
+  excludedFocus?: PaidAnalysisTopicInsight[];
   evidenceFocus: PaidAnalysisEvidenceKey[];
   decisionCriteria: Record<PaidAnalysisDecisionDirection, string>;
   decisionType: PaidAnalysisDecisionType;
@@ -36,6 +43,7 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "커리어에서 반복되는 강점과 반복되는 문제의 구조",
       "앞으로 역할이 달라질 수 있는 조건",
     ],
+    requiredInsights: [],
     evidenceFocus: [
       "fortune_brain",
       "strength",
@@ -70,6 +78,7 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "변화가 기회로 작용하기 시작하는 신호",
       "이동 이후 자리를 잡기 위해 필요한 조건",
     ],
+    requiredInsights: [],
     evidenceFocus: [
       "strength",
       "fortune_flow",
@@ -105,6 +114,7 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "혼자 집중하는 일과 사람을 상대하는 일 중 유리한 방향",
       "체계적인 조직과 유연한 환경 중 맞는 근무 조건",
     ],
+    requiredInsights: [],
     evidenceFocus: [
       "gyeokguk",
       "fortune_brain",
@@ -136,9 +146,41 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     userQuestion:
       "재물 구조 전반에서 지금 무엇을 확대·유지·조정·보류해야 하는가?",
     analysisFocus: [
-      "돈이 들어오는 수입 구조",
-      "돈이 남는 보존 구조",
-      "손실과 분산이 커지는 조건",
+      "수입 경로의 질과 지속 가능성",
+      "유출 구조와 활동 비용의 통제 가능성",
+      "현재 재물 운영에서 위험 분산과 방향을 판단하는 기준",
+    ],
+    requiredInsights: [
+      {
+        id: "income-path-quality",
+        prompt: "수입 경로가 비용과 책임을 제외하고도 지속 가능한지 설명한다.",
+      },
+      {
+        id: "outflow-control",
+        prompt: "지출과 활동 비용 중 사용자가 통제할 수 있는 구조를 구분한다.",
+      },
+      {
+        id: "activity-contract-efficiency",
+        prompt: "활동이나 계약이 비용과 책임 대비 효율적인지 판단 기준을 제시한다.",
+      },
+      {
+        id: "overall-money-direction",
+        prompt: "현재 재물 운영 전체에서 확대·유지·조정·보류 중 하나의 방향을 정한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "accumulation-leak-pattern",
+        prompt: "반복 누수의 상세 원인을 진단하는 분석",
+      },
+      {
+        id: "preservation-capacity-design",
+        prompt: "보존선·잔여분·저축 여력을 설계하는 분석",
+      },
+      {
+        id: "income-allocation-routine",
+        prompt: "수입 직후 배분 루틴과 축적 실패 패턴을 다루는 분석",
+      },
     ],
     evidenceFocus: [
       "element_relations",
@@ -155,9 +197,9 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     },
     decisionType: "exploration",
     actionFocus: [
-      "수입 경로와 지출 경로를 구분해 기록하는 행동",
-      "회수 가능한 지출과 회수 불가한 지출을 나누는 행동",
-      "계약과 약정 조건을 점검하는 행동",
+      "수입 경로별 비용과 책임을 비교하는 행동",
+      "활동과 계약의 비용 대비 효율을 점검하는 행동",
+      "재물 운영의 위험 분산 기준을 정리하는 행동",
     ],
     prohibitedClaims: [
       "3개월·6개월·1년처럼 계산 근거가 없는 기간 약속",
@@ -175,6 +217,38 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "보존과 확대 중 지금 우선해야 할 것",
       "지출과 분산이 반복되는 지점",
     ],
+    requiredInsights: [
+      {
+        id: "accumulation-leak-pattern",
+        prompt: "돈이 들어와도 축적을 막는 반복 누수 구조를 설명한다.",
+      },
+      {
+        id: "preservation-capacity-design",
+        prompt: "보존선과 저축 여력이 무너지는 조건을 구분한다.",
+      },
+      {
+        id: "income-allocation-routine",
+        prompt: "수입 증가와 지출·활동 증가가 함께 커지는 경로를 설명한다.",
+      },
+      {
+        id: "accumulation-improvement-action",
+        prompt: "잔여분을 남기기 위해 바꿀 수 있는 축적 개선 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "overall-money-direction",
+        prompt: "전체 재물 운영의 확대·유지·조정·보류 종합 판단",
+      },
+      {
+        id: "activity-contract-efficiency",
+        prompt: "계약의 종합 타당성과 신규 수입원 확대 여부의 판단",
+      },
+      {
+        id: "investment-and-portfolio-judgment",
+        prompt: "투자 상품 선택과 단기 수익 기회를 평가하는 분석",
+      },
+    ],
     evidenceFocus: [
       "element_relations",
       "strength",
@@ -190,9 +264,9 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     },
     decisionType: "exploration",
     actionFocus: [
-      "최근 지출을 구조 유형별로 분류하는 행동",
-      "남는 돈이 사라지는 지점을 특정하는 행동",
-      "보존 한도를 먼저 정하는 행동",
+      "반복 지출과 잔여분 소실 경로를 분류하는 행동",
+      "수입 직후 보존 몫과 운영 몫을 구분하는 행동",
+      "수입 증가에 따라 함께 늘어난 지출을 분리하는 행동",
     ],
     prohibitedClaims: [
       "투자·계약 전반의 판단을 결론으로 제시",
@@ -210,6 +284,7 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "관계 변화가 강해지는 촉발 조건",
       "갈등과 거리감이 커지는 지점",
     ],
+    requiredInsights: [],
     evidenceFocus: [
       "fortune_flow",
       "element_relations",
@@ -245,6 +320,7 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "연락 빈도·약속 변경·대화 재개처럼 확인 가능한 신호",
       "관계를 이어갈지 조정할지 가르는 기준",
     ],
+    requiredInsights: [],
     evidenceFocus: [
       "fortune_flow",
       "element_relations",
@@ -347,10 +423,30 @@ export function formatTopicConfigForPrompt(
       ? "- 이 상품은 의사결정형이다. decisionCheck에 예 또는 아니오로 답할 수 있는 확인 질문을 3개 이상 5개 이하로 작성한다."
       : "- 이 상품은 탐색형이다. decisionCheck 필드를 출력하지 않는다.";
 
+  const requiredInsightsBlock =
+    config.requiredInsights.length > 0
+      ? `
+[반드시 다룰 핵심 통찰]
+${config.requiredInsights.map((item) => `- ${item.prompt}`).join("\n")}
+- 각 통찰은 conclusion, coreProblem, cause, current, action 중 최소 한 곳의 중심 내용으로 반영한다.
+- 통찰 문구를 단순히 나열해서는 안 된다.
+`
+      : "";
+
+  const excludedFocusBlock =
+    config.excludedFocus && config.excludedFocus.length > 0
+      ? `
+[이 상품의 경계]
+- 다음 영역을 이 리포트의 핵심 결론이나 주된 action으로 확장하지 않는다.
+${config.excludedFocus.map((item) => `- ${item.prompt}`).join("\n")}
+`
+      : "";
+
   return `[상품 전문화 계약]
 - 이 리포트가 답해야 하는 단 하나의 질문: ${config.userQuestion}
 - 분석 초점:
 ${config.analysisFocus.map((item) => `  - ${item}`).join("\n")}
+${requiredInsightsBlock}${excludedFocusBlock}
 - evidence는 다음 key를 우선 선택한다: ${config.evidenceFocus.join(", ")}
   (해당 근거를 확인할 수 없을 때만 허용된 다른 key를 사용하고, 없는 근거를 만들지 않는다.)
 - direction 4값은 이 상품에서 다음을 뜻한다.

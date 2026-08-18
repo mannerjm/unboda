@@ -514,7 +514,7 @@ console.log(
 
 console.log(
   "wealth 기대 결과 실제 내용 포함:",
-  promptV3.includes("현재 재물 문제의 핵심 원인 이해"),
+  promptV3.includes("현재 재물 운영의 우선순위 이해"),
 );
 
 if (!promptV3.includes("상품 ID:\nwealth")) {
@@ -537,7 +537,7 @@ if (!promptV3.includes("재성의 강약과 실제 작용")) {
   throw new Error("V3 프롬프트에 wealth 분석 초점 실제 내용이 없습니다.");
 }
 
-if (!promptV3.includes("현재 재물 문제의 핵심 원인 이해")) {
+if (!promptV3.includes("현재 재물 운영의 우선순위 이해")) {
   throw new Error("V3 프롬프트에 wealth 기대 결과 실제 내용이 없습니다.");
 }
 

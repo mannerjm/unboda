@@ -43,7 +43,20 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "커리어에서 반복되는 강점과 반복되는 문제의 구조",
       "앞으로 역할이 달라질 수 있는 조건",
     ],
-    requiredInsights: [],
+    requiredInsights: [
+      {
+        id: "overall-career-pattern",
+        prompt: "현재 커리어에서 반복되는 강점과 문제의 구조를 설명한다.",
+      },
+      {
+        id: "current-career-direction",
+        prompt: "현재 역할과 업무 경계에서 조정할 방향을 제시한다.",
+      },
+      {
+        id: "career-adjustment-action",
+        prompt: "현실의 업무 조건을 점검하고 조정할 행동을 제시한다.",
+      },
+    ],
     evidenceFocus: [
       "fortune_brain",
       "strength",
@@ -114,7 +127,38 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "혼자 집중하는 일과 사람을 상대하는 일 중 유리한 방향",
       "체계적인 조직과 유연한 환경 중 맞는 근무 조건",
     ],
-    requiredInsights: [],
+    requiredInsights: [
+      {
+        id: "work-style-fit",
+        prompt: "혼자 깊게 처리하는 방식과 사람·협업을 통해 성과가 나는 방식 중 강점이 재현되는 조건을 구분한다.",
+      },
+      {
+        id: "role-environment-fit",
+        prompt: "역할 책임, 업무 유형, 체계성·자율성 같은 환경 조건이 강점 발휘에 미치는 영향을 설명한다.",
+      },
+      {
+        id: "strength-application",
+        prompt: "타고난 강점을 일반 성격이 아니라 실제 업무 산출·협업·문제 해결 방식으로 번역한다.",
+      },
+      {
+        id: "fit-verification-action",
+        prompt: "현재 업무에서 적합성을 검증할 수 있는 관찰 기준과 비교 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "specialization-roadmap",
+        prompt: "장기 전문 역량의 축적 로드맵과 깊이 설계",
+      },
+      {
+        id: "recognition-path",
+        prompt: "전문성의 인정·평가·성과 연결 경로",
+      },
+      {
+        id: "career-move-decision",
+        prompt: "이직·잔류·직무 이동의 종합 결정",
+      },
+    ],
     evidenceFocus: [
       "gyeokguk",
       "fortune_brain",
@@ -130,14 +174,81 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     },
     decisionType: "exploration",
     actionFocus: [
-      "최근 업무를 강점 유형별로 분류하는 행동",
-      "집중형 업무와 대인형 업무의 성과 차이를 확인하는 행동",
-      "근무 환경 조건을 기준표로 정리하는 행동",
+      "최근 업무를 업무 방식과 성과 조건별로 분류하는 행동",
+      "역할·환경별로 강점이 재현되는 조건을 비교하는 행동",
+      "현재 업무에서 적합성을 검증할 관찰 기준을 설정하는 행동",
     ],
     prohibitedClaims: [
       "직업명을 나열해 정답처럼 제시",
       "적성을 고정된 운명으로 단정",
       "이직 여부를 결론으로 제시",
+    ],
+  },
+  {
+    productId: "career-specialization",
+    engine: "CAREER",
+    userQuestion:
+      "어떤 전문 역량을 어느 정도 깊이로 쌓아야 장기 경쟁력과 인정 가능한 성과로 연결되는가?",
+    analysisFocus: [
+      "장기 축적할 전문 역량 방향",
+      "깊이와 넓이의 우선순위",
+      "전문성이 평가·성과·기회로 연결되는 경로",
+    ],
+    requiredInsights: [
+      {
+        id: "specialization-direction",
+        prompt: "장기적으로 깊게 축적할 가치가 큰 전문 역량의 방향과 선택 기준을 설명한다.",
+      },
+      {
+        id: "depth-vs-breadth",
+        prompt: "넓게 확장하는 방식과 한 축을 깊게 다지는 방식 중 현재 더 유리한 축적 전략을 구분한다.",
+      },
+      {
+        id: "recognition-path",
+        prompt: "전문성이 평가·성과·기회로 연결되려면 어떤 결과물·적용 경험·검증 경로가 필요한지 제시한다.",
+      },
+      {
+        id: "specialization-accumulation-action",
+        prompt: "역량을 선택하고 깊이를 누적할 수 있는 현실적인 학습·실무 적용 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "overall-job-fit-profile",
+        prompt: "전체 직무 적성 및 업무 방식의 종합 프로필",
+      },
+      {
+        id: "organization-environment-fit",
+        prompt: "조직 문화와 근무 환경의 종합 적합성 판단",
+      },
+      {
+        id: "career-move-decision",
+        prompt: "이직·잔류·직무 이동의 종합 결정",
+      },
+    ],
+    evidenceFocus: [
+      "fortune_brain",
+      "gyeokguk",
+      "strength",
+      "fortune_flow",
+      "element_relations",
+    ],
+    decisionCriteria: {
+      확대: "전문 역량의 적용 범위와 축적 비중을 넓히는 방향",
+      유지: "현재 전문 역량의 축적 방식을 그대로 유지하는 방향",
+      조정: "역량의 깊이와 넓이의 비중을 다시 배분하는 방향",
+      보류: "새로운 전문 분야의 선택을 미루고 현재 축적 방식을 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "깊게 축적할 역량 축을 하나로 좁히는 행동",
+      "넓이와 깊이의 투자 비중을 비교하는 행동",
+      "역량을 결과물·실무 적용·평가 근거로 연결하는 행동",
+    ],
+    prohibitedClaims: [
+      "특정 직업 또는 전문 분야가 유일한 정답이라고 단정",
+      "전문성 결과·승진·합격·연봉 상승 보장",
+      "근거 없는 전문성 성과 시점 확정",
     ],
   },
   {

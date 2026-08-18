@@ -11,6 +11,7 @@ const PRODUCT_ENGINE_MAP: Record<string, PaidAnalysisEngine> = {
   career: "CAREER",
   "career-job-change": "CAREER",
   "career-job-fit": "CAREER",
+  "career-specialization": "CAREER",
   wealth: "MONEY",
   "money-wealth-accumulation": "MONEY",
   relationship: "RELATIONSHIP",
@@ -29,9 +30,10 @@ export function getPaidAnalysisEngine(
 }
 
 const CAREER_ENGINE_RULES = `[CAREER Engine 규칙]
-- 이 리포트가 답해야 하는 축은 "지금 커리어에서 무엇을 확대·유지·조정·보류할 것인가"이다.
-- 역할 적합성, 조직형·독립형 성향, 반복 소진의 원인, 변화가 일어나는 조건, 실행 기준을 다룬다.
-- 강점을 나열하지 말고 그 강점이 실제 업무에서 어떻게 작동하는지 설명한다.
+- 커리어 분석은 역할, 역량, 환경, 변화 조건을 현실에서 관찰 가능한 기준으로 설명한다.
+- 강점은 일반 성격이 아니라 실제 업무에서 어떻게 작동하는지 설명한다.
+- TopicConfig의 단일 질문과 반드시 다룰 핵심 통찰을 본문 중심으로 최우선 적용한다.
+- TopicConfig에서 제외한 범위를 핵심 결론이나 주된 action으로 확장하지 않는다.
 - 다음은 절대 작성하지 않는다.
   - 특정 회사나 조직 추천
   - 특정 직업을 운명처럼 단정하는 표현

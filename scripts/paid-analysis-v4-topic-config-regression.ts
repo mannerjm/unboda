@@ -19,12 +19,13 @@ function assert(condition: boolean, message: string): void {
 
 const LAUNCH_PRODUCT_IDS = getLaunchProductIds();
 
-assert(LAUNCH_PRODUCT_IDS.length === 8, "Launch set must contain 8 products");
+assert(LAUNCH_PRODUCT_IDS.length === 9, "Launch set must contain 9 products");
 
 for (const productId of [
   "career",
   "career-job-change",
   "career-job-fit",
+  "career-specialization",
   "wealth",
   "money-wealth-accumulation",
   "relationship",
@@ -50,6 +51,7 @@ const EXPECTED_ENGINES: Record<string, string> = {
   career: "CAREER",
   "career-job-change": "CAREER",
   "career-job-fit": "CAREER",
+  "career-specialization": "CAREER",
   wealth: "MONEY",
   "money-wealth-accumulation": "MONEY",
   relationship: "RELATIONSHIP",
@@ -155,6 +157,7 @@ function assertDifferentConfigs(left: string, right: string): void {
 assertDifferentConfigs("career", "career-job-change");
 assertDifferentConfigs("career", "career-job-fit");
 assertDifferentConfigs("career-job-change", "career-job-fit");
+assertDifferentConfigs("career-job-fit", "career-specialization");
 assert(
   configOf("career-job-change").decisionType !== configOf("career-job-fit").decisionType,
   "career-job-change and career-job-fit must have different decisionType",
@@ -175,6 +178,7 @@ for (const productId of [
   "career",
   "career-job-change",
   "career-job-fit",
+  "career-specialization",
   "wealth",
   "money-wealth-accumulation",
   "relationship",
@@ -214,6 +218,7 @@ function promptFor(productId: string): string {
 const careerPrompt = promptFor("career");
 const jobChangePrompt = promptFor("career-job-change");
 const jobFitPrompt = promptFor("career-job-fit");
+const specializationPrompt = promptFor("career-specialization");
 const wealthPrompt = promptFor("wealth");
 const accumulationPrompt = promptFor("money-wealth-accumulation");
 const relationshipPrompt = promptFor("relationship");
@@ -249,6 +254,7 @@ for (const prompt of [
   careerPrompt,
   jobChangePrompt,
   jobFitPrompt,
+  specializationPrompt,
   wealthPrompt,
   accumulationPrompt,
   relationshipPrompt,
@@ -268,6 +274,7 @@ const promptPairs: [string, string][] = [
   [careerPrompt, jobChangePrompt],
   [careerPrompt, jobFitPrompt],
   [jobChangePrompt, jobFitPrompt],
+  [jobFitPrompt, specializationPrompt],
   [wealthPrompt, accumulationPrompt],
   [relationshipPrompt, relationshipCurrentPrompt],
 ];
@@ -361,6 +368,7 @@ for (const productId of ["career-job-change", "relationship-current"]) {
 for (const productId of [
   "career",
   "career-job-fit",
+  "career-specialization",
   "wealth",
   "money-wealth-accumulation",
   "relationship",

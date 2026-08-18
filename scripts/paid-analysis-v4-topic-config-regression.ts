@@ -227,7 +227,12 @@ assert(
   configOf("relationship").decisionType !== configOf("relationship-current").decisionType,
   "relationship and relationship-current must have different decisionType",
 );
+assertDifferentConfigs("relationship", "relationship-conflict");
+assertDifferentConfigs("relationship", "relationship-boundary");
+assertDifferentConfigs("relationship", "relationship-intimacy");
+assertDifferentConfigs("relationship", "relationship-reunion");
 assertDifferentConfigs("relationship", "relationship-marriage");
+assertDifferentConfigs("relationship", "relationship-new-connection");
 assertDifferentConfigs("relationship", "relationship-partner-pattern");
 
 assertDifferentConfigs("relationship-new-connection", "relationship-intimacy");

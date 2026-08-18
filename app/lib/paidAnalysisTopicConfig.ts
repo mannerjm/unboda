@@ -590,50 +590,50 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     productId: "relationship",
     engine: "RELATIONSHIP",
     userQuestion:
-      "관계 전반에서 지금 무엇을 유지하고 무엇을 조정해야 하는가?",
+      "여러 관계에서 반복되는 상호작용 운영 구조는 무엇이며, 거리·반응·정서적 부담·상호성에서 어떤 습관을 안정화·재조정·모니터링해야 하는가?",
     analysisFocus: [
-      "관계에서 반복되는 패턴",
-      "관계 변화가 강해지는 촉발 조건",
-      "갈등과 거리감이 커지는 지점",
+      "여러 관계에 걸쳐 반복되는 상호작용·거리·반응의 운영 구조",
+      "상호성·정서적 부담·관계 유지 방식이 불균형해지는 조건",
+      "특정 사람이나 사건 이전에 안정화할 관계 운영 우선순위",
     ],
     requiredInsights: [
       {
-        id: "relationship-pattern-map",
-        prompt: "여러 관계에서 반복되는 거리·갈등·감정 소모의 패턴을 구분한다.",
+        id: "relationship-operating-structure",
+        prompt: "여러 관계에서 반복되는 상호작용·거리·반응이 관계 유지에 작동하는 운영 구조를 설명한다.",
       },
       {
-        id: "relationship-trigger-boundary",
-        prompt: "관계 변화가 시작되는 촉발 조건과 유지할 거리 기준을 설명한다.",
+        id: "reciprocity-emotional-load",
+        prompt: "상호성의 불균형과 정서적 부담이 반복되는 관계 운영을 약화시키는 조건과 관찰 신호를 구분한다.",
       },
       {
-        id: "relationship-response-pattern",
-        prompt: "사용자의 반응 방식이 관계 유지와 소모에 어떤 영향을 주는지 확인 가능한 행동과 신호로 설명한다.",
+        id: "distance-response-pattern",
+        prompt: "가까워짐·거리 둠·반응 회피·과잉 대응이 여러 관계에서 반복되는 방식과 유지 조건을 설명한다.",
       },
       {
-        id: "relationship-general-adjustment",
-        prompt: "관계 유형별로 적용할 조정 행동과 검증 기준을 제시한다.",
+        id: "relationship-operating-review-action",
+        prompt: "여러 관계에서 공통으로 적용할 운영 습관의 안정화·재조정·모니터링 행동과 검토 기준을 제시한다.",
       },
     ],
     excludedFocus: [
       {
-        id: "current-relationship-decision",
-        prompt: "특정 현재 관계를 이어갈지 조정할지에 대한 결론",
+        id: "specific-current-or-reunion-decision",
+        prompt: "특정 현재 상대의 신호·지속·조정 판단이나 단절 관계의 재접촉·재연결 판단을 중심으로 하는 분석",
       },
       {
-        id: "current-relationship-signal-check",
-        prompt: "특정 관계의 연락·약속·대화 재개 신호를 근거로 한 판단",
+        id: "conflict-boundary-intimacy-intervention",
+        prompt: "특정 갈등의 수습·회복 순서, 관계 경계·허용 기준, 친밀감·감정 개방 속도를 설계하는 분석",
       },
       {
-        id: "marriage-or-reunion-decision",
-        prompt: "결혼·재회처럼 특정 관계 결과를 결정하는 판단",
+        id: "selection-commitment-connection-ownership",
+        prompt: "반복 파트너 선택, 새 인연의 접점·초기 신뢰, 장기 결합·공동생활 준비를 중심으로 하는 분석",
       },
     ],
     evidenceFocus: [
-      "fortune_flow",
       "element_relations",
-      "strength",
-      "daeun",
       "fortune_brain",
+      "strength",
+      "element_balance",
+      "yongshin",
     ],
     decisionCriteria: {
       확대: "관계의 접점과 교류를 넓히는 방향",
@@ -643,14 +643,17 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     },
     decisionType: "exploration",
     actionFocus: [
-      "반복 갈등이 시작되는 상황을 기록하는 행동",
-      "관계별로 유지하는 거리 기준을 정리하는 행동",
-      "감정 소모가 커지는 조건을 확인하는 행동",
+      "여러 관계에서 반복되는 상호작용·거리·반응을 같은 기준으로 기록하는 행동",
+      "상호성의 불균형과 정서적 부담이 커지는 관계 운영 조건을 분류하는 행동",
+      "다음 검토 주기에서 유지할 관계 습관·재조정할 반응·모니터링할 신호를 정리하는 행동",
     ],
     prohibitedClaims: [
       "상대의 감정이나 의도 단정",
       "결혼·이별 시점 제시",
       "관계 결과 보장",
+      "특정 현재 관계를 이어가거나 조정해야 한다는 결론",
+      "갈등 수습·경계 설정·친밀감 속도를 단일 관계에 처방",
+      "파트너 선택·새 인연·재회·결혼 준비를 중심 결론으로 제시",
     ],
   },
   {

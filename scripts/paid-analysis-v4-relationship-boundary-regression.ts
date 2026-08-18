@@ -70,9 +70,9 @@ for (const currentOnly of [
 }
 
 for (const generalOnly of [
-  "relationship-pattern-map",
-  "relationship-trigger-boundary",
-  "relationship-general-adjustment",
+  "relationship-operating-structure",
+  "reciprocity-emotional-load",
+  "relationship-operating-review-action",
 ]) {
   assert(
     !currentRequired.has(generalOnly),
@@ -83,9 +83,8 @@ for (const generalOnly of [
 const relationshipExcluded = ids(relationship.excludedFocus ?? []);
 const currentExcluded = ids(current.excludedFocus ?? []);
 assert(
-  relationshipExcluded.has("current-relationship-decision") &&
-    relationshipExcluded.has("current-relationship-signal-check"),
-  "relationship must yield current decision and signal checks",
+  relationshipExcluded.has("specific-current-or-reunion-decision"),
+  "relationship must yield current-person and reunion decisions",
 );
 assert(
   currentRequired.has("continue-adjust-criteria") &&
@@ -98,9 +97,9 @@ assert(
   "relationship-current must yield the general relationship profile and boundary design",
 );
 assert(
-  relationshipRequired.has("relationship-pattern-map") &&
-    relationshipRequired.has("relationship-trigger-boundary"),
-  "relationship must require general patterns and boundaries",
+  relationshipRequired.has("relationship-operating-structure") &&
+    relationshipRequired.has("reciprocity-emotional-load"),
+  "relationship must require cross-relationship operating structure and reciprocity load",
 );
 assert(
   relationship.userQuestion !== current.userQuestion,

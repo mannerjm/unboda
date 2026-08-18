@@ -16,8 +16,14 @@ export type PaidAnalysisSelfReviewResult = {
   revisedSections: string[];
 };
 
-import type { PaidAnalysisDetailOutputV2 } from "./paidAnalysisDetailOutput";
-import { validatePaidAnalysisConsistency } from "./paidAnalysisConsistencyValidator";
+import type {
+  PaidAnalysisDetailOutputV2,
+  PaidAnalysisDetailOutputV4,
+} from "./paidAnalysisDetailOutput";
+import {
+  validatePaidAnalysisConsistency,
+  validatePaidAnalysisConsistencyV4,
+} from "./paidAnalysisConsistencyValidator";
 
 function normalizeText(text: string): string {
   return text
@@ -142,6 +148,109 @@ export function reviewPaidAnalysisDetail(
   return {
     passed,
     overallScore,
+    checks,
+    feedback,
+    revisedSections,
+  };
+}
+
+function collectReportTextsV4(
+  output: PaidAnalysisDetailOutputV4,
+): string[] {
+  return [
+    output.conclusion.headline,
+    output.conclusion.focus,
+    output.conclusion.rationale,
+    output.conclusion.immediateAction,
+    output.coreProblem.title,
+    output.coreProblem.description,
+    output.coreProblem.whyItMatters,
+    output.cause.summary,
+    ...output.cause.reasons.flatMap((item) => [
+      item.title,
+      item.observedStructure,
+      item.realWorldPattern,
+      item.problemLinkage,
+    ]),
+    ...output.evidence.flatMap((item) => [item.meaning, item.linkage]),
+    output.current.summary,
+    ...[...output.current.opportunities, ...output.current.cautions].flatMap(
+      (item) => [item.situation, item.implication, item.observableSignal],
+    ),
+    ...output.timeline.flatMap((item) => [
+      item.label,
+      item.changeSignal,
+      item.preparation,
+    ]),
+    ...output.action.flatMap((item) => [
+      item.action,
+      item.target,
+      item.condition,
+      item.completionCriteria,
+    ]),
+    ...output.avoid.flatMap((item) => [item.behavior, item.reason]),
+    ...(output.decisionCheck ?? []),
+  ].map(normalizeText);
+}
+
+export function reviewPaidAnalysisDetailV4(
+  output: PaidAnalysisDetailOutputV4,
+): PaidAnalysisSelfReviewResult {
+  const feedback: string[] = [];
+  const revisedSections: string[] = [];
+
+  const consistencyResult = validatePaidAnalysisConsistencyV4(output);
+
+  const texts = collectReportTextsV4(output);
+
+  const duplicationPassed = !hasDuplicateContent(texts);
+
+  const readabilityPassed = texts.every(
+    (text) => text.length > 0 && !/\s{2,}/.test(text),
+  );
+
+  const actionabilityPassed = output.action.every(
+    (item) => !hasWeakActionExpression(normalizeText(item.action)),
+  );
+
+  const persuasivenessPassed =
+    output.cause.reasons.length >= 3 &&
+    output.evidence.length >= 3 &&
+    output.conclusion.rationale.length >= 10;
+
+  if (!consistencyResult.ok) {
+    feedback.push("리포트 섹션 사이에 방향성 모순이 있습니다.");
+  }
+
+  if (!readabilityPassed) {
+    feedback.push("빈 문장 또는 불필요한 공백이 포함되어 있습니다.");
+  }
+
+  if (!duplicationPassed) {
+    feedback.push("동일하거나 지나치게 반복되는 문장이 있습니다.");
+  }
+
+  if (!persuasivenessPassed) {
+    feedback.push("핵심 판단을 뒷받침하는 근거가 부족합니다.");
+  }
+
+  if (!actionabilityPassed) {
+    feedback.push("행동 가이드에 추상적인 표현이 포함되어 있습니다.");
+  }
+
+  const checks = {
+    consistency: consistencyResult.ok,
+    readability: readabilityPassed,
+    duplication: duplicationPassed,
+    persuasiveness: persuasivenessPassed,
+    actionability: actionabilityPassed,
+  };
+
+  const passedCheckCount = Object.values(checks).filter(Boolean).length;
+
+  return {
+    passed: Object.values(checks).every(Boolean),
+    overallScore: passedCheckCount * 20,
     checks,
     feedback,
     revisedSections,

@@ -3,23 +3,34 @@ import * as path from "path";
 import { evaluateRelationshipPremiumQuality } from "./paidAnalysisRelationshipPremiumQuality";
 import { validatePaidAnalysisHealthSafety } from "./paidAnalysisHealthSafetyValidator";
 import { generateAnalysisText } from "./ai/generateAnalysisText";
-import { reviewPaidAnalysisDetail } from "./paidAnalysisSelfReview";
+import {
+  reviewPaidAnalysisDetail,
+  reviewPaidAnalysisDetailV4,
+} from "./paidAnalysisSelfReview";
 import type {
   PaidAnalysisDetailOutput,
   PaidAnalysisDetailOutputV2,
     PaidAnalysisDetailOutputV3,
+  PaidAnalysisDetailOutputV4,
+  StoredPaidAnalysisDetail,
 } from "./paidAnalysisDetailOutput";
-import { validatePaidAnalysisConsistency } from "./paidAnalysisConsistencyValidator";
+import {
+  validatePaidAnalysisConsistency,
+  validatePaidAnalysisConsistencyV4,
+} from "./paidAnalysisConsistencyValidator";
 import { getPaidAnalysisCompressionPolicy } from "./paidAnalysisCompressionPolicy";
 import {
   parsePaidAnalysisDetailOutput,
   parsePaidAnalysisDetailOutputV2,
    parsePaidAnalysisDetailOutputV3,
+  parsePaidAnalysisDetailOutputV4,
+  parseStoredPaidAnalysisDetail,
 } from "./paidAnalysisDetailOutputParser";
 import {
   buildPaidAnalysisDetailPrompt,
   buildPaidAnalysisDetailPromptV2,
     buildPaidAnalysisDetailPromptV3,
+  buildPaidAnalysisDetailPromptV4,
   type PaidAnalysisDetailPromptInput,
 } from "./paidAnalysisDetailPrompt";
 
@@ -164,6 +175,19 @@ export function parseGeneratedPaidAnalysisDetailV3(
   value: unknown,
 ): PaidAnalysisDetailOutputV3 {
   return parseGeneratedJson(value, parsePaidAnalysisDetailOutputV3);
+}
+
+export function parseGeneratedPaidAnalysisDetailV4(
+  value: unknown,
+): PaidAnalysisDetailOutputV4 {
+  return parseGeneratedJson(value, parsePaidAnalysisDetailOutputV4);
+}
+
+/** Reads rows written before the V4 rollout as well as new ones. */
+export function readStoredPaidAnalysisDetail(
+  value: unknown,
+): StoredPaidAnalysisDetail {
+  return parseGeneratedJson(value, parseStoredPaidAnalysisDetail);
 }
 
 function normalizeText(value: string): string {
@@ -446,4 +470,71 @@ if (isRelationshipAnalysis) {
   return input.referencePeriod
     ? { ...compressedDetail, referencePeriod: input.referencePeriod }
     : compressedDetail;
+}
+
+/**
+ * V4 contract pipeline. Not wired into the API route yet: the report UI still reads
+ * the V3 shape, so the switch happens together with the UI work in Step 4B.
+ */
+export async function generatePaidAnalysisDetailV4(
+  input: PaidAnalysisDetailPromptInput,
+): Promise<PaidAnalysisDetailOutputV4> {
+  const canonicalProductId = input.productId
+    ? getCanonicalPremiumProductId(input.productId)
+    : undefined;
+
+  const registryProduct = canonicalProductId
+    ? getPremiumProduct(canonicalProductId)
+    : undefined;
+
+  console.info("[paid-analysis-detail-v4] start", {
+    productId: input.productId,
+    canonicalProductId,
+    plugin: registryProduct?.plugin,
+    analysisType: input.analysisType,
+  });
+
+  const prompt = buildPaidAnalysisDetailPromptV4(input);
+
+  const responseText = await generateAnalysisText(prompt, {
+    callType: "paid-analysis-detail",
+  });
+
+  const detail = parseGeneratedPaidAnalysisDetailV4(responseText);
+
+  const consistencyResult = validatePaidAnalysisConsistencyV4(detail);
+
+  if (!consistencyResult.ok) {
+    const issueMessage = consistencyResult.issues
+      .map((issue) => `${issue.field}: ${issue.message}`)
+      .join(" | ");
+
+    console.error("[paid-analysis-detail-v4] consistency-failed", {
+      issueMessage,
+    });
+
+    throw new Error(
+      `심층 분석 결과의 섹션 간 일관성 검증에 실패했습니다. ${issueMessage}`,
+    );
+  }
+
+  const selfReview = reviewPaidAnalysisDetailV4(detail);
+
+  if (!selfReview.passed) {
+    const feedbackMessage = selfReview.feedback.join(" | ");
+
+    console.error("[paid-analysis-detail-v4] self-review-failed", {
+      overallScore: selfReview.overallScore,
+      feedbackMessage,
+    });
+
+    throw new Error(
+      `심층 분석 결과의 Self Review에 실패했습니다. 점수: ${selfReview.overallScore}. ${feedbackMessage}`,
+    );
+  }
+
+  // Frozen once, at generation time; readers must never recompute it.
+  return input.referencePeriod
+    ? { ...detail, referencePeriod: input.referencePeriod }
+    : detail;
 }

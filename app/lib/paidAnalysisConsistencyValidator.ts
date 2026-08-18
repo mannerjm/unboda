@@ -1,4 +1,7 @@
-import type { PaidAnalysisDetailOutputV2 } from "./paidAnalysisDetailOutput";
+import type {
+  PaidAnalysisDetailOutputV2,
+  PaidAnalysisDetailOutputV4,
+} from "./paidAnalysisDetailOutput";
 
 export type PaidAnalysisConsistencyIssue = {
   field: string;
@@ -72,6 +75,58 @@ export function validatePaidAnalysisConsistency(
   output: PaidAnalysisDetailOutputV2,
 ): PaidAnalysisConsistencyResult {
   const issues = [...validateDirection(output)];
+
+  return {
+    ok: issues.length === 0,
+    issues,
+  };
+}
+
+// V4 drops coachMessage, so the direction check reads conclusion + action items.
+function validateDirectionV4(
+  output: PaidAnalysisDetailOutputV4,
+): PaidAnalysisConsistencyIssue[] {
+  const issues: PaidAnalysisConsistencyIssue[] = [];
+
+  const combinedText = [
+    output.conclusion.immediateAction,
+    ...output.action.flatMap((item) => [
+      item.action,
+      item.target,
+      item.condition,
+      item.completionCriteria,
+    ]),
+  ].join(" ");
+
+  if (
+    output.conclusion.direction === "보류" &&
+    includesAny(combinedText, EXPANSION_KEYWORDS)
+  ) {
+    issues.push({
+      field: "conclusion.direction",
+      message:
+        "conclusion.direction이 보류인데 immediateAction 또는 action에 확대·즉시 실행 표현이 포함되어 있습니다.",
+    });
+  }
+
+  if (
+    output.conclusion.direction === "확대" &&
+    includesAny(combinedText, HOLD_KEYWORDS)
+  ) {
+    issues.push({
+      field: "conclusion.direction",
+      message:
+        "conclusion.direction이 확대인데 immediateAction 또는 action에 보류·중단 표현이 포함되어 있습니다.",
+    });
+  }
+
+  return issues;
+}
+
+export function validatePaidAnalysisConsistencyV4(
+  output: PaidAnalysisDetailOutputV4,
+): PaidAnalysisConsistencyResult {
+  const issues = [...validateDirectionV4(output)];
 
   return {
     ok: issues.length === 0,

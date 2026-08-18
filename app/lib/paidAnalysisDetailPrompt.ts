@@ -1221,3 +1221,255 @@ V3 리포트 일관성 원칙:
 - 출력은 반드시 유효한 JSON 하나만 반환한다.
 `;
 }
+
+/**
+ * V4 output contract. evidenceKey is restricted to facts that are actually present
+ * in PaidAnalysisDetailPromptInput today, so the model cannot cite data it never saw.
+ */
+const V4_EVIDENCE_KEY_GUIDE = `- strength: 신강·신약 판단 (coreInterpretation의 strengthAnalysis)
+- yongshin: 용신·희신 (coreInterpretation의 yongshinAnalysis)
+- gyeokguk: 격국 (coreInterpretation의 gyeokgukAnalysis)
+- element_balance: 오행 분포와 균형 (coreInterpretation의 elementAnalysis)
+- fortune_flow: 현재 운 흐름의 기회·주의 구조 (currentFortuneFlow)
+- daeun: 현재 대운 (fortuneTiming의 currentDaeun)
+- seun: 현재 세운 (fortuneTiming의 currentSeun)`;
+
+export function buildPaidAnalysisDetailPromptV4(
+  input: PaidAnalysisDetailPromptInput,
+): string {
+  const productRules = getPaidAnalysisProductRules(
+    input.analysisType,
+    input.productId,
+  );
+  const productContext = getPaidAnalysisProductContext(
+    input.analysisType,
+    input.productId,
+  );
+  const periodStrategy = getPeriodAnalysisStrategy(input.productId);
+
+  const timelineRules = periodStrategy
+    ? `${buildPeriodTimelineSectionRules(periodStrategy)}
+${buildPeriodTimelineConsistencyRule(periodStrategy)}`
+    : `- 이 상품에는 기간 계산 근거가 전달되지 않았다. 따라서 label에 연도, 월, 날짜를 절대 쓰지 않는다.
+- label은 "지금 이후 단기", "다음 전환 구간", "중기", "장기 준비"처럼 상대적 표현이나 조건 기반 표현만 사용한다.
+- 각 항목은 무엇이 달라지는지(changeSignal)와 무엇을 준비하는지(preparation)를 모두 포함한다.
+- 모든 구간을 좋아진다 또는 나빠진다로 단정하지 않는다.`;
+
+  const periodJsonContract = periodStrategy
+    ? `,
+${buildPeriodAnalysisJsonContract(periodStrategy)}`
+    : "";
+
+  const periodRules = periodStrategy
+    ? `\n${buildPeriodAnalysisPromptRules(periodStrategy)}`
+    : "";
+
+  return `
+당신은 사용자의 사주 원국과 현재 운의 흐름을 근거로
+사용자가 지금 어떤 판단을 해야 하는지 알려주는 프리미엄 명리 리포트를 작성하는 전문가입니다.
+
+이 리포트의 목적은 정보 전달이 아니라 의사결정입니다.
+사용자는 이미 무료 분석에서 원국, 오행, 신강·신약, 용신, 격국, 대운, 세운을 확인했습니다.
+따라서 같은 내용을 다시 설명하면 실패한 리포트입니다.
+
+분석 종류:
+${input.analysisType}
+
+${productContext}
+
+출생 정보:
+${input.birthData}
+
+원국 상세 구조:
+${input.originalChart}
+
+오행·강약·용신·격국 핵심 해석:
+${input.coreInterpretation}
+
+대운·세운·현재 운 시기 정보:
+${input.fortuneTiming}
+
+사주 핵심 요약:
+${input.sajuSummary}
+
+현재 운의 흐름:
+${input.currentFortuneFlow}
+
+사용자 고민:
+${input.userConcern ?? "없음"}
+${input.referencePeriod ? `
+[기간 기준 고정]
+${formatReferencePeriodForPrompt(input.referencePeriod)}
+` : ""}${periodStrategy ? `
+[기간별 분석 전략]
+${formatPeriodStrategyForPrompt(periodStrategy)}
+` : ""}
+출력은 반드시 유효한 JSON 하나만 반환하세요.
+마크다운, 코드 블록, 설명 문장, JSON 앞뒤의 부가 문구는 절대 포함하지 마세요.
+
+반드시 아래 구조와 필드명을 그대로 사용하세요.
+
+{
+  "schemaVersion": "v4",
+  "conclusion": {
+    "headline": "지금 필요한 판단을 한 문장으로 제시",
+    "direction": "확대 | 유지 | 조정 | 보류 중 하나",
+    "focus": "그 판단을 적용할 구체적인 대상",
+    "rationale": "그 방향을 선택한 이유를 한 문장으로 제시",
+    "immediateAction": "지금 바로 할 수 있는 단 하나의 행동"
+  },
+  "coreProblem": {
+    "title": "지금 다뤄야 할 핵심 문제 하나",
+    "description": "그 문제가 어떤 조건에서 나타나는지 설명",
+    "whyItMatters": "왜 지금 이 문제를 다뤄야 하는지 설명"
+  },
+  "cause": {
+    "summary": "현재 상황이 만들어지는 구조를 한 문단으로 요약",
+    "reasons": [
+      {
+        "title": "원인 패턴의 이름",
+        "observedStructure": "전달된 계산 데이터에서 관찰되는 구조",
+        "realWorldPattern": "그 구조가 현실에서 나타나는 행동 패턴",
+        "problemLinkage": "그 패턴이 coreProblem으로 이어지는 경로"
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "evidenceKey": "strength | yongshin | gyeokguk | element_balance | fortune_flow | daeun | seun 중 하나",
+      "meaning": "그 근거가 이 분석 주제에서 무엇을 뜻하는지 한 문장",
+      "linkage": "그 근거가 conclusion 또는 coreProblem과 어떻게 연결되는지 한 문장"
+    }
+  ],
+  "current": {
+    "summary": "현재 상황 요약",
+    "opportunities": [
+      {
+        "situation": "지금 나타나는 상황",
+        "implication": "그 상황이 만드는 기회",
+        "observableSignal": "사용자가 실제로 관찰할 수 있는 신호"
+      }
+    ],
+    "cautions": [
+      {
+        "situation": "지금 나타나는 상황",
+        "implication": "그 상황이 만드는 위험",
+        "observableSignal": "사용자가 실제로 관찰할 수 있는 신호"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "label": "구간 이름",
+      "changeSignal": "그 구간에서 달라지는 신호",
+      "preparation": "그 구간을 위해 준비할 것"
+    }
+  ],
+  "action": [
+    {
+      "action": "검증 가능한 동사로 시작하는 행동",
+      "target": "그 행동의 구체적인 대상",
+      "condition": "어떤 경우에 판단을 바꾸는지",
+      "completionCriteria": "무엇이 확인되면 이 행동이 끝났다고 볼 수 있는지"
+    }
+  ],
+  "avoid": [
+    {
+      "type": "misjudgment | risky_action | bad_condition 중 하나",
+      "behavior": "피해야 할 구체적인 행동이나 판단",
+      "reason": "왜 그것이 지금 위험한지"
+    }
+  ],
+  "confidence": {
+    "level": "높음 | 중간 | 낮음 중 하나",
+    "strongestEvidence": [
+      "계산 근거가 충분해 신뢰도가 높은 결론 1",
+      "계산 근거가 충분해 신뢰도가 높은 결론 2"
+    ],
+    "uncertaintyFactors": [
+      "해석이 많이 개입해 달라질 수 있는 부분"
+    ],
+    "limitations": "현재 입력 데이터만으로는 판단할 수 없는 범위를 명확히 설명"
+  }${periodJsonContract}
+}
+
+항목 개수 규칙:
+
+- cause.reasons: 정확히 3개
+- evidence: 3개 이상 4개 이하
+- current.opportunities: 정확히 3개
+- current.cautions: 정확히 3개
+- timeline: 정확히 4개
+- action: 2개 이상 3개 이하
+- avoid: 2개 이상 3개 이하
+- confidence.strongestEvidence: 2개 이상
+
+conclusion 작성 규칙:
+
+- direction은 반드시 하나만 선택한다. 두 방향을 동시에 제시하지 않는다.
+- "상황에 따라 다릅니다"처럼 판단을 회피하는 표현을 쓰지 않는다.
+- focus는 막연한 영역이 아니라 구체적인 대상이어야 한다.
+- immediateAction은 오늘 또는 이번 주에 실행할 수 있는 단 하나의 행동이어야 한다.
+- immediateAction은 direction과 모순되지 않아야 한다.
+
+coreProblem 작성 규칙:
+
+- 문제를 하나만 선택한다. 여러 문제를 나열하지 않는다.
+- 성격이나 심리를 진단하지 않는다.
+- 사용자가 실제로 겪었다고 단정하지 않고 조건부로 설명한다.
+
+cause 작성 규칙:
+
+- 각 reason은 관찰된 구조 → 현실 패턴 → 문제 연결의 세 단계를 모두 채운다.
+- 명리 용어만 나열하고 현실 패턴을 생략하면 실패한 것으로 간주한다.
+- 3개의 reason이 서로 같은 말의 변형이면 안 된다.
+
+evidence 작성 규칙:
+
+- evidenceKey는 아래 목록 중에서만 선택한다. 목록에 없는 근거를 만들어내지 않는다.
+${V4_EVIDENCE_KEY_GUIDE}
+- 수치, 퍼센트, 점수를 직접 만들어 쓰지 않는다. 계산 값은 서버가 표시한다.
+- meaning과 linkage에는 명리 용어를 최소화하고 현실 언어를 사용한다.
+- 같은 evidenceKey를 두 번 사용하지 않는다.
+
+current 작성 규칙:
+
+- opportunities와 cautions를 서로의 반대말로 채우지 않는다.
+- observableSignal은 사용자가 실제로 확인할 수 있는 신호여야 한다.
+
+timeline 작성 규칙:
+
+${timelineRules}
+
+action 작성 규칙:
+
+- 네 필드를 모두 채운다. 하나라도 비면 실패한 것으로 간주한다.
+- "노력하세요", "신중하세요", "소통하세요", "건강을 챙기세요", "꾸준히 하세요"처럼
+  누구에게나 적용되는 조언을 쓰지 않는다.
+- 투자 종목, 의료 행위, 법률 절차처럼 전문 자격이 필요한 지시를 하지 않는다.
+
+avoid 작성 규칙:
+
+- action을 부정형으로 뒤집은 문장을 쓰지 않는다.
+- 공포를 조성하는 표현을 쓰지 않는다.
+
+confidence 작성 규칙:
+
+- "참고용입니다" 같은 일반 면책문만 쓰지 않는다.
+- 확률이나 퍼센트 숫자를 쓰지 않는다.
+- 기간 계산 근거가 전달되지 않은 상품이라면 limitations에 시점을 확정할 수 없다는 점을 포함한다.
+
+리포트 일관성 원칙:
+
+- conclusion, coreProblem, cause, evidence는 같은 중심 결론을 유지한다.
+- evidence의 linkage는 반드시 conclusion 또는 coreProblem을 가리킨다.
+- timeline은 coreProblem이 시간에 따라 어떻게 달라지는지 보여준다.
+- action과 avoid는 conclusion.direction과 모순되지 않아야 한다.
+- 섹션 사이에 같은 문장을 반복하지 않는다.
+- 전달되지 않은 데이터를 근거로 사용하지 않는다.
+- 출력은 반드시 유효한 JSON 하나만 반환한다.${periodRules}
+
+상품별 작성 규칙:
+${productRules}
+`;
+}

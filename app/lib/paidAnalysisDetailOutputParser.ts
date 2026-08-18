@@ -1,10 +1,13 @@
 import { z } from "zod";
 import { ReferencePeriodSnapshotSchema } from "./analysisReferencePeriod";
 import { PeriodAnalysisBlockSchema } from "./analysisPeriodOutput";
+import { PAID_ANALYSIS_DETAIL_SCHEMA_VERSION_V4 } from "./paidAnalysisDetailOutput";
 import type {
   PaidAnalysisDetailOutput,
   PaidAnalysisDetailOutputV2,
   PaidAnalysisDetailOutputV3,
+  PaidAnalysisDetailOutputV4,
+  StoredPaidAnalysisDetail,
 } from "./paidAnalysisDetailOutput";
 
 const PaidAnalysisDetailSchema = z.object({
@@ -149,4 +152,141 @@ export function parsePaidAnalysisDetailOutputV3(
   value: unknown,
 ): PaidAnalysisDetailOutputV3 {
   return PaidAnalysisDetailV3Schema.parse(value);
+}
+
+const PaidAnalysisSituationItemV4Schema = z.object({
+  situation: z.string().trim().min(10),
+  implication: z.string().trim().min(10),
+  observableSignal: z.string().trim().min(10),
+});
+
+const PaidAnalysisDetailV4Schema = z.object({
+  schemaVersion: z.literal(PAID_ANALYSIS_DETAIL_SCHEMA_VERSION_V4),
+
+  conclusion: z.object({
+    headline: z.string().trim().min(1),
+    direction: z.enum(["확대", "유지", "조정", "보류"]),
+    focus: z.string().trim().min(1),
+    rationale: z.string().trim().min(10),
+    immediateAction: z.string().trim().min(10),
+  }),
+
+  coreProblem: z.object({
+    title: z.string().trim().min(5),
+    description: z.string().trim().min(20),
+    whyItMatters: z.string().trim().min(20),
+  }),
+
+  cause: z.object({
+    summary: z.string().trim().min(10),
+    reasons: z
+      .array(
+        z.object({
+          title: z.string().trim().min(1),
+          observedStructure: z.string().trim().min(10),
+          realWorldPattern: z.string().trim().min(10),
+          problemLinkage: z.string().trim().min(10),
+        }),
+      )
+      .min(3)
+      .max(3),
+  }),
+
+  evidence: z
+    .array(
+      z.object({
+        evidenceKey: z.enum([
+          "strength",
+          "yongshin",
+          "gyeokguk",
+          "element_balance",
+          "fortune_flow",
+          "daeun",
+          "seun",
+        ]),
+        meaning: z.string().trim().min(10),
+        linkage: z.string().trim().min(10),
+      }),
+    )
+    .min(3)
+    .max(4),
+
+  current: z.object({
+    summary: z.string().trim().min(10),
+    opportunities: z.array(PaidAnalysisSituationItemV4Schema).min(3).max(3),
+    cautions: z.array(PaidAnalysisSituationItemV4Schema).min(3).max(3),
+  }),
+
+  timeline: z
+    .array(
+      z.object({
+        label: z.string().trim().min(1),
+        changeSignal: z.string().trim().min(10),
+        preparation: z.string().trim().min(10),
+      }),
+    )
+    .min(4)
+    .max(4),
+
+  timelineSource: z
+    .enum(["topic-relative", "period-year", "period-daeun", "lifetime"])
+    .optional(),
+
+  action: z
+    .array(
+      z.object({
+        action: z.string().trim().min(5),
+        target: z.string().trim().min(2),
+        condition: z.string().trim().min(10),
+        completionCriteria: z.string().trim().min(10),
+      }),
+    )
+    .min(2)
+    .max(3),
+
+  avoid: z
+    .array(
+      z.object({
+        type: z.enum(["misjudgment", "risky_action", "bad_condition"]),
+        behavior: z.string().trim().min(10),
+        reason: z.string().trim().min(10),
+      }),
+    )
+    .min(2)
+    .max(3),
+
+  decisionCheck: z.array(z.string().trim().min(10)).min(3).max(5).optional(),
+
+  confidence: z.object({
+    level: z.enum(["높음", "중간", "낮음"]),
+    strongestEvidence: z.array(z.string().trim().min(10)).min(2),
+    uncertaintyFactors: z.array(z.string().trim().min(10)).min(1),
+    limitations: z.string().trim().min(20),
+  }),
+
+  referencePeriod: ReferencePeriodSnapshotSchema.optional(),
+
+  periodAnalysis: PeriodAnalysisBlockSchema.optional(),
+});
+
+export function parsePaidAnalysisDetailOutputV4(
+  value: unknown,
+): PaidAnalysisDetailOutputV4 {
+  return PaidAnalysisDetailV4Schema.parse(value);
+}
+
+/** Reads both the legacy V3 rows already in paid_reports and new V4 rows. */
+export function parseStoredPaidAnalysisDetail(
+  value: unknown,
+): StoredPaidAnalysisDetail {
+  const schemaVersion =
+    typeof value === "object" && value !== null
+      ? (value as { schemaVersion?: unknown }).schemaVersion
+      : undefined;
+
+  if (schemaVersion === PAID_ANALYSIS_DETAIL_SCHEMA_VERSION_V4) {
+    return parsePaidAnalysisDetailOutputV4(value);
+  }
+
+  return parsePaidAnalysisDetailOutputV3(value);
 }

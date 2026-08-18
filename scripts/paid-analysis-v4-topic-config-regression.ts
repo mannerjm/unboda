@@ -19,7 +19,7 @@ function assert(condition: boolean, message: string): void {
 
 const LAUNCH_PRODUCT_IDS = getLaunchProductIds();
 
-assert(LAUNCH_PRODUCT_IDS.length === 15, "Launch set must contain 15 products");
+assert(LAUNCH_PRODUCT_IDS.length === 16, "Launch set must contain 16 products");
 
 for (const productId of [
   "career",
@@ -30,6 +30,7 @@ for (const productId of [
   "money-wealth-accumulation",
   "relationship",
   "relationship-current",
+  "relationship-marriage",
   "relationship-partner-pattern",
   "relationship-new-connection",
   "relationship-intimacy",
@@ -62,6 +63,7 @@ const EXPECTED_ENGINES: Record<string, string> = {
   "money-wealth-accumulation": "MONEY",
   relationship: "RELATIONSHIP",
   "relationship-current": "RELATIONSHIP",
+  "relationship-marriage": "RELATIONSHIP",
   "relationship-partner-pattern": "RELATIONSHIP",
   "relationship-new-connection": "RELATIONSHIP",
   "relationship-intimacy": "RELATIONSHIP",
@@ -184,6 +186,7 @@ assert(
   configOf("relationship").decisionType !== configOf("relationship-current").decisionType,
   "relationship and relationship-current must have different decisionType",
 );
+assertDifferentConfigs("relationship", "relationship-marriage");
 assertDifferentConfigs("relationship", "relationship-partner-pattern");
 
 assertDifferentConfigs("relationship-new-connection", "relationship-intimacy");
@@ -193,6 +196,7 @@ assertDifferentConfigs("relationship-current", "relationship-reunion");
 for (const productId of [
   "relationship",
   "relationship-current",
+  "relationship-marriage",
   "relationship-partner-pattern",
   "relationship-new-connection",
   "relationship-intimacy",
@@ -220,6 +224,7 @@ for (const productId of [
   "money-wealth-accumulation",
   "relationship",
   "relationship-current",
+  "relationship-marriage",
   "relationship-partner-pattern",
   "relationship-new-connection",
   "relationship-intimacy",
@@ -266,6 +271,7 @@ const wealthPrompt = promptFor("wealth");
 const accumulationPrompt = promptFor("money-wealth-accumulation");
 const relationshipPrompt = promptFor("relationship");
 const relationshipCurrentPrompt = promptFor("relationship-current");
+const marriagePrompt = promptFor("relationship-marriage");
 const partnerPatternPrompt = promptFor("relationship-partner-pattern");
 const connectionPrompt = promptFor("relationship-new-connection");
 const intimacyPrompt = promptFor("relationship-intimacy");
@@ -308,6 +314,7 @@ for (const prompt of [
   accumulationPrompt,
   relationshipPrompt,
   relationshipCurrentPrompt,
+  marriagePrompt,
   partnerPatternPrompt,
   connectionPrompt,
   intimacyPrompt,
@@ -332,6 +339,7 @@ const promptPairs: [string, string][] = [
   [jobFitPrompt, specializationPrompt],
   [wealthPrompt, accumulationPrompt],
   [relationshipPrompt, relationshipCurrentPrompt],
+  [relationshipPrompt, marriagePrompt],
   [relationshipPrompt, partnerPatternPrompt],
   [connectionPrompt, intimacyPrompt],
   [conflictPrompt, boundaryPrompt],

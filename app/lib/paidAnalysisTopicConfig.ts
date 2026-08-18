@@ -520,6 +520,77 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     ],
   },
   {
+    productId: "relationship-marriage",
+    engine: "RELATIONSHIP",
+    userQuestion:
+      "장기 결합을 고려할 때 안정적으로 함께 살아가기 위해 필요한 생활·역할·책임·재정·가족·갈등 대응 조건은 무엇이며, 무엇을 준비하거나 조정해야 하는가?",
+    analysisFocus: [
+      "함께 살아가기 위한 생활 조건과 합의가 필요한 영역",
+      "역할·책임·재정·가족 관련 기대를 조율할 준비 상태",
+      "장기 결합 전 확인할 현실적 마찰 신호와 준비 기준",
+    ],
+    requiredInsights: [
+      {
+        id: "shared-life-condition",
+        prompt: "장기 결합 후 함께 살아갈 때 안정성을 좌우하는 생활 조건과 합의가 필요한 영역을 구분한다.",
+      },
+      {
+        id: "role-responsibility-readiness",
+        prompt: "역할·책임·재정·가족 관련 기대를 조율할 준비 상태와 일방 부담 위험을 설명한다.",
+      },
+      {
+        id: "practical-friction-signal",
+        prompt: "생활 리듬, 재정, 가족, 갈등 대응에서 결합 전에 확인할 현실적 마찰 신호를 제시한다.",
+      },
+      {
+        id: "commitment-preparation-action",
+        prompt: "장기 결합을 준비하거나 조정하기 위한 점검 순서와 구체 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "specific-person-marriage-outcome",
+        prompt: "특정 현재 상대와 결혼할지, 관계 결과가 결혼으로 이어질지를 판정하거나 보장하는 분석",
+      },
+      {
+        id: "marriage-timing-prediction",
+        prompt: "결혼 적기·연도·월·특정 시점처럼 결혼 시기를 예언하는 분석",
+      },
+      {
+        id: "future-spouse-profile",
+        prompt: "미래 배우자의 외모·직업·성향이나 운명적 상대를 단정하는 분석",
+      },
+    ],
+    evidenceFocus: [
+      "element_relations",
+      "fortune_brain",
+      "strength",
+      "yongshin",
+      "fortune_flow",
+    ],
+    decisionCriteria: {
+      확대: "공동생활을 위한 합의와 준비 항목을 넓혀 점검하는 방향",
+      유지: "현재 생활·역할·책임 기준을 그대로 유지하며 마찰 신호를 관찰하는 방향",
+      조정: "생활 조건과 역할·책임 분담 기준을 다시 정리하는 방향",
+      보류: "장기 결합 준비를 미루고 현실 조건과 합의 가능성을 확인하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "생활 리듬·주거·재정 조건을 같은 기준으로 점검하는 행동",
+      "역할·책임·가족 관련 기대를 합의 항목으로 문장화하는 행동",
+      "갈등 대응과 한쪽 부담이 커지는 마찰 신호를 확인하는 행동",
+      "장기 결합 전에 준비하거나 조정할 항목과 중단 기준을 정리하는 행동",
+    ],
+    prohibitedClaims: [
+      "결혼 성사·실패·이별·장기 관계 결과 보장",
+      "특정 상대와 결혼할지 여부 판정",
+      "결혼 적기·연도·월·특정 시점 예언",
+      "미래 배우자의 외모·직업·성향 단정",
+      "재회가 결혼으로 이어진다는 보장",
+      "상대의 결혼 의도나 감정 단정",
+    ],
+  },
+  {
     productId: "relationship-partner-pattern",
     engine: "RELATIONSHIP",
     userQuestion:

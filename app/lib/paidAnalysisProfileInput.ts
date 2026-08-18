@@ -67,6 +67,24 @@ export function buildPaidAnalysisInputFromProfile(
     }),
     currentFortuneFlow: JSON.stringify(freeAnalysis.fortuneFlowAnalysis),
     evidenceFacts: buildPaidAnalysisEvidenceFacts({ saju, freeAnalysis }),
+    v4Context: {
+      currentTiming: JSON.stringify({
+        gender: profile.gender,
+        daeunDirection: freeAnalysis.daeunAnalysis?.direction,
+        daeunStartAge: freeAnalysis.daeunAnalysis?.startAge,
+        currentDaeun: freeAnalysis.currentDaeun,
+        currentSeun: freeAnalysis.currentSeun,
+      }),
+      // The full series is only meaningful where a period strategy consumes it.
+      ...(product.kind === "PERIOD"
+        ? {
+            periodTiming: JSON.stringify({
+              daeunAnalysis: freeAnalysis.daeunAnalysis,
+              seunAnalysis: freeAnalysis.seunAnalysis,
+            }),
+          }
+        : {}),
+    },
     ...(referencePeriod ? { referencePeriod } : {}),
   };
 }

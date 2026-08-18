@@ -4,6 +4,7 @@ import {
   validateMoneySafety,
   validateTopicTimelineDates,
 } from "../app/lib/paidAnalysisV4QualityValidators";
+import { validatePaidAnalysisConsistencyV4 } from "../app/lib/paidAnalysisConsistencyValidator";
 import type {
   PaidAnalysisDetailOutputV4,
   ResolvedPaidAnalysisDetailV4,
@@ -370,5 +371,231 @@ for (const allowed of ["productId", "warningCount", "warning.field"]) {
     `linkage warning log should report ${allowed}`,
   );
 }
+
+// --- direction consistency: true conflict vs false positive ---
+
+function withConclusionAction(
+  direction: "확대" | "유지" | "조정" | "보류",
+  immediateAction: string,
+  firstAction: string,
+): PaidAnalysisDetailOutputV4 {
+  const base = buildV4();
+
+  return {
+    ...base,
+    conclusion: { ...base.conclusion, direction, immediateAction },
+    action: [
+      { ...base.action[0], action: firstAction },
+      ...base.action.slice(1),
+    ],
+  };
+}
+
+// TRUE CONFLICT: the executed action reverses the stated direction.
+const trueConflicts: [string, PaidAnalysisDetailOutputV4][] = [
+  [
+    "보류 + 즉시 확대",
+    withConclusionAction(
+      "보류",
+      "지금 바로 사업 규모를 확대한다",
+      "매출 목표를 상향한다",
+    ),
+  ],
+  [
+    "보류 + 공격적으로 늘림",
+    withConclusionAction(
+      "보류",
+      "이번 주에 인력을 공격적으로 늘린다",
+      "채용 인원을 두 배로 늘린다",
+    ),
+  ],
+  [
+    "보류 + 바로 추진",
+    withConclusionAction(
+      "보류",
+      "이직 절차를 바로 추진한다",
+      "지원서를 이번 주에 제출한다",
+    ),
+  ],
+];
+
+for (const [label, sample] of trueConflicts) {
+  const result = validatePaidAnalysisConsistencyV4(sample);
+
+  assert(!result.ok, `${label} must stay a consistency failure`);
+  assert(
+    result.issues[0].field === "conclusion.direction",
+    `${label} must report conclusion.direction`,
+  );
+}
+
+// 확대 direction must still fail when the action holds back.
+const expandHoldConflict = withConclusionAction(
+  "확대",
+  "신규 계약을 중단한다",
+  "예산 집행을 미룬다",
+);
+
+assert(
+  !validatePaidAnalysisConsistencyV4(expandHoldConflict).ok,
+  "확대 direction with a hold action must stay a failure",
+);
+
+// FALSE POSITIVE: the keyword belongs to a decision-preparation clause.
+const falsePositives: [string, PaidAnalysisDetailOutputV4][] = [
+  [
+    "보류 + 비교 대상 확대",
+    withConclusionAction(
+      "보류",
+      "판단에 쓸 비교 대상을 확대해 기록한다",
+      "검토 범위를 확대해 후보 조건을 정리한다",
+    ),
+  ],
+  [
+    "보류 + 판단 기준 늘림",
+    withConclusionAction(
+      "보류",
+      "결정 전에 확인할 판단 기준을 늘린다",
+      "선택지를 늘려 비교표를 작성한다",
+    ),
+  ],
+  [
+    "보류 + 관찰 항목 확대",
+    withConclusionAction(
+      "보류",
+      "관찰할 신호의 범위를 확대해 기록한다",
+      "확인 질문을 늘려 조건을 점검한다",
+    ),
+  ],
+];
+
+for (const [label, sample] of falsePositives) {
+  const result = validatePaidAnalysisConsistencyV4(sample);
+
+  assert(
+    result.ok,
+    `${label} must not be treated as a direction conflict (${result.issues
+      .map((issue) => issue.message)
+      .join(" | ")})`,
+  );
+}
+
+// condition/completionCriteria describe the opposite branch by contract.
+const oppositeBranchInCondition = (() => {
+  const base = buildV4();
+
+  return {
+    ...base,
+    conclusion: {
+      ...base.conclusion,
+      direction: "보류" as const,
+      immediateAction: "결정 전에 확인할 항목을 기록한다",
+    },
+    action: [
+      {
+        ...base.action[0],
+        action: "현재 조건을 기록한다",
+        condition: "조건이 충족되면 이동을 바로 추진한다",
+        completionCriteria: "확대 여부를 판단할 근거가 정리되면 완료한다",
+      },
+      ...base.action.slice(1),
+    ],
+  };
+})();
+
+assert(
+  validatePaidAnalysisConsistencyV4(oppositeBranchInCondition).ok,
+  "opposite-direction wording inside condition/completionCriteria must be allowed",
+);
+
+// Neutral directions stay unaffected.
+for (const direction of ["유지", "조정"] as const) {
+  assert(
+    validatePaidAnalysisConsistencyV4(
+      withConclusionAction(
+        direction,
+        "이번 주에 범위를 확대해 검토한다",
+        "진행을 중단하고 기준을 정리한다",
+      ),
+    ).ok,
+    `${direction} direction must not be checked for expansion or hold wording`,
+  );
+}
+
+// The failure message must name the offending keyword for diagnosability.
+const conflictResult = validatePaidAnalysisConsistencyV4(trueConflicts[0][1]);
+assert(
+  conflictResult.issues[0].message.includes("확대"),
+  "consistency issue must name the conflicting keyword",
+);
+
+// MIXED TRUE CONFLICT: deliberation wording precedes an executed reversal.
+const mixedConflicts: [string, PaidAnalysisDetailOutputV4][] = [
+  [
+    "비교한 뒤 바로 추진",
+    withConclusionAction(
+      "보류",
+      "조건을 비교한 뒤 이직 절차를 바로 추진한다",
+      "현재 조건을 기록한다",
+    ),
+  ],
+  [
+    "검토하고 즉시 확대",
+    withConclusionAction(
+      "보류",
+      "선택지를 검토하고 사업 규모를 즉시 확대한다",
+      "현재 조건을 기록한다",
+    ),
+  ],
+  [
+    "확인한 후 공격적으로 늘림",
+    withConclusionAction(
+      "보류",
+      "기준을 확인한 후 인력을 공격적으로 늘린다",
+      "현재 조건을 기록한다",
+    ),
+  ],
+  [
+    "기록한 뒤 바로 시작",
+    withConclusionAction(
+      "보류",
+      "정보를 기록한 뒤 신규 계약 확대를 바로 시작한다",
+      "현재 조건을 기록한다",
+    ),
+  ],
+  [
+    "action 필드에서 심의 후 실행",
+    withConclusionAction(
+      "보류",
+      "결정 전에 확인할 항목을 기록한다",
+      "후보를 비교한 다음 지원을 바로 추진한다",
+    ),
+  ],
+];
+
+for (const [label, sample] of mixedConflicts) {
+  const result = validatePaidAnalysisConsistencyV4(sample);
+
+  assert(
+    !result.ok,
+    `${label}: deliberation wording must not excuse an executed reversal`,
+  );
+  assert(
+    result.issues[0].field === "conclusion.direction",
+    `${label} must report conclusion.direction`,
+  );
+}
+
+// Deliberation marker split must not lose the marker itself (예: "후보").
+assert(
+  validatePaidAnalysisConsistencyV4(
+    withConclusionAction(
+      "보류",
+      "후보 조건을 확대해 정리한다",
+      "현재 조건을 기록한다",
+    ),
+  ).ok,
+  "clause splitting must not turn 후보 into a false conflict",
+);
 
 console.log("paid-analysis-v4-quality-validator-regression passed ✓");

@@ -59,6 +59,17 @@ export type PaidAnalysisDetailPromptInput = {
 
   /** V4 only: deterministic values the evidence resolver will quote. */
   evidenceFacts?: PaidAnalysisEvidenceFacts;
+
+  /**
+   * V4 only. Replaces the raw saju/fortuneTiming payloads that V1-V3 still receive;
+   * every value is a server calculation, never something the model may recompute.
+   */
+  v4Context?: {
+    /** Current daeun/seun plus the gender-dependent daeun direction. */
+    currentTiming: string;
+    /** PERIOD products only: the full daeun/seun series their strategy needs. */
+    periodTiming?: string;
+  };
 };
 
 export function buildPaidAnalysisDetailPrompt(
@@ -1324,6 +1335,24 @@ export function buildPaidAnalysisDetailPromptV4(
       ? `\n${formatTopicConfigForPrompt(specialization.config)}\n`
       : "";
 
+  // decisionCheck only exists in the JSON contract for decision-type products.
+  const isDecisionProduct =
+    specialization.kind === "topic" &&
+    specialization.config.decisionType === "decision";
+
+  const decisionCheckJsonContract = isDecisionProduct
+    ? `,
+  "decisionCheck": [
+    "예 또는 아니오로 답할 수 있는 확인 질문 1",
+    "예 또는 아니오로 답할 수 있는 확인 질문 2",
+    "예 또는 아니오로 답할 수 있는 확인 질문 3"
+  ]`
+    : "";
+
+  const decisionCheckCountRule = isDecisionProduct
+    ? "\n- decisionCheck: 3개 이상 5개 이하 (이 상품은 의사결정형이므로 반드시 포함한다)"
+    : "\n- decisionCheck: 이 상품은 탐색형이므로 decisionCheck key 자체를 출력하지 않는다. null이나 빈 배열도 보내지 않는다.";
+
   const timelineRules = periodStrategy
     ? `${buildPeriodTimelineSectionRules(periodStrategy)}
 ${buildPeriodTimelineConsistencyRule(periodStrategy)}`
@@ -1348,6 +1377,16 @@ ${formatEvidenceFactsForPrompt(input.evidenceFacts)}
 `
     : "";
 
+  // V4 drops the raw saju dump; PERIOD products still get the full daeun/seun series.
+  const timingBlock = input.v4Context
+    ? [
+        input.v4Context.currentTiming,
+        periodStrategy ? input.v4Context.periodTiming : undefined,
+      ]
+        .filter(Boolean)
+        .join("\n")
+    : input.fortuneTiming;
+
   return `
 당신은 사용자의 사주 원국과 현재 운의 흐름을 근거로
 사용자가 지금 어떤 판단을 해야 하는지 알려주는 프리미엄 명리 리포트를 작성하는 전문가입니다.
@@ -1361,20 +1400,14 @@ ${input.analysisType}
 
 ${productContext}
 
-출생 정보:
-${input.birthData}
-
 원국 상세 구조:
 ${input.originalChart}
 
 오행·강약·용신·격국 핵심 해석:
 ${input.coreInterpretation}
 
-대운·세운·현재 운 시기 정보:
-${input.fortuneTiming}
-
-사주 핵심 요약:
-${input.sajuSummary}
+현재 대운·세운 시기 정보:
+${timingBlock}
 
 현재 운의 흐름:
 ${input.currentFortuneFlow}
@@ -1451,8 +1484,8 @@ ${formatPeriodStrategyForPrompt(periodStrategy)}
   ],
   "action": [
     {
-      "action": "검증 가능한 동사로 시작하는 행동",
-      "target": "그 행동의 구체적인 대상",
+      "action": "무엇을 어떻게 수행하는지가 드러나는 완결된 한 문장",
+      "target": "그 행동이 다루는 구체적인 대상",
       "condition": "어떤 경우에 판단을 바꾸는지",
       "completionCriteria": "무엇이 확인되면 이 행동이 끝났다고 볼 수 있는지"
     }
@@ -1474,7 +1507,7 @@ ${formatPeriodStrategyForPrompt(periodStrategy)}
       "해석이 많이 개입해 달라질 수 있는 부분"
     ],
     "limitations": "현재 입력 데이터만으로는 판단할 수 없는 범위를 명확히 설명"
-  }${periodJsonContract}
+  }${decisionCheckJsonContract}${periodJsonContract}
 }
 
 항목 개수 규칙:
@@ -1486,7 +1519,7 @@ ${formatPeriodStrategyForPrompt(periodStrategy)}
 - timeline: 정확히 4개
 - action: 2개 이상 3개 이하
 - avoid: 2개 이상 3개 이하
-- confidence.strongestEvidence: 2개 이상
+- confidence.strongestEvidence: 2개 이상${decisionCheckCountRule}
 
 conclusion 작성 규칙:
 
@@ -1529,6 +1562,11 @@ ${timelineRules}
 action 작성 규칙:
 
 - 네 필드를 모두 채운다. 하나라도 비면 실패한 것으로 간주한다.
+- action 필드는 "무엇을 어떻게 한다"가 드러나는 완결된 한 문장으로 쓴다.
+- action 필드에 동사 하나만 쓰거나 "분류하세요", "확인하세요", "점검하세요", "정리하세요"처럼
+  대상이 없는 짧은 명령만 쓰지 않는다.
+- action 필드는 최소한 동작과 그 동작이 다루는 범위를 함께 담고, 10자 이상으로 쓴다.
+- action과 target이 같은 말을 반복하지 않는다. action은 수행 내용, target은 그 행동이 다루는 대상이다.
 - "노력하세요", "신중하세요", "소통하세요", "건강을 챙기세요", "꾸준히 하세요"처럼
   누구에게나 적용되는 조언을 쓰지 않는다.
 - 투자 종목, 의료 행위, 법률 절차처럼 전문 자격이 필요한 지시를 하지 않는다.

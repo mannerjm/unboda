@@ -10,6 +10,7 @@ import {
 } from "../app/lib/paidAnalysisEngine";
 import { getPeriodAnalysisStrategy } from "../app/lib/analysisPeriodStrategy";
 import { buildPaidAnalysisDetailPromptV4 } from "../app/lib/paidAnalysisDetailPrompt";
+import { buildPaidAnalysisInputFromProfile } from "../app/lib/paidAnalysisProfileInput";
 import { getPremiumProduct } from "../app/lib/premiumProductRegistry";
 
 function assert(condition: boolean, message: string): void {
@@ -338,5 +339,205 @@ assert(
   configOf("money-wealth-accumulation").decisionCriteria.확대.includes("축적"),
   "money-wealth-accumulation 확대 must stay consistent with the accumulation focus",
 );
+
+// decisionCheck must be part of the JSON contract for decision-type products only.
+for (const productId of ["career-job-change", "relationship-current"]) {
+  const prompt = promptFor(productId);
+
+  assert(
+    prompt.includes('"decisionCheck": ['),
+    `${productId} prompt must include decisionCheck in the JSON contract`,
+  );
+  assert(
+    prompt.includes("decisionCheck: 3개 이상 5개 이하"),
+    `${productId} prompt must state the decisionCheck count rule`,
+  );
+}
+
+for (const productId of [
+  "career",
+  "career-job-fit",
+  "wealth",
+  "money-wealth-accumulation",
+  "relationship",
+]) {
+  const prompt = promptFor(productId);
+
+  assert(
+    !prompt.includes('"decisionCheck": ['),
+    `${productId} is exploration-type and must not receive a decisionCheck JSON key`,
+  );
+  assert(
+    prompt.includes("decisionCheck key 자체를 출력하지 않는다"),
+    `${productId} must be told not to output decisionCheck`,
+  );
+  assert(
+    prompt.includes("null이나 빈 배열도 보내지 않는다"),
+    `${productId} must forbid null or empty decisionCheck`,
+  );
+}
+
+// PERIOD products get no decisionCheck requirement at all.
+assert(
+  !daeunPrompt.includes('"decisionCheck": ['),
+  "daeun-current must not be forced to produce decisionCheck",
+);
+assert(
+  !daeunPrompt.includes("decisionCheck: 3개 이상 5개 이하"),
+  "daeun-current must not carry a decisionCheck count rule",
+);
+
+// action contract must forbid single-verb commands.
+for (const prompt of [careerPrompt, jobChangePrompt, daeunPrompt]) {
+  assert(
+    prompt.includes('"무엇을 어떻게 한다"가 드러나는 완결된 한 문장'),
+    "action field must be defined as a complete sentence",
+  );
+  assert(
+    prompt.includes("10자 이상으로 쓴다"),
+    "action field must state a minimum length",
+  );
+  assert(
+    prompt.includes("action과 target이 같은 말을 반복하지 않는다"),
+    "action and target must be told not to duplicate",
+  );
+
+  for (const banned of ["분류하세요", "확인하세요", "점검하세요", "정리하세요"]) {
+    assert(
+      prompt.includes(banned),
+      `single-verb command ${banned} must be listed as forbidden`,
+    );
+  }
+}
+
+assert(
+  !careerPrompt.includes('"action": "검증 가능한 동사로 시작하는 행동"'),
+  "the old verb-first action description must be gone",
+);
+
+// --- Step 4D-3 slimming safety ---
+
+const slimInput = buildPaidAnalysisInputFromProfile(
+  {
+    id: "00000000-0000-0000-0000-000000000000",
+    label: "테스트",
+    relationshipType: "self",
+    birthDate: "1995-05-20",
+    birthTime: "09:00",
+    calendarType: "양력",
+    isLeapMonth: false,
+    gender: "남성",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  },
+  "career-job-change",
+);
+
+assert(
+  Boolean(slimInput.v4Context?.currentTiming),
+  "TOPIC input must carry the slim current timing context",
+);
+assert(
+  slimInput.v4Context?.periodTiming === undefined,
+  "TOPIC input must not carry the full daeun/seun series",
+);
+
+const periodInput = buildPaidAnalysisInputFromProfile(
+  {
+    id: "00000000-0000-0000-0000-000000000000",
+    label: "테스트",
+    relationshipType: "self",
+    birthDate: "1995-05-20",
+    birthTime: "09:00",
+    calendarType: "양력",
+    isLeapMonth: false,
+    gender: "남성",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  },
+  "daeun-current",
+);
+
+assert(
+  Boolean(periodInput.v4Context?.periodTiming),
+  "PERIOD input must keep the full daeun/seun series",
+);
+
+const slimTopicPrompt = buildPaidAnalysisDetailPromptV4(slimInput);
+const slimPeriodPrompt = buildPaidAnalysisDetailPromptV4(periodInput);
+
+// A. TOPIC prompt keeps every specialization block but drops the raw dumps.
+assert(slimTopicPrompt.includes("[CAREER Engine 규칙]"), "slim TOPIC keeps engine rules");
+assert(slimTopicPrompt.includes("[상품 전문화 계약]"), "slim TOPIC keeps topic config");
+assert(slimTopicPrompt.includes('"decisionCheck": ['), "slim TOPIC keeps decisionCheck contract");
+assert(
+  slimTopicPrompt.includes('"무엇을 어떻게 한다"가 드러나는 완결된 한 문장'),
+  "slim TOPIC keeps the action contract",
+);
+assert(
+  slimTopicPrompt.includes("[선택 가능한 결정론 근거 요약]"),
+  "slim TOPIC keeps the deterministic evidence block",
+);
+assert(
+  slimTopicPrompt.includes("현재 대운·세운 시기 정보"),
+  "slim TOPIC keeps the current fortune timing context",
+);
+assert(
+  slimTopicPrompt.includes("현재 운의 흐름"),
+  "slim TOPIC keeps the current fortune flow",
+);
+assert(
+  !slimTopicPrompt.includes("출생 정보:"),
+  "slim TOPIC must drop the raw birthData block",
+);
+assert(
+  !slimTopicPrompt.includes("사주 핵심 요약:"),
+  "slim TOPIC must drop the duplicated sajuSummary block",
+);
+assert(
+  !slimTopicPrompt.includes(slimInput.fortuneTiming),
+  "slim TOPIC must not embed the full fortuneTiming payload",
+);
+assert(
+  slimTopicPrompt.length < buildPaidAnalysisDetailPromptV4({
+    ...slimInput,
+    v4Context: undefined,
+  }).length,
+  "slimming must reduce the TOPIC prompt",
+);
+
+// B. PERIOD prompt keeps the timing information its strategy needs.
+assert(
+  slimPeriodPrompt.includes("현재 대운의 진입 국면"),
+  "slim PERIOD keeps the strategy labels",
+);
+assert(
+  slimPeriodPrompt.includes("[기간 기준 고정]"),
+  "slim PERIOD keeps the reference period",
+);
+assert(
+  slimPeriodPrompt.includes(periodInput.v4Context!.periodTiming!),
+  "slim PERIOD keeps the full daeun/seun series",
+);
+assert(
+  !slimPeriodPrompt.includes("[상품 전문화 계약]"),
+  "slim PERIOD still has no topic config block",
+);
+
+// C. deterministic safety: the model is never asked to compute or invent facts.
+for (const prompt of [slimTopicPrompt, slimPeriodPrompt]) {
+  assert(
+    prompt.includes("실제 계산 값은 서버가 붙인다"),
+    "prompt must keep the server-resolved fact rule",
+  );
+  assert(
+    !prompt.includes('"observedFact"'),
+    "prompt must never ask for a raw observed fact",
+  );
+  assert(
+    !prompt.includes("직접 계산하"),
+    "prompt must not ask the model to calculate the chart",
+  );
+}
 
 console.log("paid-analysis-v4-topic-config-regression passed ✓");

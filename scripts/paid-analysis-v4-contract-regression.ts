@@ -9,6 +9,8 @@ import {
 } from "../app/lib/paidAnalysisDetailOutput";
 import { validatePaidAnalysisConsistencyV4 } from "../app/lib/paidAnalysisConsistencyValidator";
 import { buildPaidAnalysisDetailPromptV4 } from "../app/lib/paidAnalysisDetailPrompt";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(`FAIL: ${message}`);
@@ -460,6 +462,31 @@ const periodPrompt = buildPaidAnalysisDetailPromptV4({
 assert(
   periodPrompt.includes("현재 대운의 진입 국면"),
   "PERIOD prompt must keep the strategy timeline labels",
+);
+
+// action.action minimum length stays at 5; the fix belongs in the prompt, not the parser.
+assertParseFails(
+  {
+    ...buildValidV4(),
+    action: [
+      {
+        action: "분류",
+        target: "대상",
+        condition: sentence("조건."),
+        completionCriteria: sentence("완료 기준."),
+      },
+      ...(buildValidV4().action as unknown[]).slice(1),
+    ],
+  },
+  "action.action shorter than 5 characters must be rejected",
+);
+
+assert(
+  readFileSync(
+    join(process.cwd(), "app/lib/paidAnalysisDetailOutputParser.ts"),
+    "utf8",
+  ).includes("action: z.string().trim().min(5)"),
+  "action.action must keep the min(5) rule",
 );
 
 console.log("paid-analysis-v4-contract-regression passed ✓");

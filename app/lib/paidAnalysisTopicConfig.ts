@@ -520,6 +520,75 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     ],
   },
   {
+    productId: "relationship-partner-pattern",
+    engine: "RELATIONSHIP",
+    userQuestion:
+      "나는 어떤 상대 특성과 역할 기대를 반복해서 선택하며, 다음 관계에서 실제 적합성을 어떻게 검증해야 하는가?",
+    analysisFocus: [
+      "반복해서 선택하는 상대 특성과 관계 구조",
+      "상대에게 기대하거나 사용자가 떠맡는 역할과 책임",
+      "강한 끌림과 실제 적합성을 구분하는 검증 기준",
+    ],
+    requiredInsights: [
+      {
+        id: "partner-selection-pattern",
+        prompt: "과거 관계에서 반복해 끌리거나 선택한 상대의 특성과 관계 구조를 구분하고, 안정적 적합성과 혼동한 지점을 설명한다.",
+      },
+      {
+        id: "role-expectation-pattern",
+        prompt: "상대에게 기대하거나 사용자가 떠맡기 쉬운 역할·책임의 기대가 선택과 관계 부담에 미치는 영향을 설명한다.",
+      },
+      {
+        id: "compatibility-verification-signal",
+        prompt: "다음 관계에서 말보다 반복된 행동, 책임 분담, 경계 존중으로 실제 적합성을 확인할 관찰 신호를 제시한다.",
+      },
+      {
+        id: "selection-adjustment-action",
+        prompt: "다음 관계에서 적용할 선택 기준과 검증 순서를 구체 행동으로 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "overall-relationship-operating-profile",
+        prompt: "여러 관계에서의 전반적 거리·반응·운영 패턴을 general relationship 상품처럼 재서술하는 분석",
+      },
+      {
+        id: "new-connection-acquisition",
+        prompt: "새로운 사람을 만날 시기·장소·접점 획득·첫 만남 기회를 중심으로 하는 분석",
+      },
+      {
+        id: "current-marriage-reunion-outcome",
+        prompt: "현재 특정 상대와의 유지·결혼·재회 결과를 판단하거나 보장하는 분석",
+      },
+    ],
+    evidenceFocus: [
+      "element_relations",
+      "fortune_brain",
+      "strength",
+      "yongshin",
+      "fortune_flow",
+    ],
+    decisionCriteria: {
+      확대: "선택 기준을 넓히기 전에 실제 적합 신호를 확인하는 방향",
+      유지: "현재 선택 기준을 그대로 유지하며 반복 패턴을 관찰하는 방향",
+      조정: "상대 특성·역할 기대·검증 순서를 다시 정리하는 방향",
+      보류: "새로운 관계 판단을 미루고 끌림과 적합 신호를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "과거 관계에서 반복 선택한 상대 특성과 관계 구조를 같은 기준으로 기록하는 행동",
+      "강한 끌림과 실제 적합 신호를 분리해 비교하는 행동",
+      "역할·책임 분담 기대를 관계 초기에 확인할 질문으로 문장화하는 행동",
+      "다음 관계에서 적용할 선택 기준과 중단 기준을 정리하는 행동",
+    ],
+    prohibitedClaims: [
+      "이상형이나 운명적 상대 단정",
+      "미래 배우자의 외모·직업 예측",
+      "새 인연이 생기는 시점이나 장소 예측",
+      "현재 특정 상대의 적합도나 결혼·재회 결과 판단",
+    ],
+  },
+  {
     productId: "relationship-new-connection",
     engine: "RELATIONSHIP",
     userQuestion:

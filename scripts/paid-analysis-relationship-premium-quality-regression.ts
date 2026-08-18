@@ -166,6 +166,73 @@ const weakResult =
     weakRelationshipOutput,
   );
 
+const explorationWithoutVerificationQuestion =
+  evaluateRelationshipPremiumQuality({
+    ...premiumRelationshipOutput,
+    pastPatternVerificationQuestion: "",
+    requiresVerificationQuestion: false,
+  });
+
+if (!explorationWithoutVerificationQuestion.ok) {
+  throw new Error(
+    "exploration 관계 리포트는 verification question이 필수가 아닐 때 다른 품질 기준을 통과해야 합니다.",
+  );
+}
+
+if (explorationWithoutVerificationQuestion.checks.verificationQuestionIsConcrete) {
+  throw new Error(
+    "exploration 관계 리포트의 빈 verification question을 true로 위조하면 안 됩니다.",
+  );
+}
+
+if (explorationWithoutVerificationQuestion.verificationQuestionRequired) {
+  throw new Error(
+    "exploration 관계 리포트에는 verification question requirement가 비활성화되어야 합니다.",
+  );
+}
+
+const explorationWithGenericAction =
+  evaluateRelationshipPremiumQuality({
+    ...premiumRelationshipOutput,
+    pastPatternVerificationQuestion: "",
+    requiresVerificationQuestion: false,
+    actionGuide: [
+      "대화를 많이 하세요.",
+      "관계의 경계를 대화로 확인하세요.",
+    ],
+  });
+
+if (explorationWithGenericAction.ok) {
+  throw new Error(
+    "exploration 관계 리포트도 generic action quality failure를 통과하면 안 됩니다.",
+  );
+}
+
+const decisionWithVerificationQuestion =
+  evaluateRelationshipPremiumQuality({
+    ...premiumRelationshipOutput,
+    requiresVerificationQuestion: true,
+  });
+
+if (!decisionWithVerificationQuestion.ok) {
+  throw new Error(
+    "decision 관계 리포트는 concrete verification question으로 통과해야 합니다.",
+  );
+}
+
+const decisionWithoutVerificationQuestion =
+  evaluateRelationshipPremiumQuality({
+    ...premiumRelationshipOutput,
+    pastPatternVerificationQuestion: "",
+    requiresVerificationQuestion: true,
+  });
+
+if (decisionWithoutVerificationQuestion.ok) {
+  throw new Error(
+    "decision 관계 리포트는 빈 verification question을 통과하면 안 됩니다.",
+  );
+}
+
 console.log(
   "5만원급 과거 패턴 연결:",
   premiumResult.checks.pastPatternConnected,

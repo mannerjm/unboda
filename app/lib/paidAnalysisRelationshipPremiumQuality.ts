@@ -2,6 +2,8 @@ export type RelationshipPremiumQualityInput = {
   pastPatternSummary: string;
   pastPatternPeriodPatterns?: readonly string[];
   pastPatternVerificationQuestion: string;
+  /** V3 keeps this required; V4 exploration products have no decisionCheck source. */
+  requiresVerificationQuestion?: boolean;
   currentCoreProblemTitle: string;
   currentCoreProblemDescription: string;
   currentCoreProblemWhyItMatters: string;
@@ -168,6 +170,10 @@ export function evaluateRelationshipPremiumQuality(
       input.pastPatternVerificationQuestion,
       relationshipSignalExpressions,
     );
+  const verificationQuestionRequired =
+    input.requiresVerificationQuestion ?? true;
+  const verificationQuestionPassed =
+    !verificationQuestionRequired || verificationQuestionIsConcrete;
 
   const coreProblemIsFocused =
     input.currentCoreProblemTitle.length >= 5 &&
@@ -250,6 +256,8 @@ const futureIsConditional =
 
   verificationQuestionIsConcrete,
 
+  verificationQuestionRequired,
+
   actionGuideIsSpecific,
 
   genericAdviceMatches,
@@ -269,7 +277,7 @@ const futureIsConditional =
   return {
     ok:
       pastPatternConnected &&
-      verificationQuestionIsConcrete &&
+      verificationQuestionPassed &&
       coreProblemIsFocused &&
       futureIsConditional &&
       actionGuideIsSpecific &&
@@ -283,6 +291,8 @@ const futureIsConditional =
       actionGuideIsSpecific,
       hasNoBusinessLanguage,
     },
+
+    verificationQuestionRequired,
 
     businessMatches,
     genericAdviceMatches,

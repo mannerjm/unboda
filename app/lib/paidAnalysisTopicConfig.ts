@@ -395,7 +395,38 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "관계 변화가 강해지는 촉발 조건",
       "갈등과 거리감이 커지는 지점",
     ],
-    requiredInsights: [],
+    requiredInsights: [
+      {
+        id: "relationship-pattern-map",
+        prompt: "여러 관계에서 반복되는 거리·갈등·감정 소모의 패턴을 구분한다.",
+      },
+      {
+        id: "relationship-trigger-boundary",
+        prompt: "관계 변화가 시작되는 촉발 조건과 유지할 거리 기준을 설명한다.",
+      },
+      {
+        id: "relationship-response-pattern",
+        prompt: "사용자의 반응 방식이 관계 유지와 소모에 어떤 영향을 주는지 확인 가능한 행동과 신호로 설명한다.",
+      },
+      {
+        id: "relationship-general-adjustment",
+        prompt: "관계 유형별로 적용할 조정 행동과 검증 기준을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "current-relationship-decision",
+        prompt: "특정 현재 관계를 이어갈지 조정할지에 대한 결론",
+      },
+      {
+        id: "current-relationship-signal-check",
+        prompt: "특정 관계의 연락·약속·대화 재개 신호를 근거로 한 판단",
+      },
+      {
+        id: "marriage-or-reunion-decision",
+        prompt: "결혼·재회처럼 특정 관계 결과를 결정하는 판단",
+      },
+    ],
     evidenceFocus: [
       "fortune_flow",
       "element_relations",
@@ -431,7 +462,38 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "연락 빈도·약속 변경·대화 재개처럼 확인 가능한 신호",
       "관계를 이어갈지 조정할지 가르는 기준",
     ],
-    requiredInsights: [],
+    requiredInsights: [
+      {
+        id: "current-relationship-core-problem",
+        prompt: "현재 관계에서 반복되는 핵심 문제와 그 문제가 지속·조정 판단에 미치는 영향을 설명한다.",
+      },
+      {
+        id: "observable-relationship-signals",
+        prompt: "연락, 약속, 대화 재개, 갈등 후 반응처럼 실제로 확인 가능한 신호를 구분한다.",
+      },
+      {
+        id: "continue-adjust-criteria",
+        prompt: "이어갈 조건과 조정할 조건을 서로 다른 판단 기준으로 제시한다.",
+      },
+      {
+        id: "current-relationship-action",
+        prompt: "현재 관계에서 다음 대화·거리·규칙을 검증할 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "overall-relationship-profile",
+        prompt: "여러 관계를 포괄하는 전반적 관계 성향과 반복 패턴의 종합 프로필",
+      },
+      {
+        id: "relationship-type-boundary-design",
+        prompt: "관계 유형별로 적용하는 장기 거리·경계 운영 설계",
+      },
+      {
+        id: "marriage-or-reunion-decision",
+        prompt: "결혼·재회처럼 현재 관계의 지속·조정 판단을 넘어서는 결과 결정",
+      },
+    ],
     evidenceFocus: [
       "fortune_flow",
       "element_relations",

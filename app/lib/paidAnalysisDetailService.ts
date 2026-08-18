@@ -436,6 +436,8 @@ if (isRelationshipAnalysis) {
       pastPatternVerificationQuestion:
         compressedDetail.pastPattern.periods[0]?.verificationQuestion ?? "",
 
+      requiresVerificationQuestion: true,
+
       currentCoreProblemTitle:
         compressedDetail.currentCoreProblem.title,
 

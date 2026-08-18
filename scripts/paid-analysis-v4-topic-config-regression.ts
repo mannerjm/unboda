@@ -173,6 +173,17 @@ assert(
   "relationship and relationship-current must have different decisionType",
 );
 
+for (const productId of ["relationship", "relationship-current"]) {
+  assert(
+    configOf(productId).requiredInsights.length === 4,
+    `${productId} must carry four relationship required insights`,
+  );
+  assert(
+    (configOf(productId).excludedFocus?.length ?? 0) === 3,
+    `${productId} must carry three relationship excluded focus items`,
+  );
+}
+
 // decisionCheck is requested only for decision-type products.
 for (const productId of [
   "career",

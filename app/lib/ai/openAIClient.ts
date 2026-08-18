@@ -6,6 +6,7 @@ export function getOpenAIClient(): OpenAI {
   if (!openAIClientInstance) {
     openAIClientInstance = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
+      maxRetries: 0,
     });
   }
 

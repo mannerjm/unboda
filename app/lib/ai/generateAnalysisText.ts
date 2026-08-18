@@ -8,11 +8,23 @@ export type AnalysisTextCallType =
 export function resolveMaxOutputTokens(
   callType?: AnalysisTextCallType,
 ): number {
-  if (callType === "main-analysis" || callType === "paid-analysis-detail") {
+  if (callType === "main-analysis") {
+    return 6000;
+  }
+
+  if (callType === "paid-analysis-detail") {
     return 4800;
   }
 
   return 3200;
+}
+
+export function resolveModel(callType?: AnalysisTextCallType): string {
+  if (callType === "main-analysis") {
+    return "gpt-5.6-luna";
+  }
+
+  return "gpt-5";
 }
 
 // Narrows an unknown thrown value to loggable OpenAI SDK error fields without
@@ -51,27 +63,56 @@ export async function generateAnalysisText(
       ? 120000
       : 45000;
 
-  const model = "gpt-5";
+  const model = resolveModel(callType);
   const promptLength = prompt.length;
   const startedAt = Date.now();
+  const controller = new AbortController();
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
   let response;
 
   try {
-    response = await Promise.race([
-      getOpenAIClient().responses.create({
+    timeoutId = setTimeout(() => {
+      controller.abort();
+    }, timeoutMs);
+
+    response = await getOpenAIClient().responses.create(
+      {
         model,
         input: prompt,
         max_output_tokens: maxOutputTokens,
         reasoning: {
           effort: "low",
         },
-      }),
-      new Promise<never>((_, reject) => {
-        setTimeout(() => {
-          reject(new Error("OpenAI 응답이 시간 내에 완료되지 않았습니다."));
-        }, timeoutMs);
-      }),
-    ]);
+      },
+      {
+        signal: controller.signal,
+      },
+    );
+
+    if (response.status === "incomplete") {
+      const incompleteReason = response.incomplete_details?.reason ?? "unknown";
+      throw new Error(`OpenAI 응답이 incomplete 상태입니다. reason=${incompleteReason}`);
+    }
+
+    const outputText = (response.output_text ?? "").trim();
+    if (!outputText) {
+      throw new Error("OpenAI 응답이 비어 있습니다.");
+    }
+
+    console.info("[generateAnalysisText] success", {
+      callType,
+      model,
+      promptLength,
+      maxOutputTokens,
+      timeoutMs,
+      startedAt: new Date(startedAt).toISOString(),
+      finishedAt: new Date().toISOString(),
+      elapsedMs: Date.now() - startedAt,
+      responseLength: outputText.length,
+      responseStatus: response.status,
+    });
+
+    return outputText;
   } catch (error) {
     const errorMeta = extractOpenAIErrorMeta(error);
 
@@ -89,22 +130,14 @@ export async function generateAnalysisText(
       errorCode: errorMeta.code,
       errorType: errorMeta.type,
       details: errorMeta.message,
+      responseStatus: response?.status,
+      incompleteReason: response?.incomplete_details?.reason,
     });
 
-    throw new Error(`OpenAI 응답 생성에 실패했습니다. ${errorMeta.message}`);
+    throw error;
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
   }
-
-  console.info("[generateAnalysisText] success", {
-    callType,
-    model,
-    promptLength,
-    maxOutputTokens,
-    timeoutMs,
-    startedAt: new Date(startedAt).toISOString(),
-    finishedAt: new Date().toISOString(),
-    elapsedMs: Date.now() - startedAt,
-    responseLength: response.output_text?.length ?? 0,
-  });
-
-  return response.output_text;
 }

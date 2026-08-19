@@ -19,13 +19,17 @@ function assert(condition: boolean, message: string): void {
 
 const LAUNCH_PRODUCT_IDS = getLaunchProductIds();
 
-assert(LAUNCH_PRODUCT_IDS.length === 18, "Launch set must contain 18 products");
+assert(LAUNCH_PRODUCT_IDS.length === 22, "Batch 1 launch set must contain 22 products");
 
 for (const productId of [
   "career",
   "career-job-change",
   "career-job-fit",
   "career-specialization",
+  "career-promotion-readiness",
+  "career-workplace-adaptation",
+  "career-leadership-readiness",
+  "career-freelance-transition",
   "wealth",
   "money-wealth-accumulation",
   "money-leak-risk",
@@ -61,6 +65,10 @@ const EXPECTED_ENGINES: Record<string, string> = {
   "career-job-change": "CAREER",
   "career-job-fit": "CAREER",
   "career-specialization": "CAREER",
+  "career-promotion-readiness": "CAREER",
+  "career-workplace-adaptation": "CAREER",
+  "career-leadership-readiness": "CAREER",
+  "career-freelance-transition": "CAREER",
   wealth: "MONEY",
   "money-wealth-accumulation": "MONEY",
   "money-leak-risk": "MONEY",

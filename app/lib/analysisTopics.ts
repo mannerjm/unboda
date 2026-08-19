@@ -250,6 +250,58 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
       "소진을 줄이기 위해 업무 강도와 일정을 조정하는 기준",
     ],
   },
+  {
+    id: "career-promotion-readiness",
+    category: "career",
+    title: "승진 준비도 분석",
+    shortDescription: "더 큰 역할을 맡기 전에 책임 범위와 평가 근거의 공백을 점검합니다.",
+    riskLevel: "standard",
+    details: [
+      "현재 역할과 다음 역할 사이에서 확인할 책임·판단·조율 범위",
+      "개인 성과를 위임·의사결정·협업 조율의 증거로 전환하는 방식",
+      "피드백과 반복 결과로 역할 준비도를 확인하는 관찰 신호",
+      "역할 범위를 시험하고 평가 근거를 남기는 준비 행동",
+    ],
+  },
+  {
+    id: "career-workplace-adaptation",
+    category: "career",
+    title: "직장 적응 분석",
+    shortDescription: "현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정합니다.",
+    riskLevel: "standard",
+    details: [
+      "업무 속도·역할·소통 방식에서 반복되는 적응 마찰",
+      "인수인계·회의·피드백 리듬이 에너지와 업무 이해에 미치는 영향",
+      "책임 범위·우선순위·완료 기준이 정렬되는 관찰 신호",
+      "다음 적응 주기에 검토할 30일 조정 행동",
+    ],
+  },
+  {
+    id: "career-leadership-readiness",
+    category: "career",
+    title: "리더십 전환 분석",
+    shortDescription: "사람을 이끄는 책임에서 위임·피드백·의사결정 조건을 점검합니다.",
+    riskLevel: "standard",
+    details: [
+      "권한과 책임을 나누는 방식이 팀 실행에 미치는 영향",
+      "직접 통제·책임 집중·결정 병목의 관찰 신호",
+      "피드백과 후속 확인이 정렬을 만드는 조건",
+      "작은 위임·피드백·결정 실험으로 준비도를 확인하는 방법",
+    ],
+  },
+  {
+    id: "career-freelance-transition",
+    category: "career",
+    title: "프리랜서 전환 분석",
+    shortDescription: "독립 작업으로 전환하기 전에 고객·통제·회복 조건을 검증합니다.",
+    riskLevel: "sensitive",
+    details: [
+      "독립 작업에서 자율성과 감당 가능한 작업량이 만나는 조건",
+      "고객 요청·범위 변경·책임 불명확이 통제를 약화시키는 신호",
+      "반복 의뢰·요청 품질·작업 회수로 보는 준비도",
+      "유료 파일럿과 중단 기준으로 전환을 시험하는 방법",
+    ],
+  },
 
   // 연애·결혼 8
   {

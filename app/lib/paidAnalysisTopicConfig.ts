@@ -309,6 +309,254 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     ],
   },
   {
+    productId: "career-promotion-readiness",
+    engine: "CAREER",
+    userQuestion:
+      "더 큰 역할을 맡을 준비가 되었는지, 어떤 책임·평가 근거의 공백을 먼저 메워야 하는가?",
+    analysisFocus: [
+      "현재 역할과 다음 역할 사이의 책임 범위 공백",
+      "성과가 개인 실행을 넘어 판단·조율·위임의 증거로 전환되는 조건",
+      "승진 결과가 아니라 준비도를 검증할 관찰 신호와 역할 실험",
+    ],
+    requiredInsights: [
+      {
+        id: "promotion-role-scope-gap",
+        prompt: "현재 책임 범위와 더 큰 역할에서 요구되는 판단·조율·책임 범위의 공백을 구분한다.",
+      },
+      {
+        id: "promotion-leadership-evidence",
+        prompt: "개인 성과가 아닌 위임·의사결정·협업 조율의 증거가 준비도 판단에 어떻게 연결되는지 설명한다.",
+      },
+      {
+        id: "promotion-evaluation-signal",
+        prompt: "피드백, 책임 소유, 반복 가능한 결과처럼 다음 역할 준비도를 확인할 관찰 신호를 제시한다.",
+      },
+      {
+        id: "promotion-readiness-action",
+        prompt: "역할 범위를 시험하고 평가 근거를 남길 구체 행동과 다음 검토 기준을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "specialization-depth-portfolio",
+        prompt: "전문 역량의 깊이·포트폴리오·장기 인정 경로를 설계하는 분석",
+      },
+      {
+        id: "job-change-stay-move-decision",
+        prompt: "현재 자리를 떠날지 남을지 또는 외부 이동을 판단하는 분석",
+      },
+      {
+        id: "leadership-daily-team-management",
+        prompt: "직함과 무관한 일상적 팀 운영·위임·피드백 시스템을 설계하는 분석",
+      },
+    ],
+    evidenceFocus: ["gyeokguk", "strength", "fortune_flow", "fortune_brain"],
+    decisionCriteria: {
+      확대: "검증된 책임 범위와 판단 권한을 한 단계 넓히는 방향",
+      유지: "현재 책임 범위에서 평가 근거를 더 축적하는 방향",
+      조정: "준비가 약한 책임·조율·위임 범위를 먼저 보완하는 방향",
+      보류: "역할 확대 요청을 미루고 준비도 신호를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "다음 역할에서 요구될 판단·조율·책임 항목을 현재 역할과 비교하는 행동",
+      "위임·의사결정·협업 조율의 결과를 평가 근거로 남기는 행동",
+      "피드백과 반복 결과를 기준으로 역할 확대 준비도를 검토하는 행동",
+    ],
+    prohibitedClaims: [
+      "승진·직급 상승·보직 발령 결과 보장",
+      "승진 시기나 평가 결과를 특정 날짜로 단정",
+      "특정 상사나 조직의 평가 의도를 단정",
+      "현재 회사를 떠나야 승진한다는 결론",
+    ],
+  },
+  {
+    productId: "career-workplace-adaptation",
+    engine: "CAREER",
+    userQuestion:
+      "현재 직장 환경에 지속 가능하게 적응하려면 어떤 역할·소통·기대 조건을 먼저 조정해야 하는가?",
+    analysisFocus: [
+      "온보딩·현재 직장 환경에서 반복되는 적응 마찰",
+      "업무 인수인계·회의·피드백에서 기대가 어긋나는 조건",
+      "직무 적합성이나 이직 판단 전에 확인할 30일 적응 신호",
+    ],
+    requiredInsights: [
+      {
+        id: "workplace-adaptation-friction",
+        prompt: "현재 직장 환경에서 역할·업무 속도·소통 방식이 지속 가능성을 약화시키는 적응 마찰을 구분한다.",
+      },
+      {
+        id: "workplace-communication-rhythm",
+        prompt: "인수인계, 회의, 피드백의 리듬이 업무 이해와 에너지 소모에 미치는 영향을 설명한다.",
+      },
+      {
+        id: "workplace-expectation-alignment-signal",
+        prompt: "책임 범위·우선순위·완료 기준이 정렬되는지 확인할 관찰 신호를 제시한다.",
+      },
+      {
+        id: "workplace-adaptation-action",
+        prompt: "현재 환경에서 조정할 조건을 시험하고 다음 적응 주기에 검토할 구체 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "overall-job-fit-diagnosis",
+        prompt: "직업·역할·업무 방식 전체의 장기 적합성을 진단하는 분석",
+      },
+      {
+        id: "job-change-decision",
+        prompt: "현재 직장을 떠날지 남을지 또는 이직을 준비할지 판단하는 분석",
+      },
+      {
+        id: "promotion-role-readiness",
+        prompt: "더 큰 역할이나 승진 준비도를 판단하는 분석",
+      },
+    ],
+    evidenceFocus: ["strength", "element_balance", "fortune_flow", "fortune_brain"],
+    decisionCriteria: {
+      확대: "현재 환경에서 검증된 역할·소통 방식의 적용 범위를 넓히는 방향",
+      유지: "지속 가능한 업무·소통 리듬을 유지하는 방향",
+      조정: "기대·우선순위·피드백 조건을 다시 맞추는 방향",
+      보류: "직장 적합성의 큰 결론을 미루고 적응 신호를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "업무 인수인계·회의·피드백에서 기대가 어긋난 장면을 기록하는 행동",
+      "책임 범위·우선순위·완료 기준을 담당자와 다시 맞추는 행동",
+      "30일 동안 적응 마찰과 에너지 소모가 줄어드는지 검토하는 행동",
+    ],
+    prohibitedClaims: [
+      "특정 회사나 조직 문화가 반드시 맞거나 맞지 않는다고 단정",
+      "입사·수습·재직 결과 보장",
+      "이직이 유일한 해결책이라는 결론",
+      "상사·동료의 의도나 평가를 단정",
+    ],
+  },
+  {
+    productId: "career-leadership-readiness",
+    engine: "CAREER",
+    userQuestion:
+      "사람을 이끄는 책임을 맡을 때 어떤 위임·피드백·의사결정 조건을 먼저 검증해야 하는가?",
+    analysisFocus: [
+      "직함과 별개로 사람을 이끄는 방식에서 나타나는 권한·위임·피드백 패턴",
+      "결정 병목과 과도한 개인 의존이 생기는 조건",
+      "작은 역할 실험으로 리더십 방식을 검증하는 기준",
+    ],
+    requiredInsights: [
+      {
+        id: "leadership-authority-style",
+        prompt: "권한을 행사하고 책임을 나누는 방식이 팀의 판단과 실행에 미치는 영향을 구분한다.",
+      },
+      {
+        id: "leadership-delegation-risk",
+        prompt: "과도한 직접 통제·책임 집중·결정 병목이 생기는 조건과 관찰 신호를 설명한다.",
+      },
+      {
+        id: "leadership-feedback-loop",
+        prompt: "피드백과 후속 확인이 사람·업무·결과의 정렬을 만드는지 검증할 신호를 제시한다.",
+      },
+      {
+        id: "leadership-experiment-action",
+        prompt: "작은 위임·피드백·결정 실험으로 리더십 방식을 검토할 구체 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "promotion-approval-outcome",
+        prompt: "승진·직급·평가 승인 결과와 다음 역할의 공식 준비도를 판단하는 분석",
+      },
+      {
+        id: "business-team-operating-system",
+        prompt: "사업 소유자 관점에서 직원·팀의 역할·인수인계·운영 체계를 설계하는 분석",
+      },
+      {
+        id: "job-fit-or-move-decision",
+        prompt: "직무 적합성이나 이직·잔류 결정을 판단하는 분석",
+      },
+    ],
+    evidenceFocus: ["gyeokguk", "fortune_brain", "strength", "element_relations"],
+    decisionCriteria: {
+      확대: "검증된 위임과 판단 책임의 범위를 넓히는 방향",
+      유지: "현재의 리더십 실험 범위를 유지하며 피드백을 축적하는 방향",
+      조정: "권한·위임·피드백 방식의 병목을 다시 설계하는 방향",
+      보류: "사람을 이끄는 책임 확대를 미루고 작은 실험 결과를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "결정이 한 사람에게 몰리는 장면과 위임 가능한 판단을 구분하는 행동",
+      "작은 책임을 위임한 뒤 기대·지원·피드백의 후속 이행을 확인하는 행동",
+      "팀 반응과 결과를 기준으로 다음 리더십 실험의 범위를 조정하는 행동",
+    ],
+    prohibitedClaims: [
+      "리더·관리자·임원이 될 운명이라고 단정",
+      "승진·팀 성과·부하 충성도 보장",
+      "특정 구성원의 감정·의도·능력을 단정",
+      "사업 조직 운영이나 채용 결론을 제시",
+    ],
+  },
+  {
+    productId: "career-freelance-transition",
+    engine: "CAREER",
+    userQuestion:
+      "조직 일을 독립·프리랜서 방식으로 전환하기 전에 어떤 고객·통제·작업 조건을 증명해야 하는가?",
+    analysisFocus: [
+      "독립 작업에서 자율성과 회복 가능성이 함께 유지되는 조건",
+      "고객 범위·요청 변경·작업 통제를 잃는 위험 신호",
+      "전환 결과가 아니라 유료 파일럿과 중단 조건으로 검증할 준비도",
+    ],
+    requiredInsights: [
+      {
+        id: "freelance-autonomy-capacity-fit",
+        prompt: "독립적으로 업무 범위·시간·책임을 운영할 때 자율성과 감당 가능한 작업량이 만나는 조건을 구분한다.",
+      },
+      {
+        id: "freelance-client-boundary-risk",
+        prompt: "고객 요청·범위 변경·책임 불명확이 작업 통제와 회복 가능성을 약화시키는 조건을 설명한다.",
+      },
+      {
+        id: "freelance-pipeline-stability-signal",
+        prompt: "반복 의뢰·요청 품질·작업 회수처럼 전환 준비도를 확인할 관찰 신호를 제시한다.",
+      },
+      {
+        id: "freelance-transition-test-action",
+        prompt: "유료 파일럿·작업 범위·중단 기준을 통해 독립 전환을 시험할 구체 행동을 제시한다.",
+      },
+    ],
+    excludedFocus: [
+      {
+        id: "general-stay-move-decision",
+        prompt: "조직에 남을지 외부 직장으로 이직할지 판단하는 일반 이동 분석",
+      },
+      {
+        id: "business-startup-market-readiness",
+        prompt: "사업 시작·시장 성공·매출 확대를 판단하는 창업 분석",
+      },
+      {
+        id: "income-or-investment-guarantee",
+        prompt: "독립 후 수입·고객 수·사업 성과를 보장하거나 투자 판단을 제시하는 분석",
+      },
+    ],
+    evidenceFocus: ["strength", "fortune_brain", "fortune_flow", "element_relations"],
+    decisionCriteria: {
+      확대: "검증된 고객·작업 통제 조건 안에서 독립 작업의 비중을 넓히는 방향",
+      유지: "현재 조직 일과 독립 작업의 검증 범위를 유지하는 방향",
+      조정: "고객·범위·회복·통제 조건을 다시 정리하는 방향",
+      보류: "독립 전환 결정을 미루고 파일럿과 중단 조건을 관찰하는 방향",
+    },
+    decisionType: "decision",
+    actionFocus: [
+      "독립 작업에서 통제 가능한 시간·범위·책임 조건을 문장으로 정리하는 행동",
+      "고객 요청·범위 변경·대금 회수에서 중단하거나 재협상할 기준을 확인하는 행동",
+      "유료 파일럿 결과를 반복 의뢰·작업 회수·회복 가능성으로 검토하는 행동",
+    ],
+    prohibitedClaims: [
+      "프리랜서 전환 성공·수입 증가·고객 확보 보장",
+      "퇴사나 독립 전환을 반드시 해야 한다는 결론",
+      "특정 고객·업종·계약을 추천하거나 성과를 예언",
+      "대출·투자·사업 자금 실행 지시",
+    ],
+  },
+  {
     productId: "wealth",
     engine: "MONEY",
     userQuestion:

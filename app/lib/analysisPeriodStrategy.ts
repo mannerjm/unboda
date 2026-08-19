@@ -103,6 +103,27 @@ export const PERIOD_ANALYSIS_STRATEGIES: readonly PeriodAnalysisStrategy[] = [
     ],
   },
   {
+    productId: "yearly-current",
+    periodType: "yearly",
+    timeGranularity: "year",
+    coreQuestion: "올해의 전반 흐름에서 어떤 조건과 부담을 관찰·조정·점검해야 하는가",
+    focus: [
+      "현재 연도의 압력과 자원 변화",
+      "연 단위로 확인할 운영 전환 신호",
+      "올해의 선택과 운영에서 조정·보류할 우선순위",
+      "연말까지 검토할 행동과 재점검 기준",
+    ],
+    timelineSpec: {
+      labels: ["올해의 운영 기준선", "연중 압력·자원 변화", "올해의 조정 검토", "연말 운영 재점검"],
+      rule: "월별 사건이나 특정 날짜를 예측하지 않고, 연 단위 운영 조건·관찰 신호·검토 우선순위만 다룬다.",
+    },
+    prohibitedPatterns: [
+      "특정 승진·이직·소득·관계·질병 사건을 올해 반드시 일어난다고 단정하는 표현",
+      "월별 사건을 장황하게 나열하는 서술",
+      "대운의 장기 구조를 올해 상품의 중심 결론으로 확장하는 서술",
+    ],
+  },
+  {
     productId: "annual-next",
     periodType: "yearly",
     timeGranularity: "year",

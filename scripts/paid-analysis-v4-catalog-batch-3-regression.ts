@@ -31,7 +31,7 @@ const siblingPairs = [
 const basePromptInput = { analysisType: "테스트 분석", birthData: "birth", originalChart: "chart", coreInterpretation: "core", fortuneTiming: "timing", sajuSummary: "summary", currentFortuneFlow: "flow" };
 
 const launchProductIds = getLaunchProductIds();
-assert(launchProductIds.length === 48, "Batch 5 must preserve the implemented launch catalog at 48 products");
+assert(launchProductIds.length === 50, "Final batch must preserve the implemented launch catalog at 50 products");
 assert(new Set(launchProductIds).size === launchProductIds.length, "launch IDs must be unique");
 
 for (const productId of batchProductIds) {

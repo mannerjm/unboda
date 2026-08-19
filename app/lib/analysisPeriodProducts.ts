@@ -37,6 +37,13 @@ export const PERIOD_ANALYSIS_PRODUCTS: PeriodAnalysisProductDefinition[] = [
       "올해의 전체 흐름을 일·재물·관계·건강·변화 시기를 중심으로 종합 분석합니다.",
   },
   {
+    id: "yearly-current",
+    type: "yearly",
+    title: "올해 흐름 종합 분석",
+    shortDescription:
+      "올해의 압력·자원 변화와 운영 우선순위를 관찰·조정 기준으로 종합 분석합니다.",
+  },
+  {
     id: "annual-next",
     type: "yearly",
     title: "내년 운",

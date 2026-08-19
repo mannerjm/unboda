@@ -19,7 +19,7 @@ const siblingPairs = [
 const basePromptInput = { analysisType: "테스트 분석", birthData: "birth", originalChart: "chart", coreInterpretation: "core", fortuneTiming: "timing", sajuSummary: "summary", currentFortuneFlow: "flow" };
 
 const launchIds = getLaunchProductIds();
-assert(launchIds.length === 48, "Batch 5 must preserve launch catalog at 48 products");
+assert(launchIds.length === 50, "Final batch must preserve launch catalog at 50 products");
 assert(new Set(launchIds).size === launchIds.length, "launch IDs must be unique");
 for (const productId of batchProductIds) {
   const config = getPaidAnalysisTopicConfig(productId);

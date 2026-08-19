@@ -56,6 +56,8 @@ const PRODUCT_ENGINE_MAP: Record<string, PaidAnalysisEngine> = {
   "business-client-relationship": "BUSINESS",
   "business-team-management": "BUSINESS",
   "daeun-current": "PERIOD",
+    "yearly-current": "PERIOD",
+    "monthly-next": "PERIOD",
   "money-income-stability": "MONEY",
   "money-debt-repayment": "MONEY",
   "money-emergency-buffer": "MONEY",

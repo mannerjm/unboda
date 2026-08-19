@@ -2017,7 +2017,7 @@ const LAUNCH_TOPIC_CONFIG_MAP = new Map(
 );
 
 /** PERIOD products are specialised by analysisPeriodStrategy, not by a topic config. */
-const PERIOD_LAUNCH_PRODUCT_IDS = ["daeun-current"];
+const PERIOD_LAUNCH_PRODUCT_IDS = ["daeun-current", "yearly-current", "monthly-next"];
 
 export type PaidAnalysisLaunchSpecialization =
   | { kind: "topic"; config: PaidAnalysisTopicConfig }

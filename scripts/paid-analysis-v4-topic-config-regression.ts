@@ -19,7 +19,7 @@ function assert(condition: boolean, message: string): void {
 
 const LAUNCH_PRODUCT_IDS = getLaunchProductIds();
 
-assert(LAUNCH_PRODUCT_IDS.length === 48, "Batch 5 launch set must contain 48 products");
+assert(LAUNCH_PRODUCT_IDS.length === 50, "Final launch set must contain 50 products");
 
 for (const productId of [
   "career",
@@ -64,6 +64,8 @@ for (const productId of [
   "study-learning-strategy", "study-exam-preparation", "study-focus-routine", "study-credential-decision",
   "business-startup-readiness", "business-expansion-control", "business-client-relationship", "business-team-management",
   "daeun-current",
+  "yearly-current",
+  "monthly-next",
 ]) {
   assert(
     LAUNCH_PRODUCT_IDS.includes(productId),
@@ -123,6 +125,8 @@ const EXPECTED_ENGINES: Record<string, string> = {
   "study-learning-strategy": "STUDY", "study-exam-preparation": "STUDY", "study-focus-routine": "STUDY", "study-credential-decision": "STUDY",
   "business-startup-readiness": "BUSINESS", "business-expansion-control": "BUSINESS", "business-client-relationship": "BUSINESS", "business-team-management": "BUSINESS",
   "daeun-current": "PERIOD",
+  "yearly-current": "PERIOD",
+  "monthly-next": "PERIOD",
 };
 
 for (const [productId, engine] of Object.entries(EXPECTED_ENGINES)) {

@@ -19,7 +19,7 @@ function assert(condition: boolean, message: string): void {
 
 const LAUNCH_PRODUCT_IDS = getLaunchProductIds();
 
-assert(LAUNCH_PRODUCT_IDS.length === 22, "Batch 1 launch set must contain 22 products");
+assert(LAUNCH_PRODUCT_IDS.length === 27, "Batch 2 launch set must contain 27 products");
 
 for (const productId of [
   "career",
@@ -30,10 +30,15 @@ for (const productId of [
   "career-workplace-adaptation",
   "career-leadership-readiness",
   "career-freelance-transition",
+  "career-workload-recovery",
+  "career-workplace-relationships",
   "wealth",
   "money-wealth-accumulation",
   "money-leak-risk",
   "money-saving-discipline",
+  "money-income-stability",
+  "money-debt-repayment",
+  "money-emergency-buffer",
   "relationship",
   "relationship-current",
   "relationship-marriage",
@@ -69,10 +74,15 @@ const EXPECTED_ENGINES: Record<string, string> = {
   "career-workplace-adaptation": "CAREER",
   "career-leadership-readiness": "CAREER",
   "career-freelance-transition": "CAREER",
+  "career-workload-recovery": "CAREER",
+  "career-workplace-relationships": "CAREER",
   wealth: "MONEY",
   "money-wealth-accumulation": "MONEY",
   "money-leak-risk": "MONEY",
   "money-saving-discipline": "MONEY",
+  "money-income-stability": "MONEY",
+  "money-debt-repayment": "MONEY",
+  "money-emergency-buffer": "MONEY",
   relationship: "RELATIONSHIP",
   "relationship-current": "RELATIONSHIP",
   "relationship-marriage": "RELATIONSHIP",

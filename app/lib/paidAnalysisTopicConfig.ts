@@ -557,6 +557,88 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     ],
   },
   {
+    productId: "career-workload-recovery",
+    engine: "CAREER",
+    userQuestion:
+      "어떤 업무 패턴이 내 역량을 소진시키며, 지속 가능한 성과를 위해 어떤 업무 경계를 회복해야 하는가?",
+    analysisFocus: [
+      "업무 과부하가 시작되는 책임·일정·재작업의 조합",
+      "퇴근 후 침범·결정 피로·회복 지연으로 확인하는 회복 부족 신호",
+      "직업 전체 방향이 아닌 현재 업무 주기에서 적용할 업무량·우선순위 경계",
+    ],
+    requiredInsights: [
+      { id: "workload-overload-trigger", prompt: "책임·일정·재작업이 겹쳐 업무 과부하를 시작시키는 조건을 구분한다." },
+      { id: "workload-recovery-deficit", prompt: "퇴근 후 침범, 결정 피로, 다음 업무 주기의 회복 지연처럼 회복 부족을 확인할 신호를 제시한다." },
+      { id: "workload-priority-conflict", prompt: "우선순위 충돌과 책임 집중이 감당 가능한 업무량을 넘기는 메커니즘을 설명한다." },
+      { id: "workload-reset-action", prompt: "업무 경계와 재배분 기준을 시험하고 다음 주기에 검토할 구체 행동을 제시한다." },
+    ],
+    excludedFocus: [
+      { id: "broad-career-operating-portfolio", prompt: "커리어 포트폴리오 전체의 책임·성과·우선순위를 종합 운영하는 분석" },
+      { id: "medical-burnout-or-treatment", prompt: "의학적 번아웃 진단, 치료, 건강 상태를 판단하는 분석" },
+      { id: "job-change-or-environment-decision", prompt: "이직·직장 적합성·조직 이동을 결론으로 판단하는 분석" },
+    ],
+    evidenceFocus: ["strength", "element_balance", "fortune_flow", "fortune_brain"],
+    decisionCriteria: {
+      확대: "회복 가능한 범위에서 검증된 업무 책임을 넓히는 방향",
+      유지: "현재의 지속 가능한 업무량과 경계를 유지하는 방향",
+      조정: "과부하를 만드는 책임·일정·재작업 조합을 재배분하는 방향",
+      보류: "새 책임을 더하기 전 회복 부족 신호를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "과부하가 시작된 업무·일정·재작업 조합을 같은 기준으로 기록하는 행동",
+      "퇴근 후 침범과 다음 주기 회복 지연을 기준으로 줄일 책임을 정하는 행동",
+      "우선순위 충돌 시 중단·위임·재협상할 업무 경계를 검토하는 행동",
+    ],
+    prohibitedClaims: [
+      "건강 상태·질병·번아웃 여부 진단",
+      "퇴사·휴직·이직이 유일한 해결책이라는 결론",
+      "특정 시점에 반드시 소진된다는 예측",
+      "의료·심리 치료 지시",
+    ],
+  },
+  {
+    productId: "career-workplace-relationships",
+    engine: "CAREER",
+    userQuestion:
+      "업무 성과를 돕거나 소진시키는 직장 관계는 무엇이며, 어떤 협업 경계를 세워야 하는가?",
+    analysisFocus: [
+      "요청·공로·책임이 오가는 이해관계자별 상호작용 패턴",
+      "역할 충돌·소통 누락·공로 불명확이 업무 성과를 약화시키는 조건",
+      "로맨스나 일반 관계 성향이 아닌 업무 요청·공로·에스컬레이션의 협업 경계",
+    ],
+    requiredInsights: [
+      { id: "workplace-stakeholder-pattern", prompt: "상사·동료·협업자와의 업무 요청·공로·책임이 반복되는 상호작용 패턴을 구분한다." },
+      { id: "workplace-role-conflict-signal", prompt: "역할 충돌, 소통 누락, 책임 전가가 성과와 에너지를 약화시키는 관찰 신호를 제시한다." },
+      { id: "workplace-reciprocity-mechanism", prompt: "요청 명확성, 공로 공유, 후속 이행이 협업의 상호성과 신뢰를 만드는 메커니즘을 설명한다." },
+      { id: "workplace-collaboration-boundary-action", prompt: "업무 요청·공로·에스컬레이션에서 적용할 협업 경계와 검토 행동을 제시한다." },
+    ],
+    excludedFocus: [
+      { id: "romance-or-general-social-profile", prompt: "연애·친구·가족을 포함한 일반 관계 성향과 감정적 친밀감을 분석하는 범위" },
+      { id: "promotion-or-leadership-readiness", prompt: "승진 준비도나 사람을 이끄는 리더십 책임을 판단하는 분석" },
+      { id: "organization-fit-or-job-change", prompt: "조직 적합성이나 이직·잔류 결정을 판단하는 분석" },
+    ],
+    evidenceFocus: ["element_relations", "fortune_brain", "gyeokguk", "strength"],
+    decisionCriteria: {
+      확대: "요청·공로·책임이 명확한 협업 관계의 범위를 넓히는 방향",
+      유지: "상호 이행이 확인된 업무 소통과 경계를 유지하는 방향",
+      조정: "역할 충돌과 공로·책임 불명확을 다시 정리하는 방향",
+      보류: "관계 해석보다 업무 요청과 후속 이행 신호를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "업무 요청·결정·공로·책임이 어긋난 장면을 이해관계자별로 기록하는 행동",
+      "요청 범위·결정권·공로 기준을 협업 전에 문장으로 맞추는 행동",
+      "반복 충돌 시 에스컬레이션하거나 경계를 조정할 기준을 검토하는 행동",
+    ],
+    prohibitedClaims: [
+      "상사·동료의 감정·의도·능력을 단정",
+      "특정 인물을 멀리하거나 신뢰해야 한다는 결론",
+      "승진·평가·해고 결과 보장",
+      "로맨스나 일반 인간관계의 결과 판단",
+    ],
+  },
+  {
     productId: "wealth",
     engine: "MONEY",
     userQuestion:
@@ -837,6 +919,129 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       "특정 월·연도 자산 증가 예언",
       "금융 성공·실패 확정",
       "대출·투자·저축 상품 실행 강제",
+    ],
+  },
+  {
+    productId: "money-income-stability",
+    engine: "MONEY",
+    userQuestion:
+      "수입이 흔들리거나 안정되는 구조는 무엇이며, 고정비 약속 전에 어떤 지속성 증거를 확인해야 하는가?",
+    analysisFocus: [
+      "수입원 의존·지급 지연·반복 수요가 만드는 수입 변동성",
+      "고정비와 반복 의무가 불안정한 수입 흐름을 압박하는 조건",
+      "투자·축적이 아닌 수입 지속성의 관찰 신호와 검토 순서",
+    ],
+    requiredInsights: [
+      { id: "income-volatility-mechanism", prompt: "수입원 의존, 지급 지연, 반복 수요의 변화가 수입 변동성을 만드는 메커니즘을 설명한다." },
+      { id: "income-dependency-signal", prompt: "한 수입원 집중, 지급 지연, 반복 의뢰의 품질처럼 지속성을 확인할 관찰 신호를 제시한다." },
+      { id: "income-fixed-cost-vulnerability", prompt: "수입이 불안정한 상태에서 고정비와 반복 의무가 통제력을 약화시키는 조건을 구분한다." },
+      { id: "income-stability-review-action", prompt: "수입 지속성 증거와 고정비 부담을 비교해 다음 검토 주기에 적용할 구체 행동을 제시한다." },
+    ],
+    excludedFocus: [
+      { id: "wealth-accumulation-allocation", prompt: "잔여분·보존선·장기 자산 축적 구조를 설계하는 분석" },
+      { id: "saving-routine-maintenance", prompt: "저축·예산·자동화 루틴의 유지와 재설정을 중심으로 하는 분석" },
+      { id: "investment-or-income-expansion", prompt: "투자 상품·사업 확장·새 수입원 확보를 추천하거나 실행하는 분석" },
+    ],
+    evidenceFocus: ["fortune_flow", "strength", "fortune_brain", "element_balance"],
+    decisionCriteria: {
+      확대: "반복성과 회수 조건이 확인된 수입 활동의 비중을 넓히는 방향",
+      유지: "현재 수입 구조와 고정비 부담을 유지하며 지속성을 확인하는 방향",
+      조정: "수입원 의존·지급 조건·고정비 약속을 다시 정리하는 방향",
+      보류: "새 고정 의무를 더하기 전 수입 지속성 신호를 관찰하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "수입원별 반복성·지급 지연·회수 조건을 같은 기준으로 기록하는 행동",
+      "고정비 약속 전에 수입 지속성 증거와 부담 조건을 비교하는 행동",
+      "수입 신호가 흔들릴 때 조정하거나 보류할 기준을 검토하는 행동",
+    ],
+    prohibitedClaims: [
+      "수입 증가·고객 확보·사업 성공 보장",
+      "특정 금액·수입 시점 예측",
+      "투자·대출·사업 실행 지시",
+      "실제 소득·부채 사실을 사주만으로 단정",
+    ],
+  },
+  {
+    productId: "money-debt-repayment",
+    engine: "MONEY",
+    userQuestion:
+      "상환 압력이 현금 흐름을 흔드는 조건은 무엇이며, 어떤 검토 순서로 통제력을 지켜야 하는가?",
+    analysisFocus: [
+      "상환 의무·납부일·생활비 압박이 겹치는 구조",
+      "이월·연체 위험·필수 비용 압박으로 확인하는 상환 취약 신호",
+      "법률·대출 조언이 아닌 실제 채무 자료 검토와 상환 우선순위의 점검",
+    ],
+    requiredInsights: [
+      { id: "debt-obligation-pressure", prompt: "상환 의무와 반복 납부가 현금 흐름의 통제력을 약화시키는 압박 구조를 설명한다." },
+      { id: "debt-repayment-priority-signal", prompt: "납부일 집중, 필수 비용 압박, 지급 지연처럼 상환 우선순위를 다시 봐야 할 관찰 신호를 제시한다." },
+      { id: "debt-rollover-risk-condition", prompt: "이월·추가 부담·기존 의무의 누적이 상환 판단을 악화시키는 조건을 구분한다." },
+      { id: "debt-review-action", prompt: "실제 채무 자료와 현금 흐름을 검토할 순서 및 다음 검토 주기의 구체 행동을 제시한다." },
+    ],
+    excludedFocus: [
+      { id: "creditor-negotiation-or-legal-advice", prompt: "채권자 협상·법률 절차·대출 상품을 추천하거나 법률적 결론을 제시하는 분석" },
+      { id: "general-money-leak-exposure", prompt: "지출·계약·공동 부담 전반의 손실 노출을 진단하는 분석" },
+      { id: "investment-or-debt-consolidation-execution", prompt: "투자·대출 갈아타기·상환 상품 실행을 지시하는 분석" },
+    ],
+    evidenceFocus: ["strength", "element_balance", "fortune_flow", "fortune_brain"],
+    decisionCriteria: {
+      확대: "실제 상환 자료와 회복 여력이 확인된 범위에서 의무를 이행하는 방향",
+      유지: "현재 상환 순서와 생활비 경계를 유지하며 압박 신호를 관찰하는 방향",
+      조정: "납부일·반복 의무·생활비 압박의 우선순위를 다시 정리하는 방향",
+      보류: "추가 의무를 더하기 전 실제 상환 압력과 자료를 검토하는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "납부일·반복 의무·필수 비용을 실제 자료로 같은 표에 정리하는 행동",
+      "상환 압력이 생활비와 회복 여력을 침범하는 신호를 확인하는 행동",
+      "실제 금융·법률 전문가 상담이 필요한 자료와 검토 순서를 준비하는 행동",
+    ],
+    prohibitedClaims: [
+      "대출·상환 상품·법률 절차 추천",
+      "파산·연체·상환 성공을 예언하거나 보장",
+      "특정 금액이나 상환 시점 단정",
+      "실제 채무 사실을 사주만으로 단정",
+    ],
+  },
+  {
+    productId: "money-emergency-buffer",
+    engine: "MONEY",
+    userQuestion:
+      "예상 밖의 지출이나 수입 공백이 생길 때 무엇이 재정 회복력을 무너뜨리며, 어떤 보호 순서를 점검해야 하는가?",
+    analysisFocus: [
+      "돌발 지출·수입 공백·지원 의존이 회복력을 약화시키는 구조",
+      "유동성 공백·회복 지연·지원 경계로 확인하는 충격 취약 신호",
+      "목표 금액이나 상품이 아닌 실제 비용·책임의 보호 순서와 회복 검토",
+    ],
+    requiredInsights: [
+      { id: "buffer-disruption-exposure", prompt: "돌발 지출과 수입 공백이 어떤 비용·책임 조합에서 재정 충격으로 확대되는지 설명한다." },
+      { id: "buffer-liquidity-signal", prompt: "유동성 공백, 회복 지연, 반복 지원 의존처럼 회복력을 점검할 관찰 신호를 제시한다." },
+      { id: "buffer-support-dependency-condition", prompt: "외부 지원·기존 자원·반복 의무에 과도하게 의존할 때 보호 순서가 약해지는 조건을 구분한다." },
+      { id: "buffer-resilience-review-action", prompt: "충격 이후 보호할 비용과 책임의 순서를 검토하고 다음 주기의 회복 행동을 제시한다." },
+    ],
+    excludedFocus: [
+      { id: "wealth-accumulation-target-or-product", prompt: "잔여분 목표·저축 금액·자산 상품을 설계하거나 추천하는 분석" },
+      { id: "saving-routine-or-budget-maintenance", prompt: "정기 예산·저축 습관·자동화 루틴을 유지하는 분석" },
+      { id: "investment-or-borrowing-execution", prompt: "투자·대출·보험 상품을 추천하거나 실행하는 분석" },
+    ],
+    evidenceFocus: ["strength", "fortune_flow", "element_balance", "fortune_brain"],
+    decisionCriteria: {
+      확대: "충격 이후에도 보호 순서와 회복 조건이 확인된 범위에서 활동을 넓히는 방향",
+      유지: "현재 보호 순서와 지원 경계를 유지하며 회복 신호를 관찰하는 방향",
+      조정: "돌발 비용·반복 의무·지원 의존의 우선순위를 다시 정리하는 방향",
+      보류: "회복력 자료를 확인하기 전 새 책임이나 고정 의무를 더하지 않는 방향",
+    },
+    decisionType: "exploration",
+    actionFocus: [
+      "돌발 지출과 수입 공백에서 먼저 보호할 비용·책임을 실제 자료로 분류하는 행동",
+      "유동성 공백과 지원 의존이 반복되는 신호를 검토하는 행동",
+      "충격 이후 회복·조정·외부 상담이 필요한 기준을 다음 주기에 점검하는 행동",
+    ],
+    prohibitedClaims: [
+      "비상자금 목표 금액·저축 상품·투자 상품 추천",
+      "돌발 손실·위기·파산 시점 예언",
+      "대출·보험·투자 실행 지시",
+      "실제 자산·지원 관계를 사주만으로 단정",
     ],
   },
   {

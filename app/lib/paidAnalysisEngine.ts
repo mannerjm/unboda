@@ -16,6 +16,8 @@ const PRODUCT_ENGINE_MAP: Record<string, PaidAnalysisEngine> = {
   "career-workplace-adaptation": "CAREER",
   "career-leadership-readiness": "CAREER",
   "career-freelance-transition": "CAREER",
+  "career-workload-recovery": "CAREER",
+  "career-workplace-relationships": "CAREER",
   wealth: "MONEY",
   "money-wealth-accumulation": "MONEY",
   "money-leak-risk": "MONEY",
@@ -30,6 +32,9 @@ const PRODUCT_ENGINE_MAP: Record<string, PaidAnalysisEngine> = {
   "relationship-boundary": "RELATIONSHIP",
   "relationship-reunion": "RELATIONSHIP",
   "daeun-current": "PERIOD",
+  "money-income-stability": "MONEY",
+  "money-debt-repayment": "MONEY",
+  "money-emergency-buffer": "MONEY",
 };
 
 export function getPaidAnalysisEngine(

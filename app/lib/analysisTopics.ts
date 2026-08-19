@@ -27,6 +27,45 @@ export type AnalysisTopicDefinition = {
 export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
   // 재물·금전 8
   {
+    id: "money-income-stability",
+    category: "money",
+    title: "수입 안정성 분석",
+    shortDescription: "수입의 변동성과 고정비 부담을 점검해 지속 가능한 현금 흐름 기준을 만듭니다.",
+    riskLevel: "sensitive",
+    details: [
+      "수입이 흔들리거나 안정되는 구조와 반복 조건",
+      "한 수입원 의존·지급 지연·반복 수요의 관찰 신호",
+      "고정비 약속이 통제력을 약화시키는 취약 조건",
+      "수입 안정성을 검토하는 우선순위와 행동 기준",
+    ],
+  },
+  {
+    id: "money-debt-repayment",
+    category: "money",
+    title: "부채 상환 구조 분석",
+    shortDescription: "상환 압력이 현금 흐름을 흔드는 조건과 점검 순서를 분석합니다.",
+    riskLevel: "sensitive",
+    details: [
+      "상환 의무와 생활비 압박이 겹치는 구조",
+      "납부일 집중·이월·필수 비용 압박의 관찰 신호",
+      "상환 우선순위가 흐려지는 조건과 통제 기준",
+      "실제 채무 자료를 검토할 상환 점검 순서",
+    ],
+  },
+  {
+    id: "money-emergency-buffer",
+    category: "money",
+    title: "비상자금 회복력 분석",
+    shortDescription: "예상 밖의 지출과 수입 공백에서 재정 회복력을 지키는 점검 기준을 분석합니다.",
+    riskLevel: "sensitive",
+    details: [
+      "돌발 지출과 수입 공백이 취약성을 키우는 조건",
+      "유동성 공백·지원 의존·회복 지연의 관찰 신호",
+      "충격 이후 우선 보호할 비용과 책임의 순서",
+      "비상 상황에 대비한 회복력 점검 프로토콜",
+    ],
+  },
+  {
     id: "money-wealth-accumulation",
     category: "money",
     title: "재물이 쌓이는 구조",
@@ -300,6 +339,32 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
       "고객 요청·범위 변경·책임 불명확이 통제를 약화시키는 신호",
       "반복 의뢰·요청 품질·작업 회수로 보는 준비도",
       "유료 파일럿과 중단 기준으로 전환을 시험하는 방법",
+    ],
+  },
+  {
+    id: "career-workload-recovery",
+    category: "career",
+    title: "업무 과부하 회복 분석",
+    shortDescription: "업무에서 소진을 만드는 패턴과 지속 가능한 업무 경계를 점검합니다.",
+    riskLevel: "standard",
+    details: [
+      "업무 과부하를 시작시키는 책임·일정·재작업 조건",
+      "퇴근 후 업무 침범·결정 피로·회복 지연의 관찰 신호",
+      "우선순위 충돌이 반복되는 업무 조합과 경계 기준",
+      "다음 업무 주기에 검토할 과부하 회복 프로토콜",
+    ],
+  },
+  {
+    id: "career-workplace-relationships",
+    category: "career",
+    title: "직장 관계 분석",
+    shortDescription: "업무 성과를 돕거나 소진시키는 이해관계자 상호작용과 협업 경계를 점검합니다.",
+    riskLevel: "standard",
+    details: [
+      "업무 요청·공로·책임이 오가는 직장 관계 패턴",
+      "역할 충돌과 소통 누락이 성과를 약화시키는 신호",
+      "요청 명확성·공로 공유·에스컬레이션의 협업 기준",
+      "이해관계자별 협업 경계를 검토하는 행동",
     ],
   },
 

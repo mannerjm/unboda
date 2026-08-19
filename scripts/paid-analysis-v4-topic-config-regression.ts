@@ -19,7 +19,7 @@ function assert(condition: boolean, message: string): void {
 
 const LAUNCH_PRODUCT_IDS = getLaunchProductIds();
 
-assert(LAUNCH_PRODUCT_IDS.length === 40, "Batch 4 launch set must contain 40 products");
+assert(LAUNCH_PRODUCT_IDS.length === 48, "Batch 5 launch set must contain 48 products");
 
 for (const productId of [
   "career",
@@ -61,6 +61,8 @@ for (const productId of [
   "health-burnout-risk",
   "health-habit-continuity",
   "health-body-signal-review",
+  "study-learning-strategy", "study-exam-preparation", "study-focus-routine", "study-credential-decision",
+  "business-startup-readiness", "business-expansion-control", "business-client-relationship", "business-team-management",
   "daeun-current",
 ]) {
   assert(
@@ -118,6 +120,8 @@ const EXPECTED_ENGINES: Record<string, string> = {
   "health-burnout-risk": "HEALTH",
   "health-habit-continuity": "HEALTH",
   "health-body-signal-review": "HEALTH",
+  "study-learning-strategy": "STUDY", "study-exam-preparation": "STUDY", "study-focus-routine": "STUDY", "study-credential-decision": "STUDY",
+  "business-startup-readiness": "BUSINESS", "business-expansion-control": "BUSINESS", "business-client-relationship": "BUSINESS", "business-team-management": "BUSINESS",
   "daeun-current": "PERIOD",
 };
 

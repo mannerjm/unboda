@@ -5,6 +5,8 @@ export type PaidAnalysisEngine =
   | "MONEY"
   | "RELATIONSHIP"
   | "HEALTH"
+  | "STUDY"
+  | "BUSINESS"
   | "PERIOD";
 
 /** Launch-scope mapping only; Phase 2 products are intentionally absent. */
@@ -45,6 +47,14 @@ const PRODUCT_ENGINE_MAP: Record<string, PaidAnalysisEngine> = {
   "health-burnout-risk": "HEALTH",
   "health-habit-continuity": "HEALTH",
   "health-body-signal-review": "HEALTH",
+  "study-learning-strategy": "STUDY",
+  "study-exam-preparation": "STUDY",
+  "study-focus-routine": "STUDY",
+  "study-credential-decision": "STUDY",
+  "business-startup-readiness": "BUSINESS",
+  "business-expansion-control": "BUSINESS",
+  "business-client-relationship": "BUSINESS",
+  "business-team-management": "BUSINESS",
   "daeun-current": "PERIOD",
   "money-income-stability": "MONEY",
   "money-debt-repayment": "MONEY",
@@ -103,6 +113,18 @@ const HEALTH_ENGINE_RULES = `[HEALTH Engine 규칙]
 - TopicConfig의 단일 질문과 반드시 다룰 핵심 통찰을 본문 중심으로 최우선 적용한다.
 - TopicConfig에서 제외한 범위를 핵심 결론이나 주된 action으로 확장하지 않는다.`;
 
+const STUDY_ENGINE_RULES = `[STUDY Engine 규칙]
+- 학습 분석은 학습 구조, 연습·복습, 집중 환경, 진척 증거와 검토 행동으로 설명한다.
+- 합격·불합격·점수·입학 결과, 지능·ADHD·학습장애 진단, 학업 성공 시점을 예측·보장하지 않는다.
+- TopicConfig의 단일 질문과 반드시 다룰 핵심 통찰을 본문 중심으로 최우선 적용한다.
+- TopicConfig에서 제외한 범위를 핵심 결론이나 주된 action으로 확장하지 않는다.`;
+
+const BUSINESS_ENGINE_RULES = `[BUSINESS Engine 규칙]
+- 사업 분석은 운영 책임, 가설 검증, 고객 범위, 의사결정권, 위임, 용량과 검토 기준으로 설명한다.
+- 매출·고객 확보·사업 성공·투자 수익을 보장하거나, 시장 사실·법률·세무 결론을 만들거나, 정확한 성공 시점을 예측하지 않는다.
+- TopicConfig의 단일 질문과 반드시 다룰 핵심 통찰을 본문 중심으로 최우선 적용한다.
+- TopicConfig에서 제외한 범위를 핵심 결론이나 주된 action으로 확장하지 않는다.`;
+
 const PERIOD_ENGINE_RULES = `[PERIOD Engine 규칙]
 - 이 리포트가 답해야 하는 축은 "지금 어느 국면에 있고 다음 전환을 위해 무엇을 준비할 것인가"이다.
 - 기간 해상도와 구간 라벨은 아래 [기간별 분석 전략]을 벗어나지 않는다.
@@ -114,6 +136,8 @@ const ENGINE_RULES: Record<PaidAnalysisEngine, string> = {
   MONEY: MONEY_ENGINE_RULES,
   RELATIONSHIP: RELATIONSHIP_ENGINE_RULES,
   HEALTH: HEALTH_ENGINE_RULES,
+  STUDY: STUDY_ENGINE_RULES,
+  BUSINESS: BUSINESS_ENGINE_RULES,
   PERIOD: PERIOD_ENGINE_RULES,
 };
 

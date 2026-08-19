@@ -37,7 +37,7 @@ const basePromptInput = {
 };
 
 const launchProductIds = getLaunchProductIds();
-assert(launchProductIds.length === 40, "Batch 4 must preserve the implemented launch catalog at 40 products");
+assert(launchProductIds.length === 48, "Batch 5 must preserve the implemented launch catalog at 48 products");
 assert(new Set(launchProductIds).size === launchProductIds.length, "launch product IDs must be unique");
 
 for (const productId of batchProductIds) {

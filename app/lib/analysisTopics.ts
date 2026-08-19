@@ -26,6 +26,14 @@ export type AnalysisTopicDefinition = {
 
 export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
   // 재물·금전 8
+  { id: "study-learning-strategy", category: "growth", title: "학습 전략 분석", shortDescription: "노력을 이해와 활용으로 바꾸는 학습 구조를 점검합니다.", riskLevel: "standard", details: ["정보 처리와 정리 방식", "학습 범위와 깊이의 균형", "회상·설명·오류의 진척 신호", "학습 실험과 검토 프로토콜"] },
+  { id: "study-exam-preparation", category: "growth", title: "시험 준비 분석", shortDescription: "정해진 시험의 준비 순서와 연습·오류 검토 기준을 점검합니다.", riskLevel: "standard", details: ["준비 범위와 빈틈", "연습·모의 평가 신호", "오류 검토 주기", "시험 준비 사다리"] },
+  { id: "study-focus-routine", category: "growth", title: "집중 루틴 분석", shortDescription: "공부가 시작·중단·재시작되는 환경과 행동 조건을 점검합니다.", riskLevel: "standard", details: ["집중을 깨는 조건", "시작 신호", "재시작 마찰", "집중 세션 프로토콜"] },
+  { id: "study-credential-decision", category: "growth", title: "자격증 선택 판단 분석", shortDescription: "자격증·학업 투자가 현재 시간과 비용을 쓸 가치가 있는지 판단합니다.", riskLevel: "standard", details: ["목적 적합성", "시간·비용·준비 여력", "실무 증명 가치", "진행·보류·재검토 카드"] },
+  { id: "business-startup-readiness", category: "business", title: "창업 준비도 분석", shortDescription: "창업 파일럿 전에 운영 가설·역할·용량 증거를 점검합니다.", riskLevel: "sensitive", details: ["운영 준비도", "가설·증명 공백", "용량 조건", "창업 파일럿 체크리스트"] },
+  { id: "business-expansion-control", category: "business", title: "사업 확장 통제 분석", shortDescription: "범위·고객·비용·책임을 늘리기 전 운영 통제 조건을 점검합니다.", riskLevel: "sensitive", details: ["확장 압력", "운영 용량", "통제 상실 신호", "확장 중단·검토 기준"] },
+  { id: "business-client-relationship", category: "business", title: "고객 관계 운영 분석", shortDescription: "고객 요청·범위·승인·수정의 운영 경계를 점검합니다.", riskLevel: "sensitive", details: ["기대 차이", "범위 변경 신호", "승인·책임", "고객 경계 프로토콜"] },
+  { id: "business-team-management", category: "business", title: "팀 운영 분석", shortDescription: "팀의 결정권·위임·피드백·책임 모호성을 점검합니다.", riskLevel: "standard", details: ["결정 병목", "위임 신호", "피드백·책임", "팀 운영 리듬"] },
   { id: "health-energy-recovery", category: "health", title: "에너지 회복 리듬 분석", shortDescription: "일상 부담과 회복 리듬을 관찰해 지속 가능한 에너지 기준을 점검합니다.", riskLevel: "standard", details: ["일상 부담과 에너지 소진의 반복 조건", "회복 지연과 생활 리듬의 관찰 신호", "활동·휴식 균형이 어긋나는 조건", "회복 리듬 실험"] },
   { id: "health-sleep-rhythm", category: "health", title: "수면 리듬 점검 분석", shortDescription: "수면 습관을 진단하지 않고 관찰 가능한 리듬과 다음날 회복 신호를 점검합니다.", riskLevel: "standard", details: ["수면 리듬을 흔드는 생활 조건", "취침 전 신호와 기상 일관성", "다음날 회복과 생활 리듬의 연관", "수면 리듬 관찰 루프"] },
   { id: "health-stress-regulation", category: "health", title: "스트레스 반응 조절 분석", shortDescription: "외부 부담이 생활 스트레스 반응으로 커지는 흐름과 조절 순서를 점검합니다.", riskLevel: "standard", details: ["스트레스 촉발 조건", "반응 확대 신호", "회복 자원과 중단 기준", "스트레스 중단 프로토콜"] },

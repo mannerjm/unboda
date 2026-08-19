@@ -30,13 +30,6 @@ export const PERIOD_ANALYSIS_PRODUCTS: PeriodAnalysisProductDefinition[] = [
       "다가오는 달의 주요 변화와 미리 준비할 판단 기준을 분석합니다.",
   },
   {
-    id: "annual-current",
-    type: "yearly",
-    title: "올해 운",
-    shortDescription:
-      "올해의 전체 흐름을 일·재물·관계·건강·변화 시기를 중심으로 종합 분석합니다.",
-  },
-  {
     id: "yearly-current",
     type: "yearly",
     title: "올해 흐름 종합 분석",

@@ -22,7 +22,7 @@ function assertRejected(
 }
 
 const launchProductIds = getLaunchProductIds();
-assert(launchProductIds.length === 50, "Final launch set must contain exactly 50 products");
+assert(launchProductIds.length === 54, "Final launch set must contain 47 topics and 7 period products");
 
 const topicContracts: PaidAnalysisPremiumDepthContract[] = [];
 

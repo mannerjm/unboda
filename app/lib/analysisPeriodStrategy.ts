@@ -77,32 +77,6 @@ export const PERIOD_ANALYSIS_STRATEGIES: readonly PeriodAnalysisStrategy[] = [
     ],
   },
   {
-    productId: "annual-current",
-    periodType: "yearly",
-    timeGranularity: "year",
-    coreQuestion: "올해 전체 흐름 속에서 남은 기간을 어떻게 활용할 것인가",
-    focus: [
-      "기준 연도 전체를 관통하는 테마",
-      "기준 확정일 이전 흐름과 이후 흐름의 구분",
-      "기준 확정일 이후 남은 기간에서 우선할 판단",
-      "연중 주요 전환 구간",
-      "남은 기간의 행동 우선순위",
-    ],
-    timelineSpec: {
-      labels: [
-        "올해 전반의 흐름",
-        "기준 확정일 이후 남은 기간",
-        "올해 후반의 전환 구간",
-        "올해 마무리와 다음 해로의 연결",
-      ],
-      rule: "반기·분기 또는 기준일 이전/이후처럼 연 단위 해상도로 구분하고, 월별로 나누어 나열하지 않는다.",
-    },
-    prohibitedPatterns: [
-      "12개월 상품처럼 월별로 길게 나열하는 서술",
-      "특정 사건의 발생을 확정하는 표현",
-    ],
-  },
-  {
     productId: "yearly-current",
     periodType: "yearly",
     timeGranularity: "year",
@@ -263,11 +237,20 @@ const STRATEGY_BY_PRODUCT_ID = new Map(
   PERIOD_ANALYSIS_STRATEGIES.map((strategy) => [strategy.productId, strategy]),
 );
 
+const PERIOD_STRATEGY_ALIASES: Record<string, string> = {
+  "annual-current": "yearly-current",
+};
+
 /** Null for TOPIC, legacy and unknown products. */
 export function getPeriodAnalysisStrategy(
   productId: string | undefined,
 ): PeriodAnalysisStrategy | null {
-  return productId ? STRATEGY_BY_PRODUCT_ID.get(productId) ?? null : null;
+  const canonicalProductId = productId
+    ? PERIOD_STRATEGY_ALIASES[productId] ?? productId
+    : undefined;
+  return canonicalProductId
+    ? STRATEGY_BY_PRODUCT_ID.get(canonicalProductId) ?? null
+    : null;
 }
 
 const TIME_GRANULARITY_LABELS: Record<PeriodAnalysisTimeGranularity, string> = {

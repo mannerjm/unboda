@@ -689,12 +689,13 @@ export const PREMIUM_PRODUCT_LOOKUP: Record<
 export function getPremiumProduct(
   productId: string,
 ): PremiumProductDefinition | undefined {
-  return PREMIUM_PRODUCT_LOOKUP[productId];
+  return PREMIUM_PRODUCT_LOOKUP[getCanonicalPremiumProductId(productId)];
 }
 
 const PREMIUM_PRODUCT_ID_ALIASES: Record<string, string> = {
   love: "relationship",
   money: "wealth",
+  "annual-current": "yearly-current",
 };
 
 export function getCanonicalPremiumProductId(

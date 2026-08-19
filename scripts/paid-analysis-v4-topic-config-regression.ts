@@ -19,7 +19,7 @@ function assert(condition: boolean, message: string): void {
 
 const LAUNCH_PRODUCT_IDS = getLaunchProductIds();
 
-assert(LAUNCH_PRODUCT_IDS.length === 50, "Final launch set must contain 50 products");
+assert(LAUNCH_PRODUCT_IDS.length === 54, "Final launch set must contain 47 topics and 7 period products");
 
 for (const productId of [
   "career",
@@ -64,8 +64,12 @@ for (const productId of [
   "study-learning-strategy", "study-exam-preparation", "study-focus-routine", "study-credential-decision",
   "business-startup-readiness", "business-expansion-control", "business-client-relationship", "business-team-management",
   "daeun-current",
+  "monthly-current",
   "yearly-current",
   "monthly-next",
+  "annual-next",
+  "annual-3years",
+  "lifetime-overview",
 ]) {
   assert(
     LAUNCH_PRODUCT_IDS.includes(productId),
@@ -125,8 +129,12 @@ const EXPECTED_ENGINES: Record<string, string> = {
   "study-learning-strategy": "STUDY", "study-exam-preparation": "STUDY", "study-focus-routine": "STUDY", "study-credential-decision": "STUDY",
   "business-startup-readiness": "BUSINESS", "business-expansion-control": "BUSINESS", "business-client-relationship": "BUSINESS", "business-team-management": "BUSINESS",
   "daeun-current": "PERIOD",
+  "monthly-current": "PERIOD",
   "yearly-current": "PERIOD",
   "monthly-next": "PERIOD",
+  "annual-next": "PERIOD",
+  "annual-3years": "PERIOD",
+  "lifetime-overview": "PERIOD",
 };
 
 for (const [productId, engine] of Object.entries(EXPECTED_ENGINES)) {

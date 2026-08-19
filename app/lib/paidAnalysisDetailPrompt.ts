@@ -74,9 +74,34 @@ export type PaidAnalysisDetailPromptInput = {
 };
 
 function buildTopicNarrativeContract(config: PaidAnalysisTopicConfig): string {
+  const requiredInsightIds = new Set(
+    config.requiredInsights.map((insight) => insight.id),
+  );
   const insightSequence = config.requiredInsights
     .map((insight, index) => `${index + 1}. ${insight.prompt}`)
     .join("\n");
+  const currentRelationshipBoundary =
+    requiredInsightIds.has("continue-adjust-criteria") &&
+    requiredInsightIds.has("current-relationship-action")
+      ? `
+[현재 관계 상태 판단 경계]
+- 이 상품의 중심 질문은 "현재 어떤 관계 상태가 관찰되며, 어떤 반복 증거가 유지 또는 조정을 정당화하는가"다.
+- conclusion, coreProblem, timeline, action은 반드시 "현재 상태 → 상호성·후속 이행 → 최소 기준 정렬 → 관찰 창 → 유지 또는 조정" 순서로 조직한다.
+- 갈등 수습, 갈등 후 대화 재개, 화해 과정, 재발 검증은 현재 관계 상태를 판단하는 보조 증거로만 언급할 수 있다. 이 개념을 독립된 timeline 단계, 주된 action 대상, 최종 판단 틀로 만들지 않는다.
+- timeline은 현재 상태 기준선, 상호성·후속 이행 확인, 기준 정렬, 관찰 창의 종합, 유지·조정 검토를 다룬다. 갈등 회복 확인이나 재발 시험을 전용 단계로 만들지 않는다.
+- principal action 3개 중 최소 2개는 연락·상호성·약속 이행·일방 조정·최소 기준·유지·조정 판단을 직접 검증해야 한다.
+- 강약·오행·외부 반응·기준 지연 같은 공통 프로필 설명으로 섹션을 시작하지 않는다. 현재 관계의 상호성, 지속성, 이행, 기준 정렬을 먼저 말하고 명리 근거는 그 판단을 뒷받침한다.
+`
+      : "";
+  const conflictBoundary =
+    requiredInsightIds.has("conflict-trigger-pattern") &&
+    requiredInsightIds.has("conflict-recovery-action")
+      ? `
+[갈등 수습·재발 분석 보호 경계]
+- 이 상품은 반드시 "촉발 → 직후 반응 → 확대 또는 완화 → 수습 시도 → 행동 변화 → 재발 시험"을 중심 순서로 조직한다.
+- 현재 관계의 유지·조정 판단이나 일반적인 관계 상태 점검으로 갈등의 촉발·수습·재발 분석을 대체하지 않는다.
+`
+      : "";
 
   return `
 [상품 중심 추론 계약]
@@ -89,6 +114,7 @@ function buildTopicNarrativeContract(config: PaidAnalysisTopicConfig): string {
 [필수 통찰 기반 검토 순서]
 다음 네 단계는 timeline의 네 항목과 action의 우선순위에 반영한다. 고정적인 "단기·전환·중기·장기" 시간 틀을 기본값으로 반복하지 말고, 각 단계가 가리키는 제품별 메커니즘을 label과 changeSignal에 드러낸다. 이는 미래 예측이 아니라 관찰·검토 순서다.
 ${insightSequence}
+${currentRelationshipBoundary}${conflictBoundary}
 `;
 }
 

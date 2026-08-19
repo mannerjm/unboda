@@ -1,6 +1,6 @@
 "use client";
 import { calculateWeightedElements } from "../lib/elements";
-import { createContext, Suspense, useContext, useEffect, useState } from "react";
+import { createContext, startTransition, Suspense, useContext, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import type { getSaju } from "../lib/manse";
@@ -281,13 +281,27 @@ const aiSummarySections = [
 ].filter((section): section is { title: string; text: string } => Boolean(section.text));
 
 const [selectedDaeunOrder, setSelectedDaeunOrder] = useState<number | null>(null);
+const defaultDaeunOrder = sajuData?.daeunAnalysis
+  ? Math.min(
+      10,
+      Math.max(
+        1,
+        Math.floor(
+          (new Date().getFullYear() - Number(birthDate.slice(0, 4)) + 1 -
+            sajuData.daeunAnalysis.startAge) /
+            10,
+        ) + 1,
+      ),
+    )
+  : null;
+const effectiveDaeunOrder = selectedDaeunOrder ?? defaultDaeunOrder;
 const selectedDaeunStartYear =
   (freeAnalysis?.daeunAnalysis ?? sajuData?.daeunAnalysis) &&
-  selectedDaeunOrder
+  effectiveDaeunOrder
     ? Number(birthDate.slice(0, 4)) +
       (freeAnalysis?.daeunAnalysis.startAge ??
         sajuData!.daeunAnalysis.startAge) +
-      (selectedDaeunOrder - 1) * 10 -
+      (effectiveDaeunOrder - 1) * 10 -
       1
     : null;
 
@@ -306,23 +320,25 @@ useEffect(() => {
     const provided = providedResult.analysis;
     const restored = restoreStoredResult(provided.result, JSON.stringify(provided.saju));
     if (!restored.ok) {
-      setAiResult(restored.message);
+      startTransition(() => setAiResult(restored.message));
     } else {
-      setAiResult(restored.result);
-      setSajuData(restored.saju);
-      setProfile(provided.profile);
-      setFreeAnalysis(provided.freeAnalysis ?? null);
-      setRecommendationExplanation(provided.recommendationExplanation);
-      setProductRecommendations(provided.productRecommendations);
-      setGenerationMeta(provided.generationMeta);
+      startTransition(() => {
+        setAiResult(restored.result);
+        setSajuData(restored.saju);
+        setProfile(provided.profile);
+        setFreeAnalysis(provided.freeAnalysis ?? null);
+        setRecommendationExplanation(provided.recommendationExplanation);
+        setProductRecommendations(provided.productRecommendations);
+        setGenerationMeta(provided.generationMeta);
+      });
     }
-    setIsStorageChecked(true);
+    startTransition(() => setIsStorageChecked(true));
     return;
   }
 
   if (!currentProfileId) {
-    setAiResult("분석할 프로필을 찾을 수 없습니다.");
-    setIsStorageChecked(true);
+    startTransition(() => setAiResult("분석할 프로필을 찾을 수 없습니다."));
+    startTransition(() => setIsStorageChecked(true));
     return;
   }
 
@@ -366,25 +382,6 @@ useEffect(() => {
     .finally(() => setIsStorageChecked(true));
 }, [currentProfileId, providedResult]);
 
-
-useEffect(() => {
-  if (!sajuData?.daeunAnalysis || selectedDaeunOrder !== null) {
-    return;
-  }
-
-  const birthYear = Number(birthDate.slice(0, 4));
-  const currentYear = new Date().getFullYear();
-  const currentAge = currentYear - birthYear + 1;
-
-  const startAge = sajuData.daeunAnalysis.startAge;
-
-  const currentDaeunOrder = Math.min(
-    10,
-    Math.max(1, Math.floor((currentAge - startAge) / 10) + 1)
-  );
-
-  setSelectedDaeunOrder(currentDaeunOrder);
-}, [sajuData, birthDate, selectedDaeunOrder]);
 
 if (!isStorageChecked) {
   return (
@@ -875,7 +872,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
   key={daeun.order}
   onClick={() => setSelectedDaeunOrder(daeun.order)}
   className={`flex min-w-0 cursor-pointer flex-col items-center rounded-2xl px-2 py-4 transition ${
-    selectedDaeunOrder === daeun.order
+    effectiveDaeunOrder === daeun.order
       ? "bg-stone-900 text-white"
       : "bg-stone-50"
   }`}

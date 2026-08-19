@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import type {
   PaidAnalysisDetailOutputV3,
   ResolvedPaidAnalysisDetailV4,
@@ -54,7 +54,7 @@ void detail;
 
   useEffect(() => {
   if (!profileId) {
-    setErrorMessage("분석 대상을 확인하지 못했습니다.");
+    startTransition(() => setErrorMessage("분석 대상을 확인하지 못했습니다."));
     return;
   }
   let isCancelled = false;

@@ -192,7 +192,7 @@ assert(new Set(prompts.values()).size === 8, "all 8 PERIOD prompts must stay dif
 const KEY_PREFIX_BY_PRODUCT: Record<string, string> = {
   "monthly-current": "segment-1",
   "monthly-next": "segment-1",
-  "annual-current": "segment-1",
+  "yearly-current": "segment-1",
   "annual-next": "segment-1",
   "annual-3years": "year-1",
   "monthly-12months": "window-1",

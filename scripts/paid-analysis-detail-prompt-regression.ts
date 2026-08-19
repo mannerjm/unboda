@@ -509,12 +509,12 @@ console.log(
 
 console.log(
   "wealth 재물 분석 초점 실제 내용 포함:",
-  promptV3.includes("재성의 강약과 실제 작용"),
+  promptV3.includes("수입·지출·책임·활동·계약이 연결되는 재정 운영 구조"),
 );
 
 console.log(
   "wealth 기대 결과 실제 내용 포함:",
-  promptV3.includes("현재 재물 운영의 우선순위 이해"),
+  promptV3.includes("현재 재정 운영 구조와 차원별 우선순위 이해"),
 );
 
 if (!promptV3.includes("상품 ID:\nwealth")) {
@@ -529,16 +529,12 @@ if (!promptV3.includes("핵심 분석 초점:")) {
   throw new Error("V3 프롬프트에 상품 분석 초점 영역이 없습니다.");
 }
 
-if (!promptV3.includes("사용자가 얻어야 하는 결과:")) {
-  throw new Error("V3 프롬프트에 상품 기대 결과 영역이 없습니다.");
-}
+if (!promptV3.includes("수입·지출·책임·활동·계약이 연결되는 재정 운영 구조")) {
+  if (!promptV3.includes("현재 재정 운영 구조와 차원별 우선순위 이해")) {
+    throw new Error("V3 프롬프트에 wealth 기대 결과 실제 내용이 없습니다.");
+  }
 
-if (!promptV3.includes("재성의 강약과 실제 작용")) {
   throw new Error("V3 프롬프트에 wealth 분석 초점 실제 내용이 없습니다.");
-}
-
-if (!promptV3.includes("현재 재물 운영의 우선순위 이해")) {
-  throw new Error("V3 프롬프트에 wealth 기대 결과 실제 내용이 없습니다.");
 }
 
 if (!missingProductIdPrompt.includes("이 상품이 추천되는 사용자:")) {

@@ -3,7 +3,7 @@ import CoreAnalysisCard from "./CoreAnalysisCard";
 import ElementRelationsCard from "./ElementRelationsCard";
 import DaeunFlowCard from "./DaeunFlowCard";
 import ReportReadyCard from "./ReportReadyCard";
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { restoreStoredResult } from "@/app/lib/restoreStoredResult";
 import ProductRecommendationsCard from "./ProductRecommendationsCard";
 import type { AnalysisProductRecommendation } from "@/app/lib/analysisProductRecommendations";
@@ -77,11 +77,11 @@ export default function PremiumReportContent({
   window.sessionStorage.getItem("analyzeRequest");
 
   if (!savedAnalyzeRequest) {
-  setRestoreState({
+  startTransition(() => setRestoreState({
     status: "error",
     result: null,
     message: "유료 분석에 필요한 입력 정보를 찾을 수 없습니다.",
-  });
+  }));
 
   return;
 }
@@ -90,24 +90,24 @@ let analyzeRequest: AnalyzeRequest;
 try {
   analyzeRequest = JSON.parse(savedAnalyzeRequest) as AnalyzeRequest;
 } catch {
-  setPremiumRequestState({
+  startTransition(() => setPremiumRequestState({
     status: "error",
     request: null,
     message: "저장된 입력 정보를 불러올 수 없습니다.",
-  });
+  }));
 
-  setRestoreState({
+  startTransition(() => setRestoreState({
     status: "error",
     result: null,
     message: "저장된 입력 정보를 불러올 수 없습니다.",
-  });
+  }));
 
   return;
 }
-setPremiumRequestState({
+startTransition(() => setPremiumRequestState({
   status: "ready",
   request: analyzeRequest,
-});
+}));
 
 const restored = restoreStoredResult(
   savedResult,
@@ -115,11 +115,11 @@ const restored = restoreStoredResult(
 );
 
 if (!restored.ok) {
-  setRestoreState({
+  startTransition(() => setRestoreState({
     status: "error",
     result: null,
     message: restored.message,
-  });
+  }));
 
   return;
 }

@@ -390,7 +390,7 @@ const contradictory = parsePaidAnalysisDetailOutputV4({
   conclusion: {
     ...(buildValidV4().conclusion as Record<string, unknown>),
     direction: "보류",
-    immediateAction: sentence("지금 즉시 실행하여 범위를 확대한다."),
+    immediateAction: sentence("지금 즉시 실행하여 사업을 확대한다."),
   },
 });
 

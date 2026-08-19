@@ -4,6 +4,7 @@ export type PaidAnalysisEngine =
   | "CAREER"
   | "MONEY"
   | "RELATIONSHIP"
+  | "HEALTH"
   | "PERIOD";
 
 /** Launch-scope mapping only; Phase 2 products are intentionally absent. */
@@ -36,6 +37,14 @@ const PRODUCT_ENGINE_MAP: Record<string, PaidAnalysisEngine> = {
   "relationship-reunion": "RELATIONSHIP",
   "relationship-long-distance": "RELATIONSHIP",
   "relationship-unrequited": "RELATIONSHIP",
+  "relationship-friendship": "RELATIONSHIP",
+  "relationship-family-role": "RELATIONSHIP",
+  "health-energy-recovery": "HEALTH",
+  "health-sleep-rhythm": "HEALTH",
+  "health-stress-regulation": "HEALTH",
+  "health-burnout-risk": "HEALTH",
+  "health-habit-continuity": "HEALTH",
+  "health-body-signal-review": "HEALTH",
   "daeun-current": "PERIOD",
   "money-income-stability": "MONEY",
   "money-debt-repayment": "MONEY",
@@ -87,6 +96,13 @@ const RELATIONSHIP_ENGINE_RULES = `[RELATIONSHIP Engine 규칙]
   - 특정 날짜나 시점의 예측
   - "대화를 많이 하세요"처럼 누구에게나 적용되는 조언`;
 
+const HEALTH_ENGINE_RULES = `[HEALTH Engine 규칙]
+- 건강·웰빙 분석은 생활 리듬, 업무·일상 부담, 관찰 가능한 회복 신호와 검토 행동으로 설명한다.
+- 질병, 정신질환, 임상적 번아웃, 치료 필요성, 의학적 원인이나 예후를 진단·단정하지 않는다.
+- 증상이 지속되거나 일상 기능이 크게 흔들리는 경우에는 진단 대신 실제 의료·전문가 상담이 필요한 관찰 기준만 제시한다.
+- TopicConfig의 단일 질문과 반드시 다룰 핵심 통찰을 본문 중심으로 최우선 적용한다.
+- TopicConfig에서 제외한 범위를 핵심 결론이나 주된 action으로 확장하지 않는다.`;
+
 const PERIOD_ENGINE_RULES = `[PERIOD Engine 규칙]
 - 이 리포트가 답해야 하는 축은 "지금 어느 국면에 있고 다음 전환을 위해 무엇을 준비할 것인가"이다.
 - 기간 해상도와 구간 라벨은 아래 [기간별 분석 전략]을 벗어나지 않는다.
@@ -97,6 +113,7 @@ const ENGINE_RULES: Record<PaidAnalysisEngine, string> = {
   CAREER: CAREER_ENGINE_RULES,
   MONEY: MONEY_ENGINE_RULES,
   RELATIONSHIP: RELATIONSHIP_ENGINE_RULES,
+  HEALTH: HEALTH_ENGINE_RULES,
   PERIOD: PERIOD_ENGINE_RULES,
 };
 

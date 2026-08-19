@@ -26,6 +26,12 @@ export type AnalysisTopicDefinition = {
 
 export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
   // 재물·금전 8
+  { id: "health-energy-recovery", category: "health", title: "에너지 회복 리듬 분석", shortDescription: "일상 부담과 회복 리듬을 관찰해 지속 가능한 에너지 기준을 점검합니다.", riskLevel: "standard", details: ["일상 부담과 에너지 소진의 반복 조건", "회복 지연과 생활 리듬의 관찰 신호", "활동·휴식 균형이 어긋나는 조건", "회복 리듬 실험"] },
+  { id: "health-sleep-rhythm", category: "health", title: "수면 리듬 점검 분석", shortDescription: "수면 습관을 진단하지 않고 관찰 가능한 리듬과 다음날 회복 신호를 점검합니다.", riskLevel: "standard", details: ["수면 리듬을 흔드는 생활 조건", "취침 전 신호와 기상 일관성", "다음날 회복과 생활 리듬의 연관", "수면 리듬 관찰 루프"] },
+  { id: "health-stress-regulation", category: "health", title: "스트레스 반응 조절 분석", shortDescription: "외부 부담이 생활 스트레스 반응으로 커지는 흐름과 조절 순서를 점검합니다.", riskLevel: "standard", details: ["스트레스 촉발 조건", "반응 확대 신호", "회복 자원과 중단 기준", "스트레스 중단 프로토콜"] },
+  { id: "health-burnout-risk", category: "health", title: "번아웃 위험 관찰 분석", shortDescription: "의학적 진단 없이 누적 부담과 회복 실패 신호를 검토합니다.", riskLevel: "sensitive", details: ["누적 부담과 거리감의 관찰 조건", "회복 실패와 기능 저하 신호", "부하를 줄여야 할 기준", "번아웃 위험 검토"] },
+  { id: "health-habit-continuity", category: "health", title: "생활 습관 유지 분석", shortDescription: "건강 지원 습관이 무너지는 조건과 재시작 기준을 점검합니다.", riskLevel: "standard", details: ["습관이 끊기는 조건", "단서와 반복 신호", "재시작 마찰", "습관 재설정 루프"] },
+  { id: "health-body-signal-review", category: "health", title: "몸의 신호 점검 분석", shortDescription: "비진단적 몸의 신호를 휴식·검토·상담 기준으로 정리합니다.", riskLevel: "sensitive", details: ["몸의 신호 범주", "지속·반복 조건", "안전 검토 기준", "휴식·상담 준비 행동"] },
   { id: "money-shared-finance", category: "money", title: "공동 재정 경계 분석", shortDescription: "공동 지출과 재정 책임을 분리해 일방 부담을 줄이는 기준을 분석합니다.", riskLevel: "sensitive", details: ["결정권과 최종 부담자가 어긋나는 공동 재정 구조", "승인권·정산 시점·변경 조건의 관찰 신호", "공동 비용의 책임 경계와 보호 기준", "공동 재정 합의와 재검토 행동"] },
   { id: "money-contract-commitment", category: "money", title: "계약·고정비 검토 분석", shortDescription: "장기 계약과 고정 의무의 중단·검토·출구 조건을 점검합니다.", riskLevel: "sensitive", details: ["장기 의무와 자동 연장이 만드는 잠김 위험", "변경 조건·해지 비용·승인권의 관찰 신호", "계약 전 통제 조건과 출구 기준", "계약·고정비 검토 프로토콜"] },
   { id: "money-spending-decision", category: "money", title: "큰 지출 판단 분석", shortDescription: "중요 지출에서 필요·압박·매몰비용을 구분하는 판단 기준을 분석합니다.", riskLevel: "sensitive", details: ["큰 지출을 촉발하는 필요·압박·이미 쓴 비용의 조건", "독립 필요성과 감당 범위의 관찰 신호", "매몰비용과 이미지 압박이 판단을 왜곡하는 방식", "보류·검토·실행 기준을 만드는 지출 결정 카드"] },
@@ -372,6 +378,8 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
   },
 
   // 연애·결혼 8
+  { id: "relationship-friendship", category: "social", title: "친구 관계 분석", shortDescription: "친구 관계의 상호성·신뢰·감정 노동을 점검하고 재조정 기준을 만듭니다.", riskLevel: "standard", details: ["친구 관계에서 반복되는 교류와 지원 패턴", "약속·연락·도움의 상호성 신호", "감정 노동과 일방 요청이 누적되는 조건", "친구 관계 재조정 행동"] },
+  { id: "relationship-family-role", category: "social", title: "가족 역할 경계 분석", shortDescription: "가족 역할 기대와 반복 부담을 조정하는 관찰 기준을 분석합니다.", riskLevel: "standard", details: ["가족 역할 기대와 책임이 고정되는 패턴", "요청·돌봄·결정에서 나타나는 부담 신호", "의무감과 실제 책임의 경계", "가족 역할 재조정 행동"] },
   { id: "relationship-long-distance", category: "relationship", title: "장거리 관계 운영 분석", shortDescription: "거리 상황에서 연락·방문·기대 조건을 지속 가능하게 조정합니다.", riskLevel: "standard", details: ["거리에서 반복되는 연락·방문·조정 마찰", "일정 후속 이행과 소통 리듬의 관찰 신호", "기대와 개인 시간의 정렬 조건", "장거리 관계 운영 체크리스트"] },
   { id: "relationship-unrequited", category: "relationship", title: "짝사랑 접근 판단 분석", shortDescription: "감정 표현 전에 확인할 상호성 신호와 접근·보류 기준을 분석합니다.", riskLevel: "standard", details: ["일방적 관심과 상호성의 경계", "주도권·후속 반응·경계 반응의 관찰 신호", "환상·추측이 접근 판단을 왜곡하는 조건", "접근 또는 보류를 위한 단계적 확인 행동"] },
   {

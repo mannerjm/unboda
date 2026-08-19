@@ -33,20 +33,22 @@ function assert(condition: boolean, message: string): void {
 
 // --- catalog counts ---
 const legacyCount = Object.keys(PREMIUM_PRODUCT_REGISTRY).length;
+const topicCount = ANALYSIS_TOPICS.length;
+const periodCount = PERIOD_ANALYSIS_PRODUCTS.length;
 assert(legacyCount === 4, `legacy V1 product count must stay 4, got ${legacyCount}`);
-assert(TOPIC_PREMIUM_PRODUCTS.length === 50, `TOPIC must stay 50, got ${TOPIC_PREMIUM_PRODUCTS.length}`);
-assert(PERIOD_PREMIUM_PRODUCTS.length === 8, `PERIOD must be 8, got ${PERIOD_PREMIUM_PRODUCTS.length}`);
+assert(TOPIC_PREMIUM_PRODUCTS.length === topicCount, `TOPIC must mirror taxonomy count ${topicCount}, got ${TOPIC_PREMIUM_PRODUCTS.length}`);
+assert(PERIOD_PREMIUM_PRODUCTS.length === periodCount, `PERIOD must mirror definition count ${periodCount}, got ${PERIOD_PREMIUM_PRODUCTS.length}`);
 assert(
-  ALL_PREMIUM_PRODUCTS.length === legacyCount + 50 + 8,
-  `ALL_PREMIUM_PRODUCTS must be ${legacyCount + 58}, got ${ALL_PREMIUM_PRODUCTS.length}`,
+  ALL_PREMIUM_PRODUCTS.length === legacyCount + topicCount + periodCount,
+  `ALL_PREMIUM_PRODUCTS count mismatch, got ${ALL_PREMIUM_PRODUCTS.length}`,
 );
 assert(
   new Set(ALL_PREMIUM_PRODUCTS.map((product) => product.id)).size === ALL_PREMIUM_PRODUCTS.length,
   "ALL_PREMIUM_PRODUCTS must not contain duplicate productIds",
 );
-console.log(`counts: legacy=${legacyCount} topic=50 period=8 all=${ALL_PREMIUM_PRODUCTS.length}`);
+console.log(`counts: legacy=${legacyCount} topic=${topicCount} period=${periodCount} all=${ALL_PREMIUM_PRODUCTS.length}`);
 
-// --- TOPIC 50 must stay byte-identical to the topic taxonomy, in order ---
+// --- TOPIC products must stay byte-identical to the topic taxonomy, in order ---
 assert(
   TOPIC_PREMIUM_PRODUCTS.length === ANALYSIS_TOPICS.length
     && TOPIC_PREMIUM_PRODUCTS.every((product, index) => product.id === ANALYSIS_TOPICS[index].id),
@@ -65,7 +67,7 @@ const EXPECTED_PERIOD_PRODUCTS: ReadonlyArray<{
 }> = [
   { id: "monthly-current", title: "이번달 운", type: "monthly" },
   { id: "monthly-next", title: "다음달 운", type: "monthly" },
-  { id: "annual-current", title: "올해 운", type: "yearly" },
+  { id: "yearly-current", title: "올해 흐름 종합 분석", type: "yearly" },
   { id: "annual-next", title: "내년 운", type: "yearly" },
   { id: "annual-3years", title: "향후 3년 운", type: "yearly-series" },
   { id: "monthly-12months", title: "앞으로 12개월", type: "monthly-series" },
@@ -82,7 +84,7 @@ assert(
 const FROZEN_PERIOD_PRODUCT_IDS = [
   "monthly-current",
   "monthly-next",
-  "annual-current",
+  "yearly-current",
   "annual-next",
   "monthly-12months",
 ] as const;
@@ -159,8 +161,8 @@ for (const [index, expected] of EXPECTED_PERIOD_PRODUCTS.entries()) {
 console.log(`period: ${periodIds.join(", ")}`);
 
 // --- catalog helper ---
-assert(listTopicCatalogProducts().length === 50, "catalog topic list must expose 50 products");
-assert(listPeriodCatalogProducts().length === 8, "catalog period list must expose 8 products");
+assert(listTopicCatalogProducts().length === topicCount, "catalog topic list must expose the full topic taxonomy");
+assert(listPeriodCatalogProducts().length === periodCount, "catalog period list must expose all period definitions");
 assert(
   listPeriodCatalogProducts().every((product) => product.kind === "PERIOD"),
   "catalog period list must only contain PERIOD products",
@@ -172,8 +174,8 @@ assert(
 
 const groups = groupTopicCatalogProductsByCategory();
 assert(
-  groups.reduce((total, group) => total + group.products.length, 0) === 50,
-  "category grouping must cover all 50 topics",
+  groups.reduce((total, group) => total + group.products.length, 0) === topicCount,
+  "category grouping must cover the full topic taxonomy",
 );
 assert(
   groups.every((group) => group.category !== "period"),

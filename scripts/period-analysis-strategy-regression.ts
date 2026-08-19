@@ -146,15 +146,16 @@ assert(
   "H: monthly prompts must not share each other's timeline labels",
 );
 
-// I. annual-current vs annual-next
-const annualCurrent = prompts.get("annual-current")!;
+// I. yearly-current vs annual-next
+const annualCurrent = prompts.get("yearly-current")!;
 const annualNext = prompts.get("annual-next")!;
 assert(annualCurrent !== annualNext, "I: annual prompts must differ");
 assert(
-  annualCurrent.includes("기준 확정일 이후 남은 기간")
+  annualCurrent.includes("올해의 전반 흐름에서 어떤 조건과 부담을 관찰·조정·점검해야 하는가")
+    && annualCurrent.includes("올해의 운영 기준선")
     && annualCurrent.includes("기준 연도: 2026년")
     && annualCurrent.includes("2026년 올해 운"),
-  "I: annual-current must center the remaining part of the current year",
+  "I: yearly-current must center the current-year operating review",
 );
 assert(
   annualNext.includes("기준 연도: 2027년")

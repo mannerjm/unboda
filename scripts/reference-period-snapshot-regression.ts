@@ -52,14 +52,18 @@ assert(c.coverage?.to === "2028-02-29", `C: leap February must end on 29, got ${
 const nonLeap = snapshot("monthly-current", "2026-02-10");
 assert(nonLeap.coverage?.to === "2026-02-28", `C: non-leap February must end on 28, got ${nonLeap.coverage?.to}`);
 
-// D. annual-current
-const d = snapshot("annual-current", "2026-08-17");
-assert(d.scale === "yearly" && d.referenceYear === 2026, "D: annual-current must anchor on 2026");
+// D. yearly-current and annual-current compatibility alias
+const d = snapshot("yearly-current", "2026-08-17");
+assert(d.scale === "yearly" && d.referenceYear === 2026, "D: yearly-current must anchor on 2026");
 assert(
   d.coverage?.from === "2026-01-01" && d.coverage?.to === "2026-12-31",
-  "D: annual-current coverage must span the whole year",
+  "D: yearly-current coverage must span the whole year",
 );
 assert(d.labelSnapshot === "2026년 올해 운", `D: label drifted: ${d.labelSnapshot}`);
+assert(
+  snapshot("annual-current", "2026-08-17").productId === "yearly-current",
+  "D: annual-current compatibility alias must resolve to yearly-current",
+);
 
 // E. annual-next
 const e = snapshot("annual-next", "2026-08-17");

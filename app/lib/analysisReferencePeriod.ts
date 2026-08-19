@@ -180,7 +180,7 @@ export function buildReferencePeriodSnapshot(
     case "monthly-next":
       return buildMonthSnapshot(productId, anchorDate, 1, "다음달 운");
 
-    case "annual-current":
+    case "yearly-current":
       return buildYearSnapshot(productId, anchorDate, 0, "올해 운");
 
     case "annual-next":

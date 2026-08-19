@@ -131,19 +131,19 @@ export async function createPaidAnalysisV4DiagnosticArtifactStore(
 ): Promise<PaidAnalysisV4DiagnosticArtifactStore> {
   const artifactDirectory = path.join(baseDirectory, runId);
   await mkdir(artifactDirectory, { recursive: true });
+  const getProductPath = (productId: string) =>
+    path.join(artifactDirectory, `${runId}-${productId}.json`);
 
   return {
     artifactDirectory,
-    getProductPath(productId) {
-      return path.join(artifactDirectory, `${runId}-${productId}.json`);
-    },
+    getProductPath,
     async writeManifest(manifest) {
       const filePath = path.join(artifactDirectory, `${runId}-manifest.json`);
       await writeJsonAtomically(filePath, manifest);
       return filePath;
     },
     async writeProduct(productId, artifact) {
-      const filePath = this.getProductPath(productId);
+      const filePath = getProductPath(productId);
       await writeJsonAtomically(filePath, artifact);
       return filePath;
     },

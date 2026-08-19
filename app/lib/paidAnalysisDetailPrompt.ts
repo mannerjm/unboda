@@ -31,6 +31,7 @@ import {
 import {
   formatTopicConfigForPrompt,
   resolvePaidAnalysisLaunchSpecialization,
+  type PaidAnalysisTopicConfig,
 } from "./paidAnalysisTopicConfig";
 
 
@@ -71,6 +72,25 @@ export type PaidAnalysisDetailPromptInput = {
     periodTiming?: string;
   };
 };
+
+function buildTopicNarrativeContract(config: PaidAnalysisTopicConfig): string {
+  const insightSequence = config.requiredInsights
+    .map((insight, index) => `${index + 1}. ${insight.prompt}`)
+    .join("\n");
+
+  return `
+[상품 중심 추론 계약]
+- 이 리포트는 반드시 사용자 질문에서 시작한다: ${config.userQuestion}
+- 원국의 강약, 오행 분포, 현재 흐름을 공통적인 성격 요약처럼 섹션의 첫 문장에 반복하지 않는다. 이 근거는 이 상품의 질문에 필요한 경우에만 제품별 추론을 뒷받침하는 보조 근거로 사용한다.
+- 각 핵심 판단은 반드시 "이 상품의 근거 해석 → 사용자가 확인할 수 있는 조건 또는 메커니즘 → 이 상품 질문에 대한 결과 → 상품별 행동 또는 검토 시험" 순서로 연결한다.
+- 다른 상품에도 그대로 옮길 수 있는 원인 문단, 결론, action, timeline 문장을 쓰지 않는다. 같은 명리 근거라도 이 상품의 질문과 행동 초점에 맞는 다른 의미로 해석한다.
+- actionFocus를 일반 조언으로 축소하지 않는다. 이 상품의 행동은 질문의 판단 대상과 완료·재검토 조건을 직접 다뤄야 한다.
+
+[필수 통찰 기반 검토 순서]
+다음 네 단계는 timeline의 네 항목과 action의 우선순위에 반영한다. 고정적인 "단기·전환·중기·장기" 시간 틀을 기본값으로 반복하지 말고, 각 단계가 가리키는 제품별 메커니즘을 label과 changeSignal에 드러낸다. 이는 미래 예측이 아니라 관찰·검토 순서다.
+${insightSequence}
+`;
+}
 
 export function buildPaidAnalysisDetailPrompt(
   input: PaidAnalysisDetailPromptInput,
@@ -1334,6 +1354,10 @@ export function buildPaidAnalysisDetailPromptV4(
     specialization.kind === "topic"
       ? `\n${formatTopicConfigForPrompt(specialization.config)}\n`
       : "";
+  const topicNarrativeBlock =
+    specialization.kind === "topic"
+      ? `\n${buildTopicNarrativeContract(specialization.config)}\n`
+      : "";
 
   // decisionCheck only exists in the JSON contract for decision-type products.
   const isDecisionProduct =
@@ -1357,7 +1381,7 @@ export function buildPaidAnalysisDetailPromptV4(
     ? `${buildPeriodTimelineSectionRules(periodStrategy)}
 ${buildPeriodTimelineConsistencyRule(periodStrategy)}`
     : `- 이 상품에는 기간 계산 근거가 전달되지 않았다. 따라서 label에 연도, 월, 날짜를 절대 쓰지 않는다.
-- label은 "지금 이후 단기", "다음 전환 구간", "중기", "장기 준비"처럼 상대적 표현이나 조건 기반 표현만 사용한다.
+  - label은 [필수 통찰 기반 검토 순서]의 제품별 메커니즘을 드러낸다. 모든 상품에 같은 시간 구간 이름을 기계적으로 반복하지 않는다.
 - 각 항목은 무엇이 달라지는지(changeSignal)와 무엇을 준비하는지(preparation)를 모두 포함한다.
 - 모든 구간을 좋아진다 또는 나빠진다로 단정하지 않는다.`;
 
@@ -1420,7 +1444,7 @@ ${formatReferencePeriodForPrompt(input.referencePeriod)}
 ` : ""}${periodStrategy ? `
 [기간별 분석 전략]
 ${formatPeriodStrategyForPrompt(periodStrategy)}
-` : ""}${evidenceFactsBlock}${engineRulesBlock}${topicConfigBlock}
+` : ""}${evidenceFactsBlock}${engineRulesBlock}${topicConfigBlock}${topicNarrativeBlock}
 출력은 반드시 유효한 JSON 하나만 반환하세요.
 마크다운, 코드 블록, 설명 문장, JSON 앞뒤의 부가 문구는 절대 포함하지 마세요.
 

@@ -26,6 +26,9 @@ export type AnalysisTopicDefinition = {
 
 export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
   // 재물·금전 8
+  { id: "money-shared-finance", category: "money", title: "공동 재정 경계 분석", shortDescription: "공동 지출과 재정 책임을 분리해 일방 부담을 줄이는 기준을 분석합니다.", riskLevel: "sensitive", details: ["결정권과 최종 부담자가 어긋나는 공동 재정 구조", "승인권·정산 시점·변경 조건의 관찰 신호", "공동 비용의 책임 경계와 보호 기준", "공동 재정 합의와 재검토 행동"] },
+  { id: "money-contract-commitment", category: "money", title: "계약·고정비 검토 분석", shortDescription: "장기 계약과 고정 의무의 중단·검토·출구 조건을 점검합니다.", riskLevel: "sensitive", details: ["장기 의무와 자동 연장이 만드는 잠김 위험", "변경 조건·해지 비용·승인권의 관찰 신호", "계약 전 통제 조건과 출구 기준", "계약·고정비 검토 프로토콜"] },
+  { id: "money-spending-decision", category: "money", title: "큰 지출 판단 분석", shortDescription: "중요 지출에서 필요·압박·매몰비용을 구분하는 판단 기준을 분석합니다.", riskLevel: "sensitive", details: ["큰 지출을 촉발하는 필요·압박·이미 쓴 비용의 조건", "독립 필요성과 감당 범위의 관찰 신호", "매몰비용과 이미지 압박이 판단을 왜곡하는 방식", "보류·검토·실행 기준을 만드는 지출 결정 카드"] },
   {
     id: "money-income-stability",
     category: "money",
@@ -369,6 +372,8 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
   },
 
   // 연애·결혼 8
+  { id: "relationship-long-distance", category: "relationship", title: "장거리 관계 운영 분석", shortDescription: "거리 상황에서 연락·방문·기대 조건을 지속 가능하게 조정합니다.", riskLevel: "standard", details: ["거리에서 반복되는 연락·방문·조정 마찰", "일정 후속 이행과 소통 리듬의 관찰 신호", "기대와 개인 시간의 정렬 조건", "장거리 관계 운영 체크리스트"] },
+  { id: "relationship-unrequited", category: "relationship", title: "짝사랑 접근 판단 분석", shortDescription: "감정 표현 전에 확인할 상호성 신호와 접근·보류 기준을 분석합니다.", riskLevel: "standard", details: ["일방적 관심과 상호성의 경계", "주도권·후속 반응·경계 반응의 관찰 신호", "환상·추측이 접근 판단을 왜곡하는 조건", "접근 또는 보류를 위한 단계적 확인 행동"] },
   {
     id: "relationship-current",
     category: "relationship",

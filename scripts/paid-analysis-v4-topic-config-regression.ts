@@ -19,7 +19,7 @@ function assert(condition: boolean, message: string): void {
 
 const LAUNCH_PRODUCT_IDS = getLaunchProductIds();
 
-assert(LAUNCH_PRODUCT_IDS.length === 27, "Batch 2 launch set must contain 27 products");
+assert(LAUNCH_PRODUCT_IDS.length === 32, "Batch 3 launch set must contain 32 products");
 
 for (const productId of [
   "career",
@@ -39,6 +39,9 @@ for (const productId of [
   "money-income-stability",
   "money-debt-repayment",
   "money-emergency-buffer",
+  "money-shared-finance",
+  "money-contract-commitment",
+  "money-spending-decision",
   "relationship",
   "relationship-current",
   "relationship-marriage",
@@ -48,6 +51,8 @@ for (const productId of [
   "relationship-conflict",
   "relationship-boundary",
   "relationship-reunion",
+  "relationship-long-distance",
+  "relationship-unrequited",
   "daeun-current",
 ]) {
   assert(
@@ -83,6 +88,9 @@ const EXPECTED_ENGINES: Record<string, string> = {
   "money-income-stability": "MONEY",
   "money-debt-repayment": "MONEY",
   "money-emergency-buffer": "MONEY",
+  "money-shared-finance": "MONEY",
+  "money-contract-commitment": "MONEY",
+  "money-spending-decision": "MONEY",
   relationship: "RELATIONSHIP",
   "relationship-current": "RELATIONSHIP",
   "relationship-marriage": "RELATIONSHIP",
@@ -92,6 +100,8 @@ const EXPECTED_ENGINES: Record<string, string> = {
   "relationship-conflict": "RELATIONSHIP",
   "relationship-boundary": "RELATIONSHIP",
   "relationship-reunion": "RELATIONSHIP",
+  "relationship-long-distance": "RELATIONSHIP",
+  "relationship-unrequited": "RELATIONSHIP",
   "daeun-current": "PERIOD",
 };
 

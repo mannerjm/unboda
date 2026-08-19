@@ -39,7 +39,7 @@ const basePromptInput = {
 };
 
 const launchProductIds = getLaunchProductIds();
-assert(launchProductIds.length === 27, "Batch 2 must raise the implemented launch catalog to 27 products");
+assert(launchProductIds.length === 32, "Batch 3 must preserve the implemented launch catalog at 32 products");
 assert(new Set(launchProductIds).size === launchProductIds.length, "launch product IDs must be unique");
 
 for (const productId of batchProductIds) {

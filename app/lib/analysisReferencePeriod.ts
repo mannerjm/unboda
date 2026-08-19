@@ -28,6 +28,13 @@ export const ReferencePeriodSnapshotSchema = z.object({
   anchorDate: z.string().regex(DATE_PATTERN),
   referenceYear: z.number().int().optional(),
   referenceMonth: z.number().int().min(1).max(12).optional(),
+  comparisonPeriod: z
+    .object({
+      year: z.number().int(),
+      month: z.number().int().min(1).max(12),
+      label: z.string().min(1),
+    })
+    .optional(),
   coverage: z
     .object({
       from: z.string().regex(DATE_PATTERN),
@@ -178,7 +185,14 @@ export function buildReferencePeriodSnapshot(
       return buildMonthSnapshot(productId, anchorDate, 0, "이번달 운");
 
     case "monthly-next":
-      return buildMonthSnapshot(productId, anchorDate, 1, "다음달 운");
+      return {
+        ...buildMonthSnapshot(productId, anchorDate, 1, "다음달 운"),
+        comparisonPeriod: {
+          year: anchor.year,
+          month: anchor.month,
+          label: `${anchor.year}년 ${anchor.month}월 직전 기준 월`,
+        },
+      };
 
     case "yearly-current":
       return buildYearSnapshot(productId, anchorDate, 0, "올해 운");
@@ -271,6 +285,15 @@ export function formatReferencePeriodForPrompt(
 
   if (snapshot.referenceMonth !== undefined) {
     lines.push(`기준 월: ${snapshot.referenceMonth}월`);
+  }
+
+  if (snapshot.comparisonPeriod) {
+    lines.push(
+      `비교 기준 월: ${snapshot.comparisonPeriod.year}년 ${snapshot.comparisonPeriod.month}월 (${snapshot.comparisonPeriod.label})`,
+    );
+    lines.push(
+      "비교 기준 월에서 실제 사건을 추정하지 말고, 운영 조건·자원·압력의 차이만 다음 달 판단 근거로 비교한다.",
+    );
   }
 
   if (snapshot.coverage) {

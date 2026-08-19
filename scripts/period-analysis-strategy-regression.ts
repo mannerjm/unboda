@@ -84,6 +84,17 @@ for (const strategy of PERIOD_ANALYSIS_STRATEGIES) {
   );
   assert(strategy.focus.length >= 3, `${strategy.productId}: focus needs at least 3 entries`);
   assert(
+    strategy.requiredInsights.length === 4,
+    `${strategy.productId}: requiredInsights must contain exactly four responsibilities`,
+  );
+  for (const responsibility of strategy.requiredInsights) {
+    assert(responsibility.id.length > 0, `${strategy.productId}: responsibility id must be explicit`);
+    assert(responsibility.evidenceInterpretation.length >= 10, `${strategy.productId}: evidence responsibility is too short`);
+    assert(responsibility.mechanismResponsibility.length >= 10, `${strategy.productId}: mechanism responsibility is too short`);
+    assert(responsibility.observableSignal.length >= 10, `${strategy.productId}: observable signal is too short`);
+    assert(responsibility.actionResponsibility.length >= 10, `${strategy.productId}: action responsibility is too short`);
+  }
+  assert(
     strategy.prohibitedPatterns.length >= 2,
     `${strategy.productId}: prohibitedPatterns needs at least 2 entries`,
   );

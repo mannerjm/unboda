@@ -11,6 +11,7 @@ import {
 import {
   buildPeriodTimelineConsistencyRule,
   buildPeriodTimelineSectionRules,
+  formatPeriodOwnershipContractForPrompt,
   formatPeriodStrategyForPrompt,
   getPeriodAnalysisStrategy,
 } from "./analysisPeriodStrategy";
@@ -1470,6 +1471,7 @@ ${formatReferencePeriodForPrompt(input.referencePeriod)}
 ` : ""}${periodStrategy ? `
 [기간별 분석 전략]
 ${formatPeriodStrategyForPrompt(periodStrategy)}
+${formatPeriodOwnershipContractForPrompt(periodStrategy)}
 ` : ""}${evidenceFactsBlock}${engineRulesBlock}${topicConfigBlock}${topicNarrativeBlock}
 출력은 반드시 유효한 JSON 하나만 반환하세요.
 마크다운, 코드 블록, 설명 문장, JSON 앞뒤의 부가 문구는 절대 포함하지 마세요.

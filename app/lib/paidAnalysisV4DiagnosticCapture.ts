@@ -15,6 +15,7 @@ import {
 } from "./paidAnalysisV4QualityValidators";
 import { getPaidAnalysisEngine } from "./paidAnalysisEngine";
 import { getPaidAnalysisTopicConfig } from "./paidAnalysisTopicConfig";
+import { getPeriodAnalysisStrategy } from "./analysisPeriodStrategy";
 
 export type PaidAnalysisV4DiagnosticStage =
   | "PREPARE"
@@ -103,6 +104,14 @@ export type PaidAnalysisV4DiagnosticOptions = {
   artifactStore: PaidAnalysisV4DiagnosticArtifactStore;
 };
 
+export function getPaidAnalysisV4ExpectedInsightCount(productId: string): number {
+  return (
+    getPaidAnalysisTopicConfig(productId)?.requiredInsights.length ??
+    getPeriodAnalysisStrategy(productId)?.requiredInsights.length ??
+    0
+  );
+}
+
 function safeError(error: unknown): { name: string; message: string } {
   if (error instanceof Error) {
     return { name: error.name, message: error.message.slice(0, 500) };
@@ -183,7 +192,6 @@ export async function runPaidAnalysisV4DiagnosticCapture(
   productLoop: for (const productId of options.productIds) {
     const startedAt = new Date().toISOString();
     const startedMs = Date.now();
-    const config = getPaidAnalysisTopicConfig(productId);
     const envelope: PaidAnalysisV4DiagnosticEnvelope = {
       runId: options.runId,
       productId,
@@ -204,7 +212,7 @@ export async function runPaidAnalysisV4DiagnosticCapture(
       parsedOutputLength: 0,
       structuredParseSuccess: false,
       schemaValidationSuccess: false,
-      requiredInsightCountExpected: config?.requiredInsights.length ?? 0,
+      requiredInsightCountExpected: getPaidAnalysisV4ExpectedInsightCount(productId),
     };
     const artifact: PaidAnalysisV4DiagnosticArtifact = { envelope };
 
@@ -257,7 +265,7 @@ export async function runPaidAnalysisV4DiagnosticCapture(
         envelope.structuredParseSuccess = true;
         envelope.parsedOutputAvailable = true;
         envelope.parsedOutputLength = JSON.stringify(detail).length;
-        envelope.requiredInsightCountDetected = config?.requiredInsights.length;
+        envelope.requiredInsightCountDetected = getPaidAnalysisV4ExpectedInsightCount(productId);
         artifact.parsedOutput = detail;
       } catch (error) {
         const details = safeError(error);

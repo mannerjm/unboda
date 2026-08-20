@@ -1,4 +1,11 @@
 import { getOpenAIClient } from "./openAIClient";
+import type { Response as OpenAIResponse } from "openai/resources/responses/responses";
+import {
+  extractPaidGenerationUsage,
+  getPaidGenerationRequestId,
+  PaidGenerationTextError,
+  type PaidGenerationTextResult,
+} from "../paidGenerationTelemetry";
 
 export type AnalysisTextCallType =
   | "main-analysis"
@@ -139,5 +146,115 @@ export async function generateAnalysisText(
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
+  }
+}
+
+/** Paid-only boundary that preserves Responses API usage without changing main-analysis callers. */
+export async function generatePaidAnalysisTextWithUsage(
+  prompt: string,
+): Promise<PaidGenerationTextResult> {
+  const maxOutputTokens = resolveMaxOutputTokens("paid-analysis-detail");
+  const model = resolveModel("paid-analysis-detail");
+  const startedAt = new Date().toISOString();
+  const startedMs = Date.now();
+  const controller = new AbortController();
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let response: OpenAIResponse | undefined;
+
+  const buildTelemetry = (): PaidGenerationTextResult => {
+    const completedAt = new Date().toISOString();
+    const usage = extractPaidGenerationUsage(response ?? {});
+
+    return {
+      text: (response?.output_text ?? "").trim(),
+      requestId: response ? getPaidGenerationRequestId(response) : null,
+      model,
+      reasoningEffort: "low",
+      maxOutputTokens,
+      usage,
+      usageAvailable: Object.values(usage).some((value) => value !== null),
+      startedAt,
+      completedAt,
+      durationMs: Date.now() - startedMs,
+    };
+  };
+
+  try {
+    timeoutId = setTimeout(() => controller.abort(), 120000);
+    response = await getOpenAIClient().responses.create(
+      {
+        model,
+        input: prompt,
+        max_output_tokens: maxOutputTokens,
+        reasoning: { effort: "low" },
+      },
+      { signal: controller.signal },
+    ) as OpenAIResponse;
+
+    if (response.status === "incomplete") {
+      const reason = response.incomplete_details?.reason ?? "unknown";
+      const telemetry = buildTelemetry();
+      throw new PaidGenerationTextError({
+        message: `OpenAI 응답이 incomplete 상태입니다. reason=${reason}`,
+        telemetry,
+        failureStage: "response",
+        status: "incomplete",
+      });
+    }
+
+    const telemetry = buildTelemetry();
+    if (!telemetry.text) {
+      throw new PaidGenerationTextError({
+        message: "OpenAI 응답이 비어 있습니다.",
+        telemetry,
+        failureStage: "extraction",
+        status: "failed",
+      });
+    }
+
+    console.info("[paid-generation-telemetry] attempt", {
+      requestId: telemetry.requestId,
+      model: telemetry.model,
+      durationMs: telemetry.durationMs,
+      status: "succeeded",
+      ...telemetry.usage,
+    });
+
+    return telemetry;
+  } catch (error) {
+    if (error instanceof PaidGenerationTextError) {
+      console.error("[paid-generation-telemetry] attempt", {
+        requestId: error.telemetry.requestId,
+        model,
+        durationMs: error.telemetry.durationMs,
+        status: error.status,
+        failureStage: error.failureStage,
+        ...error.telemetry.usage,
+      });
+      throw error;
+    }
+
+    const telemetry = buildTelemetry();
+    const timedOut = error instanceof Error
+      && (error.name === "AbortError" || /abort|timeout/i.test(error.message));
+    const status = timedOut ? "timed_out" : "failed";
+
+    console.error("[paid-generation-telemetry] attempt", {
+      requestId: telemetry.requestId,
+      model,
+      durationMs: telemetry.durationMs,
+      status,
+      failureStage: "request",
+      ...telemetry.usage,
+    });
+
+    throw new PaidGenerationTextError({
+      message: error instanceof Error ? error.message : "OpenAI request failed",
+      telemetry,
+      failureStage: "request",
+      status,
+    });
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
 import {
   generatePaidAnalysisDetailV2,
 } from "@/app/lib/paidAnalysisDetailService";
@@ -13,6 +14,7 @@ import {
   failPaidReport,
 } from "@/app/lib/paidReports/server";
 import { buildPaidAnalysisInputFromProfile } from "@/app/lib/paidAnalysisProfileInput";
+import { markPaidGenerationPersistenceFailure } from "@/app/lib/paidGenerationTelemetryServer";
 
 type PaidAnalysisDetailRequest = {
   productId?: unknown;
@@ -130,9 +132,15 @@ export async function POST(request: Request) {
     );
   }
 
+  const telemetryAttemptId = randomUUID();
+
   try {
     const paidInput = buildPaidAnalysisInputFromProfile(profile, resolved.productId);
-    const detail = await generatePaidAnalysisDetailV2(paidInput);
+    const detail = await generatePaidAnalysisDetailV2(paidInput, {
+      attemptId: telemetryAttemptId,
+      reportId: claim.report.id,
+      generationId: claim.report.id,
+    });
     await completePaidReport({
       reportId: claim.report.id,
       userId: user.id,
@@ -143,6 +151,20 @@ export async function POST(request: Request) {
 
     return NextResponse.json(detail);
   } catch (error) {
+    const reportPersistenceFailure = error instanceof Error
+      && error.message.includes("유료 분석 결과를 저장하지 못했습니다");
+
+    if (reportPersistenceFailure) {
+      try {
+        await markPaidGenerationPersistenceFailure({
+          attemptId: telemetryAttemptId,
+          failureStage: "persistence",
+        });
+      } catch (telemetryError) {
+        console.error("[paid-analysis-detail-v2] persistence telemetry update failed", telemetryError);
+      }
+    }
+
     try {
       await failPaidReport({
         reportId: claim.report.id,

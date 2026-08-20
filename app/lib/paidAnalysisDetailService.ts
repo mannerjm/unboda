@@ -2,7 +2,24 @@ import { promises as fs } from "fs";
 import * as path from "path";
 import { evaluateRelationshipPremiumQuality } from "./paidAnalysisRelationshipPremiumQuality";
 import { validatePaidAnalysisHealthSafety } from "./paidAnalysisHealthSafetyValidator";
-import { generateAnalysisText } from "./ai/generateAnalysisText";
+import {
+  generateAnalysisText,
+  generatePaidAnalysisTextWithUsage,
+} from "./ai/generateAnalysisText";
+import { randomUUID } from "node:crypto";
+import {
+  getPaidGenerationCommercialBand,
+  getPaidGenerationProductFamily,
+  PaidGenerationTextError,
+  type PaidGenerationAttempt,
+  type PaidGenerationFailureStage,
+  type PaidGenerationTelemetryContext,
+  type PaidGenerationTextResult,
+} from "./paidGenerationTelemetry";
+import {
+  getNextPaidGenerationRetryIndex,
+  persistPaidGenerationAttempt,
+} from "./paidGenerationTelemetryServer";
 import {
   reviewPaidAnalysisDetail,
   reviewPaidAnalysisDetailV4,
@@ -284,8 +301,12 @@ export async function generatePaidAnalysisDetail(
   return parseGeneratedPaidAnalysisDetail(responseText);
 }
 
-export async function generatePaidAnalysisDetailV2(
+async function generatePaidAnalysisDetailV2Core(
   input: PaidAnalysisDetailPromptInput,
+  hooks?: {
+    onTextResult: (result: PaidGenerationTextResult) => void;
+    onFailureStage: (stage: PaidGenerationFailureStage) => void;
+  },
 ): Promise<PaidAnalysisDetailOutputV3> {
   const canonicalProductId = input.productId
     ? getCanonicalPremiumProductId(input.productId)
@@ -311,9 +332,9 @@ export async function generatePaidAnalysisDetailV2(
   let responseText: string;
 
   try {
-    responseText = await generateAnalysisText(prompt, {
-      callType: "paid-analysis-detail",
-    });
+    const textResult = await generatePaidAnalysisTextWithUsage(prompt);
+    hooks?.onTextResult(textResult);
+    responseText = textResult.text;
     console.info("[paid-analysis-detail-v2] model-response-received", {
       responseLength: responseText?.length ?? 0,
     });
@@ -325,6 +346,7 @@ export async function generatePaidAnalysisDetailV2(
   let detail: PaidAnalysisDetailOutputV3;
 
   try {
+    hooks?.onFailureStage("parse");
     detail = parseGeneratedPaidAnalysisDetailV3(responseText);
     console.info("[paid-analysis-detail-v2] parsed-success", {
       hasHeroSummary: Boolean(detail.heroSummary),
@@ -342,6 +364,7 @@ export async function generatePaidAnalysisDetailV2(
   );
 
   const consistencyResult = validatePaidAnalysisConsistency(compressedDetail);
+  hooks?.onFailureStage("consistency");
 
   if (!consistencyResult.ok) {
     const issueMessage = consistencyResult.issues
@@ -358,6 +381,7 @@ export async function generatePaidAnalysisDetailV2(
   }
 
 const selfReview = reviewPaidAnalysisDetail(compressedDetail);
+hooks?.onFailureStage("self_review");
 
 if (!selfReview.passed) {
   const feedbackMessage = selfReview.feedback.join(" | ");
@@ -376,6 +400,7 @@ const isHealthAnalysis =
   registryProduct?.plugin === "HEALTH";
 
 if (isHealthAnalysis) {
+  hooks?.onFailureStage("category_validation");
   const healthSafetyResult =
     validatePaidAnalysisHealthSafety(detail);
 
@@ -423,6 +448,7 @@ if (
 }
 
 if (isRelationshipAnalysis) {
+  hooks?.onFailureStage("category_validation");
   const relationshipPremiumResult =
     evaluateRelationshipPremiumQuality({
       pastPatternSummary:
@@ -484,6 +510,106 @@ if (isRelationshipAnalysis) {
   return input.referencePeriod
     ? { ...compressedDetail, referencePeriod: input.referencePeriod }
     : compressedDetail;
+}
+
+export async function generatePaidAnalysisDetailV2(
+  input: PaidAnalysisDetailPromptInput,
+  telemetryContext?: PaidGenerationTelemetryContext,
+): Promise<PaidAnalysisDetailOutputV3> {
+  if (!telemetryContext) {
+    return generatePaidAnalysisDetailV2Core(input);
+  }
+
+  const canonicalProductId = input.productId
+    ? getCanonicalPremiumProductId(input.productId)
+    : input.productId;
+  const startedAt = new Date().toISOString();
+  const startedMs = Date.now();
+  const attemptId = telemetryContext.attemptId ?? randomUUID();
+  const retryIndex = telemetryContext.retryIndex
+    ?? await getNextPaidGenerationRetryIndex(telemetryContext.generationId);
+  let textResult: PaidGenerationTextResult | undefined;
+  let status: PaidGenerationAttempt["status"] = "failed";
+  let failureStage: PaidGenerationFailureStage | null = "request";
+
+  try {
+    const detail = await generatePaidAnalysisDetailV2Core(input, {
+      onTextResult: (result) => {
+        textResult = result;
+        failureStage = null;
+      },
+      onFailureStage: (stage) => {
+        failureStage = stage;
+      },
+    });
+    status = "succeeded";
+    failureStage = null;
+    return detail;
+  } catch (error) {
+    if (error instanceof PaidGenerationTextError) {
+      textResult = error.telemetry;
+      status = error.status;
+      failureStage = error.failureStage;
+    }
+    throw error;
+  } finally {
+    if (textResult && canonicalProductId) {
+      const usage = textResult.usage;
+      const attempt: PaidGenerationAttempt = {
+        attemptId,
+        generationId: telemetryContext.generationId,
+        reportId: telemetryContext.reportId,
+        productId: canonicalProductId,
+        productFamily: getPaidGenerationProductFamily(canonicalProductId),
+        commercialBand: getPaidGenerationCommercialBand(canonicalProductId),
+        generationContractVersion: "V3",
+        model: textResult.model,
+        reasoningEffort: textResult.reasoningEffort,
+        maxOutputTokens: textResult.maxOutputTokens,
+        requestId: textResult.requestId,
+        startedAt: textResult.startedAt || startedAt,
+        completedAt: textResult.completedAt,
+        durationMs: textResult.durationMs || Date.now() - startedMs,
+        status,
+        failureStage,
+        retryIndex,
+        usageAvailable: textResult.usageAvailable,
+        inputTokens: usage.inputTokens,
+        cachedInputTokens: usage.cachedInputTokens,
+        cacheWriteTokens: usage.cacheWriteTokens,
+        outputTokens: usage.outputTokens,
+        reasoningTokens: usage.reasoningTokens,
+        totalTokens: usage.totalTokens,
+      };
+
+      try {
+        await persistPaidGenerationAttempt(attempt);
+        console.info("[paid-generation-telemetry] persisted", {
+          attemptId: attempt.attemptId,
+          generationId: attempt.generationId,
+          reportId: attempt.reportId,
+          productId: attempt.productId,
+          durationMs: attempt.durationMs,
+          status: attempt.status,
+          failureStage: attempt.failureStage,
+          retryIndex: attempt.retryIndex,
+          inputTokens: attempt.inputTokens,
+          cachedInputTokens: attempt.cachedInputTokens,
+          cacheWriteTokens: attempt.cacheWriteTokens,
+          outputTokens: attempt.outputTokens,
+          reasoningTokens: attempt.reasoningTokens,
+          totalTokens: attempt.totalTokens,
+        });
+      } catch (telemetryError) {
+        console.error("[paid-generation-telemetry] persistence-failed", {
+          attemptId: attempt.attemptId,
+          reportId: attempt.reportId,
+          productId: attempt.productId,
+          error: telemetryError instanceof Error ? telemetryError.message : "unknown",
+        });
+      }
+    }
+  }
 }
 
 /**

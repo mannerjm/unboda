@@ -363,8 +363,8 @@ async function generatePaidAnalysisDetailV2Core(
     registryProduct?.kind,
   );
 
-  const consistencyResult = validatePaidAnalysisConsistency(compressedDetail);
   hooks?.onFailureStage("consistency");
+  const consistencyResult = validatePaidAnalysisConsistency(compressedDetail);
 
   if (!consistencyResult.ok) {
     const issueMessage = consistencyResult.issues
@@ -380,8 +380,8 @@ async function generatePaidAnalysisDetailV2Core(
     );
   }
 
-const selfReview = reviewPaidAnalysisDetail(compressedDetail);
 hooks?.onFailureStage("self_review");
+const selfReview = reviewPaidAnalysisDetail(compressedDetail);
 
 if (!selfReview.passed) {
   const feedbackMessage = selfReview.feedback.join(" | ");

@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   extractPaidGenerationUsage,
   getPaidGenerationCommercialBand,
@@ -7,6 +9,10 @@ import {
   toPaidGenerationAttemptRow,
 } from "../app/lib/paidGenerationTelemetry";
 import { getLaunchProductIds } from "../app/lib/paidAnalysisTopicConfig";
+
+function read(relativePath: string): string {
+  return readFileSync(join(process.cwd(), relativePath), "utf-8");
+}
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(`FAIL: ${message}`);
@@ -99,5 +105,29 @@ const row = toPaidGenerationAttemptRow({
 assert(row.attempt_id === "attempt-1", "attempt row mapping must preserve identity");
 assert(row.input_tokens === 100 && row.total_tokens === 180, "attempt row mapping must preserve usage");
 assert(row.product_family === "PERIOD" && row.commercial_band === "MONTHLY", "attempt row mapping must preserve commercial dimensions");
+
+const detailService = read("app/lib/paidAnalysisDetailService.ts");
+
+const consistencyHookIndex = detailService.indexOf('hooks?.onFailureStage("consistency")');
+const consistencyCallIndex = detailService.indexOf("validatePaidAnalysisConsistency(compressedDetail)");
+assert(
+  consistencyHookIndex !== -1 && consistencyCallIndex !== -1 && consistencyHookIndex < consistencyCallIndex,
+  "onFailureStage('consistency') must be set before validatePaidAnalysisConsistency runs, so an internal throw is still tagged correctly",
+);
+
+const selfReviewHookIndex = detailService.indexOf('hooks?.onFailureStage("self_review")');
+const selfReviewCallIndex = detailService.indexOf("reviewPaidAnalysisDetail(compressedDetail)");
+assert(
+  selfReviewHookIndex !== -1 && selfReviewCallIndex !== -1 && selfReviewHookIndex < selfReviewCallIndex,
+  "onFailureStage('self_review') must be set before reviewPaidAnalysisDetail runs, so an internal throw is still tagged correctly",
+);
+console.log("5. consistency/self_review failureStage hooks are set before the fallible call ✓");
+
+const telemetryServer = read("app/lib/paidGenerationTelemetryServer.ts");
+assert(
+  telemetryServer.includes('.update({ failure_stage: input.failureStage, status: "failed" })'),
+  "markPaidGenerationPersistenceFailure must move status to failed alongside failure_stage, never leaving status=succeeded with failure_stage=persistence",
+);
+console.log("6. persistence failure marking updates both failure_stage and status ✓");
 
 console.log("paid-generation-telemetry-regression passed");

@@ -47,7 +47,8 @@ export async function markPaidGenerationPersistenceFailure(input: {
   const supabase = createAdminClient();
   const { error } = await supabase
     .from("paid_generation_attempts")
-    .update({ failure_stage: input.failureStage })
+    // status must move off "succeeded" so it doesn't contradict failure_stage.
+    .update({ failure_stage: input.failureStage, status: "failed" })
     .eq("attempt_id", input.attemptId);
 
   if (error) {

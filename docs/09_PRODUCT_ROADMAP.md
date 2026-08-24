@@ -1,5 +1,12 @@
 # UNBODA PRODUCT ROADMAP
 
+> **CURRENT PRODUCTION (2026-08-24 기준)**: Launch 판매 카탈로그는 `getLaunchProductIds()`
+> 기준 총 **54개(TOPIC 47 + PERIOD 7)**로 확정되었다. 가격은 전 상품 **9,900원 고정**이다
+> (`app/lib/productPricing.ts`). 아래 문서 내 "15,000원 가치 기준"은 **판매가가 아니라**
+> 당시 품질 검증용 historical value criterion이었다. Tiered pricing(ENTRY/CORE/DEEP/PREMIUM)은
+> **NEXT RELEASE candidate**일 뿐 아직 production에 적용되지 않았으며, 상세는
+> `docs/12_PRICING_REVENUE_ARCHITECTURE.md`를 source of truth로 한다.
+
 운보다 Premium Product 출시 및 고도화 로드맵
 
 이 문서는 Premium 상품을 어떤 순서로 설계, 구현, 검증, 출시할지 정의한다.
@@ -15,14 +22,19 @@
 - Self Review
 - 필요한 Safety Validator
 - 실제 AI 출력 검증
-- 15,000원 가치 기준
+- 15,000원 가치 기준(Historical Design 당시 품질 바, 판매가 아님)
 - Analysis Asset 저장 가능 구조
 
 ---
 
 # 1. 현재 개발 위치
 
-현재 단계:
+> **CURRENT PRODUCTION**: 아래 "Stage 5 진행 중"은 작성 시점의 서술이며,
+> 이후 Checkpoint A(Launch 54종 카탈로그 정렬)와 Checkpoint B(profiles service_role grant)가
+> 이미 production에 반영되어 **이 단계는 완료된 상태**다. 현재 단계는
+> pricing/revenue 구조 설계(STEP 55, `docs/12_PRICING_REVENUE_ARCHITECTURE.md`)로 이동했다.
+
+현재 단계(작성 시점 기준, Historical):
 
 Stage 5.
 Premium 대표상품 품질 동결 및 Product Catalog 확장 준비
@@ -61,6 +73,28 @@ Premium 대표상품 품질 동결 및 Product Catalog 확장 준비
 - AI 추천 Top 3와 직접선택 UI를 공통 Product Registry에 연결
 - 구매/권한/리포트 생성 흐름 최종 검증
 
+---
+
+## 1-1. NEXT RELEASE / PLANNED — 판매 자동화 로드맵
+
+> **STATUS: PLANNED.** 아래 항목은 전부 미구현이며, 순서대로 진행 예정인 로드맵이다.
+> 구현되기 전까지 어떤 문서에서도 "이미 구현됨"으로 서술하지 않는다.
+
+```
+Pricing Architecture (docs/12, 설계만 완료)
+→ Real PG Integration (PLANNED, 현재 mock 결제만 존재)
+→ Order State Machine (PLANNED)
+→ Payment Verification (PLANNED)
+→ Refund/Cancellation (PLANNED, docs/12 §13)
+→ Self-service CS (PLANNED, docs/12 §12)
+→ Exception Queue/Admin (PLANNED)
+→ Analytics/Funnel Measurement (PLANNED, docs/12 §8 KPI 정의만 존재)
+→ Pricing Validation (PLANNED, docs/12 §16 Pricing Decision Gate)
+→ Production QA
+→ Launch
+```
+
+---
 
 기존 "V1 핵심 상품 11개"는 전체 판매 상품 목록이라는 의미가 아니라
 Premium 품질을 검증하는 "대표 분석 상품"으로 재정의한다.

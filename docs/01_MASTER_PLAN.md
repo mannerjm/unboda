@@ -8,6 +8,44 @@
 
 ---
 
+# PART 0. 최종 사업 방향 (LONG-TERM)
+
+> **STATUS: LONG-TERM.** 아래 사업 방향·운영 모델·매출 단계는 현재 production에
+> 구현된 기능이 아니라 장기 지향점이다. 세부 가격/자동화/조직 설계는 STEP 55에서
+> 별도로 `docs/12_PRICING_REVENUE_ARCHITECTURE.md`에 정리되어 있다.
+
+최종 비전:
+
+**대한민국 1등 AI 명리 플랫폼**
+
+핵심 운영 모델(PLANNED, 단계적으로 검증):
+
+- founder-led, solo-first 운영
+- software/AI automation 우선, 정상 주문은 human touch 없이 처리
+- founder는 product/strategy/quality/control에 집중
+- 반복되는 CS를 founder가 직접 처리하는 구조를 만들지 않는다
+- CS 문의량이 늘어나면 가장 먼저 CS part-time/outsourcing부터 확장한다
+- 조직 규모 확대보다 **contribution margin과 operating profit**을 성장 기준으로 삼는다
+
+단계적 재무 목표(LONG-TERM, forecast 아님 — ASSUMPTION):
+
+```
+Product-Market Fit
+→ 연매출 1억
+→ 연매출 3억
+→ 연매출 10억
+→ 연매출 30억
+→ 연매출 100억+
+→ 장기 영업이익 100억 STRETCH GOAL
+```
+
+**영업이익 100억원은 현재 달성 가능하다고 가정하는 forecast가 아니라,
+장기 stretch goal이다.** 각 단계에서 CAC/CVR/AOV/LTV/refund rate/AI cost/
+PG fee/marketing cost/CS cost를 실측 검증하며 확장한다. 상세 재무 모델과
+가정치는 `docs/12_PRICING_REVENUE_ARCHITECTURE.md`를 source of truth로 한다.
+
+---
+
 # PART 1. 프로젝트 비전
 
 운보다는 단순히 사주 결과를 보여주는 서비스가 아니다.
@@ -233,7 +271,7 @@ Premium 상품 체계는 크게 다음 두 종류로 구분한다.
 
 1. Topic Analysis
    - 특정 고민과 주제를 깊게 분석
-   - 약 50개 Topic Registry
+   - Historical Design 목표는 약 50개 Topic Registry였음
    - AI 추천 Top 3의 기본 후보
 
 2. Period Analysis
@@ -243,6 +281,11 @@ Premium 상품 체계는 크게 다음 두 종류로 구분한다.
    - 이번 달 월운
    - 다음 달 월운
    - 12개월 월별 흐름
+
+> **CURRENT PRODUCTION**: 실제 Launch 판매 카탈로그는 `getLaunchProductIds()`
+> (`app/lib/paidAnalysisTopicConfig.ts`)를 source of truth로 하는 **총 54개
+> (TOPIC 47 + PERIOD 7)**다. 상세 내역과 가격 실험 계획은
+> `docs/12_PRICING_REVENUE_ARCHITECTURE.md` 참조.
 
 추천 시스템은 상품 Catalog를 숨기거나 제한하지 않는다.
 ---

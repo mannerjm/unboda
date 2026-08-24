@@ -1,5 +1,20 @@
 # 50-Topic Premium Catalog Architecture
 
+> **STATUS: Historical Design.** This document is preserved as the original
+> Step 4D-70 planning artifact for the TOPIC layer.
+>
+> **CURRENT PRODUCTION (2026-08-24)**: the actual Launch sales catalog is
+> **54 products = TOPIC 47 + PERIOD 7**, defined by `getLaunchProductIds()`
+> (`app/lib/paidAnalysisTopicConfig.ts`). The 47-TOPIC breakdown below
+> (Career 10 / Money 10 / Relationship 13 / Health 6 / Study 4 / Business 4)
+> matches production exactly. The PERIOD side does not: this document
+> planned only 3 period products, while production shipped 7
+> (`monthly-current`, `monthly-next`, `yearly-current`, `annual-next`,
+> `annual-3years`, `daeun-current`, `lifetime-overview`). The historical
+> "total 50" below is therefore superseded by the current total of 54.
+> Do not read this document as the current catalog contract; use
+> `app/lib/premiumCatalog.ts` / `getLaunchProductIds()` for that.
+
 ## Scope and Decision
 
 This document is the Step 4D-70 implementation plan. It is not a product registry,

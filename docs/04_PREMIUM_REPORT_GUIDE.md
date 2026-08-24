@@ -126,7 +126,7 @@ Current Core Problem, AI Coach 등의 섹션은
 
 상품별로 분석 기준과 행동 기준을 바꾸는 모듈이다.
 
-예:
+예(Historical Design):
 
 MONEY
 CAREER
@@ -136,6 +136,11 @@ HEALTH
 STUDY
 BUSINESS
 FORTUNE
+
+> **CURRENT PRODUCTION**: 실제 `PremiumProductPlugin`(`app/lib/premiumProductRegistry.ts`)은
+> `MONEY | CAREER | RELATIONSHIP | HEALTH | FORTUNE | COMMON` 6종이다(`LOVE` 없음).
+> `STUDY`/`BUSINESS`는 Plugin이 아니라 `PaidAnalysisEngine`(`app/lib/paidAnalysisEngine.ts`) 분류다.
+
 3-3. Product Context
 
 같은 Plugin을 사용하더라도 상품별 질문과 범위를 구분한다.

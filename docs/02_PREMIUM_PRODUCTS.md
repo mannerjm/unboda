@@ -1,5 +1,11 @@
 # UNBODA PREMIUM PRODUCTS
 
+> **STATUS: Historical Design.** 이 문서는 Premium 상품 체계의 초기 설계 문서다.
+> 실제 canonical productId / Plugin / 카테고리의 **source of truth는 코드**다:
+> `app/lib/premiumProductRegistry.ts`(등록/조회), `app/lib/paidAnalysisTopicConfig.ts`(Launch 54종 계약).
+> 아래 초기 설계 내용은 삭제하지 않고 역사적 설계 의도로 보존하되,
+> 현재 CURRENT PRODUCTION과 다른 부분은 각 절에 표기했다.
+
 운보다 유료 심층분석 상품 정의 문서
 
 이 문서는 운보다에서 제공하는 모든 Premium 상품의 기준 문서이다.
@@ -164,7 +170,7 @@ Product Plugin은 공통 Premium 품질 규칙을 유지하면서,
 따라서 Career, 재물, 연애, 건강, 학업, 사업, 종합운은
 동일한 섹션 구성을 강제로 공유하지 않는다.
 
-초기 Plugin:
+초기 Plugin(Historical Design):
 
 MONEY
 CAREER
@@ -174,6 +180,12 @@ HEALTH
 STUDY
 BUSINESS
 FORTUNE
+
+> **CURRENT PRODUCTION**: 실제 `PremiumProductPlugin` enum(`app/lib/premiumProductRegistry.ts`)은
+> `MONEY | CAREER | RELATIONSHIP | HEALTH | FORTUNE | COMMON` 6종이다. `LOVE`는 존재하지 않으며,
+> `STUDY`/`BUSINESS`는 Plugin이 아니라 별도 개념인 `PaidAnalysisEngine`(`app/lib/paidAnalysisEngine.ts`)에서만 쓰인다.
+> Plugin(상품 메타데이터 분류)과 Engine(AI 생성 로직 분류)을 혼동하지 않는다.
+
 ### 3-3. Cross Plugin Intelligence
 
 Premium 분석은 현재 상품의 분석 목적을 우선 완결한다.

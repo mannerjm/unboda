@@ -16,6 +16,7 @@ import {
   listTopicCatalogProducts,
 } from "../app/lib/premiumCatalog";
 import { resolvePurchasableProduct } from "../app/lib/purchases/products";
+import { getLaunchProductIds } from "../app/lib/paidAnalysisTopicConfig";
 import { getProductPricing } from "../app/lib/productPricing";
 import { buildAnalysisProductRecommendations } from "../app/lib/analysisProductRecommendations";
 import { buildPremiumAnalysis } from "../app/lib/buildPremiumAnalysis";
@@ -161,8 +162,31 @@ for (const [index, expected] of EXPECTED_PERIOD_PRODUCTS.entries()) {
 console.log(`period: ${periodIds.join(", ")}`);
 
 // --- catalog helper ---
-assert(listTopicCatalogProducts().length === topicCount, "catalog topic list must expose the full topic taxonomy");
-assert(listPeriodCatalogProducts().length === periodCount, "catalog period list must expose all period definitions");
+// The sales catalog is intentionally a Launch-only subset of the full
+// taxonomy above: adding rows to ANALYSIS_TOPICS/PERIOD_ANALYSIS_PRODUCTS
+// must never widen it on its own; getLaunchProductIds() is the only switch.
+const launchIds = getLaunchProductIds();
+const launchIdSet = new Set(launchIds);
+assert(launchIdSet.size === launchIds.length, "getLaunchProductIds() must not contain duplicates");
+
+const catalogTopicProducts = listTopicCatalogProducts();
+const catalogPeriodProducts = listPeriodCatalogProducts();
+const catalogProductIds = [...catalogTopicProducts, ...catalogPeriodProducts].map((product) => product.id);
+
+assert(
+  new Set(catalogProductIds).size === catalogProductIds.length,
+  "catalog productIds must be unique",
+);
+
+const catalogIdSet = new Set(catalogProductIds);
+assert(
+  catalogProductIds.every((id) => launchIdSet.has(id)),
+  "catalog must never expose a productId outside getLaunchProductIds()",
+);
+assert(
+  launchIds.every((id) => catalogIdSet.has(id)),
+  "catalog must expose every productId returned by getLaunchProductIds()",
+);
 assert(
   listPeriodCatalogProducts().every((product) => product.kind === "PERIOD"),
   "catalog period list must only contain PERIOD products",
@@ -171,11 +195,15 @@ assert(
   listTopicCatalogProducts().every((product) => product.kind === "TOPIC"),
   "catalog topic list must only contain TOPIC products",
 );
+assert(
+  TOPIC_PREMIUM_PRODUCTS.length === topicCount && PERIOD_PREMIUM_PRODUCTS.length === periodCount,
+  "the full taxonomy registries must stay untouched by Launch catalog scoping",
+);
 
 const groups = groupTopicCatalogProductsByCategory();
 assert(
-  groups.reduce((total, group) => total + group.products.length, 0) === topicCount,
-  "category grouping must cover the full topic taxonomy",
+  groups.reduce((total, group) => total + group.products.length, 0) === catalogTopicProducts.length,
+  "category grouping must cover exactly the exposed Launch TOPIC products",
 );
 assert(
   groups.every((group) => group.category !== "period"),

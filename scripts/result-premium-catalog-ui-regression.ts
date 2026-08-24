@@ -5,7 +5,8 @@ import {
   listPeriodCatalogProducts,
   listTopicCatalogProducts,
 } from "../app/lib/premiumCatalog";
-import { getPremiumProduct } from "../app/lib/premiumProductRegistry";
+import { getPremiumCategoryLabel, getPremiumProduct } from "../app/lib/premiumProductRegistry";
+import { getLaunchProductIds } from "../app/lib/paidAnalysisTopicConfig";
 import { getProductPricing } from "../app/lib/productPricing";
 import { buildAnalysisProductRecommendations } from "../app/lib/analysisProductRecommendations";
 import { buildPremiumAnalysis } from "../app/lib/buildPremiumAnalysis";
@@ -73,64 +74,83 @@ for (const birthDate of ["1995-05-20", "1990-01-01", "1988-10-10", "1986-03-15"]
   );
 }
 
-// 4 & 5. topic catalog exposure
+// 4 & 5. topic catalog exposure must equal the Launch set exactly (sales scope,
+// not the full ANALYSIS_TOPICS/legacy taxonomy which stays available for later use).
+const launchIds = getLaunchProductIds();
+const launchIdSet = new Set(launchIds);
+assert(launchIdSet.size === launchIds.length, "getLaunchProductIds() must not contain duplicates");
+
 const topicProducts = listTopicCatalogProducts();
-assert(topicProducts.length === 50, `catalog must expose 50 TOPIC products, got ${topicProducts.length}`);
+const catalogIds = [...topicProducts, ...periodProducts].map((product) => product.id);
 
-const topicGroups = groupTopicCatalogProductsByCategory();
-assert(topicGroups.length === 9, `TOPIC categories must be exactly 9, got ${topicGroups.length}`);
-
-const EXPECTED_CATEGORY_LABELS = [
-  "재물운",
-  "직업운",
-  "관계운",
-  "대인관계운",
-  "건강운",
-  "사업운",
-  "성장운",
-  "변화운",
-  "종합운",
-];
 assert(
-  topicGroups.map((group) => group.label).join(",") === EXPECTED_CATEGORY_LABELS.join(","),
-  `TOPIC category labels drifted: ${topicGroups.map((group) => group.label).join(",")}`,
+  new Set(catalogIds).size === catalogIds.length,
+  `catalog productIds must be unique, got ${catalogIds.length} entries / ${new Set(catalogIds).size} unique`,
+);
+
+const catalogIdSet = new Set(catalogIds);
+const catalogMinusLaunch = catalogIds.filter((id) => !launchIdSet.has(id));
+const launchMinusCatalog = launchIds.filter((id) => !catalogIdSet.has(id));
+assert(
+  catalogMinusLaunch.length === 0,
+  `catalog exposes productIds outside the Launch set: ${catalogMinusLaunch.join(", ")}`,
 );
 assert(
-  topicGroups.reduce((total, group) => total + group.products.length, 0) === 50,
-  "TOPIC category grouping must cover all 50 products",
+  launchMinusCatalog.length === 0,
+  `Launch productIds are missing from the catalog: ${launchMinusCatalog.join(", ")}`,
+);
+
+const topicGroups = groupTopicCatalogProductsByCategory();
+assert(
+  new Set(topicGroups.map((group) => group.category)).size === topicGroups.length,
+  "topic grouping must not repeat a category",
+);
+assert(
+  topicGroups.every((group) => group.label === getPremiumCategoryLabel(group.category)),
+  "every group label must come from getPremiumCategoryLabel, not a hardcoded string",
+);
+assert(
+  topicGroups.reduce((total, group) => total + group.products.length, 0) === topicProducts.length,
+  "TOPIC category grouping must cover every exposed TOPIC product exactly once",
 );
 assert(
   catalogSection.includes("groupTopicCatalogProductsByCategory")
     && catalogSection.includes("setSelectedCategory")
     && catalogSection.includes("activeGroup"),
-  "the catalog must render topics per selected category instead of all 50 at once",
+  "the catalog must render topics per selected category instead of a flat list",
 );
 assert(
   !catalogSection.includes("listTopicCatalogProducts()"),
-  "the catalog must not flatten all 50 topics into a single list",
+  "the catalog must not flatten all topics into a single list",
 );
 
-// 6 & 7. period exposure and order
-const EXPECTED_PERIOD_ORDER = [
-  "monthly-current",
-  "monthly-next",
-  "annual-current",
-  "annual-next",
-  "annual-3years",
-  "monthly-12months",
-  "daeun-current",
-  "lifetime-overview",
-];
-assert(periodIds.length === 8, `catalog must expose 8 PERIOD products, got ${periodIds.length}`);
+// 6 & 7. period exposure: Launch-only, monthly-12months (dormant/non-launch) excluded
 assert(
-  periodIds.join(",") === EXPECTED_PERIOD_ORDER.join(","),
-  `PERIOD order drifted: ${periodIds.join(",")}`,
+  !periodIds.includes("monthly-12months"),
+  "monthly-12months is not a Launch product and must stay out of the sales catalog",
+);
+assert(
+  periodIds.every((id) => launchIdSet.has(id)),
+  `every exposed PERIOD product must be part of the Launch set, got ${periodIds.join(",")}`,
 );
 assert(
   catalogSection.includes("listPeriodCatalogProducts")
     && catalogSection.includes("기간별 심층 분석")
     && catalogSection.includes("periodProducts.map"),
   "the catalog must render the period products in their own grid",
+);
+
+// 7b. career/wealth/relationship (Launch legacy generals) must be exposed;
+// health (legacy, non-Launch) must stay absent.
+for (const legacyLaunchId of ["career", "wealth", "relationship"]) {
+  assert(
+    catalogIdSet.has(legacyLaunchId),
+    `Launch legacy general "${legacyLaunchId}" must be exposed in the sales catalog`,
+  );
+}
+assert(
+  !catalogIdSet.has("health"),
+  "legacy general \"health\" is not part of the Launch set and must stay out of the sales catalog",
 );
 
 // 8. every catalog productId is canonical

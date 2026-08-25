@@ -17,16 +17,11 @@ import {
   type PaidGenerationTextResult,
 } from "./paidGenerationTelemetry";
 import {
-  getNextPaidGenerationRetryIndex,
-  persistPaidGenerationAttempt,
-} from "./paidGenerationTelemetryServer";
-import {
   reviewPaidAnalysisDetail,
   reviewPaidAnalysisDetailV4,
 } from "./paidAnalysisSelfReview";
 import type {
   PaidAnalysisDetailOutput,
-  PaidAnalysisDetailOutputV2,
     PaidAnalysisDetailOutputV3,
   PaidAnalysisDetailOutputV4,
   ResolvedPaidAnalysisDetailV4,
@@ -49,7 +44,6 @@ import {
 import { getPaidAnalysisCompressionPolicy } from "./paidAnalysisCompressionPolicy";
 import {
   parsePaidAnalysisDetailOutput,
-  parsePaidAnalysisDetailOutputV2,
    parsePaidAnalysisDetailOutputV3,
   parsePaidAnalysisDetailOutputV4,
   parseResolvedPaidAnalysisDetailV4,
@@ -57,11 +51,11 @@ import {
 } from "./paidAnalysisDetailOutputParser";
 import {
   buildPaidAnalysisDetailPrompt,
-  buildPaidAnalysisDetailPromptV2,
     buildPaidAnalysisDetailPromptV3,
   buildPaidAnalysisDetailPromptV4,
   type PaidAnalysisDetailPromptInput,
 } from "./paidAnalysisDetailPrompt";
+import type { PaidAnalysisResponseTelemetry } from "./ai/generateAnalysisText";
 
 import {
   getCanonicalPremiumProductId,
@@ -167,12 +161,12 @@ function parseGeneratedJson<T>(value: unknown, parser: (input: unknown) => T): T
 
   try {
     return parser(JSON.parse(normalizedValue));
-  } catch (error) {
+  } catch {
     const candidate = extractJsonCandidate(normalizedValue);
 
     try {
       return parser(JSON.parse(candidate));
-    } catch (firstParseError) {
+    } catch {
       try {
         const repairedCandidate = repairJsonText(candidate);
         return parser(JSON.parse(repairedCandidate));
@@ -192,12 +186,6 @@ function parseGeneratedPaidAnalysisDetail(
   value: unknown,
 ): PaidAnalysisDetailOutput {
   return parseGeneratedJson(value, parsePaidAnalysisDetailOutput);
-}
-
-function parseGeneratedPaidAnalysisDetailV2(
-  value: unknown,
-): PaidAnalysisDetailOutputV2 {
-  return parseGeneratedJson(value, parsePaidAnalysisDetailOutputV2);
 }
 
 export function parseGeneratedPaidAnalysisDetailV3(
@@ -526,6 +514,12 @@ export async function generatePaidAnalysisDetailV2(
   const startedAt = new Date().toISOString();
   const startedMs = Date.now();
   const attemptId = telemetryContext.attemptId ?? randomUUID();
+  const {
+    getNextPaidGenerationRetryIndex,
+    persistPaidGenerationAttempt,
+  } = await import(
+    "./paidGenerationTelemetryServer"
+  );
   const retryIndex = telemetryContext.retryIndex
     ?? await getNextPaidGenerationRetryIndex(telemetryContext.generationId);
   let textResult: PaidGenerationTextResult | undefined;
@@ -618,6 +612,7 @@ export async function generatePaidAnalysisDetailV2(
  */
 export async function generatePaidAnalysisDetailV4(
   input: PaidAnalysisDetailPromptInput,
+  options?: { onResponseTelemetry?: (telemetry: PaidAnalysisResponseTelemetry) => void },
 ): Promise<ResolvedPaidAnalysisDetailV4> {
   const canonicalProductId = input.productId
     ? getCanonicalPremiumProductId(input.productId)
@@ -640,6 +635,7 @@ export async function generatePaidAnalysisDetailV4(
 
   const responseText = await generateAnalysisText(prompt, {
     callType: "paid-analysis-detail",
+    onResponseTelemetry: options?.onResponseTelemetry,
   });
 
   const detail = parseGeneratedPaidAnalysisDetailV4(responseText);
@@ -711,11 +707,11 @@ export async function generatePaidAnalysisDetailV4(
     });
   }
 
-  // Guarantees the UI never receives evidence without a deterministic fact.
   parseResolvedPaidAnalysisDetailV4(resolvedDetail);
 
   // Frozen once, at generation time; readers must never recompute it.
-  return input.referencePeriod
+  const result = input.referencePeriod
     ? { ...resolvedDetail, referencePeriod: input.referencePeriod }
     : resolvedDetail;
+  return result;
 }

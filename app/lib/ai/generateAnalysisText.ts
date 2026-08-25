@@ -12,6 +12,16 @@ export type AnalysisTextCallType =
   | "recommendation-analysis"
   | "paid-analysis-detail";
 
+export type PaidAnalysisResponseTelemetry = {
+  status: string;
+  incompleteReason: string | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  reasoningTokens: number | null;
+  responseIdPresent: boolean;
+  durationMs: number;
+};
+
 export function resolveMaxOutputTokens(
   callType?: AnalysisTextCallType,
 ): number {
@@ -59,7 +69,10 @@ function extractOpenAIErrorMeta(error: unknown): {
 
 export async function generateAnalysisText(
   prompt: string,
-  options?: { callType?: AnalysisTextCallType },
+  options?: {
+    callType?: AnalysisTextCallType;
+    onResponseTelemetry?: (telemetry: PaidAnalysisResponseTelemetry) => void;
+  },
 ): Promise<string> {
   const callType = options?.callType;
   const maxOutputTokens = resolveMaxOutputTokens(callType);
@@ -95,6 +108,18 @@ export async function generateAnalysisText(
         signal: controller.signal,
       },
     );
+
+    if (options?.onResponseTelemetry) {
+      options.onResponseTelemetry({
+        status: response.status ?? "unknown",
+        incompleteReason: response.incomplete_details?.reason ?? null,
+        inputTokens: response.usage?.input_tokens ?? null,
+        outputTokens: response.usage?.output_tokens ?? null,
+        reasoningTokens: response.usage?.output_tokens_details?.reasoning_tokens ?? null,
+        responseIdPresent: Boolean(response.id || response._request_id),
+        durationMs: Date.now() - startedAt,
+      });
+    }
 
     if (response.status === "incomplete") {
       const incompleteReason = response.incomplete_details?.reason ?? "unknown";

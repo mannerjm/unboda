@@ -533,51 +533,6 @@ export function buildPaidAnalysisDetailPromptV2(
 );
   // Null for every TOPIC/legacy product, so their prompt text stays unchanged.
   const periodStrategy = getPeriodAnalysisStrategy(input.productId);
-  const futureTimelineExample = isCareerAnalysis(
-    input.analysisType,
-    input.productId,
-  )
-    ? `    {
-      "period": "현재 흐름",
-      "title": "현재 흐름의 핵심",
-      "description": "현재 전달된 명리 데이터에서 직접 확인되는 흐름을 해석하고, 지금 우선적으로 확인할 판단 기준을 설명한다."
-    },
-    {
-      "period": "다음 변화의 조건",
-      "title": "다음 변화의 조건",
-      "description": "미래 사건을 단정하지 않고, 현재 흐름이 변화할 때 확인해야 할 조건과 신호를 설명한다."
-    },
-    {
-      "period": "중기적으로 확인할 신호",
-      "title": "중기적으로 확인할 신호",
-      "description": "특정 시점의 사건을 예측하지 말고, 중기적으로 사용자가 관찰해야 할 신호와 판단 기준을 설명한다."
-    },
-    {
-      "period": "장기적으로 준비할 방향",
-      "title": "장기적으로 준비할 방향",
-      "description": "장기 미래를 단정하지 않고, 현재 근거에서 도출할 수 있는 준비 방향과 대응 기준을 설명한다."
-    }`
-    : `    {
-      "period": "현재",
-      "title": "현재 흐름의 핵심",
-      "description": "현재 시기에 나타나는 변화와 대응 방향"
-    },
-    {
-      "period": "앞으로 3개월",
-      "title": "단기 흐름의 핵심",
-      "description": "앞으로 3개월 동안 확인할 변화와 대응 방향"
-    },
-    {
-      "period": "앞으로 6개월",
-      "title": "중기 흐름의 핵심",
-      "description": "앞으로 6개월 동안 확인할 변화와 대응 방향"
-    },
-    {
-      "period": "앞으로 1년",
-      "title": "장기 흐름의 핵심",
-      "description": "앞으로 1년 동안 이어질 흐름과 준비 방향"
-    }`;
-
   const futureTimelineRuleText = periodStrategy
     ? buildPeriodTimelineConsistencyRule(periodStrategy)
     : isCareerAnalysis(
@@ -1408,6 +1363,8 @@ export function buildPaidAnalysisDetailPromptV4(
     ? `${buildPeriodTimelineSectionRules(periodStrategy)}
 ${buildPeriodTimelineConsistencyRule(periodStrategy)}`
     : `- 이 상품에는 기간 계산 근거가 전달되지 않았다. 따라서 label에 연도, 월, 날짜를 절대 쓰지 않는다.
+  - TOPIC 상품의 timeline label, changeSignal, preparation에는 기간 계산 근거 없이 숫자로 된 일·주·개월·년 기간을 쓰지 않는다. 예: "30일", "60일", "90일", "3개월", "6개월", "1년" 금지.
+  - TOPIC 상품은 "초기 단계", "준비 단계", "다음 단계", "단기적으로", "점검 시점", "조건이 충족되면"처럼 관찰 순서와 조건을 표현하고, 구체적인 날짜·기간을 예측하거나 약속하지 않는다.
   - label은 [필수 통찰 기반 검토 순서]의 제품별 메커니즘을 드러낸다. 모든 상품에 같은 시간 구간 이름을 기계적으로 반복하지 않는다.
 - 각 항목은 무엇이 달라지는지(changeSignal)와 무엇을 준비하는지(preparation)를 모두 포함한다.
 - 모든 구간을 좋아진다 또는 나빠진다로 단정하지 않는다.`;
@@ -1590,6 +1547,9 @@ coreProblem 작성 규칙:
 cause 작성 규칙:
 
 - 각 reason은 관찰된 구조 → 현실 패턴 → 문제 연결의 세 단계를 모두 채운다.
+- observedStructure는 단독 명리 용어·키워드·짧은 명사구가 아니라, 제공된 계산 구조와 그 구조가 의미하는 현실적 조건을 함께 설명하는 완결된 문장으로 작성한다.
+- realWorldPattern은 입력에 없는 직업·관계·재무 사실을 만들지 말고, 제공된 구조가 나타날 수 있는 조건을 설명한다.
+- problemLinkage는 해당 reason이 coreProblem으로 이어지는 연결을 구체적으로 설명한다.
 - 명리 용어만 나열하고 현실 패턴을 생략하면 실패한 것으로 간주한다.
 - 3개의 reason이 서로 같은 말의 변형이면 안 된다.
 
@@ -1605,7 +1565,10 @@ ${V4_EVIDENCE_KEY_GUIDE}
 current 작성 규칙:
 
 - opportunities와 cautions를 서로의 반대말로 채우지 않는다.
+- situation은 현재 현실에서 형성되는 조건·장면을 완결된 설명으로 작성한다. 단일 키워드나 짧은 fragment를 사용하지 않는다.
+- implication은 situation이 이 상품의 질문에 갖는 의미를 작성하고, situation을 반복하지 않는다.
 - observableSignal은 사용자가 실제로 확인할 수 있는 신호여야 한다.
+- 제공된 계산·문맥에 없는 현실 사실을 채우기 위해 임의의 사람·금액·날짜·사건을 만들지 않는다. 근거가 부족하면 uncertaintyFactors와 limitations에 반영한다.
 
 timeline 작성 규칙:
 
@@ -1622,6 +1585,12 @@ action 작성 규칙:
 - "노력하세요", "신중하세요", "소통하세요", "건강을 챙기세요", "꾸준히 하세요"처럼
   누구에게나 적용되는 조언을 쓰지 않는다.
 - 투자 종목, 의료 행위, 법률 절차처럼 전문 자격이 필요한 지시를 하지 않는다.
+
+필드 정보량 원칙:
+
+- observedStructure, realWorldPattern, problemLinkage, situation, implication, observableSignal, changeSignal, preparation, condition, completionCriteria, avoid.reason, confidence의 설명 필드는 각각 역할이 드러나는 완결된 문장으로 작성한다.
+- 짧은 문자열로 문자 수만 채우지 않는다. 각 필드는 "관찰 또는 조건 → 의미 → 이 상품의 판단·행동 연결" 중 해당 역할을 실제로 담아야 한다.
+- 모든 설명은 제공된 계산 데이터와 문맥만 사용하며, 없는 근거를 창작하지 않는다.
 
 avoid 작성 규칙:
 

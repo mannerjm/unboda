@@ -247,6 +247,14 @@ export type CalibrationArtifact = {
   usage: PaidAnalysisResponseTelemetry | null;
 };
 
+export function getCalibrationProcessExitCode(
+  artifact: Pick<CalibrationArtifact, "status" | "validation">,
+): 0 | 1 {
+  return artifact.status === "completed" && artifact.validation.status === "passed"
+    ? 0
+    : 1;
+}
+
 function classifyFailureStage(error: unknown): CalibrationArtifact["failureStage"] {
   const message = error instanceof Error ? error.message : "";
   if (/incomplete|OpenAI 응답|OPENAI/i.test(message)) return "OPENAI_RESPONSE";
@@ -339,7 +347,7 @@ export async function generateCalibrationProduct(
 
 export async function runCalibrationHarness(
   argv: readonly string[] = process.argv.slice(2),
-): Promise<void> {
+): Promise<boolean> {
   const { dryRun, generate, productId } = parseHarnessArgs(argv);
 
   if (generate) {
@@ -349,15 +357,17 @@ export async function runCalibrationHarness(
     assert(targets.length <= 10, "a calibration run may generate at most 10 products");
     await mkdir(CALIBRATION_ARTIFACT_DIRECTORY, { recursive: true });
     const runId = new Date().toISOString().replace(/[:.]/g, "-");
+    let allSucceeded = true;
     for (const target of targets) {
       console.log(`[v4-calibration-harness] GENERATOR_START productId=${target}`);
       const artifact = await generateCalibrationProduct(target);
+      allSucceeded = allSucceeded && getCalibrationProcessExitCode(artifact) === 0;
       console.log(`[v4-calibration-harness] GENERATOR_COMPLETE productId=${target} status=${artifact.status}`);
       await writeFile(getCalibrationArtifactPath(target, runId), JSON.stringify(artifact, null, 2), "utf8");
       console.log(`[v4-calibration-harness] ARTIFACT_WRITE_COMPLETE productId=${target}`);
       console.log(`[v4-calibration-harness] artifact = ${getCalibrationArtifactPath(target, runId)}`);
     }
-    return;
+    return allSucceeded;
   }
 
   validateCalibrationSet();
@@ -385,4 +395,5 @@ export async function runCalibrationHarness(
   console.log("[v4-calibration-harness] SAFETY_GATE_PASS");
   console.log("[v4-calibration-harness] no OpenAI call, no DB write, no production route switch");
   console.log("[v4-calibration-harness] one-product smoke readiness = READY FOR ONE-PRODUCT SMOKE GENERATION");
+  return true;
 }

@@ -634,7 +634,7 @@ export async function generatePaidAnalysisDetailV4(
   const prompt = buildPaidAnalysisDetailPromptV4(input);
 
   const responseText = await generateAnalysisText(prompt, {
-    callType: "paid-analysis-detail",
+    callType: "paid-analysis-detail-v4",
     onResponseTelemetry: options?.onResponseTelemetry,
   });
 

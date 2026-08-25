@@ -11,10 +11,16 @@ import { validatePaidAnalysisConsistencyV4 } from "../app/lib/paidAnalysisConsis
 import { buildPaidAnalysisDetailPromptV4 } from "../app/lib/paidAnalysisDetailPrompt";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { resolveMaxOutputTokens } from "../app/lib/ai/generateAnalysisText";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(`FAIL: ${message}`);
 }
+
+assert(resolveMaxOutputTokens("paid-analysis-detail") === 4800, "legacy paid detail budget must remain 4800");
+assert(resolveMaxOutputTokens("paid-analysis-detail-v4") === 6000, "V4 paid detail budget must be 6000");
+assert(resolveMaxOutputTokens("main-analysis") === 6000, "main analysis budget must remain 6000");
+assert(resolveMaxOutputTokens("recommendation-analysis") === 3200, "recommendation budget must remain 3200");
 
 function assertParseFails(value: unknown, message: string): void {
   let failed = false;

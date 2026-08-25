@@ -10,7 +10,8 @@ import {
 export type AnalysisTextCallType =
   | "main-analysis"
   | "recommendation-analysis"
-  | "paid-analysis-detail";
+  | "paid-analysis-detail"
+  | "paid-analysis-detail-v4";
 
 export type PaidAnalysisResponseTelemetry = {
   status: string;
@@ -31,6 +32,10 @@ export function resolveMaxOutputTokens(
 
   if (callType === "paid-analysis-detail") {
     return 4800;
+  }
+
+  if (callType === "paid-analysis-detail-v4") {
+    return 6000;
   }
 
   return 3200;
@@ -79,7 +84,8 @@ export async function generateAnalysisText(
   const timeoutMs =
     callType === "main-analysis" ||
     callType === "recommendation-analysis" ||
-    callType === "paid-analysis-detail"
+    callType === "paid-analysis-detail" ||
+    callType === "paid-analysis-detail-v4"
       ? 120000
       : 45000;
 

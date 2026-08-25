@@ -1,5 +1,8 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { once } from "node:events";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { resolveCalibrationProduct } from "../app/lib/paidAnalysisV4CalibrationHarness";
 
 const WATCHDOG_MS = 150_000;
 const HEARTBEAT_MS = 10_000;
@@ -28,11 +31,34 @@ function safeError(error: unknown): Record<string, unknown> {
   };
 }
 
-async function runProduct(productId: string, generate: boolean): Promise<boolean> {
+function loadCalibrationEnvironment(): NodeJS.ProcessEnv {
+  let loadedApiKey: string | undefined;
+
+  if (!process.env.OPENAI_API_KEY) {
+    const envPath = path.join(process.cwd(), ".env.local");
+    try {
+      const apiKeyLine = readFileSync(envPath, "utf8")
+        .split(/\r?\n/)
+        .find((line) => line.trim().startsWith("OPENAI_API_KEY="));
+      const apiKey = apiKeyLine?.slice(apiKeyLine.indexOf("=") + 1).trim().replace(/^['\"]|['\"]$/g, "");
+      loadedApiKey = apiKey;
+    } catch {
+      // The child harness reports the missing credential without exposing secrets.
+    }
+  }
+
   const nodeEnv = process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test"
     ? process.env.NODE_ENV
     : "development";
-  const environment: NodeJS.ProcessEnv = { ...process.env, NODE_ENV: nodeEnv };
+  return {
+    ...process.env,
+    ...(loadedApiKey ? { OPENAI_API_KEY: loadedApiKey } : {}),
+    NODE_ENV: nodeEnv,
+  };
+}
+
+async function runProduct(productId: string, generate: boolean): Promise<boolean> {
+  const environment = loadCalibrationEnvironment();
   const childMode = generate ? "--generate" : "--dry-run";
   const childCommand = process.platform === "win32"
     ? (process.env.ComSpec ?? "C:\\Windows\\System32\\cmd.exe")
@@ -112,12 +138,21 @@ async function runProduct(productId: string, generate: boolean): Promise<boolean
 }
 
 async function main(): Promise<void> {
-  const generate = process.argv.includes("--generate");
+  const args = process.argv.slice(2);
+  const generate = args.includes("--generate");
+  const productIndex = args.indexOf("--product");
+  const selectedProductId = productIndex >= 0 ? args[productIndex + 1] : undefined;
+  if (selectedProductId) {
+    resolveCalibrationProduct(selectedProductId);
+  }
+  const productIds = selectedProductId ? [selectedProductId] : [...BATCH_PRODUCT_IDS];
+
   console.log("V4_BATCH_PARENT_START");
   console.log(`V4_BATCH_MODE=${generate ? "GENERATE" : "DRY_RUN"}`);
-  console.log(`V4_BATCH_COUNT=${BATCH_PRODUCT_IDS.length}`);
+  console.log(`V4_BATCH_COUNT=${productIds.length}`);
+  console.log(`V4_BATCH_TARGET=${selectedProductId ?? "all-calibration-products"}`);
 
-  for (const productId of BATCH_PRODUCT_IDS) {
+  for (const productId of productIds) {
     const success = await runProduct(productId, generate);
     if (!success) {
       throw new Error(`batch stopped after execution failure for ${productId}`);

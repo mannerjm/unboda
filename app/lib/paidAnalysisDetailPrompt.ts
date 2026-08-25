@@ -1464,7 +1464,7 @@ ${formatPeriodOwnershipContractForPrompt(periodStrategy)}
     {
       "evidenceKey": "strength | yongshin | gyeokguk | element_balance | fortune_flow | daeun | seun 중 하나",
       "meaning": "그 근거가 이 분석 주제에서 무엇을 뜻하는지 한 문장",
-      "linkage": "그 근거가 conclusion 또는 coreProblem과 어떻게 연결되는지 한 문장"
+      "linkage": "이 근거가 현재 conclusion의 direction과 focus를 왜 지지하는지, 그리고 어떤 현실 조건이나 검토 기준으로 이어지는지 설명하는 한 문장"
     }
   ],
   "current": {
@@ -1561,6 +1561,10 @@ ${V4_EVIDENCE_KEY_GUIDE}
 - 수치, 퍼센트, 점수, 간지, 관계 기호를 직접 만들어 쓰지 않는다. 실제 계산 값은 서버가 붙인다.
 - meaning과 linkage에는 명리 용어를 최소화하고 현실 언어를 사용한다.
 - 같은 evidenceKey를 두 번 사용하지 않는다.
+- linkage는 evidence 내용을 그대로 반복하지 말고, 그 근거가 현재 conclusion의 direction과 focus를 왜 지지하는지 명확히 설명한다.
+- linkage에는 direction 또는 focus의 핵심 표현이 자연스럽게 드러나되, conclusion 전체 문장을 기계적으로 복사하지 않는다.
+- linkage는 가능하면 '근거의 현실 의미 → 현재 판단 방향·대상 → 확인할 조건 또는 검토 기준'의 순서로 작성한다.
+- 결론 방향이나 focus와 무관한 일반적인 명리 해설만 적으면 실패한 것으로 간주한다.
 
 current 작성 규칙:
 
@@ -1585,12 +1589,19 @@ action 작성 규칙:
 - "노력하세요", "신중하세요", "소통하세요", "건강을 챙기세요", "꾸준히 하세요"처럼
   누구에게나 적용되는 조언을 쓰지 않는다.
 - 투자 종목, 의료 행위, 법률 절차처럼 전문 자격이 필요한 지시를 하지 않는다.
+- action.target과 action.condition도 입력에서 확인되지 않은 현실 사실을 전제로 하지 않는다.
+- 실제 프로젝트, 계약, 수입, 조직, 관계 등이 있는 경우에만 해당 대상을 직접 지칭하고, 그렇지 않으면 조건형 검토 대상으로 작성한다.
+- action은 여전히 구체적이고 실행 가능해야 하며, 입력 부재로 인해 generic하게 축소되면 안 된다.
 
 필드 정보량 원칙:
 
 - observedStructure, realWorldPattern, problemLinkage, situation, implication, observableSignal, changeSignal, preparation, condition, completionCriteria, avoid.reason, confidence의 설명 필드는 각각 역할이 드러나는 완결된 문장으로 작성한다.
 - 짧은 문자열로 문자 수만 채우지 않는다. 각 필드는 "관찰 또는 조건 → 의미 → 이 상품의 판단·행동 연결" 중 해당 역할을 실제로 담아야 한다.
 - 모든 설명은 제공된 계산 데이터와 문맥만 사용하며, 없는 근거를 창작하지 않는다.
+- 입력에서 확인되지 않은 직장, 프로젝트, 조직, 협업, 계약, 수입, 자산, 관계, 건강 상태, 질병, 일정 등은 사용자의 실제 사실처럼 단정하지 않는다.
+- 그러한 맥락이 분석에 필요하면 '진행 중인 프로젝트가 있다면', '협업 제안이 들어오는 경우', '고정 일정이 있다면', '현금흐름을 관리하는 상황이라면', '수면 부족이 반복된다면' 같이 조건형 또는 관찰형으로 표현한다.
+- 모든 문장을 기계적으로 '~라면'으로 만들지 않는다. 명리상 가능성과 확인된 사용자 현실을 구분하고, 조건형으로 바꾸더라도 상품별 관찰 기준과 행동 기준은 구체적으로 유지한다.
+- generic disclaimer로 대체하지 않는다.
 
 avoid 작성 규칙:
 

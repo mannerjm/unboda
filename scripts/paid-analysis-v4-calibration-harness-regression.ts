@@ -4,6 +4,7 @@ import {
   CALIBRATION_ARTIFACT_DIRECTORY,
   CALIBRATION_PRODUCT_SET,
   getCalibrationInput,
+  getCalibrationProcessExitCode,
   parseHarnessArgs,
   resolveCalibrationProduct,
   validateCalibrationSet,
@@ -64,4 +65,7 @@ assert(CALIBRATION_PRODUCT_SET.filter((item) => item.tier === "CORE").length ===
 assert(CALIBRATION_PRODUCT_SET.filter((item) => item.tier === "DEEP").length === 3, "DEEP tier must contain 3 products");
 assert(CALIBRATION_PRODUCT_SET.filter((item) => item.tier === "LONG_RANGE").length === 2, "LONG_RANGE tier must contain 2 products");
 assert(CALIBRATION_PRODUCT_SET.filter((item) => item.tier === "SIGNATURE").length === 1, "SIGNATURE tier must contain 1 product");
+assert(getCalibrationProcessExitCode({ status: "completed", validation: { status: "passed" } }) === 0, "completed passed artifact must exit 0");
+assert(getCalibrationProcessExitCode({ status: "failed", validation: { status: "failed" } }) === 1, "failed artifact must exit 1");
+assert(getCalibrationProcessExitCode({ status: "completed", validation: { status: "failed" } }) === 1, "validation failure artifact must exit 1");
 console.log("paid-analysis-v4-calibration-harness-regression passed ✓");

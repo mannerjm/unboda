@@ -6,7 +6,8 @@ async function main(): Promise<void> {
   console.log("V4_CHILD_START");
   console.log(`V4_CHILD_MODE=${args.includes("--generate") ? "GENERATE" : "DRY_RUN"}`);
   console.log("V4_CHILD_TARGET=career-job-change");
-  await runCalibrationHarness(args);
+  const success = await runCalibrationHarness(args);
+  if (!success) process.exitCode = 1;
   console.log("V4_CHILD_COMPLETE");
 }
 

@@ -17,8 +17,9 @@ if (args.includes("--help") || args.includes("-h")) {
 }
 
 runCalibrationHarness(args)
-  .then(() => {
+  .then((success) => {
     console.log("[v4-calibration-harness] CLI_COMPLETE");
+    if (!success) process.exitCode = 1;
   })
   .catch((error: unknown) => {
     console.error("[v4-calibration-harness] CLI_FAILURE", {

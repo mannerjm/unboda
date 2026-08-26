@@ -11,6 +11,23 @@ import { createClient } from "@/app/lib/supabase/client";
 import { getUserAccessPermissions } from "@/app/lib/userAccess";
 import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 
+declare global {
+  interface Window {
+    TossPayments?: (clientKey: string) => {
+      payment: (options: { customerKey: string }) => {
+        requestPayment: (input: {
+          method: "CARD";
+          amount: { currency: "KRW"; value: number };
+          orderId: string;
+          orderName: string;
+          successUrl: string;
+          failUrl: string;
+        }) => Promise<void>;
+      };
+    };
+  }
+}
+
 type CheckoutAccessPanelProps = {
   productId: string;
   profileId?: string;
@@ -52,7 +69,7 @@ const router = useRouter();
 
   const canonicalProductId = getCanonicalPremiumProductId(productId);
 
-  async function handleMockPayment() {
+  async function handlePayment() {
     if (authState.status !== "authenticated" || !profileId || isPaying) {
       return;
     }
@@ -75,22 +92,23 @@ const router = useRouter();
       }
 
       const { order } = (await orderResponse.json()) as {
-        order: { id: string };
+        order: { id: string; amount: number };
       };
 
-      const confirmResponse = await fetch(
-        `/api/orders/${order.id}/mock-confirm`,
-        { method: "POST" },
-      );
-
-      if (!confirmResponse.ok) {
-        throw new Error(
-          `결제 확인에 실패했습니다. (${confirmResponse.status})`,
-        );
+      const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
+      if (!clientKey?.startsWith("test_ck_") || !window.TossPayments) {
+        throw new Error("Toss 테스트 결제 설정을 불러오지 못했습니다.");
       }
 
-      router.push(`/paid-analysis/${canonicalProductId}?profileId=${profileId}`);
-      router.refresh();
+      const toss = window.TossPayments(clientKey);
+      await toss.payment({ customerKey: authState.user.id }).requestPayment({
+        method: "CARD",
+        amount: { currency: "KRW", value: order.amount },
+        orderId: order.id,
+        orderName: `심층 분석 - ${canonicalProductId}`,
+        successUrl: `${window.location.origin}/checkout/success?productId=${encodeURIComponent(canonicalProductId)}&profileId=${encodeURIComponent(profileId)}`,
+        failUrl: `${window.location.origin}/checkout/fail?productId=${encodeURIComponent(canonicalProductId)}&profileId=${encodeURIComponent(profileId)}`,
+      });
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -155,7 +173,7 @@ const router = useRouter();
 
           <button
             type="button"
-            onClick={handleMockPayment}
+            onClick={handlePayment}
             disabled={isPaying || !profileId}
             className="mt-7 w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
           >

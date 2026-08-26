@@ -8,6 +8,7 @@ import {
   getCanonicalPremiumProductId,
   getPremiumProduct,
 } from "@/app/lib/premiumProductRegistry";
+import Script from "next/script";
 
 type CheckoutPageProps = {
   params: Promise<{
@@ -62,6 +63,7 @@ const product = getPremiumProduct(canonicalProductId);
 
   return (
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
+      <Script src="https://js.tosspayments.com/v2/standard" strategy="afterInteractive" />
       <div className="mx-auto max-w-2xl">
         <Link
           href={`/paid-analysis/${canonicalProductId}${profileId ? `?profileId=${profileId}` : ""}`}

@@ -6,7 +6,13 @@ import {
   type EntitlementRecord,
   type OrderRecord,
   type PurchaseRecord,
+  type TossPaymentRecord,
 } from "./types";
+import {
+  getPaymentByOrderIdFromToss,
+  type TossConfirmationFailure,
+  type TossConfirmResponse,
+} from "../toss/server";
 
 type OrderRow = {
   id: string;
@@ -40,6 +46,32 @@ type EntitlementRow = {
   purchase_id: string | null;
   source: "purchase" | "subscription" | "credit" | "grant";
   created_at: string;
+};
+
+type TossPaymentRow = {
+  id: string;
+  order_id: string;
+  payment_key: string | null;
+  provider_order_id: string | null;
+  expected_amount: number;
+  confirmed_amount: number | null;
+  currency: string | null;
+  provider_status: string | null;
+  confirmation_started_at: string | null;
+  confirmed_at: string | null;
+  reconciliation_status: TossPaymentRecord["reconciliationStatus"];
+  last_reconciliation_result: string | null;
+  last_reconciled_at: string | null;
+  retry_count: number;
+  max_retry_count: number;
+  next_retry_at: string;
+  last_attempt_at: string | null;
+  last_confirmation_http_status: number | null;
+  last_provider_error_code: string | null;
+  last_provider_error_message: string | null;
+  last_confirmation_attempt_at: string | null;
+  last_confirmation_retryability: TossPaymentRecord["lastConfirmationRetryability"];
+  last_confirmation_correlation_id: string | null;
 };
 
 function toOrderRecord(row: OrderRow): OrderRecord {
@@ -82,6 +114,241 @@ function toEntitlementRecord(row: EntitlementRow): EntitlementRecord {
   };
 }
 
+function toTossPaymentRecord(row: TossPaymentRow): TossPaymentRecord {
+  return {
+    id: row.id,
+    orderId: row.order_id,
+    paymentKey: row.payment_key,
+    providerOrderId: row.provider_order_id,
+    expectedAmount: row.expected_amount,
+    confirmedAmount: row.confirmed_amount,
+    currency: row.currency,
+    providerStatus: row.provider_status,
+    confirmationStartedAt: row.confirmation_started_at,
+    confirmedAt: row.confirmed_at,
+    reconciliationStatus: row.reconciliation_status,
+    lastReconciliationResult: row.last_reconciliation_result,
+    lastReconciledAt: row.last_reconciled_at,
+    retryCount: row.retry_count,
+    maxRetryCount: row.max_retry_count,
+    nextRetryAt: row.next_retry_at,
+    lastAttemptAt: row.last_attempt_at,
+    lastConfirmationHttpStatus: row.last_confirmation_http_status,
+    lastProviderErrorCode: row.last_provider_error_code,
+    lastProviderErrorMessage: row.last_provider_error_message,
+    lastConfirmationAttemptAt: row.last_confirmation_attempt_at,
+    lastConfirmationRetryability: row.last_confirmation_retryability,
+    lastConfirmationCorrelationId: row.last_confirmation_correlation_id,
+  };
+}
+
+export async function recordTossConfirmationStarted(
+  order: OrderRecord,
+): Promise<TossPaymentRecord> {
+  const supabase = createAdminClient();
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("toss_payment_records")
+    .upsert(
+      {
+        order_id: order.id,
+        expected_amount: order.amount,
+        reconciliation_status: "confirmation_started",
+        confirmation_started_at: now,
+        updated_at: now,
+        last_attempt_at: now,
+      },
+      { onConflict: "order_id" },
+    )
+    .select("*")
+    .single<TossPaymentRow>();
+
+  if (error || !data) {
+    throw new Error(`Toss 결제 시도 기록에 실패했습니다: ${error?.message ?? "unknown"}`);
+  }
+
+  return toTossPaymentRecord(data);
+}
+
+export async function getTossPaymentRecordForOrder(orderId: string): Promise<TossPaymentRecord | null> {
+  const { data, error } = await createAdminClient().from("toss_payment_records").select("*").eq("order_id", orderId).maybeSingle<TossPaymentRow>();
+  if (error || !data) return null;
+  return toTossPaymentRecord(data);
+}
+
+export async function revokeEntitlementForRefund(input: {
+  userId: string;
+  profileId: string;
+  productId: string;
+  reason: string;
+  orderId?: string;
+  claimToken?: string;
+}): Promise<EntitlementRecord | null> {
+  const supabase = createAdminClient();
+  if (input.orderId && input.claimToken) {
+    const { data, error } = await supabase.rpc("revoke_refund_entitlement", {
+      target_order_id: input.orderId,
+      claim_token: input.claimToken,
+      reason: input.reason,
+    });
+    if (error || !data?.[0]) return null;
+    return toEntitlementRecord(data[0] as EntitlementRow);
+  }
+  const { data, error } = await supabase.from("entitlements").update({
+    is_active: false,
+    revoked_at: new Date().toISOString(),
+    revocation_reason: input.reason,
+  }).eq("user_id", input.userId).eq("profile_id", input.profileId).eq("resource_id", input.productId).eq("is_active", true).select("*").maybeSingle<EntitlementRow>();
+  if (error || !data) return null;
+  return toEntitlementRecord(data);
+}
+
+export async function recordTossConfirmationFailure(
+  orderId: string,
+  failure: TossConfirmationFailure,
+): Promise<void> {
+  const supabase = createAdminClient();
+  const now = new Date().toISOString();
+  const reconciliationStatus = failure.retryability === "RETRYABLE"
+    ? "reconciliation_required"
+    : "terminal_mismatch";
+  const { error } = await supabase
+    .from("toss_payment_records")
+    .update({
+      last_confirmation_http_status: failure.httpStatus,
+      last_provider_error_code: failure.providerErrorCode,
+      last_provider_error_message: failure.safeMessage,
+      last_confirmation_attempt_at: now,
+      last_confirmation_retryability: failure.retryability,
+      last_confirmation_correlation_id: failure.correlationId,
+      reconciliation_status: reconciliationStatus,
+      last_reconciliation_result: failure.safeMessage,
+      last_reconciled_at: now,
+      updated_at: now,
+      last_attempt_at: now,
+    })
+    .eq("order_id", orderId);
+
+  if (error) {
+    throw new Error(`Toss 결제 실패 진단 저장에 실패했습니다: ${error.message}`);
+  }
+}
+
+export async function recordTossProviderConfirmation(
+  order: OrderRecord,
+  provider: TossConfirmResponse,
+  reconciliationStatus: TossPaymentRecord["reconciliationStatus"] = "externally_confirmed",
+): Promise<TossPaymentRecord> {
+  const supabase = createAdminClient();
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("toss_payment_records")
+    .upsert(
+      {
+        order_id: order.id,
+        payment_key: provider.paymentKey,
+        provider_order_id: provider.orderId,
+        expected_amount: order.amount,
+        confirmed_amount: provider.totalAmount,
+        currency: provider.currency,
+        provider_status: provider.status,
+        confirmed_at: provider.approvedAt ?? now,
+        reconciliation_status: reconciliationStatus,
+        last_reconciliation_result: "provider confirmation recorded",
+        last_reconciled_at: now,
+        updated_at: now,
+      },
+      { onConflict: "order_id" },
+    )
+    .select("*")
+    .single<TossPaymentRow>();
+
+  if (error || !data) {
+    throw new Error(`Toss 결제 증거 저장에 실패했습니다: ${error?.message ?? "unknown"}`);
+  }
+
+  return toTossPaymentRecord(data);
+}
+
+export async function markTossPaymentReconciliationResult(
+  orderId: string,
+  status: TossPaymentRecord["reconciliationStatus"],
+  result: string,
+): Promise<void> {
+  const supabase = createAdminClient();
+  const now = new Date().toISOString();
+  const { data: current, error: readError } = await supabase
+    .from("toss_payment_records")
+    .select("retry_count,max_retry_count")
+    .eq("order_id", orderId)
+    .single<{ retry_count: number; max_retry_count: number }>();
+
+  if (readError || !current) {
+    throw new Error(`Toss reconciliation 상태를 읽지 못했습니다: ${readError?.message ?? "unknown"}`);
+  }
+
+  const retryCount = status === "paid" || status === "terminal_mismatch"
+    ? current.retry_count
+    : current.retry_count + 1;
+  const exhausted = retryCount >= current.max_retry_count;
+  const finalStatus = exhausted && status !== "paid" && status !== "terminal_mismatch"
+    ? "reconciliation_failed"
+    : status;
+  const nextRetryAt = new Date(
+    Date.now() + Math.min(60 * 60 * 1000, 60 * 1000 * 2 ** Math.min(retryCount, 6)),
+  ).toISOString();
+  const { error } = await supabase
+    .from("toss_payment_records")
+    .update({
+      reconciliation_status: finalStatus,
+      last_reconciliation_result: result,
+      last_reconciled_at: now,
+      updated_at: now,
+      retry_count: retryCount,
+      next_retry_at: nextRetryAt,
+      last_attempt_at: now,
+    })
+    .eq("order_id", orderId);
+
+  if (error) {
+    throw new Error(`Toss reconciliation 상태 저장에 실패했습니다: ${error.message}`);
+  }
+}
+
+export async function listTossPaymentsForReconciliation(): Promise<TossPaymentRecord[]> {
+  const supabase = createAdminClient();
+  const { data: recordData, error: recordError } = await supabase
+    .from("toss_payment_records")
+    .select("*")
+    .in("reconciliation_status", ["pending", "confirmation_started", "externally_confirmed", "reconciliation_required"])
+    .lte("next_retry_at", new Date().toISOString())
+    .order("updated_at", { ascending: true });
+
+  if (recordError || !recordData) {
+    throw new Error(`Toss reconciliation 대상을 조회하지 못했습니다: ${recordError?.message ?? "unknown"}`);
+  }
+
+  const records = (recordData as TossPaymentRow[]).map(toTossPaymentRecord);
+  const knownOrderIds = new Set(records.map((record) => record.orderId));
+  const { data: orders, error: orderError } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("payment_provider", "toss")
+    .eq("status", "pending");
+
+  if (orderError || !orders) {
+    throw new Error(`Toss pending 주문을 조회하지 못했습니다: ${orderError?.message ?? "unknown"}`);
+  }
+
+  for (const row of orders as OrderRow[]) {
+    if (!knownOrderIds.has(row.id)) {
+      records.push(await recordTossConfirmationStarted(toOrderRecord(row)));
+    }
+  }
+
+  return records.slice(0, 50);
+}
+
 export class InvalidProductError extends Error {
   constructor(productId: unknown) {
     super(`유효하지 않은 분석 상품입니다: ${String(productId)}`);
@@ -93,6 +360,7 @@ export async function createPendingOrder(input: {
   userId: string;
   profileId: string;
   productId: string;
+  paymentProvider?: string;
 }): Promise<OrderRecord> {
   const resolved = resolvePurchasableProduct(input.productId);
 
@@ -110,7 +378,7 @@ export async function createPendingOrder(input: {
       product_id: resolved.productId,
       amount: resolved.amount,
       status: "pending" satisfies PaymentStatus,
-      payment_provider: "mock",
+      payment_provider: input.paymentProvider ?? "mock",
     })
     .select("*")
     .single<OrderRow>();
@@ -119,7 +387,13 @@ export async function createPendingOrder(input: {
     throw new Error(`주문 생성에 실패했습니다: ${error?.message ?? "unknown"}`);
   }
 
-  return toOrderRecord(data);
+  const order = toOrderRecord(data);
+
+  if (order.paymentProvider === "toss") {
+    await recordTossConfirmationStarted(order);
+  }
+
+  return order;
 }
 
 /** Loads an order only when it belongs to the given user. */
@@ -141,6 +415,17 @@ export async function getOrderForUser(
   }
 
   return toOrderRecord(data);
+}
+
+async function getOrderById(orderId: string): Promise<OrderRecord | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("id", orderId)
+    .maybeSingle<OrderRow>();
+
+  return error || !data ? null : toOrderRecord(data);
 }
 
 export async function markOrderPaid(
@@ -328,6 +613,89 @@ export type MockPaymentConfirmation = {
   purchase: PurchaseRecord;
   entitlement: EntitlementRecord;
 };
+
+export async function reconcileTossPayment(
+  record: TossPaymentRecord,
+): Promise<MockPaymentConfirmation> {
+  const order = await getOrderById(record.orderId);
+
+  if (!order || order.paymentProvider !== "toss") {
+    await markTossPaymentReconciliationResult(
+      record.orderId,
+      "terminal_mismatch",
+      "internal Toss order was not found",
+    );
+    throw new Error("Toss reconciliation order mismatch");
+  }
+
+  if (order.status === "paid") {
+    const purchase = await createPurchaseFromPaidOrder(order);
+    const entitlement = await grantEntitlement({
+      userId: order.userId,
+      profileId: order.profileId,
+      resourceId: order.productId,
+      purchaseId: purchase.id,
+      source: "purchase",
+    });
+    await markTossPaymentReconciliationResult(
+      order.id,
+      "paid",
+      "order already paid; purchase and entitlement replayed",
+    );
+    return { order, purchase, entitlement };
+  }
+
+  const provider = await getPaymentByOrderIdFromToss(order.id);
+
+  if (
+    provider.orderId !== order.id ||
+    provider.totalAmount !== order.amount ||
+    provider.currency !== "KRW"
+  ) {
+    await markTossPaymentReconciliationResult(
+      order.id,
+      "terminal_mismatch",
+      "provider order reference, amount, or currency mismatch",
+    );
+    throw new Error("Toss reconciliation provider mismatch");
+  }
+
+  if (provider.status !== "DONE") {
+    await markTossPaymentReconciliationResult(
+      order.id,
+      "reconciliation_failed",
+      `provider status ${provider.status} is not DONE`,
+    );
+    throw new Error("Toss payment is not complete");
+  }
+
+  await recordTossProviderConfirmation(order, provider, "externally_confirmed");
+
+  try {
+    const paidOrder = await markOrderPaid(order, provider.paymentKey);
+    const purchase = await createPurchaseFromPaidOrder(paidOrder);
+    const entitlement = await grantEntitlement({
+      userId: paidOrder.userId,
+      profileId: paidOrder.profileId,
+      resourceId: paidOrder.productId,
+      purchaseId: purchase.id,
+      source: "purchase",
+    });
+    await markTossPaymentReconciliationResult(
+      order.id,
+      "paid",
+      "provider payment verified and access restored",
+    );
+    return { order: paidOrder, purchase, entitlement };
+  } catch (error) {
+    await markTossPaymentReconciliationResult(
+      order.id,
+      "reconciliation_required",
+      "provider confirmed; internal access persistence must be retried",
+    );
+    throw error;
+  }
+}
 
 /**
  * Mock payment confirmation (no PG integration yet, Phase 4).

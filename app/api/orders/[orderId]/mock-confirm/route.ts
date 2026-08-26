@@ -7,6 +7,13 @@ type RouteContext = {
 };
 
 export async function POST(_request: Request, context: RouteContext) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json(
+      { error: "mock 결제 확인은 프로덕션에서 사용할 수 없습니다." },
+      { status: 403 },
+    );
+  }
+
   const user = await getCurrentUser();
 
   if (!user) {
@@ -31,7 +38,7 @@ export async function POST(_request: Request, context: RouteContext) {
 
     return NextResponse.json(confirmation, { status: 200 });
   } catch (error) {
-    console.error("[orders/mock-confirm] failed", error);
+    console.error("[orders/mock-confirm] failed");
 
     return NextResponse.json(
       { error: "결제 확인 처리에 실패했습니다." },

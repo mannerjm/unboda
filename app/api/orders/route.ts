@@ -4,6 +4,7 @@ import { resolvePurchasableProduct } from "@/app/lib/purchases/products";
 import { createPendingOrder } from "@/app/lib/purchases/server";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
+import { emitPaymentEvent } from "@/app/lib/payments/observability";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -74,6 +75,13 @@ export async function POST(request: Request) {
       userId: user.id,
       profileId: profile.id,
       productId: resolved.productId,
+      paymentProvider: "toss",
+    });
+    emitPaymentEvent("order_created", {
+      operationalClass: "NORMAL",
+      orderId: order.id,
+      profileId: order.profileId,
+      productId: order.productId,
     });
 
     return NextResponse.json({ order }, { status: 201 });

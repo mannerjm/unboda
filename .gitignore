@@ -33,6 +33,11 @@ yarn-error.log*
 # local diagnostics
 .tmp/
 
+# local Supabase runtime state and disposable test stack
+/supabase/.temp/
+/supabase/.branches/
+/supabase-r6-disposable/
+
 # env files (can opt-in for committing if needed)
 .env*
 

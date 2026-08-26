@@ -2,13 +2,21 @@ import {
   getCanonicalPremiumProductId,
   getPremiumProduct,
 } from "../premiumProductRegistry";
-import { getProductPricing } from "../productPricing";
+import {
+  getProductPricing,
+  type PricingFamily,
+  type ProductPricingSource,
+} from "../productPricing";
 
 export type PurchasableProductResolution =
   | {
       ok: true;
       productId: string;
+      family: PricingFamily;
       amount: number;
+      currency: "KRW";
+      source: ProductPricingSource;
+      entryExperimentEligible: boolean;
     }
   | {
       ok: false;
@@ -35,8 +43,7 @@ export function resolvePurchasableProduct(
 
   return {
     ok: true,
-    productId: canonicalProductId,
-    amount: getProductPricing(canonicalProductId).amount,
+    ...getProductPricing(canonicalProductId),
   };
 }
 

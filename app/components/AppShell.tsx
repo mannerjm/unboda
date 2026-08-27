@@ -156,7 +156,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
 
             return (
               <Link
-                key={item.href}
+                key={item.label}
                 href={item.href}
                 className={`flex min-h-[56px] flex-col items-center justify-center rounded-xl px-1 py-2 text-[11px] font-semibold transition ${
                   active

@@ -75,6 +75,28 @@ type PaidAnalysisSummary = {
   reportStatus: PaidReportStatus;
 };
 
+type RefundSummary = {
+  orderId: string;
+  status: "REFUND_REQUESTED" | "REFUND_PROCESSING" | "REFUND_FAILED_RETRYING" | "REFUND_COMPLETED" | "OWNER_REVIEW_REQUIRED";
+  customerMessage: string;
+  requestedAt: string;
+  completedAt: string | null;
+};
+
+type PurchaseHistoryItem = {
+  purchaseId: string;
+  orderId: string;
+  profileId: string;
+  productId: string;
+  productName: string;
+  categoryLabel: string;
+  purchasedAt: string;
+  amount: number;
+  currency: string;
+  paymentStatus: "pending" | "paid" | "failed" | "canceled";
+  refund: RefundSummary | null;
+};
+
 const paidReportStatusLabels: Record<PaidReportStatus, string> = {
   none: "아직 생성되지 않음",
   generating: "생성 중",
@@ -88,6 +110,21 @@ const paidReportActionLabels: Record<PaidReportStatus, string> = {
   generating: "생성 중",
   completed: "리포트 보기",
   failed: "다시 생성하기",
+};
+
+const paymentStatusLabels: Record<PurchaseHistoryItem["paymentStatus"], string> = {
+  pending: "결제 대기",
+  paid: "결제 완료",
+  failed: "결제 실패",
+  canceled: "결제 취소",
+};
+
+const refundStatusLabels: Record<RefundSummary["status"], string> = {
+  REFUND_REQUESTED: "환불 요청 접수",
+  REFUND_PROCESSING: "환불 처리 중",
+  REFUND_FAILED_RETRYING: "환불 재처리 중",
+  REFUND_COMPLETED: "환불 완료",
+  OWNER_REVIEW_REQUIRED: "담당자 확인 중",
 };
 
 type StatusTone = "neutral" | "positive" | "warning" | "critical";
@@ -154,6 +191,7 @@ type SummaryBody = {
   freeAnalysisResults?: Array<{ profileId: string; status: FreeAnalysisResultStatus }>;
   profileDeletability?: Array<{ profileId: string; deletable: boolean; reason?: ProfileDeleteReason }>;
   paidAnalysis?: PaidAnalysisSummary[];
+  purchaseHistory?: PurchaseHistoryItem[];
 };
 
 type ProfileDeletabilityState = { deletable: boolean; reason?: ProfileDeleteReason };
@@ -168,6 +206,7 @@ export default function MyPage() {
   const [freeAnalysisStatusById, setFreeAnalysisStatusById] = useState<Record<string, FreeAnalysisResultStatus>>({});
   const [deletabilityById, setDeletabilityById] = useState<Record<string, ProfileDeletabilityState>>({});
   const [paidAnalysisByProfileId, setPaidAnalysisByProfileId] = useState<Record<string, PaidAnalysisSummary[]>>({});
+  const [purchaseHistory, setPurchaseHistory] = useState<PurchaseHistoryItem[]>([]);
   const [pendingDeleteProfileId, setPendingDeleteProfileId] = useState<string | null>(null);
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
   const [isClearingActiveProfile, setIsClearingActiveProfile] = useState(false);
@@ -224,6 +263,18 @@ export default function MyPage() {
       (paidByProfileId[item.profileId] ??= []).push(item);
     }
     setPaidAnalysisByProfileId(paidByProfileId);
+    setPurchaseHistory(body.purchaseHistory ?? []);
+  }
+
+  function formatPurchaseDate(value: string): string {
+    return new Intl.DateTimeFormat("ko-KR", {
+      dateStyle: "medium",
+      timeZone: "Asia/Seoul",
+    }).format(new Date(value));
+  }
+
+  function formatPurchaseAmount(amount: number, currency: string): string {
+    return `${amount.toLocaleString("ko-KR")} ${currency}`;
   }
 
   function activate(profileId: string) {
@@ -432,11 +483,12 @@ export default function MyPage() {
               <p className="mt-4 max-w-xl text-sm leading-7 text-stone-600">여기서 선택한 사람을 기준으로 무료 사주와 유료 심층분석이 진행됩니다.</p>
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              {profiles.length > 0 ? (
-                <span className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-500">
-                  {profiles.length}명 등록
-                </span>
-              ) : null}
+              <Link
+                href="/account"
+                className={`rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 ${restingFocusRing}`}
+              >
+                계정 관리
+              </Link>
               <button
                 type="button"
                 onClick={openCreateForm}
@@ -444,6 +496,11 @@ export default function MyPage() {
               >
                 인원 추가
               </button>
+              {profiles.length > 0 ? (
+                <span className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-500">
+                  {profiles.length}명 등록
+                </span>
+              ) : null}
             </div>
           </header>
         {isFormOpen ? (
@@ -519,7 +576,9 @@ export default function MyPage() {
             </button>
           </section>
         ) : null}
-        <div className="mt-8 space-y-4">
+        <div className="mt-8">
+          {profiles.length > 0 ? <p className="mb-3 text-xs font-semibold tracking-[0.2em] text-stone-500">내 프로필 및 이용 가능한 분석</p> : null}
+          <div className="space-y-4">
           {profiles.map((profile) => (
             <div
               key={profile.id}
@@ -579,19 +638,16 @@ export default function MyPage() {
                   </p>
                 ) : null}
               </div>
-              {(paidAnalysisByProfileId[profile.id] ?? []).length > 0 ? (
-                <div className={subCardClass(profile.id === activeProfileId)}>
+              <div className={subCardClass(profile.id === activeProfileId)}>
                   <p className={profile.id === activeProfileId
                     ? "text-xs font-semibold tracking-[0.14em] text-stone-500"
                     : "text-xs font-semibold tracking-[0.14em] text-stone-500"}
                   >
                     구매한 심층 분석
                   </p>
-                  <ul className={profile.id === activeProfileId
-                    ? "mt-3 divide-y divide-stone-200"
-                    : "mt-3 divide-y divide-stone-200"}
-                  >
-                    {(paidAnalysisByProfileId[profile.id] ?? []).map((item) => (
+                  {(paidAnalysisByProfileId[profile.id] ?? []).length > 0 ? (
+                    <ul className="mt-3 divide-y divide-stone-200">
+                      {(paidAnalysisByProfileId[profile.id] ?? []).map((item) => (
                       <li key={item.productId} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                         <span className="min-w-0">
                           <span className="block text-sm font-semibold">{item.productName}</span>
@@ -620,21 +676,16 @@ export default function MyPage() {
                           </Link>
                         )}
                       </li>
-                    ))}
-                  </ul>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-3 text-sm text-stone-500">아직 구매한 심층 분석이 없습니다.</p>
+                  )}
                 </div>
-              ) : null}
               <div className={profile.id === activeProfileId
                 ? "mt-5 flex flex-wrap gap-2 border-t border-stone-200 pt-4"
                 : "mt-5 flex flex-wrap gap-2 border-t border-stone-200 pt-4"}
               >
-                <button
-                  type="button"
-                  onClick={() => openEditForm(profile)}
-                  className={cardActionClass(profile.id === activeProfileId)}
-                >
-                  수정
-                </button>
                 {profile.id === activeProfileId ? (
                   <button
                     type="button"
@@ -645,6 +696,13 @@ export default function MyPage() {
                     {isClearingActiveProfile ? "해제 중..." : "분석 대상 선택 해제"}
                   </button>
                 ) : null}
+                <button
+                  type="button"
+                  onClick={() => openEditForm(profile)}
+                  className={cardActionClass(profile.id === activeProfileId)}
+                >
+                  수정
+                </button>
                 <button
                   type="button"
                   onClick={() => { setMessage(null); setPendingDeleteProfileId(profile.id); }}
@@ -695,7 +753,36 @@ export default function MyPage() {
               ) : null}
             </div>
           ))}
+          </div>
         </div>
+        {purchaseHistory.length > 0 ? (
+          <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-7">
+            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">PURCHASE HISTORY</p>
+            <h2 className="mt-2 text-2xl font-bold text-stone-900">구매 및 환불 내역</h2>
+            <p className="mt-2 text-sm leading-6 text-stone-600">구매한 분석은 현재 이용 권한과 관계없이 기록으로 남습니다.</p>
+            <ul className="mt-5 divide-y divide-stone-200">
+              {purchaseHistory.map((item) => {
+                const profile = profiles.find((candidate) => candidate.id === item.profileId);
+                return (
+                  <li key={item.purchaseId} className="py-4 first:pt-0 last:pb-0">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-stone-900">{item.productName}</p>
+                        <p className="mt-1 text-xs text-stone-500">{item.categoryLabel} · 분석 대상: {profile?.label ?? "등록된 프로필"}</p>
+                        <p className="mt-2 text-sm text-stone-600">{formatPurchaseDate(item.purchasedAt)} · {formatPurchaseAmount(item.amount, item.currency)}</p>
+                      </div>
+                      <div className="flex shrink-0 flex-wrap gap-2">
+                        <span className="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-xs font-semibold text-stone-600">{paymentStatusLabels[item.paymentStatus]}</span>
+                        {item.refund ? <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${item.refund.status === "REFUND_COMPLETED" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : item.refund.status === "OWNER_REVIEW_REQUIRED" ? "border-amber-200 bg-amber-50 text-amber-800" : "border-stone-200 bg-stone-50 text-stone-600"}`}>{refundStatusLabels[item.refund.status]}</span> : null}
+                      </div>
+                    </div>
+                    {item.refund ? <p className="mt-2 text-xs leading-5 text-stone-500">{item.refund.customerMessage}</p> : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ) : null}
         {profiles.length > 0 ? (
           <section className="mt-10 flex flex-col gap-4 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-7">
             <p className="text-sm leading-6 text-stone-600">

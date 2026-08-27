@@ -17,6 +17,7 @@ import {
   assessFullRefundEligibility,
   type RefundReasonCategory,
 } from "./policy";
+import { getRefundCustomerMessage } from "./status";
 
 type RefundRow = {
   id: string;
@@ -280,4 +281,39 @@ export async function finalizeRefundForClaim(input: {
   } catch {
     return null;
   }
+}
+
+export type UserRefundSummary = {
+  orderId: string;
+  status: RefundStatus;
+  customerMessage: string;
+  requestedAt: string;
+  completedAt: string | null;
+};
+
+export async function listUserRefundSummaries(
+  userId: string,
+): Promise<UserRefundSummary[]> {
+  const { data, error } = await createAdminClient()
+    .from("refund_workflows")
+    .select("order_id,status,requested_at,completed_at")
+    .eq("user_id", userId)
+    .order("requested_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`환불 내역을 조회하지 못했습니다: ${error.message}`);
+  }
+
+  return (data ?? []).map((row: {
+    order_id: string;
+    status: RefundStatus;
+    requested_at: string;
+    completed_at: string | null;
+  }) => ({
+    orderId: row.order_id,
+    status: row.status,
+    customerMessage: getRefundCustomerMessage(row.status),
+    requestedAt: row.requested_at,
+    completedAt: row.completed_at,
+  }));
 }

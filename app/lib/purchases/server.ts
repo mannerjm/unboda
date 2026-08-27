@@ -13,6 +13,7 @@ import {
   type TossConfirmationFailure,
   type TossConfirmResponse,
 } from "../toss/server";
+import { getPremiumCategoryLabel, getPremiumProduct } from "../premiumProductRegistry";
 
 type OrderRow = {
   id: string;
@@ -627,6 +628,75 @@ export async function listUserEntitlements(
   }
 
   return (data as EntitlementRow[]).map(toEntitlementRecord);
+}
+
+export type UserPurchaseHistoryItem = {
+  purchaseId: string;
+  orderId: string;
+  profileId: string;
+  productId: string;
+  productName: string;
+  categoryLabel: string;
+  purchasedAt: string;
+  amount: number;
+  currency: string;
+  paymentStatus: PaymentStatus;
+};
+
+export async function listUserPurchaseHistory(
+  userId: string,
+): Promise<UserPurchaseHistoryItem[]> {
+  const supabase = createAdminClient();
+  const { data: purchaseData, error: purchaseError } = await supabase
+    .from("purchases")
+    .select("*")
+    .eq("user_id", userId)
+    .order("purchased_at", { ascending: false });
+
+  if (purchaseError) {
+    throw new Error(`구매 내역을 조회하지 못했습니다: ${purchaseError.message}`);
+  }
+
+  const purchases = (purchaseData ?? []) as PurchaseRow[];
+  if (purchases.length === 0) return [];
+
+  const orderIds = purchases.map((purchase) => purchase.order_id);
+  const [{ data: orderData, error: orderError }, { data: paymentData, error: paymentError }] = await Promise.all([
+    supabase.from("orders").select("*").eq("user_id", userId).in("id", orderIds),
+    supabase.from("toss_payment_records").select("order_id,currency").in("order_id", orderIds),
+  ]);
+
+  if (orderError) {
+    throw new Error(`주문 내역을 조회하지 못했습니다: ${orderError.message}`);
+  }
+  if (paymentError) {
+    throw new Error(`결제 내역을 조회하지 못했습니다: ${paymentError.message}`);
+  }
+
+  const ordersById = new Map((orderData as OrderRow[] ?? []).map((row) => [row.id, toOrderRecord(row)]));
+  const currencyByOrderId = new Map(
+    ((paymentData ?? []) as Array<{ order_id: string; currency: string | null }>)
+      .map((row) => [row.order_id, row.currency ?? "KRW"]),
+  );
+
+  return purchases.flatMap((purchase) => {
+    const order = ordersById.get(purchase.order_id);
+    const product = getPremiumProduct(purchase.product_id);
+    if (!order || !product) return [];
+
+    return [{
+      purchaseId: purchase.id,
+      orderId: purchase.order_id,
+      profileId: purchase.profile_id,
+      productId: product.id,
+      productName: product.title,
+      categoryLabel: getPremiumCategoryLabel(product.category),
+      purchasedAt: purchase.purchased_at,
+      amount: order.amount,
+      currency: currencyByOrderId.get(order.id) ?? "KRW",
+      paymentStatus: order.status,
+    }];
+  });
 }
 
 export type MockPaymentConfirmation = {

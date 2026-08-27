@@ -18,6 +18,7 @@ import {
   type FreeAnalysisResultRecord,
 } from "@/app/lib/freeAnalysisResults/server";
 import { buildFreeAnalysisResponse } from "@/app/lib/freeAnalysisPipeline/server";
+import { createEvaluationContext } from "@/app/lib/evaluationContext";
 export async function POST(req: Request) {
   let claimedFreeResult: FreeAnalysisResultRecord | null = null;
 
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
     if (!isProfileId(body.profileId)) return NextResponse.json({ error: "유효한 프로필을 선택해 주세요." }, { status: 400 });
     const profile = await getUserProfile(body.profileId, user.id);
     if (!profile) return NextResponse.json({ error: "프로필을 찾을 수 없습니다." }, { status: 404 });
+    const evaluationContext = createEvaluationContext();
     birthDate = profile.birthDate;
     birthTime = profile.birthTime;
     calendarType = profile.calendarType;
@@ -96,7 +98,7 @@ if (
 }
 
 if (productId === undefined) {
-  const claim = await claimFreeAnalysisResult({ userId: user.id, profile });
+  const claim = await claimFreeAnalysisResult({ userId: user.id, profile, evaluationContext });
 
   if (claim.state === "completed" && claim.record.content) {
     return NextResponse.json(claim.record.content);
@@ -104,6 +106,15 @@ if (productId === undefined) {
 
   if (claim.state === "generating") {
     return NextResponse.json({ status: "generating" }, { status: 202 });
+  }
+
+  if (claim.state === "stale") {
+    return NextResponse.json({
+      status: "stale",
+      freshness: "STALE",
+      analysis: claim.record.content,
+      refreshAvailable: true,
+    }, { status: 200 });
   }
 
   claimedFreeResult = claim.record;
@@ -120,6 +131,7 @@ const responseData: AnalyzeSuccessResponse = await buildFreeAnalysisResponse({
     isLeapMonth: resolvedIsLeapMonth === "윤달",
   },
   includePremiumAnalysis: productId !== undefined,
+  evaluationDate: evaluationContext.evaluationDate,
 });
 
 if (claimedFreeResult) {

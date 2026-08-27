@@ -108,8 +108,8 @@ async function completeRefund(order: OrderRecord, workflow: RefundWorkflowRecord
   emitPaymentEvent("entitlement_revocation_started", { operationalClass: "RECOVERING", orderId: order.id, productId: order.productId, profileReference: order.profileId, runId: workflow.correlationId });
   await options.beforeEntitlementRevocation?.();
   const fencedRevoked = claimToken
-    ? await revokeEntitlementForRefund({ userId: order.userId, profileId: order.profileId, productId: order.productId, reason: workflow.reasonCategory, orderId: order.id, claimToken })
-    : await revokeEntitlementForRefund({ userId: order.userId, profileId: order.profileId, productId: order.productId, reason: workflow.reasonCategory });
+    ? await revokeEntitlementForRefund({ userId: order.userId, profileId: order.profileId, productId: order.productId, orderId: order.id, claimToken })
+    : await revokeEntitlementForRefund({ userId: order.userId, profileId: order.profileId, productId: order.productId });
   const remaining = await createAdminClient().from("entitlements").select("id").eq("user_id", order.userId).eq("profile_id", order.profileId).eq("resource_id", order.productId).eq("is_active", true).maybeSingle<{ id: string }>();
   if (remaining.data) throw new Error("환불 확정 후 이용 권한을 회수하지 못했습니다.");
   if (fencedRevoked) emitPaymentEvent("entitlement_revoked", { operationalClass: "CONVERGED", orderId: order.id, productId: order.productId, profileReference: order.profileId, runId: workflow.correlationId });

@@ -51,6 +51,7 @@ export function toAnalyzeProfileMetadata(profile: ProfileDto): AnalyzeProfileMet
     isLeapMonth: profile.isLeapMonth,
   };
 }
+import type { EvaluationContext } from "../evaluationContext";
 
 export function getProfileFingerprint(profile: ProfileDto): string {
   const snapshot = toAnalyzeProfileMetadata(profile);
@@ -105,6 +106,8 @@ export type FreeAnalysisResultSummary = {
   // Read from the stored content in the same query; "failed" means the row is
   // complete but its AI main analysis still needs a retry.
   mainAnalysisStatus?: "completed" | "failed" | null;
+  evaluationYear?: number | null;
+  evaluationMonth?: number | null;
 };
 
 export async function listUserFreeAnalysisResults(
@@ -114,7 +117,7 @@ export async function listUserFreeAnalysisResults(
   const { data, error } = await supabase
     .from("free_analysis_results")
     .select(
-      "profile_id, status, profile_fingerprint, main_analysis_status:content->generationMeta->>mainAnalysisStatus",
+      "profile_id, status, profile_fingerprint, main_analysis_status:content->generationMeta->>mainAnalysisStatus, evaluation_year:content->saju->evaluationContext->>evaluationYear, evaluation_month:content->saju->evaluationContext->>evaluationMonth",
     )
     .eq("user_id", userId);
 
@@ -127,6 +130,8 @@ export async function listUserFreeAnalysisResults(
     status: FreeAnalysisResultStatus;
     profile_fingerprint: string;
     main_analysis_status: string | null;
+    evaluation_year: string | null;
+    evaluation_month: string | null;
   }) => ({
     profileId: row.profile_id,
     status: row.status,
@@ -135,6 +140,8 @@ export async function listUserFreeAnalysisResults(
       row.main_analysis_status === "failed" || row.main_analysis_status === "completed"
         ? row.main_analysis_status
         : null,
+    evaluationYear: row.evaluation_year === null ? null : Number(row.evaluation_year),
+    evaluationMonth: row.evaluation_month === null ? null : Number(row.evaluation_month),
   }));
 }
 
@@ -154,6 +161,7 @@ export type ProfileFreeAnalysisStatus =
 export function resolveProfileFreeAnalysisStatus(
   profile: ProfileDto,
   summaries: FreeAnalysisResultSummary[],
+  evaluationContext?: EvaluationContext,
 ): ProfileFreeAnalysisStatus {
   const summary = summaries.find((item) => item.profileId === profile.id);
 
@@ -161,6 +169,10 @@ export function resolveProfileFreeAnalysisStatus(
   if (summary.status !== "completed") return summary.status;
 
   if (summary.profileFingerprint === getProfileFingerprint(profile)) {
+    if (
+      evaluationContext &&
+      (summary.evaluationYear !== evaluationContext.evaluationYear || summary.evaluationMonth !== evaluationContext.evaluationMonth)
+    ) return "stale";
     return summary.mainAnalysisStatus === "failed" ? "needs_retry" : "completed";
   }
 
@@ -170,7 +182,8 @@ export function resolveProfileFreeAnalysisStatus(
 export type FreeAnalysisResultClaim =
   | { state: "claimed"; record: FreeAnalysisResultRecord }
   | { state: "completed"; record: FreeAnalysisResultRecord }
-  | { state: "generating"; record: FreeAnalysisResultRecord };
+  | { state: "generating"; record: FreeAnalysisResultRecord }
+  | { state: "stale"; record: FreeAnalysisResultRecord };
 
 /**
  * A completed row whose main analysis failed and whose retry budget is gone:
@@ -184,9 +197,23 @@ export function isMainAnalysisRetryExhausted(
   return (content.generationMeta.mainAnalysisRetryCount ?? 0) >= MAX_MAIN_ANALYSIS_RETRY_COUNT;
 }
 
+export function hasCurrentEvaluationPeriod(
+  content: AnalyzeSuccessResponse | null,
+  evaluationContext: EvaluationContext,
+): boolean {
+  const stored = content?.saju.evaluationContext;
+  return Boolean(
+    stored &&
+      stored.evaluationYear === evaluationContext.evaluationYear &&
+      stored.evaluationMonth === evaluationContext.evaluationMonth,
+  );
+}
+
 export async function claimFreeAnalysisResult(input: {
   userId: string;
   profile: ProfileDto;
+  evaluationContext: EvaluationContext;
+  allowPeriodRefresh?: boolean;
 }): Promise<FreeAnalysisResultClaim> {
   const fingerprint = getProfileFingerprint(input.profile);
   const snapshot = toAnalyzeProfileMetadata(input.profile);
@@ -206,13 +233,32 @@ export async function claimFreeAnalysisResult(input: {
       throw new Error(`오래된 무료 분석 결과를 정리하지 못했습니다: ${error.message}`);
     }
   } else if (existing?.status === "completed" && existing.content) {
-    if (!isMainAnalysisRetryExhausted(existing.content)) {
+    const isCurrentPeriod = hasCurrentEvaluationPeriod(existing.content, input.evaluationContext);
+    if (isCurrentPeriod && !isMainAnalysisRetryExhausted(existing.content)) {
       return { state: "completed", record: existing };
     }
 
-    // The conditional UPDATE is the claim: the loser sees status "generating".
-    const supabase = createAdminClient();
-    const { data, error } = await supabase
+    if (isCurrentPeriod) {
+      // Preserve the existing main-analysis retry lifecycle for a current result.
+      const supabase = createAdminClient();
+      const { data, error } = await supabase
+        .from("free_analysis_results")
+        .update({ status: "generating" satisfies FreeAnalysisResultStatus, error_code: null })
+        .eq("id", existing.id)
+        .eq("user_id", input.userId)
+        .eq("profile_id", input.profile.id)
+        .eq("profile_fingerprint", fingerprint)
+        .eq("status", "completed")
+        .eq("content->generationMeta->>mainAnalysisStatus", "failed")
+        .select("*")
+        .maybeSingle<FreeAnalysisResultRow>();
+      if (error) throw new Error(`무료 분석 재생성을 시작하지 못했습니다: ${error.message}`);
+      return data ? { state: "claimed", record: toRecord(data) } : { state: "generating", record: existing };
+    }
+
+    if (!input.allowPeriodRefresh) return { state: "stale", record: existing };
+
+    const staleClaim = await createAdminClient()
       .from("free_analysis_results")
       .update({ status: "generating" satisfies FreeAnalysisResultStatus, error_code: null })
       .eq("id", existing.id)
@@ -220,17 +266,12 @@ export async function claimFreeAnalysisResult(input: {
       .eq("profile_id", input.profile.id)
       .eq("profile_fingerprint", fingerprint)
       .eq("status", "completed")
-      .eq("content->generationMeta->>mainAnalysisStatus", "failed")
       .select("*")
       .maybeSingle<FreeAnalysisResultRow>();
-
-    if (error) {
-      throw new Error(`무료 분석 재생성을 시작하지 못했습니다: ${error.message}`);
-    }
-
-    return data
-      ? { state: "claimed", record: toRecord(data) }
-      : { state: "generating", record: existing };
+    if (staleClaim.error) throw new Error(`무료 분석 재생성을 시작하지 못했습니다: ${staleClaim.error.message}`);
+    if (staleClaim.data) return { state: "claimed", record: toRecord(staleClaim.data) };
+    const currentAfterStaleClaim = await getFreeAnalysisResult(input.userId, input.profile.id);
+    if (currentAfterStaleClaim) return { state: "generating", record: currentAfterStaleClaim };
   } else if (existing?.status === "generating") {
     const staleBefore = new Date(Date.now() - STALE_GENERATING_MS).toISOString();
     const supabase = createAdminClient();

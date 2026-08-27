@@ -153,10 +153,23 @@ for (const [index, expected] of EXPECTED_PERIOD_PRODUCTS.entries()) {
     purchasable.ok && purchasable.productId === expected.id,
     `${expected.id}: must be resolvable at checkout`,
   );
+  const pricing = getProductPricing(expected.id);
+  const expectedFamily = [
+    "yearly-current",
+    "annual-next",
+    "annual-3years",
+  ].includes(expected.id)
+    ? "LONG_RANGE"
+    : expected.id === "daeun-current"
+      ? "LONG_RANGE"
+      : expected.id === "lifetime-overview"
+        ? "SIGNATURE"
+        : "CORE";
   assert(
-    getProductPricing(expected.id).amount === 9900
-      && getProductPricing(expected.id).currency === "KRW",
-    `${expected.id}: pricing contract must stay 9900 KRW`,
+    pricing.family === expectedFamily
+      && pricing.currency === "KRW"
+      && pricing.amount > 0,
+    `${expected.id}: pricing family/amount contract mismatch`,
   );
 }
 console.log(`period: ${periodIds.join(", ")}`);

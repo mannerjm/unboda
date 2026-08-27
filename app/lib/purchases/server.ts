@@ -176,20 +176,23 @@ export async function getTossPaymentRecordForOrder(orderId: string): Promise<Tos
   return toTossPaymentRecord(data);
 }
 
-export async function revokeEntitlementForRefund(input: {
+export type EntitlementRevocationReason = "REFUND_CANCELLATION" | "ACCOUNT_CLOSURE";
+
+async function revokeEntitlement(input: {
   userId: string;
   profileId: string;
   productId: string;
-  reason: string;
+  reason: EntitlementRevocationReason;
   orderId?: string;
   claimToken?: string;
 }): Promise<EntitlementRecord | null> {
   const supabase = createAdminClient();
+  const revocationReason = input.reason;
   if (input.orderId && input.claimToken) {
     const { data, error } = await supabase.rpc("revoke_refund_entitlement", {
       target_order_id: input.orderId,
       claim_token: input.claimToken,
-      reason: input.reason,
+      reason: revocationReason,
     });
     if (error || !data?.[0]) return null;
     return toEntitlementRecord(data[0] as EntitlementRow);
@@ -197,10 +200,28 @@ export async function revokeEntitlementForRefund(input: {
   const { data, error } = await supabase.from("entitlements").update({
     is_active: false,
     revoked_at: new Date().toISOString(),
-    revocation_reason: input.reason,
+    revocation_reason: revocationReason,
   }).eq("user_id", input.userId).eq("profile_id", input.profileId).eq("resource_id", input.productId).eq("is_active", true).select("*").maybeSingle<EntitlementRow>();
   if (error || !data) return null;
   return toEntitlementRecord(data);
+}
+
+export async function revokeEntitlementForRefund(input: {
+  userId: string;
+  profileId: string;
+  productId: string;
+  orderId?: string;
+  claimToken?: string;
+}): Promise<EntitlementRecord | null> {
+  return revokeEntitlement({ ...input, reason: "REFUND_CANCELLATION" });
+}
+
+export async function revokeEntitlementForAccountClosure(input: {
+  userId: string;
+  profileId: string;
+  productId: string;
+}): Promise<EntitlementRecord | null> {
+  return revokeEntitlement({ ...input, reason: "ACCOUNT_CLOSURE" });
 }
 
 export async function recordTossConfirmationFailure(

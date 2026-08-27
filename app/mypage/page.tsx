@@ -12,6 +12,7 @@ import type {
 import { profileDeleteBlockMessages } from "@/app/lib/profiles/types";
 import { createClient } from "@/app/lib/supabase/client";
 import { GUEST_BIRTH_DATE_MIN, getGuestBirthDateMax } from "@/app/lib/guestFreeAnalyses/date";
+import AppShell from "@/app/components/AppShell";
 
 function formatProfileBirthDate(birthDate: string): string {
   return birthDate.replace(/-/g, ".");
@@ -127,25 +128,25 @@ const restingFocusRing = `${focusRing} focus-visible:ring-stone-900 focus-visibl
 // The active card is charcoal, so tone colors would drop below contrast on it.
 function statusBadgeClass(isActive: boolean, tone: StatusTone): string {
   return `inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
-    isActive ? "border-white/25 bg-white/10 text-white" : statusToneClasses[tone]
+    isActive ? "border-[#cdbb98] bg-[#f3eee4] text-stone-800" : statusToneClasses[tone]
   }`;
 }
 
 function cardActionClass(isActive: boolean): string {
   return isActive
-    ? `rounded-full border border-white/30 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 ${activeFocusRing}`
+    ? `rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50 ${restingFocusRing}`
     : `rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400 ${restingFocusRing}`;
 }
 
 function deleteActionClass(isActive: boolean): string {
   return isActive
-    ? `rounded-full border border-white/30 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 ${activeFocusRing}`
+    ? `rounded-full border border-red-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 ${restingFocusRing}`
     : `rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400 ${restingFocusRing}`;
 }
 
 function subCardClass(isActive: boolean): string {
   return isActive
-    ? "mt-5 rounded-2xl border border-white/20 bg-white/5 p-4"
+    ? "mt-5 rounded-2xl border border-[#dfd3bd] bg-[#fbf7ef] p-4"
     : "mt-5 rounded-2xl border border-stone-200 bg-stone-50/60 p-4";
 }
 
@@ -421,29 +422,30 @@ export default function MyPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-5 py-12 text-stone-900 sm:py-16">
-      <div className="mx-auto w-full max-w-3xl">
-        <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold tracking-[0.25em] text-stone-500">MY PROFILE</p>
-            <h1 className="mt-3 text-3xl font-bold sm:text-4xl">사주 분석 대상</h1>
-            <p className="mt-4 max-w-xl text-sm leading-7 text-stone-600">여기서 선택한 사람을 기준으로 무료 사주와 유료 심층분석이 진행됩니다.</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-3">
-            {profiles.length > 0 ? (
-              <span className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-500">
-                {profiles.length}명 등록
-              </span>
-            ) : null}
-            <button
-              type="button"
-              onClick={openCreateForm}
-              className={`rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 ${restingFocusRing}`}
-            >
-              인원 추가
-            </button>
-          </div>
-        </header>
+    <AppShell activeProfileId={activeProfileId}>
+      <main className="min-h-screen bg-[#f7f3ea] px-5 py-12 text-stone-900 sm:py-16">
+        <div className="mx-auto w-full max-w-3xl">
+          <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.25em] text-stone-500">MY PROFILE</p>
+              <h1 className="mt-3 text-3xl font-bold sm:text-4xl">사주 분석 대상</h1>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-stone-600">여기서 선택한 사람을 기준으로 무료 사주와 유료 심층분석이 진행됩니다.</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-3">
+              {profiles.length > 0 ? (
+                <span className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-500">
+                  {profiles.length}명 등록
+                </span>
+              ) : null}
+              <button
+                type="button"
+                onClick={openCreateForm}
+                className={`rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 ${restingFocusRing}`}
+              >
+                인원 추가
+              </button>
+            </div>
+          </header>
         {isFormOpen ? (
           <form
             className="mt-8 space-y-5 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
@@ -523,7 +525,7 @@ export default function MyPage() {
               key={profile.id}
               onClick={(event) => selectFromCardClick(event, profile.id)}
               className={profile.id === activeProfileId
-                ? "rounded-3xl border border-stone-900 bg-stone-900 p-6 text-left text-white shadow-md sm:p-7"
+                ? "rounded-2xl border border-[#cdbb98] bg-[#fffdf8] p-6 text-left text-stone-900 shadow-sm sm:p-7"
                 : "cursor-pointer rounded-3xl border border-stone-200 bg-white p-6 text-left shadow-sm transition hover:border-stone-300 hover:shadow-md sm:p-7"}
             >
               <button
@@ -536,17 +538,17 @@ export default function MyPage() {
                 <span className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-xl font-bold">{profile.label}</span>
                   {profile.id === activeProfileId ? (
-                    <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold text-white">현재 분석 대상</span>
+                    <span className="rounded-full border border-[#cdbb98] bg-[#f3eee4] px-3 py-1 text-xs font-semibold text-stone-800">현재 분석 대상</span>
                   ) : null}
                 </span>
                 <span className={profile.id === activeProfileId
-                  ? "mt-2 block text-sm text-white/70"
+                  ? "mt-2 block text-sm text-stone-600"
                   : "mt-2 block text-sm text-stone-500"}
                 >
                   {relationshipLabels[profile.relationshipType]}
                 </span>
                 <span className={profile.id === activeProfileId
-                  ? "mt-1 block text-sm text-white/70"
+                  ? "mt-1 block text-sm text-stone-600"
                   : "mt-1 block text-sm text-stone-500"}
                 >
                   {formatProfileDetails(profile)}
@@ -555,7 +557,7 @@ export default function MyPage() {
               <div className={subCardClass(profile.id === activeProfileId)}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className={profile.id === activeProfileId
-                    ? "text-xs font-semibold tracking-[0.14em] text-white/70"
+                    ? "text-xs font-semibold tracking-[0.14em] text-stone-500"
                     : "text-xs font-semibold tracking-[0.14em] text-stone-500"}
                   >
                     무료 사주
@@ -570,7 +572,7 @@ export default function MyPage() {
                 </div>
                 {freeAnalysisStatusHints[freeAnalysisStatusById[profile.id] ?? "none"] ? (
                   <p className={profile.id === activeProfileId
-                    ? "mt-2 text-xs leading-5 text-white/60"
+                    ? "mt-2 text-xs leading-5 text-stone-500"
                     : "mt-2 text-xs leading-5 text-stone-500"}
                   >
                     {freeAnalysisStatusHints[freeAnalysisStatusById[profile.id] ?? "none"]}
@@ -580,13 +582,13 @@ export default function MyPage() {
               {(paidAnalysisByProfileId[profile.id] ?? []).length > 0 ? (
                 <div className={subCardClass(profile.id === activeProfileId)}>
                   <p className={profile.id === activeProfileId
-                    ? "text-xs font-semibold tracking-[0.14em] text-white/70"
+                    ? "text-xs font-semibold tracking-[0.14em] text-stone-500"
                     : "text-xs font-semibold tracking-[0.14em] text-stone-500"}
                   >
                     구매한 심층 분석
                   </p>
                   <ul className={profile.id === activeProfileId
-                    ? "mt-3 divide-y divide-white/10"
+                    ? "mt-3 divide-y divide-stone-200"
                     : "mt-3 divide-y divide-stone-200"}
                   >
                     {(paidAnalysisByProfileId[profile.id] ?? []).map((item) => (
@@ -623,7 +625,7 @@ export default function MyPage() {
                 </div>
               ) : null}
               <div className={profile.id === activeProfileId
-                ? "mt-5 flex flex-wrap gap-2 border-t border-white/15 pt-4"
+                ? "mt-5 flex flex-wrap gap-2 border-t border-stone-200 pt-4"
                 : "mt-5 flex flex-wrap gap-2 border-t border-stone-200 pt-4"}
               >
                 <button
@@ -654,7 +656,7 @@ export default function MyPage() {
               </div>
               {getDeleteBlockMessage(profile.id) ? (
                 <p className={profile.id === activeProfileId
-                  ? "mt-3 rounded-xl bg-white/10 px-3 py-2 text-xs leading-5 text-white/70"
+                  ? "mt-3 rounded-xl bg-stone-50 px-3 py-2 text-xs leading-5 text-stone-500"
                   : "mt-3 rounded-xl bg-stone-50 px-3 py-2 text-xs leading-5 text-stone-500"}
                 >
                   {getDeleteBlockMessage(profile.id)}
@@ -662,11 +664,11 @@ export default function MyPage() {
               ) : null}
               {pendingDeleteProfileId === profile.id ? (
                 <div className={profile.id === activeProfileId
-                  ? "mt-3 rounded-2xl border border-white/30 bg-white/10 p-4"
+                  ? "mt-3 rounded-2xl border border-[#dfd3bd] bg-[#fbf7ef] p-4"
                   : "mt-3 rounded-2xl border border-red-200 bg-red-50 p-4"}
                 >
                   <p className={profile.id === activeProfileId
-                    ? "text-xs leading-6 text-white"
+                    ? "text-xs leading-6 text-stone-700"
                     : "text-xs leading-6 text-red-800"}
                   >
                     프로필을 삭제하면 저장된 무료 분석 결과도 함께 삭제되며 복구할 수 없습니다.
@@ -736,6 +738,7 @@ export default function MyPage() {
           {isSigningOut ? "로그아웃 중..." : "로그아웃"}
         </button>
       </div>
-    </main>
+      </main>
+    </AppShell>
   );
 }

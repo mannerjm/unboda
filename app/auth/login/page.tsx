@@ -125,6 +125,13 @@ function LoginPageContent() {
             </button>
           </form>
 
+          <Link
+            href={`/auth/forgot-password?returnTo=${encodeURIComponent(safeReturnTo)}`}
+            className="mt-4 block text-center text-sm font-semibold text-stone-600 underline"
+          >
+            비밀번호를 잊으셨나요?
+          </Link>
+
           <div className="mt-6 border-t border-stone-200 pt-6 text-center">
             <p className="text-sm text-stone-600">
               아직 계정이 없으신가요?

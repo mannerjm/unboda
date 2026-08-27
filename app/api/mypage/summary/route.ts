@@ -6,12 +6,14 @@ import {
 } from "@/app/lib/freeAnalysisResults/server";
 import { listProfileDeleteBlockers, listUserProfiles } from "@/app/lib/profiles/server";
 import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
+import { createEvaluationContext } from "@/app/lib/evaluationContext";
 
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
 
   try {
+    const evaluationContext = createEvaluationContext();
     const [profiles, summaries, deleteBlockers, paidAnalysis] = await Promise.all([
       listUserProfiles(user.id),
       listUserFreeAnalysisResults(user.id),
@@ -20,7 +22,7 @@ export async function GET() {
     ]);
     const freeAnalysisResults = profiles.map((profile) => ({
       profileId: profile.id,
-      status: resolveProfileFreeAnalysisStatus(profile, summaries),
+      status: resolveProfileFreeAnalysisStatus(profile, summaries, evaluationContext),
     }));
     // UX hint only: DELETE /api/profiles/[profileId] re-checks the same rules.
     const profileDeletability = profiles.map((profile) => {

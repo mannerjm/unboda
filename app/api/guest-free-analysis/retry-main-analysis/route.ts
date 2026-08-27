@@ -8,6 +8,8 @@ import {
   completeGuestMainAnalysisRetry,
 } from "@/app/lib/guestFreeAnalyses/server";
 import { regenerateMainAnalysis } from "@/app/lib/freeAnalysisPipeline/server";
+import { createEvaluationContext } from "@/app/lib/evaluationContext";
+import { hasCurrentEvaluationPeriod } from "@/app/lib/freeAnalysisResults/server";
 
 export async function POST() {
   const cookieStore = await cookies();
@@ -18,6 +20,10 @@ export async function POST() {
     const record = await getGuestFreeAnalysis(credential.analysisId, hashGuestAnalysisSecret(credential.secret));
     if (!record || !isUsableGuestFreeAnalysis(record)) {
       return NextResponse.json({ error: "비회원 분석 결과를 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    if (!hasCurrentEvaluationPeriod(record.content, createEvaluationContext())) {
+      return NextResponse.json({ error: "현재 기간의 분석을 먼저 다시 생성해 주세요.", code: "STALE_EVALUATION_PERIOD" }, { status: 409 });
     }
 
     if (record.content?.generationMeta?.mainAnalysisStatus !== "failed") {

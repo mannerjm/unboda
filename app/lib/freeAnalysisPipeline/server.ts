@@ -10,11 +10,14 @@ import { buildMainAnalysisPrompt } from "../mainAnalysisPrompt";
 import { buildMainAnalysisCompactFacts } from "../mainAnalysisCompactFacts";
 import { generateMainAnalysis, generateRecommendationExplanation, type MainAnalysisGenerationResult } from "../analysisAIService";
 import type { AnalyzeProfileMetadata, AnalyzeSuccessResponse } from "../analyzeApiTypes";
+import { createEvaluationContext } from "../evaluationContext";
 
 export async function buildFreeAnalysisResponse(input: {
   profile: AnalyzeProfileMetadata;
   includePremiumAnalysis?: boolean;
+  evaluationDate?: string;
 }): Promise<AnalyzeSuccessResponse> {
+  const evaluationContext = createEvaluationContext(input.evaluationDate);
   const isLeapMonth = input.profile.isLeapMonth ? "윤달" : "평달";
   const saju = getSaju(
     input.profile.birthDate,
@@ -22,6 +25,7 @@ export async function buildFreeAnalysisResponse(input: {
     input.profile.calendarType,
     isLeapMonth,
     input.profile.gender,
+    evaluationContext.evaluationDate,
   );
   const freeAnalysis = buildFreeAnalysis(saju);
   const compactFacts = buildMainAnalysisCompactFacts({ saju, freeAnalysis });
@@ -32,6 +36,7 @@ export async function buildFreeAnalysisResponse(input: {
     elementRelations: recommendationAnalysis.elementRelations,
     fortuneFlow: recommendationAnalysis.fortuneFlowAnalysis,
     elementAnalysis: recommendationAnalysis.elementAnalysis,
+    evaluationContext,
   });
 
   if (!productRecommendations.engineResult) {

@@ -9,6 +9,8 @@ import {
 } from "@/app/lib/freeAnalysisResults/server";
 import { regenerateMainAnalysis } from "@/app/lib/freeAnalysisPipeline/server";
 import { isProfileId } from "@/app/lib/profiles/types";
+import { createEvaluationContext } from "@/app/lib/evaluationContext";
+import { hasCurrentEvaluationPeriod } from "@/app/lib/freeAnalysisResults/server";
 
 type RouteContext = {
   params: Promise<{ profileId: string }>;
@@ -30,6 +32,10 @@ export async function POST(_request: Request, context: RouteContext) {
     const cached = await getFreeAnalysisResult(user.id, profile.id);
     if (!cached || cached.profileFingerprint !== getProfileFingerprint(profile)) {
       return NextResponse.json({ error: "저장된 무료 분석 결과가 없습니다." }, { status: 404 });
+    }
+
+    if (!hasCurrentEvaluationPeriod(cached.content, createEvaluationContext())) {
+      return NextResponse.json({ error: "현재 기간의 분석을 먼저 다시 생성해 주세요.", code: "STALE_EVALUATION_PERIOD" }, { status: 409 });
     }
 
     if (cached.content?.generationMeta?.mainAnalysisStatus !== "failed") {

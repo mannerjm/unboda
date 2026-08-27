@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { ensureAccountLifecycle } from "@/app/lib/accounts/server";
 import { resolvePurchasableProduct } from "@/app/lib/purchases/products";
 import { createPendingOrder } from "@/app/lib/purchases/server";
 import { getUserProfile } from "@/app/lib/profiles/server";
@@ -14,6 +15,11 @@ export async function POST(request: Request) {
       { error: "로그인이 필요합니다." },
       { status: 401 },
     );
+  }
+
+  const account = await ensureAccountLifecycle(user.id);
+  if (account.status !== "ACTIVE") {
+    return NextResponse.json({ error: "계정을 사용할 수 없습니다." }, { status: 403 });
   }
 
   let body: unknown;

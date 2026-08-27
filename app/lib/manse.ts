@@ -14,6 +14,7 @@ import { calculateDaeun, type Gender } from "./daeun";
 import { calculateSeun } from "./seun";
 import { analyzeFullFortuneFlow } from "./fortuneFlowAnalysis";
 import type { Element } from "./elements";
+import { createEvaluationContext, type EvaluationContext } from "./evaluationContext";
 
 const branchHiddenStem: Record<string, string> = {
   子: "癸",
@@ -274,8 +275,10 @@ export function getSaju(
   birthTime: string,
   calendarType: "양력" | "음력",
   isLeapMonth: "평달" | "윤달",
-  gender: Gender
+  gender: Gender,
+  evaluationDate?: string,
 ) {
+  const evaluationContext = createEvaluationContext(evaluationDate);
   const [year, month, day] = birthDate.split("-").map(Number);
   const [hour, minute] = birthTime.split(":").map(Number);
 
@@ -489,7 +492,7 @@ const daeunAnalysis = calculateDaeun(
 );
 const seunAnalysis = calculateSeun(
   solarYear,
-  new Date().getFullYear(),
+  evaluationContext.evaluationYear,
    saju.dayPillar[0],
   10
 );
@@ -497,12 +500,14 @@ const seunAnalysis = calculateSeun(
 const currentDaeun = daeunAnalysis.daeuns.find((daeun) => {
   const start = daeunAnalysis.startAge + (daeun.order - 1) * 10;
   const end = start + 9;
-  const currentAge = new Date().getFullYear() - solarYear + 1;
+  const currentAge = evaluationContext.evaluationYear - solarYear + 1;
 
   return currentAge >= start && currentAge <= end;
 });
 
-const currentSeun = seunAnalysis.items[0];
+const currentSeun = seunAnalysis.items.find(
+  (item) => item.year === evaluationContext.evaluationYear,
+);
 
 const fortuneFlowAnalysis =
   currentDaeun && currentSeun
@@ -532,12 +537,13 @@ const fortuneFlowAnalysis =
       })
     : null;
 
-   console.log(
+  console.log(
   "FORTUNE_FLOW_ANALYSIS:",
   JSON.stringify(fortuneFlowAnalysis, null, 2)
 ); 
 
   return {
+    evaluationContext,
      solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
     solarDay
   ).padStart(2, "0")}`,

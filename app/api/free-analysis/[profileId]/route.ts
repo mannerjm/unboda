@@ -6,6 +6,8 @@ import {
   getProfileFingerprint,
 } from "@/app/lib/freeAnalysisResults/server";
 import { isProfileId } from "@/app/lib/profiles/types";
+import { createEvaluationContext } from "@/app/lib/evaluationContext";
+import { hasCurrentEvaluationPeriod } from "@/app/lib/freeAnalysisResults/server";
 
 type RouteContext = {
   params: Promise<{ profileId: string }>;
@@ -29,12 +31,29 @@ export async function GET(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "저장된 무료 분석 결과가 없습니다." }, { status: 404 });
     }
 
-    if (cached.status === "generating") {
-      return NextResponse.json({ status: "generating" }, { status: 202 });
+    if (!cached.content) {
+      if (cached.status === "generating") return NextResponse.json({ status: "generating" }, { status: 202 });
+      return NextResponse.json({ error: "저장된 무료 분석 결과가 없습니다." }, { status: 404 });
     }
 
-    if (cached.status !== "completed" || !cached.content) {
-      return NextResponse.json({ error: "저장된 무료 분석 결과가 없습니다." }, { status: 404 });
+    const currentContext = createEvaluationContext();
+    if (!hasCurrentEvaluationPeriod(cached.content, currentContext)) {
+      return NextResponse.json({
+        analysis: cached.content,
+        status: cached.status === "generating" ? "generating" : "stale",
+        freshness: "STALE",
+        storedEvaluationContext: cached.content.saju.evaluationContext ?? null,
+        currentEvaluationContext: currentContext,
+        refreshAvailable: cached.status !== "generating",
+      }, { status: 200 });
+    }
+
+    if (cached.status === "generating") {
+      return NextResponse.json({ analysis: cached.content, status: "generating", freshness: "CURRENT", refreshAvailable: false }, { status: 200 });
+    }
+
+    if (cached.status !== "completed") {
+      return NextResponse.json({ analysis: cached.content, status: cached.status, freshness: "CURRENT", refreshAvailable: true }, { status: 200 });
     }
 
     return NextResponse.json({ analysis: cached.content });

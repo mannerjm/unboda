@@ -39,6 +39,27 @@ export const CALIBRATION_PRODUCT_SET: readonly CalibrationProduct[] = [
     failureMode: "generic career advice without direct decision anchor",
   },
   {
+    productId: "career",
+    tier: "CORE",
+    domain: "career",
+    whySelected: "광범위한 커리어 운영 구조와 책임·과부하·우선순위 재배분을 검증한다.",
+    failureMode: "broad career output that collapses into generic advice",
+  },
+  {
+    productId: "study-learning-strategy",
+    tier: "CORE",
+    domain: "study",
+    whySelected: "학습 입력·정리·회상·적용을 종합하는 broad STUDY 구조를 검증한다.",
+    failureMode: "study output that collapses into generic study advice",
+  },
+  {
+    productId: "money-leak-risk",
+    tier: "CORE",
+    domain: "money",
+    whySelected: "지출·계약·공동 부담의 손실 노출과 통제 경계를 검증한다.",
+    failureMode: "money output that repeats income-stability advice without loss controls",
+  },
+  {
     productId: "money-saving-discipline",
     tier: "ENTRY",
     domain: "money",
@@ -67,6 +88,13 @@ export const CALIBRATION_PRODUCT_SET: readonly CalibrationProduct[] = [
     failureMode: "relationship output that confuses current status with future ideal",
   },
   {
+    productId: "relationship-boundary",
+    tier: "DEEP",
+    domain: "relationship",
+    whySelected: "관계의 거리·역할·허용·거절과 감정 노동 경계를 검증한다.",
+    failureMode: "boundary output that invents relationship facts or collapses into generic advice",
+  },
+  {
     productId: "health-stress-regulation",
     tier: "DEEP",
     domain: "health",
@@ -74,11 +102,32 @@ export const CALIBRATION_PRODUCT_SET: readonly CalibrationProduct[] = [
     failureMode: "unsafe certainty or medical overreach",
   },
   {
+    productId: "health-burnout-risk",
+    tier: "DEEP",
+    domain: "health",
+    whySelected: "누적 부하·회복 저하·기능 신호와 health-safe reduction criteria를 검증한다.",
+    failureMode: "burnout output that becomes medical diagnosis or generic wellness advice",
+  },
+  {
     productId: "business-startup-readiness",
     tier: "DEEP",
     domain: "business",
     whySelected: "사업 가설·역할·용량 검증을 통해 현실적 운영 경계를 확인한다.",
     failureMode: "business output that treats launch as certainty rather than proof-driven pilot",
+  },
+  {
+    productId: "business-team-management",
+    tier: "DEEP",
+    domain: "business",
+    whySelected: "팀의 결정권·위임·인계·책임 병목과 accountability rhythm을 검증한다.",
+    failureMode: "business team output that collapses into generic leadership advice",
+  },
+  {
+    productId: "career-leadership-readiness",
+    tier: "DEEP",
+    domain: "career",
+    whySelected: "개인 리더십 전환의 권한·위임·피드백 실험과 personal dependence를 검증한다.",
+    failureMode: "leadership output that assumes a team system instead of individual readiness",
   },
   {
     productId: "yearly-current",
@@ -93,6 +142,13 @@ export const CALIBRATION_PRODUCT_SET: readonly CalibrationProduct[] = [
     domain: "period",
     whySelected: "다음 해 준비와 전환 조건을 검증한다.",
     failureMode: "future-year output with weak comparative timing logic",
+  },
+  {
+    productId: "annual-3years",
+    tier: "LONG_RANGE",
+    domain: "period",
+    whySelected: "3개 연도의 차이·순서·누적 전환을 검증하는 multi-year PERIOD 구조를 검증한다.",
+    failureMode: "multi-year output that repeats yearly prose without sequencing depth",
   },
   {
     productId: "lifetime-overview",
@@ -158,9 +214,9 @@ export function validateCalibrationSet(): void {
   }
 
   assert((tierCounts.get("ENTRY") ?? 0) === 2, "ENTRY coverage must be exactly 2 products");
-  assert((tierCounts.get("CORE") ?? 0) === 2, "CORE coverage must be exactly 2 products");
-  assert((tierCounts.get("DEEP") ?? 0) === 3, "DEEP coverage must be exactly 3 products");
-  assert((tierCounts.get("LONG_RANGE") ?? 0) === 2, "LONG_RANGE coverage must be exactly 2 products");
+  assert((tierCounts.get("CORE") ?? 0) === 5, "CORE coverage must be exactly 5 products");
+  assert((tierCounts.get("DEEP") ?? 0) === 7, "DEEP coverage must be exactly 7 products");
+  assert((tierCounts.get("LONG_RANGE") ?? 0) === 3, "LONG_RANGE coverage must be exactly 3 products");
   assert((tierCounts.get("SIGNATURE") ?? 0) === 1, "SIGNATURE coverage must be exactly 1 product");
 
   const coveredDomains = new Set(CALIBRATION_PRODUCT_SET.map((item) => item.domain));

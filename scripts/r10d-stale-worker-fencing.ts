@@ -79,7 +79,7 @@ async function main(): Promise<void> {
     const staleRetry = await updateRefundRetryForClaim({ orderId, claimToken: tokenA, retryCount: 99, nextRetryAt: new Date(0).toISOString() });
     const staleEscalation = await escalateRefundForClaim({ orderId, claimToken: tokenA });
     const staleFinal = await finalizeRefundForClaim({ orderId, claimToken: tokenA });
-    const staleRevoke = await revokeEntitlementForRefund({ userId, profileId, productId: "money-leak-risk", reason: "stale-worker", orderId, claimToken: tokenA });
+    const staleRevoke = await revokeEntitlementForRefund({ userId, profileId, productId: "money-leak-risk", orderId, claimToken: tokenA });
     assert(!staleEvidence && !staleRetry && !staleEscalation && !staleFinal && !staleRevoke, "all stale Worker A mutations must be rejected/no-op");
     const afterStale = await readWorkflow(orderId);
     if (!afterStale) throw new Error("R10D workflow disappeared");

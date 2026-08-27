@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { calculateWeightedElements } from "../lib/elements";
 import { createContext, startTransition, Suspense, useContext, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -17,6 +18,7 @@ import {
   getPremiumCategoryLabel,
   getPremiumProduct,
 } from "@/app/lib/premiumProductRegistry";
+import { getProductPricing } from "@/app/lib/productPricing";
 import type {
   AnalysisRecommendationOutput,
 } from "@/app/lib/analysisRecommendationOutput";
@@ -26,7 +28,7 @@ import {
   type FreeAnalysisAIInterpretation,
 } from "@/app/lib/freeAnalysisAIInterpretation";
 import ProfileSelector from "@/app/components/ProfileSelector";
-import PremiumCatalogSection from "@/app/components/PremiumCatalogSection";
+import AppShell from "@/app/components/AppShell";
 
 type SajuResult = ReturnType<typeof getSaju>;
 
@@ -136,6 +138,12 @@ const fiveElementMap: Record<string, FiveElement> = {
   酉: "metal",
   子: "water",
   亥: "water",
+
+  목: "wood",
+  화: "fire",
+  토: "earth",
+  금: "metal",
+  수: "water",
 };
 
 const fiveElementStyles: Record<
@@ -144,32 +152,56 @@ const fiveElementStyles: Record<
     label: string;
     normal: string;
     highlighted: string;
+    badge: string;
+    bar: string;
+    barColor: string;
+    tint: string;
   }
 > = {
   wood: {
     label: "목",
     normal: "text-emerald-700",
     highlighted: "text-emerald-300",
+    badge: "bg-emerald-100 text-emerald-800",
+    bar: "bg-emerald-600",
+    barColor: "#059669",
+    tint: "border-emerald-100 bg-emerald-50/70",
   },
   fire: {
     label: "화",
     normal: "text-red-600",
     highlighted: "text-red-300",
+    badge: "bg-red-100 text-red-700",
+    bar: "bg-red-500",
+    barColor: "#ef4444",
+    tint: "border-red-100 bg-red-50/70",
   },
   earth: {
     label: "토",
     normal: "text-amber-700",
     highlighted: "text-amber-300",
+    badge: "bg-amber-100 text-amber-800",
+    bar: "bg-amber-500",
+    barColor: "#f59e0b",
+    tint: "border-amber-100 bg-amber-50/70",
   },
   metal: {
     label: "금",
     normal: "text-slate-600",
     highlighted: "text-slate-200",
+    badge: "bg-slate-200 text-slate-700",
+    bar: "bg-slate-500",
+    barColor: "#64748b",
+    tint: "border-slate-200 bg-slate-50/80",
   },
   water: {
     label: "수",
     normal: "text-blue-700",
     highlighted: "text-sky-300",
+    badge: "bg-blue-100 text-blue-800",
+    bar: "bg-blue-600",
+    barColor: "#2563eb",
+    tint: "border-blue-100 bg-blue-50/70",
   },
 };
 
@@ -183,6 +215,10 @@ function getFiveElementStyle(
     return {
       label: "",
       textClass: highlighted ? "text-white" : "text-stone-900",
+      badgeClass: "bg-stone-100 text-stone-800",
+      barClass: "",
+      barColor: "#52525b",
+      tintClass: "border-stone-200 bg-stone-50",
     };
   }
 
@@ -191,7 +227,23 @@ function getFiveElementStyle(
   return {
     label: style.label,
     textClass: highlighted ? style.highlighted : style.normal,
+    badgeClass: style.badge,
+    barClass: style.bar,
+    barColor: style.barColor,
+    tintClass: style.tint,
   };
+}
+
+const fiveElementLabelCharacters: Record<string, string> = {
+  목: "갑",
+  화: "병",
+  토: "무",
+  금: "경",
+  수: "임",
+};
+
+function getFiveElementLabelStyle(label: string) {
+  return getFiveElementStyle(fiveElementLabelCharacters[label] ?? label);
 }
 function ganjiToHanja(ganji: string) {
   const stemMap: Record<string, string> = {
@@ -255,14 +307,18 @@ const [selectedPaidAnalysisId, setSelectedPaidAnalysisId] =
 const [profileSelectionProductId, setProfileSelectionProductId] =
   useState<string | null>(null);
 
-const currentProfileId = searchParams.get("profileId") ?? providedResult?.analysis.profile.id;
+const currentProfileId = searchParams.get("profileId") ?? providedResult?.analysis.profile.id ?? "";
 const profileLabel = profile?.label?.trim() || "분석 대상";
 const birthDate = profile ? formatProfileBirthDate(profile.birthDate) : "입력 없음";
 const birthTime = profile?.birthTime ?? "입력 없음";
 const gender = profile?.gender ?? "입력 없음";
 
 const conversionGuidance =
-  recommendationExplanation?.conversionGuidance ?? null;
+  recommendationExplanation?.conversionGuidance ?? {
+    whyNow: "",
+    whatYouWillLearn: "",
+    riskOfDelay: "",
+  };
 
 const aiInterpretation: FreeAnalysisAIInterpretation =
   parseFreeAnalysisAIInterpretation(aiResult);
@@ -448,6 +504,10 @@ const elementAnalysis =
   );
 const strengthAnalysis =
   freeAnalysis?.strengthAnalysis ?? sajuData.strengthAnalysis;
+const customerStrengthSummary = strengthAnalysis.summary.replace(
+  /\s*현재\s+v\d+\s+기준으로\s+[^.]+범주입니다\.\s*$/i,
+  "",
+);
 const elementInterpretation =
   freeAnalysis?.elementInterpretation ?? sajuData.elementInterpretation;
 const yongshinAnalysis =
@@ -466,6 +526,14 @@ const elementItems = [
   { key: "수", label: "수" },
 ] as const;
 
+const elementBarColors: Record<(typeof elementItems)[number]["key"], string> = {
+  목: "#059669",
+  화: "#ef4444",
+  토: "#f59e0b",
+  금: "#64748b",
+  수: "#2563eb",
+};
+
 const recommendedPaidAnalysisProducts =
   productRecommendations?.recommendations
     .map((recommendation) => getPremiumProduct(recommendation.productId))
@@ -480,7 +548,7 @@ const displayedPaidAnalysisProducts =
 
 const selectedPaidAnalysis = displayedPaidAnalysisProducts.find(
   (product) => product.id === selectedPaidAnalysisId
-);
+)!;
 
 function handlePaidAnalysisEntry(productId: string) {
   if (providedResult?.onProductSelected) {
@@ -529,8 +597,9 @@ async function retryMainAnalysis() {
 }
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
-      <div className="mx-auto w-full max-w-3xl">
+    <AppShell activeProfileId={currentProfileId}>
+      <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
+        <div className="mx-auto w-full max-w-6xl">
         <header className="mb-10 text-center">
           <p className="mb-4 text-xs tracking-[0.35em] text-stone-500">
             UNBODA AI REPORT
@@ -831,7 +900,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
   </p>
 </section>
 {daeunAnalysis && (
-  <div className="mt-6 rounded-3xl border border-stone-200 bg-white p-6">
+  <div className="mt-5 rounded-3xl border border-stone-200 bg-white p-5">
     <p className="text-sm tracking-[0.25em] text-stone-500">
       DAEUN ANALYSIS
     </p>
@@ -840,8 +909,8 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
       대운 분석
     </h2>
 
-    <div className="mt-6 grid grid-cols-2 gap-4">
-      <div className="rounded-2xl bg-stone-50 p-5">
+    <div className="mt-5 grid grid-cols-2 gap-3">
+      <div className="rounded-2xl bg-stone-50 p-4">
         <p className="text-sm text-stone-500">
           대운 방향
         </p>
@@ -850,7 +919,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
         </p>
       </div>
 
-      <div className="rounded-2xl bg-stone-50 p-5">
+      <div className="rounded-2xl bg-stone-50 p-4">
         <p className="text-sm text-stone-500">
           대운 시작
         </p>
@@ -860,8 +929,8 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
       </div>
     </div>
 
-    <div className="mt-6">
-  <div className="grid grid-cols-10 gap-2">
+    <div className="mt-5">
+    <div className="grid grid-cols-10 gap-1.5">
     {[...daeunAnalysis.daeuns]
       .reverse()
       .map((daeun: { order: number; ganji: string }) => {
@@ -874,19 +943,19 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
   className={`flex min-w-0 cursor-pointer flex-col items-center rounded-2xl px-2 py-4 transition ${
     effectiveDaeunOrder === daeun.order
       ? "bg-stone-900 text-white"
-      : "bg-stone-50"
+              : "bg-stone-50"
   }`}
 >
-            <span className="text-xs font-semibold text-stone-600">
+            <span className={`text-xs font-semibold ${effectiveDaeunOrder === daeun.order ? "text-white/70" : "text-stone-600"}`}>
               {daeun.order}대운
             </span>
 
             <div className="mt-3 flex flex-col items-center text-2xl font-bold leading-none">
-              <span>{hanja[0]}</span>
-              <span className="mt-1">{hanja[1]}</span>
+              <span className={getFiveElementStyle(hanja[0], effectiveDaeunOrder === daeun.order).textClass}>{hanja[0]}</span>
+              <span className={`mt-1 ${getFiveElementStyle(hanja[1], effectiveDaeunOrder === daeun.order).textClass}`}>{hanja[1]}</span>
             </div>
 
-            <span className="mt-3 text-xs text-stone-500">
+            <span className={`mt-3 text-xs ${effectiveDaeunOrder === daeun.order ? "text-white/60" : "text-stone-500"}`}>
               {daeunAnalysis.startAge +
   (daeun.order - 1) * 10}
               세
@@ -899,7 +968,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
 </div>
 )}
 {displayedSeun && (
-  <div className="mt-6 rounded-3xl border border-stone-200 bg-white p-6">
+  <div className="mt-5 rounded-3xl border border-stone-200 bg-white p-5">
     <p className="text-sm tracking-[0.25em] text-stone-500">
       SEUN ANALYSIS
     </p>
@@ -908,10 +977,8 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
       세운 분석
     </h2>
 
-    <div className="mt-6 grid grid-cols-10 gap-2">
-      {[...displayedSeun.items]
-  .reverse()
-  .map(
+    <div className="mt-5 grid grid-cols-10 gap-1.5">
+      {[...displayedSeun.items].reverse().map(
         (item: { year: number; age: number; ganji: string }) => {
           const hanja = ganjiToHanja(item.ganji);
 
@@ -925,8 +992,8 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
               </span>
 
               <div className="mt-3 flex flex-col items-center text-2xl font-bold leading-none">
-                <span>{hanja[0]}</span>
-                <span className="mt-1">{hanja[1]}</span>
+                <span className={getFiveElementStyle(hanja[0]).textClass}>{hanja[0]}</span>
+                <span className={`mt-1 ${getFiveElementStyle(hanja[1]).textClass}`}>{hanja[1]}</span>
               </div>
 
               <span className="mt-3 text-xs text-stone-500">
@@ -940,15 +1007,15 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
   </div>
 )}
 
-<section className="mt-7 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
-  <div className="mb-7 flex items-end justify-between gap-4">
+<section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
+  <div className="mb-5 flex items-end justify-between gap-4">
     <div>
       <p className="mb-2 text-xs tracking-[0.3em] text-stone-500">
         FIVE ELEMENTS
       </p>
 
-      <h2 className="text-2xl font-bold text-stone-900">
-        오행 분석
+        <h2 className="text-2xl font-bold text-stone-900">
+          오행 분석 결과
       </h2>
     </div>
 
@@ -957,7 +1024,9 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
 </p>
   </div>
 
-  <div className="space-y-5">
+  <div className="grid gap-7 lg:grid-cols-[0.9fr_1.1fr] lg:gap-8">
+    <div>
+  <div className="space-y-4">
     {elementItems.map((item) => {
       const score = elementAnalysis.counts[item.key];
       const percentage =
@@ -967,7 +1036,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
         <div key={item.key}>
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-sm font-bold text-stone-800">
+              <span className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${getFiveElementLabelStyle(item.key).badgeClass}`}>
                 {item.label}
               </span>
 
@@ -983,9 +1052,10 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
 
           <div className="h-3 overflow-hidden rounded-full bg-stone-100">
             <div
-              className="h-full rounded-full bg-stone-800 transition-all duration-500"
+              className="h-full rounded-full transition-all duration-500"
               style={{
                 width: `${Math.min(percentage, 100)}%`,
+                backgroundColor: elementBarColors[item.key],
               }}
             />
           </div>
@@ -994,8 +1064,8 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
     })}
   </div>
 
-  <div className="mt-8 grid gap-4 sm:grid-cols-2">
-    <div className="rounded-2xl bg-stone-50 p-5">
+  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+    <div className="rounded-2xl bg-stone-50 p-4">
       <p className="mb-2 text-xs text-stone-500">
         가장 강한 오행
       </p>
@@ -1005,7 +1075,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
       </p>
     </div>
 
-    <div className="rounded-2xl bg-stone-50 p-5">
+    <div className="rounded-2xl bg-stone-50 p-4">
       <p className="mb-2 text-xs text-stone-500">
         가장 약한 오행
       </p>
@@ -1016,12 +1086,55 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
     </div>
   </div>
 
-  <p className="mt-6 text-center text-xs leading-6 text-stone-500">
-    현재 결과는 천간·지지·지장간 가중치를 반영한
-    오행 점수 v1입니다.
-  </p>
+    </div>
+    <div className="border-t border-stone-200 pt-5 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+    <p className="mb-4 text-xs font-semibold tracking-[0.2em] text-stone-500">오행 해석</p>
+    <div className="space-y-2">
+      {elementInterpretation.items.map((item: { element: string; level: string; description: string }) => (
+        <div key={item.element} className={`rounded-xl border p-3 ${getFiveElementLabelStyle(item.element).tintClass}`}>
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold text-stone-900">{item.element}</h3>
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-stone-600">{item.level}</span>
+          </div>
+          <p className="mt-1.5 text-sm leading-6 text-stone-700">{item.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+  </div>
+  <div className="mt-7 border-t border-stone-200 pt-5">
+    <div className="mb-4">
+      <p className="text-xs tracking-[0.25em] text-stone-500">ELEMENT RELATIONS</p>
+      <h3 className="mt-1 text-xl font-bold text-stone-900">오행 상생·상극 분석</h3>
+    </div>
+    <p className="mb-5 text-sm leading-6 text-stone-600">{elementRelations.summary}</p>
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {elementRelations.highlights.map(
+        (relation: { source: string; target: string; type: string; strength: string; description: string }, index: number) => {
+          const sourceStyle = getFiveElementLabelStyle(relation.source);
+          const targetStyle = getFiveElementLabelStyle(relation.target);
+          return (
+            <div key={`${relation.source}-${relation.target}-${relation.type}-${index}`} className="rounded-2xl bg-stone-50 p-4">
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-semibold text-stone-900">
+                  <span className={sourceStyle.textClass}>{relation.source}</span>
+                  <span className="mx-1 text-stone-400">→</span>
+                  <span className={targetStyle.textClass}>{relation.target}</span>
+                </p>
+                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-stone-600">
+                  {relation.type} · {relation.strength}
+                </span>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-stone-600">{relation.description}</p>
+            </div>
+          );
+        }
+      )}
+    </div>
+  </div>
 </section>
-<section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+<div className="mt-6 grid items-start gap-5 lg:grid-cols-2">
+<section className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
   <div className="mb-7 flex items-center gap-3">
     <div className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-900 text-lg text-white">
       ⚖
@@ -1033,12 +1146,12 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
       </p>
 
       <h2 className="mt-1 text-2xl font-bold">
-        신강·신약 참고 지표
+        신강·신약 분석
       </h2>
     </div>
   </div>
 
-  <div className="rounded-2xl bg-stone-50 p-6">
+  <div className="rounded-2xl bg-stone-50 p-5">
     <p className="text-lg font-semibold">
       판정 :
       <span className="ml-2 text-indigo-600">
@@ -1047,11 +1160,11 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
     </p>
 
     <p className="mt-3 text-stone-700">
-      {strengthAnalysis.summary}
+      {customerStrengthSummary}
     </p>
   </div>
 </section>
-<section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+<section className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
   <div className="mb-6">
     <p className="text-xs tracking-[0.25em] text-stone-500">
       YONGSHIN ANALYSIS
@@ -1062,8 +1175,8 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
     </h2>
   </div>
 
-  <div className="space-y-4">
-    <div className="rounded-2xl bg-stone-50 p-5">
+  <div className="space-y-3">
+    <div className="rounded-2xl bg-stone-50 p-4">
       <p className="font-semibold">
         주 용신
       </p>
@@ -1073,7 +1186,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
       </p>
     </div>
 
-    <div className="rounded-2xl bg-stone-50 p-5">
+    <div className="rounded-2xl bg-stone-50 p-4">
       <p className="font-semibold">
         보조 용신
       </p>
@@ -1085,56 +1198,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
       </p>
     </div>
 
-    <div className="rounded-2xl bg-stone-50 p-5">
-  <p className="font-semibold">
-    용신 점수
-  </p>
-
-  <div className="mt-3 space-y-2 text-sm text-stone-700">
-    {Object.entries(yongshinAnalysis.scores)
-      .sort(([, a], [, b]) => b - a)
-      .map(([element, score]) => {
-  const detail =
-  yongshinAnalysis.scoreDetails[
-    element as keyof typeof yongshinAnalysis.scoreDetails
-  ];
-
-  return (
-    <div
-      key={element}
-      className="rounded-xl border border-stone-200 bg-white p-3"
-    >
-      <div className="flex items-center justify-between font-semibold">
-        <span>{element}</span>
-        <div className="text-right">
-  <div className="font-semibold">
-    보완 우선도{" "}
-{yongshinAnalysis.normalizedScores[
-  element as keyof typeof yongshinAnalysis.normalizedScores
-].toFixed(1)}
-
-  </div>
-  <div className="text-xs text-stone-400">
-    원점수 {score.toFixed(1)}
-  </div>
-</div>
-      </div>
-
-      <div className="mt-2 grid grid-cols-2 gap-1 text-xs text-stone-500">
-  <span>신강·신약: {detail.strength.toFixed(1)}</span>
-  <span>균형 보정: {detail.balance.toFixed(1)}</span>
-  <span>계절 보정: {detail.season.toFixed(1)}</span>
-  <span>조후 보정: {detail.climate.toFixed(1)}</span>
-  <span>통관 보정: {detail.passage.toFixed(1)}</span>
-  <span>과다 보정: {detail.excess.toFixed(1)}</span>
-</div>
-    </div>
-  );
-})}
-  </div>
-</div>
-
-    <div className="rounded-2xl bg-stone-50 p-5">
+    <div className="rounded-2xl bg-stone-50 p-4">
       <p className="font-semibold">
         판단 근거
       </p>
@@ -1145,7 +1209,8 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
     </div>
   </div>
 </section>
-<section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+</div>
+<section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
   <div className="mb-6">
     <p className="text-xs tracking-[0.25em] text-stone-500">
       GYEOKGUK ANALYSIS
@@ -1156,8 +1221,8 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
     </h2>
   </div>
 
-  <div className="space-y-4">
-    <div className="rounded-2xl bg-stone-50 p-5">
+  <div className="grid gap-3 lg:grid-cols-2">
+    <div className="rounded-2xl bg-stone-50 p-4">
       <p className="font-semibold">
         주 격국
       </p>
@@ -1167,7 +1232,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
       </p>
     </div>
 
-    <div className="rounded-2xl bg-stone-50 p-5">
+    <div className="rounded-2xl bg-stone-50 p-4">
       <p className="font-semibold">
         후보 격국
       </p>
@@ -1179,7 +1244,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
       </p>
     </div>
 
-    <div className="rounded-2xl bg-stone-50 p-5">
+    <div className="rounded-2xl bg-stone-50 p-4 lg:col-span-2">
       <p className="font-semibold">
         판단 근거
       </p>
@@ -1191,97 +1256,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
   </div>
 </section>
 
-<section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
-  <div className="mb-6">
-    <p className="text-xs tracking-[0.25em] text-stone-500">
-      FIVE ELEMENT INTERPRETATION
-    </p>
-
-    <h2 className="mt-1 text-2xl font-bold">
-      오행 해석
-    </h2>
-  </div>
-
-  <div className="space-y-5">
-    {elementInterpretation.items.map(
-  (
-    item: {
-      element: string;
-      level: string;
-      description: string;
-    }
-  ) => (
-      <div
-        key={item.element}
-        className="rounded-2xl bg-stone-50 p-5"
-      >
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">
-            {item.element}
-          </h3>
-
-          <span className="rounded-full bg-stone-900 px-3 py-1 text-sm text-white">
-            {item.level}
-          </span>
-        </div>
-
-        <p className="mt-3 leading-7 text-stone-700">
-          {item.description}
-        </p>
-      </div>
-    ))}
-  </div>
-</section>
-<section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
-  <div className="mb-6">
-    <p className="text-xs tracking-[0.25em] text-stone-500">
-      ELEMENT RELATIONS
-    </p>
-
-    <h2 className="mt-1 text-2xl font-bold">
-      오행 상생·상극
-    </h2>
-  </div>
-
-  <p className="mb-6 text-sm leading-7 text-stone-600">
-    {elementRelations.summary}
-  </p>
-
-  <div className="grid gap-4 sm:grid-cols-2">
-    {elementRelations.highlights.map(
-      (
-        relation: {
-          source: string;
-          target: string;
-          type: string;
-          strength: string;
-          description: string;
-        },
-        index: number
-      ) => (
-        <div
-          key={`${relation.source}-${relation.target}-${relation.type}-${index}`}
-          className="rounded-2xl bg-stone-50 p-5"
-        >
-          <div className="flex items-center justify-between gap-3">
-            <p className="font-semibold text-stone-900">
-              {relation.source} → {relation.target}
-            </p>
-
-            <span className="rounded-full bg-stone-900 px-3 py-1 text-xs font-medium text-white">
-              {relation.type} · {relation.strength}
-            </span>
-          </div>
-
-          <p className="mt-3 text-sm leading-7 text-stone-600">
-            {relation.description}
-          </p>
-        </div>
-      )
-    )}
-  </div>
-</section>
-        <section className="rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+        <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-7 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-900 text-lg text-white">
               運
@@ -1342,7 +1317,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
           ) : (
             <>
               {aiSummarySections.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {aiSummarySections.map((section) => (
                     <AISummarySectionCard
                       key={section.title}
@@ -1441,7 +1416,7 @@ h3: ({ children }) => {
             </>
           )}
         </section>
-<section className="mt-8 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+{false && (<section id="legacy-recommendations" className="mt-8 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
   <div className="mx-auto max-w-2xl text-center">
     <p className="text-xs font-semibold tracking-[0.25em] text-stone-500">
       NEXT ANALYSIS
@@ -1545,10 +1520,10 @@ h3: ({ children }) => {
   </p>
 
   <h3 className="mt-2 text-2xl font-bold text-stone-900">
-    추천되는 심층 분석
+    지금 나에게 추천된 분석 TOP 3
   </h3>
 </div>
-<div className="grid gap-4 md:grid-cols-3">
+<div className="grid gap-3 md:grid-cols-3">
   {displayedPaidAnalysisProducts.map((product, index) => {
   const isPrimaryRecommendation = index === 0;
 
@@ -1566,12 +1541,12 @@ h3: ({ children }) => {
       onClick={() => setSelectedPaidAnalysisId(product.id)}
       className={
   isPrimaryRecommendation
-    ? "flex h-full flex-col rounded-2xl border-2 border-stone-900 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5"
-    : "flex h-full flex-col rounded-2xl border border-stone-200 bg-stone-50 p-5 text-left transition hover:-translate-y-0.5 hover:border-stone-300"
+  ? "flex h-full flex-col rounded-xl border border-[#c9b68f] bg-[#fbf7ef] p-5 text-left transition hover:border-[#a99163]"
+  : "flex h-full flex-col rounded-xl border border-stone-200 bg-white p-5 text-left transition hover:border-stone-300"
 }
     >
 
-     <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-stone-500">
+    <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-stone-500">
   {isPrimaryRecommendation
     ? "1순위 추천"
     : `${index + 1}순위 보조 추천`}
@@ -1580,6 +1555,10 @@ h3: ({ children }) => {
 </p>
       <p className="text-sm font-bold text-stone-900">
         {product.title}
+      </p>
+
+      <p className="mt-2 text-xs leading-5 text-stone-500">
+        {product.description}
       </p>
 
   {false &&
@@ -1608,11 +1587,16 @@ h3: ({ children }) => {
   </div>
 )}
 
-      <p className="mt-auto pt-5 text-sm font-semibold text-stone-900">
+      <div className="mt-auto flex items-end justify-between gap-3 pt-5">
+        <p className="text-xs font-medium text-stone-500">
+          {getProductPricing(product.id).amount.toLocaleString("ko-KR")}원
+        </p>
+        <p className="text-sm font-semibold text-stone-900">
   {isPrimaryRecommendation
     ? "1순위 심층 분석 확인하기"
     : "심층 분석 확인하기"}
-</p>
+        </p>
+      </div>
        </button>
   );
 })}
@@ -1658,18 +1642,30 @@ h3: ({ children }) => {
 )}
 {profileSelectionProductId && (
   <ProfileSelector
-    productId={profileSelectionProductId}
+    productId={profileSelectionProductId ?? ""}
     currentProfileId={currentProfileId}
     destination="paid-analysis"
   />
 )}
 </div>
 </section>
-        <PremiumCatalogSection
-          profileId={currentProfileId}
-          recommendedProductIds={displayedPaidAnalysisProducts.map((product) => product.id)}
-        />
-        <div className="mt-8 grid gap-3 sm:grid-cols-2">
+  )}
+        <section className="mt-8 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" aria-labelledby="next-analysis-title">
+          <div className="max-w-2xl">
+            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">NEXT ANALYSIS</p>
+            <h2 id="next-analysis-title" className="mt-3 text-2xl font-bold text-stone-900">무료 분석에서 확인한 흐름을 더 깊게 살펴보세요</h2>
+            <p className="mt-3 text-sm leading-7 text-stone-600">무료 분석에서 확인한 현재 흐름을 바탕으로, 지금 먼저 살펴보면 좋은 분석을 추천받거나 원하는 주제를 직접 선택해 더 깊게 볼 수 있어요.</p>
+          </div>
+          <div className="mt-7 grid gap-3 sm:grid-cols-2">
+            <Link href={`/recommendations?profileId=${currentProfileId}`} className="rounded-xl bg-stone-900 px-5 py-4 text-center text-sm font-semibold text-white transition hover:bg-stone-800">
+              나에게 추천된 심층 분석 보기
+            </Link>
+            <Link href={`/deep-analysis?profileId=${currentProfileId}`} className="rounded-xl border border-stone-300 bg-white px-5 py-4 text-center text-sm font-semibold text-stone-700 transition hover:bg-stone-50">
+              원하는 심층 분석 직접 찾기
+            </Link>
+          </div>
+        </section>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
           <button
             type="button"
             onClick={() => router.push("/saju")}
@@ -1681,30 +1677,19 @@ h3: ({ children }) => {
           <button
             type="button"
             onClick={() => window.print()}
-            className="rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800"
+            className="rounded-2xl border border-stone-300 bg-white px-5 py-4 font-semibold text-stone-900 transition hover:bg-stone-50"
           >
             리포트 인쇄하기
           </button>
         </div>
 
-        {!providedResult && (
-          <button
-            type="button"
-            onClick={() => router.push("/mypage")}
-            className="mt-3 w-full rounded-2xl border border-stone-300 bg-white px-5 py-4 font-semibold transition hover:bg-stone-50"
-          >
-            마이페이지에서 관리하기
-          </button>
-        )}
-
         <p className="mt-8 text-center text-xs leading-6 text-stone-500">
           본 리포트는 참고용 콘텐츠이며 중요한 건강·법률·투자 결정은
           관련 전문가와 상담해 주세요.
           </p>
-    </div>
-
-  
-</main>
+        </div>
+      </main>
+    </AppShell>
 );
 }
 

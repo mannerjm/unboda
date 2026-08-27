@@ -15,6 +15,17 @@ export type PaidAnalysisTopicInsight = {
   prompt: string;
 };
 
+export type TopicPurchaseDecision = {
+  recommendedFor: readonly string[];
+  whatItAnalyzes: readonly string[];
+  expectedUnderstanding: readonly string[];
+  distinction: string;
+  decisionQuestion: string;
+};
+
+export type PaidAnalysisTopicConfigWithPurchaseDecision =
+  PaidAnalysisTopicConfig & { purchaseDecision: TopicPurchaseDecision };
+
 /**
  * Only the values that specialise the AI contract. Product metadata (title, price,
  * description) stays in premiumProductRegistry / analysisTopics and is never copied here.
@@ -32,6 +43,45 @@ export type PaidAnalysisTopicConfig = {
   actionFocus: string[];
   prohibitedClaims: string[];
 };
+
+function createTopicPurchaseDecision(
+  config: PaidAnalysisTopicConfig,
+): TopicPurchaseDecision {
+  const trimSentence = (value: string) => value
+    .replace(/노력কে/g, "노력을")
+    .replace(/readiness/g, "준비 상태")
+    .replace(/observable difference/g, "관찰 가능한 차이")
+    .replace(/observable/g, "관찰 가능한")
+    .replace(/evidence/g, "근거")
+    .replace(/general relationship/g, "일반 관계")
+    .replace(/analysis/g, "분석")
+    .replace(/hold\/adjust\/review/g, "보류·조정·재검토")
+    .replace(/[.。?？]+$/, "");
+  const understandingText = (value: string) => trimSentence(value)
+    .replace(/(설명한다|구분한다|제시한다)$/, "에 대한 내용을");
+  const firstFocus = config.analysisFocus[0] ?? config.userQuestion;
+  const firstAction = config.actionFocus[0] ?? firstFocus;
+  const excludedFocus = config.excludedFocus?.[0]?.prompt;
+
+  return {
+    recommendedFor: [
+      `${trimSentence(config.userQuestion)}에 대한 답이 궁금할 때`,
+      `${trimSentence(firstFocus)} 관련 내용을 구체적으로 살펴보고 싶을 때`,
+      `${trimSentence(firstAction)}에 대해 점검하고 싶을 때`,
+    ],
+    whatItAnalyzes: [
+      ...config.analysisFocus,
+      ...config.requiredInsights.slice(0, 2).map((insight) => trimSentence(insight.prompt)),
+    ].slice(0, 5),
+    expectedUnderstanding: config.requiredInsights
+      .slice(0, 3)
+      .map((insight) => `${understandingText(insight.prompt)} 확인할 수 있습니다.`),
+    distinction: excludedFocus
+      ? `이 분석은 ${trimSentence(excludedFocus)}보다 ${trimSentence(firstFocus)} 관련 내용을 중심으로 살펴봅니다.`
+      : `${trimSentence(firstFocus)} 관련 내용을 중심으로 살펴보며, 다른 세부 분석보다 이 분석의 질문과 범위를 먼저 확인합니다.`,
+    decisionQuestion: `${trimSentence(config.userQuestion)}?`,
+  };
+}
 
 const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
   {
@@ -2012,8 +2062,11 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
   },
 ];
 
-const LAUNCH_TOPIC_CONFIG_MAP = new Map(
-  LAUNCH_TOPIC_CONFIGS.map((config) => [config.productId, config]),
+const LAUNCH_TOPIC_CONFIG_MAP = new Map<string, PaidAnalysisTopicConfigWithPurchaseDecision>(
+  LAUNCH_TOPIC_CONFIGS.map((config) => [
+    config.productId,
+    { ...config, purchaseDecision: createTopicPurchaseDecision(config) },
+  ]),
 );
 
 /** PERIOD products are specialised by analysisPeriodStrategy, not by a topic config. */
@@ -2034,7 +2087,7 @@ export type PaidAnalysisLaunchSpecialization =
 
 export function getPaidAnalysisTopicConfig(
   productId?: string,
-): PaidAnalysisTopicConfig | undefined {
+): PaidAnalysisTopicConfigWithPurchaseDecision | undefined {
   if (!productId) {
     return undefined;
   }

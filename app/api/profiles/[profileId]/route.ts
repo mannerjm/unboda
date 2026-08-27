@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { AccountAccessError, requireVerifiedEmailAccount } from "@/app/lib/accounts/server";
 import {
   deleteUserProfile,
   getProfileDeletability,
@@ -19,10 +20,17 @@ type RouteContext = {
 };
 
 export async function PATCH(request: Request, context: RouteContext) {
-  const user = await getCurrentUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+  let user;
+  try {
+    user = await requireVerifiedEmailAccount();
+  } catch (error) {
+    if (error instanceof AccountAccessError) {
+      return NextResponse.json(
+        { error: error.code === "EMAIL_NOT_VERIFIED" ? "이메일 인증이 필요합니다." : "계정을 사용할 수 없습니다." },
+        { status: error.code === "AUTHENTICATION_REQUIRED" ? 401 : 403 },
+      );
+    }
+    throw error;
   }
 
   let body: unknown;

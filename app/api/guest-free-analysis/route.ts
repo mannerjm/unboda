@@ -19,6 +19,8 @@ import {
   isUsableGuestFreeAnalysis,
   toGuestAnalyzeProfile,
 } from "@/app/lib/guestFreeAnalyses/server";
+import { createEvaluationContext } from "@/app/lib/evaluationContext";
+import { hasCurrentEvaluationPeriod } from "@/app/lib/freeAnalysisResults/server";
 
 function clearGuestCookie(response: NextResponse): NextResponse {
   response.cookies.set(GUEST_ANALYSIS_COOKIE_NAME, "", { ...guestAnalysisCookieOptions, maxAge: 0 });
@@ -34,6 +36,10 @@ export async function GET() {
     const record = await getGuestFreeAnalysis(credential.analysisId, hashGuestAnalysisSecret(credential.secret));
     if (!record || !isUsableGuestFreeAnalysis(record) || record.status !== "completed" || !record.content) {
       return clearGuestCookie(NextResponse.json({ error: "비회원 분석 결과를 찾을 수 없습니다." }, { status: 404 }));
+    }
+
+    if (!hasCurrentEvaluationPeriod(record.content, createEvaluationContext())) {
+      return clearGuestCookie(NextResponse.json({ error: "현재 기간의 무료 분석 결과가 없습니다. 다시 분석해 주세요.", code: "STALE_EVALUATION_PERIOD" }, { status: 409 }));
     }
 
     return NextResponse.json({ analysis: record.content });

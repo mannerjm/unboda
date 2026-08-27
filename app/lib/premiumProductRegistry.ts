@@ -9,6 +9,7 @@ import {
   PERIOD_ANALYSIS_PRODUCTS,
   type PeriodAnalysisProductDefinition,
   type PeriodAnalysisProductType,
+  type PeriodPurchaseDecision,
 } from "./analysisPeriodProducts";
 // app/lib/premiumProductRegistry.ts
 
@@ -77,6 +78,7 @@ export type PremiumProductDefinition = {
 
   /** Only set for kind === "PERIOD"; analysisPeriodProducts stays the source of truth. */
   periodType?: PeriodAnalysisProductType;
+  purchaseDecision?: PeriodPurchaseDecision;
 
   releaseLevel: PremiumProductReleaseLevel;
 
@@ -494,6 +496,7 @@ export const TOPIC_PREMIUM_PRODUCTS: PremiumProductDefinition[] =
     plugin: "FORTUNE",
     kind: "PERIOD",
     periodType: period.type,
+    purchaseDecision: period.purchaseDecision,
     releaseLevel: "V2",
 
     description: period.shortDescription,

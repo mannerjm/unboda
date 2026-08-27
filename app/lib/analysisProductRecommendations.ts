@@ -12,7 +12,9 @@ import {
   getPremiumProduct,
   type RecommendationSignalKey,
 } from "./premiumProductRegistry";
+import { getLaunchProductIds } from "./paidAnalysisTopicConfig";
 import { normalizeRecommendationSignals } from "./recommendationSignals";
+import { createEvaluationContext, type EvaluationContext } from "./evaluationContext";
 
 type FortuneFlowAnalysisResult =
   ReturnType<typeof analyzeFullFortuneFlow>;
@@ -32,6 +34,7 @@ export type AnalysisProductRecommendation = {
 
 export type AnalysisProductRecommendationResult = {
   recommendations: AnalysisProductRecommendation[];
+  evaluationContext?: EvaluationContext;
   engineResult?: RecommendationEngineResult;
 };
 
@@ -41,6 +44,7 @@ export interface AnalysisProductRecommendationInput {
   elementRelations: ElementRelationsAnalysis;
   fortuneFlow: ReturnType<typeof analyzeFullFortuneFlow> | null;
   elementAnalysis: ElementAnalysis;
+  evaluationContext?: EvaluationContext;
 }
 
 type ProductRecommendationScore = {
@@ -93,14 +97,25 @@ const CANONICAL_BACKFILL_REASON =
 
 const TOP_RECOMMENDATION_COUNT = 3;
 
-function resolveCanonicalRecommendationProductId(
+const LAUNCH_TOPIC_PRODUCT_IDS = new Set(
+  getLaunchProductIds().filter((productId) => PREMIUM_PRODUCT_LOOKUP[productId]?.kind === "TOPIC"),
+);
+
+export function resolveCanonicalRecommendationProductId(
   productId: string,
 ): string | null {
   const canonicalProductId =
     LEGACY_THEME_TO_CANONICAL_PRODUCT_ID[productId]
     ?? getCanonicalPremiumProductId(productId);
 
-  return getPremiumProduct(canonicalProductId) ? canonicalProductId : null;
+  return getPremiumProduct(canonicalProductId) && LAUNCH_TOPIC_PRODUCT_IDS.has(canonicalProductId)
+    ? canonicalProductId
+    : null;
+}
+
+export function resolveCanonicalRecommendationProduct(productId: string) {
+  const canonicalProductId = resolveCanonicalRecommendationProductId(productId);
+  return canonicalProductId ? getPremiumProduct(canonicalProductId) ?? null : null;
 }
 
 /**
@@ -108,7 +123,7 @@ function resolveCanonicalRecommendationProductId(
  * the premium registry, duplicates are dropped, and the list is always exactly
  * three items long.
  */
-function toCanonicalRecommendations(
+export function toCanonicalRecommendations(
   recommendations: readonly AnalysisProductRecommendation[],
 ): AnalysisProductRecommendation[] {
   const canonicalRecommendations: AnalysisProductRecommendation[] = [];
@@ -308,23 +323,27 @@ export function buildTopicAwareRecommendations(
   const selectedCategories = new Set<string>();
 
   for (const recommendation of uniqueRecommendations) {
-    const category = PREMIUM_PRODUCT_LOOKUP[recommendation.productId]?.category;
+    const canonicalProductId = resolveCanonicalRecommendationProductId(recommendation.productId);
+    if (!canonicalProductId) continue;
+
+    const category = PREMIUM_PRODUCT_LOOKUP[canonicalProductId]?.category;
 
     if (category && selectedCategories.has(category)) {
       continue;
     }
 
-    topRecommendations.push(recommendation);
+    topRecommendations.push({ ...recommendation, productId: canonicalProductId });
     if (category) selectedCategories.add(category);
     if (topRecommendations.length === 3) break;
   }
 
   for (const recommendation of uniqueRecommendations) {
-    if (topRecommendations.some((selected) => selected.productId === recommendation.productId)) {
+    const canonicalProductId = resolveCanonicalRecommendationProductId(recommendation.productId);
+    if (!canonicalProductId || topRecommendations.some((selected) => selected.productId === canonicalProductId)) {
       continue;
     }
 
-    topRecommendations.push(recommendation);
+    topRecommendations.push({ ...recommendation, productId: canonicalProductId });
     if (topRecommendations.length === 3) break;
   }
 
@@ -345,6 +364,7 @@ export function buildTopicAwareRecommendations(
 export function buildAnalysisProductRecommendations(
   input: AnalysisProductRecommendationInput,
 ): AnalysisProductRecommendationResult {
+  const evaluationContext = input.evaluationContext ?? createEvaluationContext();
   const topicAwareResult = buildTopicAwareRecommendations(input);
 
   if (topicAwareResult.recommendations.length >= 3 && topicAwareResult.engineResult) {
@@ -354,6 +374,7 @@ export function buildAnalysisProductRecommendations(
 
     return {
       recommendations: canonicalRecommendations,
+      evaluationContext,
       engineResult: buildRecommendationEngineResult(canonicalRecommendations),
     };
   }
@@ -449,6 +470,7 @@ export function buildAnalysisProductRecommendations(
 
   return {
     recommendations: canonicalRecommendations,
+    evaluationContext,
     engineResult: buildRecommendationEngineResult(canonicalRecommendations),
   };
 }

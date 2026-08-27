@@ -4,6 +4,7 @@ type SajuResult = ReturnType<typeof getSaju>;
 
 export function buildSajuResponse(saju: SajuResult) {
   return {
+    evaluationContext: saju.evaluationContext,
     solarDate: saju.solarDate,
 
     yearPillarHanja: saju.yearPillarHanja,

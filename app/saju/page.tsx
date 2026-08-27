@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ProfileDto } from "@/app/lib/profiles/types";
 import type { AnalyzeSuccessResponse } from "@/app/lib/analyzeApiTypes";
+import AppShell from "@/app/components/AppShell";
 
 export default function SajuPage() {
   const router = useRouter();
@@ -62,30 +63,35 @@ export default function SajuPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-[#f7f3ea] px-6">
-      <h1 className="text-5xl font-bold mb-8">사주 조회</h1>
+    <AppShell activeProfileId={activeProfile?.id}>
+      <main className="flex min-h-screen flex-col items-center justify-center bg-[#f7f3ea] px-6 py-12">
+        <div className="w-full max-w-xl rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
+          <p className="mb-3 text-xs font-semibold tracking-[0.28em] text-stone-500">AI ANALYSIS</p>
+          <h1 className="text-4xl font-bold text-stone-900 sm:text-5xl">사주 조회</h1>
 
-      <div className="w-full max-w-md space-y-5">
-        {isLoading ? <p className="text-sm text-stone-600">활성 분석 대상을 불러오는 중입니다.</p> : null}
-        {activeProfile ? (
-          <div className="rounded-xl border border-stone-200 bg-white p-5 text-sm leading-7 text-stone-700">
-            <p className="font-semibold text-stone-900">활성 분석 대상: {activeProfile.label}</p>
-            <p>{activeProfile.birthDate} · {activeProfile.birthTime} · {activeProfile.gender} · {activeProfile.calendarType}</p>
-            <a href="/mypage" className="mt-3 inline-block font-semibold text-stone-900">마이페이지에서 대상 변경</a>
+          <div className="mt-8 space-y-5">
+            {isLoading ? <p className="text-sm text-stone-600">활성 분석 대상을 불러오는 중입니다.</p> : null}
+            {activeProfile ? (
+              <div className="rounded-2xl border border-stone-200 bg-stone-50 p-5 text-sm leading-7 text-stone-700">
+                <p className="font-semibold text-stone-900">활성 분석 대상: {activeProfile.label}</p>
+                <p>{activeProfile.birthDate} · {activeProfile.birthTime} · {activeProfile.gender} · {activeProfile.calendarType}</p>
+                <a href="/mypage" className="mt-3 inline-block font-semibold text-stone-900">마이페이지에서 대상 변경</a>
+              </div>
+            ) : null}
+
+            <button
+              onClick={() => void startAnalysis()}
+              disabled={!activeProfile || isLoading || isStarting}
+              className="block w-full rounded-2xl bg-stone-900 p-4 text-center text-base font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
+            >
+              {isStarting ? "분석 결과를 확인하는 중..." : "운보다 AI로 분석하기"}
+            </button>
+            {validationMessage ? (
+              <p className="text-sm text-red-600">{validationMessage}</p>
+            ) : null}
           </div>
-        ) : null}
-
-        <button
-          onClick={() => void startAnalysis()}
-          disabled={!activeProfile || isLoading || isStarting}
-          className="block w-full rounded-xl bg-black p-4 text-center text-white disabled:bg-stone-400"
-        >
-          {isStarting ? "분석 결과를 확인하는 중..." : "운보다 AI로 분석하기"}
-        </button>
-        {validationMessage ? (
-          <p className="text-sm text-red-600">{validationMessage}</p>
-        ) : null}
-      </div>
-    </main>
+        </div>
+      </main>
+    </AppShell>
   );
 }

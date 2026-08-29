@@ -1,11 +1,25 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { ensureAccountLifecycle } from "@/app/lib/accounts/server";
+import { ensureAccountLifecycle, type PaidEligibilityStatus } from "@/app/lib/accounts/server";
 import { createClient as createServerClient } from "@/app/lib/supabase/server";
 
 const statusLabels = { ACTIVE: "사용 중", DELETION_REQUESTED: "탈퇴 처리 중", CLOSED: "종료됨" } as const;
-const eligibilityLabels = { UNVERIFIED: "확인 전", VERIFIED_ADULT: "유료 이용 가능", REVOKED: "확인 만료" } as const;
+
+/**
+ * Canonical labels for paid eligibility status.
+ * IMPORTANT: These labels describe only the eligibility enrollment state, NOT account holder age.
+ * - UNVERIFIED: Eligibility has not been confirmed (enrollment incomplete, no provider data collected).
+ * - VERIFIED_ADULT: Adult eligibility has been verified (external provider confirmed).
+ * - REVOKED: Eligibility has been revoked (provider revocation or account action).
+ *
+ * Profile birth date is NOT used here. Relationship=self is NOT identity proof.
+ */
+const eligibilityLabels: Record<PaidEligibilityStatus, string> = {
+  UNVERIFIED: "확인 전",
+  VERIFIED_ADULT: "유료 이용 가능",
+  REVOKED: "확인 만료",
+} as const;
 
 export default async function AccountPage() {
   const user = await getCurrentUser();

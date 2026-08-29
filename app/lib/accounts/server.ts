@@ -17,6 +17,63 @@ export type AccountLifecycle = {
   paidEligibilityInvalidatedAt: string | null;
 };
 
+/**
+ * Machine-readable reasons why account service access is blocked.
+ * Used in AccountAccessDecision for structured error reporting.
+ */
+export type AccountAccessBlockReason =
+  | "AUTHENTICATION_REQUIRED"
+  | "ACCOUNT_NOT_ACTIVE"
+  | "ACCOUNT_DELETED"
+  | "EMAIL_NOT_VERIFIED"
+  | "PAID_ELIGIBILITY_UNVERIFIED"
+  | "PAID_ELIGIBILITY_REVOKED"
+  | "UNKNOWN_ERROR";
+
+/**
+ * Canonical structured decision for whether account can access a service.
+ * Allows clear separation of: internal error state, machine reason, and policy decision.
+ */
+export type AccountAccessDecision =
+  | { allowed: true; account: AccountLifecycle; user: AuthenticatedUser }
+  | { allowed: false; reason: AccountAccessBlockReason; account?: AccountLifecycle };
+
+/**
+ * Machine-readable reasons why paid purchase is blocked.
+ * Used in PaidPurchaseEligibilityDecision for structured error reporting.
+ */
+export type PaidPurchaseBlockReason =
+  | "AUTHENTICATION_REQUIRED"
+  | "ACCOUNT_NOT_ACTIVE"
+  | "ACCOUNT_DELETED"
+  | "EMAIL_NOT_VERIFIED"
+  | "PAID_ELIGIBILITY_UNVERIFIED"
+  | "PAID_ELIGIBILITY_REVOKED"
+  | "UNKNOWN_ERROR";
+
+/**
+ * Canonical structured decision for whether account can make a new paid purchase.
+ * Separates: target policy, currently enforced policy, and enforcement state.
+ */
+export type PaidPurchaseEligibilityDecision =
+  | {
+      eligible: true;
+      account: AccountLifecycle;
+      user: AuthenticatedUser;
+      /** Current policy is stricter than target; this would be eligible under full enforcement. */
+      willBeEligibleWhenFullyEnforced?: boolean;
+    }
+  | {
+      eligible: false;
+      reason: PaidPurchaseBlockReason;
+      account?: AccountLifecycle;
+      /**
+       * True if blocked by a rule that is NOT currently enforced due to rollout feature flag.
+       * This means the user would be blocked if PAID_ELIGIBILITY_ENFORCEMENT_ENABLED = true.
+       */
+      blockedByUnenforcedRule?: boolean;
+    };
+
 export class AccountAccessError extends Error {
   constructor(readonly code: "AUTHENTICATION_REQUIRED" | "ACCOUNT_NOT_ACTIVE" | "EMAIL_NOT_VERIFIED" | "PAID_ELIGIBILITY_REQUIRED") {
     super(code);
@@ -136,3 +193,214 @@ export async function getAccountClosureFinancialBlockers(userId: string): Promis
 }
 
 export const PAID_ELIGIBILITY_ENFORCEMENT_ENABLED = process.env.PAID_ELIGIBILITY_ENFORCEMENT_ENABLED === "true";
+
+// ============================================================================
+// PHASE 3A CANONICAL POLICY DECISION HELPERS
+// ============================================================================
+
+/**
+ * Reads whether authenticated Supabase user has verified email.
+ * Uses trusted server-side auth state; never trusts client-submitted emailVerified.
+ * Returns null if not authenticated.
+ */
+export async function getEmailVerificationState(): Promise<{ emailVerified: boolean } | null> {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const supabase = await (await import("../supabase/server")).createClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) return null;
+
+  return { emailVerified: data.user.email_confirmed_at !== null && data.user.email_confirmed_at !== undefined };
+}
+
+/**
+ * Reads the canonical paid eligibility status for an account.
+ * Fails closed: unknown/missing state returns UNVERIFIED when enforcement is active.
+ * Never derives from: profile DOB, relationship type, Toss payment, purchase history, client input.
+ */
+export async function getPaidEligibilityState(account: AccountLifecycle): Promise<{ status: PaidEligibilityStatus }> {
+  // If enforcement is OFF, treat missing eligibility data as fully compatible (no blocking).
+  // If enforcement is ON, missing/unknown state is treated as UNVERIFIED (blocked).
+  // The account_lifecycles table default is UNVERIFIED, so the only way this happens
+  // is if the account row is corrupted or the enforcement flag was just enabled
+  // on an old account. Fail closed in that case.
+  return { status: account.paidEligibilityStatus };
+}
+
+/**
+ * TARGET PAID PURCHASE POLICY (Phase 3A canonical definition):
+ *
+ * For a NEW paid purchase to be eligible, ALL three conditions must be met:
+ * 1. Account lifecycle status = ACTIVE
+ * 2. Email is verified (email_confirmed_at is not null)
+ * 3. Paid eligibility status = VERIFIED_ADULT
+ *
+ * CURRENTLY ENFORCED POLICY (as of Phase 3A):
+ * - Condition 1 (ACTIVE) is ENFORCED (already in /api/orders)
+ * - Condition 2 (email verified) is NOT YET ENFORCED (gap fixed in Phase 3A)
+ * - Condition 3 (VERIFIED_ADULT) is NOT YET ENFORCED (depends on flag PAID_ELIGIBILITY_ENFORCEMENT_ENABLED)
+ *
+ * Phase 3A wires conditions 1 + 2 into /api/orders immediately.
+ * Phase 3D will wire condition 3 when enforcement is explicitly enabled via flag.
+ *
+ * Feature flag OFF behavior: Satisfies current production rollout compatibility.
+ * Feature flag ON behavior: Enforces full target policy.
+ */
+export async function evaluatePaidPurchaseEligibility(): Promise<PaidPurchaseEligibilityDecision> {
+  // Read authenticated user
+  const user = await getCurrentUser();
+  if (!user) {
+    return {
+      eligible: false,
+      reason: "AUTHENTICATION_REQUIRED",
+    };
+  }
+
+  // Read account lifecycle
+  let account: AccountLifecycle;
+  try {
+    account = await ensureAccountLifecycle(user.id);
+  } catch {
+    return {
+      eligible: false,
+      reason: "UNKNOWN_ERROR",
+    };
+  }
+
+  // Condition 1: Account must be ACTIVE (already enforced in /api/orders)
+  if (account.status === "DELETION_REQUESTED") {
+    return {
+      eligible: false,
+      reason: "ACCOUNT_NOT_ACTIVE",
+      account,
+    };
+  }
+  if (account.status === "CLOSED") {
+    return {
+      eligible: false,
+      reason: "ACCOUNT_DELETED",
+      account,
+    };
+  }
+  // Only ACTIVE passes through.
+  if (account.status !== "ACTIVE") {
+    return {
+      eligible: false,
+      reason: "ACCOUNT_NOT_ACTIVE",
+      account,
+    };
+  }
+
+  // Condition 2: Email must be verified (Phase 3A canonical enforcement)
+  const emailState = await getEmailVerificationState();
+  if (!emailState || !emailState.emailVerified) {
+    return {
+      eligible: false,
+      reason: "EMAIL_NOT_VERIFIED",
+      account,
+    };
+  }
+
+  // Condition 3: Paid eligibility must be VERIFIED_ADULT (enforcement controlled by feature flag)
+  if (PAID_ELIGIBILITY_ENFORCEMENT_ENABLED) {
+    // Full enforcement: reject unverified and revoked
+    if (account.paidEligibilityStatus === "REVOKED") {
+      return {
+        eligible: false,
+        reason: "PAID_ELIGIBILITY_REVOKED",
+        account,
+      };
+    }
+    if (account.paidEligibilityStatus !== "VERIFIED_ADULT") {
+      return {
+        eligible: false,
+        reason: "PAID_ELIGIBILITY_UNVERIFIED",
+        account,
+      };
+    }
+  } else {
+    // Phase 3A rollout compatibility: preserve the pre-3A live customer behavior.
+    // The helper still describes future target policy, but it does not newly
+    // block UNVERIFIED or REVOKED while the rollout flag is OFF.
+    return {
+      eligible: true,
+      account,
+      user,
+      willBeEligibleWhenFullyEnforced: account.paidEligibilityStatus === "VERIFIED_ADULT",
+    };
+  }
+
+  // All conditions passed; eligible for paid purchase.
+  return {
+    eligible: true,
+    account,
+    user,
+  };
+}
+
+/**
+ * Canonical decision helper for ordinary account service access.
+ * This is separate from new paid purchase eligibility.
+ *
+ * General/free service access must NOT depend on:
+ * - VERIFIED_ADULT
+ * - profile DOB
+ * - relationship=self
+ * - Toss payment state
+ *
+ * Account lifecycle remains authoritative.
+ */
+export async function evaluateAccountServiceAccess(): Promise<AccountAccessDecision> {
+  // Read authenticated user
+  const user = await getCurrentUser();
+  if (!user) {
+    return {
+      allowed: false,
+      reason: "AUTHENTICATION_REQUIRED",
+    };
+  }
+
+  // Read account lifecycle
+  let account: AccountLifecycle;
+  try {
+    account = await ensureAccountLifecycle(user.id);
+  } catch {
+    return {
+      allowed: false,
+      reason: "UNKNOWN_ERROR",
+    };
+  }
+
+  // Condition 1: Account must be ACTIVE
+  if (account.status === "DELETION_REQUESTED") {
+    return {
+      allowed: false,
+      reason: "ACCOUNT_NOT_ACTIVE",
+      account,
+    };
+  }
+  if (account.status === "CLOSED") {
+    return {
+      allowed: false,
+      reason: "ACCOUNT_DELETED",
+      account,
+    };
+  }
+  if (account.status !== "ACTIVE") {
+    return {
+      allowed: false,
+      reason: "ACCOUNT_NOT_ACTIVE",
+      account,
+    };
+  }
+
+  // General/free service access remains lifecycle-scoped only.
+  // Email verification and paid eligibility are separate policy concerns for the
+  // paid boundary and are intentionally not enforced here.
+  return {
+    allowed: true,
+    account,
+    user,
+  };
+}

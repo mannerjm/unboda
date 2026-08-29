@@ -1,4 +1,4 @@
-import { createAdminClient } from "../supabase/admin";
+﻿import { createAdminClient } from "../supabase/admin";
 import { getCurrentUser, type AuthenticatedUser } from "../supabase/auth";
 
 export type AccountLifecycleStatus = "ACTIVE" | "DELETION_REQUESTED" | "CLOSED";
@@ -117,7 +117,7 @@ export async function ensureAccountLifecycle(userId: string): Promise<AccountLif
     .order("generation", { ascending: false })
     .limit(1)
     .maybeSingle<AccountLifecycleRow>();
-  if (existingError) throw new Error(`계정 상태를 조회하지 못했습니다: ${existingError.message}`);
+  if (existingError) throw new Error(`怨꾩젙 ?곹깭瑜?議고쉶?섏? 紐삵뻽?듬땲?? ${existingError.message}`);
   if (existing) return toAccountLifecycle(existing);
 
   const { data, error } = await supabase
@@ -134,7 +134,7 @@ export async function ensureAccountLifecycle(userId: string): Promise<AccountLif
     .order("generation", { ascending: false })
     .limit(1)
     .maybeSingle<AccountLifecycleRow>();
-  if (raceError || !raced) throw new Error(`계정 상태를 생성하지 못했습니다: ${error?.message ?? raceError?.message ?? "unknown"}`);
+  if (raceError || !raced) throw new Error(`怨꾩젙 ?곹깭瑜??앹꽦?섏? 紐삵뻽?듬땲?? ${error?.message ?? raceError?.message ?? "unknown"}`);
   return toAccountLifecycle(raced);
 }
 
@@ -146,7 +146,7 @@ export async function getAccountLifecycle(userId: string): Promise<AccountLifecy
     .order("generation", { ascending: false })
     .limit(1)
     .maybeSingle<AccountLifecycleRow>();
-  if (error) throw new Error(`계정 상태를 조회하지 못했습니다: ${error.message}`);
+  if (error) throw new Error(`怨꾩젙 ?곹깭瑜?議고쉶?섏? 紐삵뻽?듬땲?? ${error.message}`);
   return data ? toAccountLifecycle(data) : null;
 }
 
@@ -180,13 +180,13 @@ export async function getAccountClosureFinancialBlockers(userId: string): Promis
   const blockers = new Set<AccountClosureFinancialBlocker>();
   const { data: refunds, error: refundError } = await supabase.from("refund_workflows").select("status").eq("user_id", userId).in("status", ["REFUND_REQUESTED", "REFUND_PROCESSING", "REFUND_FAILED_RETRYING", "OWNER_REVIEW_REQUIRED"]);
   const { data: orders, error: orderError } = await supabase.from("orders").select("id").eq("user_id", userId);
-  if (refundError) throw new Error(`환불 상태를 확인하지 못했습니다: ${refundError.message}`);
-  if (orderError) throw new Error(`주문 상태를 확인하지 못했습니다: ${orderError.message}`);
+  if (refundError) throw new Error(`?섎텋 ?곹깭瑜??뺤씤?섏? 紐삵뻽?듬땲?? ${refundError.message}`);
+  if (orderError) throw new Error(`二쇰Ц ?곹깭瑜??뺤씤?섏? 紐삵뻽?듬땲?? ${orderError.message}`);
   for (const row of refunds ?? []) blockers.add(row.status === "OWNER_REVIEW_REQUIRED" ? "REFUND_OWNER_REVIEW" : "REFUND_IN_PROGRESS");
   const orderIds = (orders ?? []).map((row) => row.id);
   if (orderIds.length > 0) {
     const { data: payments, error: paymentError } = await supabase.from("toss_payment_records").select("reconciliation_status").in("order_id", orderIds).in("reconciliation_status", ["reconciliation_required", "reconciliation_failed"]);
-    if (paymentError) throw new Error(`결제 상태를 확인하지 못했습니다: ${paymentError.message}`);
+    if (paymentError) throw new Error(`寃곗젣 ?곹깭瑜??뺤씤?섏? 紐삵뻽?듬땲?? ${paymentError.message}`);
     if ((payments ?? []).length > 0) blockers.add("PAYMENT_RECONCILIATION_REQUIRED");
   }
   return [...blockers];
@@ -403,4 +403,69 @@ export async function evaluateAccountServiceAccess(): Promise<AccountAccessDecis
     account,
     user,
   };
+}
+
+/**
+ * Self-service helper: transition account lifecycle from ACTIVE to DELETION_REQUESTED.
+ * Performs safe validation:
+ * - Checks financial blockers (e.g. pending refunds or reconciliation required).
+ * - Never deletes auth.users, profiles, reports, purchases, orders, payments, or refunds.
+ * - Only transitions ACTIVE -> DELETION_REQUESTED.
+ */
+export async function requestAccountClosure(userId: string): Promise<AccountLifecycle> {
+  const account = await ensureAccountLifecycle(userId);
+  if (account.status === "CLOSED") {
+    throw new Error("?대? 醫낅즺??怨꾩젙?낅땲??");
+  }
+  if (account.status === "DELETION_REQUESTED") {
+    return account;
+  }
+
+  const blockers = await getAccountClosureFinancialBlockers(userId);
+  if (blockers.length > 0) {
+    throw new Error("吏꾪뻾 以묒씤 ?섎텋?대굹 寃곗젣 ?뺤씤 嫄댁씠 ?덉뼱 ?덊눜 ?붿껌???꾨즺?????놁뒿?덈떎.");
+  }
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("account_lifecycles")
+    .update({ status: "DELETION_REQUESTED" })
+    .eq("user_id", userId)
+    .eq("status", "ACTIVE")
+    .select("*")
+    .maybeSingle<AccountLifecycleRow>();
+
+  if (error || !data) {
+    throw new Error(`怨꾩젙 ?덊눜 ?붿껌??泥섎━?섏? 紐삵뻽?듬땲?? ${error?.message ?? "unknown"}`);
+  }
+  return toAccountLifecycle(data);
+}
+
+/**
+ * Self-service helper: transition account lifecycle from DELETION_REQUESTED back to ACTIVE.
+ * Customer self-service withdrawal of closure request.
+ * Supported by schema 024 unique constraint on user_id where status <> 'CLOSED'.
+ */
+export async function cancelAccountClosureRequest(userId: string): Promise<AccountLifecycle> {
+  const account = await ensureAccountLifecycle(userId);
+  if (account.status === "CLOSED") {
+    throw new Error("?대? 醫낅즺??怨꾩젙? 蹂듦뎄?????놁뒿?덈떎.");
+  }
+  if (account.status === "ACTIVE") {
+    return account;
+  }
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("account_lifecycles")
+    .update({ status: "ACTIVE" })
+    .eq("user_id", userId)
+    .eq("status", "DELETION_REQUESTED")
+    .select("*")
+    .maybeSingle<AccountLifecycleRow>();
+
+  if (error || !data) {
+    throw new Error(`怨꾩젙 ?덊눜 ?붿껌 痍⑥냼瑜?泥섎━?섏? 紐삵뻽?듬땲?? ${error?.message ?? "unknown"}`);
+  }
+  return toAccountLifecycle(data);
 }

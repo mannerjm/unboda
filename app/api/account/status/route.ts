@@ -17,6 +17,7 @@ export async function GET() {
         generation: account.generation,
         status: account.status,
         paidEligibilityStatus: account.paidEligibilityStatus,
+        finalizationStartedAt: account.finalizationStartedAt ?? null,
       },
     });
   } catch (error) {

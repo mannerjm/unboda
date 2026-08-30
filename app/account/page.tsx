@@ -33,6 +33,7 @@ type AccountStatusResponse = {
     generation: number;
     status: AccountLifecycleStatus;
     paidEligibilityStatus: PaidEligibilityStatus;
+    finalizationStartedAt?: string | null;
   };
 };
 
@@ -410,17 +411,25 @@ export default function AccountPage() {
             ) : account.status === "DELETION_REQUESTED" ? (
               <div className="rounded-2xl bg-amber-50 p-4 border border-amber-200 space-y-3">
                 <p className="text-xs font-semibold text-amber-900">현재 회원탈퇴 요청 처리 중입니다.</p>
-                <p className="text-xs leading-5 text-amber-800">
-                  탈퇴 요청 취소를 원하시면 아래 버튼을 누르면 계정이 다시 활성화됩니다.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => void handleCancelClosure()}
-                  disabled={closureSubmitting}
-                  className="rounded-xl bg-amber-700 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-800 disabled:bg-amber-400"
-                >
-                  {closureSubmitting ? "처리 중..." : "회원탈퇴 요청 취소하기"}
-                </button>
+                {account.finalizationStartedAt ? (
+                  <p className="text-xs leading-5 text-amber-800">
+                    탈퇴 처리가 진행 중이므로 요청을 취소할 수 없습니다.
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-xs leading-5 text-amber-800">
+                      탈퇴 요청 취소를 원하시면 아래 버튼을 누르면 계정이 다시 활성화됩니다.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => void handleCancelClosure()}
+                      disabled={closureSubmitting}
+                      className="rounded-xl bg-amber-700 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-800 disabled:bg-amber-400"
+                    >
+                      {closureSubmitting ? "처리 중..." : "회원탈퇴 요청 취소하기"}
+                    </button>
+                  </>
+                )}
               </div>
             ) : null}
 

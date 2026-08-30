@@ -15,6 +15,9 @@ export type AccountLifecycle = {
   paidEligibleAt: string | null;
   paidEligibilityPolicyVersion: string | null;
   paidEligibilityInvalidatedAt: string | null;
+  finalizationStartedAt?: string | null;
+  dataScrubbedAt?: string | null;
+  finalizedAt?: string | null;
 };
 
 /**
@@ -92,6 +95,9 @@ type AccountLifecycleRow = {
   paid_eligible_at: string | null;
   paid_eligibility_policy_version: string | null;
   paid_eligibility_invalidated_at: string | null;
+  finalization_started_at?: string | null;
+  data_scrubbed_at?: string | null;
+  finalized_at?: string | null;
 };
 
 function toAccountLifecycle(row: AccountLifecycleRow): AccountLifecycle {
@@ -105,6 +111,9 @@ function toAccountLifecycle(row: AccountLifecycleRow): AccountLifecycle {
     paidEligibleAt: row.paid_eligible_at,
     paidEligibilityPolicyVersion: row.paid_eligibility_policy_version,
     paidEligibilityInvalidatedAt: row.paid_eligibility_invalidated_at,
+    finalizationStartedAt: row.finalization_started_at ?? null,
+    dataScrubbedAt: row.data_scrubbed_at ?? null,
+    finalizedAt: row.finalized_at ?? null,
   };
 }
 
@@ -444,7 +453,7 @@ export async function requestAccountClosure(userId: string): Promise<AccountLife
 /**
  * Self-service helper: transition account lifecycle from DELETION_REQUESTED back to ACTIVE.
  * Customer self-service withdrawal of closure request.
- * Supported by schema 024 unique constraint on user_id where status <> 'CLOSED'.
+ * Disallowed once finalization_started_at is non-null.
  */
 export async function cancelAccountClosureRequest(userId: string): Promise<AccountLifecycle> {
   const account = await ensureAccountLifecycle(userId);
@@ -454,6 +463,9 @@ export async function cancelAccountClosureRequest(userId: string): Promise<Accou
   if (account.status === "ACTIVE") {
     return account;
   }
+  if (account.finalizationStartedAt) {
+    throw new Error("계정 탈퇴 처리가 이미 시작되어 요청을 취소할 수 없습니다.");
+  }
 
   const supabase = createAdminClient();
   const { data, error } = await supabase
@@ -461,6 +473,7 @@ export async function cancelAccountClosureRequest(userId: string): Promise<Accou
     .update({ status: "ACTIVE" })
     .eq("user_id", userId)
     .eq("status", "DELETION_REQUESTED")
+    .is("finalization_started_at", null)
     .select("*")
     .maybeSingle<AccountLifecycleRow>();
 
@@ -471,31 +484,83 @@ export async function cancelAccountClosureRequest(userId: string): Promise<Accou
 }
 
 /**
- * PHASE 3C CLEANUP ORCHESTRATOR SPECIFICATION (PLANNING STUB - NOT EXECUTED IN PRODUCTION)
- *
- * Designed finalization flow (DELETION_REQUESTED -> CLOSED):
- * 1. Inspect financial blockers (refunds in progress, payment reconciliation required).
- * 2. Scrub personalized report content (Class D data) without violating paid_reports_completed_requires_content constraint.
- * 3. Tombstone personal Saju profile fields (Class A data: birth_date, birth_time, label) instead of DELETE
- *    to preserve ON DELETE RESTRICT foreign keys from orders, purchases, entitlements, and paid_reports.
- * 4. Revoke active entitlements (is_active = false, revocation_reason = 'ACCOUNT_CLOSED').
- * 5. Transition account_lifecycles status to CLOSED.
- *
- * Destructive execution is strictly disabled until Phase 3C retention architecture is human-approved.
+ * Server-side helper: start account closure finalization by atomically setting finalization_started_at.
+ * Re-checks financial blockers before setting the lock.
+ * Lock is race-safe against cancelAccountClosureRequest.
  */
-export async function finalizeAccountClosure(userId: string): Promise<AccountLifecycle> {
+export async function startAccountClosureFinalization(userId: string): Promise<AccountLifecycle> {
   const account = await ensureAccountLifecycle(userId);
   if (account.status === "CLOSED") {
     return account;
   }
   if (account.status !== "DELETION_REQUESTED") {
-    throw new Error("탈퇴 요청(DELETION_REQUESTED) 상태의 계정만 최종 종료 처리할 수 있습니다.");
+    throw new Error("탈퇴 요청(DELETION_REQUESTED) 상태의 계정만 최종 처리를 시작할 수 있습니다.");
+  }
+  if (account.finalizationStartedAt) {
+    return account;
   }
 
   const blockers = await getAccountClosureFinancialBlockers(userId);
   if (blockers.length > 0) {
-    throw new Error(`진행 중인 금융 처리가 있어 계정을 최종 종료할 수 없습니다: ${blockers.join(", ")}`);
+    throw new Error(`진행 중인 금융 처리가 있어 계정 최종 처리를 시작할 수 없습니다: ${blockers.join(", ")}`);
   }
 
-  throw new Error("Phase 3C 계정 최종 종료 처리 실행은 아키텍처 승인 전까지 비활성화되어 있습니다.");
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("account_lifecycles")
+    .update({ finalization_started_at: new Date().toISOString() })
+    .eq("user_id", userId)
+    .eq("status", "DELETION_REQUESTED")
+    .is("finalization_started_at", null)
+    .select("*")
+    .maybeSingle<AccountLifecycleRow>();
+
+  if (error || !data) {
+    const current = await getAccountLifecycle(userId);
+    if (current?.finalizationStartedAt) {
+      return current;
+    }
+    throw new Error(`계정 탈퇴 처리 시작 잠금을 설정하지 못했습니다: ${error?.message ?? "unknown"}`);
+  }
+  return toAccountLifecycle(data);
+}
+
+/**
+ * STEP 57D-46 PHASE 3D-1: Transactional Account Closure Database Cleanup Execution.
+ *
+ * Re-checks financial blockers, locks finalization_started_at, and executes atomic DB cleanup
+ * (active_profiles deletion, profile tombstoning, paid report scrub, entitlement revocation)
+ * via server-only RPC `execute_account_closure_db_cleanup`.
+ *
+ * Stops at `data_scrubbed_at IS NOT NULL`. Status remains DELETION_REQUESTED.
+ * Does NOT mutate auth.users email, auth.identities, or set finalized_at.
+ */
+export async function executeAccountClosureDbCleanup(userId: string): Promise<AccountLifecycle> {
+  const lockedAccount = await startAccountClosureFinalization(userId);
+  if (lockedAccount.status === "CLOSED" || lockedAccount.dataScrubbedAt) {
+    return lockedAccount;
+  }
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase.rpc("execute_account_closure_db_cleanup", {
+    p_user_id: userId,
+  });
+
+  if (error || !data) {
+    throw new Error(`계정 데이터 정리(DB cleanup) 처리 중 오류가 발생했습니다: ${error?.message ?? "unknown"}`);
+  }
+
+  return toAccountLifecycle(data as AccountLifecycleRow);
+}
+
+/**
+ * STEP 57D-46 PHASE 3D-1: Full Account Closure Finalization Orchestrator (Phase 3D-1 STOP boundary).
+ *
+ * Executes Phase 3D-1 database cleanup via `executeAccountClosureDbCleanup(userId)`.
+ * Stops at `dataScrubbedAt IS NOT NULL` with status `DELETION_REQUESTED`.
+ * Auth identity tombstoning and setting status = CLOSED remain deferred to Phase 3D-2/3E.
+ */
+export async function finalizeAccountClosure(userId: string): Promise<AccountLifecycle> {
+  const result = await executeAccountClosureDbCleanup(userId);
+  return result;
 }

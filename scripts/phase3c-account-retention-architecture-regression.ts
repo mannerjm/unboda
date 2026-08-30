@@ -89,7 +89,7 @@ assert(accountServer.includes("export async function finalizeAccountClosure"), "
 assert(accountServer.includes('if (account.status === "CLOSED")'), "finalizeAccountClosure is idempotent");
 assert(accountServer.includes("getAccountClosureFinancialBlockers(userId)"), "finalizeAccountClosure checks financial blockers before cleanup");
 assert(!accountServer.includes('.from("profiles").delete()'), "finalizeAccountClosure does NOT execute premature destructive profile deletion");
-assert(accountServer.includes("Phase 3C 계정 최종 종료 처리 실행은 아키텍처 승인 전까지 비활성화되어 있습니다."), "finalizeAccountClosure is deactivated prior to architecture approval");
+assert(accountServer.includes("executeAccountClosureDbCleanup"), "finalizeAccountClosure orchestrates DB cleanup via executeAccountClosureDbCleanup");
 console.log("   Cleanup orchestrator specification verified ✓");
 
 console.log("\n9. OWNERSHIP JOIN BY EMAIL DISALLOWED");

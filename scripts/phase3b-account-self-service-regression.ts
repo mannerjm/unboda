@@ -77,7 +77,10 @@ assert(accountServer.includes('eq("status", "ACTIVE")'), "requestAccountClosure 
 
 console.log("\nG. CLOSURE REQUEST CANNOT DIRECTLY SET CLOSED");
 assert(!requestClosureRoute.includes('status: "CLOSED"'), "requestClosure route cannot set CLOSED status");
-assert(!accountServer.slice(accountServer.indexOf("export async function requestAccountClosure")).includes('status: "CLOSED"'), "requestAccountClosure function does not set CLOSED");
+const requestClosureStart = accountServer.indexOf("export async function requestAccountClosure");
+const cancelClosureStart = accountServer.indexOf("export async function cancelAccountClosureRequest");
+const requestClosureFn = accountServer.substring(requestClosureStart, cancelClosureStart);
+assert(!requestClosureFn.includes('status: "CLOSED"'), "requestAccountClosure function does not set CLOSED");
 
 console.log("\nH. CLOSURE REQUEST DOES NOT DELETE AUTH.USERS");
 assert(!accountServer.includes("deleteFromAuthUsers") && !accountServer.includes("delete from auth.users"), "requestAccountClosure does not delete auth.users");

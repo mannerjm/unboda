@@ -415,7 +415,7 @@ export async function evaluateAccountServiceAccess(): Promise<AccountAccessDecis
 export async function requestAccountClosure(userId: string): Promise<AccountLifecycle> {
   const account = await ensureAccountLifecycle(userId);
   if (account.status === "CLOSED") {
-    throw new Error("?대? 醫낅즺??怨꾩젙?낅땲??");
+    throw new Error("이미 종료된 계정입니다.");
   }
   if (account.status === "DELETION_REQUESTED") {
     return account;
@@ -423,7 +423,7 @@ export async function requestAccountClosure(userId: string): Promise<AccountLife
 
   const blockers = await getAccountClosureFinancialBlockers(userId);
   if (blockers.length > 0) {
-    throw new Error("吏꾪뻾 以묒씤 ?섎텋?대굹 寃곗젣 ?뺤씤 嫄댁씠 ?덉뼱 ?덊눜 ?붿껌???꾨즺?????놁뒿?덈떎.");
+    throw new Error("진행 중인 환불이나 결제 확인 건이 있어 탈퇴 요청을 완료할 수 없습니다.");
   }
 
   const supabase = createAdminClient();
@@ -436,7 +436,7 @@ export async function requestAccountClosure(userId: string): Promise<AccountLife
     .maybeSingle<AccountLifecycleRow>();
 
   if (error || !data) {
-    throw new Error(`怨꾩젙 ?덊눜 ?붿껌??泥섎━?섏? 紐삵뻽?듬땲?? ${error?.message ?? "unknown"}`);
+    throw new Error(`계정 탈퇴 요청을 처리하지 못했습니다: ${error?.message ?? "unknown"}`);
   }
   return toAccountLifecycle(data);
 }
@@ -449,7 +449,7 @@ export async function requestAccountClosure(userId: string): Promise<AccountLife
 export async function cancelAccountClosureRequest(userId: string): Promise<AccountLifecycle> {
   const account = await ensureAccountLifecycle(userId);
   if (account.status === "CLOSED") {
-    throw new Error("?대? 醫낅즺??怨꾩젙? 蹂듦뎄?????놁뒿?덈떎.");
+    throw new Error("이미 종료된 계정은 복구할 수 없습니다.");
   }
   if (account.status === "ACTIVE") {
     return account;
@@ -465,7 +465,37 @@ export async function cancelAccountClosureRequest(userId: string): Promise<Accou
     .maybeSingle<AccountLifecycleRow>();
 
   if (error || !data) {
-    throw new Error(`怨꾩젙 ?덊눜 ?붿껌 痍⑥냼瑜?泥섎━?섏? 紐삵뻽?듬땲?? ${error?.message ?? "unknown"}`);
+    throw new Error(`계정 탈퇴 요청 취소를 처리하지 못했습니다: ${error?.message ?? "unknown"}`);
   }
   return toAccountLifecycle(data);
+}
+
+/**
+ * PHASE 3C CLEANUP ORCHESTRATOR SPECIFICATION (PLANNING STUB - NOT EXECUTED IN PRODUCTION)
+ *
+ * Designed finalization flow (DELETION_REQUESTED -> CLOSED):
+ * 1. Inspect financial blockers (refunds in progress, payment reconciliation required).
+ * 2. Scrub personalized report content (Class D data) without violating paid_reports_completed_requires_content constraint.
+ * 3. Tombstone personal Saju profile fields (Class A data: birth_date, birth_time, label) instead of DELETE
+ *    to preserve ON DELETE RESTRICT foreign keys from orders, purchases, entitlements, and paid_reports.
+ * 4. Revoke active entitlements (is_active = false, revocation_reason = 'ACCOUNT_CLOSED').
+ * 5. Transition account_lifecycles status to CLOSED.
+ *
+ * Destructive execution is strictly disabled until Phase 3C retention architecture is human-approved.
+ */
+export async function finalizeAccountClosure(userId: string): Promise<AccountLifecycle> {
+  const account = await ensureAccountLifecycle(userId);
+  if (account.status === "CLOSED") {
+    return account;
+  }
+  if (account.status !== "DELETION_REQUESTED") {
+    throw new Error("탈퇴 요청(DELETION_REQUESTED) 상태의 계정만 최종 종료 처리할 수 있습니다.");
+  }
+
+  const blockers = await getAccountClosureFinancialBlockers(userId);
+  if (blockers.length > 0) {
+    throw new Error(`진행 중인 금융 처리가 있어 계정을 최종 종료할 수 없습니다: ${blockers.join(", ")}`);
+  }
+
+  throw new Error("Phase 3C 계정 최종 종료 처리 실행은 아키텍처 승인 전까지 비활성화되어 있습니다.");
 }

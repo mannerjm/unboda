@@ -554,13 +554,119 @@ export async function executeAccountClosureDbCleanup(userId: string): Promise<Ac
 }
 
 /**
- * STEP 57D-46 PHASE 3D-1: Full Account Closure Finalization Orchestrator (Phase 3D-1 STOP boundary).
+ * STEP 57D-46 PHASE 3D-2: Production Auth Tombstone Primitive & DB Finalization.
  *
- * Executes Phase 3D-1 database cleanup via `executeAccountClosureDbCleanup(userId)`.
- * Stops at `dataScrubbedAt IS NOT NULL` with status `DELETION_REQUESTED`.
- * Auth identity tombstoning and setting status = CLOSED remain deferred to Phase 3D-2/3E.
+ * Preconditions:
+ * 1. Account lifecycle status = DELETION_REQUESTED (or CLOSED with finalizedAt set for idempotency).
+ * 2. finalization_started_at IS NOT NULL.
+ * 3. data_scrubbed_at IS NOT NULL (DB cleanup complete).
+ *
+ * Execution:
+ * 1. Verifies preconditions (fails closed with NOT_READY_FOR_AUTH_FINALIZATION if DB cleanup is incomplete).
+ * 2. If status === CLOSED and finalizedAt is non-null, returns idempotent current lifecycle.
+ * 3. Fetches Auth user via admin.getUserById(userId) (fails closed with AUTH_USER_NOT_FOUND if missing).
+ * 4. Generates deterministic tombstone email: `tombstone_${userId}@deleted.unboda.internal`.
+ * 5. If Auth user email !== expectedTombstoneEmail:
+ *    Mutates email to tombstone email and clears user_metadata via admin.updateUserById(userId, { email, user_metadata: {} }).
+ *    Re-fetches and verifies Auth user email.
+ * 6. Atomically transitions account_lifecycles status to CLOSED and sets finalized_at = now().
+ */
+export async function finalizeAccountClosureAuthIdentity(userId: string): Promise<AccountLifecycle> {
+  const account = await ensureAccountLifecycle(userId);
+  if (account.status === "CLOSED" && account.finalizedAt) {
+    return account;
+  }
+
+  if (account.status !== "DELETION_REQUESTED") {
+    throw new Error("NOT_READY_FOR_AUTH_FINALIZATION: 계정 탈퇴 요청(DELETION_REQUESTED) 상태가 아닙니다.");
+  }
+  if (!account.finalizationStartedAt) {
+    throw new Error("NOT_READY_FOR_AUTH_FINALIZATION: 계정 탈퇴 처리(finalization_started_at)가 시작되지 않았습니다.");
+  }
+  if (!account.dataScrubbedAt) {
+    throw new Error("NOT_READY_FOR_AUTH_FINALIZATION: 계정 DB 데이터 정리(data_scrubbed_at)가 완료되지 않았습니다.");
+  }
+
+  const expectedTombstoneEmail = `tombstone_${userId}@deleted.unboda.internal`;
+  const supabase = createAdminClient();
+
+  const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
+  if (userError || !userData.user) {
+    throw new Error(`AUTH_USER_NOT_FOUND: Auth 계정을 찾을 수 없습니다 (${userId})`);
+  }
+
+  const currentUser = userData.user;
+
+  if (currentUser.email !== expectedTombstoneEmail) {
+    const scrubbedMetadata: Record<string, null> = {};
+    if (currentUser.user_metadata) {
+      for (const key of Object.keys(currentUser.user_metadata)) {
+        scrubbedMetadata[key] = null;
+      }
+    }
+
+    const { data: updateData, error: updateError } = await supabase.auth.admin.updateUserById(userId, {
+      email: expectedTombstoneEmail,
+      user_metadata: scrubbedMetadata,
+    });
+
+    if (updateError || !updateData.user) {
+      if (
+        updateError?.message?.toLowerCase().includes("already") ||
+        updateError?.message?.toLowerCase().includes("duplicate") ||
+        updateError?.message?.toLowerCase().includes("conflict") ||
+        updateError?.status === 422 ||
+        updateError?.status === 400
+      ) {
+        throw new Error(`TOMBSTONE_EMAIL_CONFLICT: tombstone 이메일이 이미 다른 Auth 계정에 할당되어 있습니다 (${updateError.message})`);
+      }
+      throw new Error(`AUTH_UPDATE_FAILED: Auth 계정 이메일 변경에 실패했습니다: ${updateError?.message ?? "unknown"}`);
+    }
+
+    const { data: verifyData, error: verifyError } = await supabase.auth.admin.getUserById(userId);
+    if (verifyError || !verifyData.user || verifyData.user.email !== expectedTombstoneEmail) {
+      throw new Error("AUTH_VERIFICATION_FAILED: Auth 계정 이메일 변경 검증에 실패했습니다.");
+    }
+  }
+
+  const now = new Date().toISOString();
+  const { data: finalizedRow, error: finalizationError } = await supabase
+    .from("account_lifecycles")
+    .update({
+      status: "CLOSED",
+      finalized_at: now,
+      updated_at: now,
+    })
+    .eq("user_id", userId)
+    .eq("status", "DELETION_REQUESTED")
+    .not("finalization_started_at", "is", null)
+    .not("data_scrubbed_at", "is", null)
+    .is("finalized_at", null)
+    .select("*")
+    .maybeSingle<AccountLifecycleRow>();
+
+  if (finalizationError) {
+    throw new Error(`DB_FINALIZATION_FAILED: 계정 최종 종료 DB 처리 중 오류가 발생했습니다: ${finalizationError.message}`);
+  }
+
+  if (!finalizedRow) {
+    const currentLifecycle = await getAccountLifecycle(userId);
+    if (currentLifecycle?.status === "CLOSED" && currentLifecycle.finalizedAt) {
+      return currentLifecycle;
+    }
+    throw new Error("DB_FINALIZATION_FAILED: 계정 최종 종료 상태 전환 실패.");
+  }
+
+  return toAccountLifecycle(finalizedRow);
+}
+
+/**
+ * STEP 57D-46 PHASE 3D-2: Full Account Closure Finalization Orchestrator.
+ *
+ * 1. Executes Phase 3D-1 DB cleanup (executeAccountClosureDbCleanup).
+ * 2. Executes Phase 3D-2 Auth tombstoning & DB status = CLOSED transition (finalizeAccountClosureAuthIdentity).
  */
 export async function finalizeAccountClosure(userId: string): Promise<AccountLifecycle> {
-  const result = await executeAccountClosureDbCleanup(userId);
-  return result;
+  await executeAccountClosureDbCleanup(userId);
+  return finalizeAccountClosureAuthIdentity(userId);
 }

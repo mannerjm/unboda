@@ -615,8 +615,10 @@ export async function finalizeAccountClosureAuthIdentity(userId: string): Promis
         updateError?.message?.toLowerCase().includes("already") ||
         updateError?.message?.toLowerCase().includes("duplicate") ||
         updateError?.message?.toLowerCase().includes("conflict") ||
+        updateError?.message?.toLowerCase().includes("error updating user") ||
         updateError?.status === 422 ||
-        updateError?.status === 400
+        updateError?.status === 400 ||
+        updateError?.status === 500
       ) {
         throw new Error(`TOMBSTONE_EMAIL_CONFLICT: tombstone 이메일이 이미 다른 Auth 계정에 할당되어 있습니다 (${updateError.message})`);
       }
@@ -669,4 +671,229 @@ export async function finalizeAccountClosureAuthIdentity(userId: string): Promis
 export async function finalizeAccountClosure(userId: string): Promise<AccountLifecycle> {
   await executeAccountClosureDbCleanup(userId);
   return finalizeAccountClosureAuthIdentity(userId);
+}
+
+// ============================================================================
+// PHASE 3E-2 SERVER-ONLY ACCOUNT CLOSURE BATCH RECONCILIATION WORKER
+// ============================================================================
+
+export type AccountClosureReconciliationResult = {
+  runId: string;
+  startedAt: string;
+  claimed: number;
+  scanned: number;
+  eligible: number;
+  finalized: number;
+  alreadyClosed: number;
+  retryScheduled: number;
+  waitingFinancial: number;
+  ownerReview: number;
+  claimLost: number;
+  failed: number;
+  durationMs: number;
+  results: Array<{
+    userId: string;
+    outcome:
+      | "finalized"
+      | "already_closed"
+      | "retry_scheduled"
+      | "waiting_financial"
+      | "owner_review"
+      | "claim_lost"
+      | "failed";
+    errorCode?: string;
+  }>;
+};
+
+export const MAX_ACCOUNT_CLOSURE_RETRIES = 5;
+
+/**
+ * STEP 57D-46 PHASE 3E-2: Server-Only Account Closure Batch Reconciliation Worker.
+ *
+ * Claims a bounded batch of closure-candidate accounts via migration 027 RPC
+ * and attempts finalization for each account independently.
+ *
+ * Error & Retry Policy:
+ * - Happy / already closed -> Releases claim token, records outcome 'finalized' or 'already_closed'.
+ * - Financial Wait -> Schedules retry with exponential backoff if retry count < MAX_ACCOUNT_CLOSURE_RETRIES.
+ * - Retryable technical errors (DB/Auth transient errors) -> Schedules retry with backoff if retry count < MAX_ACCOUNT_CLOSURE_RETRIES.
+ * - Non-retryable / Ambiguous / Exhausted errors (TOMBSTONE_EMAIL_CONFLICT, AUTH_USER_NOT_FOUND, OWNER_REVIEW_REQUIRED, max retries reached) -> Escalates to owner review (`closure_owner_review_required = true`).
+ */
+export async function reconcileAccountClosureFinalizations(options?: {
+  batchLimit?: number;
+  leaseSeconds?: number;
+}): Promise<AccountClosureReconciliationResult> {
+  const startedAt = Date.now();
+  const runId = crypto.randomUUID();
+  const claimToken = crypto.randomUUID();
+  const batchLimit = options?.batchLimit ?? 10;
+  const leaseSeconds = options?.leaseSeconds ?? 300;
+
+  const supabase = createAdminClient();
+
+  const { data: claimedRows, error: claimError } = await supabase.rpc(
+    "claim_account_closure_finalizations",
+    {
+      requested_limit: batchLimit,
+      claim_token: claimToken,
+      lease_seconds: leaseSeconds,
+    }
+  );
+
+  if (claimError || !claimedRows) {
+    throw new Error(`계정 탈퇴 재조정 배치 작업 선점에 실패했습니다: ${claimError?.message ?? "unknown"}`);
+  }
+
+  const candidateRows = claimedRows as AccountLifecycleRow[];
+  const claimedCount = candidateRows.length;
+
+  let finalized = 0;
+  let alreadyClosed = 0;
+  let retryScheduled = 0;
+  let waitingFinancial = 0;
+  let ownerReview = 0;
+  let claimLost = 0;
+  let failed = 0;
+
+  const results: AccountClosureReconciliationResult["results"] = [];
+
+  for (const row of candidateRows) {
+    const userId = row.user_id;
+    const currentRetryCount = row.closure_retry_count ?? 0;
+    const wasAlreadyClosed = row.status === "CLOSED" || Boolean(row.finalized_at);
+
+    try {
+      await finalizeAccountClosure(userId);
+
+      // Release claim token upon completion
+      await supabase.rpc("release_account_closure_claim", {
+        p_user_id: userId,
+        p_claim_token: claimToken,
+      });
+
+      if (wasAlreadyClosed) {
+        alreadyClosed += 1;
+        results.push({ userId, outcome: "already_closed" });
+      } else {
+        finalized += 1;
+        results.push({ userId, outcome: "finalized" });
+      }
+    } catch (err: unknown) {
+      const rawMessage = err instanceof Error ? err.message : "UNKNOWN_FAILURE";
+
+      let sanitizedCode = "UNKNOWN_ERROR";
+      let isFinancialWait = false;
+      let isOwnerReview = false;
+
+      if (
+        rawMessage.includes("진행 중인 금융 처리") ||
+        rawMessage.includes("financial blockers") ||
+        rawMessage.includes("REFUND_IN_PROGRESS") ||
+        rawMessage.includes("PAYMENT_RECONCILIATION_REQUIRED") ||
+        rawMessage.includes("WAITING_FINANCIAL")
+      ) {
+        sanitizedCode = "WAITING_FINANCIAL";
+        isFinancialWait = true;
+      } else if (rawMessage.includes("TOMBSTONE_EMAIL_CONFLICT")) {
+        sanitizedCode = "TOMBSTONE_EMAIL_CONFLICT";
+        isOwnerReview = true;
+      } else if (rawMessage.includes("AUTH_USER_NOT_FOUND")) {
+        sanitizedCode = "AUTH_USER_NOT_FOUND";
+        isOwnerReview = true;
+      } else if (rawMessage.includes("REFUND_OWNER_REVIEW") || rawMessage.includes("OWNER_REVIEW_REQUIRED")) {
+        sanitizedCode = "REFUND_OWNER_REVIEW";
+        isOwnerReview = true;
+      } else if (rawMessage.includes("NOT_READY_FOR_AUTH_FINALIZATION")) {
+        sanitizedCode = "NOT_READY_FOR_AUTH_FINALIZATION";
+      } else if (rawMessage.includes("AUTH_UPDATE_FAILED")) {
+        sanitizedCode = "AUTH_UPDATE_FAILED";
+      } else if (rawMessage.includes("AUTH_VERIFICATION_FAILED")) {
+        sanitizedCode = "AUTH_VERIFICATION_FAILED";
+      } else if (rawMessage.includes("DB_FINALIZATION_FAILED")) {
+        sanitizedCode = "DB_FINALIZATION_FAILED";
+      }
+
+      const nextRetryIndex = currentRetryCount + 1;
+      const isExhausted = nextRetryIndex >= MAX_ACCOUNT_CLOSURE_RETRIES;
+
+      if (isOwnerReview || (isExhausted && !isFinancialWait)) {
+        const finalErrorCode = isExhausted && !isOwnerReview ? `RETRY_EXHAUSTED_${sanitizedCode}` : sanitizedCode;
+        const { data: escalateData } = await supabase.rpc("escalate_account_closure_owner_review", {
+          p_user_id: userId,
+          p_claim_token: claimToken,
+          p_error_code: finalErrorCode,
+        });
+
+        const updatedRow = escalateData as AccountLifecycleRow | null;
+        if (!updatedRow || (updatedRow.closure_owner_review_required !== true && updatedRow.closure_last_error_code !== finalErrorCode)) {
+          claimLost += 1;
+          failed += 1;
+          results.push({ userId, outcome: "claim_lost", errorCode: "CLAIM_LOST" });
+        } else {
+          ownerReview += 1;
+          failed += 1;
+          results.push({ userId, outcome: "owner_review", errorCode: finalErrorCode });
+        }
+      } else if (isFinancialWait) {
+        const backoffMs = Math.min(60 * 60 * 1000, 60 * 1000 * Math.pow(2, Math.min(currentRetryCount, 6)));
+        const nextRetryAt = new Date(Date.now() + backoffMs).toISOString();
+
+        const { data: retryData } = await supabase.rpc("record_account_closure_retry", {
+          p_user_id: userId,
+          p_claim_token: claimToken,
+          p_error_code: sanitizedCode,
+          p_next_retry_at: nextRetryAt,
+        });
+
+        const updatedRow = retryData as AccountLifecycleRow | null;
+        if (!updatedRow || (updatedRow.closure_retry_count !== currentRetryCount + 1 && updatedRow.closure_last_error_code !== sanitizedCode)) {
+          claimLost += 1;
+          failed += 1;
+          results.push({ userId, outcome: "claim_lost", errorCode: "CLAIM_LOST" });
+        } else {
+          waitingFinancial += 1;
+          failed += 1;
+          results.push({ userId, outcome: "waiting_financial", errorCode: sanitizedCode });
+        }
+      } else {
+        const backoffMs = Math.min(60 * 60 * 1000, 60 * 1000 * Math.pow(2, Math.min(currentRetryCount, 6)));
+        const nextRetryAt = new Date(Date.now() + backoffMs).toISOString();
+
+        const { data: retryData } = await supabase.rpc("record_account_closure_retry", {
+          p_user_id: userId,
+          p_claim_token: claimToken,
+          p_error_code: sanitizedCode,
+          p_next_retry_at: nextRetryAt,
+        });
+
+        const updatedRow = retryData as AccountLifecycleRow | null;
+        if (!updatedRow || (updatedRow.closure_retry_count !== currentRetryCount + 1 && updatedRow.closure_last_error_code !== sanitizedCode)) {
+          claimLost += 1;
+          failed += 1;
+          results.push({ userId, outcome: "claim_lost", errorCode: "CLAIM_LOST" });
+        } else {
+          retryScheduled += 1;
+          failed += 1;
+          results.push({ userId, outcome: "retry_scheduled", errorCode: sanitizedCode });
+        }
+      }
+    }
+  }
+
+  return {
+    runId,
+    startedAt: new Date(startedAt).toISOString(),
+    claimed: claimedCount,
+    scanned: claimedCount,
+    eligible: claimedCount,
+    finalized,
+    alreadyClosed,
+    retryScheduled,
+    waitingFinancial,
+    ownerReview,
+    claimLost,
+    failed,
+    durationMs: Date.now() - startedAt,
+    results,
+  };
 }

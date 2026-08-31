@@ -26,7 +26,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { execSync, spawn } from "node:child_process";
-import { createAdminClient } from "../app/lib/accounts/server.ts"; // test import
+import { createAdminClient } from "../app/lib/supabase/admin"; // test import
 import { createClient as createBaseClient } from "@supabase/supabase-js";
 
 function loadLocalEnv() {

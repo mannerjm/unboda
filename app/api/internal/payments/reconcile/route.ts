@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  listTossPaymentsForReconciliation,
-  reconcileTossPayment,
-} from "@/app/lib/purchases/server";
-import { emitPaymentEvent } from "@/app/lib/payments/observability";
+import { reconcilePaymentsBatch } from "@/app/lib/purchases/server";
 
 export const dynamic = "force-dynamic";
 
@@ -20,51 +16,8 @@ async function reconcile(request: Request) {
   }
 
   try {
-    const startedAt = Date.now();
-    const records = await listTossPaymentsForReconciliation();
-    emitPaymentEvent("reconciliation_scheduled", {
-      operationalClass: "RECOVERING",
-    });
-    let recovered = 0;
-    let failed = 0;
-    let retryPending = 0;
-    let escalation = 0;
-
-    for (const record of records) {
-      try {
-        await reconcileTossPayment(record);
-        recovered += 1;
-        emitPaymentEvent("reconciliation_converged", {
-          operationalClass: "CONVERGED",
-          orderId: record.orderId,
-          profileId: undefined,
-          productId: undefined,
-          providerReference: record.paymentKey ?? undefined,
-        });
-      } catch {
-        failed += 1;
-        retryPending += 1;
-        emitPaymentEvent("reconciliation_retry", {
-          operationalClass: "RETRY_PENDING",
-          orderId: record.orderId,
-          attempt: record.retryCount + 1,
-          nextRetryAt: record.nextRetryAt,
-        });
-      }
-    }
-
-    return NextResponse.json({
-      runId: crypto.randomUUID(),
-      startedAt: new Date().toISOString(),
-      attempted: records.length,
-      scanned: records.length,
-      eligible: records.length,
-      converged: recovered,
-      retryPending,
-      failed,
-      escalation,
-      durationMs: Date.now() - startedAt,
-    }, {
+    const summary = await reconcilePaymentsBatch();
+    return NextResponse.json(summary, {
       headers: { "Cache-Control": "no-store" },
     });
   } catch {

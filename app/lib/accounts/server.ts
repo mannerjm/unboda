@@ -98,6 +98,15 @@ type AccountLifecycleRow = {
   finalization_started_at?: string | null;
   data_scrubbed_at?: string | null;
   finalized_at?: string | null;
+  // Migration 027: account closure durable retry + claim/lease columns.
+  closure_retry_count: number;
+  closure_next_retry_at?: string | null;
+  closure_last_attempt_at?: string | null;
+  closure_last_error_code?: string | null;
+  closure_owner_review_required: boolean;
+  closure_claim_token?: string | null;
+  closure_claimed_at?: string | null;
+  closure_claim_expires_at?: string | null;
 };
 
 function toAccountLifecycle(row: AccountLifecycleRow): AccountLifecycle {

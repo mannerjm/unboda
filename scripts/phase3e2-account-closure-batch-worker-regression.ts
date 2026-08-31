@@ -214,6 +214,12 @@ async function runDbIntegrationTests() {
   console.log("\n--- TEST 3: RETRY BUDGET EXHAUSTION (retry_count >= 5 -> OWNER REVIEW) ---");
   const tombstoneF = `tombstone_${userF}@deleted.unboda.internal`;
 
+  // A prior run's raw-SQL Auth deletion below (session_replication_role='replica') bypasses
+  // GoTrue's normal cascade and can leave an orphaned auth.identities row for userF, which
+  // makes the next createUser() call fail with a 500 ("unable to find user from email
+  // identity for duplicates"). Clear it defensively so fixture creation is idempotent.
+  execSync(`docker exec -i supabase_db_unboda psql -U postgres -d postgres -c "DELETE FROM auth.identities WHERE user_id = '${userF}';"`, { encoding: "utf-8" });
+
   await supabase.auth.admin.createUser({ id: userF, email: tombstoneF, password: "Password123!", email_confirm: true });
   await supabase.from("profiles").insert({ id: profileF, user_id: userF, label: "Prof F", relationship_type: "self", birth_date: "1990-01-01", birth_time: "12:00:00", gender: "male", calendar_type: "solar" });
   await supabase.from("account_lifecycles").insert({
@@ -233,8 +239,27 @@ async function runDbIntegrationTests() {
 
   const { data: userFLifecycle } = await supabase.from("account_lifecycles").select("*").eq("user_id", userF).single();
   assert(userFLifecycle?.closure_owner_review_required === true, "User F closure_owner_review_required set to TRUE upon retry exhaustion");
+  // AUTH_USER_NOT_FOUND is an immediate, non-retryable owner-review classification (same tier
+  // as TOMBSTONE_EMAIL_CONFLICT) independent of closure_retry_count, so it is never prefixed
+  // with RETRY_EXHAUSTED_ — confirm the exact stable code and that retry bookkeeping is untouched.
   assert(userFLifecycle?.closure_last_error_code === "AUTH_USER_NOT_FOUND", "User F closure_last_error_code recorded AUTH_USER_NOT_FOUND");
+  assert(userFLifecycle?.closure_retry_count === 4, "User F closure_retry_count unchanged by immediate owner-review escalation");
+  assert(userFLifecycle?.closure_next_retry_at === null, "User F closure_next_retry_at not set (no further retry scheduled)");
+  assert(userFLifecycle?.closure_claim_token === null, "User F closure_claim_token cleared upon escalation");
+  assert(userFLifecycle?.closure_claimed_at === null, "User F closure_claimed_at cleared upon escalation");
+  assert(userFLifecycle?.closure_claim_expires_at === null, "User F closure_claim_expires_at cleared upon escalation");
   assert(userFLifecycle?.status === "DELETION_REQUESTED", "User F status remains DELETION_REQUESTED");
+  assert(userFLifecycle?.finalized_at === null, "User F finalized_at remains NULL");
+
+  const reclaimAttempt = await supabase.rpc("claim_account_closure_finalizations", {
+    requested_limit: 10,
+    claim_token: "22222222-9999-9999-9999-999999999999",
+    lease_seconds: 300,
+  });
+  assert(
+    !(reclaimAttempt.data as Array<{ user_id: string }> | null)?.some((row) => row.user_id === userF),
+    "User F is not claimable again after owner-review escalation"
+  );
 
   await cleanupAll();
 

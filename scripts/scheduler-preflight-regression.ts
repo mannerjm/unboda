@@ -14,17 +14,20 @@ const vercel = JSON.parse(read("vercel.json")) as {
 };
 const crons = vercel.crons ?? [];
 assert(crons.length === 1, "exactly one bounded reconciliation cron must exist");
-assert(crons[0]?.path === "/api/internal/payments/reconcile", "cron must invoke reconciliation route");
+// STEP 57D-46 PHASE 3E-3: the single hourly cron now targets the shared internal dispatcher,
+// which invokes the payment reconciliation worker as a direct server-side call.
+assert(crons[0]?.path === "/api/internal/reconcile", "cron must invoke the shared internal dispatcher route");
 assert(crons[0]?.schedule === "0 * * * *", "cron must run at most hourly");
 
-const route = read("app/api/internal/payments/reconcile/route.ts");
-assert(route.includes("PAYMENT_RECONCILIATION_SECRET"), "scheduler route must require a secret");
-assert(route.includes("Bearer"), "scheduler route must accept Vercel Cron bearer authentication");
-assert(route.includes("export async function GET"), "scheduler route must expose GET for Vercel Cron");
-assert(route.includes("force-dynamic") && route.includes("no-store"), "cron mutation route must be dynamic and uncached");
-assert(route.includes("runId") && route.includes("retryPending") && route.includes("escalation") && route.includes("durationMs"), "scheduler result must be structured");
+const dispatcherRoute = read("app/api/internal/reconcile/route.ts");
+const schedulerAuth = read("app/lib/internal/schedulerAuth.ts");
+assert(schedulerAuth.includes("PAYMENT_RECONCILIATION_SECRET"), "scheduler route must require a secret");
+assert(schedulerAuth.includes("Bearer"), "scheduler route must accept Vercel Cron bearer authentication");
+assert(dispatcherRoute.includes("export async function GET"), "scheduler route must expose GET for Vercel Cron");
+assert(dispatcherRoute.includes("force-dynamic") && dispatcherRoute.includes("no-store"), "cron mutation route must be dynamic and uncached");
 
 const server = read("app/lib/purchases/server.ts");
+assert(server.includes("runId") && server.includes("retryPending") && server.includes("escalation") && server.includes("durationMs"), "scheduler result must be structured");
 assert(server.includes("max_retry_count") && server.includes("next_retry_at"), "retry budget must be durable");
 assert(server.includes("Math.min(60 * 60 * 1000"), "retry backoff must be bounded");
 assert(server.includes("records.slice(0, 50)"), "reconciliation batch must be bounded");

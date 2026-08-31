@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 
 /**
  * STEP 57D-46 PHASE 3A ACCOUNT POLICY REGRESSION

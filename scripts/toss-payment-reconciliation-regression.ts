@@ -101,7 +101,10 @@ assert(server.includes("createPurchaseFromPaidOrder(order)"), "already-paid reco
 
 const reconcileRoute = read("app/api/internal/payments/reconcile/route.ts");
 assert(reconcileRoute.includes("PAYMENT_RECONCILIATION_SECRET"), "reconciliation trigger must be server-authenticated");
-assert(reconcileRoute.includes("listTossPaymentsForReconciliation"), "reconciliation trigger must find unresolved records");
+// STEP 57D-46 PHASE 3E-3: the batch scan now lives in reconcilePaymentsBatch, called by both
+// the standalone route and the shared cron dispatcher.
+assert(reconcileRoute.includes("reconcilePaymentsBatch"), "reconciliation trigger must delegate to the reusable batch worker");
+assert(server.includes("listTossPaymentsForReconciliation"), "reconciliation batch worker must find unresolved records");
 
 const confirmRoute = read("app/api/orders/[orderId]/confirm-payment/route.ts");
 assert(confirmRoute.includes("recordTossConfirmationStarted"), "confirmation must persist started state");

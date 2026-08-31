@@ -24,9 +24,11 @@ for (const operationalClass of ["NORMAL", "RECOVERING", "RETRY_PENDING", "CONVER
 assert(source.includes('createHash("sha256")'), "provider references must be redacted");
 assert(!source.includes("secretKey") && !source.includes("authorization"), "event model must not log secrets or auth headers");
 
-const reconcile = read("app/api/internal/payments/reconcile/route.ts");
-assert(reconcile.includes("runId") && reconcile.includes("durationMs"), "reconciliation result must remain correlated and timed");
-assert(reconcile.includes("reconciliation_retry"), "reconciliation retry event must be emitted");
+// STEP 57D-46 PHASE 3E-3: reconciliation batch logic was extracted from the route
+// into a reusable server-side function so the shared cron dispatcher can call it directly.
+const purchasesServer = read("app/lib/purchases/server.ts");
+assert(purchasesServer.includes("runId") && purchasesServer.includes("durationMs"), "reconciliation result must remain correlated and timed");
+assert(purchasesServer.includes("reconciliation_retry"), "reconciliation retry event must be emitted");
 
 const checkout = read("app/checkout/[productId]/CheckoutAccessPanel.tsx");
 assert(checkout.includes("NEXT_PUBLIC_TOSS_CLIENT_KEY"), "checkout must use the public Toss client key only");

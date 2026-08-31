@@ -14,6 +14,7 @@ import {
   type TossConfirmResponse,
 } from "../toss/server";
 import { getPremiumCategoryLabel, getPremiumProduct } from "../premiumProductRegistry";
+import { emitPaymentEvent } from "../payments/observability";
 
 type OrderRow = {
   id: string;
@@ -786,6 +787,73 @@ export async function reconcileTossPayment(
     );
     throw error;
   }
+}
+
+export type PaymentReconciliationSummary = {
+  runId: string;
+  startedAt: string;
+  attempted: number;
+  scanned: number;
+  eligible: number;
+  converged: number;
+  retryPending: number;
+  failed: number;
+  escalation: number;
+  durationMs: number;
+};
+
+/**
+ * STEP 57D-46 PHASE 3E-3: Server-only reusable Toss payment reconciliation
+ * batch worker, extracted from /api/internal/payments/reconcile so it can be
+ * invoked directly by the shared internal cron dispatcher (no internal HTTP hop).
+ */
+export async function reconcilePaymentsBatch(): Promise<PaymentReconciliationSummary> {
+  const startedAt = Date.now();
+  const records = await listTossPaymentsForReconciliation();
+  emitPaymentEvent("reconciliation_scheduled", {
+    operationalClass: "RECOVERING",
+  });
+
+  let recovered = 0;
+  let failed = 0;
+  let retryPending = 0;
+  const escalation = 0;
+
+  for (const record of records) {
+    try {
+      await reconcileTossPayment(record);
+      recovered += 1;
+      emitPaymentEvent("reconciliation_converged", {
+        operationalClass: "CONVERGED",
+        orderId: record.orderId,
+        profileId: undefined,
+        productId: undefined,
+        providerReference: record.paymentKey ?? undefined,
+      });
+    } catch {
+      failed += 1;
+      retryPending += 1;
+      emitPaymentEvent("reconciliation_retry", {
+        operationalClass: "RETRY_PENDING",
+        orderId: record.orderId,
+        attempt: record.retryCount + 1,
+        nextRetryAt: record.nextRetryAt,
+      });
+    }
+  }
+
+  return {
+    runId: crypto.randomUUID(),
+    startedAt: new Date().toISOString(),
+    attempted: records.length,
+    scanned: records.length,
+    eligible: records.length,
+    converged: recovered,
+    retryPending,
+    failed,
+    escalation,
+    durationMs: Date.now() - startedAt,
+  };
 }
 
 /**

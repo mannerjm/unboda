@@ -13,13 +13,13 @@ assert(!hasCurrentEvaluationPeriod({ saju: {} } as AnalyzeSuccessResponse, creat
 assert(!hasCurrentEvaluationPeriod(null, createEvaluationContext("2026-08-15")), "missing content is stale");
 
 const results = readFileSync("app/lib/freeAnalysisResults/server.ts", "utf8");
-const registeredGet = readFileSync("app/api/free-analysis/[profileId]/route.ts", "utf8");
+const registeredRetry = readFileSync("app/api/free-analysis/[profileId]/retry-main-analysis/route.ts", "utf8");
 const registeredAnalyze = readFileSync("app/api/analyze/route.ts", "utf8");
 const guestGet = readFileSync("app/api/guest-free-analysis/route.ts", "utf8");
 const guestRetry = readFileSync("app/api/guest-free-analysis/retry-main-analysis/route.ts", "utf8");
 const paidReports = readFileSync("app/lib/paidReports/server.ts", "utf8");
 assert(results.includes("hasCurrentEvaluationPeriod") && results.includes('content: null'), "stale registered results claim whole-response regeneration");
-assert(registeredGet.includes("STALE_EVALUATION_PERIOD") && registeredAnalyze.includes("evaluationContext"), "registered read and generation paths use period context");
+assert(registeredRetry.includes("STALE_EVALUATION_PERIOD") && registeredAnalyze.includes("evaluationContext"), "registered read and generation paths use period context");
 assert(guestGet.includes("STALE_EVALUATION_PERIOD") && guestRetry.includes("STALE_EVALUATION_PERIOD"), "guest read and retry paths protect freshness");
 assert(!results.includes("purchases") && !results.includes("entitlements"), "freshness key excludes purchase and entitlement state");
 assert(paidReports.includes("getPaidReport") && !paidReports.includes("evaluationContext"), "paid report persistence is not invalidated by recommendation period");

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { PeriodAnalysisProductType } from "./analysisPeriodProducts";
 import { getPremiumProduct } from "./premiumProductRegistry";
+import { getKoreaEvaluationDate } from "./evaluationContext";
 
 const REFERENCE_PERIOD_SCALES = [
   "monthly",
@@ -111,9 +112,9 @@ function parseAnchorDate(anchorDate: string): {
   return { year, month, day };
 }
 
-/** Server-local calendar day; the only place production reads the clock. */
+/** Asia/Seoul calendar day; the only place production reads the clock. Host-timezone-independent. */
 export function getServerAnchorDate(now: Date = new Date()): string {
-  return toDateString(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  return getKoreaEvaluationDate(now);
 }
 
 function buildMonthSnapshot(

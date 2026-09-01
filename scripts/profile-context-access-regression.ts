@@ -21,6 +21,8 @@ const detailRoute = read("app/api/paid-analysis-detail-v2/route.ts");
 const ordersRoute = read("app/api/orders/route.ts");
 const purchaseServer = read("app/lib/purchases/server.ts");
 const selector = read("app/components/ProfileSelector.tsx");
+const purchasedAnalysesPage = read("app/purchased-analyses/page.tsx");
+const mypage = read("app/mypage/page.tsx");
 
 assert(selector.includes('fetch("/api/profiles")'), "selector must load profiles through the Profile API");
 assert(!selector.includes("localStorage") && !selector.includes("sessionStorage"), "selector must not persist profile ownership in browser storage");
@@ -30,23 +32,31 @@ assert(selector.includes("max-h-80") && selector.includes("overflow-y-auto"), "s
 console.log("1. selector requires explicit URL-backed profile selection ✓");
 
 assert(resultPage.includes("setProfileSelectionProductId(productId)"), "result paid-analysis entry must open Profile selection instead of navigating directly");
-assert(resultPage.includes("<ProfileSelector") && resultPage.includes("productId={profileSelectionProductId}"), "result must reuse ProfileSelector for the selected recommendation product");
+assert(resultPage.includes("<ProfileSelector") && resultPage.includes('destination="paid-analysis"'), "result must reuse ProfileSelector for the selected recommendation product");
 assert(resultPage.includes("currentProfileId={currentProfileId}"), "result must preserve existing profileId query context when present");
 assert(!resultPage.includes("router.push(`/paid-analysis/${productId}`)"), "result must not navigate to paid analysis without profileId");
 assert(!resultPage.includes("profiles[0]") && !resultPage.includes("relationshipType === \"self\""), "result must not auto-select self or first profile");
 console.log("2. result requires explicit Profile selection before paid-analysis navigation ✓");
 
-for (const [name, source] of [["paid page", paidPage], ["checkout page", checkoutPage]] as const) {
+assert(checkoutPage.includes("<ProfileSelector") && checkoutPage.includes("user && !profileId"), "checkout may show explicit ProfileSelector only when authenticated profile context is absent");
+assert(!checkoutPage.includes("getActiveProfile("), "checkout must not auto-select an active profile");
+
+for (const [name, source] of [["paid page", paidPage]] as const) {
   assert(source.includes("getUserProfile(profileId, user.id)"), `${name} must server-verify selected profile ownership`);
-  assert(source.includes("분석 대상") || source.includes("결제 대상"), `${name} must show the verified active target`);
+  assert(source.includes("<PaidAnalysisAccessPanel productId={product.id} profileId={profileId}"), `${name} must pass verified profile context to the access panel`);
   assert(!source.includes("<ProfileSelector") && !source.includes("ProfileTargetControl"), `${name} must not expose an intermediate profile selector or change control`);
 }
+assert(accessPanel.includes("getUserProfile(profileId, user.id)"), "standalone access panel must verify the profile before rendering product state");
 assert(checkoutPage.includes("searchParams") && checkoutPage.includes("profileId"), "checkout page must read and preserve profileId query context");
-assert(checkoutPanel.includes("profileId?: string") && checkoutPanel.includes("disabled={isPaying || !profileId}"), "checkout must require selected profileId before payment");
+assert(checkoutPanel.includes("profileId?: string") && checkoutPanel.includes("{profileId ? ("), "checkout must render payment only after explicit profile selection");
 assert(checkoutPanel.includes("JSON.stringify({ productId: canonicalProductId, profileId })"), "checkout must send selected profileId to orders API");
 assert(checkoutPanel.includes("?profileId=${profileId}"), "checkout success navigation must preserve profileId");
 assert(ordersRoute.includes("getUserProfile(rawProfileId, user.id)"), "orders API must ownership-verify profileId");
 console.log("3. checkout requires and preserves selected profileId ✓");
+
+assert(!purchasedAnalysesPage.includes("ProfileSelector") && purchasedAnalysesPage.includes("getActiveProfile(user.id)"), "purchased analyses must remain active-profile scoped without a switcher");
+assert(mypage.includes("분석 대상 선택 해제") && mypage.includes("인원 추가"), "My Page must remain the profile management location");
+console.log("3b. profile switching stays in My Page except approved checkout recovery ✓");
 
 for (const [name, source] of [["paid page", paidPage], ["report page", reportPage]] as const) {
   assert(source.includes("searchParams"), `${name} must read profileId query context`);

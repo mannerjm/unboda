@@ -9,7 +9,7 @@ type NavItem = {
   href: string;
   label: string;
   shortLabel?: string;
-  icon: "home" | "chart" | "spark" | "user";
+  icon: "home" | "chart" | "spark" | "book" | "user";
 };
 
 function NavIcon({ icon }: { icon: NavItem["icon"] }) {
@@ -17,6 +17,7 @@ function NavIcon({ icon }: { icon: NavItem["icon"] }) {
     home: "M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5M9 21v-6h6v6",
     chart: "M4 19V5M4 19h16M7 15l3-4 3 2 4-6",
     spark: "m12 3 1.7 6.3L20 11l-6.3 1.7L12 19l-1.7-6.3L4 11l6.3-1.7L12 3Z",
+    book: "M5 4.5A2.5 2.5 0 0 1 7.5 2H19v17H7.5A2.5 2.5 0 0 0 5 21.5Zm0 0V19m0-14.5A2.5 2.5 0 0 1 7.5 7H19",
     user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9a7 7 0 0 1 14 0",
   } as const;
 
@@ -31,6 +32,7 @@ const analysisNavItems: NavItem[] = [
   { href: "/saju", label: "내 분석", icon: "home" },
   { href: "/recommendations", label: "추천 분석", icon: "chart" },
   { href: "/deep-analysis", label: "심층 분석", icon: "spark" },
+  { href: "/purchased-analyses", label: "구매한 분석", icon: "book" },
 ];
 
 const managementNavItems: NavItem[] = [
@@ -41,6 +43,7 @@ const mobileNavItems: NavItem[] = [
   { href: "/saju", label: "내 분석", shortLabel: "내 분석", icon: "home" },
   { href: "/recommendations", label: "추천", shortLabel: "추천", icon: "chart" },
   { href: "/deep-analysis", label: "심층", shortLabel: "심층", icon: "spark" },
+  { href: "/purchased-analyses", label: "구매한 분석", shortLabel: "구매", icon: "book" },
   { href: "/mypage", label: "마이페이지", shortLabel: "내 정보", icon: "user" },
 ];
 
@@ -150,7 +153,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
         className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-[#f8f4ee]/95 backdrop-blur-sm lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <div className="mx-auto grid max-w-md grid-cols-4 gap-1 px-2 py-2">
+        <div className="mx-auto grid max-w-md grid-cols-5 gap-1 px-2 py-2">
           {resolvedMobileNavItems.map((item) => {
             const active = isActivePath(pathname, item.href);
 

@@ -16,7 +16,10 @@ if (getPremiumAnalysisHref("monthly-current", "not_purchased", "profile-a") !== 
 if (getProductPricing("lifetime-overview").amount !== 39900) throw new Error("Period pricing changed");
 
 const source = readFileSync("app/components/PremiumCatalogSection.tsx", "utf8");
-for (const required of ["어느 정도의 시간 범위를 살펴보고 싶으세요?", "PeriodDetailPanel", "recommendedFor", "analysisScope", "expectedUnderstanding", "다른 기간 분석과의 차이"]) if (!source.includes(required)) throw new Error(`Missing Period UX contract: ${required}`);
+const sharedDetail = readFileSync("app/components/PremiumProductDetail.tsx", "utf8");
+for (const required of ["어느 정도의 시간 범위를 살펴보고 싶으세요?", "PeriodDiscovery", "PERIOD_ICONS", "<CatalogIcon", "grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-7", "flex-col items-center justify-center"]) if (!source.includes(required)) throw new Error(`Missing compact Period catalog UX contract: ${required}`);
+if (source.includes("purchaseDecision.distinction}</span>")) throw new Error("Period catalog tiles must reserve long descriptions for selected detail");
+for (const required of ["product.purchaseDecision", "recommendedFor", "analysisScope", "expectedUnderstanding", "다른 기간 분석과의 차이"]) if (!sharedDetail.includes(required)) throw new Error(`Missing shared Period UX contract: ${required}`);
 if (source.includes("periodProducts.map(renderProductRow)")) throw new Error("Period mode must not use the repeated purchase-row list");
 
 console.log("period-purchase-decision-regression: OK");

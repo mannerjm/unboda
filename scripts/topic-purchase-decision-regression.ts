@@ -33,8 +33,12 @@ if (getProductPricing("money-leak-risk").amount !== 16900 || getProductPricing("
 }
 
 const topicUi = readFileSync("app/components/PremiumCatalogSection.tsx", "utf8");
-for (const required of ["TopicDiscovery", "recommendedFor", "whatItAnalyzes", "expectedUnderstanding", "distinction", "decisionQuestion", "이 분석 시작하기"]) {
-  if (!topicUi.includes(required)) throw new Error(`Topic decision-first UI contract missing: ${required}`);
+const sharedDetail = readFileSync("app/components/PremiumProductDetail.tsx", "utf8");
+for (const required of ["TopicDiscovery", "이 분석 시작하기"]) {
+  if (!topicUi.includes(required) && !sharedDetail.includes(required)) throw new Error(`Topic decision-first UI contract missing: ${required}`);
+}
+for (const required of ["recommendedFor", "whatItAnalyzes", "expectedUnderstanding", "distinction", "decisionQuestion"]) {
+  if (!sharedDetail.includes(required)) throw new Error(`Shared Topic decision-first UI contract missing: ${required}`);
 }
 if (!topicUi.includes("selectedProductId") || !topicUi.includes("분석 내용 보기")) {
   throw new Error("Topic selection must be separate from purchase action");
@@ -42,16 +46,13 @@ if (!topicUi.includes("selectedProductId") || !topicUi.includes("분석 내용 �
 if (!topicUi.includes("const selected = selectedCategory === group.category") || !topicUi.includes("aria-pressed={selected}")) {
   throw new Error("Topic category selection must drive one semantic selected state");
 }
-if (!topicUi.includes('selected ? "border-[#bda777] bg-[#e8ddc8]')) {
+if (!topicUi.includes('selected ? "border-[#cdbb98] bg-[#fff8eb]')) {
   throw new Error("Selected Topic category must use the warm active treatment");
 }
-if (!topicUi.includes('selected ? "border-[#bda777] bg-[#e8ddc8]')) {
-  throw new Error("Selected Topic category must use the warm active treatment");
+for (const required of ["topicDecision?.decisionQuestion", "recommendedFor.slice(0, 3)", "whatItAnalyzes.slice(0, 4)", "expectedUnderstanding.slice(0, 3)", "분석을 받고 나면", "그래서 이 분석으로"]) {
+  if (!sharedDetail.includes(required)) throw new Error(`Topic density contract missing: ${required}`);
 }
-for (const required of ["decision.decisionQuestion", "recommendedFor.slice(0, 3)", "whatItAnalyzes.slice(0, 4)", "expectedUnderstanding.slice(0, 3)", "분석을 받고 나면", "그래서 이 분석으로"]) {
-  if (!topicUi.includes(required)) throw new Error(`Topic density contract missing: ${required}`);
-}
-if (!topicUi.includes('role="tablist"') || !topicUi.includes('aria-selected={mode === item}') || !topicUi.includes('mode === item ? "border-[#bda777] bg-[#e8ddc8]')) {
+if (!topicUi.includes('role="tablist"') || !topicUi.includes('aria-selected={mode === item}') || !topicUi.includes('mode === item ? "border-[#cdbb98] bg-[#f3e6cf]') || !topicUi.includes("CATEGORY_ICONS") || !topicUi.includes("<CatalogIcon")) {
   throw new Error("Topic/Period tabs must expose and visibly represent one active mode");
 }
 if (!topicUi.includes('mode === "topic" ? (') || !topicUi.includes("PeriodDiscovery") || !topicUi.includes("setMode(item)")) {

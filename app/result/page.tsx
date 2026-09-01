@@ -18,6 +18,7 @@ import {
   getPremiumCategoryLabel,
   getPremiumProduct,
 } from "@/app/lib/premiumProductRegistry";
+import { resolveCanonicalRecommendationProduct } from "@/app/lib/analysisProductRecommendations";
 import { getProductPricing } from "@/app/lib/productPricing";
 import type {
   AnalysisRecommendationOutput,
@@ -536,7 +537,7 @@ const elementBarColors: Record<(typeof elementItems)[number]["key"], string> = {
 
 const recommendedPaidAnalysisProducts =
   productRecommendations?.recommendations
-    .map((recommendation) => getPremiumProduct(recommendation.productId))
+    .map((recommendation) => resolveCanonicalRecommendationProduct(recommendation.productId))
     .filter((product): product is NonNullable<typeof product> => Boolean(product)) ?? [];
 const fallbackPaidAnalysisProducts = ["career", "wealth", "relationship"]
   .map((id) => getPremiumProduct(id))

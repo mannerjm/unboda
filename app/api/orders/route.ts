@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { ensureAccountLifecycle } from "@/app/lib/accounts/server";
-import { resolvePurchasableProduct } from "@/app/lib/purchases/products";
+import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
 import { createPendingOrder } from "@/app/lib/purchases/server";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   } | null;
   const rawProductId = requestBody?.productId;
   const rawProfileId = requestBody?.profileId;
-  const resolved = resolvePurchasableProduct(rawProductId);
+  const resolved = resolveLaunchPurchasableProduct(rawProductId);
 
   if (!resolved.ok) {
     return NextResponse.json(

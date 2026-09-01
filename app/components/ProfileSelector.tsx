@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MAX_PROFILES_PER_USER, type ProfileDto } from "@/app/lib/profiles/types";
 
@@ -8,6 +9,15 @@ type ProfileSelectorProps = {
   productId: string;
   currentProfileId?: string;
   destination: "checkout" | "paid-analysis";
+};
+
+const relationshipLabels: Record<ProfileDto["relationshipType"], string> = {
+  self: "본인",
+  spouse: "배우자",
+  child: "자녀",
+  parent: "부모",
+  sibling: "형제자매",
+  other: "기타",
 };
 
 export default function ProfileSelector({
@@ -62,12 +72,17 @@ export default function ProfileSelector({
               : "border border-stone-200 bg-stone-50 px-4 py-3 text-left text-stone-900"}
           >
             <span className="block font-semibold">{profile.label}</span>
-            <span className="mt-1 block text-xs opacity-75">{profile.relationshipType}</span>
+            <span className="mt-1 block text-xs opacity-75">{relationshipLabels[profile.relationshipType]}</span>
           </button>
         ))}
       </div>
       {!isLoading && profiles.length === 0 ? (
-        <p className="mt-4 text-sm text-stone-600">등록된 Profile이 없습니다.</p>
+        <div className="mt-4">
+          <p className="text-sm text-stone-600">아직 등록된 분석 대상이 없습니다.</p>
+          <Link href="/mypage" className="mt-3 inline-flex text-sm font-semibold text-stone-700 underline decoration-stone-300 underline-offset-4">
+            분석 대상 등록하기
+          </Link>
+        </div>
       ) : null}
       {!isLoading && profiles.length >= MAX_PROFILES_PER_USER ? (
         <p className="mt-4 text-xs text-stone-500">계정당 최대 {MAX_PROFILES_PER_USER}개의 Profile을 사용할 수 있습니다.</p>

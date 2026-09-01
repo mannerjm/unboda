@@ -1,13 +1,14 @@
 import Link from "next/link";
 import CheckoutAccessPanel from "./CheckoutAccessPanel";
+import ProfileSelector from "@/app/components/ProfileSelector";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { notFound } from "next/navigation";
 import {
-  getCanonicalPremiumProductId,
   getPremiumProduct,
 } from "@/app/lib/premiumProductRegistry";
+import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
 import Script from "next/script";
 
 type CheckoutPageProps = {
@@ -38,8 +39,9 @@ export default async function CheckoutPage({
  if (user && profileId && !profile) {
    notFound();
  }
-const canonicalProductId = getCanonicalPremiumProductId(productId);
-const product = getPremiumProduct(canonicalProductId);
+const resolved = resolveLaunchPurchasableProduct(productId);
+const canonicalProductId = resolved.ok ? resolved.productId : null;
+const product = canonicalProductId ? getPremiumProduct(canonicalProductId) : undefined;
 
 
   if (!product) {
@@ -90,7 +92,10 @@ const product = getPremiumProduct(canonicalProductId);
            <p className="mt-2 font-semibold text-stone-900">{profile.label}</p>
          </div>
        ) : null}
-       <CheckoutAccessPanel productId={canonicalProductId} profileId={profileId} />
+      <CheckoutAccessPanel productId={product.id} profileId={profileId} />
+      {user && !profileId ? (
+        <ProfileSelector productId={product.id} destination="checkout" />
+      ) : null}
       </div>
     </main>
   );

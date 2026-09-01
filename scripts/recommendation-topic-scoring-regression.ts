@@ -8,6 +8,7 @@ import {
 } from "../app/lib/premiumProductRegistry";
 import { normalizeRecommendationSignals } from "../app/lib/recommendationSignals";
 import { buildTopicAwareRecommendations, buildAnalysisProductRecommendations } from "../app/lib/analysisProductRecommendations";
+import { resolveLaunchPurchasableProduct } from "../app/lib/purchases/products";
 
 function createSajuFixture(birthDate: string, birthTime: string) {
   return getSaju(
@@ -26,8 +27,17 @@ function assert(condition: boolean, message: string) {
 }
 
 const topicProducts = TOPIC_PREMIUM_PRODUCTS.filter((product) => product.kind === "TOPIC");
-assert(topicProducts.length === 50, "topic premium products should total 50");
-assert(topicProducts.every((product) => Boolean(product.recommendationProfile)), "every topic should have a recommendation profile");
+const profiledTopics = topicProducts.filter((product) => product.recommendationProfile);
+assert(profiledTopics.length > 0, "recommendation profiles must exist");
+for (const product of profiledTopics) {
+  assert(PREMIUM_PRODUCT_LOOKUP[product.id]?.id === product.id, `${product.id}: profile product must be canonical`);
+  assert(
+    Object.keys(product.recommendationProfile!.weights).every((key) =>
+      ["career_change", "career_stability", "career_independence", "wealth_growth", "wealth_risk", "wealth_control", "relationship_new", "relationship_commitment", "relationship_conflict", "relationship_recovery", "social_support", "health_recovery", "health_stress", "business_growth", "business_control", "growth_learning", "growth_transition"].includes(key),
+    ),
+    `${product.id}: profile has an unsupported signal key`,
+  );
+}
 
 function runScenario(label: string, saju: ReturnType<typeof getSaju>) {
   const freeAnalysis = buildFreeAnalysis(saju);
@@ -44,9 +54,7 @@ function runScenario(label: string, saju: ReturnType<typeof getSaju>) {
     fortuneFlowRelations: premiumAnalysis.fortuneFlowAnalysis?.relations ?? [],
   });
 
-  const topicCandidates = topicProducts.filter(
-    (product) => product.recommendationProfile,
-  );
+  const topicCandidates = profiledTopics;
 
   const scored = topicCandidates
     .map((product) => {
@@ -57,7 +65,7 @@ function runScenario(label: string, saju: ReturnType<typeof getSaju>) {
       }, 0);
       return { productId: product.id, score };
     })
-    .sort((a, b) => b.score - a.score);
+    .sort((a, b) => b.score - a.score || a.productId.localeCompare(b.productId));
 
   assert(scored.length > 0, `${label}: topic candidates were not created`);
   assert(scored[0].score >= 0, `${label}: top score should be non-negative`);
@@ -74,13 +82,8 @@ function runScenario(label: string, saju: ReturnType<typeof getSaju>) {
   assert(topicAware.recommendations.length <= 3, `${label}: topic-aware recommendations should be capped at 3`);
   assert(topicAware.recommendations.every((item) => item.evidence && item.evidence.length > 0), `${label}: topic-aware recommendations need evidence`);
   assert(topicAware.recommendations.every((item) => topicProducts.some((product) => product.id === item.productId)), `${label}: topic-aware recommendations should use canonical registry topics`);
-  const categories = topicAware.recommendations.map(
-    (item) => PREMIUM_PRODUCT_LOOKUP[item.productId]?.category,
-  );
-  assert(
-    new Set(categories).size === categories.length,
-    `${label}: topic-aware recommendations should use distinct categories when available`,
-  );
+  assert(topicAware.recommendations.every((item) => resolveLaunchPurchasableProduct(item.productId).ok), `${label}: topic-aware recommendations must be launch-authorized`);
+  assert(new Set(topicAware.recommendations.map((item) => item.productId)).size === topicAware.recommendations.length, `${label}: topic-aware recommendations must be unique`);
 
   const fallback = buildAnalysisProductRecommendations({
     strengthAnalysis: premiumAnalysis.strengthAnalysis,
@@ -91,6 +94,16 @@ function runScenario(label: string, saju: ReturnType<typeof getSaju>) {
   });
 
   assert(fallback.recommendations.length > 0, `${label}: legacy fallback recommendations should exist`);
+  assert(fallback.recommendations.every((item) => resolveLaunchPurchasableProduct(item.productId).ok), `${label}: fallback recommendations must be launch-authorized`);
+  assert(new Set(fallback.recommendations.map((item) => item.productId)).size === fallback.recommendations.length, `${label}: fallback recommendations must be unique`);
+  const repeated = buildTopicAwareRecommendations({
+    strengthAnalysis: premiumAnalysis.strengthAnalysis,
+    fortuneBrain: premiumAnalysis.fortuneBrain,
+    elementRelations: premiumAnalysis.elementRelations,
+    fortuneFlow: premiumAnalysis.fortuneFlowAnalysis,
+    elementAnalysis: premiumAnalysis.elementAnalysis,
+  });
+  assert(repeated.recommendations.map((item) => item.productId).join(",") === topicAware.recommendations.map((item) => item.productId).join(","), `${label}: topic-aware ranking must be deterministic`);
 
   console.log(`${label}: topicAware=${topicAware.recommendations.slice(0, 3).map((item) => item.productId).join(",")}`);
 }

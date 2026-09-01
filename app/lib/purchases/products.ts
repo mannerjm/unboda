@@ -7,6 +7,7 @@ import {
   type PricingFamily,
   type ProductPricingSource,
 } from "../productPricing";
+import { getLaunchProductIds } from "../paidAnalysisTopicConfig";
 
 export type PurchasableProductResolution =
   | {
@@ -21,6 +22,13 @@ export type PurchasableProductResolution =
   | {
       ok: false;
       reason: "missing" | "unknown_product";
+    };
+
+export type LaunchPurchasableProductResolution =
+  | PurchasableProductResolution & { ok: true }
+  | {
+      ok: false;
+      reason: "missing" | "unknown_product" | "not_for_sale";
     };
 
 /**
@@ -45,6 +53,26 @@ export function resolvePurchasableProduct(
     ok: true,
     ...getProductPricing(canonicalProductId),
   };
+}
+
+/**
+ * Resolves a product for a new sale. Historical order, entitlement, and report
+ * paths must continue using resolvePurchasableProduct instead.
+ */
+export function resolveLaunchPurchasableProduct(
+  rawProductId: unknown,
+): LaunchPurchasableProductResolution {
+  const resolved = resolvePurchasableProduct(rawProductId);
+
+  if (!resolved.ok) {
+    return resolved;
+  }
+
+  if (!getLaunchProductIds().includes(resolved.productId)) {
+    return { ok: false, reason: "not_for_sale" };
+  }
+
+  return resolved;
 }
 
 /** Returns the canonical productId, or null when it is not a real product. */

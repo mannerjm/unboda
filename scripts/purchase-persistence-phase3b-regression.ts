@@ -98,8 +98,8 @@ assert(ordersRoute.includes("getCurrentUser"), "orders route must call getCurren
 assert(ordersRoute.includes("status: 401"), "orders route must return 401 when unauthenticated");
 assert(ordersRoute.includes("status: 400"), "orders route must return 400 for invalid productId");
 assert(
-  ordersRoute.includes("resolvePurchasableProduct"),
-  "orders route must canonicalize/validate productId",
+  ordersRoute.includes("resolveLaunchPurchasableProduct"),
+  "orders route must require launch authorization for a new productId",
 );
 assert(
   ordersRoute.includes("userId: user.id"),
@@ -212,8 +212,8 @@ assert(
 );
 assert(
   checkoutPanel.includes('fetch("/api/orders"') &&
-    checkoutPanel.includes("mock-confirm"),
-  "checkout panel must create the order and confirm payment through the server API",
+    checkoutPanel.includes("requestPayment"),
+  "checkout panel must create the order through the server before Toss payment handoff",
 );
 assert(
   !checkoutPanel.includes("getProductPricing"),

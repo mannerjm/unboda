@@ -8,8 +8,11 @@
 import {
   getPremiumProduct,
   getCanonicalPremiumProductId,
-  TOPIC_PREMIUM_PRODUCTS,
 } from "../app/lib/premiumProductRegistry";
+import {
+  resolveLaunchPurchasableProduct,
+  resolvePurchasableProduct,
+} from "../app/lib/purchases/products";
 import { readFileSync } from "fs";
 import { join } from "path";
 
@@ -21,12 +24,11 @@ function assert(condition: boolean, message: string): void {
 
 // --- A. canonical Topic productId preserved through detail → checkout ---
 const sampleTopicIds = [
-  "career-organization-fit",
+  "career-job-fit",
   "money-wealth-accumulation",
   "relationship-new-connection",
-  "social-helper",
-  "health-energy",
-  "growth-study",
+  "monthly-current",
+  "career",
 ];
 
 for (const topicId of sampleTopicIds) {
@@ -71,14 +73,16 @@ for (const topicId of sampleTopicIds) {
 }
 console.log("B. canonical Topic productId resolves via getPremiumProduct at checkout ✓");
 
-// --- B2. all 50 Topic products can be resolved at checkout ---
-const topicProducts = TOPIC_PREMIUM_PRODUCTS.filter((p) => p.kind === "TOPIC");
-assert(topicProducts.length === 50, "expected 50 TOPIC products");
-for (const p of topicProducts) {
-  const resolved = getPremiumProduct(p.id);
-  assert(resolved !== undefined, `checkout must resolve topic product "${p.id}"`);
+// --- B2. launch-only checkout preserves canonical historical resolution ---
+for (const productId of ["health", "money-investment-style", "monthly-12months"]) {
+  assert(resolvePurchasableProduct(productId).ok, `${productId} must remain canonically resolvable`);
+  assert(!resolveLaunchPurchasableProduct(productId).ok, `${productId} must be rejected for new sale`);
 }
-console.log("B2. all 50 Topic products resolve at checkout ✓");
+for (const productId of ["career-job-fit", "monthly-current", "career"]) {
+  assert(resolveLaunchPurchasableProduct(productId).ok, `${productId} must remain eligible for new sale`);
+}
+assert(!resolveLaunchPurchasableProduct("unknown-product").ok, "unknown product must be rejected for new sale");
+console.log("B2. launch-only checkout preserves canonical historical resolution ✓");
 
 // --- C. result fallback IDs all exist in registry ---
 const fallbackIds = ["career", "wealth", "relationship"];
@@ -134,10 +138,25 @@ const accessPanelSource = readFileSync(
   join(process.cwd(), "app/paid-analysis/[productId]/PaidAnalysisAccessPanel.tsx"),
   "utf-8",
 );
-assert(
-  accessPanelSource.includes("`/checkout/${canonicalProductId}?profileId=${profileId}`"),
-  "PaidAnalysisAccessPanel must preserve profileId in the non-access checkout CTA",
+const sharedDetailSource = readFileSync(
+  join(process.cwd(), "app/components/PremiumProductDetail.tsx"),
+  "utf-8",
 );
+assert(
+  accessPanelSource.includes("PremiumProductDetail") &&
+    sharedDetailSource.includes("getPremiumAnalysisHref(product.id, state, profileId)"),
+  "standalone detail must preserve profileId in its state-aware checkout CTA",
+);
+const checkoutPageSource = readFileSync(join(process.cwd(), "app/checkout/[productId]/page.tsx"), "utf-8");
+const profileSelectorSource = readFileSync(join(process.cwd(), "app/components/ProfileSelector.tsx"), "utf-8");
+const detailPageSource = readFileSync(join(process.cwd(), "app/paid-analysis/[productId]/page.tsx"), "utf-8");
+const orderRouteSource = readFileSync(join(process.cwd(), "app/api/orders/route.ts"), "utf-8");
+const purchaseServerSource = readFileSync(join(process.cwd(), "app/lib/purchases/server.ts"), "utf-8");
+assert(checkoutPageSource.includes("resolveLaunchPurchasableProduct"), "checkout page must reject non-launch new-sale URLs");
+assert(checkoutPageSource.includes('destination="checkout"') && profileSelectorSource.includes('router.push(`/${destination}/${productId}?profileId=${profile.id}`)'), "profile-less checkout must let the customer bind the purchase to a selected profile");
+assert(detailPageSource.includes("resolveLaunchPurchasableProduct"), "product detail page must not offer a new-sale CTA for non-launch products");
+assert(orderRouteSource.includes("resolveLaunchPurchasableProduct"), "new-order API must require launch authorization");
+assert(purchaseServerSource.includes("const resolved = resolveLaunchPurchasableProduct(input.productId)"), "new pending orders must enforce launch authorization at persistence boundary");
 console.log("E. PaidAnalysisAccessPanel has profile-scoped checkout CTA for non-access users ✓");
 
 console.log("\ne2e-purchase-funnel-regression passed ✓");

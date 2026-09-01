@@ -6,6 +6,7 @@ import type { ReactElement } from "react";
 import { groupTopicCatalogProductsByCategory, listPeriodCatalogProducts } from "@/app/lib/premiumCatalog";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import { getProductPricing } from "@/app/lib/productPricing";
+import PremiumProductDetail from "@/app/components/PremiumProductDetail";
 import type { PaidAnalysisSummary } from "@/app/lib/paidReports/server";
 import { getPremiumAnalysisHref, toPremiumAnalysisProductState, type PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
 import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
@@ -164,7 +165,6 @@ export default function PremiumCatalogSection({ profileId, recommendedProductIds
     </section>
   );
 }
-
 function TopicDiscovery({
   products,
   selectedProductId,
@@ -206,9 +206,8 @@ function TopicDiscovery({
         })}
       </div>
       {selectedProduct && purchaseDecision ? (
-        <TopicDetailPanel
+        <PremiumProductDetail
           product={selectedProduct}
-          purchaseDecision={purchaseDecision}
           state={toPremiumAnalysisProductState(stateByProductId.get(selectedProduct.id))}
           profileId={profileId}
           onClear={() => onSelect("")}
@@ -221,60 +220,6 @@ function TopicDiscovery({
     </div>
   );
 }
-
-function TopicDetailPanel({
-  product,
-  purchaseDecision,
-  state,
-  profileId,
-  onClear,
-}: {
-  product: PremiumProductDefinition;
-  purchaseDecision: NonNullable<ReturnType<typeof getPaidAnalysisTopicConfig>>["purchaseDecision"];
-  state: CatalogProductState;
-  profileId?: string;
-  onClear: () => void;
-}) {
-  if (!purchaseDecision) return null;
-  const href = getPremiumAnalysisHref(product.id, state, profileId);
-
-  return (
-    <section className="rounded-xl border border-[#cdbb98] bg-[#fffdf8] p-5 sm:p-6" aria-labelledby="selected-topic-title">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-semibold tracking-[0.16em] text-stone-500">선택한 분석</p>
-          <h3 id="selected-topic-title" className="mt-2 text-xl font-bold text-stone-900">{product.title}</h3>
-        </div>
-        <button type="button" onClick={onClear} className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs text-stone-600">다른 분석 선택</button>
-      </div>
-      <p className="mt-4 text-sm font-semibold leading-6 text-stone-900">{purchaseDecision.decisionQuestion}</p>
-      <TopicDetailList title="이런 고민이 있다면" items={purchaseDecision.recommendedFor.slice(0, 3)} />
-      <TopicDetailList title="이 분석이 확인하는 것" items={purchaseDecision.whatItAnalyzes.slice(0, 4)} />
-      <TopicDetailList title="분석을 받고 나면" items={purchaseDecision.expectedUnderstanding.slice(0, 3)} />
-      <div className="mt-5 border-t border-stone-200 pt-4">
-        <p className="text-xs font-semibold text-stone-700">비슷한 분석과의 차이</p>
-        <p className="mt-2 text-sm leading-6 text-stone-600">{purchaseDecision.distinction}</p>
-      </div>
-      <p className="mt-5 border-t border-stone-200 pt-4 text-sm leading-6 text-stone-700">
-        그래서 이 분석으로 {purchaseDecision.expectedUnderstanding[0] ?? purchaseDecision.whatItAnalyzes[0] ?? "현재 고민과 관련된 흐름을 확인할 수 있습니다."}
-      </p>
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-4">
-        <span className="text-sm font-medium text-stone-500">{formatPrice(product.id)}</span>
-        {state === "generating" ? <span className="rounded-lg bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-500">생성 중</span> : href ? <Link href={href} className="rounded-lg bg-stone-900 px-4 py-2.5 text-xs font-semibold text-white hover:bg-stone-800">{state === "not_purchased" ? "이 분석 시작하기" : ACTION_LABELS[state]}</Link> : null}
-      </div>
-    </section>
-  );
-}
-
-function TopicDetailList({ title, items }: { title: string; items: readonly string[] }) {
-  return (
-    <div className="mt-5">
-      <p className="text-xs font-semibold text-stone-700">{title}</p>
-      <ul className="mt-2 space-y-1 text-sm leading-6 text-stone-600">{items.map((item) => <li key={item}>· {item}</li>)}</ul>
-    </div>
-  );
-}
-
 function PeriodDiscovery({
   products,
   selectedProductId,
@@ -320,9 +265,8 @@ function PeriodDiscovery({
       </div>
 
       {selectedProduct?.purchaseDecision ? (
-        <PeriodDetailPanel
+        <PremiumProductDetail
           product={selectedProduct}
-          purchaseDecision={selectedProduct.purchaseDecision}
           state={toPremiumAnalysisProductState(stateByProductId.get(selectedProduct.id))}
           profileId={profileId}
           onClear={onClear}
@@ -332,55 +276,6 @@ function PeriodDiscovery({
           <p className="text-xs text-stone-500">기간을 선택하면 분석 내용과 구매 전 안내를 확인할 수 있어요.</p>
         </div>
       )}
-    </div>
-  );
-}
-
-function PeriodDetailPanel({
-  product,
-  purchaseDecision,
-  state,
-  profileId,
-  onClear,
-}: {
-  product: PremiumProductDefinition;
-  purchaseDecision: NonNullable<PremiumProductDefinition["purchaseDecision"]>;
-  state: CatalogProductState;
-  profileId?: string;
-  onClear: () => void;
-}) {
-  const href = getPremiumAnalysisHref(product.id, state, profileId);
-
-  return (
-    <section className="mt-6 rounded-xl border border-[#cdbb98] bg-[#fffdf8] p-5 sm:p-6" aria-labelledby="selected-period-title">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-semibold tracking-[0.16em] text-stone-500">선택한 기간 분석</p>
-          <h3 id="selected-period-title" className="mt-2 text-xl font-bold text-stone-900">{product.title}</h3>
-        </div>
-        <button type="button" onClick={onClear} className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs text-stone-600">다른 기간 선택</button>
-      </div>
-      <p className="mt-4 text-sm font-semibold leading-6 text-stone-900">{purchaseDecision.primaryQuestion}</p>
-      <PeriodDetailList title="이런 때 살펴보세요" items={purchaseDecision.recommendedFor} />
-      <PeriodDetailList title="이 분석에서 살펴보는 것" items={purchaseDecision.analysisScope} />
-      <PeriodDetailList title="분석 후 이해할 수 있는 것" items={purchaseDecision.expectedUnderstanding} />
-      <div className="mt-5 border-t border-stone-200 pt-4">
-        <p className="text-xs font-semibold text-stone-700">다른 기간 분석과의 차이</p>
-        <p className="mt-2 text-sm leading-6 text-stone-600">{purchaseDecision.distinction}</p>
-      </div>
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-4">
-        <span className="text-sm font-medium text-stone-500">{formatPrice(product.id)}</span>
-        {state === "generating" ? <span className="rounded-lg bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-500">생성 중</span> : href ? <Link href={href} className="rounded-lg bg-stone-900 px-4 py-2.5 text-xs font-semibold text-white hover:bg-stone-800">{state === "not_purchased" ? "이 분석 구매하기" : ACTION_LABELS[state]}</Link> : null}
-      </div>
-    </section>
-  );
-}
-
-function PeriodDetailList({ title, items }: { title: string; items: readonly string[] }) {
-  return (
-    <div className="mt-5">
-      <p className="text-xs font-semibold text-stone-700">{title}</p>
-      <ul className="mt-2 space-y-1 text-sm leading-6 text-stone-600">{items.map((item) => <li key={item}>· {item}</li>)}</ul>
     </div>
   );
 }

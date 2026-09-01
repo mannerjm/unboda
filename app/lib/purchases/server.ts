@@ -1,6 +1,9 @@
 import type { PaymentStatus } from "../payment";
 import { createAdminClient } from "../supabase/admin";
-import { resolvePurchasableProduct } from "./products";
+import {
+  resolveLaunchPurchasableProduct,
+  resolvePurchasableProduct,
+} from "./products";
 import {
   PAID_ANALYSIS_RESOURCE_TYPE,
   type EntitlementRecord,
@@ -385,7 +388,7 @@ export async function createPendingOrder(input: {
   productId: string;
   paymentProvider?: string;
 }): Promise<OrderRecord> {
-  const resolved = resolvePurchasableProduct(input.productId);
+  const resolved = resolveLaunchPurchasableProduct(input.productId);
 
   if (!resolved.ok) {
     throw new InvalidProductError(input.productId);

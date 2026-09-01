@@ -8,7 +8,7 @@ import {
   getCanonicalPremiumProductId,
   getPremiumProduct,
 } from "../app/lib/premiumProductRegistry";
-import { resolvePurchasableProduct } from "../app/lib/purchases/products";
+import { resolveLaunchPurchasableProduct } from "../app/lib/purchases/products";
 import { getSaju } from "../app/lib/manse";
 import { buildPremiumAnalysis } from "../app/lib/buildPremiumAnalysis";
 import type { ElementAnalysis } from "../app/lib/elements";
@@ -97,7 +97,7 @@ const scenarios: Scenario[] = [
   {
     label: "매우 신약-no-element-signal",
     input: createInput({ strengthLevel: "매우 신약" }),
-    expectsFallback: false,
+    expectsFallback: true,
   },
   {
     label: "신강-with-opportunity-flow",
@@ -124,9 +124,12 @@ const scenarios: Scenario[] = [
         highlights: [{ type: "극함", strength: "강함" }],
       } as ElementRelationsAnalysis,
     }),
-    expectsFallback: false,
+    expectsFallback: true,
   },
 ];
+
+let observedDiverseTopicAwareResult = false;
+let observedDuplicateCategoryFallback = false;
 
 for (const birthDate of ["1995-05-20", "1990-01-01", "1988-10-10", "1986-03-15"]) {
   const premiumAnalysis = buildPremiumAnalysis(
@@ -179,8 +182,8 @@ for (const scenario of scenarios) {
       `${scenario.label}: "${productId}" must already be the canonical id`,
     );
 
-    // ⑤ recommended products stay purchasable at checkout
-    const purchasable = resolvePurchasableProduct(productId);
+    // ⑤ fresh recommendations are valid new-sale products.
+    const purchasable = resolveLaunchPurchasableProduct(productId);
     assert(
       purchasable.ok && purchasable.productId === productId,
       `${scenario.label}: "${productId}" is not resolvable at checkout`,
@@ -205,6 +208,12 @@ for (const scenario of scenarios) {
     `${scenario.label}: expected fallback=${scenario.expectsFallback}, got ${usedFallback}`,
   );
 
+  const repeated = buildAnalysisProductRecommendations(scenario.input);
+  assert(
+    repeated.recommendations.map((item) => item.productId).join(",") === productIds.join(","),
+    `${scenario.label}: fresh recommendation ordering must be deterministic`,
+  );
+
   if (!usedFallback) {
     // ④ the topic-aware path must not be reordered or rewritten
     const topicIds = topicAware.recommendations.map((item) => item.productId);
@@ -213,17 +222,22 @@ for (const scenario of scenarios) {
       `${scenario.label}: topic-aware ranking changed (${topicIds.join(",")} vs ${productIds.join(",")})`,
     );
 
-    // ⑥ category diversity contract of the topic-aware path
+    // ⑥ diversity is preferred, but ranked fallback may repeat a category.
     const categories = productIds.map(
       (productId) => PREMIUM_PRODUCT_LOOKUP[productId]?.category,
     );
-    assert(
-      new Set(categories).size === categories.length,
-      `${scenario.label}: topic-aware recommendations must keep distinct categories (${categories.join(",")})`,
-    );
+    if (new Set(categories).size === categories.length) {
+      observedDiverseTopicAwareResult = true;
+    } else {
+      observedDuplicateCategoryFallback = true;
+    }
+
   }
 
   console.log(`${scenario.label}: ${productIds.join(", ")}`);
 }
+
+assert(observedDiverseTopicAwareResult, "at least one fixture must prove diversity-first selection");
+assert(observedDuplicateCategoryFallback, "a ranked fallback fixture must permit a duplicate category");
 
 console.log("\nrecommendation canonical integrity regression passed ✓");

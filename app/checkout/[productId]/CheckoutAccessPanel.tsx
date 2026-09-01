@@ -168,17 +168,21 @@ const router = useRouter();
           </h2>
 
           <p className="mt-4 text-sm leading-7 text-stone-600">
-            이제 선택한 심층 분석의 결제를 계속 진행할 수 있습니다.
+            {profileId
+              ? "이제 선택한 심층 분석의 결제를 계속 진행할 수 있습니다."
+              : "분석 대상을 선택한 뒤 결제를 계속 진행할 수 있습니다."}
           </p>
 
-          <button
-            type="button"
-            onClick={handlePayment}
-            disabled={isPaying || !profileId}
-            className="mt-7 w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
-          >
-            {isPaying ? "결제 처리 중..." : profileId ? "결제 계속하기" : "분석 대상을 선택해 주세요"}
-          </button>
+          {profileId ? (
+            <button
+              type="button"
+              onClick={handlePayment}
+              disabled={isPaying}
+              className="mt-7 w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
+            >
+              {isPaying ? "결제 처리 중..." : "결제 계속하기"}
+            </button>
+          ) : null}
 
           {errorMessage ? (
             <p className="mt-4 text-sm leading-6 text-red-600">

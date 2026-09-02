@@ -211,9 +211,9 @@ const accountLifecycleLabels: Record<AccountStatus["account"]["status"], string>
 };
 
 const paidEligibilityLabels: Record<AccountStatus["account"]["paidEligibilityStatus"], string> = {
-  UNVERIFIED: "확인 전",
-  VERIFIED_ADULT: "유료 이용 가능",
-  REVOKED: "확인 필요",
+  UNVERIFIED: "인증 전",
+  VERIFIED_ADULT: "인증 완료 · 유료 이용 가능",
+  REVOKED: "재확인 필요",
 };
 
 export default function MyPage() {

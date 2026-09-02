@@ -21,9 +21,15 @@ const statusLabels: Record<AccountLifecycleStatus, string> = {
  * Profile birth date is NOT used here. Relationship=self is NOT identity proof.
  */
 const eligibilityLabels: Record<PaidEligibilityStatus, string> = {
-  UNVERIFIED: "확인 전",
-  VERIFIED_ADULT: "유료 이용 가능",
-  REVOKED: "확인 만료",
+  UNVERIFIED: "인증 전",
+  VERIFIED_ADULT: "인증 완료 · 유료 이용 가능",
+  REVOKED: "재확인 필요",
+};
+
+const eligibilityGuidance: Record<PaidEligibilityStatus, string> = {
+  UNVERIFIED: "회원가입과 무료 분석 이용에는 인증이 필요하지 않습니다. 유료 분석 결제 전에는 본인/성인 인증이 필요합니다.",
+  VERIFIED_ADULT: "이 계정은 현재 유료 분석 결제 자격이 확인되었습니다.",
+  REVOKED: "새 유료 분석 결제는 현재 이용할 수 없습니다. 기존에 구매한 분석은 이용 권한 상태에 따라 계속 확인할 수 있습니다.",
 };
 
 type AccountStatusResponse = {
@@ -224,9 +230,11 @@ export default function AccountPage() {
         <p className="mt-10 text-xs font-semibold tracking-[0.25em] text-stone-500">ACCOUNT</p>
         <h1 className="mt-3 text-3xl font-bold">계정 정보</h1>
 
-        <section className="mt-8 space-y-5 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <section className="mt-8 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" aria-labelledby="account-status-heading">
+          <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">ACCOUNT STATUS</p>
+          <h2 id="account-status-heading" className="mt-2 text-xl font-bold text-stone-900">계정 상태</h2>
           {/* 로그인 이메일 & 이메일 변경 */}
-          <div>
+          <div className="mt-6">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-stone-500">로그인 이메일</p>
               <button
@@ -294,16 +302,20 @@ export default function AccountPage() {
             )}
           </div>
 
+          {/* 본인/성인 인증 */}
+          <div className="border-t border-stone-100 pt-5">
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-sm text-stone-600">본인/성인 인증</span>
+              <span className="text-sm font-semibold">{eligibilityLabels[account.paidEligibilityStatus]}</span>
+            </div>
+            <p className="mt-3 text-sm leading-6 text-stone-600">{eligibilityGuidance[account.paidEligibilityStatus]}</p>
+            <p className="mt-2 text-xs leading-5 text-stone-500">분석 프로필의 생년월일과 계정 본인 인증은 별개입니다.</p>
+          </div>
+
           {/* 계정 상태 */}
           <div className="flex items-center justify-between gap-4 border-t border-stone-100 pt-5">
             <span className="text-sm text-stone-600">계정 상태</span>
             <span className="text-sm font-semibold">{statusLabels[account.status]}</span>
-          </div>
-
-          {/* 유료 이용 자격 */}
-          <div className="flex items-center justify-between gap-4 border-t border-stone-100 pt-5">
-            <span className="text-sm text-stone-600">유료 이용 자격</span>
-            <span className="text-sm font-semibold">{eligibilityLabels[account.paidEligibilityStatus]}</span>
           </div>
 
           {/* 비밀번호 변경 */}
@@ -441,9 +453,6 @@ export default function AccountPage() {
           </div>
         </section>
 
-        <p className="mt-5 text-xs leading-6 text-stone-500">
-          성인 본인확인은 별도 외부 인증 연동 이후 제공됩니다. 프로필의 출생 정보는 계정 자격을 대신하지 않습니다.
-        </p>
       </div>
     </main>
   );

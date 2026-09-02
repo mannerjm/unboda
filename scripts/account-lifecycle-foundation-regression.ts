@@ -34,7 +34,7 @@ assert(profileEdit.includes("requireVerifiedEmailAccount"), "profile edit requir
 assert(read("app/lib/profiles/types.ts").includes("MAX_PROFILES_PER_USER = 10"), "10 profile limit preserved");
 assert(forgot.includes("resetPasswordForEmail") && forgot.includes("입력한 이메일 주소가 맞다면"), "recovery request uses provider API and generic response");
 assert(reset.includes("PASSWORD_RECOVERY") && reset.includes("updateUser") && reset.includes('signOut({ scope: "global" })'), "recovery completion updates password and signs out globally");
-assert(accountPage.includes("paidEligibilityStatus") && !/\b(?:CI|DI)\b|주민등록번호|전화번호|생년월일/i.test(accountPage), "account UI stays provider-neutral");
+assert(accountPage.includes("paidEligibilityStatus") && !/주민등록번호|전화번호|NICE|PASS|providerReference|verificationAttempt/.test(accountPage), "account UI stays provider-neutral");
 const purchases = read("app/lib/purchases/server.ts");
 assert(purchases.includes('"REFUND_CANCELLATION"') && purchases.includes('"ACCOUNT_CLOSURE"'), "revocation reasons are distinct");
 assert(purchases.includes("revokeEntitlementForAccountClosure") && !purchases.slice(purchases.indexOf("revokeEntitlementForAccountClosure")).includes("cancelPaymentWithToss"), "account closure revoke has no provider refund path");

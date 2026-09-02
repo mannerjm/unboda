@@ -92,12 +92,12 @@ assert(accountServer.includes("getAccountClosureFinancialBlockers"), "requestAcc
 
 console.log("\nJ. DELETION_REQUESTED BLOCKS NEW PAID ACTIVITY");
 assert(accountServer.includes('account.status === "DELETION_REQUESTED"'), "evaluatePaidPurchaseEligibility blocks DELETION_REQUESTED status");
-assert(ordersRoute.includes("ensureAccountLifecycle"), "Orders API checks account status");
+assert(ordersRoute.includes("PaidPurchaseEligibilityError") && accountServer.includes("assertPaidPurchaseEligibility"), "Orders API maps the authoritative service-layer account status gate");
 
 console.log("\nK. PAID ELIGIBILITY SEMANTICS REMAIN UNCHANGED");
-assert(accountPage.includes('UNVERIFIED: "확인 전"'), "Paid eligibility UNVERIFIED label remains '확인 전'");
-assert(accountPage.includes('VERIFIED_ADULT: "유료 이용 가능"'), "Paid eligibility VERIFIED_ADULT label remains '유료 이용 가능'");
-assert(accountPage.includes('REVOKED: "확인 만료"'), "Paid eligibility REVOKED label remains '확인 만료'");
+assert(accountPage.includes('UNVERIFIED: "인증 전"'), "Paid eligibility UNVERIFIED label uses clear customer copy");
+assert(accountPage.includes('VERIFIED_ADULT: "인증 완료 · 유료 이용 가능"'), "Paid eligibility VERIFIED_ADULT label uses clear customer copy");
+assert(accountPage.includes('REVOKED: "재확인 필요"'), "Paid eligibility REVOKED label uses clear customer copy");
 assert(accountPage.includes("Profile birth date is NOT used here"), "Account page preserves identity boundary disclaimer");
 
 console.log("\nL. EXISTING FORGOT-PASSWORD / RESET-PASSWORD FLOW INTACT");

@@ -22,6 +22,7 @@ import { resolveAnalysisEditionForOrder } from "../analysisEditionForOrder";
 import { parseAnalysisInputSnapshot } from "../analysisInputSnapshot";
 import { compareEditionKeys } from "../analysisEditionLabel";
 import type { ProfileDto } from "../profiles/types";
+import { assertPaidPurchaseEligibility } from "../accounts/server";
 
 type OrderRow = {
   id: string;
@@ -460,6 +461,8 @@ export async function createPendingOrder(input: {
   productId: string;
   paymentProvider?: string;
 }): Promise<OrderRecord> {
+  await assertPaidPurchaseEligibility(input.userId);
+
   const resolved = resolveLaunchPurchasableProduct(input.productId);
 
   if (!resolved.ok) {

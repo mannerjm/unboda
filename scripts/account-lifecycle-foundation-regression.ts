@@ -25,9 +25,9 @@ for (const forbidden of ["GUARDIAN_CONSENTED", "birth_date", "phone", "phone_num
 assert(account.includes("requireActiveAccount") && account.includes("requireVerifiedEmailAccount") && account.includes("requirePaidEligibleAccount"), "canonical guards exist");
 assert(account.includes("getAccountClosureFinancialBlockers") && account.includes("REFUND_OWNER_REVIEW") && account.includes("PAYMENT_RECONCILIATION_REQUIRED"), "financial closure blocker exists");
 assert(account.includes("email_confirmed_at") && account.includes("ACCOUNT_NOT_ACTIVE"), "verified email and active account checks are server-side");
-assert(account.includes("PAID_ELIGIBILITY_ENFORCEMENT_ENABLED"), "paid gate is feature-gated");
+assert(account.includes("assertPaidPurchaseEligibility") && !account.includes("PAID_ELIGIBILITY_ENFORCEMENT_ENABLED"), "paid gate is fail-closed without a flag-off bypass");
 assert(migration.includes("revoke all on public.account_lifecycles from anon, authenticated") && migration.includes("grant select on public.account_lifecycles to authenticated"), "lifecycle privileges are explicit");
-assert(orders.includes("ensureAccountLifecycle") && orders.includes("account.status !== \"ACTIVE\""), "order creation checks active account");
+assert(orders.includes("PaidPurchaseEligibilityError") && orders.includes("PAID_ELIGIBILITY_UNVERIFIED"), "order creation maps enforced paid account eligibility");
 assert(confirm.includes("ensureAccountLifecycle") && confirm.includes("account.status !== \"ACTIVE\""), "payment confirmation checks active account");
 assert(profiles.includes("requireVerifiedEmailAccount"), "profile creation requires verified account");
 assert(profileEdit.includes("requireVerifiedEmailAccount"), "profile edit requires verified account");
@@ -38,4 +38,4 @@ assert(accountPage.includes("paidEligibilityStatus") && !/\b(?:CI|DI)\b|주민�
 const purchases = read("app/lib/purchases/server.ts");
 assert(purchases.includes('"REFUND_CANCELLATION"') && purchases.includes('"ACCOUNT_CLOSURE"'), "revocation reasons are distinct");
 assert(purchases.includes("revokeEntitlementForAccountClosure") && !purchases.slice(purchases.indexOf("revokeEntitlementForAccountClosure")).includes("cancelPaymentWithToss"), "account closure revoke has no provider refund path");
-console.log(JSON.stringify({ accountLifecycle: "verified", paidEligibilityAccountLevel: true, profileDobUsedForAccountEligibility: false, profileLimit: 10, passwordRecoveryFoundation: "verified", productionPaidAgeGateEnabled: false }));
+console.log(JSON.stringify({ accountLifecycle: "verified", paidEligibilityAccountLevel: true, profileDobUsedForAccountEligibility: false, profileLimit: 10, passwordRecoveryFoundation: "verified", productionPaidAgeGateEnabled: true }));

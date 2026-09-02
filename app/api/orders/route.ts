@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { ensureAccountLifecycle } from "@/app/lib/accounts/server";
+import { PaidPurchaseEligibilityError } from "@/app/lib/accounts/server";
 import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
 import {
   ActiveEditionOrderAlreadyPaidError,
@@ -20,11 +20,6 @@ export async function POST(request: Request) {
       { error: "로그인이 필요합니다." },
       { status: 401 },
     );
-  }
-
-  const account = await ensureAccountLifecycle(user.id);
-  if (account.status !== "ACTIVE") {
-    return NextResponse.json({ error: "계정을 사용할 수 없습니다." }, { status: 403 });
   }
 
   let body: unknown;
@@ -97,6 +92,20 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ order }, { status: 201 });
   } catch (error) {
+    if (error instanceof PaidPurchaseEligibilityError) {
+      const messages = {
+        AUTHENTICATION_REQUIRED: "로그인이 필요합니다.",
+        ACCOUNT_NOT_ACTIVE: "현재 계정에서는 결제를 진행할 수 없습니다.",
+        ACCOUNT_DELETED: "현재 계정에서는 결제를 진행할 수 없습니다.",
+        EMAIL_NOT_VERIFIED: "이메일 인증이 필요합니다.",
+        PAID_ELIGIBILITY_UNVERIFIED: "결제 전에 성인 인증을 완료해 주세요.",
+        PAID_ELIGIBILITY_REVOKED: "현재 성인 인증 상태로는 결제를 진행할 수 없습니다.",
+        UNKNOWN_ERROR: "계정 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      } as const;
+      const status = error.reason === "AUTHENTICATION_REQUIRED" ? 401 : 403;
+      return NextResponse.json({ error: messages[error.reason], code: error.reason }, { status });
+    }
+
     if (error instanceof AlreadyOwnedError) {
       return NextResponse.json(
         { error: "현재 분석을 이미 보유하고 있습니다. 구매한 분석에서 확인해 주세요.", code: "ALREADY_OWNED" },

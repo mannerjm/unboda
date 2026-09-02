@@ -54,6 +54,13 @@ export type PaidPurchaseBlockReason =
   | "PAID_ELIGIBILITY_REVOKED"
   | "UNKNOWN_ERROR";
 
+export class PaidPurchaseEligibilityError extends Error {
+  constructor(readonly reason: PaidPurchaseBlockReason) {
+    super(reason);
+    this.name = "PaidPurchaseEligibilityError";
+  }
+}
+
 /**
  * Canonical structured decision for whether account can make a new paid purchase.
  * Separates: target policy, currently enforced policy, and enforcement state.
@@ -63,18 +70,11 @@ export type PaidPurchaseEligibilityDecision =
       eligible: true;
       account: AccountLifecycle;
       user: AuthenticatedUser;
-      /** Current policy is stricter than target; this would be eligible under full enforcement. */
-      willBeEligibleWhenFullyEnforced?: boolean;
     }
   | {
       eligible: false;
       reason: PaidPurchaseBlockReason;
       account?: AccountLifecycle;
-      /**
-       * True if blocked by a rule that is NOT currently enforced due to rollout feature flag.
-       * This means the user would be blocked if PAID_ELIGIBILITY_ENFORCEMENT_ENABLED = true.
-       */
-      blockedByUnenforcedRule?: boolean;
     };
 
 export class AccountAccessError extends Error {
@@ -210,8 +210,6 @@ export async function getAccountClosureFinancialBlockers(userId: string): Promis
   return [...blockers];
 }
 
-export const PAID_ELIGIBILITY_ENFORCEMENT_ENABLED = process.env.PAID_ELIGIBILITY_ENFORCEMENT_ENABLED === "true";
-
 // ============================================================================
 // PHASE 3A CANONICAL POLICY DECISION HELPERS
 // ============================================================================
@@ -254,16 +252,8 @@ export async function getPaidEligibilityState(account: AccountLifecycle): Promis
  * 2. Email is verified (email_confirmed_at is not null)
  * 3. Paid eligibility status = VERIFIED_ADULT
  *
- * CURRENTLY ENFORCED POLICY (as of Phase 3A):
- * - Condition 1 (ACTIVE) is ENFORCED (already in /api/orders)
- * - Condition 2 (email verified) is NOT YET ENFORCED (gap fixed in Phase 3A)
- * - Condition 3 (VERIFIED_ADULT) is NOT YET ENFORCED (depends on flag PAID_ELIGIBILITY_ENFORCEMENT_ENABLED)
- *
- * Phase 3A wires conditions 1 + 2 into /api/orders immediately.
- * Phase 3D will wire condition 3 when enforcement is explicitly enabled via flag.
- *
- * Feature flag OFF behavior: Satisfies current production rollout compatibility.
- * Feature flag ON behavior: Enforces full target policy.
+ * All three conditions are enforced at the paid order boundary. A missing,
+ * malformed, or unavailable configuration must not create a bypass.
  */
 export async function evaluatePaidPurchaseEligibility(): Promise<PaidPurchaseEligibilityDecision> {
   // Read authenticated user
@@ -320,32 +310,19 @@ export async function evaluatePaidPurchaseEligibility(): Promise<PaidPurchaseEli
     };
   }
 
-  // Condition 3: Paid eligibility must be VERIFIED_ADULT (enforcement controlled by feature flag)
-  if (PAID_ELIGIBILITY_ENFORCEMENT_ENABLED) {
-    // Full enforcement: reject unverified and revoked
-    if (account.paidEligibilityStatus === "REVOKED") {
-      return {
-        eligible: false,
-        reason: "PAID_ELIGIBILITY_REVOKED",
-        account,
-      };
-    }
-    if (account.paidEligibilityStatus !== "VERIFIED_ADULT") {
-      return {
-        eligible: false,
-        reason: "PAID_ELIGIBILITY_UNVERIFIED",
-        account,
-      };
-    }
-  } else {
-    // Phase 3A rollout compatibility: preserve the pre-3A live customer behavior.
-    // The helper still describes future target policy, but it does not newly
-    // block UNVERIFIED or REVOKED while the rollout flag is OFF.
+  if (account.paidEligibilityStatus === "REVOKED") {
     return {
-      eligible: true,
+      eligible: false,
+      reason: "PAID_ELIGIBILITY_REVOKED",
       account,
-      user,
-      willBeEligibleWhenFullyEnforced: account.paidEligibilityStatus === "VERIFIED_ADULT",
+    };
+  }
+
+  if (account.paidEligibilityStatus !== "VERIFIED_ADULT") {
+    return {
+      eligible: false,
+      reason: "PAID_ELIGIBILITY_UNVERIFIED",
+      account,
     };
   }
 
@@ -355,6 +332,26 @@ export async function evaluatePaidPurchaseEligibility(): Promise<PaidPurchaseEli
     account,
     user,
   };
+}
+
+/**
+ * The service-layer paid-order trust boundary. The session identity from
+ * Supabase Auth must match the caller's persisted user identity.
+ */
+export async function assertPaidPurchaseEligibility(
+  expectedUserId: string,
+): Promise<AuthenticatedUser & { account: AccountLifecycle }> {
+  const decision = await evaluatePaidPurchaseEligibility();
+
+  if (!decision.eligible) {
+    throw new PaidPurchaseEligibilityError(decision.reason);
+  }
+
+  if (decision.user.id !== expectedUserId) {
+    throw new PaidPurchaseEligibilityError("AUTHENTICATION_REQUIRED");
+  }
+
+  return { ...decision.user, account: decision.account };
 }
 
 /**

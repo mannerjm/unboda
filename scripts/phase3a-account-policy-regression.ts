@@ -5,8 +5,7 @@
  *
  * Validates the corrected Phase 3A contract only:
  * - general service access is lifecycle-only
- * - target paid purchase policy is canonical, but live rollout remains compatibility-safe
- * - premature email enforcement is not added to /api/orders during this phase
+ * - paid purchase policy is enforced at the authoritative service boundary
  * - account lifecycle and eligibility semantics remain separated from profile data
  */
 
@@ -55,27 +54,23 @@ assert(generalServiceFn.includes("General/free service access remains lifecycle-
 assert(paidPurchaseFn.includes("EMAIL_NOT_VERIFIED"), "Target policy must recognize EMAIL_NOT_VERIFIED");
 assert(paidPurchaseFn.includes("PAID_ELIGIBILITY_UNVERIFIED"), "Target policy must recognize PAID_ELIGIBILITY_UNVERIFIED");
 assert(paidPurchaseFn.includes("PAID_ELIGIBILITY_REVOKED"), "Target policy must recognize PAID_ELIGIBILITY_REVOKED");
-assert(paidPurchaseFn.includes("PAID_ELIGIBILITY_ENFORCEMENT_ENABLED"), "Target policy must remain feature-flag gated");
-assert(paidPurchaseFn.includes("willBeEligibleWhenFullyEnforced"), "Feature flag OFF compatibility must be explicit");
-
-assert(accountServer.includes("willBeEligibleWhenFullyEnforced: account.paidEligibilityStatus === \"VERIFIED_ADULT\""), "Flag OFF must preserve rollout compatibility");
-assert(accountServer.includes("if (PAID_ELIGIBILITY_ENFORCEMENT_ENABLED)"), "Flag ON enforcement branch must exist");
+assert(!paidPurchaseFn.includes("PAID_ELIGIBILITY_ENFORCEMENT_ENABLED"), "Paid eligibility must not have a flag-off bypass");
+assert(accountServer.includes("export async function assertPaidPurchaseEligibility"), "Authoritative paid eligibility guard must exist");
 assert(accountServer.includes("account.status === \"DELETION_REQUESTED\""), "DELETION_REQUESTED must be recognized");
 assert(accountServer.includes("account.status === \"CLOSED\""), "CLOSED must be recognized");
 assert(accountServer.includes("account.status !== \"ACTIVE\""), "ACTIVE lifecycle policy must be authoritative");
 assert(accountServer.includes("Never derives from: profile DOB, relationship type, Toss payment"), "Account policy must separate identity from Saju profile data");
 
-assert(!ordersRoute.includes("evaluatePaidPurchaseEligibility()"), "Phase 3A must not newly enforce email/eligibility in live order creation");
-assert(!ordersRoute.includes("EMAIL_NOT_VERIFIED"), "Order creation must not newly block on unverified email during Phase 3A");
-assert(!ordersRoute.includes("PAID_ELIGIBILITY_UNVERIFIED"), "Order creation must not newly block on unverified paid eligibility during Phase 3A");
-assert(!ordersRoute.includes("mapPaidPurchaseBlockReasonToUserMessage"), "Order creation must not add premature user-visible enforcement gate");
+assert(ordersRoute.includes("PaidPurchaseEligibilityError"), "Order creation must map service-layer paid eligibility failures");
+assert(ordersRoute.includes("EMAIL_NOT_VERIFIED"), "Order creation must block unverified email");
+assert(ordersRoute.includes("PAID_ELIGIBILITY_UNVERIFIED"), "Order creation must block unverified paid eligibility");
 
 assert(accountPage.includes("const eligibilityLabels: Record<PaidEligibilityStatus, string>"), "Account page mapping must be centralized");
 assert(accountPage.includes("Profile birth date is NOT used here"), "Account page must hold the account-level identity boundary");
 assert(migration024.includes("status in ('ACTIVE', 'DELETION_REQUESTED', 'CLOSED')"), "Lifecycle status contract must exist in migration 024");
 assert(migration024.includes("paid_eligibility_status in ('UNVERIFIED', 'VERIFIED_ADULT', 'REVOKED')"), "Eligibility state contract must exist in migration 024");
 
-console.log("\nAll corrected Phase 3A invariants validated.");
+console.log("\nAccount policy foundation and paid-boundary invariants validated.");
 console.log("=".repeat(80));
 console.log("✓ ALL PHASE 3A REGRESSION TESTS PASSED");
 console.log("=".repeat(80));

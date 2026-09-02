@@ -34,7 +34,7 @@ assert(catalog.includes('import PremiumProductDetail from "@/app/components/Prem
 assert(catalog.includes("<PremiumProductDetail"), "deep-analysis selected detail must render the shared component");
 assert(accessPanel.includes('import PremiumProductDetail from "@/app/components/PremiumProductDetail"'), "standalone access panel must use the shared detail");
 assert(accessPanel.includes("getPaidReport"), "standalone access panel must resolve report status");
-assert(accessPanel.includes('<PremiumProductDetail product={product} state={state} profileId={profileId} />'), "standalone must pass profile-aware state into the shared detail");
+assert(accessPanel.includes('<PremiumProductDetail product={product} state={state} profileId={profileId} isSaved={isSaved} />'), "standalone must pass profile-aware state and authoritative save state into the shared detail");
 assert(standalonePage.includes("resolveLaunchPurchasableProduct"), "standalone route must keep the launch-only availability boundary");
 assert(standalonePage.includes('`/deep-analysis?profileId=${encodeURIComponent(profileId)}`'), "standalone return navigation must preserve profile context in deep analysis");
 assert(standalonePage.includes(' : "/deep-analysis"'), "profile-less standalone return navigation must stay customer-safe");

@@ -86,8 +86,9 @@ const router = useRouter();
       });
 
       if (!orderResponse.ok) {
+        const body = await orderResponse.json().catch(() => null) as { error?: string } | null;
         throw new Error(
-          `주문 생성에 실패했습니다. (${orderResponse.status})`,
+          body?.error ?? `주문 생성에 실패했습니다. (${orderResponse.status})`,
         );
       }
 

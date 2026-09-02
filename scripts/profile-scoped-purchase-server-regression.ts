@@ -54,12 +54,12 @@ console.log("4. mock-confirm inherits profile scope only from the order ✓");
 
 assert(purchaseServer.includes("getActiveEntitlementForProfile"), "strict profile entitlement lookup must exist");
 assert(purchaseServer.includes('.eq("profile_id", profileId)'), "strict entitlement lookup must filter profile_id");
-assert(purchaseServer.includes('onConflict: "user_id,profile_id,resource_id,resource_type"'), "entitlement upsert must use the profile-scoped unique key");
+assert(purchaseServer.includes('onConflict: "user_id,profile_id,resource_id,resource_type,analysis_edition_key"'), "entitlement upsert must use the edition-scoped unique key (57D-48F-D)");
 assert(!grantEntitlementSource.includes("ignoreDuplicates: true"), "repeat purchases must refresh the entitlement purchase source instead of ignoring the new purchase");
 assert(!purchaseServer.includes("profile_id: undefined") && !purchaseServer.includes("profileId ??"), "profile persistence must not have a legacy fallback");
 console.log("5. profile-scoped entitlement lookup and latest-purchase upsert contract present ✓");
 
-assert(checkoutPanel.includes("profileId?: string") && checkoutPanel.includes("disabled={isPaying || !profileId}"), "checkout must require an explicit profileId");
+assert(checkoutPanel.includes("profileId?: string") && checkoutPanel.includes("disabled={isPaying}") && checkoutPanel.includes("{profileId ? ("), "checkout must require an explicit profileId (button only renders once a profile is selected)");
 assert(!checkoutPanel.includes("profiles[0]") && !checkoutPanel.includes("relationshipType === \"self\""), "checkout must not invent a self or first-profile fallback");
 console.log("6. checkout requires explicit profile context without a fallback ✓");
 

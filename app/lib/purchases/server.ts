@@ -18,6 +18,8 @@ import {
 } from "../toss/server";
 import { getPremiumCategoryLabel, getPremiumProduct } from "../premiumProductRegistry";
 import { emitPaymentEvent } from "../payments/observability";
+import { resolveAnalysisEditionForOrder } from "../analysisEditionForOrder";
+import { parseAnalysisInputSnapshot } from "../analysisInputSnapshot";
 
 type OrderRow = {
   id: string;
@@ -30,6 +32,9 @@ type OrderRow = {
   transaction_id: string | null;
   created_at: string;
   paid_at: string | null;
+  analysis_edition_key: string | null;
+  analysis_reference_snapshot: unknown;
+  analysis_input_snapshot: unknown;
 };
 
 type PurchaseRow = {
@@ -39,6 +44,9 @@ type PurchaseRow = {
   product_id: string;
   order_id: string;
   purchased_at: string;
+  analysis_edition_key: string | null;
+  analysis_reference_snapshot: unknown;
+  analysis_input_snapshot: unknown;
 };
 
 type EntitlementRow = {
@@ -51,6 +59,7 @@ type EntitlementRow = {
   purchase_id: string | null;
   source: "purchase" | "subscription" | "credit" | "grant";
   created_at: string;
+  analysis_edition_key: string | null;
 };
 
 type TossPaymentRow = {
@@ -91,6 +100,9 @@ function toOrderRecord(row: OrderRow): OrderRecord {
     transactionId: row.transaction_id,
     createdAt: row.created_at,
     paidAt: row.paid_at,
+    analysisEditionKey: row.analysis_edition_key,
+    analysisReferenceSnapshot: row.analysis_reference_snapshot,
+    analysisInputSnapshot: row.analysis_input_snapshot,
   };
 }
 
@@ -102,6 +114,9 @@ function toPurchaseRecord(row: PurchaseRow): PurchaseRecord {
     productId: row.product_id,
     orderId: row.order_id,
     purchasedAt: row.purchased_at,
+    analysisEditionKey: row.analysis_edition_key,
+    analysisReferenceSnapshot: row.analysis_reference_snapshot,
+    analysisInputSnapshot: row.analysis_input_snapshot,
   };
 }
 
@@ -116,6 +131,7 @@ function toEntitlementRecord(row: EntitlementRow): EntitlementRecord {
     purchaseId: row.purchase_id,
     source: row.source,
     createdAt: row.created_at,
+    analysisEditionKey: row.analysis_edition_key,
   };
 }
 
@@ -202,13 +218,17 @@ async function revokeEntitlement(input: {
     if (error || !data?.[0]) return null;
     return toEntitlementRecord(data[0] as EntitlementRow);
   }
+  // Account-closure path only (refund always supplies orderId+claimToken above):
+  // stays account-wide/product-global by design, revoking ALL active editions
+  // of this product rather than a single one (a product can now have more
+  // than one simultaneously-active edition row).
   const { data, error } = await supabase.from("entitlements").update({
     is_active: false,
     revoked_at: new Date().toISOString(),
     revocation_reason: revocationReason,
-  }).eq("user_id", input.userId).eq("profile_id", input.profileId).eq("resource_id", input.productId).eq("is_active", true).select("*").maybeSingle<EntitlementRow>();
-  if (error || !data) return null;
-  return toEntitlementRecord(data);
+  }).eq("user_id", input.userId).eq("profile_id", input.profileId).eq("resource_id", input.productId).eq("is_active", true).select("*");
+  if (error || !data || data.length === 0) return null;
+  return toEntitlementRecord(data[0] as EntitlementRow);
 }
 
 export async function revokeEntitlementForRefund(input: {
@@ -382,6 +402,30 @@ export class InvalidProductError extends Error {
   }
 }
 
+/**
+ * P0 fail-closed guard (57D-48F-A): pre-edition commercial identity is
+ * product-global, so a repeat purchase would pay again for zero new content.
+ * Intentionally over-blocks legitimate future-edition repurchase until
+ * edition-aware identity ships.
+ */
+export class AlreadyOwnedError extends Error {
+  constructor(productId: unknown) {
+    super(`이미 보유하고 있는 분석입니다: ${String(productId)}`);
+    this.name = "AlreadyOwnedError";
+  }
+}
+
+/**
+ * Fail-closed when the commercial edition for a new-sale order cannot be
+ * computed. This must never silently fall back to LEGACY/null for a new order.
+ */
+export class AnalysisEditionUnavailableError extends Error {
+  constructor(productId: unknown) {
+    super(`분석 에디션을 계산하지 못했습니다: ${String(productId)}`);
+    this.name = "AnalysisEditionUnavailableError";
+  }
+}
+
 export async function createPendingOrder(input: {
   userId: string;
   profileId: string;
@@ -392,6 +436,29 @@ export async function createPendingOrder(input: {
 
   if (!resolved.ok) {
     throw new InvalidProductError(input.productId);
+  }
+
+  if (await hasActiveEntitlementForProfile(input.userId, input.profileId, resolved.productId)) {
+    throw new AlreadyOwnedError(resolved.productId);
+  }
+
+  // Frozen here, server-side, before the order exists: never recomputed by any
+  // later step (payment confirmation, purchase creation, reconciliation, refund).
+  let analysisEditionKey: string;
+  let analysisReferenceSnapshot: unknown = null;
+  let analysisInputSnapshot: unknown;
+
+  try {
+    const resolution = await resolveAnalysisEditionForOrder({
+      userId: input.userId,
+      profileId: input.profileId,
+      productId: resolved.productId,
+    });
+    analysisEditionKey = resolution.editionKey;
+    analysisReferenceSnapshot = resolution.referenceSnapshot;
+    analysisInputSnapshot = resolution.inputSnapshot;
+  } catch {
+    throw new AnalysisEditionUnavailableError(resolved.productId);
   }
 
   const supabase = createAdminClient();
@@ -405,6 +472,9 @@ export async function createPendingOrder(input: {
       amount: resolved.amount,
       status: "pending" satisfies PaymentStatus,
       payment_provider: input.paymentProvider ?? "mock",
+      analysis_edition_key: analysisEditionKey,
+      analysis_reference_snapshot: analysisReferenceSnapshot,
+      analysis_input_snapshot: analysisInputSnapshot,
     })
     .select("*")
     .single<OrderRow>();
@@ -492,6 +562,19 @@ export async function createPurchaseFromPaidOrder(
     throw new Error("결제가 완료된 주문만 구매를 생성할 수 있습니다.");
   }
 
+  // The purchase must carry the exact edition frozen on the order at creation
+  // time (LEGACY/LIFETIME copy through unchanged); never recomputed here.
+  if (!order.analysisEditionKey) {
+    throw new AnalysisEditionUnavailableError(order.productId);
+  }
+
+  // Fail closed only on a PRESENT-but-corrupted snapshot; a legacy order that
+  // predates this column is legitimately null and must fall back conservatively
+  // (never invented) rather than block the purchase. Never refetch the profile.
+  if (order.analysisInputSnapshot) {
+    parseAnalysisInputSnapshot(order.analysisInputSnapshot);
+  }
+
   const supabase = createAdminClient();
 
   const { error } = await supabase.from("purchases").upsert(
@@ -501,6 +584,9 @@ export async function createPurchaseFromPaidOrder(
       product_id: order.productId,
       order_id: order.id,
       purchased_at: order.paidAt ?? new Date().toISOString(),
+      analysis_edition_key: order.analysisEditionKey,
+      analysis_reference_snapshot: order.analysisReferenceSnapshot,
+      analysis_input_snapshot: order.analysisInputSnapshot,
     },
     { onConflict: "order_id", ignoreDuplicates: true },
   );
@@ -524,9 +610,30 @@ export async function createPurchaseFromPaidOrder(
   return toPurchaseRecord(data);
 }
 
+/** Used to recover a purchase's frozen analysisReferenceSnapshot for report generation. */
+export async function getPurchaseById(purchaseId: string): Promise<PurchaseRecord | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("purchases")
+    .select("*")
+    .eq("id", purchaseId)
+    .maybeSingle<PurchaseRow>();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return toPurchaseRecord(data);
+}
+
 /**
- * Idempotent per user/profile/resource/type. A repeat purchase keeps one active
- * entitlement while updating its purchase_id to the most recent purchase.
+ * Idempotent per user/profile/resource/type/edition. A retry of the SAME
+ * edition reactivates that edition's own row and updates its purchase_id to
+ * that edition's own purchase; a DIFFERENT edition creates a separate row and
+ * never touches another edition's purchase_id.
+ *
+ * analysisEditionKey must come from the frozen purchase/order — this function
+ * never computes it and never uses the current date.
  */
 export async function grantEntitlement(input: {
   userId: string;
@@ -534,12 +641,17 @@ export async function grantEntitlement(input: {
   resourceId: string;
   resourceType?: string;
   purchaseId: string | null;
+  analysisEditionKey: string;
   source?: "purchase" | "subscription" | "credit" | "grant";
 }): Promise<EntitlementRecord> {
   const resolved = resolvePurchasableProduct(input.resourceId);
 
   if (!resolved.ok) {
     throw new InvalidProductError(input.resourceId);
+  }
+
+  if (!input.analysisEditionKey) {
+    throw new AnalysisEditionUnavailableError(resolved.productId);
   }
 
   const resourceType = input.resourceType ?? PAID_ANALYSIS_RESOURCE_TYPE;
@@ -554,19 +666,21 @@ export async function grantEntitlement(input: {
       resource_type: resourceType,
       is_active: true,
       purchase_id: input.purchaseId,
+      analysis_edition_key: input.analysisEditionKey,
       source,
     },
-    { onConflict: "user_id,profile_id,resource_id,resource_type" },
+    { onConflict: "user_id,profile_id,resource_id,resource_type,analysis_edition_key" },
   );
 
   if (error) {
     throw new Error(`이용 권한 생성에 실패했습니다: ${error.message}`);
   }
 
-  const entitlement = await getActiveEntitlementForProfile(
+  const entitlement = await getActiveEntitlementForProfileEdition(
     input.userId,
     input.profileId,
     resolved.productId,
+    input.analysisEditionKey,
     resourceType,
   );
 
@@ -577,6 +691,13 @@ export async function grantEntitlement(input: {
   return entitlement;
 }
 
+/**
+ * Coarse "ANY active edition" lookup. Existing callers (57D-48F-A's P0 guard,
+ * today's single-active-edition report-preview flow) rely on this exact
+ * semantic and must not be broken. Safe against multiple simultaneously
+ * active editions (a future/test state): returns the most recently created
+ * active row rather than crashing on 2+ matches.
+ */
 export async function getActiveEntitlementForProfile(
   userId: string,
   profileId: string,
@@ -599,6 +720,47 @@ export async function getActiveEntitlementForProfile(
     .eq("resource_id", resolved.productId)
     .eq("resource_type", resourceType)
     .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<EntitlementRow>();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return toEntitlementRecord(data);
+}
+
+/**
+ * Exact-edition lookup: "does this profile own THIS specific edition?" Used
+ * wherever a specific edition's access must be resolved (report claim,
+ * refund-safe display), as opposed to getActiveEntitlementForProfile's
+ * "ANY edition" coarse answer used by the P0 guard.
+ */
+export async function getActiveEntitlementForProfileEdition(
+  userId: string,
+  profileId: string,
+  productId: string,
+  analysisEditionKey: string,
+  resourceType: string = PAID_ANALYSIS_RESOURCE_TYPE,
+): Promise<EntitlementRecord | null> {
+  const resolved = resolvePurchasableProduct(productId);
+
+  if (!resolved.ok || !analysisEditionKey) {
+    return null;
+  }
+
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("entitlements")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("profile_id", profileId)
+    .eq("resource_id", resolved.productId)
+    .eq("resource_type", resourceType)
+    .eq("analysis_edition_key", analysisEditionKey)
+    .eq("is_active", true)
     .maybeSingle<EntitlementRow>();
 
   if (error || !data) {
@@ -614,6 +776,17 @@ export async function hasActiveEntitlementForProfile(
   productId: string,
 ): Promise<boolean> {
   return (await getActiveEntitlementForProfile(userId, profileId, productId)) !== null;
+}
+
+export async function hasActiveEntitlementForProfileEdition(
+  userId: string,
+  profileId: string,
+  productId: string,
+  analysisEditionKey: string,
+): Promise<boolean> {
+  return (
+    (await getActiveEntitlementForProfileEdition(userId, profileId, productId, analysisEditionKey)) !== null
+  );
 }
 
 export async function listUserEntitlements(
@@ -730,6 +903,7 @@ export async function reconcileTossPayment(
       profileId: order.profileId,
       resourceId: order.productId,
       purchaseId: purchase.id,
+      analysisEditionKey: purchase.analysisEditionKey!,
       source: "purchase",
     });
     await markTossPaymentReconciliationResult(
@@ -774,6 +948,7 @@ export async function reconcileTossPayment(
       profileId: paidOrder.profileId,
       resourceId: paidOrder.productId,
       purchaseId: purchase.id,
+      analysisEditionKey: purchase.analysisEditionKey!,
       source: "purchase",
     });
     await markTossPaymentReconciliationResult(
@@ -886,6 +1061,7 @@ export async function confirmMockPayment(
     profileId: paidOrder.profileId,
     resourceId: paidOrder.productId,
     purchaseId: purchase.id,
+    analysisEditionKey: purchase.analysisEditionKey!,
     source: "purchase",
   });
 

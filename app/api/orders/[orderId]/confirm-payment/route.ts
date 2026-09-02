@@ -182,6 +182,7 @@ export async function POST(request: Request, context: RouteContext) {
       profileId: paidOrder.profileId,
       resourceId: paidOrder.productId,
       purchaseId: purchase.id,
+      analysisEditionKey: purchase.analysisEditionKey!,
       source: "purchase",
     });
     emitPaymentEvent("payment_confirmed", {

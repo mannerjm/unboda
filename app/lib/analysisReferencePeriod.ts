@@ -94,7 +94,8 @@ function addMonths(
   };
 }
 
-function parseAnchorDate(anchorDate: string): {
+/** Exported for reuse by computeAnalysisEditionKey(); avoids duplicating date math. */
+export function parseAnchorDate(anchorDate: string): {
   year: number;
   month: number;
   day: number;

@@ -104,13 +104,17 @@ export default function PremiumCatalogSection({ profileId, recommendedProductIds
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [summaries, setSummaries] = useState<PaidAnalysisSummary[]>([]);
+  const [savedProductIds, setSavedProductIds] = useState<ReadonlySet<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
     void fetch("/api/premium-catalog/status")
       .then(async (response) => {
-        const body = await response.json() as { paidAnalysis?: PaidAnalysisSummary[] };
-        if (!cancelled && response.ok) setSummaries(body.paidAnalysis ?? []);
+        const body = await response.json() as { paidAnalysis?: PaidAnalysisSummary[]; savedProductIds?: string[] };
+        if (!cancelled && response.ok) {
+          setSummaries(body.paidAnalysis ?? []);
+          setSavedProductIds(new Set(body.savedProductIds ?? []));
+        }
       })
       .catch(() => undefined);
     return () => { cancelled = true; };
@@ -210,7 +214,7 @@ export default function PremiumCatalogSection({ profileId, recommendedProductIds
               );
             })}
           </div>
-          {!activeGroup ? <div className="mt-6 flex min-h-[112px] items-center justify-center rounded-xl border border-stone-200 bg-white px-5 text-center"><div><p className="text-sm font-semibold text-stone-700">2. 지금 어떤 고민에 가장 가까우세요?</p><p className="mt-2 text-xs text-stone-500">영역을 선택하면 지금의 질문에 가까운 분석을 골라볼 수 있어요.</p></div></div> : <TopicDiscovery products={activeGroup.products} selectedProductId={selectedProductId} onSelect={setSelectedProductId} onClear={() => { setSelectedCategory(null); setSelectedProductId(null); }} stateByProductId={stateByProductId} profileId={profileId} />}
+          {!activeGroup ? <div className="mt-6 flex min-h-[112px] items-center justify-center rounded-xl border border-stone-200 bg-white px-5 text-center"><div><p className="text-sm font-semibold text-stone-700">2. 지금 어떤 고민에 가장 가까우세요?</p><p className="mt-2 text-xs text-stone-500">영역을 선택하면 지금의 질문에 가까운 분석을 골라볼 수 있어요.</p></div></div> : <TopicDiscovery products={activeGroup.products} selectedProductId={selectedProductId} onSelect={setSelectedProductId} onClear={() => { setSelectedCategory(null); setSelectedProductId(null); }} stateByProductId={stateByProductId} profileId={profileId} savedProductIds={savedProductIds} />}
         </div>
       ) : (
         <PeriodDiscovery
@@ -221,6 +225,7 @@ export default function PremiumCatalogSection({ profileId, recommendedProductIds
           renderTile={renderPeriodTile}
           stateByProductId={stateByProductId}
           profileId={profileId}
+          savedProductIds={savedProductIds}
         />
       )}
     </section>
@@ -233,6 +238,7 @@ function TopicDiscovery({
   onClear,
   stateByProductId,
   profileId,
+  savedProductIds,
 }: {
   products: readonly PremiumProductDefinition[];
   selectedProductId: string | null;
@@ -240,6 +246,7 @@ function TopicDiscovery({
   onClear: () => void;
   stateByProductId: ReadonlyMap<string, CatalogProductState>;
   profileId?: string;
+  savedProductIds: ReadonlySet<string>;
 }) {
   const selectedProduct = products.find((product) => product.id === selectedProductId) ?? null;
   const selectedConfig = selectedProduct ? getPaidAnalysisTopicConfig(selectedProduct.id) : undefined;
@@ -268,10 +275,12 @@ function TopicDiscovery({
       </div>
       {selectedProduct && purchaseDecision ? (
         <PremiumProductDetail
+          key={selectedProduct.id}
           product={selectedProduct}
           state={toPremiumAnalysisProductState(stateByProductId.get(selectedProduct.id))}
           profileId={profileId}
           onClear={() => onSelect("")}
+          isSaved={savedProductIds.has(selectedProduct.id)}
         />
       ) : (
         <div className="flex min-h-[104px] items-center justify-center rounded-xl border border-stone-200 bg-white px-5 text-center">
@@ -289,6 +298,7 @@ function PeriodDiscovery({
   renderTile,
   stateByProductId,
   profileId,
+  savedProductIds,
 }: {
   products: readonly PremiumProductDefinition[];
   selectedProductId: string | null;
@@ -297,6 +307,7 @@ function PeriodDiscovery({
   renderTile: (product: PremiumProductDefinition) => ReactElement | null;
   stateByProductId: ReadonlyMap<string, CatalogProductState>;
   profileId?: string;
+  savedProductIds: ReadonlySet<string>;
 }) {
   const selectedProduct = products.find((product) => product.id === selectedProductId) ?? null;
   return (
@@ -311,10 +322,12 @@ function PeriodDiscovery({
 
       {selectedProduct?.purchaseDecision ? (
         <PremiumProductDetail
+          key={selectedProduct.id}
           product={selectedProduct}
           state={toPremiumAnalysisProductState(stateByProductId.get(selectedProduct.id))}
           profileId={profileId}
           onClear={onClear}
+          isSaved={savedProductIds.has(selectedProduct.id)}
         />
       ) : (
         <div className="mt-6 flex min-h-[104px] items-center justify-center rounded-xl border border-stone-200 bg-white px-5 text-center">

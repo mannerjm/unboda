@@ -17,8 +17,14 @@ const myPage = read("app/mypage/page.tsx");
 const detailRoute = read("app/api/paid-analysis-detail-v2/route.ts");
 
 assert(summaryRoute.includes("listUserPaidAnalysisSummaries(user.id)"), "summary must build the paid list on the server for the session user");
-assert(summaryRoute.includes("{ freeAnalysisResults, profileDeletability, paidAnalysis }"), "summary must add paidAnalysis without dropping the existing arrays");
-assert(summaryRoute.includes("resolveProfileFreeAnalysisStatus(profile, summaries)"), "the P0-3 free analysis contract must stay unchanged");
+// Field-level contract (not an exact object-literal match): the route has
+// legitimately grown a purchaseHistory field since this assertion was
+// written; asserting each field independently avoids re-breaking on future
+// additive fields while still proving none of the original arrays were dropped.
+for (const field of ["freeAnalysisResults", "profileDeletability", "paidAnalysis", "purchaseHistory"]) {
+  assert(summaryRoute.includes(field), `summary response must still include ${field}`);
+}
+assert(summaryRoute.includes("resolveProfileFreeAnalysisStatus(profile, summaries"), "the P0-3 free analysis contract must stay unchanged");
 assert(summaryRoute.includes("listProfileDeleteBlockers(user.id)") && summaryRoute.includes("deleteBlockers.get(profile.id)"), "the P0-4 deletability contract must stay unchanged");
 assert(!summaryRoute.includes("delete(") && !summaryRoute.includes("update("), "summary must stay read-only");
 console.log("1. summary exposes paidAnalysis while preserving the P0-3 and P0-4 contracts ✓");

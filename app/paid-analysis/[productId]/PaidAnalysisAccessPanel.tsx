@@ -7,8 +7,9 @@ import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
-import { hasActiveEntitlementForProfile } from "@/app/lib/purchases/server";
+import { getActiveEntitlementForProfile } from "@/app/lib/purchases/server";
 import { getPaidReport } from "@/app/lib/paidReports/server";
+import { isProductSaved } from "@/app/lib/interestedAnalyses/server";
 
 type PaidAnalysisAccessPanelProps = {
   productId: string;
@@ -33,19 +34,21 @@ export default async function PaidAnalysisAccessPanel({
     notFound();
   }
 
-  const hasAccess = user && profile
-    ? await hasActiveEntitlementForProfile(user.id, profile.id, canonicalProductId)
-    : false;
+  const entitlement = user && profile
+    ? await getActiveEntitlementForProfile(user.id, profile.id, canonicalProductId)
+    : null;
+  const hasAccess = entitlement !== null;
   const product = getPremiumProduct(canonicalProductId);
 
   if (!product) {
     notFound();
   }
 
-  const report = hasAccess && user && profile
-    ? await getPaidReport(user.id, profile.id, canonicalProductId)
+  const report = hasAccess && user && profile && entitlement.analysisEditionKey
+    ? await getPaidReport(user.id, profile.id, canonicalProductId, entitlement.analysisEditionKey)
     : null;
   const state = hasAccess ? report?.status ?? "none" : "not_purchased";
+  const isSaved = user ? await isProductSaved(user.id, canonicalProductId) : false;
 
-  return <PremiumProductDetail product={product} state={state} profileId={profileId} />;
+  return <PremiumProductDetail product={product} state={state} profileId={profileId} isSaved={isSaved} />;
 }

@@ -129,7 +129,10 @@ export async function requestFullRefund(input: {
   if (!payment?.paymentKey || payment.providerStatus !== "DONE" || payment.confirmedAmount !== input.order.amount || payment.currency !== "KRW" || payment.providerOrderId !== input.order.id) {
     throw new Error("환불 가능한 Toss 결제 상태를 확인하지 못했습니다.");
   }
-  const eligibility = await assessFullRefundEligibility({ userId: input.order.userId, profileId: input.order.profileId, productId: input.order.productId, reasonCategory: input.reasonCategory });
+  if (!input.order.analysisEditionKey) {
+    throw new Error("주문의 분석 에디션을 확인하지 못했습니다.");
+  }
+  const eligibility = await assessFullRefundEligibility({ userId: input.order.userId, profileId: input.order.profileId, productId: input.order.productId, analysisEditionKey: input.order.analysisEditionKey, reasonCategory: input.reasonCategory });
   if (!eligibility.eligible) {
     throw new Error("현재 환불 정책상 담당자 확인이 필요합니다.");
   }
@@ -199,7 +202,7 @@ export async function reconcileRefundWorkflow(
     if (provider.status === "CANCELED" && provider.orderId === workflow.orderId && provider.currency === workflow.currency && cancellation?.cancelStatus === "DONE" && cancellation.cancelAmount === workflow.requestedAmount) {
       await updateRefund(workflow.orderId, { provider_status: "CANCELED", provider_cancellation_reference: cancellation.transactionKey, provider_confirmed_at: workflow.providerConfirmedAt ?? new Date().toISOString(), last_provider_http_status: 200, updated_at: new Date().toISOString() }, workflow.reconciliationClaimToken);
       await options.afterProviderCancellationVerified?.();
-      const completed = await completeRefund({ id: order.id, userId: order.user_id, profileId: order.profile_id, productId: order.product_id, amount: order.amount, status: order.status, paymentProvider: order.payment_provider, transactionId: order.transaction_id, createdAt: order.created_at, paidAt: order.paid_at }, workflow, workflow.reconciliationClaimToken, { beforeEntitlementRevocation: options.beforeEntitlementRevocation });
+      const completed = await completeRefund({ id: order.id, userId: order.user_id, profileId: order.profile_id, productId: order.product_id, amount: order.amount, status: order.status, paymentProvider: order.payment_provider, transactionId: order.transaction_id, createdAt: order.created_at, paidAt: order.paid_at, analysisEditionKey: null, analysisReferenceSnapshot: null, analysisInputSnapshot: null }, workflow, workflow.reconciliationClaimToken, { beforeEntitlementRevocation: options.beforeEntitlementRevocation });
       emitPaymentEvent("refund_reconciliation_converged", { operationalClass: "CONVERGED", orderId: workflow.orderId, productId: workflow.productId, profileReference: workflow.profileId, runId: workflow.correlationId });
       return completed;
     }

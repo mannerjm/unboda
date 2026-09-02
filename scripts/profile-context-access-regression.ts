@@ -64,7 +64,10 @@ for (const [name, source] of [["paid page", paidPage], ["report page", reportPag
 for (const [name, source] of [["access panel", accessPanel], ["report gate", reportGate]] as const) {
   assert(source.includes("isProfileId(profileId)"), `${name} must reject missing/invalid profileId`);
   assert(source.includes("getUserProfile(profileId, user.id)"), `${name} must verify profile ownership`);
-  assert(source.includes("hasActiveEntitlementForProfile"), `${name} must use strict profile entitlement lookup`);
+  assert(
+    source.includes("hasActiveEntitlementForProfile") || source.includes("getActiveEntitlementForProfile"),
+    `${name} must use strict profile entitlement lookup`,
+  );
   assert(source.includes("notFound()"), `${name} must return 404 for invalid/foreign profile`);
 }
 assert(reportGate.includes("?profileId=${profileId}"), "report gate return link must preserve profileId");

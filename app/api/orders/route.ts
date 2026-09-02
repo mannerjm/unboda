@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { ensureAccountLifecycle } from "@/app/lib/accounts/server";
 import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
-import { createPendingOrder } from "@/app/lib/purchases/server";
+import { AlreadyOwnedError, AnalysisEditionUnavailableError, createPendingOrder } from "@/app/lib/purchases/server";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { emitPaymentEvent } from "@/app/lib/payments/observability";
@@ -92,6 +92,20 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ order }, { status: 201 });
   } catch (error) {
+    if (error instanceof AlreadyOwnedError) {
+      return NextResponse.json(
+        { error: "이미 보유하고 있는 분석입니다. 구매한 분석에서 확인해 주세요.", code: "ALREADY_OWNED" },
+        { status: 409 },
+      );
+    }
+
+    if (error instanceof AnalysisEditionUnavailableError) {
+      return NextResponse.json(
+        { error: "지금은 이 분석을 준비할 수 없습니다. 잠시 후 다시 시도해 주세요.", code: "ANALYSIS_EDITION_UNAVAILABLE" },
+        { status: 409 },
+      );
+    }
+
     console.error("[orders] create order failed", error);
 
     return NextResponse.json(

@@ -21,6 +21,8 @@ export type PaidReportRecord = {
   createdAt: string;
   updatedAt: string;
   completedAt: string | null;
+  /** STEP 57D-48F-B foundation column; null/LEGACY/LIFETIME until report identity becomes edition-scoped. */
+  analysisEditionKey: string | null;
 };
 
 type PaidReportRow = {
@@ -35,6 +37,7 @@ type PaidReportRow = {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+  analysis_edition_key: string | null;
 };
 
 const STALE_GENERATING_MS = 5 * 60 * 1000;
@@ -52,6 +55,7 @@ function toPaidReportRecord(row: PaidReportRow): PaidReportRecord {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     completedAt: row.completed_at,
+    analysisEditionKey: row.analysis_edition_key,
   };
 }
 
@@ -59,6 +63,7 @@ export async function getPaidReport(
   userId: string,
   profileId: string,
   productId: string,
+  analysisEditionKey: string,
 ): Promise<PaidReportRecord | null> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
@@ -67,6 +72,7 @@ export async function getPaidReport(
     .eq("user_id", userId)
     .eq("profile_id", profileId)
     .eq("product_id", productId)
+    .eq("analysis_edition_key", analysisEditionKey)
     .maybeSingle<PaidReportRow>();
 
   if (error) {
@@ -160,7 +166,12 @@ export async function claimPaidReport(input: {
   profileId: string;
   productId: string;
   purchaseId: string | null;
+  analysisEditionKey: string;
 }): Promise<PaidReportClaim> {
+  if (!input.analysisEditionKey) {
+    throw new Error("분석 에디션을 확인하지 못했습니다.");
+  }
+
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("paid_reports")
@@ -170,13 +181,14 @@ export async function claimPaidReport(input: {
         profile_id: input.profileId,
         product_id: input.productId,
         purchase_id: input.purchaseId,
+        analysis_edition_key: input.analysisEditionKey,
         status: "generating" satisfies PaidReportStatus,
         content: null,
         error_code: null,
         completed_at: null,
       },
       {
-        onConflict: "user_id,profile_id,product_id",
+        onConflict: "user_id,profile_id,product_id,analysis_edition_key",
         ignoreDuplicates: true,
       },
     )
@@ -191,7 +203,7 @@ export async function claimPaidReport(input: {
     return { state: "claimed", report: toPaidReportRecord(data) };
   }
 
-  const existing = await getPaidReport(input.userId, input.profileId, input.productId);
+  const existing = await getPaidReport(input.userId, input.profileId, input.productId, input.analysisEditionKey);
 
   if (!existing) {
     throw new Error("유료 분석 생성 상태를 확인하지 못했습니다.");
@@ -215,6 +227,7 @@ export async function claimPaidReport(input: {
     .eq("user_id", input.userId)
     .eq("profile_id", input.profileId)
     .eq("product_id", input.productId)
+    .eq("analysis_edition_key", input.analysisEditionKey)
     .eq("status", retryableStatus);
 
   const { data: reclaimed, error: reclaimError } = existing.status === "generating"
@@ -229,7 +242,7 @@ export async function claimPaidReport(input: {
     return { state: "claimed", report: toPaidReportRecord(reclaimed) };
   }
 
-  const current = await getPaidReport(input.userId, input.profileId, input.productId);
+  const current = await getPaidReport(input.userId, input.profileId, input.productId, input.analysisEditionKey);
 
   if (!current) {
     throw new Error("유료 분석 생성 상태를 다시 확인하지 못했습니다.");

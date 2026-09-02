@@ -13,6 +13,12 @@ export type OrderRecord = {
   transactionId: string | null;
   createdAt: string;
   paidAt: string | null;
+  /** STEP 57D-48F-B foundation column; null/LEGACY until Phase C freezes it at order creation. */
+  analysisEditionKey: string | null;
+  /** STEP 57D-48F-D: frozen evaluation-date/fortune context so delayed generation never drifts to "now". */
+  analysisReferenceSnapshot: unknown;
+  /** STEP 57D-48F-D2: frozen canonical birth-data input; report generation must consume this, never the live profile. */
+  analysisInputSnapshot: unknown;
 };
 
 export type TossPaymentRecord = {
@@ -55,6 +61,12 @@ export type PurchaseRecord = {
   productId: string;
   orderId: string;
   purchasedAt: string;
+  /** STEP 57D-48F-B foundation column; null/LEGACY until a later phase threads it through. */
+  analysisEditionKey: string | null;
+  /** STEP 57D-48F-D: copied verbatim from the originating order, never recomputed. */
+  analysisReferenceSnapshot: unknown;
+  /** STEP 57D-48F-D2: copied verbatim from the originating order, never recomputed. */
+  analysisInputSnapshot: unknown;
 };
 
 export type RefundStatus =
@@ -107,4 +119,6 @@ export type EntitlementRecord = {
   purchaseId: string | null;
   source: "purchase" | "subscription" | "credit" | "grant";
   createdAt: string;
+  /** STEP 57D-48F-B foundation column; null/LEGACY until edition-scoped identity ships. */
+  analysisEditionKey: string | null;
 };

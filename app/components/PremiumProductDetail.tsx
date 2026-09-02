@@ -1,16 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
 import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import { getProductPricing } from "@/app/lib/productPricing";
+import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
 
 type PremiumProductDetailProps = {
   product: PremiumProductDefinition;
   state: PremiumAnalysisProductState;
   profileId?: string;
   onClear?: () => void;
+  isSaved?: boolean;
 };
 
 const ACTION_LABELS: Record<PremiumAnalysisProductState, string> = {
@@ -41,7 +44,30 @@ export default function PremiumProductDetail({
   state,
   profileId,
   onClear,
+  isSaved = false,
 }: PremiumProductDetailProps) {
+  const [savedState, setSavedState] = useState(isSaved);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Re-sync with authoritative persisted state whenever it changes (e.g. async fetch resolves after mount).
+  useEffect(() => {
+    setSavedState(isSaved);
+  }, [isSaved]);
+
+  // Product detail only saves; removal is handled exclusively on /interests.
+  const handleSave = async () => {
+    if (savedState) return;
+    try {
+      setIsSaving(true);
+      await saveAnalysisAction(product.id);
+      setSavedState(true);
+    } catch (error) {
+      console.error("Failed to save interest:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const topicDecision = getPaidAnalysisTopicConfig(product.id)?.purchaseDecision;
   const periodDecision = product.purchaseDecision;
   const isPeriod = product.kind === "PERIOD";
@@ -96,13 +122,26 @@ export default function PremiumProductDetail({
       ) : null}
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-4">
         <span className="text-sm font-medium text-stone-500">{formatPrice(product.id)}</span>
-        {state === "generating" ? (
-          <span className="rounded-lg bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-500">{ACTION_LABELS[state]}</span>
-        ) : href ? (
-          <Link href={href} className="rounded-lg bg-stone-900 px-4 py-2.5 text-xs font-semibold text-white hover:bg-stone-800">
-            {ACTION_LABELS[state]}
-          </Link>
-        ) : null}
+        <div className="flex flex-wrap gap-2">
+          {state === "generating" ? (
+            <span className="rounded-lg bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-500">{ACTION_LABELS[state]}</span>
+          ) : href ? (
+            <Link href={href} className="rounded-lg bg-stone-900 px-4 py-2.5 text-xs font-semibold text-white hover:bg-stone-800">
+              {ACTION_LABELS[state]}
+            </Link>
+          ) : null}
+          <button
+            onClick={handleSave}
+            disabled={isSaving || savedState}
+            className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-default disabled:bg-stone-50 disabled:text-stone-500"
+          >
+            {isSaving
+              ? "저장 중..."
+              : savedState
+                ? "관심 분석에 저장됨"
+                : "관심 분석에 저장"}
+          </button>
+        </div>
       </div>
     </section>
   );

@@ -23,6 +23,7 @@ export function buildPaidAnalysisInputFromProfile(
     profile.calendarType,
     profile.isLeapMonth ? "윤달" : "평달",
     profile.gender,
+    anchorDate,
   );
   const freeAnalysis = buildFreeAnalysis(saju);
   const referencePeriod = buildReferencePeriodSnapshot({

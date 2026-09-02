@@ -136,8 +136,8 @@ assert(
   "purchase creation must be idempotent via onConflict order_id",
 );
 assert(
-  purchasesServer.includes('onConflict: "user_id,profile_id,resource_id,resource_type"'),
-  "entitlement grant must be idempotent via unique (user_id, profile_id, resource_id, resource_type)",
+  purchasesServer.includes('onConflict: "user_id,profile_id,resource_id,resource_type,analysis_edition_key"'),
+  "entitlement grant must be idempotent via unique (user_id, profile_id, resource_id, resource_type, analysis_edition_key)",
 );
 assert(
   purchasesServer.includes("profile_id: order.profileId") &&
@@ -278,6 +278,65 @@ assert(
 );
 console.log("10. service_role key stays server-only ✓");
 
+// --- 12. P0 duplicate-purchase fail-closed guard (57D-48F-A) ---
+const purchasesServerSource = read("app/lib/purchases/server.ts");
+assert(
+  purchasesServerSource.includes("export class AlreadyOwnedError extends Error"),
+  "a dedicated AlreadyOwnedError must exist for the duplicate-purchase guard",
+);
+const createPendingOrderBody = purchasesServerSource.slice(
+  purchasesServerSource.indexOf("export async function createPendingOrder"),
+  purchasesServerSource.indexOf("export async function getOrderForUser"),
+);
+assert(
+  createPendingOrderBody.includes("resolveLaunchPurchasableProduct"),
+  "createPendingOrder must still resolve the launch-purchasable product first",
+);
+assert(
+  /hasActiveEntitlementForProfile\(input\.userId, input\.profileId, resolved\.productId\)/.test(
+    createPendingOrderBody,
+  ),
+  "createPendingOrder must check the strict profile-scoped entitlement helper before inserting an order",
+);
+assert(
+  createPendingOrderBody.includes("throw new AlreadyOwnedError(resolved.productId)"),
+  "createPendingOrder must reject with AlreadyOwnedError when already entitled",
+);
+assert(
+  createPendingOrderBody.indexOf("hasActiveEntitlementForProfile") <
+    createPendingOrderBody.indexOf('.from("orders")'),
+  "the entitlement guard must run before the orders insert",
+);
+assert(
+  !createPendingOrderBody.includes("hasActiveEntitlement(") ||
+    createPendingOrderBody.includes("hasActiveEntitlementForProfile("),
+  "createPendingOrder must use the strict profile-scoped helper, not the account-wide one",
+);
+
+const ordersRouteSource = read("app/api/orders/route.ts");
+assert(
+  ordersRouteSource.includes("AlreadyOwnedError"),
+  "POST /api/orders must import and handle AlreadyOwnedError",
+);
+assert(
+  /error instanceof AlreadyOwnedError[\s\S]{0,200}status: 409/.test(ordersRouteSource),
+  "POST /api/orders must map AlreadyOwnedError to HTTP 409",
+);
+assert(
+  /code: "ALREADY_OWNED"/.test(ordersRouteSource),
+  "POST /api/orders must return a stable ALREADY_OWNED machine-readable code",
+);
+assert(
+  !/DB|database|internal/i.test(
+    ordersRouteSource.slice(
+      ordersRouteSource.indexOf("ALREADY_OWNED") - 200,
+      ordersRouteSource.indexOf("ALREADY_OWNED"),
+    ),
+  ),
+  "the ALREADY_OWNED customer message must not leak internal/DB details",
+);
+console.log("12. P0 duplicate-purchase guard: static contract (service + API mapping) ✓");
+
 // --- 11. integration block (env dependent) ---
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -317,11 +376,19 @@ async function runIntegration(): Promise<void> {
     order.amount === getProductPricing(productId).amount,
     "order amount must come from the server pricing source",
   );
+  assert(
+    typeof order.analysisEditionKey === "string" && /^YEAR:\d{4}$/.test(order.analysisEditionKey),
+    "new order must freeze a non-null YEAR:YYYY edition for a YEARLY-policy product",
+  );
 
   const first = await confirmMockPayment(order.id, integrationUserId!);
   assert(first !== null, "owner must be able to confirm the mock payment");
   assert(first!.order.status === "paid", "confirmed order must be paid");
   assert(first!.purchase.profileId === integrationProfileId, "purchase must inherit the order profileId");
+  assert(
+    first!.purchase.analysisEditionKey === order.analysisEditionKey,
+    "purchase must copy the exact frozen order edition, never recompute",
+  );
   assert(first!.entitlement.resourceId === productId, "entitlement must use the canonical productId");
   assert(first!.entitlement.profileId === integrationProfileId, "entitlement must inherit the order profileId");
   assert(first!.entitlement.purchaseId === first!.purchase.id, "purchase entitlement must record its purchaseId");
@@ -356,6 +423,61 @@ async function runIntegration(): Promise<void> {
     entitlements.filter((item) => item.resourceId === productId).length === 1,
     "exactly one entitlement row must exist for the product",
   );
+
+  // --- P0 duplicate-purchase fail-closed guard (57D-48F-A) ---
+  const { AlreadyOwnedError, revokeEntitlementForAccountClosure } = await import(
+    "../app/lib/purchases/server"
+  );
+
+  // 1. same user/profile/product with an active entitlement must be rejected.
+  let blockedAsExpected = false;
+  try {
+    await createPendingOrder({ userId: integrationUserId!, profileId: integrationProfileId!, productId });
+  } catch (error) {
+    blockedAsExpected = error instanceof AlreadyOwnedError;
+  }
+  assert(blockedAsExpected, "createPendingOrder must reject a repeat order for an already-owned profile/product");
+
+  // 2. same user/product, DIFFERENT profile must still be allowed.
+  const differentProfileOrder = await createPendingOrder({
+    userId: integrationUserId!,
+    profileId: otherProfileId!,
+    productId,
+  });
+  assert(differentProfileOrder.status === "pending", "a different profile must still be able to order the same product");
+  assert(typeof differentProfileOrder.analysisEditionKey === "string", "a different profile's order must still freeze its own edition");
+
+  // 3. same user/profile, DIFFERENT product must still be allowed.
+  const differentProductOrder = await createPendingOrder({
+    userId: integrationUserId!,
+    profileId: integrationProfileId!,
+    productId: "money-leak-risk",
+  });
+  assert(differentProductOrder.status === "pending", "the same profile must still be able to order a different product");
+  assert(
+    typeof differentProductOrder.analysisEditionKey === "string" && /^MONTH:\d{4}-\d{2}$/.test(differentProductOrder.analysisEditionKey),
+    "a different (MONTHLY-policy) product's order must freeze its own MONTH:YYYY-MM edition",
+  );
+
+  // 4. a revoked entitlement must no longer block a new order (pre-edition semantics).
+  const revoked = await revokeEntitlementForAccountClosure({
+    userId: integrationUserId!,
+    profileId: integrationProfileId!,
+    productId,
+  });
+  assert(revoked?.isActive === false, "test setup: entitlement must be revoked before re-checking order creation");
+  assert(
+    !(await hasActiveEntitlementForProfile(integrationUserId!, integrationProfileId!, productId)),
+    "revoked entitlement must no longer read as active",
+  );
+  const reorderAfterRevoke = await createPendingOrder({
+    userId: integrationUserId!,
+    profileId: integrationProfileId!,
+    productId,
+  });
+  assert(reorderAfterRevoke.status === "pending", "a revoked entitlement must allow a new order under current pre-edition semantics");
+
+  console.log("12. DB integration: P0 duplicate-purchase guard blocks same profile/product only, revoked entitlement re-allows ✓");
 
   console.log("11. DB integration: order → purchase → entitlement, idempotent + owner-scoped ✓");
 }

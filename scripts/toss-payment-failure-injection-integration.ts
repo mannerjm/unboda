@@ -331,6 +331,7 @@ async function main(): Promise<void> {
         profileId: fixture.profileId,
         resourceId: PRODUCT_ID,
         purchaseId: "already-created",
+        analysisEditionKey: "LEGACY",
         source: "purchase",
       });
     });

@@ -80,7 +80,7 @@ async function main(): Promise<void> {
 
   try {
     // A. paid_reports fixture via the real claim contract (no auth/purchase flow).
-    const claim = await claimPaidReport({ userId, profileId, productId, purchaseId: null });
+    const claim = await claimPaidReport({ userId, profileId, productId, purchaseId: null, analysisEditionKey: "LEGACY" });
     if (claim.state !== "claimed") {
       throw new Error(`unexpected claim state for a fresh fixture: ${claim.state}`);
     }

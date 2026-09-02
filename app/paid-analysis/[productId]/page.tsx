@@ -6,6 +6,7 @@ import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
+import { isProductSaved } from "@/app/lib/interestedAnalyses/server";
 import { notFound } from "next/navigation";
 
 type PaidAnalysisPageProps = {
@@ -69,7 +70,11 @@ const product = canonicalProductId ? getPremiumProduct(canonicalProductId) : und
         {profileId ? (
           <PaidAnalysisAccessPanel productId={product.id} profileId={profileId} />
         ) : (
-          <PremiumProductDetail product={product} state="not_purchased" />
+          <PremiumProductDetail
+            product={product}
+            state="not_purchased"
+            isSaved={user ? await isProductSaved(user.id, product.id) : false}
+          />
         )}
       </div>
     </main>

@@ -5,7 +5,7 @@ import {
 } from "@/app/lib/paidAnalysisDetailService";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { resolvePurchasableProduct } from "@/app/lib/purchases/products";
-import { getActiveEntitlementForProfile } from "@/app/lib/purchases/server";
+import { getActiveEntitlementForProfile, getPurchaseById } from "@/app/lib/purchases/server";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import {
@@ -15,6 +15,8 @@ import {
 } from "@/app/lib/paidReports/server";
 import { buildPaidAnalysisInputFromProfile } from "@/app/lib/paidAnalysisProfileInput";
 import { markPaidGenerationPersistenceFailure } from "@/app/lib/paidGenerationTelemetryServer";
+import { parseAnalysisInputSnapshot, InvalidAnalysisInputSnapshotError } from "@/app/lib/analysisInputSnapshot";
+import type { ProfileDto } from "@/app/lib/profiles/types";
 
 type PaidAnalysisDetailRequest = {
   productId?: unknown;
@@ -103,6 +105,13 @@ export async function POST(request: Request) {
     );
   }
 
+  if (!entitlement.analysisEditionKey) {
+    return NextResponse.json(
+      { error: "분석 에디션을 확인하지 못했습니다." },
+      { status: 409 },
+    );
+  }
+
   let claim;
 
   try {
@@ -111,6 +120,7 @@ export async function POST(request: Request) {
       profileId: profile.id,
       productId: resolved.productId,
       purchaseId: entitlement.purchaseId,
+      analysisEditionKey: entitlement.analysisEditionKey,
     });
   } catch (error) {
     console.error("[paid-analysis-detail-v2] report claim failed", error);
@@ -135,7 +145,36 @@ export async function POST(request: Request) {
   const telemetryAttemptId = randomUUID();
 
   try {
-    const paidInput = buildPaidAnalysisInputFromProfile(profile, resolved.productId);
+    // Frozen at order creation; never recomputed from "now" for a delayed worker.
+    const purchase = entitlement.purchaseId ? await getPurchaseById(entitlement.purchaseId) : null;
+    const referenceSnapshot = purchase?.analysisReferenceSnapshot as { anchorDate?: string } | null;
+
+    // The purchased profile's birth data must never drift from what was frozen
+    // at order time, even if the profile is edited before generation completes.
+    let generationProfile: ProfileDto = profile;
+
+    if (purchase?.analysisInputSnapshot) {
+      let inputSnapshot;
+
+      try {
+        inputSnapshot = parseAnalysisInputSnapshot(purchase.analysisInputSnapshot);
+      } catch (error) {
+        if (error instanceof InvalidAnalysisInputSnapshotError) {
+          console.error("[paid-analysis-detail-v2] frozen input snapshot invalid", error);
+
+          return NextResponse.json(
+            { error: "분석 입력 정보를 확인하지 못했습니다.", code: "ANALYSIS_INPUT_SNAPSHOT_INVALID" },
+            { status: 409 },
+          );
+        }
+
+        throw error;
+      }
+
+      generationProfile = { ...profile, ...inputSnapshot.birthData };
+    }
+
+    const paidInput = buildPaidAnalysisInputFromProfile(generationProfile, resolved.productId, referenceSnapshot?.anchorDate);
     const detail = await generatePaidAnalysisDetailV2(paidInput, {
       attemptId: telemetryAttemptId,
       reportId: claim.report.id,

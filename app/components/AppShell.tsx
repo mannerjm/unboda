@@ -32,6 +32,7 @@ const analysisNavItems: NavItem[] = [
   { href: "/saju", label: "내 분석", icon: "home" },
   { href: "/recommendations", label: "추천 분석", icon: "chart" },
   { href: "/deep-analysis", label: "심층 분석", icon: "spark" },
+  { href: "/interests", label: "관심 분석", icon: "book" },
   { href: "/purchased-analyses", label: "구매한 분석", icon: "book" },
 ];
 
@@ -43,6 +44,7 @@ const mobileNavItems: NavItem[] = [
   { href: "/saju", label: "내 분석", shortLabel: "내 분석", icon: "home" },
   { href: "/recommendations", label: "추천", shortLabel: "추천", icon: "chart" },
   { href: "/deep-analysis", label: "심층", shortLabel: "심층", icon: "spark" },
+  { href: "/interests", label: "관심 분석", shortLabel: "관심", icon: "book" },
   { href: "/purchased-analyses", label: "구매한 분석", shortLabel: "구매", icon: "book" },
   { href: "/mypage", label: "마이페이지", shortLabel: "내 정보", icon: "user" },
 ];

@@ -46,11 +46,11 @@ assert(entitlementIndex !== -1 && claimIndex !== -1 && generateIndex !== -1, "ro
 assert(entitlementIndex < claimIndex && claimIndex < generateIndex, "entitlement must precede report claim and OpenAI generation");
 assert(detailRoute.includes("claim.state === \"completed\"") && detailRoute.includes("return NextResponse.json(claim.report.content)"), "completed reports must return DB content without generation");
 assert(detailRoute.includes("claim.state === \"generating\"") && detailRoute.includes("status: 202"), "concurrent generation must return generating status");
-assert(detailRoute.includes("buildPaidAnalysisInputFromProfile(profile, resolved.productId)"), "route must build input from verified profile");
+assert(detailRoute.includes("buildPaidAnalysisInputFromProfile(generationProfile, resolved.productId"), "route must build input from the profile (frozen input snapshot applied when present, 57D-48F-D2)");
 assert(detailRoute.includes("completePaidReport") && detailRoute.includes("failPaidReport"), "route must persist completed and failed report states");
 console.log("4. authorization, cache, claim, and completion order present ✓");
 
-assert(reportsServer.includes("ignoreDuplicates: true") && reportsServer.includes("onConflict: \"user_id,profile_id,product_id\""), "claim must use DB unique identity as concurrency defense");
+assert(reportsServer.includes("ignoreDuplicates: true") && reportsServer.includes("onConflict: \"user_id,profile_id,product_id,analysis_edition_key\""), "claim must use DB unique identity as concurrency defense (57D-48F-D: edition-scoped)");
 assert(reportsServer.includes("STALE_GENERATING_MS"), "stale generating reports must be retryable");
 assert(reportsServer.includes('existing.status === "failed"') && reportsServer.includes("retryableStatus"), "failed reports must be reclaimable without duplicate rows");
 assert(reportsServer.includes("purchase_id: input.purchaseId"), "report claim must retain latest purchase source");

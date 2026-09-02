@@ -218,6 +218,47 @@ export async function reconcileRefundWorkflow(
   }
 }
 
+export type RefundReconciliationSummary = {
+  processed: number;
+  scanned: number;
+  eligible: number;
+  claimed: number;
+  converged: number;
+  retryPending: number;
+  escalation: number;
+  results: Array<{ id: string; status: RefundStatus }>;
+};
+
+/**
+ * Bounded canonical refund reconciliation orchestration. Claiming, provider
+ * evidence verification, retry policy, and exact-edition revocation remain in
+ * reconcileRefundWorkflow.
+ */
+export async function reconcileRefundsBatch(): Promise<RefundReconciliationSummary> {
+  const workflows = await listRefundWorkflowsForReconciliation();
+  const results = [];
+
+  for (const workflow of workflows) {
+    results.push(await reconcileRefundWorkflow(workflow));
+  }
+
+  const converged = results.filter((result) => result.status === "REFUND_COMPLETED").length;
+  const retryPending = results.filter((result) => result.status === "REFUND_FAILED_RETRYING").length;
+  const escalation = results.filter((result) => result.status === "OWNER_REVIEW_REQUIRED").length;
+  emitPaymentEvent("refund_reconciliation_converged", { operationalClass: "NORMAL", attempt: converged });
+
+  return {
+    processed: results.length,
+    scanned: results.length,
+    eligible: results.length,
+    claimed: results.length,
+    converged,
+    retryPending,
+    escalation,
+    results: results.map((result) => ({ id: result.id, status: result.status })),
+  };
+}
+
 export async function recordRefundProviderEvidenceForClaim(input: {
   orderId: string;
   claimToken: string;

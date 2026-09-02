@@ -10,5 +10,5 @@ assert(route.includes("Cache-Control") && route.includes("no-store"), "scheduler
 assert(route.includes("export async function GET") && route.includes("export async function POST"), "GET and POST must share implementation");
 assert(worker.includes("requested_limit: 50"), "refund worker batch must be bounded to 50");
 assert(worker.includes("next_retry_at"), "refund worker must select due work");
-assert(route.includes("refund_reconciliation_converged"), "scheduler must emit safe reconciliation event");
+assert(route.includes("reconcileRefundsBatch") && worker.includes("refund_reconciliation_converged"), "scheduler route must reuse the canonical worker that emits the safe reconciliation event");
 console.log("refund reconciliation scheduler regression passed");

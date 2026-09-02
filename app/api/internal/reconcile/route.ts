@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAuthorizedSchedulerRequest } from "@/app/lib/internal/schedulerAuth";
 import { reconcilePaymentsBatch } from "@/app/lib/purchases/server";
+import { reconcileRefundsBatch } from "@/app/lib/refunds/server";
 import { reconcileAccountClosureFinalizations } from "@/app/lib/accounts/server";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +50,31 @@ async function dispatch(request: Request) {
     payments = { ok: false };
   }
 
+  let refunds: WorkerReport<{
+    processed: number;
+    scanned: number;
+    eligible: number;
+    claimed: number;
+    converged: number;
+    retryPending: number;
+    escalation: number;
+  }>;
+  try {
+    const summary = await reconcileRefundsBatch();
+    refunds = {
+      ok: true,
+      processed: summary.processed,
+      scanned: summary.scanned,
+      eligible: summary.eligible,
+      claimed: summary.claimed,
+      converged: summary.converged,
+      retryPending: summary.retryPending,
+      escalation: summary.escalation,
+    };
+  } catch {
+    refunds = { ok: false };
+  }
+
   let accountClosures: WorkerReport<{
     claimed: number;
     finalized: number;
@@ -79,10 +105,10 @@ async function dispatch(request: Request) {
     accountClosures = { ok: false };
   }
 
-  const ok = payments.ok && accountClosures.ok;
+  const ok = payments.ok && refunds.ok && accountClosures.ok;
 
   return NextResponse.json(
-    { ok, payments, accountClosures },
+    { ok, payments, refunds, accountClosures },
     { status: ok ? 200 : 500, headers: { "Cache-Control": "no-store" } },
   );
 }

@@ -68,6 +68,7 @@ assert(oldPaymentRoute.includes("reconcilePaymentsBatch"), "old payment route de
 
 const dispatcherRoute = read("app/api/internal/reconcile/route.ts");
 assert(dispatcherRoute.includes("reconcilePaymentsBatch"), "dispatcher directly imports the payment worker function");
+assert(dispatcherRoute.includes("reconcileRefundsBatch"), "dispatcher directly imports the refund worker function");
 assert(dispatcherRoute.includes("reconcileAccountClosureFinalizations"), "dispatcher directly imports the account closure worker function");
 assert(!dispatcherRoute.includes("fetch("), "dispatcher performs no internal HTTP fetch (direct function calls only)");
 assert(!/req(uest)?\.(json|url|nextUrl)[^\n]*job/i.test(dispatcherRoute), "dispatcher does not read a client-selected job name");
@@ -75,8 +76,8 @@ assert(dispatcherRoute.includes("batchLimit: 10") && dispatcherRoute.includes("l
 assert(dispatcherRoute.includes('"Cache-Control": "no-store"'), "dispatcher sets Cache-Control: no-store");
 assert(dispatcherRoute.includes('dynamic = "force-dynamic"'), "dispatcher declares force-dynamic");
 
-const paymentsTryCatchCount = (dispatcherRoute.match(/try\s*{/g) ?? []).length;
-assert(paymentsTryCatchCount === 2, "dispatcher isolates each worker in its own independent try/catch (no shared transaction)");
+const workerTryCatchCount = (dispatcherRoute.match(/try\s*{/g) ?? []).length;
+assert(workerTryCatchCount === 3, "dispatcher isolates payment, refund, and closure workers in independent try/catch blocks");
 assert(!dispatcherRoute.includes("BEGIN") && !dispatcherRoute.includes(".transaction("), "no shared DB transaction wraps both workers");
 
 const schedulerAuth = read("app/lib/internal/schedulerAuth.ts");

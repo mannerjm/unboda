@@ -17,7 +17,7 @@ export type OperatorAuditAction = (typeof OPERATOR_AUDIT_ACTIONS)[number];
 export const OPERATOR_AUDIT_TARGET_TYPES = ["ACCOUNT", "ORDER", "FAILURE_QUEUE"] as const;
 export type OperatorAuditTargetType = (typeof OPERATOR_AUDIT_TARGET_TYPES)[number];
 
-export const OPERATOR_AUDIT_OUTCOMES = ["SUCCESS", "NO_RESULT"] as const;
+export const OPERATOR_AUDIT_OUTCOMES = ["SUCCESS", "NOT_FOUND", "INVALID_INPUT", "ERROR"] as const;
 export type OperatorAuditOutcome = (typeof OPERATOR_AUDIT_OUTCOMES)[number];
 
 export type OperatorIdentity = {

@@ -40,7 +40,7 @@ type PaidReportRow = {
   analysis_edition_key: string | null;
 };
 
-const STALE_GENERATING_MS = 5 * 60 * 1000;
+export const PAID_REPORT_STALE_GENERATING_MS = 5 * 60 * 1000;
 
 function toPaidReportRecord(row: PaidReportRow): PaidReportRecord {
   return {
@@ -228,7 +228,7 @@ export async function claimPaidReport(input: {
     return { state: "completed", report: existing };
   }
 
-  const staleBefore = new Date(Date.now() - STALE_GENERATING_MS).toISOString();
+  const staleBefore = new Date(Date.now() - PAID_REPORT_STALE_GENERATING_MS).toISOString();
   const retryableStatus = existing.status === "failed" ? "failed" : "generating";
   const retryQuery = supabase
     .from("paid_reports")

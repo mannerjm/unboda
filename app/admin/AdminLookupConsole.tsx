@@ -17,6 +17,13 @@ type Order = {
   accountClosure: { lifecycleStatus: string | null; finalizationStartedAt: string | null; finalizedAt: string | null; retryCount: number; nextRetryAt: string | null; ownerReviewRequired: boolean } | null;
 };
 
+type FailureCategory = "PAYMENT_RECONCILIATION" | "REFUND_RETRY" | "REFUND_OWNER_REVIEW" | "REPORT_FAILED" | "REPORT_STALE" | "CLOSURE_RETRY" | "CLOSURE_OWNER_REVIEW";
+type FailureItem = { referenceId: string; productLabel: string | null; editionLabel: string | null; status: string; retryCount: number | null; nextRetryAt: string | null; failureCode: string | null; updatedAt: string };
+
+const failureLabels: Record<FailureCategory, string> = {
+  PAYMENT_RECONCILIATION: "결제 확인 필요", REFUND_RETRY: "환불 재시도", REFUND_OWNER_REVIEW: "환불 수동 확인", REPORT_FAILED: "분석 생성 실패", REPORT_STALE: "분석 생성 지연", CLOSURE_RETRY: "계정 종료 재시도", CLOSURE_OWNER_REVIEW: "계정 종료 수동 확인",
+};
+
 const labels: Record<string, string> = {
   ACTIVE: "사용 중",
   DELETION_REQUESTED: "탈퇴 처리 중",
@@ -69,6 +76,9 @@ export default function AdminLookupConsole() {
   const [order, setOrder] = useState<Order | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<"customer" | "order" | null>(null);
+  const [failureSummary, setFailureSummary] = useState<Partial<Record<FailureCategory, number>> | null>(null);
+  const [failureQueue, setFailureQueue] = useState<FailureItem[] | null>(null);
+  const [selectedFailure, setSelectedFailure] = useState<FailureCategory | null>(null);
 
   async function request<T>(url: string): Promise<T> {
     const response = await fetch(url, { method: "GET", credentials: "same-origin", cache: "no-store" });
@@ -98,6 +108,14 @@ export default function AdminLookupConsole() {
     } finally { setLoading(null); }
   }
 
+  async function loadFailures(category?: FailureCategory) {
+    setMessage(null);
+    try {
+      const result = await request<{ summary?: Partial<Record<FailureCategory, number>>; queue?: FailureItem[] }>(category ? `/api/internal/admin/failures?category=${category}` : "/api/internal/admin/failures");
+      if (category) { setSelectedFailure(category); setFailureQueue(result.queue ?? []); } else setFailureSummary(result.summary ?? {});
+    } catch (error) { setMessage(error instanceof Error ? error.message : "운영 현황을 조회하지 못했습니다."); }
+  }
+
   return (
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-10 text-stone-900 sm:px-8 sm:py-14">
       <div className="mx-auto w-full max-w-5xl">
@@ -106,6 +124,7 @@ export default function AdminLookupConsole() {
           <form onSubmit={lookupCustomer} className="border border-stone-200 bg-white p-5 shadow-sm"><label htmlFor="customer-email" className="text-sm font-bold">정확한 계정 이메일</label><p className="mt-1 text-xs leading-5 text-stone-500">전체 이메일 주소를 입력해 주세요.</p><div className="mt-4 flex flex-col gap-2 sm:flex-row"><input id="customer-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="min-w-0 flex-1 border border-stone-300 px-3 py-2.5 text-sm outline-none focus:border-stone-900" required /><button type="submit" disabled={loading !== null} className="min-h-11 shrink-0 bg-stone-900 px-4 text-sm font-semibold text-white disabled:bg-stone-400">{loading === "customer" ? "조회 중" : "고객 조회"}</button></div></form>
           <form onSubmit={lookupOrder} className="border border-stone-200 bg-white p-5 shadow-sm"><label htmlFor="order-id" className="text-sm font-bold">내부 주문 ID</label><p className="mt-1 text-xs leading-5 text-stone-500">정확한 주문 UUID만 조회할 수 있습니다.</p><div className="mt-4 flex flex-col gap-2 sm:flex-row"><input id="order-id" value={orderId} onChange={(event) => setOrderId(event.target.value)} className="min-w-0 flex-1 border border-stone-300 px-3 py-2.5 font-mono text-sm outline-none focus:border-stone-900" required /><button type="submit" disabled={loading !== null} className="min-h-11 shrink-0 bg-stone-900 px-4 text-sm font-semibold text-white disabled:bg-stone-400">{loading === "order" ? "조회 중" : "주문 조회"}</button></div></form>
         </div>
+        <section className="mt-8 border-y border-stone-200 py-6" aria-labelledby="failure-summary-heading"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-semibold tracking-[0.2em] text-stone-500">OPERATIONAL STATUS</p><h2 id="failure-summary-heading" className="mt-2 text-xl font-bold">운영 확인 필요</h2></div><button type="button" onClick={() => void loadFailures()} className="min-h-11 border border-stone-300 bg-white px-4 text-sm font-semibold text-stone-700">현황 새로고침</button></div><div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{(Object.keys(failureLabels) as FailureCategory[]).map((category) => <button key={category} type="button" onClick={() => void loadFailures(category)} className="min-h-16 border border-stone-200 bg-white p-3 text-left"><span className="block text-xs font-semibold text-stone-500">{failureLabels[category]}</span><span className="mt-1 block text-lg font-bold">{failureSummary ? failureSummary[category] ?? 0 : "-"}</span></button>)}</div>{selectedFailure && failureQueue ? <div className="mt-5"><h3 className="text-sm font-bold">{failureLabels[selectedFailure]}</h3>{failureQueue.length === 0 ? <p className="mt-2 text-sm text-stone-500">확인할 항목이 없습니다.</p> : <ul className="mt-3 divide-y divide-stone-200 border-y border-stone-200">{failureQueue.map((item) => <li key={item.referenceId} className="py-3 text-sm"><p className="break-all font-mono text-xs text-stone-600">{item.referenceId}</p><p className="mt-1 font-semibold">{item.productLabel ?? "계정 종료"}{item.editionLabel ? ` · ${item.editionLabel}` : ""}</p><p className="mt-1 text-xs text-stone-600">{value(item.status)} · 재시도 {item.retryCount ?? 0}회 · {item.failureCode ?? "안전한 실패 코드 없음"}</p></li>)}</ul>}</div> : null}</section>
         {message ? <p role="alert" className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{message}</p> : null}
         {customer ? <div className="mt-8 grid gap-6 lg:grid-cols-2"><Section title="계정"><Field label="이메일">{customer.account.email}</Field><Field label="이메일 인증">{value(customer.account.emailVerified)}</Field><Field label="계정 상태">{value(customer.account.lifecycleStatus)}</Field><Field label="유료 이용 자격">{value(customer.account.paidEligibilityStatus)}</Field><Field label="탈퇴 처리">{customer.account.closure?.ownerReviewRequired ? "수동 확인 필요" : time(customer.account.closure?.finalizationStartedAt)}</Field></Section><Section title="프로필"><Field label="등록 프로필">{customer.profiles.length === 0 ? "없음" : customer.profiles.map((profile) => <span key={profile.id} className="block">{profile.label} · {profile.relationshipLabel}</span>)}</Field></Section></div> : null}
         {order ? <div className="mt-8 grid gap-x-8 lg:grid-cols-2"><Section title="주문"><Field label="주문 ID">{order.order.id}</Field><Field label="고객">{order.order.accountEmail}</Field><Field label="상품">{order.order.productLabel}</Field><Field label="분석 회차">{order.order.analysisEditionLabel}</Field><Field label="금액">{order.order.amount.toLocaleString("ko-KR")} KRW</Field><Field label="상태">{value(order.order.status)}</Field><Field label="생성 시각">{time(order.order.createdAt)}</Field></Section><Section title="결제"><Field label="결제 상태">{value(order.payment?.providerStatus)}</Field><Field label="정산 상태">{value(order.payment?.reconciliationStatus)}</Field><Field label="확인 시각">{time(order.payment?.confirmedAt)}</Field><Field label="실패 코드">{value(order.payment?.failureCode)}</Field></Section><Section title="이용권"><Field label="상태">{order.entitlement?.active ? "활성" : "없음 또는 취소됨"}</Field><Field label="분석 회차">{order.entitlement?.analysisEditionKey ?? "없음"}</Field><Field label="취소 사유">{value(order.entitlement?.revocationReason)}</Field></Section><Section title="분석 생성"><Field label="상태">{value(order.report.status)}</Field><Field label="완료 시각">{time(order.report.completedAt)}</Field><Field label="실패 코드">{value(order.report.errorCode)}</Field></Section><Section title="환불"><Field label="상태">{value(order.refund?.status)}</Field><Field label="금액">{order.refund ? `${order.refund.requestedAmount.toLocaleString("ko-KR")} KRW` : "없음"}</Field><Field label="수동 확인">{value(order.refund?.ownerReviewRequired)}</Field></Section><Section title="계정 종료"><Field label="계정 상태">{value(order.accountClosure?.lifecycleStatus)}</Field><Field label="수동 확인">{value(order.accountClosure?.ownerReviewRequired)}</Field></Section></div> : null}

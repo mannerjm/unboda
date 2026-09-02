@@ -20,6 +20,7 @@ import { getPremiumCategoryLabel, getPremiumProduct } from "../premiumProductReg
 import { emitPaymentEvent } from "../payments/observability";
 import { resolveAnalysisEditionForOrder } from "../analysisEditionForOrder";
 import { parseAnalysisInputSnapshot } from "../analysisInputSnapshot";
+import { compareEditionKeys } from "../analysisEditionLabel";
 
 type OrderRow = {
   id: string;
@@ -719,16 +720,22 @@ export async function getActiveEntitlementForProfile(
     .eq("profile_id", profileId)
     .eq("resource_id", resolved.productId)
     .eq("resource_type", resourceType)
-    .eq("is_active", true)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle<EntitlementRow>();
+    .eq("is_active", true);
 
-  if (error || !data) {
+  if (error || !data || data.length === 0) {
     return null;
   }
 
-  return toEntitlementRecord(data);
+  return data
+    .map((row) => toEntitlementRecord(row as EntitlementRow))
+    .sort((a, b) => {
+      const editionOrder = compareEditionKeys(
+        a.analysisEditionKey ?? "LEGACY",
+        b.analysisEditionKey ?? "LEGACY",
+      );
+
+      return editionOrder || b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id);
+    })[0] ?? null;
 }
 
 /**

@@ -2,19 +2,25 @@ import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
-import { hasActiveEntitlementForProfile } from "@/app/lib/purchases/server";
+import {
+  hasActiveEntitlementForProfile,
+  hasActiveEntitlementForProfileEdition,
+} from "@/app/lib/purchases/server";
 
 type ReportAccessGateProps = {
   productId: string;
   profileId?: string;
+  edition?: string;
   children: React.ReactNode;
 };
 
 export default async function ReportAccessGate({
   productId,
   profileId,
+  edition,
   children,
 }: ReportAccessGateProps) {
   const canonicalProductId = getCanonicalPremiumProductId(productId);
@@ -26,13 +32,16 @@ export default async function ReportAccessGate({
   }
 
   const profile = user ? await getUserProfile(profileId, user.id) : null;
+  const activeProfile = user ? await getActiveProfile(user.id) : null;
 
-  if (user && !profile) {
+  if (user && (!profile || activeProfile?.id !== profile.id)) {
     notFound();
   }
 
   const hasAccess = user && profile
-    ? await hasActiveEntitlementForProfile(user.id, profile.id, canonicalProductId)
+    ? edition
+      ? await hasActiveEntitlementForProfileEdition(user.id, profile.id, canonicalProductId, edition)
+      : await hasActiveEntitlementForProfile(user.id, profile.id, canonicalProductId)
     : false;
 
   if (!hasAccess) {

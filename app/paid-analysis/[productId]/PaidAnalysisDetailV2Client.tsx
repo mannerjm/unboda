@@ -17,6 +17,7 @@ import PaidAnalysisV4Report from "./PaidAnalysisV4Report";
 type PaidAnalysisDetailV2ClientProps = {
   productId: string;
   profileId?: string;
+  edition?: string;
 };
 
 function getAnalysisType(productId: string): string {
@@ -33,6 +34,7 @@ function getAnalysisType(productId: string): string {
 export default function PaidAnalysisDetailV2Client({
   productId,
   profileId,
+  edition,
 }: PaidAnalysisDetailV2ClientProps) {
   const [detail, setDetail] =
   useState<PaidAnalysisDetailOutputV3 | null>(null);
@@ -70,7 +72,7 @@ void detail;
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ productId, profileId }),
+      body: JSON.stringify({ productId, profileId, edition }),
     });
 
     if (response.status === 202) {
@@ -119,7 +121,7 @@ void detail;
   return () => {
     isCancelled = true;
   };
-}, [productId, profileId, retryCount]);
+}, [edition, productId, profileId, retryCount]);
 
   void detail;
   void isLoading;

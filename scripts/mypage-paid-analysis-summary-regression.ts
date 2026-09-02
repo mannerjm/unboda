@@ -30,7 +30,7 @@ assert(!summaryRoute.includes("delete(") && !summaryRoute.includes("update("), "
 console.log("1. summary exposes paidAnalysis while preserving the P0-3 and P0-4 contracts ✓");
 
 assert(reportsServer.includes("export async function listUserPaidReports") && reportsServer.includes('.eq("user_id", userId)'), "paid report listing must be scoped to the session user in Postgres");
-assert(reportsServer.includes('.select("profile_id, product_id, status")'), "paid report listing must stay minimal and read-only");
+assert(reportsServer.includes('.select("profile_id, product_id, status, analysis_edition_key")'), "paid report listing must read the edition needed for an exact report-state join");
 assert(purchasesServer.includes("export async function listUserEntitlements") && purchasesServer.includes('.eq("is_active", true)'), "the entitlement source must return active rows only");
 assert(reportsServer.includes("entitlement.resourceType === PAID_ANALYSIS_RESOURCE_TYPE"), "only paid_analysis entitlements may appear in the list");
 assert(reportsServer.includes("listUserEntitlements(userId)") && reportsServer.includes("listUserPaidReports(userId)"), "the summary must combine entitlements with report state");
@@ -38,8 +38,8 @@ assert(reportsServer.includes("Promise.all(["), "entitlements and reports must b
 assert(!/for \(const entitlement[\s\S]*?await /.test(reportsServer), "the summary must not await inside a per-entitlement loop (no N+1)");
 console.log("2. active paid_analysis entitlements drive the list, reports are joined in two queries ✓");
 
-assert(reportsServer.includes('statusByKey.get(paidReportKey(entitlement.profileId, productId)) ?? "none"'), "a missing report must resolve to none and match on profile + product");
-assert(reportsServer.includes("function paidReportKey(profileId: string, productId: string)"), "report state must be keyed by profile and product together");
+assert(reportsServer.includes('paidReportKey(entitlement.profileId, productId, editionKey)') && reportsServer.includes(') ?? "none",'), "a missing report must resolve to none and match on profile, product, and edition");
+assert(reportsServer.includes("function paidReportKey(profileId: string, productId: string, editionKey: string | null)"), "report state must be keyed by profile, product, and edition together (STEP 57D-48F-G)");
 assert(reportsServer.includes("getCanonicalPremiumProductId(entitlement.resourceId)") && reportsServer.includes("getCanonicalPremiumProductId(report.productId)"), "both sides of the join must be canonicalized before matching");
 assert(reportsServer.includes('reportStatus: PaidReportStatus | "none"'), "the exposed status must be the stored report status plus none");
 assert(!reportsServer.includes("entitlementActive"), "an always-true field must not be added to the response");

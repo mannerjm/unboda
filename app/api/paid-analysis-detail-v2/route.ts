@@ -5,8 +5,13 @@ import {
 } from "@/app/lib/paidAnalysisDetailService";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { resolvePurchasableProduct } from "@/app/lib/purchases/products";
-import { getActiveEntitlementForProfile, getPurchaseById } from "@/app/lib/purchases/server";
+import {
+  getActiveEntitlementForProfile,
+  getActiveEntitlementForProfileEdition,
+  getPurchaseById,
+} from "@/app/lib/purchases/server";
 import { getUserProfile } from "@/app/lib/profiles/server";
+import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { isProfileId } from "@/app/lib/profiles/types";
 import {
   claimPaidReport,
@@ -21,6 +26,7 @@ import type { ProfileDto } from "@/app/lib/profiles/types";
 type PaidAnalysisDetailRequest = {
   productId?: unknown;
   profileId?: unknown;
+  edition?: unknown;
 };
 
 export async function POST(request: Request) {
@@ -61,6 +67,13 @@ export async function POST(request: Request) {
     );
   }
 
+  if (input.edition !== undefined && (typeof input.edition !== "string" || !input.edition)) {
+    return NextResponse.json(
+      { error: "유효한 분석 에디션을 선택해 주세요." },
+      { status: 400 },
+    );
+  }
+
   let profile;
 
   try {
@@ -81,14 +94,30 @@ export async function POST(request: Request) {
     );
   }
 
+  const activeProfile = await getActiveProfile(user.id);
+
+  if (!activeProfile || activeProfile.id !== profile.id) {
+    return NextResponse.json(
+      { error: "현재 선택한 분석 대상의 리포트만 열 수 있습니다." },
+      { status: 403 },
+    );
+  }
+
   let entitlement;
 
   try {
-    entitlement = await getActiveEntitlementForProfile(
-      user.id,
-      profile.id,
-      resolved.productId,
-    );
+    entitlement = typeof input.edition === "string"
+      ? await getActiveEntitlementForProfileEdition(
+        user.id,
+        profile.id,
+        resolved.productId,
+        input.edition,
+      )
+      : await getActiveEntitlementForProfile(
+        user.id,
+        profile.id,
+        resolved.productId,
+      );
   } catch (error) {
     console.error("[paid-analysis-detail-v2] entitlement check failed", error);
 

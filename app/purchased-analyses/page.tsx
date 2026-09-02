@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
-import PurchasedAnalysesList from "@/app/components/PurchasedAnalysesList";
+import PurchasedAnalysesListMultiEdition from "@/app/components/PurchasedAnalysesListMultiEdition";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
+import { groupPurchasedAnalysesByProduct } from "@/app/lib/purchasedAnalysesGrouping";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 
 export default async function PurchasedAnalysesPage() {
@@ -35,6 +36,7 @@ export default async function PurchasedAnalysesPage() {
 
   const analyses = (await listUserPaidAnalysisSummaries(user.id))
     .filter((analysis) => analysis.profileId === activeProfile.id);
+  const groups = groupPurchasedAnalysesByProduct(analyses);
 
   return (
     <AppShell activeProfileId={activeProfile.id}>
@@ -47,7 +49,7 @@ export default async function PurchasedAnalysesPage() {
               <Link href="/mypage" className="text-xs font-medium text-stone-500 underline decoration-stone-300 underline-offset-4">프로필 변경은 마이페이지에서</Link>
             </div>
           </header>
-          <PurchasedAnalysesList analyses={analyses} profileId={activeProfile.id} />
+          <PurchasedAnalysesListMultiEdition groups={groups} profileId={activeProfile.id} />
         </div>
       </main>
     </AppShell>

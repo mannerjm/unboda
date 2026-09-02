@@ -86,13 +86,14 @@ export type PaidReportSummary = {
   profileId: string;
   productId: string;
   status: PaidReportStatus;
+  analysisEditionKey: string | null;
 };
 
 export async function listUserPaidReports(userId: string): Promise<PaidReportSummary[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("paid_reports")
-    .select("profile_id, product_id, status")
+    .select("profile_id, product_id, status, analysis_edition_key")
     .eq("user_id", userId);
 
   if (error) {
@@ -103,10 +104,12 @@ export async function listUserPaidReports(userId: string): Promise<PaidReportSum
     profile_id: string;
     product_id: string;
     status: PaidReportStatus;
+    analysis_edition_key: string | null;
   }) => ({
     profileId: row.profile_id,
     productId: row.product_id,
     status: row.status,
+    analysisEditionKey: row.analysis_edition_key,
   }));
 }
 
@@ -115,15 +118,18 @@ export type PaidAnalysisSummary = {
   productId: string;
   productName: string;
   reportStatus: PaidReportStatus | "none";
+  analysisEditionKey: string | null;
 };
 
-function paidReportKey(profileId: string, productId: string): string {
-  return `${profileId}|${productId}`;
+function paidReportKey(profileId: string, productId: string, editionKey: string | null): string {
+  // Edition key is now part of the identity (STEP 57D-48F-G multi-edition)
+  return `${profileId}|${productId}|${editionKey ?? "<null>"}`;
 }
 
 /**
  * Active entitlements decide what the account may open; paid_reports only adds
  * the generation state. Two queries total, regardless of profile count.
+ * STEP 57D-48F-G: Now supports multiple editions per product per profile.
  */
 export async function listUserPaidAnalysisSummaries(
   userId: string,
@@ -136,7 +142,11 @@ export async function listUserPaidAnalysisSummaries(
   const statusByKey = new Map<string, PaidReportStatus>();
   for (const report of reports) {
     statusByKey.set(
-      paidReportKey(report.profileId, getCanonicalPremiumProductId(report.productId)),
+      paidReportKey(
+        report.profileId,
+        getCanonicalPremiumProductId(report.productId),
+        report.analysisEditionKey,
+      ),
       report.status,
     );
   }
@@ -146,12 +156,17 @@ export async function listUserPaidAnalysisSummaries(
     .map((entitlement) => {
       const productId = getCanonicalPremiumProductId(entitlement.resourceId);
       const product = getPremiumProduct(productId);
+      const editionKey = entitlement.analysisEditionKey;
 
       return {
         profileId: entitlement.profileId,
         productId,
         productName: product?.title ?? productId,
-        reportStatus: statusByKey.get(paidReportKey(entitlement.profileId, productId)) ?? "none",
+        reportStatus:
+          statusByKey.get(
+            paidReportKey(entitlement.profileId, productId, editionKey),
+          ) ?? "none",
+        analysisEditionKey: editionKey,
       };
     });
 }

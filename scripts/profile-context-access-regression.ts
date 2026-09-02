@@ -73,11 +73,12 @@ for (const [name, source] of [["access panel", accessPanel], ["report gate", rep
 assert(reportGate.includes("?profileId=${profileId}"), "report gate return link must preserve profileId");
 console.log("4. paid access and report gate are profile-scoped ✓");
 
-assert(reportPage.includes("<PaidAnalysisDetailV2Client productId={productId} profileId={profileId}"), "report page must pass profileId to the detail client");
-assert(detailClient.includes("profileId?: string") && detailClient.includes("JSON.stringify({ productId, profileId })"), "detail client must send only productId and profileId");
+assert(reportPage.includes("<PaidAnalysisDetailV2Client productId={productId} profileId={profileId} edition={edition}"), "report page must pass profileId and edition to the detail client");
+assert(detailClient.includes("profileId?: string") && detailClient.includes("edition?: string") && detailClient.includes("JSON.stringify({ productId, profileId, edition })"), "detail client must send only productId, profileId, and the optional edition selector");
 assert(!detailClient.includes("sessionStorage"), "detail client must not use free-analysis sessionStorage as report input");
 assert(detailRoute.includes("isProfileId(input.profileId)"), "detail API must reject missing/invalid profileId");
 assert(detailRoute.includes("getUserProfile(input.profileId, user.id)"), "detail API must verify profile ownership");
+assert(detailRoute.includes("getActiveProfile(user.id)") && detailRoute.includes("activeProfile.id !== profile.id"), "detail API must reject a report request for a non-active profile");
 assert(detailRoute.includes("getActiveEntitlementForProfile"), "detail API must use strict profile entitlement lookup");
 const entitlementIndex = detailRoute.indexOf("getActiveEntitlementForProfile");
 const generateIndex = detailRoute.indexOf("generatePaidAnalysisDetailV2(");

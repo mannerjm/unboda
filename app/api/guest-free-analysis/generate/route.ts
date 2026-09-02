@@ -12,6 +12,7 @@ export async function POST() {
   if (!record || !isUsableGuestFreeAnalysis(record)) return NextResponse.json({ error: "비회원 분석 결과를 찾을 수 없습니다." }, { status: 404 });
   if (record.status === "completed" && record.content) return NextResponse.json({ analysis: record.content });
   if (record.status !== "generating") return NextResponse.json({ error: "무료 분석을 다시 시작해 주세요." }, { status: 409 });
+  if (!record.profileInput) return NextResponse.json({ error: "비회원 분석 결과를 찾을 수 없습니다." }, { status: 404 });
   try {
     const content = await buildFreeAnalysisResponse({ profile: toGuestAnalyzeProfile(record.profileInput, record.id) });
     await completeGuestFreeAnalysis(record, content);

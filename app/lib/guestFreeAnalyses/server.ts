@@ -17,8 +17,8 @@ export type GuestFreeAnalysisRecord = {
   id: string;
   secretHash: string;
   status: GuestFreeAnalysisStatus;
-  profileInput: ProfileInput;
-  profileFingerprint: string;
+  profileInput: ProfileInput | null;
+  profileFingerprint: string | null;
   content: AnalyzeSuccessResponse | null;
   selectedProductId: string | null;
   expiresAt: string;
@@ -31,8 +31,8 @@ type GuestFreeAnalysisRow = {
   id: string;
   secret_hash: string;
   status: GuestFreeAnalysisStatus;
-  profile_input: ProfileInput;
-  profile_fingerprint: string;
+  profile_input: ProfileInput | null;
+  profile_fingerprint: string | null;
   content: AnalyzeSuccessResponse | null;
   selected_product_id: string | null;
   expires_at: string;
@@ -269,7 +269,7 @@ export async function transferGuestFreeAnalysisToUser(input: {
     p_guest_analysis_id: input.record.id,
     p_secret_hash: input.record.secretHash,
     p_user_id: input.userId,
-    p_profile_fingerprint: input.record.profileFingerprint,
+    p_profile_fingerprint: input.record.profileFingerprint ?? "",
   });
 
   if (error) throw error;
@@ -282,4 +282,47 @@ export async function transferGuestFreeAnalysisToUser(input: {
     selectedProductId: row.selected_product_id ?? null,
     transferStatus: row.transfer_status,
   };
+}
+
+export type GuestCleanupSummary = {
+  claimed: number;
+  deleted: number;
+  failed: number;
+};
+
+/**
+ * Deletes only guest rows past the absolute created_at + 7 day retention
+ * boundary. The database claim uses an expiring lease, so repeated scheduler
+ * delivery and process interruption cannot extend retention or double-delete.
+ */
+export async function cleanupExpiredGuestFreeAnalyses(): Promise<GuestCleanupSummary> {
+  const supabase = createAdminClient();
+  const claimToken = crypto.randomUUID();
+  const { data, error } = await supabase.rpc("claim_guest_free_analysis_cleanup", {
+    requested_limit: 25,
+    claim_token: claimToken,
+    lease_seconds: 300,
+  });
+
+  if (error || !data) {
+    throw new Error("Guest cleanup batch could not be claimed");
+  }
+
+  let deleted = 0;
+  let failed = 0;
+  for (const row of data as Array<{ id: string }>) {
+    const { error: deleteError } = await supabase
+      .from("guest_free_analyses")
+      .delete()
+      .eq("id", row.id)
+      .eq("cleanup_claim_token", claimToken);
+
+    if (deleteError) {
+      failed += 1;
+    } else {
+      deleted += 1;
+    }
+  }
+
+  return { claimed: data.length, deleted, failed };
 }

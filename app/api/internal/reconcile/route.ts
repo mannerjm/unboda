@@ -3,6 +3,7 @@ import { isAuthorizedSchedulerRequest } from "@/app/lib/internal/schedulerAuth";
 import { reconcilePaymentsBatch } from "@/app/lib/purchases/server";
 import { reconcileRefundsBatch } from "@/app/lib/refunds/server";
 import { reconcileAccountClosureFinalizations } from "@/app/lib/accounts/server";
+import { cleanupExpiredGuestFreeAnalyses } from "@/app/lib/guestFreeAnalyses/server";
 
 export const dynamic = "force-dynamic";
 
@@ -105,10 +106,27 @@ async function dispatch(request: Request) {
     accountClosures = { ok: false };
   }
 
-  const ok = payments.ok && refunds.ok && accountClosures.ok;
+  let guestCleanup: WorkerReport<{
+    claimed: number;
+    deleted: number;
+    failed: number;
+  }>;
+  try {
+    const summary = await cleanupExpiredGuestFreeAnalyses();
+    guestCleanup = {
+      ok: true,
+      claimed: summary.claimed,
+      deleted: summary.deleted,
+      failed: summary.failed,
+    };
+  } catch {
+    guestCleanup = { ok: false };
+  }
+
+  const ok = payments.ok && refunds.ok && accountClosures.ok && guestCleanup.ok;
 
   return NextResponse.json(
-    { ok, payments, refunds, accountClosures },
+    { ok, payments, refunds, accountClosures, guestCleanup },
     { status: ok ? 200 : 500, headers: { "Cache-Control": "no-store" } },
   );
 }

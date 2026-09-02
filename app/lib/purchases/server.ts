@@ -21,6 +21,7 @@ import { emitPaymentEvent } from "../payments/observability";
 import { resolveAnalysisEditionForOrder } from "../analysisEditionForOrder";
 import { parseAnalysisInputSnapshot } from "../analysisInputSnapshot";
 import { compareEditionKeys } from "../analysisEditionLabel";
+import type { ProfileDto } from "../profiles/types";
 
 type OrderRow = {
   id: string;
@@ -404,10 +405,8 @@ export class InvalidProductError extends Error {
 }
 
 /**
- * P0 fail-closed guard (57D-48F-A): pre-edition commercial identity is
- * product-global, so a repeat purchase would pay again for zero new content.
- * Intentionally over-blocks legitimate future-edition repurchase until
- * edition-aware identity ships.
+ * Exact-edition purchase guard: a repeat purchase is blocked only when the
+ * selected profile actively owns the server-resolved commercial edition.
  */
 export class AlreadyOwnedError extends Error {
   constructor(productId: unknown) {
@@ -467,10 +466,6 @@ export async function createPendingOrder(input: {
     throw new InvalidProductError(input.productId);
   }
 
-  if (await hasActiveEntitlementForProfile(input.userId, input.profileId, resolved.productId)) {
-    throw new AlreadyOwnedError(resolved.productId);
-  }
-
   // Frozen here, server-side, before the order exists: never recomputed by any
   // later step (payment confirmation, purchase creation, reconciliation, refund).
   let analysisEditionKey: string;
@@ -488,6 +483,15 @@ export async function createPendingOrder(input: {
     analysisInputSnapshot = resolution.inputSnapshot;
   } catch {
     throw new AnalysisEditionUnavailableError(resolved.productId);
+  }
+
+  if (await getActiveEntitlementForProfileEdition(
+    input.userId,
+    input.profileId,
+    resolved.productId,
+    analysisEditionKey,
+  )) {
+    throw new AlreadyOwnedError(resolved.productId);
   }
 
   const supabase = createAdminClient();
@@ -839,6 +843,43 @@ export async function hasActiveEntitlementForProfileEdition(
   return (
     (await getActiveEntitlementForProfileEdition(userId, profileId, productId, analysisEditionKey)) !== null
   );
+}
+
+/**
+ * Purchase-facing current-edition ownership. Unlike the coarse helper, this
+ * resolves the current commercial edition server-side and checks that exact
+ * active entitlement only.
+ */
+export async function getCurrentEditionEntitlementForProfile(input: {
+  userId: string;
+  profile: ProfileDto;
+  productId: string;
+}): Promise<{ entitlement: EntitlementRecord; analysisEditionKey: string } | null> {
+  const resolved = resolveLaunchPurchasableProduct(input.productId);
+  if (!resolved.ok) {
+    return null;
+  }
+
+  try {
+    const resolution = await resolveAnalysisEditionForOrder({
+      userId: input.userId,
+      profileId: input.profile.id,
+      profile: input.profile,
+      productId: resolved.productId,
+    });
+    const entitlement = await getActiveEntitlementForProfileEdition(
+      input.userId,
+      input.profile.id,
+      resolved.productId,
+      resolution.editionKey,
+    );
+
+    return entitlement
+      ? { entitlement, analysisEditionKey: resolution.editionKey }
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function listUserEntitlements(

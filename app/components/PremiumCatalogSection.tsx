@@ -104,16 +104,18 @@ export default function PremiumCatalogSection({ profileId, recommendedProductIds
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [summaries, setSummaries] = useState<PaidAnalysisSummary[]>([]);
+  const [currentOwnedProductIds, setCurrentOwnedProductIds] = useState<ReadonlySet<string>>(new Set());
   const [savedProductIds, setSavedProductIds] = useState<ReadonlySet<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
     void fetch("/api/premium-catalog/status")
       .then(async (response) => {
-        const body = await response.json() as { paidAnalysis?: PaidAnalysisSummary[]; savedProductIds?: string[] };
+        const body = await response.json() as { paidAnalysis?: PaidAnalysisSummary[]; savedProductIds?: string[]; currentOwnedProductIds?: string[] };
         if (!cancelled && response.ok) {
           setSummaries(body.paidAnalysis ?? []);
           setSavedProductIds(new Set(body.savedProductIds ?? []));
+          setCurrentOwnedProductIds(new Set(body.currentOwnedProductIds ?? []));
         }
       })
       .catch(() => undefined);
@@ -123,10 +125,15 @@ export default function PremiumCatalogSection({ profileId, recommendedProductIds
   const stateByProductId = useMemo(() => {
     const states = new Map<string, CatalogProductState>();
     for (const summary of summaries) {
-      if (!profileId || summary.profileId === profileId) states.set(summary.productId, toPremiumAnalysisProductState(summary.reportStatus));
+      if (
+        (!profileId || summary.profileId === profileId) &&
+        currentOwnedProductIds.has(summary.productId)
+      ) {
+        states.set(summary.productId, toPremiumAnalysisProductState(summary.reportStatus));
+      }
     }
     return states;
-  }, [summaries, profileId]);
+  }, [summaries, profileId, currentOwnedProductIds]);
 
   function getCategoryLabel(category: string): string {
     return topicGroups.find((group) => group.category === category)?.label ?? category;

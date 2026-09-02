@@ -278,7 +278,7 @@ assert(
 );
 console.log("10. service_role key stays server-only ✓");
 
-// --- 12. P0 duplicate-purchase fail-closed guard (57D-48F-A) ---
+// --- 12. Exact-current-edition duplicate-purchase guard ---
 const purchasesServerSource = read("app/lib/purchases/server.ts");
 assert(
   purchasesServerSource.includes("export class AlreadyOwnedError extends Error"),
@@ -293,24 +293,24 @@ assert(
   "createPendingOrder must still resolve the launch-purchasable product first",
 );
 assert(
-  /hasActiveEntitlementForProfile\(input\.userId, input\.profileId, resolved\.productId\)/.test(
+  /getActiveEntitlementForProfileEdition\([\s\S]*?input\.userId,[\s\S]*?input\.profileId,[\s\S]*?resolved\.productId,[\s\S]*?analysisEditionKey/.test(
     createPendingOrderBody,
   ),
-  "createPendingOrder must check the strict profile-scoped entitlement helper before inserting an order",
+  "createPendingOrder must check exact current-edition entitlement ownership before inserting an order",
 );
 assert(
   createPendingOrderBody.includes("throw new AlreadyOwnedError(resolved.productId)"),
   "createPendingOrder must reject with AlreadyOwnedError when already entitled",
 );
 assert(
-  createPendingOrderBody.indexOf("hasActiveEntitlementForProfile") <
+  createPendingOrderBody.indexOf("getActiveEntitlementForProfileEdition") <
     createPendingOrderBody.indexOf('.from("orders")'),
-  "the entitlement guard must run before the orders insert",
+  "the exact entitlement guard must run before the orders insert",
 );
 assert(
   !createPendingOrderBody.includes("hasActiveEntitlement(") ||
-    createPendingOrderBody.includes("hasActiveEntitlementForProfile("),
-  "createPendingOrder must use the strict profile-scoped helper, not the account-wide one",
+    createPendingOrderBody.includes("getActiveEntitlementForProfileEdition("),
+  "createPendingOrder must use exact profile-and-edition ownership, not an account-wide helper",
 );
 
 const ordersRouteSource = read("app/api/orders/route.ts");
@@ -335,7 +335,7 @@ assert(
   ),
   "the ALREADY_OWNED customer message must not leak internal/DB details",
 );
-console.log("12. P0 duplicate-purchase guard: static contract (service + API mapping) ✓");
+console.log("12. exact-current-edition duplicate-purchase guard: static contract (service + API mapping) ✓");
 
 // --- 11. integration block (env dependent) ---
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -19,7 +19,7 @@ assert(migration.includes("analysis_edition_key <> 'LEGACY'"), "unknown historic
 assert(purchases.includes('error?.code === "23505"') && purchases.includes("getActiveKnownEditionOrder"), "same-edition concurrent inserts must converge after a unique conflict");
 assert(purchases.includes('existing?.status === "pending"') && purchases.includes("return existing"), "a repeated pending request must safely reuse the existing order");
 assert(purchases.includes('existing?.status === "paid"') && purchases.includes("ActiveEditionOrderAlreadyPaidError"), "a paid exact edition must not create a second order");
-assert(purchases.includes('hasActiveEntitlementForProfile(input.userId, input.profileId, resolved.productId)'), "P0 guard must remain product-global");
+assert(purchases.includes("getActiveEntitlementForProfileEdition(") && purchases.includes("analysisEditionKey,"), "the activated purchase guard must remain exact-edition scoped");
 console.log("1. exact-edition active order concurrency is database-backed and lifecycle-safe ✓");
 
 assert(confirmation.includes("createPurchaseFromPaidOrder") && confirmation.includes("grantEntitlement"), "payment confirmation must retain purchase and entitlement idempotency");

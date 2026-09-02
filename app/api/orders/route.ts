@@ -99,7 +99,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof AlreadyOwnedError) {
       return NextResponse.json(
-        { error: "이미 보유하고 있는 분석입니다. 구매한 분석에서 확인해 주세요.", code: "ALREADY_OWNED" },
+        { error: "현재 분석을 이미 보유하고 있습니다. 구매한 분석에서 확인해 주세요.", code: "ALREADY_OWNED" },
         { status: 409 },
       );
     }

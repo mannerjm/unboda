@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
-import { getActiveEntitlementForProfile } from "@/app/lib/purchases/server";
+import { getCurrentEditionEntitlementForProfile } from "@/app/lib/purchases/server";
 import { getPaidReport } from "@/app/lib/paidReports/server";
 import { isProductSaved } from "@/app/lib/interestedAnalyses/server";
 
@@ -34,9 +34,14 @@ export default async function PaidAnalysisAccessPanel({
     notFound();
   }
 
-  const entitlement = user && profile
-    ? await getActiveEntitlementForProfile(user.id, profile.id, canonicalProductId)
+  const currentEditionOwnership = user && profile
+    ? await getCurrentEditionEntitlementForProfile({
+      userId: user.id,
+      profile,
+      productId: canonicalProductId,
+    })
     : null;
+  const entitlement = currentEditionOwnership?.entitlement ?? null;
   const hasAccess = entitlement !== null;
   const product = getPremiumProduct(canonicalProductId);
 
@@ -44,8 +49,8 @@ export default async function PaidAnalysisAccessPanel({
     notFound();
   }
 
-  const report = hasAccess && user && profile && entitlement.analysisEditionKey
-    ? await getPaidReport(user.id, profile.id, canonicalProductId, entitlement.analysisEditionKey)
+  const report = hasAccess && user && profile && currentEditionOwnership
+    ? await getPaidReport(user.id, profile.id, canonicalProductId, currentEditionOwnership.analysisEditionKey)
     : null;
   const state = hasAccess ? report?.status ?? "none" : "not_purchased";
   const isSaved = user ? await isProductSaved(user.id, canonicalProductId) : false;

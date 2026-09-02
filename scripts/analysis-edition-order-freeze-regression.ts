@@ -27,11 +27,11 @@ const createPendingOrderBody = purchasesServer.slice(
   purchasesServer.indexOf("export async function createPendingOrder"),
   purchasesServer.indexOf("export async function getOrderForUser"),
 );
-const guardIndex = createPendingOrderBody.indexOf("hasActiveEntitlementForProfile");
+const guardIndex = createPendingOrderBody.indexOf("getActiveEntitlementForProfileEdition");
 const editionIndex = createPendingOrderBody.indexOf("resolveAnalysisEditionForOrder(");
 const insertIndex = createPendingOrderBody.indexOf('.from("orders")');
 assert(guardIndex > -1 && editionIndex > -1 && insertIndex > -1, "createPendingOrder must contain the guard, edition resolution, and insert in sequence");
-assert(guardIndex < editionIndex, "the P0 duplicate guard must run before edition computation (avoid wasted work for a blocked purchase)");
+assert(editionIndex < guardIndex, "the exact entitlement guard must use the same server-resolved edition later frozen onto the order");
 assert(editionIndex < insertIndex, "edition must be resolved before the order is inserted");
 assert(
   createPendingOrderBody.includes("analysis_edition_key: analysisEditionKey"),
@@ -45,7 +45,7 @@ assert(
   !createPendingOrderBody.includes("input.analysisEditionKey") && !createPendingOrderBody.includes("input.editionKey"),
   "createPendingOrder must never accept a caller/client-supplied edition key",
 );
-console.log("1-6. createPendingOrder: P0 guard -> edition freeze -> insert ordering, fail-closed, no client override ✓");
+console.log("1-6. createPendingOrder: edition freeze -> exact entitlement guard -> insert ordering, fail-closed, no client override ✓");
 
 // --- 7. createPurchaseFromPaidOrder copies verbatim, fails closed if missing ---
 const createPurchaseBody = purchasesServer.slice(

@@ -22,9 +22,10 @@ const appShell = read("app/components/AppShell.tsx");
 
 assert(mypage.includes("현재 분석 대상") && mypage.includes("프로필 수정") && mypage.includes("삭제 확인"), "existing profile management UI must remain");
 assert(
-  mypage.indexOf('href="/account"') < mypage.indexOf("인원 추가")
-    && mypage.indexOf("인원 추가") < mypage.indexOf("{profiles.length}명 등록"),
-  "top actions must render account, add-profile, then registration count",
+  mypage.includes("계정 설정에서 확인하기")
+    && mypage.indexOf("인원 추가") < mypage.indexOf("{profiles.length}명 등록")
+    && mypage.includes("ACCOUNT MANAGEMENT"),
+  "My Page must separate account management while preserving add-profile and registration count actions",
 );
 assert(
   mypage.indexOf("onClick={() => void clearActiveSelection()") < mypage.indexOf("onClick={() => openEditForm(profile)")
@@ -32,7 +33,7 @@ assert(
   "profile actions must render deselect, edit, then delete",
 );
 assert(mypage.includes("구매한 심층 분석") && mypage.includes("아직 구매한 심층 분석이 없습니다."), "zero-paid-analysis profiles must show a compact library empty state");
-assert(mypage.includes("내 프로필 및 이용 가능한 분석") && mypage.includes("구매 및 환불 내역"), "My Page must distinguish current analysis from purchase history");
+assert(mypage.includes("내 프로필 및 이용 가능한 분석") && mypage.includes("결제 내역") && mypage.includes("구매한 분석은 보관함에서"), "My Page must distinguish current analysis content from financial purchase history");
 assert(summaryRoute.includes("listUserPurchaseHistory(user.id)") && summaryRoute.includes("purchaseHistory"), "summary must expose historical purchase records");
 assert(summaryRoute.includes("listUserPaidAnalysisSummaries(user.id)"), "summary must preserve active entitlement-backed analysis summaries");
 assert(purchases.includes("export async function listUserPurchaseHistory") && purchases.includes('.from("purchases")'), "purchase history must derive from purchases, not entitlements");

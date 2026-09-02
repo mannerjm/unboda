@@ -195,6 +195,27 @@ type SummaryBody = {
 
 type ProfileDeletabilityState = { deletable: boolean; reason?: ProfileDeleteReason };
 
+type AccountStatus = {
+  email: string;
+  emailVerified: boolean;
+  account: {
+    status: "ACTIVE" | "DELETION_REQUESTED" | "CLOSED";
+    paidEligibilityStatus: "UNVERIFIED" | "VERIFIED_ADULT" | "REVOKED";
+  };
+};
+
+const accountLifecycleLabels: Record<AccountStatus["account"]["status"], string> = {
+  ACTIVE: "사용 중",
+  DELETION_REQUESTED: "탈퇴 처리 중",
+  CLOSED: "종료됨",
+};
+
+const paidEligibilityLabels: Record<AccountStatus["account"]["paidEligibilityStatus"], string> = {
+  UNVERIFIED: "확인 전",
+  VERIFIED_ADULT: "유료 이용 가능",
+  REVOKED: "확인 필요",
+};
+
 export default function MyPage() {
   const router = useRouter();
   const [profiles, setProfiles] = useState<ProfileDto[]>([]);
@@ -206,6 +227,7 @@ export default function MyPage() {
   const [deletabilityById, setDeletabilityById] = useState<Record<string, ProfileDeletabilityState>>({});
   const [paidAnalysisByProfileId, setPaidAnalysisByProfileId] = useState<Record<string, PaidAnalysisSummary[]>>({});
   const [purchaseHistory, setPurchaseHistory] = useState<PurchaseHistoryItem[]>([]);
+  const [accountStatus, setAccountStatus] = useState<AccountStatus | null>(null);
   const [pendingDeleteProfileId, setPendingDeleteProfileId] = useState<string | null>(null);
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
   const [isClearingActiveProfile, setIsClearingActiveProfile] = useState(false);
@@ -234,6 +256,15 @@ export default function MyPage() {
       })
       .catch(() => setMessage("로그인 상태를 확인한 뒤 다시 시도해 주세요."))
       .finally(() => setIsProfilesLoaded(true));
+  }, []);
+
+  useEffect(() => {
+    void fetch("/api/account/status")
+      .then(async (response) => {
+        if (!response.ok) return;
+        setAccountStatus(await response.json() as AccountStatus);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -477,17 +508,11 @@ export default function MyPage() {
         <div className="mx-auto w-full max-w-3xl">
           <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-semibold tracking-[0.25em] text-stone-500">MY PROFILE</p>
-              <h1 className="mt-3 text-3xl font-bold sm:text-4xl">사주 분석 대상</h1>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-stone-600">여기서 선택한 사람을 기준으로 무료 사주와 유료 심층분석이 진행됩니다.</p>
+              <p className="text-xs font-semibold tracking-[0.25em] text-stone-500">MY PAGE</p>
+              <h1 className="mt-3 text-3xl font-bold sm:text-4xl">마이페이지</h1>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-stone-600">계정 상태와 분석 대상을 관리하고, 저장하거나 구매한 분석을 확인하세요.</p>
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <Link
-                href="/account"
-                className={`rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 ${restingFocusRing}`}
-              >
-                계정 관리
-              </Link>
               <button
                 type="button"
                 onClick={openCreateForm}
@@ -502,6 +527,48 @@ export default function MyPage() {
               ) : null}
             </div>
           </header>
+          <section className="mt-8 border-y border-stone-200 py-6" aria-labelledby="account-status-heading">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">ACCOUNT STATUS</p>
+                <h2 id="account-status-heading" className="mt-2 text-xl font-bold text-stone-900">계정 상태</h2>
+                <p className="mt-2 text-sm leading-6 text-stone-600">계정 인증 상태는 분석 대상 프로필의 출생 정보와 별개로 관리됩니다.</p>
+              </div>
+              <Link href="/account" className={`shrink-0 rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-center text-sm font-semibold text-stone-700 transition hover:bg-stone-50 ${restingFocusRing}`}>
+                계정 설정에서 확인하기
+              </Link>
+            </div>
+            {accountStatus ? (
+              <dl className="mt-5 grid gap-3 sm:grid-cols-3">
+                <div className="min-w-0 border-t border-stone-100 pt-3 sm:border-t-0 sm:border-r sm:pr-4 sm:pt-0">
+                  <dt className="text-xs font-semibold text-stone-500">로그인 이메일</dt>
+                  <dd className="mt-1 break-all text-sm font-semibold text-stone-800">{accountStatus.email}</dd>
+                </div>
+                <div className="border-t border-stone-100 pt-3 sm:border-t-0 sm:border-r sm:px-4 sm:pt-0">
+                  <dt className="text-xs font-semibold text-stone-500">이메일 인증</dt>
+                  <dd className="mt-1 text-sm font-semibold text-stone-800">{accountStatus.emailVerified ? "인증됨" : "인증 필요"}</dd>
+                </div>
+                <div className="border-t border-stone-100 pt-3 sm:border-t-0 sm:pl-4 sm:pt-0">
+                  <dt className="text-xs font-semibold text-stone-500">본인/성인 인증</dt>
+                  <dd className="mt-1 text-sm font-semibold text-stone-800">{paidEligibilityLabels[accountStatus.account.paidEligibilityStatus]}</dd>
+                </div>
+              </dl>
+            ) : null}
+          </section>
+          <section className="mt-8" aria-labelledby="library-heading">
+            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">MY LIBRARY</p>
+            <h2 id="library-heading" className="mt-2 text-xl font-bold text-stone-900">내 보관함</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <Link href="/interests" className={`rounded-xl border border-stone-200 bg-white p-5 transition hover:border-stone-300 hover:bg-stone-50 ${restingFocusRing}`}>
+                <p className="text-base font-semibold text-stone-900">관심 분석</p>
+                <p className="mt-2 text-sm leading-6 text-stone-600">저장한 분석 주제와 현재 회차 상태를 확인합니다.</p>
+              </Link>
+              <Link href="/purchased-analyses" className={`rounded-xl border border-stone-200 bg-white p-5 transition hover:border-stone-300 hover:bg-stone-50 ${restingFocusRing}`}>
+                <p className="text-base font-semibold text-stone-900">구매한 분석</p>
+                <p className="mt-2 text-sm leading-6 text-stone-600">보유한 분석과 이전 회차 리포트를 확인합니다.</p>
+              </Link>
+            </div>
+          </section>
         {isFormOpen ? (
           <form
             className="mt-8 space-y-5 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
@@ -575,16 +642,20 @@ export default function MyPage() {
             </button>
           </section>
         ) : null}
-        <div className="mt-8">
+        <section className="mt-10" aria-labelledby="profile-management-heading">
+          <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">PROFILE MANAGEMENT</p>
+          <h2 id="profile-management-heading" className="mt-2 text-xl font-bold text-stone-900">프로필 관리</h2>
+          <p className="mt-2 text-sm leading-6 text-stone-600">프로필은 분석 대상이며 계정 본인 인증과 별개입니다.</p>
+        <div className="mt-5">
           {profiles.length > 0 ? <p className="mb-3 text-xs font-semibold tracking-[0.2em] text-stone-500">내 프로필 및 이용 가능한 분석</p> : null}
-          <div className="space-y-4">
+          <div className="space-y-3">
           {profiles.map((profile) => (
             <div
               key={profile.id}
               onClick={(event) => selectFromCardClick(event, profile.id)}
               className={profile.id === activeProfileId
-                ? "rounded-2xl border border-[#cdbb98] bg-[#fffdf8] p-6 text-left text-stone-900 shadow-sm sm:p-7"
-                : "cursor-pointer rounded-3xl border border-stone-200 bg-white p-6 text-left shadow-sm transition hover:border-stone-300 hover:shadow-md sm:p-7"}
+                ? "rounded-2xl border border-[#cdbb98] bg-[#fffdf8] p-4 text-left text-stone-900 shadow-sm sm:p-5"
+                : "cursor-pointer rounded-2xl border border-stone-200 bg-white p-4 text-left shadow-sm transition hover:border-stone-300 hover:shadow-md sm:p-5"}
             >
               <button
                 type="button"
@@ -593,26 +664,29 @@ export default function MyPage() {
                   ? `block w-full rounded-2xl text-left ${activeFocusRing}`
                   : `block w-full rounded-2xl text-left ${restingFocusRing}`}
               >
-                <span className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-xl font-bold">{profile.label}</span>
+                <span className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-lg font-bold">{profile.label}</span>
                   {profile.id === activeProfileId ? (
                     <span className="rounded-full border border-[#cdbb98] bg-[#f3eee4] px-3 py-1 text-xs font-semibold text-stone-800">현재 분석 대상</span>
                   ) : null}
                 </span>
                 <span className={profile.id === activeProfileId
-                  ? "mt-2 block text-sm text-stone-600"
-                  : "mt-2 block text-sm text-stone-500"}
+                  ? "mt-1.5 block text-sm text-stone-600"
+                  : "mt-1.5 block text-sm text-stone-500"}
                 >
                   {relationshipLabels[profile.relationshipType]}
                 </span>
                 <span className={profile.id === activeProfileId
-                  ? "mt-1 block text-sm text-stone-600"
-                  : "mt-1 block text-sm text-stone-500"}
+                  ? "mt-0.5 block text-sm text-stone-600"
+                  : "mt-0.5 block text-sm text-stone-500"}
                 >
                   {formatProfileDetails(profile)}
                 </span>
               </button>
-              <div className={subCardClass(profile.id === activeProfileId)}>
+              <div className={profile.id === activeProfileId
+                ? "mt-3 rounded-xl border border-[#dfd3bd] bg-[#fbf7ef] px-3 py-2.5"
+                : "mt-3 rounded-xl border border-stone-200 bg-stone-50/60 px-3 py-2.5"}
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className={profile.id === activeProfileId
                     ? "text-xs font-semibold tracking-[0.14em] text-stone-500"
@@ -630,14 +704,17 @@ export default function MyPage() {
                 </div>
                 {freeAnalysisStatusHints[freeAnalysisStatusById[profile.id] ?? "none"] ? (
                   <p className={profile.id === activeProfileId
-                    ? "mt-2 text-xs leading-5 text-stone-500"
-                    : "mt-2 text-xs leading-5 text-stone-500"}
+                    ? "mt-1.5 text-xs leading-5 text-stone-500"
+                    : "mt-1.5 text-xs leading-5 text-stone-500"}
                   >
                     {freeAnalysisStatusHints[freeAnalysisStatusById[profile.id] ?? "none"]}
                   </p>
                 ) : null}
               </div>
-              <div className={subCardClass(profile.id === activeProfileId)}>
+              <div className={profile.id === activeProfileId
+                ? "mt-2 rounded-xl border border-[#dfd3bd] bg-[#fbf7ef] px-3 py-2.5"
+                : "mt-2 rounded-xl border border-stone-200 bg-stone-50/60 px-3 py-2.5"}
+              >
                   <p className={profile.id === activeProfileId
                     ? "text-xs font-semibold tracking-[0.14em] text-stone-500"
                     : "text-xs font-semibold tracking-[0.14em] text-stone-500"}
@@ -645,9 +722,9 @@ export default function MyPage() {
                     구매한 심층 분석
                   </p>
                   {(paidAnalysisByProfileId[profile.id] ?? []).length > 0 ? (
-                    <ul className="mt-3 divide-y divide-stone-200">
+                    <ul className="mt-2 divide-y divide-stone-200">
                       {(paidAnalysisByProfileId[profile.id] ?? []).map((item) => (
-                      <li key={item.productId} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                      <li key={item.productId} className="flex flex-wrap items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">
                         <span className="min-w-0">
                           <span className="block text-sm font-semibold">{item.productName}</span>
                           <span className={`mt-1.5 ${statusBadgeClass(profile.id === activeProfileId, paidReportStatusTones[item.reportStatus])}`}>
@@ -678,12 +755,12 @@ export default function MyPage() {
                       ))}
                     </ul>
                   ) : (
-                    <p className="mt-3 text-sm text-stone-500">아직 구매한 심층 분석이 없습니다.</p>
+                    <p className="mt-2 text-sm text-stone-500">아직 구매한 심층 분석이 없습니다.</p>
                   )}
                 </div>
               <div className={profile.id === activeProfileId
-                ? "mt-5 flex flex-wrap gap-2 border-t border-stone-200 pt-4"
-                : "mt-5 flex flex-wrap gap-2 border-t border-stone-200 pt-4"}
+                ? "mt-3 flex flex-wrap gap-2 border-t border-stone-200 pt-3"
+                : "mt-3 flex flex-wrap gap-2 border-t border-stone-200 pt-3"}
               >
                 {profile.id === activeProfileId ? (
                   <button
@@ -753,12 +830,47 @@ export default function MyPage() {
             </div>
           ))}
           </div>
+          {profiles.length > 0 ? (
+            <section className="mt-5 flex flex-col gap-3 border-t border-stone-200 pt-5 sm:flex-row sm:items-center sm:justify-between" aria-labelledby="selected-profile-action-heading">
+              <div>
+                <p id="selected-profile-action-heading" className="text-sm font-semibold text-stone-900">선택한 프로필로 분석 이어가기</p>
+                <p className="mt-1 text-sm leading-6 text-stone-600">
+                  {activeProfileId
+                    ? "현재 분석 대상의 무료 사주 결과를 확인하거나 새로 분석할 수 있습니다."
+                    : "먼저 위에서 분석 대상을 선택해 주세요."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const status = activeProfileId ? freeAnalysisStatusById[activeProfileId] : undefined;
+
+                  if (activeProfileId && (status === "completed" || status === "needs_retry")) {
+                    router.push(`/result?profileId=${activeProfileId}`);
+                    return;
+                  }
+                  router.push("/saju");
+                }}
+                disabled={!activeProfileId}
+                className={`w-full shrink-0 rounded-xl bg-stone-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400 sm:w-auto ${restingFocusRing}`}
+              >
+                {activeProfileId && freeAnalysisStatusById[activeProfileId] === "completed"
+                  ? "선택한 프로필의 무료 분석 결과 보기"
+                  : activeProfileId && freeAnalysisStatusById[activeProfileId] === "needs_retry"
+                    ? "저장된 결과 열고 AI 해석 다시 생성하기"
+                    : activeProfileId && freeAnalysisStatusById[activeProfileId] === "stale"
+                      ? "변경된 출생 정보로 다시 분석하기"
+                      : "선택한 프로필로 사주 조회하기"}
+              </button>
+            </section>
+          ) : null}
         </div>
-        {purchaseHistory.length > 0 ? (
-          <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-7">
-            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">PURCHASE HISTORY</p>
-            <h2 className="mt-2 text-2xl font-bold text-stone-900">구매 및 환불 내역</h2>
-            <p className="mt-2 text-sm leading-6 text-stone-600">구매한 분석은 현재 이용 권한과 관계없이 기록으로 남습니다.</p>
+        </section>
+        <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-7" aria-labelledby="payment-history-heading">
+            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">PAYMENT HISTORY</p>
+            <h2 id="payment-history-heading" className="mt-2 text-2xl font-bold text-stone-900">결제 내역</h2>
+            <p className="mt-2 text-sm leading-6 text-stone-600">구매한 분석은 보관함에서, 결제와 환불 기록은 여기에서 확인합니다.</p>
+            {purchaseHistory.length > 0 ? (
             <ul className="mt-5 divide-y divide-stone-200">
               {purchaseHistory.map((item) => {
                 const profile = profiles.find((candidate) => candidate.id === item.profileId);
@@ -780,49 +892,24 @@ export default function MyPage() {
                 );
               })}
             </ul>
-          </section>
-        ) : null}
-        {profiles.length > 0 ? (
-          <section className="mt-10 flex flex-col gap-4 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-7">
-            <p className="text-sm leading-6 text-stone-600">
-              {activeProfileId
-                ? "선택한 분석 대상으로 이어서 진행합니다."
-                : "먼저 위에서 분석 대상을 선택해 주세요."}
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                const status = activeProfileId ? freeAnalysisStatusById[activeProfileId] : undefined;
-
-                // needs_retry keeps its own stored result; retry lives on that screen.
-                if (activeProfileId && (status === "completed" || status === "needs_retry")) {
-                  router.push(`/result?profileId=${activeProfileId}`);
-                  return;
-                }
-                router.push("/saju");
-              }}
-              disabled={!activeProfileId}
-              className={`w-full shrink-0 rounded-xl bg-stone-900 px-6 py-4 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400 sm:w-auto sm:py-3 ${restingFocusRing}`}
-            >
-              {activeProfileId && freeAnalysisStatusById[activeProfileId] === "completed"
-                ? "선택한 프로필의 무료 분석 결과 보기"
-                : activeProfileId && freeAnalysisStatusById[activeProfileId] === "needs_retry"
-                  ? "저장된 결과 열고 AI 해석 다시 생성하기"
-                  : activeProfileId && freeAnalysisStatusById[activeProfileId] === "stale"
-                    ? "변경된 출생 정보로 다시 분석하기"
-                    : "선택한 프로필로 사주 조회하기"}
-            </button>
-          </section>
-        ) : null}
+            ) : <p className="mt-5 border-t border-stone-100 pt-5 text-sm leading-6 text-stone-500">아직 결제 또는 환불 내역이 없습니다.</p>}
+        </section>
         {message ? <p className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{message}</p> : null}
-        <button
-          type="button"
-          onClick={() => void signOut()}
-          disabled={isSigningOut}
-          className={`mt-8 w-full rounded-lg py-2 text-center text-sm text-stone-400 underline-offset-4 transition hover:text-stone-600 hover:underline disabled:cursor-not-allowed disabled:text-stone-300 ${restingFocusRing}`}
-        >
-          {isSigningOut ? "로그아웃 중..." : "로그아웃"}
-        </button>
+        <section className="mt-10 border-t border-stone-200 pt-6" aria-labelledby="account-management-heading">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">ACCOUNT MANAGEMENT</p>
+              <h2 id="account-management-heading" className="mt-2 text-xl font-bold text-stone-900">계정 관리</h2>
+              <p className="mt-2 text-sm leading-6 text-stone-600">이메일, 비밀번호, 회원탈퇴 같은 민감한 설정은 계정 관리에서 변경합니다.</p>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <Link href="/account" className={`rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 ${restingFocusRing}`}>계정 관리</Link>
+              <button type="button" onClick={() => void signOut()} disabled={isSigningOut} className={`rounded-lg px-4 py-2.5 text-sm font-semibold text-stone-500 underline-offset-4 transition hover:text-stone-700 hover:underline disabled:cursor-not-allowed disabled:text-stone-300 ${restingFocusRing}`}>
+                {isSigningOut ? "로그아웃 중..." : "로그아웃"}
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
       </main>
     </AppShell>

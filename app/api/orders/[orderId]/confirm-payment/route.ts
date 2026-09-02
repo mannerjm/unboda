@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { ensureAccountLifecycle } from "@/app/lib/accounts/server";
 import { resolvePurchasableProduct } from "@/app/lib/purchases/products";
@@ -13,6 +13,10 @@ import {
 } from "@/app/lib/purchases/server";
 import { confirmPaymentWithToss, TossConfirmationError } from "@/app/lib/toss/server";
 import { emitPaymentEvent } from "@/app/lib/payments/observability";
+import {
+  preparePaidReportGeneration,
+  runPaidReportGeneration,
+} from "@/app/lib/paidReports/generation";
 
 type RouteContext = {
   params: Promise<{ orderId: string }>;
@@ -83,11 +87,36 @@ export async function POST(request: Request, context: RouteContext) {
     orderProfileId = order.profileId;
 
     if (order.status === "paid") {
+      const purchase = await createPurchaseFromPaidOrder(order);
+      const entitlement = await grantEntitlement({
+        userId: order.userId,
+        profileId: order.profileId,
+        resourceId: order.productId,
+        purchaseId: purchase.id,
+        analysisEditionKey: purchase.analysisEditionKey!,
+        source: "purchase",
+      });
+      const reportInput = {
+        userId: order.userId,
+        profileId: order.profileId,
+        productId: order.productId,
+        purchaseId: purchase.id,
+        analysisEditionKey: purchase.analysisEditionKey!,
+      };
+      const reportClaim = await preparePaidReportGeneration(reportInput);
+      if (reportClaim.state === "claimed") {
+        after(() => runPaidReportGeneration(reportInput, reportClaim).catch((error) => {
+          console.error("[orders/confirm-payment] automatic report generation replay failed", error);
+        }));
+      }
       return NextResponse.json(
         {
           order,
           status: "paid",
           alreadyProcessed: true,
+          purchase,
+          entitlement,
+          reportStatus: reportClaim.state === "completed" ? "completed" : "preparing",
         },
         { status: 200 },
       );
@@ -185,6 +214,19 @@ export async function POST(request: Request, context: RouteContext) {
       analysisEditionKey: purchase.analysisEditionKey!,
       source: "purchase",
     });
+    const reportInput = {
+      userId: paidOrder.userId,
+      profileId: paidOrder.profileId,
+      productId: paidOrder.productId,
+      purchaseId: purchase.id,
+      analysisEditionKey: purchase.analysisEditionKey!,
+    };
+    const reportClaim = await preparePaidReportGeneration(reportInput);
+    if (reportClaim.state === "claimed") {
+      after(() => runPaidReportGeneration(reportInput, reportClaim).catch((error) => {
+        console.error("[orders/confirm-payment] automatic report generation failed", error);
+      }));
+    }
     emitPaymentEvent("payment_confirmed", {
       operationalClass: "CONVERGED",
       orderId: paidOrder.id,
@@ -204,6 +246,7 @@ export async function POST(request: Request, context: RouteContext) {
         order: paidOrder,
         purchase,
         entitlement,
+        reportStatus: reportClaim.state === "completed" ? "completed" : "preparing",
         payment: {
           provider: "toss",
           status: provider.status,

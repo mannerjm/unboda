@@ -18,8 +18,8 @@ type PremiumProductDetailProps = {
 
 const ACTION_LABELS: Record<PremiumAnalysisProductState, string> = {
   not_purchased: "이 분석 시작하기",
-  none: "심층 분석 생성하기",
-  generating: "생성 중",
+  none: "분석 준비 중",
+  generating: "분석 준비 중",
   completed: "리포트 보기",
   failed: "다시 생성하기",
 };
@@ -123,7 +123,7 @@ export default function PremiumProductDetail({
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-4">
         <span className="text-sm font-medium text-stone-500">{formatPrice(product.id)}</span>
         <div className="flex flex-wrap gap-2">
-          {state === "generating" ? (
+          {state === "none" || state === "generating" ? (
             <span className="rounded-lg bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-500">{ACTION_LABELS[state]}</span>
           ) : href ? (
             <Link href={href} className="rounded-lg bg-stone-900 px-4 py-2.5 text-xs font-semibold text-white hover:bg-stone-800">

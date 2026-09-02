@@ -2,10 +2,10 @@ import Link from "next/link";
 import type { PurchasedAnalysisProductGroup } from "@/app/lib/purchasedAnalysesGrouping";
 
 const statusLabels: Record<string, string> = {
-  none: "생성 전",
-  generating: "생성 중",
+  none: "분석 준비 중",
+  generating: "분석 준비 중",
   completed: "분석 완료",
-  failed: "생성 실패",
+  failed: "분석 준비에 문제가 있어요",
 };
 
 const statusClasses: Record<string, string> = {
@@ -16,10 +16,10 @@ const statusClasses: Record<string, string> = {
 };
 
 const actionLabels: Record<string, string> = {
-  none: "심층 분석 생성하기",
-  generating: "생성 중",
+  none: "분석을 준비하고 있어요",
+  generating: "분석을 준비하고 있어요",
   completed: "분석 결과 보기",
-  failed: "다시 생성하기",
+  failed: "다시 준비하기",
 };
 
 type PurchasedAnalysesListProps = {
@@ -58,7 +58,7 @@ export default function PurchasedAnalysesList({
               const href = `/paid-analysis/${group.productId}/report?profileId=${encodeURIComponent(
                 profileId,
               )}${edition.analysisEditionKey ? `&edition=${encodeURIComponent(edition.analysisEditionKey)}` : ""}`;
-              const isGenerating = edition.reportStatus === "generating";
+              const isPreparing = edition.reportStatus === "none" || edition.reportStatus === "generating";
 
               return (
                 <div
@@ -82,7 +82,7 @@ export default function PurchasedAnalysesList({
                       {statusLabels[edition.reportStatus]}
                     </span>
                   </div>
-                  {isGenerating ? (
+                  {isPreparing ? (
                     <span className="shrink-0 rounded-lg bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-500">
                       {actionLabels[edition.reportStatus]}
                     </span>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
-import PurchasedAnalysesListMultiEdition from "@/app/components/PurchasedAnalysesListMultiEdition";
+import PurchasedAnalysesAutoRefresh from "@/app/components/PurchasedAnalysesAutoRefresh";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
 import { groupPurchasedAnalysesByProduct } from "@/app/lib/purchasedAnalysesGrouping";
@@ -49,7 +49,7 @@ export default async function PurchasedAnalysesPage() {
               <Link href="/mypage" className="text-xs font-medium text-stone-500 underline decoration-stone-300 underline-offset-4">프로필 변경은 마이페이지에서</Link>
             </div>
           </header>
-          <PurchasedAnalysesListMultiEdition groups={groups} profileId={activeProfile.id} />
+          <PurchasedAnalysesAutoRefresh groups={groups} profileId={activeProfile.id} />
         </div>
       </main>
     </AppShell>

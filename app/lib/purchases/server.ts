@@ -427,6 +427,34 @@ export class AnalysisEditionUnavailableError extends Error {
   }
 }
 
+export class ActiveEditionOrderAlreadyPaidError extends Error {
+  constructor(readonly orderId: string) {
+    super("이미 결제 완료된 동일 분석 에디션 주문이 있습니다.");
+    this.name = "ActiveEditionOrderAlreadyPaidError";
+  }
+}
+
+async function getActiveKnownEditionOrder(input: {
+  userId: string;
+  profileId: string;
+  productId: string;
+  analysisEditionKey: string;
+}): Promise<OrderRecord | null> {
+  const { data, error } = await createAdminClient()
+    .from("orders")
+    .select("*")
+    .eq("user_id", input.userId)
+    .eq("profile_id", input.profileId)
+    .eq("product_id", input.productId)
+    .eq("analysis_edition_key", input.analysisEditionKey)
+    .in("status", ["pending", "paid"])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<OrderRow>();
+
+  return error || !data ? null : toOrderRecord(data);
+}
+
 export async function createPendingOrder(input: {
   userId: string;
   profileId: string;
@@ -479,6 +507,23 @@ export async function createPendingOrder(input: {
     })
     .select("*")
     .single<OrderRow>();
+
+  if (error?.code === "23505") {
+    const existing = await getActiveKnownEditionOrder({
+      userId: input.userId,
+      profileId: input.profileId,
+      productId: resolved.productId,
+      analysisEditionKey,
+    });
+
+    if (existing?.status === "pending") {
+      return existing;
+    }
+
+    if (existing?.status === "paid") {
+      throw new ActiveEditionOrderAlreadyPaidError(existing.id);
+    }
+  }
 
   if (error || !data) {
     throw new Error(`주문 생성에 실패했습니다: ${error?.message ?? "unknown"}`);
@@ -887,6 +932,7 @@ export type MockPaymentConfirmation = {
   order: OrderRecord;
   purchase: PurchaseRecord;
   entitlement: EntitlementRecord;
+  reportClaim?: import("../paidReports/server").PaidReportClaim;
 };
 
 export async function reconcileTossPayment(
@@ -912,6 +958,13 @@ export async function reconcileTossPayment(
       purchaseId: purchase.id,
       analysisEditionKey: purchase.analysisEditionKey!,
       source: "purchase",
+    });
+    await (await import("../paidReports/generation")).preparePaidReportGeneration({
+      userId: order.userId,
+      profileId: order.profileId,
+      productId: order.productId,
+      purchaseId: purchase.id,
+      analysisEditionKey: purchase.analysisEditionKey!,
     });
     await markTossPaymentReconciliationResult(
       order.id,
@@ -957,6 +1010,13 @@ export async function reconcileTossPayment(
       purchaseId: purchase.id,
       analysisEditionKey: purchase.analysisEditionKey!,
       source: "purchase",
+    });
+    await (await import("../paidReports/generation")).preparePaidReportGeneration({
+      userId: paidOrder.userId,
+      profileId: paidOrder.profileId,
+      productId: paidOrder.productId,
+      purchaseId: purchase.id,
+      analysisEditionKey: purchase.analysisEditionKey!,
     });
     await markTossPaymentReconciliationResult(
       order.id,
@@ -1072,5 +1132,13 @@ export async function confirmMockPayment(
     source: "purchase",
   });
 
-  return { order: paidOrder, purchase, entitlement };
+  const reportClaim = await (await import("../paidReports/generation")).preparePaidReportGeneration({
+    userId: paidOrder.userId,
+    profileId: paidOrder.profileId,
+    productId: paidOrder.productId,
+    purchaseId: purchase.id,
+    analysisEditionKey: purchase.analysisEditionKey!,
+  });
+
+  return { order: paidOrder, purchase, entitlement, reportClaim };
 }

@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { confirmMockPayment } from "@/app/lib/purchases/server";
+import { runPaidReportGeneration } from "@/app/lib/paidReports/generation";
 
 type RouteContext = {
   params: Promise<{ orderId: string }>;
@@ -36,7 +37,25 @@ export async function POST(_request: Request, context: RouteContext) {
       );
     }
 
-    return NextResponse.json(confirmation, { status: 200 });
+    const reportClaim = confirmation.reportClaim;
+    if (reportClaim?.state === "claimed") {
+      after(() => runPaidReportGeneration({
+        userId: confirmation.order.userId,
+        profileId: confirmation.order.profileId,
+        productId: confirmation.order.productId,
+        purchaseId: confirmation.purchase.id,
+        analysisEditionKey: confirmation.purchase.analysisEditionKey!,
+      }, reportClaim).catch((error) => {
+        console.error("[orders/mock-confirm] automatic report generation failed", error);
+      }));
+    }
+
+    return NextResponse.json({
+      order: confirmation.order,
+      purchase: confirmation.purchase,
+      entitlement: confirmation.entitlement,
+      reportStatus: reportClaim?.state === "completed" ? "completed" : "preparing",
+    }, { status: 200 });
   } catch (error) {
     console.error("[orders/mock-confirm] failed");
 

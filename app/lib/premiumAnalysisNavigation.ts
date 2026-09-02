@@ -10,7 +10,7 @@ export function getPremiumAnalysisHref(
   state: PremiumAnalysisProductState,
   profileId?: string,
 ): string | null {
-  if (state === "generating") return null;
+  if (state === "none" || state === "generating") return null;
 
   const query = profileId ? `?profileId=${encodeURIComponent(profileId)}` : "";
   return state === "not_purchased"

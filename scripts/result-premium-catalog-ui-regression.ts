@@ -253,8 +253,8 @@ assert(
 assert(
   catalogSection.includes('not_purchased: "분석 내용 보기"')
     && catalogSection.includes('completed: "리포트 보기"')
-    && catalogSection.includes('none: "심층 분석 생성하기"')
-    && catalogSection.includes('generating: "생성 중"')
+    && catalogSection.includes('none: "분석 준비 중"')
+    && catalogSection.includes('generating: "분석 준비 중"')
     && catalogSection.includes('failed: "다시 생성하기"'),
   "the catalog must map every purchase state to its action label",
 );
@@ -265,9 +265,9 @@ assert(
   "not-purchased must route to checkout and purchased states to the report entry",
 );
 assert(
-  catalogSection.includes('state === "generating"')
+  catalogSection.includes('state === "none" || state === "generating"')
     && catalogSection.includes("ACTION_LABELS[state]")
-    && catalogSection.includes("생성 중")
+    && catalogSection.includes("분석 준비 중")
     && catalogSection.includes("<Link")
     && catalogSection.includes("</Link>"),
   "generating must render a disabled action branch without a report link",

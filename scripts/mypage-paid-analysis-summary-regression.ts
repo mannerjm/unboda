@@ -53,10 +53,10 @@ console.log("4. product names are derived from the registry, never duplicated �
 assert(myPage.includes("구매한 심층 분석"), "the card must label the purchased section");
 assert(myPage.includes('(paidAnalysisByProfileId[profile.id] ?? []).length > 0 ?'), "the section must be hidden for profiles without purchases");
 assert(myPage.includes('completed: "리포트 보기"'), "a completed report must offer 리포트 보기");
-assert(myPage.includes('none: "심층 분석 생성하기"'), "a missing report must warn that generation starts");
-assert(myPage.includes('failed: "다시 생성하기"'), "a failed report must warn that regeneration starts");
+assert(myPage.includes('none: "분석을 준비하고 있어요"'), "a missing report must show automatic preparation");
+assert(myPage.includes('failed: "다시 준비하기"'), "a failed report must offer customer-friendly recovery");
 assert(!/none: "리포트 보기"|failed: "리포트 보기"/.test(myPage), "none and failed must never read as a plain view action");
-assert(myPage.includes('item.reportStatus === "generating" ?') && myPage.includes("disabled"), "a generating report must not be clickable");
+assert(myPage.includes('item.reportStatus === "none" || item.reportStatus === "generating"') && myPage.includes("disabled"), "a preparing report must not be clickable");
 assert(!myPage.includes("setInterval") && !myPage.includes("setTimeout"), "no polling may be introduced for generating reports");
 console.log("5. status labels and actions match the OpenAI cost of each transition ✓");
 

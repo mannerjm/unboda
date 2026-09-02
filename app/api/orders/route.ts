@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { ensureAccountLifecycle } from "@/app/lib/accounts/server";
 import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
-import { AlreadyOwnedError, AnalysisEditionUnavailableError, createPendingOrder } from "@/app/lib/purchases/server";
+import {
+  ActiveEditionOrderAlreadyPaidError,
+  AlreadyOwnedError,
+  AnalysisEditionUnavailableError,
+  createPendingOrder,
+} from "@/app/lib/purchases/server";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { emitPaymentEvent } from "@/app/lib/payments/observability";
@@ -102,6 +107,13 @@ export async function POST(request: Request) {
     if (error instanceof AnalysisEditionUnavailableError) {
       return NextResponse.json(
         { error: "지금은 이 분석을 준비할 수 없습니다. 잠시 후 다시 시도해 주세요.", code: "ANALYSIS_EDITION_UNAVAILABLE" },
+        { status: 409 },
+      );
+    }
+
+    if (error instanceof ActiveEditionOrderAlreadyPaidError) {
+      return NextResponse.json(
+        { error: "동일한 분석 에디션의 결제가 이미 완료되었습니다.", code: "EDITION_ALREADY_PAID" },
         { status: 409 },
       );
     }

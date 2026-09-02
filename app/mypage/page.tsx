@@ -98,18 +98,17 @@ type PurchaseHistoryItem = {
 };
 
 const paidReportStatusLabels: Record<PaidReportStatus, string> = {
-  none: "아직 생성되지 않음",
-  generating: "생성 중",
+  none: "분석 준비 중",
+  generating: "분석 준비 중",
   completed: "분석 완료",
   failed: "생성 실패",
 };
 
-// "none"/"failed" start a real generation, so they must never read as a plain view action.
 const paidReportActionLabels: Record<PaidReportStatus, string> = {
-  none: "심층 분석 생성하기",
-  generating: "생성 중",
+  none: "분석을 준비하고 있어요",
+  generating: "분석을 준비하고 있어요",
   completed: "리포트 보기",
-  failed: "다시 생성하기",
+  failed: "다시 준비하기",
 };
 
 const paymentStatusLabels: Record<PurchaseHistoryItem["paymentStatus"], string> = {
@@ -655,7 +654,7 @@ export default function MyPage() {
                             {paidReportStatusLabels[item.reportStatus]}
                           </span>
                         </span>
-                        {item.reportStatus === "generating" ? (
+                        {item.reportStatus === "none" || item.reportStatus === "generating" ? (
                           <button
                             type="button"
                             disabled

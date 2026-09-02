@@ -49,7 +49,7 @@ assert(purchaseServer.includes("profile_id: order.profileId"), "purchase insert 
 assert(purchaseServer.includes("profileId: paidOrder.profileId"), "mock-confirm entitlement must inherit profileId from the paid order");
 assert(purchaseServer.includes("purchaseId: purchase.id"), "mock-confirm entitlement must receive its purchase id");
 assert(purchaseServer.includes('source: "purchase"'), "mock-confirm entitlement source must be purchase");
-assert(mockConfirmRoute.includes("confirmMockPayment(orderId, user.id)") && !mockConfirmRoute.includes("profileId"), "mock-confirm must not accept client profileId");
+assert(mockConfirmRoute.includes("confirmMockPayment(orderId, user.id)") && !mockConfirmRoute.includes("profileId?: unknown"), "mock-confirm must not accept a client-supplied profileId");
 console.log("4. mock-confirm inherits profile scope only from the order ✓");
 
 assert(purchaseServer.includes("getActiveEntitlementForProfile"), "strict profile entitlement lookup must exist");

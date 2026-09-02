@@ -17,16 +17,16 @@ type CatalogProductState = PremiumAnalysisProductState;
 
 const ACTION_LABELS: Record<CatalogProductState, string> = {
   not_purchased: "분석 내용 보기",
-  none: "심층 분석 생성하기",
-  generating: "생성 중",
+  none: "분석 준비 중",
+  generating: "분석 준비 중",
   completed: "리포트 보기",
   failed: "다시 생성하기",
 };
 
 const STATUS_LABELS: Record<CatalogProductState, string> = {
   not_purchased: "미보유",
-  none: "보유 · 생성 전",
-  generating: "생성 중",
+  none: "보유 · 분석 준비 중",
+  generating: "분석 준비 중",
   completed: "리포트 완료",
   failed: "생성 실패",
 };
@@ -152,7 +152,7 @@ export default function PremiumCatalogSection({ profileId, recommendedProductIds
           </button>
           <div className="flex items-center justify-between gap-3 sm:justify-end">
             <span className="text-xs font-medium text-stone-500">{formatPrice(product.id)}</span>
-            {state === "generating" ? <span className="rounded-lg bg-stone-100 px-3 py-2 text-[11px] font-semibold text-stone-500">{ACTION_LABELS[state]}</span> : isOwned ? <Link href={href ?? "#"} className="rounded-lg border border-stone-300 px-3 py-2 text-[11px] font-semibold text-stone-700 hover:bg-stone-50">{ACTION_LABELS[state]}</Link> : <button type="button" onClick={() => setSelectedProductId(product.id)} className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-[11px] font-semibold text-stone-700 hover:bg-stone-50">{ACTION_LABELS[state]}</button>}
+            {state === "none" || state === "generating" ? <span className="rounded-lg bg-stone-100 px-3 py-2 text-[11px] font-semibold text-stone-500">{ACTION_LABELS[state]}</span> : isOwned ? <Link href={href ?? "#"} className="rounded-lg border border-stone-300 px-3 py-2 text-[11px] font-semibold text-stone-700 hover:bg-stone-50">{ACTION_LABELS[state]}</Link> : <button type="button" onClick={() => setSelectedProductId(product.id)} className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-[11px] font-semibold text-stone-700 hover:bg-stone-50">{ACTION_LABELS[state]}</button>}
           </div>
         </div>
         {isSelected ? <div className="mt-4 border-t border-stone-200 pt-4"><p className="text-xs font-semibold text-stone-700">이 분석에서 확인하는 것</p><ul className="mt-2 space-y-1 text-xs leading-5 text-stone-600">{(product.details ?? [product.description]).slice(0, 3).map((detail) => <li key={detail}>· {detail}</li>)}</ul>{!isOwned && href ? <Link href={href} className="mt-4 inline-flex rounded-lg bg-stone-900 px-4 py-2.5 text-xs font-semibold text-white hover:bg-stone-800">이 분석 자세히 보기</Link> : null}</div> : null}

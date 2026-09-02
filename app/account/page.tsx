@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { AccountLifecycleStatus, PaidEligibilityStatus } from "@/app/lib/accounts/server";
+import AppShell from "@/app/components/AppShell";
+import type { ReactNode } from "react";
 
 const statusLabels: Record<AccountLifecycleStatus, string> = {
   ACTIVE: "사용 중",
@@ -42,6 +44,16 @@ type AccountStatusResponse = {
     finalizationStartedAt?: string | null;
   };
 };
+
+function AccountPageFrame({ children }: { children: ReactNode }) {
+  return (
+    <AppShell>
+      <main className="min-h-screen bg-[#f7f3ea] px-5 py-12 text-stone-900 sm:py-16">
+        <div className="mx-auto w-full max-w-xl">{children}</div>
+      </main>
+    </AppShell>
+  );
+}
 
 export default function AccountPage() {
   const router = useRouter();
@@ -202,30 +214,27 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#f7f3ea] px-5 py-12 text-stone-900 sm:py-16">
-        <div className="mx-auto w-full max-w-xl text-center">
+      <AccountPageFrame>
+        <div className="text-center">
           <p className="text-sm font-semibold text-stone-600">계정 정보를 불러오는 중입니다...</p>
         </div>
-      </main>
+      </AccountPageFrame>
     );
   }
 
   if (fetchError || !data) {
     return (
-      <main className="min-h-screen bg-[#f7f3ea] px-5 py-12 text-stone-900 sm:py-16">
-        <div className="mx-auto w-full max-w-xl">
-          <p className="text-sm text-red-600">{fetchError || "계정 정보를 불러올 수 없습니다."}</p>
-          <Link href="/mypage" className="mt-4 inline-block text-sm font-semibold text-stone-600">마이페이지로 돌아가기</Link>
-        </div>
-      </main>
+      <AccountPageFrame>
+        <p className="text-sm text-red-600">{fetchError || "계정 정보를 불러올 수 없습니다."}</p>
+        <Link href="/mypage" className="mt-4 inline-block text-sm font-semibold text-stone-600">마이페이지로 돌아가기</Link>
+      </AccountPageFrame>
     );
   }
 
   const { email, emailVerified, account } = data;
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-5 py-12 text-stone-900 sm:py-16">
-      <div className="mx-auto w-full max-w-xl">
+    <AccountPageFrame>
         <Link href="/mypage" className="text-sm font-semibold text-stone-600">마이페이지로 돌아가기</Link>
         <p className="mt-10 text-xs font-semibold tracking-[0.25em] text-stone-500">ACCOUNT</p>
         <h1 className="mt-3 text-3xl font-bold">계정 정보</h1>
@@ -453,7 +462,6 @@ export default function AccountPage() {
           </div>
         </section>
 
-      </div>
-    </main>
+    </AccountPageFrame>
   );
 }

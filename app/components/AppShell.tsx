@@ -50,6 +50,14 @@ const mobileNavItems: NavItem[] = [
 ];
 
 function isActivePath(pathname: string, href: string): boolean {
+  if (href === "/purchased-analyses" && pathname.startsWith("/paid-analysis/")) {
+    return true;
+  }
+
+  if (href === "/mypage" && pathname.startsWith("/account")) {
+    return true;
+  }
+
   if (href.startsWith("/result#")) {
     return pathname.startsWith("/result");
   }
@@ -65,6 +73,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
   const deepAnalysisHref = profileId ? `/deep-analysis?profileId=${encodeURIComponent(profileId)}` : "/deep-analysis";
   const navigationItems = (items: NavItem[]) => items.map((item) => ({
     ...item,
+    activeHref: item.href,
     href: item.href === "/recommendations" ? recommendationHref : item.href === "/deep-analysis" ? deepAnalysisHref : item.href,
   }));
   const resolvedAnalysisNavItems = navigationItems(analysisNavItems);
@@ -83,7 +92,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
             <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.18em] text-stone-400">분석</p>
             <div className="space-y-1">
             {resolvedAnalysisNavItems.map((item) => {
-              const active = isActivePath(pathname, item.href);
+              const active = isActivePath(pathname, item.activeHref);
 
               return (
                 <Link
@@ -155,9 +164,9 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
         className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-[#f8f4ee]/95 backdrop-blur-sm lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <div className="mx-auto grid max-w-md grid-cols-5 gap-1 px-2 py-2">
+        <div className="mx-auto grid max-w-md grid-cols-6 gap-1 px-2 py-2">
           {resolvedMobileNavItems.map((item) => {
-            const active = isActivePath(pathname, item.href);
+            const active = isActivePath(pathname, item.activeHref);
 
             return (
               <Link

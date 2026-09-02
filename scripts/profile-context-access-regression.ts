@@ -64,12 +64,10 @@ for (const [name, source] of [["paid page", paidPage], ["report page", reportPag
 for (const [name, source] of [["access panel", accessPanel], ["report gate", reportGate]] as const) {
   assert(source.includes("isProfileId(profileId)"), `${name} must reject missing/invalid profileId`);
   assert(source.includes("getUserProfile(profileId, user.id)"), `${name} must verify profile ownership`);
-  assert(
-    source.includes("hasActiveEntitlementForProfile") || source.includes("getActiveEntitlementForProfile"),
-    `${name} must use strict profile entitlement lookup`,
-  );
   assert(source.includes("notFound()"), `${name} must return 404 for invalid/foreign profile`);
 }
+assert(accessPanel.includes("currentEditionOwnership") && accessPanel.includes("analysisEditionKey"), "paid detail access must derive from the current edition for the verified profile");
+assert(reportGate.includes("? edition") && reportGate.includes("hasAccess"), "explicit report routes must honor their requested edition after profile verification");
 assert(reportGate.includes("?profileId=${profileId}"), "report gate return link must preserve profileId");
 console.log("4. paid access and report gate are profile-scoped ✓");
 

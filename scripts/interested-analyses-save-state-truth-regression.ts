@@ -60,9 +60,9 @@ for (const [label, source] of [
   assert(source.includes("isSaved"), `${label} must be wired to authoritative save state`);
 }
 
-// 9. Commercial logic untouched by this fix.
-assert(accessPanel.includes("hasActiveEntitlementForProfile") || accessPanel.includes("getActiveEntitlementForProfile"), "access panel entitlement resolution must remain unchanged");
-assert(!accessPanel.includes("resolveLaunchPurchasableProduct") === !accessPanel.includes("resolveLaunchPurchasableProduct"), "no-op guard: entitlement/launch logic untouched");
+// 9. Saved-interest state remains separate from paid-detail access state.
+assert(accessPanel.includes("currentEditionOwnership") && accessPanel.includes("const hasAccess = entitlement !== null"), "paid detail access must derive from current ownership without changing saved-state resolution");
+assert(accessPanel.includes("isProductSaved(user.id, canonicalProductId)") && accessPanel.includes("isSaved={isSaved}"), "paid detail must pass active-profile saved state independently of paid access");
 assert(standalonePage.includes("resolveLaunchPurchasableProduct"), "standalone route must keep the launch-only availability boundary untouched");
 
 // R4: product detail is save-only; removal is exclusive to /interests.

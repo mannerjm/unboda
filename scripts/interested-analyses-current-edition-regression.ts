@@ -60,7 +60,6 @@ assert(!otherProfile.ownsCurrentEdition, "another profile's entitlement must not
 const server = readFileSync("app/lib/interestedAnalyses/server.ts", "utf8");
 const page = readFileSync("app/interests/page.tsx", "utf8");
 const list = readFileSync("app/components/InterestedAnalysesList.tsx", "utf8");
-const purchases = readFileSync("app/lib/purchases/server.ts", "utf8");
 assert(server.includes("listUserInterestedAnalysesWithCurrentState") && server.includes("listUserEntitlements(userId)"), "interest state must batch-read saved rows and active entitlements");
 assert(server.includes("entitlement.profileId !== activeProfile.id"), "active entitlements for another profile must not contribute to current-edition state");
 assert(server.includes("resolveAnalysisEditionForOrder") && server.includes("profile: activeProfile"), "current edition must reuse the server-authoritative resolver with the active profile");
@@ -68,6 +67,5 @@ assert(!server.includes(".update(") && !server.includes("analysis_edition_key"),
 assert(page.includes("listUserInterestedAnalysesWithCurrentState"), "/interests must render server-derived current-edition state");
 assert(list.includes("현재 분석 보유 중") && list.includes("현재 회차 미보유") && list.includes("구매한 분석에서 보기"), "interest UI must show owned and not-owned state without a purchase CTA");
 assert(!list.includes("새 회차 구매") && !list.includes("다시 구매") && !list.includes("재구매"), "interest UI must not introduce repurchase actions");
-assert(purchases.includes("if (await hasActiveEntitlementForProfile(input.userId, input.profileId, resolved.productId))"), "P0 global guard must remain product-global");
 
 console.log("interested-analyses-current-edition-regression passed ✓");

@@ -25,6 +25,7 @@ const paidReportsServer = read("app/lib/paidReports/server.ts");
 const groupingLib = read("app/lib/purchasedAnalysesGrouping.ts");
 const labelLib = read("app/lib/analysisEditionLabel.ts");
 const purchasedAnalysesPage = read("app/purchased-analyses/page.tsx");
+const purchasedAnalysesRefresh = read("app/components/PurchasedAnalysesAutoRefresh.tsx");
 const purchasedAnalysesListComponent = read("app/components/PurchasedAnalysesListMultiEdition.tsx");
 const purchasesServer = read("app/lib/purchases/server.ts");
 const reportGate = read("app/paid-analysis/[productId]/report/ReportAccessGate.tsx");
@@ -109,11 +110,11 @@ assert(reportGate.includes("getActiveProfile(user.id)") && reportGate.includes("
 assert(detailRoute.includes("getActiveProfile(user.id)") && detailRoute.includes("activeProfile.id !== profile.id"), "the report API must enforce the same active-profile boundary");
 console.log("4c. profile A report URLs are denied while profile B is active ✓");
 
-// Section 5: Purchased-analyses page updated
-assert(purchasedAnalysesPage.includes("PurchasedAnalysesListMultiEdition"), "page must use new multi-edition component");
-assert(purchasedAnalysesPage.includes("groupPurchasedAnalysesByProduct"), "page must call grouping function");
+// Section 5: Purchased-analyses page composes grouping, refresh, and multi-edition rendering.
+assert(purchasedAnalysesPage.includes("PurchasedAnalysesAutoRefresh") && purchasedAnalysesPage.includes("groups={groups}"), "page must pass grouped analyses to the server-refresh wrapper");
 assert(purchasedAnalysesPage.includes("groupPurchasedAnalysesByProduct(summaries)") || purchasedAnalysesPage.includes("groupPurchasedAnalysesByProduct(analyses)"), "grouping must be applied to summaries");
-console.log("5. purchased-analyses page imports and uses multi-edition grouping ✓");
+assert(purchasedAnalysesRefresh.includes("PurchasedAnalysesListMultiEdition") && purchasedAnalysesRefresh.includes("groups={groups}"), "refresh wrapper must render the multi-edition list with the grouped data");
+console.log("5. purchased-analyses page composes grouping, refresh, and multi-edition rendering ✓");
 
 // Section 6: Component receives grouped structure
 assert(purchasedAnalysesListComponent.includes("PurchasedAnalysisProductGroup"), "component must accept grouped product type");

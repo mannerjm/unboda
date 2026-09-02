@@ -39,8 +39,8 @@ console.log("2. free analysis derives birth data from the active verified Profil
 
 assert(resultPage.includes("currentProfileId = searchParams.get(\"profileId\")"), "result must retain active profileId context");
 assert(resultPage.includes("setProfileSelectionProductId(productId)"), "result must use active context without direct profile-less paid navigation");
-assert(!paidPage.includes("ProfileSelector") && !checkoutPage.includes("ProfileSelector"), "paid-analysis and checkout must not expose intermediate profile selectors");
-assert(!paidPage.includes("ProfileTargetControl") && !checkoutPage.includes("ProfileTargetControl"), "paid-analysis and checkout must not expose target-change controls");
+assert(!paidPage.includes("ProfileSelector") && !paidPage.includes("ProfileTargetControl"), "paid-analysis must not expose mid-flow profile switching controls");
+assert(checkoutPage.includes("user && !profileId") && !checkoutPage.includes("getActiveProfile("), "checkout recovery may require an explicit profile selection but must not silently substitute an active profile");
 assert(paidPage.includes("getUserProfile(profileId, user.id)") && checkoutPage.includes("getUserProfile(profileId, user.id)"), "paid-analysis and checkout must preserve server ownership checks");
 console.log("3. result to paid flow preserves active profile context without mid-flow switching ✓");
 

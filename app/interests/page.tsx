@@ -3,9 +3,9 @@ import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import {
-  listUserInterestedAnalyses,
-  getInterestedAnalysisProducts,
+  listUserInterestedAnalysesWithCurrentState,
 } from "@/app/lib/interestedAnalyses/server";
+import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import InterestedAnalysesList from "@/app/components/InterestedAnalysesList";
 
@@ -36,8 +36,13 @@ export default async function InterestedAnalysesPage() {
     );
   }
 
-  const analyses = await listUserInterestedAnalyses(user.id);
-  const productsWithMetadata = getInterestedAnalysisProducts(analyses);
+  const analyses = await listUserInterestedAnalysesWithCurrentState(user.id);
+  const productsWithMetadata = analyses
+    .map(({ record, currentState }) => {
+      const product = getPremiumProduct(record.productId);
+      return product ? { record, product, currentState } : null;
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 
   return (
     <AppShell activeProfileId={activeProfile.id}>

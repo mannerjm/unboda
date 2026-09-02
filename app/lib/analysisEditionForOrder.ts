@@ -1,4 +1,5 @@
 import { getUserProfile } from "./profiles/server";
+import type { ProfileDto } from "./profiles/types";
 import { getSaju } from "./manse";
 import { buildFreeAnalysis } from "./buildFreeAnalysis";
 import { getCanonicalPremiumProductId } from "./premiumProductRegistry";
@@ -18,6 +19,8 @@ export type ResolveAnalysisEditionForOrderInput = {
   profileId: string;
   productId: string;
   anchorDate?: string;
+  /** Trusted server-fetched profile used by batched read-only callers. */
+  profile?: ProfileDto;
 };
 
 export type AnalysisReferenceSnapshot = {
@@ -64,9 +67,9 @@ export async function resolveAnalysisEditionForOrder(
   const policy = getAnalysisEditionPolicy(canonicalProductId);
 
   // Ownership-checked: only the requesting user's own profile is ever read.
-  const profile = await getUserProfile(input.profileId, input.userId);
+  const profile = input.profile ?? await getUserProfile(input.profileId, input.userId);
 
-  if (!profile) {
+  if (!profile || profile.id !== input.profileId) {
     throw new UnresolvableEditionPolicyError(canonicalProductId);
   }
 

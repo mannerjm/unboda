@@ -5,6 +5,10 @@ import {
   getPremiumProduct,
 } from "../premiumProductRegistry";
 import type { PremiumProductDefinition } from "../premiumProductRegistry";
+import { resolveAnalysisEditionForOrder } from "../analysisEditionForOrder";
+import { compareEditionKeys } from "../analysisEditionLabel";
+import { listUserEntitlements } from "../purchases/server";
+import { PAID_ANALYSIS_RESOURCE_TYPE, type EntitlementRecord } from "../purchases/types";
 
 export type InterestedAnalysisRecord = {
   id: string;
@@ -13,6 +17,20 @@ export type InterestedAnalysisRecord = {
   productId: string;
   createdAt: string;
   updatedAt: string;
+};
+
+export type InterestedAnalysisCurrentState = {
+  productId: string;
+  isSaved: true;
+  currentEditionKey: string | null;
+  ownsCurrentEdition: boolean;
+  hasAnyActiveOwnedEdition: boolean;
+  latestOwnedEditionKey: string | null;
+};
+
+export type InterestedAnalysisWithCurrentState = {
+  record: InterestedAnalysisRecord;
+  currentState: InterestedAnalysisCurrentState;
 };
 
 type InterestedAnalysisRow = {
@@ -37,25 +55,16 @@ function toInterestedAnalysisRecord(
   };
 }
 
-/**
- * List all interested analyses for the current active profile of a user.
- * Returns empty array if no active profile exists.
- */
-export async function listUserInterestedAnalyses(
+async function listInterestedAnalysesForProfile(
   userId: string,
+  profileId: string,
 ): Promise<InterestedAnalysisRecord[]> {
   const supabase = createAdminClient();
-
-  const activeProfile = await getActiveProfile(userId);
-  if (!activeProfile) {
-    return [];
-  }
-
   const { data, error } = await supabase
     .from("interested_analyses")
     .select("*")
     .eq("user_id", userId)
-    .eq("profile_id", activeProfile.id)
+    .eq("profile_id", profileId)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -65,6 +74,113 @@ export async function listUserInterestedAnalyses(
   }
 
   return (data ?? []).map(toInterestedAnalysisRecord);
+}
+
+/**
+ * List all interested analyses for the current active profile of a user.
+ * Returns empty array if no active profile exists.
+ */
+export async function listUserInterestedAnalyses(
+  userId: string,
+): Promise<InterestedAnalysisRecord[]> {
+  const activeProfile = await getActiveProfile(userId);
+  if (!activeProfile) {
+    return [];
+  }
+
+  return listInterestedAnalysesForProfile(userId, activeProfile.id);
+}
+
+function latestOwnedEditionKey(
+  entitlements: readonly EntitlementRecord[],
+): string | null {
+  return [...entitlements]
+    .sort((left, right) =>
+      compareEditionKeys(
+        left.analysisEditionKey ?? "LEGACY",
+        right.analysisEditionKey ?? "LEGACY",
+      ) || right.createdAt.localeCompare(left.createdAt) || right.id.localeCompare(left.id),
+    )[0]?.analysisEditionKey ?? null;
+}
+
+export function deriveInterestedAnalysisCurrentState(
+  record: InterestedAnalysisRecord,
+  currentEditionKey: string | null,
+  ownedEntitlements: readonly EntitlementRecord[],
+): InterestedAnalysisCurrentState {
+  return {
+    productId: record.productId,
+    isSaved: true,
+    currentEditionKey,
+    ownsCurrentEdition: currentEditionKey !== null && ownedEntitlements.some(
+      (entitlement) => entitlement.analysisEditionKey === currentEditionKey,
+    ),
+    hasAnyActiveOwnedEdition: ownedEntitlements.length > 0,
+    latestOwnedEditionKey: latestOwnedEditionKey(ownedEntitlements),
+  };
+}
+
+/**
+ * Read-only current-edition display state for the active profile's saved
+ * products. It never writes interest rows or changes the P0 purchase guard.
+ */
+export async function listUserInterestedAnalysesWithCurrentState(
+  userId: string,
+  options: { anchorDate?: string } = {},
+): Promise<InterestedAnalysisWithCurrentState[]> {
+  const activeProfile = await getActiveProfile(userId);
+  if (!activeProfile) {
+    return [];
+  }
+
+  const [records, entitlements] = await Promise.all([
+    listInterestedAnalysesForProfile(userId, activeProfile.id),
+    listUserEntitlements(userId),
+  ]);
+  const activeEntitlementsByProductId = new Map<string, EntitlementRecord[]>();
+
+  for (const entitlement of entitlements) {
+    if (
+      entitlement.profileId !== activeProfile.id ||
+      entitlement.resourceType !== PAID_ANALYSIS_RESOURCE_TYPE
+    ) {
+      continue;
+    }
+
+    const productId = getCanonicalPremiumProductId(entitlement.resourceId);
+    if (!productId) {
+      continue;
+    }
+
+    const productEntitlements = activeEntitlementsByProductId.get(productId) ?? [];
+    productEntitlements.push(entitlement);
+    activeEntitlementsByProductId.set(productId, productEntitlements);
+  }
+
+  return Promise.all(records.map(async (record) => {
+    const productId = getCanonicalPremiumProductId(record.productId);
+    const ownedEntitlements = productId
+      ? activeEntitlementsByProductId.get(productId) ?? []
+      : [];
+    let currentEditionKey: string | null = null;
+
+    if (productId) {
+      try {
+        currentEditionKey = (await resolveAnalysisEditionForOrder({
+          userId,
+          profileId: activeProfile.id,
+          profile: activeProfile,
+          productId,
+          anchorDate: options.anchorDate,
+        })).editionKey;
+      } catch {
+        // An unresolved policy must never make an old entitlement look current.
+        currentEditionKey = null;
+      }
+    }
+
+    return { record, currentState: deriveInterestedAnalysisCurrentState(record, currentEditionKey, ownedEntitlements) };
+  }));
 }
 
 /**

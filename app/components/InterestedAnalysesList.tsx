@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type {
+  InterestedAnalysisCurrentState,
   InterestedAnalysisRecord,
 } from "@/app/lib/interestedAnalyses/server";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
@@ -12,6 +13,7 @@ type InterestedAnalysesListProps = {
   analyses: Array<{
     record: InterestedAnalysisRecord;
     product: PremiumProductDefinition;
+    currentState: InterestedAnalysisCurrentState;
   }>;
   profileId: string;
 };
@@ -58,7 +60,7 @@ export default function InterestedAnalysesList({
 
   return (
     <ul className="mt-8 divide-y divide-stone-200 border-y border-stone-200">
-      {displayAnalyses.map(({ record, product }) => (
+      {displayAnalyses.map(({ record, product, currentState }) => (
         <li
           key={record.id}
           className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between"
@@ -72,8 +74,21 @@ export default function InterestedAnalysesList({
                 {product.description}
               </p>
             )}
+            <p className="mt-2 text-xs font-semibold text-stone-500">
+              {currentState.ownsCurrentEdition
+                ? "현재 분석 보유 중"
+                : "현재 회차 미보유"}
+            </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            {currentState.ownsCurrentEdition ? (
+              <Link
+                href="/purchased-analyses"
+                className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs font-semibold text-stone-700 transition hover:bg-stone-50"
+              >
+                구매한 분석에서 보기
+              </Link>
+            ) : null}
             <button
               onClick={() => handleRemove(record.productId, record.id)}
               disabled={loading === record.productId}

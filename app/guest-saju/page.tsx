@@ -28,6 +28,7 @@ export default function GuestSajuPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [age14OrOlderConfirmed, setAge14OrOlderConfirmed] = useState(false);
   const [hasSavedResult, setHasSavedResult] = useState(false);
   const [savedResultNeedsRetry, setSavedResultNeedsRetry] = useState(false);
 
@@ -55,13 +56,18 @@ export default function GuestSajuPage() {
   }, []);
 
   async function submit() {
+    if (!age14OrOlderConfirmed) {
+      setError("무료 분석을 시작하려면 서비스 이용자가 만 14세 이상임을 확인해 주세요.");
+      document.getElementById("guest-age-confirmation")?.focus();
+      return;
+    }
     setIsSubmitting(true);
     setError(null);
     try {
       const response = await fetch("/api/guest-free-analysis/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
+        body: JSON.stringify({ ...input, age14OrOlderConfirmed: true }),
       });
       const body = await response.json() as { error?: string };
       if (!response.ok) throw new Error(body.error ?? "무료 분석을 시작하지 못했습니다.");
@@ -126,7 +132,22 @@ export default function GuestSajuPage() {
             </label>
           </div>
           {input.calendarType === "음력" ? <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={input.isLeapMonth} onChange={(event) => setInput({ ...input, isLeapMonth: event.target.checked })} /> 윤달</label> : null}
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          <div role="group" aria-labelledby="guest-age-confirmation-label" aria-describedby={error ? "guest-analysis-error" : undefined}>
+            <label htmlFor="guest-age-confirmation" id="guest-age-confirmation-label" className="flex min-h-11 items-center gap-3 text-sm font-semibold text-stone-800">
+              <input
+                id="guest-age-confirmation"
+                name="age14OrOlderConfirmed"
+                type="checkbox"
+                checked={age14OrOlderConfirmed}
+                onChange={(event) => { setAge14OrOlderConfirmed(event.target.checked); if (event.target.checked) setError(null); }}
+                className="h-5 w-5 shrink-0 rounded border-stone-400 accent-stone-900 focus:ring-2 focus:ring-stone-900 focus:ring-offset-2"
+                aria-invalid={Boolean(error && !age14OrOlderConfirmed)}
+              />
+              <span>저는 만 14세 이상입니다.</span>
+            </label>
+            <p className="mt-1 pl-8 text-xs leading-5 text-stone-500">서비스 이용자 기준이며, 분석 대상의 나이와는 다릅니다.</p>
+          </div>
+          {error ? <p id="guest-analysis-error" role="alert" className="text-sm text-red-600">{error}</p> : null}
           <button type="submit" disabled={isSubmitting} className="w-full rounded-xl bg-stone-900 px-5 py-4 font-semibold text-white disabled:bg-stone-400">{isSubmitting ? "무료 분석 중..." : "무료 사주 분석하기"}</button>
         </form>
       </div>

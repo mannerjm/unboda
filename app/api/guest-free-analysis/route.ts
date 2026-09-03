@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { validateGuestProfileInput } from "@/app/lib/guestFreeAnalyses/input";
+import { guestAgeSelfAttestationError, hasGuestAgeSelfAttestation, validateGuestProfileInput } from "@/app/lib/guestFreeAnalyses/input";
 import { getAnalyzeErrorStatus } from "@/app/lib/getAnalyzeErrorStatus";
 import { buildFreeAnalysisResponse } from "@/app/lib/freeAnalysisPipeline/server";
 import {
@@ -54,6 +54,9 @@ export async function POST(request: Request) {
 
   try {
     const body: unknown = await request.json();
+    if (!hasGuestAgeSelfAttestation(body)) {
+      return NextResponse.json(guestAgeSelfAttestationError(), { status: 400 });
+    }
     const validation = validateGuestProfileInput(body);
     if (!validation.valid) return NextResponse.json({ error: validation.error }, { status: 400 });
 

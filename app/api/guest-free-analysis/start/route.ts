@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
-import { validateGuestProfileInput } from "@/app/lib/guestFreeAnalyses/input";
+import { guestAgeSelfAttestationError, hasGuestAgeSelfAttestation, validateGuestProfileInput } from "@/app/lib/guestFreeAnalyses/input";
 import { createGuestAnalysisCredential, encodeGuestAnalysisCredential, guestAnalysisCookieOptions, hashGuestAnalysisSecret, GUEST_ANALYSIS_COOKIE_NAME } from "@/app/lib/guestFreeAnalyses/cookie";
 import { createGuestFreeAnalysis } from "@/app/lib/guestFreeAnalyses/server";
 
 export async function POST(request: Request) {
   try {
     const body: unknown = await request.json();
+    if (!hasGuestAgeSelfAttestation(body)) {
+      return NextResponse.json(guestAgeSelfAttestationError(), { status: 400 });
+    }
     const validation = validateGuestProfileInput(body);
     if (!validation.valid) return NextResponse.json({ error: validation.error }, { status: 400 });
     const seed = crypto.randomUUID();

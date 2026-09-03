@@ -26,9 +26,9 @@ const guestAge = readFileSync("app/lib/guestFreeAnalyses/input.ts", "utf8");
 assert(migration.includes("policy_acceptance_events") && migration.includes("policy_type in ('TERMS', 'AGE_14_PLUS')"), "migration defines only the two V1 policy event types");
 assert(migration.includes("policy_acceptance_events_unique_version") && migration.includes("on conflict (user_id, policy_type, policy_version) do nothing"), "same policy-version acceptance is idempotent");
 assert(migration.includes("enable row level security") && migration.includes("revoke all on public.policy_acceptance_events from anon, authenticated") && migration.includes("grant execute on function public.record_signup_policy_acceptance(uuid, text, text) to service_role"), "evidence writes remain service-role-only");
-assert(config.includes('version: "TERMS_V1"') && config.includes('version: "AGE_14_PLUS_V1"') && config.includes("enforceable: false"), "canonical policy versions are centralized and unpublished");
+assert(config.includes('version: "TERMS_V1"') && config.includes('version: "AGE_14_PLUS_V1"') && config.includes("enforceable: true"), "canonical policy versions are centralized and active");
 assert(repository.includes("record_signup_policy_acceptance") && repository.includes("isSignupPolicyAcceptanceValid") && !repository.includes("p_user_id: input.userId"), "server repository validates policy claims and owns the RPC boundary");
-assert(signupPage.includes("auth.signUp") && !signupPage.includes("termsAccepted") && !signupPage.includes("age14OrOlderConfirmed"), "production signup UX remains intentionally inactive");
+assert(signupPage.includes("/api/auth/signup") && signupPage.includes("termsAccepted") && signupPage.includes("age14OrOlderConfirmed"), "production signup UX requires both policy choices");
 assert(guestAge.includes("GUEST_AGE_SELF_ATTESTATION_REQUIRED"), "Guest 14+ remains a separate request-scoped contract");
 console.log("1. policy config, immutable table, RLS, and inactive UX contracts present ✓");
 

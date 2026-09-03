@@ -12,6 +12,18 @@ function LoginPageContent() {
 
   const returnTo = searchParams.get("returnTo") ?? undefined;
   const safeReturnTo = getSafeReturnTo(returnTo);
+  const origin = searchParams.get("origin");
+  const isGuestResultOrigin = searchParams.get("origin") === "guest-result";
+  const isGuestNavigationOrigin = searchParams.get("origin") === "guest-navigation";
+  const isGuestResultNavigationOrigin = searchParams.get("origin") === "guest-result-navigation";
+  const backHref = isGuestResultOrigin || isGuestResultNavigationOrigin ? "/guest-result" : isGuestNavigationOrigin ? "/guest-saju" : "/result";
+  const guestContextCopy = safeReturnTo === "/recommendations"
+    ? "추천 심층 분석을 확인하려면 로그인해 주세요."
+    : safeReturnTo === "/interests"
+      ? "관심 분석을 저장하고 관리하려면 로그인해 주세요."
+      : safeReturnTo === "/purchased-analyses"
+        ? "구매한 분석을 확인하려면 로그인해 주세요."
+        : "마이페이지를 이용하려면 로그인해 주세요.";
   const urlError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
@@ -50,7 +62,7 @@ function LoginPageContent() {
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
       <div className="mx-auto w-full max-w-xl">
         <Link
-          href="/result"
+          href={backHref}
           className="text-sm font-semibold text-stone-600 transition hover:text-stone-900"
         >
           ← 이전 화면으로 돌아가기
@@ -64,8 +76,10 @@ function LoginPageContent() {
           운보다에 로그인
         </h1>
 
-        <p className="mt-5 text-sm leading-7 text-stone-600">
-          구매한 심층 분석을 보관하고 다시 확인하려면 계정에 로그인해 주세요.
+          <p className="mt-5 text-sm leading-7 text-stone-600">
+          {isGuestResultOrigin || isGuestResultNavigationOrigin || isGuestNavigationOrigin
+            ? guestContextCopy
+            : "구매한 심층 분석을 보관하고 다시 확인하려면 계정에 로그인해 주세요."}
         </p>
 
         <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
@@ -138,7 +152,7 @@ function LoginPageContent() {
             </p>
 
             <Link
-               href={`/auth/signup?returnTo=${encodeURIComponent(safeReturnTo)}`}
+              href={`/auth/signup?returnTo=${encodeURIComponent(safeReturnTo)}${origin ? `&origin=${encodeURIComponent(origin)}` : ""}`}
               className="mt-3 inline-block text-sm font-bold text-stone-900 underline"
             >
               회원가입하기

@@ -1654,22 +1654,33 @@ h3: ({ children }) => {
         <section className="mt-8 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" aria-labelledby="next-analysis-title">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">NEXT ANALYSIS</p>
-            <h2 id="next-analysis-title" className="mt-3 text-2xl font-bold text-stone-900">무료 분석에서 확인한 흐름을 더 깊게 살펴보세요</h2>
-            <p className="mt-3 text-sm leading-7 text-stone-600">무료 분석에서 확인한 현재 흐름을 바탕으로, 지금 먼저 살펴보면 좋은 분석을 추천받거나 원하는 주제를 직접 선택해 더 깊게 볼 수 있어요.</p>
+            <h2 id="next-analysis-title" className="mt-3 text-2xl font-bold text-stone-900">{providedResult ? "더 깊이 보고 싶은 흐름을 살펴보세요" : "무료 분석에서 확인한 흐름을 더 깊게 살펴보세요"}</h2>
+            <p className="mt-3 text-sm leading-7 text-stone-600">{providedResult ? <>현재 분석을 바탕으로 추천된 심층 분석을 확인하거나,<br className="hidden sm:block" /> 원하는 주제를 직접 선택할 수 있어요.</> : "무료 분석에서 확인한 현재 흐름을 바탕으로, 지금 먼저 살펴보면 좋은 분석을 추천받거나 원하는 주제를 직접 선택해 더 깊게 볼 수 있어요."}</p>
           </div>
+          {providedResult ? (
+            <div className="mt-6 border-y border-stone-200 py-5">
+              <p className="text-sm font-semibold text-stone-900">무료 결과는 로그인 없이 계속 확인할 수 있어요.</p>
+              <p className="mt-2 text-sm leading-6 text-stone-600">로그인하면 분석을 저장하고 이어서 관리할 수 있습니다.</p>
+            </div>
+          ) : null}
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
-            <Link href={`/recommendations?profileId=${currentProfileId}`} className="rounded-xl bg-stone-900 px-5 py-4 text-center text-sm font-semibold text-white transition hover:bg-stone-800">
+            <Link href={providedResult ? "/auth/login?returnTo=/recommendations&origin=guest-result" : `/recommendations?profileId=${currentProfileId}`} className="rounded-xl bg-stone-900 px-5 py-4 text-center text-sm font-semibold text-white transition hover:bg-stone-800">
               나에게 추천된 심층 분석 보기
             </Link>
             <Link href={`/deep-analysis?profileId=${currentProfileId}`} className="rounded-xl border border-stone-300 bg-white px-5 py-4 text-center text-sm font-semibold text-stone-700 transition hover:bg-stone-50">
               원하는 심층 분석 직접 찾기
             </Link>
           </div>
+          {providedResult ? (
+            <Link href="/auth/login?returnTo=/recommendations&origin=guest-result" className="mt-3 block text-center text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-900">
+              로그인 / 회원가입
+            </Link>
+          ) : null}
         </section>
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
           <button
             type="button"
-            onClick={() => router.push("/saju")}
+            onClick={() => router.push(providedResult ? "/guest-saju" : "/saju")}
             className="rounded-2xl border border-stone-300 bg-white px-5 py-4 font-semibold transition hover:bg-stone-50"
           >
             다시 분석하기

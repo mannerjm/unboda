@@ -218,6 +218,7 @@ const paidEligibilityLabels: Record<AccountStatus["account"]["paidEligibilitySta
 
 export default function MyPage() {
   const router = useRouter();
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [profiles, setProfiles] = useState<ProfileDto[]>([]);
   const [isProfilesLoaded, setIsProfilesLoaded] = useState(false);
   const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
@@ -239,6 +240,18 @@ export default function MyPage() {
   const confirmedActiveProfileIdRef = useRef<string | null>(null);
   const pendingActiveProfileIdRef = useRef<string | null>(null);
   const isPersistingActiveProfileRef = useRef(false);
+
+  useEffect(() => {
+    void fetch("/api/account/status")
+      .then((response) => {
+        if (!response.ok) {
+          router.replace("/auth/login?returnTo=/mypage&origin=guest-navigation");
+          return;
+        }
+        setIsAuthChecked(true);
+      })
+      .catch(() => router.replace("/auth/login?returnTo=/mypage&origin=guest-navigation"));
+  }, [router]);
 
   useEffect(() => {
     void Promise.all([fetch("/api/profiles"), fetch("/api/profiles/active")])
@@ -500,6 +513,10 @@ export default function MyPage() {
     } finally {
       setIsSubmittingForm(false);
     }
+  }
+
+  if (!isAuthChecked) {
+    return <main className="flex min-h-screen items-center justify-center bg-[#fbfbfa] px-6 text-center text-sm text-stone-600">로그인 상태를 확인하고 있습니다.</main>;
   }
 
   return (

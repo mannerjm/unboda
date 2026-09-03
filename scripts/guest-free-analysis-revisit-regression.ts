@@ -101,6 +101,10 @@ assert(
     && countMatches(guestResult, START_ENDPOINT) === 0,
   "guest-result must stay a read-only revisit page",
 );
+assert(
+  resultPage.includes('router.push(providedResult ? "/guest-saju" : "/saju")'),
+  "Guest result re-analysis must use /guest-saju while member result keeps /saju",
+);
 
 // the read endpoint contract the probe relies on
 assert(

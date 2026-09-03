@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Suspense } from "react";
 import type { ReactNode } from "react";
 
@@ -68,13 +69,41 @@ function isActivePath(pathname: string, href: string): boolean {
 function AppShellContent({ children, activeProfileId }: { children: ReactNode; activeProfileId?: string | null }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isGuest, setIsGuest] = useState<boolean | null>(null);
+  const [hasGuestResult, setHasGuestResult] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/account/status")
+      .then((response) => {
+        if (!cancelled) setIsGuest(!response.ok);
+        return response.ok ? null : fetch("/api/guest-free-analysis");
+      })
+      .then((response) => {
+        if (!cancelled && response) setHasGuestResult(response.ok);
+      })
+      .catch(() => {
+        if (!cancelled) { setIsGuest(true); setHasGuestResult(false); }
+      });
+    return () => { cancelled = true; };
+  }, []);
   const profileId = searchParams.get("profileId") || activeProfileId || null;
-  const recommendationHref = profileId ? `/recommendations?profileId=${encodeURIComponent(profileId)}` : "/mypage";
+  const guestContext = isGuest === true && hasGuestResult;
+  const guestOrigin = guestContext ? "guest-result-navigation" : "guest-navigation";
+  const recommendationHref = isGuest !== false
+    ? `/auth/login?returnTo=/recommendations${guestContext ? "&origin=guest-result-navigation" : "&origin=guest-navigation"}`
+    : profileId ? `/recommendations?profileId=${encodeURIComponent(profileId)}` : "/mypage";
   const deepAnalysisHref = profileId ? `/deep-analysis?profileId=${encodeURIComponent(profileId)}` : "/deep-analysis";
+  const navigationHref = (item: NavItem): string => {
+    if (isGuest === false) return item.href === "/recommendations" ? recommendationHref : item.href === "/deep-analysis" ? deepAnalysisHref : item.href;
+    if (item.href === "/saju") return hasGuestResult ? "/guest-result" : "/guest-saju";
+    if (item.href === "/recommendations") return recommendationHref;
+    if (item.href === "/deep-analysis") return "/deep-analysis";
+    return `/auth/login?returnTo=${encodeURIComponent(item.href)}&origin=${guestOrigin}`;
+  };
   const navigationItems = (items: NavItem[]) => items.map((item) => ({
     ...item,
     activeHref: item.href,
-    href: item.href === "/recommendations" ? recommendationHref : item.href === "/deep-analysis" ? deepAnalysisHref : item.href,
+    href: navigationHref(item),
   }));
   const resolvedAnalysisNavItems = navigationItems(analysisNavItems);
   const resolvedMobileNavItems = navigationItems(mobileNavItems);
@@ -85,7 +114,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
         <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 shrink-0 border-r border-stone-200 bg-[#f8f6f1] px-4 py-6 lg:flex lg:flex-col">
           <div className="mb-10">
             <Link href="/" className="text-xl font-bold tracking-tight text-stone-900">운보다</Link>
-            <p className="mt-2 text-[11px] leading-5 text-stone-500">대한민국 1등 AI 명리 플랫폼</p>
+            <p className="mt-2 text-[11px] leading-5 text-stone-500">AI 명리 분석 플랫폼</p>
           </div>
 
           <nav aria-label="메인 네비게이션">
@@ -104,7 +133,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                       : "text-stone-600 hover:bg-white/70 hover:text-stone-900"
                   }`}
                 >
-                  <NavIcon icon={item.icon} /><span>{item.label}</span>
+                  <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/deep-analysis" ? <LockIcon /> : null}<span>{item.label}</span>
                 </Link>
               );
             })}
@@ -124,7 +153,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                         : "text-stone-600 hover:bg-white/70 hover:text-stone-900"
                     }`}
                   >
-                    <NavIcon icon={item.icon} /><span>{item.label}</span>
+                    <NavIcon icon={item.icon} />{isGuest ? <LockIcon /> : null}<span>{item.label}</span>
                   </Link>
                 );
               })}
@@ -140,15 +169,6 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
         </aside>
 
         <div className="min-w-0 flex-1 lg:pl-60">
-          <header className="hidden h-16 items-center justify-between border-b border-stone-200 bg-white px-8 lg:flex">
-            <div className="flex h-9 w-72 items-center rounded-lg border border-stone-200 bg-stone-50 px-3 text-xs text-stone-400">
-              <span className="mr-2 text-stone-500">⌕</span> 원하는 분석을 찾아보세요
-            </div>
-            <div className="flex items-center gap-3 text-sm text-stone-600">
-              <span className="h-2 w-2 rounded-full bg-[#cbb88e]" aria-hidden="true" />
-              현재 분석 서비스
-            </div>
-          </header>
           <header className="flex h-14 items-center justify-between border-b border-stone-200 bg-white px-5 lg:hidden">
             <Link href="/" className="text-lg font-bold tracking-tight text-stone-900">운보다</Link>
             <span className="text-xs font-medium text-stone-500">명리 분석</span>
@@ -178,7 +198,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                     : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
                 }`}
               >
-                    <NavIcon icon={item.icon} /><span>{item.shortLabel ?? item.label}</span>
+                    <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/deep-analysis" ? <LockIcon /> : null}<span>{item.shortLabel ?? item.label}</span>
               </Link>
             );
           })}
@@ -194,4 +214,8 @@ export default function AppShell({ children, activeProfileId }: { children: Reac
       <AppShellContent activeProfileId={activeProfileId}>{children}</AppShellContent>
     </Suspense>
   );
+}
+
+function LockIcon() {
+  return <svg aria-hidden="true" className="h-3 w-3 shrink-0 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>;
 }

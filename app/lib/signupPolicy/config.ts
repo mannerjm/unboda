@@ -17,12 +17,12 @@ export const SIGNUP_POLICIES: Readonly<Record<SignupPolicyType, SignupPolicyDefi
   TERMS: {
     type: SIGNUP_POLICY_TYPES.TERMS,
     version: "TERMS_V1",
-    enforceable: false,
+    enforceable: true,
   },
   AGE_14_PLUS: {
     type: SIGNUP_POLICY_TYPES.AGE_14_PLUS,
     version: "AGE_14_PLUS_V1",
-    enforceable: false,
+    enforceable: true,
   },
 };
 

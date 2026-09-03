@@ -49,17 +49,17 @@ assert(
 );
 console.log("2. Demo-user removed from login; Supabase signInWithPassword used ✓");
 
-// --- 3. Signup page calls supabase.auth.signUp ---
+// --- 3. Signup page uses the server-owned signup boundary ---
 const signupTs = readFileSync(join(process.cwd(), "app/auth/signup/page.tsx"), "utf-8");
 assert(
-  signupTs.includes("signUp"),
-  "signup page must call supabase.auth.signUp",
+  signupTs.includes("/api/auth/signup") && !signupTs.includes("createClient"),
+  "signup page must use the server-owned signup boundary",
 );
 assert(
-  signupTs.includes("emailRedirectTo"),
-  "signup must set emailRedirectTo for confirmation flow",
+  signupTs.includes("termsAccepted") && signupTs.includes("age14OrOlderConfirmed"),
+  "signup must submit both required policy choices",
 );
-console.log("3. Signup calls supabase.auth.signUp with emailRedirectTo ✓");
+console.log("3. Signup uses server-owned policy activation boundary ✓");
 
 // --- 4. Auth callback route exists ---
 const callbackTs = readFileSync(join(process.cwd(), "app/auth/callback/route.ts"), "utf-8");

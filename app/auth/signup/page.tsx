@@ -1,24 +1,44 @@
 "use client";
-import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getSafeReturnTo } from "@/app/lib/auth";
-import { createClient } from "@/app/lib/supabase/client";
+import { getSignupCompletionState } from "@/app/lib/signupPolicy/completion";
 import Link from "next/link";
 import { Suspense } from "react";
 
 function SignupPageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const returnTo = searchParams.get("returnTo") ?? undefined;
   const safeReturnTo = getSafeReturnTo(returnTo);
+  const origin = searchParams.get("origin");
+  const isGuestOrigin = origin === "guest-result" || origin === "guest-result-navigation" || origin === "guest-navigation";
+  const initialError = searchParams.get("error") === "policy_incomplete"
+    ? "가입 정책 확인이 완료되지 않았습니다. 두 항목을 다시 확인해 주세요."
+    : null;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(initialError);
   const [isConfirmationSent, setIsConfirmationSent] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [age14OrOlderConfirmed, setAge14OrOlderConfirmed] = useState(false);
+  const ageRef = useRef<HTMLInputElement>(null);
+  const termsRef = useRef<HTMLInputElement>(null);
 
   async function handleSignup() {
+    if (!age14OrOlderConfirmed) {
+      setErrorMessage("서비스 이용자가 만 14세 이상임을 확인해 주세요.");
+      ageRef.current?.focus();
+      return;
+    }
+    if (!termsAccepted) {
+      setErrorMessage("이용약관에 동의해 주세요.");
+      termsRef.current?.focus();
+      return;
+    }
     if (!email || !password) {
       setErrorMessage("이메일과 비밀번호를 입력해 주세요.");
       return;
@@ -35,24 +55,36 @@ function SignupPageContent() {
     setIsLoading(true);
     setErrorMessage(null);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        // After email confirmation, redirect back to checkout or result
-        emailRedirectTo: `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(safeReturnTo)}`,
-      },
+    const response = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, termsAccepted, age14OrOlderConfirmed, returnTo: safeReturnTo }),
     });
+    const body = await response.json() as { error?: string; policyComplete?: boolean; emailVerified?: boolean };
 
     setIsLoading(false);
 
-    if (error) {
-      setErrorMessage(error.message);
+    if (!response.ok) {
+      setErrorMessage(body.error ?? "가입을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.");
       return;
     }
 
-    // Supabase sends a confirmation email; show the confirmation state
+    const completionState = getSignupCompletionState({
+      policyComplete: body.policyComplete === true,
+      emailVerified: body.emailVerified === true,
+    });
+
+    if (completionState === "SIGNUP_COMPLETE") {
+      router.push(safeReturnTo);
+      router.refresh();
+      return;
+    }
+
+    if (completionState === "POLICY_RECOVERY_REQUIRED") {
+      setErrorMessage("이메일 인증은 완료되었지만 가입 확인이 끝나지 않았습니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+
     setIsConfirmationSent(true);
   }
 
@@ -80,7 +112,7 @@ function SignupPageContent() {
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
       <div className="mx-auto w-full max-w-xl">
         <Link
-          href="/result"
+          href={origin === "guest-result" || origin === "guest-result-navigation" ? "/guest-result" : origin === "guest-navigation" ? "/guest-saju" : "/result"}
           className="text-sm font-semibold text-stone-600 transition hover:text-stone-900"
         >
           ← 이전 화면으로 돌아가기
@@ -149,8 +181,32 @@ function SignupPageContent() {
               />
             </div>
 
+            <fieldset className="space-y-4 border-t border-stone-200 pt-6">
+              <legend className="text-sm font-semibold text-stone-900">가입 확인</legend>
+              <label className="flex items-start gap-3 text-sm leading-6 text-stone-700">
+                <input
+                  ref={ageRef}
+                  type="checkbox"
+                  checked={age14OrOlderConfirmed}
+                  onChange={(e) => setAge14OrOlderConfirmed(e.target.checked)}
+                  className="mt-1 h-5 w-5 shrink-0 accent-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+                />
+                <span>저는 만 14세 이상입니다.</span>
+              </label>
+              <label className="flex items-start gap-3 text-sm leading-6 text-stone-700">
+                <input
+                  ref={termsRef}
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-1 h-5 w-5 shrink-0 accent-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+                />
+                <span><Link href="/terms" className="font-semibold text-stone-900 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900">이용약관</Link>에 동의합니다.</span>
+              </label>
+            </fieldset>
+
             {errorMessage && (
-              <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+              <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                 {errorMessage}
               </p>
             )}
@@ -170,7 +226,7 @@ function SignupPageContent() {
             </p>
 
             <Link
-              href={`/auth/login?returnTo=${encodeURIComponent(safeReturnTo)}`}
+              href={`/auth/login?returnTo=${encodeURIComponent(safeReturnTo)}${isGuestOrigin ? `&origin=${encodeURIComponent(origin)}` : ""}`}
               className="mt-3 inline-block text-sm font-bold text-stone-900 underline"
             >
               로그인하기

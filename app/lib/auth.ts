@@ -40,7 +40,29 @@ export function getSafeReturnTo(
   returnTo: string | undefined,
   fallback = "/result"
 ): string {
-  return returnTo?.startsWith("/") ? returnTo : fallback;
+  if (typeof returnTo !== "string" || !returnTo) return fallback;
+
+  let normalized = returnTo;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const decoded = decodeURIComponent(normalized);
+      if (decoded === normalized) break;
+      normalized = decoded;
+    } catch {
+      return fallback;
+    }
+  }
+
+  if (!normalized.startsWith("/") || normalized.startsWith("//") || normalized.includes("\\") || /[\u0000-\u001f\u007f]/.test(normalized)) {
+    return fallback;
+  }
+
+  try {
+    const resolved = new URL(normalized, "https://internal.invalid");
+    return resolved.origin === "https://internal.invalid" ? normalized : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 // ---------------------------------------------------------------------------

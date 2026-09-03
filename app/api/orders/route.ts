@@ -36,9 +36,16 @@ export async function POST(request: Request) {
   const requestBody = body as {
     productId?: unknown;
     profileId?: unknown;
+    immediateGenerationAcknowledged?: unknown;
   } | null;
   const rawProductId = requestBody?.productId;
   const rawProfileId = requestBody?.profileId;
+  if (requestBody?.immediateGenerationAcknowledged !== true) {
+    return NextResponse.json(
+      { error: "개인화 분석 생성 안내 확인이 필요합니다.", code: "IMMEDIATE_GENERATION_ACKNOWLEDGEMENT_REQUIRED" },
+      { status: 400 },
+    );
+  }
   const resolved = resolveLaunchPurchasableProduct(rawProductId);
 
   if (!resolved.ok) {

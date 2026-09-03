@@ -1,7 +1,6 @@
 "use client";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getAuthUserAccessLevel,
   guestAuthState,
@@ -31,21 +30,29 @@ declare global {
 type CheckoutAccessPanelProps = {
   productId: string;
   profileId?: string;
+  productTitle: string;
+  profileLabel?: string;
+  priceLabel: string;
+  editionLabel?: string;
 };
 
 export default function CheckoutAccessPanel({
   productId,
   profileId,
+  productTitle,
+  profileLabel,
+  priceLabel,
+  editionLabel,
 }: CheckoutAccessPanelProps) {
   const [authState, setAuthState] =
     useState<AuthState>(guestAuthState);
 
   const [isPaying, setIsPaying] = useState(false);
+  const [immediateGenerationAcknowledged, setImmediateGenerationAcknowledged] = useState(false);
+  const acknowledgementRef = useRef<HTMLInputElement>(null);
 
   const [errorMessage, setErrorMessage] =
     useState<string | null>(null);
-
-const router = useRouter();
 
   useEffect(() => {
     const supabase = createClient();
@@ -74,6 +81,12 @@ const router = useRouter();
       return;
     }
 
+    if (!immediateGenerationAcknowledged) {
+      setErrorMessage("개인화 분석 생성 안내를 확인해 주세요.");
+      acknowledgementRef.current?.focus();
+      return;
+    }
+
     setIsPaying(true);
     setErrorMessage(null);
 
@@ -82,7 +95,11 @@ const router = useRouter();
       const orderResponse = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: canonicalProductId, profileId }),
+        body: JSON.stringify({
+          productId: canonicalProductId,
+          profileId,
+          immediateGenerationAcknowledged: true,
+        }),
       });
 
       if (!orderResponse.ok) {
@@ -175,14 +192,57 @@ const router = useRouter();
           </p>
 
           {profileId ? (
-            <button
-              type="button"
-              onClick={handlePayment}
-              disabled={isPaying}
-              className="mt-7 w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
-            >
-              {isPaying ? "결제 처리 중..." : "결제 계속하기"}
-            </button>
+            <>
+              <div className="mt-7 border-t border-stone-200 pt-6" aria-labelledby="checkout-notice-title">
+                <h3 id="checkout-notice-title" className="text-base font-bold text-stone-900">
+                  결제 및 분석 생성 안내
+                </h3>
+                <dl className="mt-4 space-y-2 text-sm leading-6 text-stone-700">
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-stone-500">상품</dt>
+                    <dd className="text-right font-semibold">{productTitle}</dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-stone-500">분석 대상</dt>
+                    <dd className="text-right font-semibold">{profileLabel ?? "-"}</dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-stone-500">결제 금액</dt>
+                    <dd className="text-right font-semibold">{priceLabel}</dd>
+                  </div>
+                  {editionLabel ? (
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-stone-500">분석 기준</dt>
+                      <dd className="text-right font-semibold">{editionLabel}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+                <p className="mt-5 text-sm font-semibold leading-6 text-stone-900">
+                  결제가 승인되면 선택한 프로필의 개인화 분석 생성이 즉시 시작됩니다.
+                </p>
+                <p className="mt-2 text-sm leading-6 text-stone-600">
+                  환불·취소·청약철회에 관한 자세한 내용은 정책에서 확인할 수 있습니다. <Link href="/refund" className="font-semibold text-stone-900 underline underline-offset-4">환불·취소·청약철회 정책 확인</Link>
+                </p>
+                <label className="mt-5 flex items-start gap-3 text-sm leading-6 text-stone-700">
+                  <input
+                    ref={acknowledgementRef}
+                    type="checkbox"
+                    checked={immediateGenerationAcknowledged}
+                    onChange={(event) => setImmediateGenerationAcknowledged(event.target.checked)}
+                    className="mt-1 h-5 w-5 shrink-0 accent-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+                  />
+                  <span>결제 승인 후 개인화 분석 생성이 즉시 시작된다는 내용을 확인했습니다.</span>
+                </label>
+              </div>
+              <button
+                type="button"
+                onClick={handlePayment}
+                disabled={isPaying || !immediateGenerationAcknowledged}
+                className="mt-7 w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
+              >
+                {isPaying ? "결제 처리 중..." : "결제 계속하기"}
+              </button>
+            </>
           ) : null}
 
           {errorMessage ? (

@@ -9,6 +9,9 @@ import {
   getPremiumProduct,
 } from "@/app/lib/premiumProductRegistry";
 import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
+import { resolveAnalysisEditionForOrder } from "@/app/lib/analysisEditionForOrder";
+import { formatAnalysisEditionLabel } from "@/app/lib/analysisEditionLabel";
+import { getProductPricing } from "@/app/lib/productPricing";
 import Script from "next/script";
 
 type CheckoutPageProps = {
@@ -43,7 +46,6 @@ const resolved = resolveLaunchPurchasableProduct(productId);
 const canonicalProductId = resolved.ok ? resolved.productId : null;
 const product = canonicalProductId ? getPremiumProduct(canonicalProductId) : undefined;
 
-
   if (!product) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6">
@@ -62,6 +64,19 @@ const product = canonicalProductId ? getPremiumProduct(canonicalProductId) : und
       </main>
     );
   }
+
+  const pricing = getProductPricing(product.id);
+  const edition = user && profile
+    ? await resolveAnalysisEditionForOrder({
+        userId: user.id,
+        profileId: profile.id,
+        productId: product.id,
+        profile,
+      })
+    : null;
+  const checkoutEditionLabel = edition
+    ? formatAnalysisEditionLabel(edition.editionKey, edition.referenceSnapshot).replace(/ 분석$/, "")
+    : undefined;
 
   return (
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
@@ -92,7 +107,14 @@ const product = canonicalProductId ? getPremiumProduct(canonicalProductId) : und
            <p className="mt-2 font-semibold text-stone-900">{profile.label}</p>
          </div>
        ) : null}
-      <CheckoutAccessPanel productId={product.id} profileId={profileId} />
+      <CheckoutAccessPanel
+        productId={product.id}
+        profileId={profileId}
+        productTitle={product.title}
+        profileLabel={profile?.label}
+        priceLabel={`${pricing?.amount.toLocaleString("ko-KR")}원`}
+        editionLabel={checkoutEditionLabel}
+      />
       {user && !profileId ? (
         <ProfileSelector productId={product.id} destination="checkout" />
       ) : null}

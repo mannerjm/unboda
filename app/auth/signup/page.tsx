@@ -10,7 +10,7 @@ function SignupPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const returnTo = searchParams.get("returnTo") ?? undefined;
-  const safeReturnTo = getSafeReturnTo(returnTo);
+  const safeReturnTo = getSafeReturnTo(returnTo, "/saju");
   const origin = searchParams.get("origin");
   const isGuestOrigin = origin === "guest-result" || origin === "guest-result-navigation" || origin === "guest-navigation";
   const initialError = searchParams.get("error") === "policy_incomplete"

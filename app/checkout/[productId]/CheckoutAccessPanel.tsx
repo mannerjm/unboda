@@ -91,6 +91,12 @@ export default function CheckoutAccessPanel({
       return;
     }
 
+    const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
+    if (!isCheckoutCompatibleTossClientKey(clientKey) || !window.TossPayments) {
+      setErrorMessage("결제 기능이 아직 준비되지 않았습니다.");
+      return;
+    }
+
     setIsPaying(true);
     setErrorMessage(null);
 
@@ -116,11 +122,6 @@ export default function CheckoutAccessPanel({
       const { order } = (await orderResponse.json()) as {
         order: { id: string; amount: number };
       };
-
-      const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
-      if (!isCheckoutCompatibleTossClientKey(clientKey) || !window.TossPayments) {
-        throw new Error("Toss 결제 설정을 불러오지 못했습니다.");
-      }
 
       const toss = window.TossPayments(clientKey);
       await toss.payment({ customerKey: authState.user.id }).requestPayment({

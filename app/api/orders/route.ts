@@ -11,6 +11,7 @@ import {
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { emitPaymentEvent } from "@/app/lib/payments/observability";
+import { getTossConfig } from "@/app/lib/toss/config";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -79,6 +80,15 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "프로필을 찾을 수 없습니다." },
       { status: 404 },
+    );
+  }
+
+  try {
+    getTossConfig();
+  } catch {
+    return NextResponse.json(
+      { error: "결제 기능이 아직 준비되지 않았습니다.", code: "PAYMENT_PROVIDER_NOT_READY" },
+      { status: 503 },
     );
   }
 

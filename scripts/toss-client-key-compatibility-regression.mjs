@@ -7,6 +7,9 @@ const confirmation = await readFile("app/api/orders/[orderId]/confirm-payment/ro
 const orders = await readFile("app/api/orders/route.ts", "utf8");
 
 const keyPattern = /\^\(\?:test\|live\)_ck_\[A-Za-z0-9_-\]\+\$/;
+const clientGuardIndex = checkout.indexOf("isCheckoutCompatibleTossClientKey(clientKey)");
+const orderApiIndex = checkout.indexOf('fetch("/api/orders"');
+assert.ok(clientGuardIndex >= 0 && clientGuardIndex < orderApiIndex, "client readiness guard precedes order API call");
 assert.match(checkout, keyPattern, "client accepts test and live Toss client-key formats");
 assert.match(checkout, /typeof clientKey === "string"/);
 assert.match(checkout, /!isCheckoutCompatibleTossClientKey\(clientKey\)/);
@@ -23,5 +26,10 @@ assert.match(confirmation, /provider\.orderId !== order\.id/);
 assert.match(confirmation, /order\.amount !== resolved\.amount/);
 assert.match(orders, /paymentProvider: "toss"/);
 assert.match(orders, /amount comes from the server-side pricing source/);
+const serverReadinessIndex = orders.indexOf("getTossConfig();");
+const pendingOrderIndex = orders.indexOf("const order = await createPendingOrder");
+assert.ok(serverReadinessIndex >= 0 && serverReadinessIndex < pendingOrderIndex, "server readiness precedes pending-order creation");
+assert.match(orders, /PAYMENT_PROVIDER_NOT_READY/);
+assert.match(orders, /status: 503/);
 
 console.log("Toss client-key compatibility regression: PASS");

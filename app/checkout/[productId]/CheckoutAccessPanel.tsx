@@ -36,6 +36,10 @@ type CheckoutAccessPanelProps = {
   editionLabel?: string;
 };
 
+function isCheckoutCompatibleTossClientKey(clientKey: string | undefined): clientKey is string {
+  return typeof clientKey === "string" && /^(?:test|live)_ck_[A-Za-z0-9_-]+$/.test(clientKey);
+}
+
 export default function CheckoutAccessPanel({
   productId,
   profileId,
@@ -114,8 +118,8 @@ export default function CheckoutAccessPanel({
       };
 
       const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
-      if (!clientKey?.startsWith("test_ck_") || !window.TossPayments) {
-        throw new Error("Toss 테스트 결제 설정을 불러오지 못했습니다.");
+      if (!isCheckoutCompatibleTossClientKey(clientKey) || !window.TossPayments) {
+        throw new Error("Toss 결제 설정을 불러오지 못했습니다.");
       }
 
       const toss = window.TossPayments(clientKey);

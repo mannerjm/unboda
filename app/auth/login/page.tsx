@@ -16,7 +16,8 @@ function LoginPageContent() {
   const isGuestResultOrigin = searchParams.get("origin") === "guest-result";
   const isGuestNavigationOrigin = searchParams.get("origin") === "guest-navigation";
   const isGuestResultNavigationOrigin = searchParams.get("origin") === "guest-result-navigation";
-  const backHref = isGuestResultOrigin || isGuestResultNavigationOrigin ? "/guest-result" : isGuestNavigationOrigin ? "/guest-saju" : "/result";
+  // Back link is a distinct navigation target from the post-login redirect: it must never dead-end on /result.
+  const backHref = isGuestResultOrigin || isGuestResultNavigationOrigin ? "/guest-result" : isGuestNavigationOrigin ? "/guest-saju" : getSafeReturnTo(returnTo, "/");
   const guestContextCopy = safeReturnTo === "/recommendations"
     ? "추천 심층 분석을 확인하려면 로그인해 주세요."
     : safeReturnTo === "/interests"

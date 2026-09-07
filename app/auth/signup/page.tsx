@@ -13,6 +13,8 @@ function SignupPageContent() {
   const safeReturnTo = getSafeReturnTo(returnTo, "/saju");
   const origin = searchParams.get("origin");
   const isGuestOrigin = origin === "guest-result" || origin === "guest-result-navigation" || origin === "guest-navigation";
+  // Back link is a distinct navigation target from the post-signup redirect: it must never dead-end on /result.
+  const backHref = origin === "guest-result" || origin === "guest-result-navigation" ? "/guest-result" : origin === "guest-navigation" ? "/guest-saju" : getSafeReturnTo(returnTo, "/");
   const initialError = searchParams.get("error") === "policy_incomplete"
     ? "가입 정책 확인이 완료되지 않았습니다. 두 항목을 다시 확인해 주세요."
     : null;
@@ -112,7 +114,7 @@ function SignupPageContent() {
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
       <div className="mx-auto w-full max-w-xl">
         <Link
-          href={origin === "guest-result" || origin === "guest-result-navigation" ? "/guest-result" : origin === "guest-navigation" ? "/guest-saju" : "/result"}
+          href={backHref}
           className="text-sm font-semibold text-stone-600 transition hover:text-stone-900"
         >
           ← 이전 화면으로 돌아가기

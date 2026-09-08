@@ -4,7 +4,7 @@ import {
   AI_CONSULTING_MAX_QUESTION_CHARS,
   AI_CONSULTING_TARGET_ANSWER_CHARS,
   assertSameConsultingBoundary,
-  canConsumeAiConsultingQuestion,
+  canReserveAiConsultingQuestion,
   isAiConsultingMemoryUsableAsUserFact,
   shouldChargeAiConsultingQuestion,
 } from "../app/lib/aiConsultingDataModel";
@@ -14,6 +14,7 @@ const activeGrant = {
   status: "active" as const,
   questionLimit: 5,
   questionsUsed: 0,
+  questionsReserved: 0,
   expiresAt: null,
 };
 
@@ -24,19 +25,29 @@ assert.deepEqual(AI_CONSULTING_CONTEXT_LIMITS, {
   longTermMemories: 8,
 });
 
-assert.equal(canConsumeAiConsultingQuestion(activeGrant, now), true);
+assert.equal(canReserveAiConsultingQuestion(activeGrant, now), true);
 assert.equal(
-  canConsumeAiConsultingQuestion({ ...activeGrant, questionsUsed: 5 }, now),
+  canReserveAiConsultingQuestion({ ...activeGrant, questionsUsed: 5 }, now),
   false,
-  "exhausted grants must not consume another question",
+  "fully used grants must not reserve another question",
 );
 assert.equal(
-  canConsumeAiConsultingQuestion({ ...activeGrant, status: "revoked" }, now),
+  canReserveAiConsultingQuestion({ ...activeGrant, questionsReserved: 5 }, now),
+  false,
+  "fully reserved grants must not reserve another question",
+);
+assert.equal(
+  canReserveAiConsultingQuestion({ ...activeGrant, questionsUsed: 3, questionsReserved: 2 }, now),
+  false,
+  "used plus reserved capacity must never exceed the grant limit",
+);
+assert.equal(
+  canReserveAiConsultingQuestion({ ...activeGrant, status: "revoked" }, now),
   false,
   "revoked grants must be blocked",
 );
 assert.equal(
-  canConsumeAiConsultingQuestion(
+  canReserveAiConsultingQuestion(
     { ...activeGrant, expiresAt: "2026-09-08T05:59:59.000Z" },
     now,
   ),
@@ -49,8 +60,7 @@ for (const scopeDecision of ["CLARIFY", "DENY", "SAFETY_REDIRECT"] as const) {
     shouldChargeAiConsultingQuestion({
       scopeDecision,
       answerCompleted: true,
-      grant: activeGrant,
-      now,
+      hasActiveReservation: true,
     }),
     false,
     `${scopeDecision} must never consume a paid question`,
@@ -61,8 +71,7 @@ assert.equal(
   shouldChargeAiConsultingQuestion({
     scopeDecision: "ALLOW",
     answerCompleted: false,
-    grant: activeGrant,
-    now,
+    hasActiveReservation: true,
   }),
   false,
   "failed or incomplete AI responses must not consume a paid question",
@@ -71,11 +80,19 @@ assert.equal(
   shouldChargeAiConsultingQuestion({
     scopeDecision: "ALLOW",
     answerCompleted: true,
-    grant: activeGrant,
-    now,
+    hasActiveReservation: false,
+  }),
+  false,
+  "a completed answer without an active reservation must never consume a paid question",
+);
+assert.equal(
+  shouldChargeAiConsultingQuestion({
+    scopeDecision: "ALLOW",
+    answerCompleted: true,
+    hasActiveReservation: true,
   }),
   true,
-  "only completed ALLOW responses may consume a paid question",
+  "only completed ALLOW responses with an active reservation may consume a paid question",
 );
 
 assert.equal(

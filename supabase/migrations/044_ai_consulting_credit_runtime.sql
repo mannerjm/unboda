@@ -198,6 +198,7 @@ declare
   v_expires_at timestamptz;
   v_balance integer;
   v_reserved integer;
+  v_existing_found boolean := false;
 begin
   if p_request_id is null then
     raise exception 'AI_CONSULTING_REQUEST_ID_REQUIRED';
@@ -272,6 +273,7 @@ begin
     and request_id = p_request_id
     and role = 'user'
   for update;
+  v_existing_found := found;
 
   select coalesce(sum(quantity), 0)::integer into v_balance
   from public.ai_consulting_credit_ledger
@@ -289,7 +291,7 @@ begin
     and m.reservation_released_at is null
     and m.reservation_expires_at > now();
 
-  if found then
+  if v_existing_found then
     if v_existing.content <> p_content
       or v_existing.scope_decision <> p_scope_decision
       or v_existing.scope_reason_code is distinct from p_scope_reason_code then

@@ -25,18 +25,19 @@ assert(!migration.toLowerCase().includes("drop table") && !migration.toLowerCase
 
 assert(sessionService.includes("getActiveEntitlementForProfileEdition"), "session must verify exact-edition paid entitlement");
 assert(sessionService.includes('report.status !== "completed"'), "session must require a completed paid report");
-assert(sessionService.includes('.from("ai_consulting_grants")'), "session must require an existing consulting grant");
+assert(sessionService.includes("getAiConsultingCreditBalance"), "session must read the shared profile credit balance");
+assert(sessionService.includes("ensureAiConsultingAccessGrant"), "session must create only an access binding after credit and entitlement checks");
 assert(sessionService.includes("get_or_create_ai_consulting_thread"), "session service must use atomic thread RPC");
 
 assert(sessionRoute.includes("getCurrentUser"), "session API must authenticate first");
 assert(sessionRoute.includes("getActiveProfile"), "session API must enforce the active profile boundary");
-assert(sessionRoute.includes('initial.state !== "ready"'), "session API must not create a thread without a ready grant");
-assert(questionRoute.includes("answerAiConsultingQuestion"), "question API must use the grounded Phase 8 pipeline");
+assert(sessionRoute.includes('initial.state !== "ready"'), "session API must not create a thread without a ready credit-backed state");
+assert(questionRoute.includes("answerAiConsultingQuestion"), "question API must use the grounded answer pipeline");
 assert(questionRoute.includes("crypto") === false, "server question API must never generate hidden retries on behalf of the browser");
 assert(questionRoute.includes("300"), "question API must enforce the 300-char cap");
 
-assert(entryCard.includes('session.state === "grant_required"') && entryCard.includes("return null"), "report CTA must stay hidden until a real consulting grant exists");
-assert(reportPage.includes("AiConsultingEntryCard"), "paid report page must wire the grant-gated entry card");
+assert(entryCard.includes('session.state === "credit_required"') && entryCard.includes("return null"), "report CTA must stay hidden when no credit and no prior thread exists");
+assert(reportPage.includes("AiConsultingEntryCard"), "paid report page must wire the credit-gated entry card");
 assert(chatClient.includes("crypto.randomUUID()"), "each browser submission must get an idempotency request id");
 assert(chatClient.includes("scopeDecision") && chatClient.includes("차감되지 않았습니다"), "non-chargeable scope outcomes must be visible without pretending they are answers");
 assert(chatClient.includes("whitespace-pre-wrap"), "assistant answers must render as text rather than injected HTML");

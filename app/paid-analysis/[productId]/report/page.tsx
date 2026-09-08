@@ -1,7 +1,9 @@
 import PaidAnalysisDetailV2Client from "../PaidAnalysisDetailV2Client";
 import Link from "next/link";
 import ReportAccessGate from "./ReportAccessGate";
+import AiConsultingEntryCard from "./AiConsultingEntryCard";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
+
 type PaidAnalysisReportPageProps = {
   params: Promise<{
     productId: string;
@@ -9,15 +11,13 @@ type PaidAnalysisReportPageProps = {
   searchParams: Promise<{ profileId?: string; edition?: string }>;
 };
 
-
 export default async function PaidAnalysisReportPage({
   params,
   searchParams,
 }: PaidAnalysisReportPageProps) {
   const { productId } = await params;
   const { profileId, edition } = await searchParams;
-
-const product = getPremiumProduct(productId);
+  const product = getPremiumProduct(productId);
 
   if (!product) {
     return (
@@ -39,10 +39,11 @@ const product = getPremiumProduct(productId);
   }
 
   return (
-      <main className="min-h-screen bg-[#f7f3ea] text-stone-900">
-    <ReportAccessGate productId={productId} profileId={profileId} edition={edition}>
-      <PaidAnalysisDetailV2Client productId={productId} profileId={profileId} edition={edition} />
-    </ReportAccessGate>
-  </main>
-);
+    <main className="min-h-screen bg-[#f7f3ea] text-stone-900">
+      <ReportAccessGate productId={productId} profileId={profileId} edition={edition}>
+        <PaidAnalysisDetailV2Client productId={productId} profileId={profileId} edition={edition} />
+        <AiConsultingEntryCard productId={productId} profileId={profileId} edition={edition} />
+      </ReportAccessGate>
+    </main>
+  );
 }

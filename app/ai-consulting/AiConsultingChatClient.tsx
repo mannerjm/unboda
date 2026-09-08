@@ -84,7 +84,7 @@ export default function AiConsultingChatClient({
   }, [loadSession]);
 
   const messages = useMemo(() => {
-    if (!session || session.state === "report_required" || session.state === "grant_required") return [];
+    if (!session || !("messages" in session)) return [];
     return session.messages;
   }, [session]);
 

@@ -52,6 +52,7 @@ export interface AiConsultingGrant {
   analysisEditionKey: string;
   questionLimit: number;
   questionsUsed: number;
+  questionsReserved: number;
   status: AiConsultingGrantStatus;
   expiresAt: string | null;
   revokedAt: string | null;
@@ -60,10 +61,6 @@ export interface AiConsultingGrant {
   updatedAt: string;
 }
 
-/**
- * A thread cannot float between profiles or products. If the user starts a
- * consultation from another profile/product/edition, a new thread is required.
- */
 export interface AiConsultingThread {
   id: string;
   userId: string;
@@ -78,8 +75,9 @@ export interface AiConsultingThread {
 }
 
 /**
- * scopeDecision is persisted as an audit snapshot. Only a successfully
- * answered user message with ALLOW may consume one paid question.
+ * ALLOW user messages reserve one slot before the model call. The reservation
+ * becomes charged only when the assistant answer is persisted successfully.
+ * A failed model call releases the reservation without incrementing used count.
  */
 export interface AiConsultingMessage {
   id: string;
@@ -91,17 +89,17 @@ export interface AiConsultingMessage {
   scopeDecision: AiConsultingScopeDecision | null;
   scopeReasonCode: string | null;
   charged: boolean;
+  requestId: string | null;
+  replyToMessageId: string | null;
+  reservationToken: string | null;
+  reservationExpiresAt: string | null;
+  reservationReleasedAt: string | null;
   model: string | null;
   inputTokens: number | null;
   outputTokens: number | null;
   createdAt: string;
 }
 
-/**
- * Long-term memory is profile-scoped and provenance-tagged. USER_STATED items
- * may be treated as user-provided facts. ANALYSIS_DERIVED and SYSTEM_SUMMARY
- * items must never be silently promoted to objective facts.
- */
 export interface AiConsultingMemory {
   id: string;
   userId: string;
@@ -117,17 +115,18 @@ export interface AiConsultingMemory {
   updatedAt: string;
 }
 
-export function canConsumeAiConsultingQuestion(
+export function canReserveAiConsultingQuestion(
   grant: Pick<
     AiConsultingGrant,
-    "status" | "questionLimit" | "questionsUsed" | "expiresAt"
+    "status" | "questionLimit" | "questionsUsed" | "questionsReserved" | "expiresAt"
   >,
   now: Date = new Date(),
 ): boolean {
   if (grant.status !== "active") return false;
   if (!Number.isInteger(grant.questionLimit) || grant.questionLimit <= 0) return false;
   if (!Number.isInteger(grant.questionsUsed) || grant.questionsUsed < 0) return false;
-  if (grant.questionsUsed >= grant.questionLimit) return false;
+  if (!Number.isInteger(grant.questionsReserved) || grant.questionsReserved < 0) return false;
+  if (grant.questionsUsed + grant.questionsReserved >= grant.questionLimit) return false;
 
   if (grant.expiresAt) {
     const expiresAt = new Date(grant.expiresAt);
@@ -142,16 +141,12 @@ export function canConsumeAiConsultingQuestion(
 export function shouldChargeAiConsultingQuestion(input: {
   scopeDecision: AiConsultingScopeDecision;
   answerCompleted: boolean;
-  grant: Pick<
-    AiConsultingGrant,
-    "status" | "questionLimit" | "questionsUsed" | "expiresAt"
-  >;
-  now?: Date;
+  hasActiveReservation: boolean;
 }): boolean {
   return (
     input.scopeDecision === "ALLOW" &&
     input.answerCompleted &&
-    canConsumeAiConsultingQuestion(input.grant, input.now)
+    input.hasActiveReservation
   );
 }
 

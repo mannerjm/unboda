@@ -36,20 +36,26 @@ export type AiConsultingMemoryStatus = "active" | "superseded" | "deleted";
 
 /**
  * A paid question grant is always scoped to exactly one authenticated user,
- * one profile, and one purchased/entitled analysis edition. A memory does not
- * create permission; this grant is the commercial permission boundary.
+ * one profile, one paid source purchase, and one purchased/entitled analysis
+ * edition. A memory does not create permission; this grant is the commercial
+ * permission boundary.
  */
 export interface AiConsultingGrant {
   id: string;
   userId: string;
   profileId: string;
+  sourcePurchaseId: string;
+  sourceProductId: string;
   baseEntitlementId: string;
   baseProductId: string;
+  baseResourceType: "paid_analysis";
   analysisEditionKey: string;
   questionLimit: number;
   questionsUsed: number;
   status: AiConsultingGrantStatus;
   expiresAt: string | null;
+  revokedAt: string | null;
+  revocationReason: string | null;
   createdAt: string;
   updatedAt: string;
 }

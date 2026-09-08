@@ -15,15 +15,49 @@ export default function SajuPage() {
   const [validationMessage, setValidationMessage] = useState("");
 
   useEffect(() => {
-    void fetch("/api/profiles/active")
-      .then(async (response) => {
-        if (!response.ok) throw new Error();
-        const body = await response.json() as { profile?: ProfileDto | null };
-        setActiveProfile(body.profile ?? null);
-      })
-      .catch(() => setValidationMessage("활성 프로필을 불러오지 못했습니다."))
-      .finally(() => setIsLoading(false));
-  }, []);
+    let cancelled = false;
+
+    const loadActiveProfile = async () => {
+      try {
+        const activeResponse = await fetch("/api/profiles/active");
+        if (!activeResponse.ok) throw new Error();
+
+        const body = await activeResponse.json() as { profile?: ProfileDto | null };
+        const profile = body.profile ?? null;
+
+        if (cancelled) return;
+        setActiveProfile(profile);
+
+        if (!profile) return;
+
+        const analysisResponse = await fetch(`/api/free-analysis/${profile.id}`);
+        if (!analysisResponse.ok) return;
+
+        const analysisBody = await analysisResponse.json() as { analysis?: AnalyzeSuccessResponse };
+        if (analysisBody.analysis?.profile.id !== profile.id || cancelled) return;
+
+        sessionStorage.setItem(
+          `freeAnalysisResult:${profile.id}`,
+          JSON.stringify(analysisBody.analysis),
+        );
+        router.replace(`/result?profileId=${profile.id}`);
+      } catch {
+        if (!cancelled) {
+          setValidationMessage("활성 프로필을 불러오지 못했습니다.");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadActiveProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   const startAnalysis = async () => {
     if (!activeProfile) {
@@ -70,8 +104,8 @@ export default function SajuPage() {
           <h1 className="text-4xl font-bold text-stone-900 sm:text-5xl">사주 조회</h1>
 
           <div className="mt-8 space-y-5">
-            {isLoading ? <p className="text-sm text-stone-600">활성 분석 대상을 불러오는 중입니다.</p> : null}
-            {activeProfile ? (
+            {isLoading ? <p className="text-sm text-stone-600">저장된 분석 결과를 확인하는 중입니다.</p> : null}
+            {activeProfile && !isLoading ? (
               <div className="rounded-2xl border border-stone-200 bg-stone-50 p-5 text-sm leading-7 text-stone-700">
                 <p className="font-semibold text-stone-900">활성 분석 대상: {activeProfile.label}</p>
                 <p>{activeProfile.birthDate} · {activeProfile.birthTime} · {activeProfile.gender} · {activeProfile.calendarType}</p>

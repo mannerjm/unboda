@@ -40,7 +40,7 @@ export default function AiConsultingEntryCard({
 
   // The add-on is intentionally invisible until a real consulting grant exists.
   // Payment/grant issuance is a later commercial phase; no dead CTA is exposed.
-  if (!profileId || !edition || !session || session.state === "grant_required" || session.state === "report_required") {
+  if (!profileId || !edition || !session || !("questionsRemaining" in session)) {
     return null;
   }
 

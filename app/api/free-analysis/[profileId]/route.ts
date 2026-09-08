@@ -8,10 +8,30 @@ import {
 import { isProfileId } from "@/app/lib/profiles/types";
 import { createEvaluationContext } from "@/app/lib/evaluationContext";
 import { hasCurrentEvaluationPeriod } from "@/app/lib/freeAnalysisResults/server";
+import type { AnalyzeSuccessResponse } from "@/app/lib/analyzeApiTypes";
+import type { ProfileDto } from "@/app/lib/profiles/types";
 
 type RouteContext = {
   params: Promise<{ profileId: string }>;
 };
+
+function withCurrentProfile(
+  analysis: AnalyzeSuccessResponse,
+  profile: ProfileDto,
+): AnalyzeSuccessResponse {
+  return {
+    ...analysis,
+    profile: {
+      id: profile.id,
+      label: profile.label,
+      birthDate: profile.birthDate,
+      birthTime: profile.birthTime,
+      gender: profile.gender,
+      calendarType: profile.calendarType,
+      isLeapMonth: profile.isLeapMonth,
+    },
+  };
+}
 
 export async function GET(_request: Request, context: RouteContext) {
   const user = await getCurrentUser();
@@ -36,27 +56,28 @@ export async function GET(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "저장된 무료 분석 결과가 없습니다." }, { status: 404 });
     }
 
+    const analysis = withCurrentProfile(cached.content, profile);
     const currentContext = createEvaluationContext();
-    if (!hasCurrentEvaluationPeriod(cached.content, currentContext)) {
+    if (!hasCurrentEvaluationPeriod(analysis, currentContext)) {
       return NextResponse.json({
-        analysis: cached.content,
+        analysis,
         status: cached.status === "generating" ? "generating" : "stale",
         freshness: "STALE",
-        storedEvaluationContext: cached.content.saju.evaluationContext ?? null,
+        storedEvaluationContext: analysis.saju.evaluationContext ?? null,
         currentEvaluationContext: currentContext,
         refreshAvailable: cached.status !== "generating",
       }, { status: 200 });
     }
 
     if (cached.status === "generating") {
-      return NextResponse.json({ analysis: cached.content, status: "generating", freshness: "CURRENT", refreshAvailable: false }, { status: 200 });
+      return NextResponse.json({ analysis, status: "generating", freshness: "CURRENT", refreshAvailable: false }, { status: 200 });
     }
 
     if (cached.status !== "completed") {
-      return NextResponse.json({ analysis: cached.content, status: cached.status, freshness: "CURRENT", refreshAvailable: true }, { status: 200 });
+      return NextResponse.json({ analysis, status: cached.status, freshness: "CURRENT", refreshAvailable: true }, { status: 200 });
     }
 
-    return NextResponse.json({ analysis: cached.content });
+    return NextResponse.json({ analysis });
   } catch (error) {
     console.error("[free-analysis-results] get failed", error);
     return NextResponse.json({ error: "무료 분석 결과를 불러오지 못했습니다." }, { status: 500 });

@@ -96,6 +96,16 @@ export default function SajuPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <AppShell activeProfileId={activeProfile?.id}>
+        <main className="min-h-screen bg-[#f7f3ea]">
+          <p className="sr-only" aria-live="polite">저장된 분석 결과를 확인하는 중입니다.</p>
+        </main>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell activeProfileId={activeProfile?.id}>
       <main className="flex min-h-screen flex-col items-center justify-center bg-[#f7f3ea] px-6 py-12">
@@ -104,8 +114,7 @@ export default function SajuPage() {
           <h1 className="text-4xl font-bold text-stone-900 sm:text-5xl">사주 조회</h1>
 
           <div className="mt-8 space-y-5">
-            {isLoading ? <p className="text-sm text-stone-600">저장된 분석 결과를 확인하는 중입니다.</p> : null}
-            {activeProfile && !isLoading ? (
+            {activeProfile ? (
               <div className="rounded-2xl border border-stone-200 bg-stone-50 p-5 text-sm leading-7 text-stone-700">
                 <p className="font-semibold text-stone-900">활성 분석 대상: {activeProfile.label}</p>
                 <p>{activeProfile.birthDate} · {activeProfile.birthTime} · {activeProfile.gender} · {activeProfile.calendarType}</p>
@@ -115,7 +124,7 @@ export default function SajuPage() {
 
             <button
               onClick={() => void startAnalysis()}
-              disabled={!activeProfile || isLoading || isStarting}
+              disabled={!activeProfile || isStarting}
               className="block w-full rounded-2xl bg-stone-900 p-4 text-center text-base font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
             >
               {isStarting ? "분석 결과를 확인하는 중..." : "운보다 AI로 분석하기"}

@@ -51,6 +51,10 @@ const mobileNavItems: NavItem[] = [
 ];
 
 function isActivePath(pathname: string, href: string): boolean {
+  if (href === "/saju" && pathname.startsWith("/result")) {
+    return true;
+  }
+
   if (href === "/purchased-analyses" && pathname.startsWith("/paid-analysis/")) {
     return true;
   }
@@ -71,6 +75,8 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
   const searchParams = useSearchParams();
   const [isGuest, setIsGuest] = useState<boolean | null>(null);
   const [hasGuestResult, setHasGuestResult] = useState(false);
+  const [memberSajuHref, setMemberSajuHref] = useState("/saju");
+
   useEffect(() => {
     let cancelled = false;
     void fetch("/api/account/status")
@@ -86,7 +92,33 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
       });
     return () => { cancelled = true; };
   }, []);
+
   const profileId = searchParams.get("profileId") || activeProfileId || null;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (isGuest !== false || !profileId) {
+      setMemberSajuHref("/saju");
+      return () => { cancelled = true; };
+    }
+
+    void fetch(`/api/free-analysis/${encodeURIComponent(profileId)}`)
+      .then((response) => {
+        if (cancelled) return;
+        setMemberSajuHref(
+          response.ok
+            ? `/result?profileId=${encodeURIComponent(profileId)}`
+            : "/saju",
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setMemberSajuHref("/saju");
+      });
+
+    return () => { cancelled = true; };
+  }, [isGuest, profileId]);
+
   const guestContext = isGuest === true && hasGuestResult;
   const guestOrigin = guestContext ? "guest-result-navigation" : "guest-navigation";
   const recommendationHref = isGuest !== false
@@ -94,7 +126,12 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
     : profileId ? `/recommendations?profileId=${encodeURIComponent(profileId)}` : "/mypage";
   const deepAnalysisHref = profileId ? `/deep-analysis?profileId=${encodeURIComponent(profileId)}` : "/deep-analysis";
   const navigationHref = (item: NavItem): string => {
-    if (isGuest === false) return item.href === "/recommendations" ? recommendationHref : item.href === "/deep-analysis" ? deepAnalysisHref : item.href;
+    if (isGuest === false) {
+      if (item.href === "/saju") return memberSajuHref;
+      if (item.href === "/recommendations") return recommendationHref;
+      if (item.href === "/deep-analysis") return deepAnalysisHref;
+      return item.href;
+    }
     if (item.href === "/saju") return hasGuestResult ? "/guest-result" : "/guest-saju";
     if (item.href === "/recommendations") return recommendationHref;
     if (item.href === "/deep-analysis") return "/deep-analysis";

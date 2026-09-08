@@ -10,40 +10,24 @@
 --   also pinned to exactly one owned paid-analysis entitlement edition.
 -- Memory is profile-scoped for long-term continuity, but never creates access.
 
--- ---------------------------------------------------------------------------
--- Supporting immutable boundary indexes for composite foreign keys.
--- ---------------------------------------------------------------------------
 create unique index if not exists purchases_ai_consulting_source_boundary_uidx
   on public.purchases (id, user_id, profile_id, product_id);
 
 create unique index if not exists entitlements_ai_consulting_base_boundary_uidx
   on public.entitlements (
-    id,
-    user_id,
-    profile_id,
-    resource_id,
-    resource_type,
-    analysis_edition_key
+    id, user_id, profile_id, resource_id, resource_type, analysis_edition_key
   );
 
--- ---------------------------------------------------------------------------
--- Paid consultation grants.
--- One paid source purchase may issue at most one grant. Multiple purchases may
--- fund additional grants for the same base analysis edition.
--- ---------------------------------------------------------------------------
 create table if not exists public.ai_consulting_grants (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
   profile_id uuid not null references public.profiles (id) on delete cascade,
-
   source_purchase_id uuid not null,
   source_product_id text not null,
-
   base_entitlement_id uuid not null,
   base_product_id text not null,
   base_resource_type text not null default 'paid_analysis',
   analysis_edition_key text not null,
-
   question_limit integer not null,
   questions_used integer not null default 0,
   status text not null default 'active',
@@ -76,28 +60,18 @@ create table if not exists public.ai_consulting_grants (
       (status = 'revoked' and revoked_at is not null)
       or (status <> 'revoked' and revoked_at is null)
     ),
-  constraint ai_consulting_grants_source_purchase_unique
-    unique (source_purchase_id),
+  constraint ai_consulting_grants_source_purchase_unique unique (source_purchase_id),
   constraint ai_consulting_grants_source_purchase_boundary_fkey
     foreign key (source_purchase_id, user_id, profile_id, source_product_id)
     references public.purchases (id, user_id, profile_id, product_id)
     on delete cascade,
   constraint ai_consulting_grants_base_entitlement_boundary_fkey
     foreign key (
-      base_entitlement_id,
-      user_id,
-      profile_id,
-      base_product_id,
-      base_resource_type,
-      analysis_edition_key
+      base_entitlement_id, user_id, profile_id, base_product_id,
+      base_resource_type, analysis_edition_key
     )
     references public.entitlements (
-      id,
-      user_id,
-      profile_id,
-      resource_id,
-      resource_type,
-      analysis_edition_key
+      id, user_id, profile_id, resource_id, resource_type, analysis_edition_key
     )
     on delete cascade,
   constraint ai_consulting_grants_boundary_unique
@@ -106,20 +80,11 @@ create table if not exists public.ai_consulting_grants (
 
 create index if not exists ai_consulting_grants_user_profile_idx
   on public.ai_consulting_grants (user_id, profile_id, status);
-
 create index if not exists ai_consulting_grants_base_analysis_idx
   on public.ai_consulting_grants (
-    user_id,
-    profile_id,
-    base_product_id,
-    analysis_edition_key,
-    status
+    user_id, profile_id, base_product_id, analysis_edition_key, status
   );
 
--- ---------------------------------------------------------------------------
--- Consultation threads.
--- A thread is hard-pinned to the same user/profile/product/edition as its grant.
--- ---------------------------------------------------------------------------
 create table if not exists public.ai_consulting_threads (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
@@ -139,11 +104,7 @@ create table if not exists public.ai_consulting_threads (
   constraint ai_consulting_threads_grant_boundary_fkey
     foreign key (grant_id, user_id, profile_id, base_product_id, analysis_edition_key)
     references public.ai_consulting_grants (
-      id,
-      user_id,
-      profile_id,
-      base_product_id,
-      analysis_edition_key
+      id, user_id, profile_id, base_product_id, analysis_edition_key
     )
     on delete cascade,
   constraint ai_consulting_threads_owner_boundary_unique
@@ -152,16 +113,9 @@ create table if not exists public.ai_consulting_threads (
 
 create index if not exists ai_consulting_threads_user_profile_idx
   on public.ai_consulting_threads (user_id, profile_id, updated_at desc);
-
 create index if not exists ai_consulting_threads_grant_idx
   on public.ai_consulting_threads (grant_id, status, updated_at desc);
 
--- ---------------------------------------------------------------------------
--- Messages.
--- scope_decision is an immutable audit snapshot of the pre-LLM scope gate.
--- A charged message must be a user question that was ALLOWed. Actual question
--- consumption will later be performed by one atomic server-side transaction.
--- ---------------------------------------------------------------------------
 create table if not exists public.ai_consulting_messages (
   id uuid primary key default gen_random_uuid(),
   thread_id uuid not null,
@@ -217,17 +171,9 @@ create table if not exists public.ai_consulting_messages (
 
 create index if not exists ai_consulting_messages_thread_created_idx
   on public.ai_consulting_messages (thread_id, created_at, id);
-
 create index if not exists ai_consulting_messages_user_profile_recent_idx
   on public.ai_consulting_messages (user_id, profile_id, created_at desc);
 
--- ---------------------------------------------------------------------------
--- Long-term profile memory.
--- Memory intentionally has NO grant FK: it can survive across paid consulting
--- purchases for the same profile. It still cannot create permission to answer.
--- Provenance is mandatory so AI-derived interpretation is never silently
--- promoted to a user-stated fact.
--- ---------------------------------------------------------------------------
 create table if not exists public.ai_consulting_memories (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
@@ -245,12 +191,8 @@ create table if not exists public.ai_consulting_memories (
   constraint ai_consulting_memories_kind_valid
     check (
       kind in (
-        'user_fact',
-        'life_event',
-        'goal',
-        'preference',
-        'consultation_summary',
-        'analysis_interpretation'
+        'user_fact', 'life_event', 'goal', 'preference',
+        'consultation_summary', 'analysis_interpretation'
       )
     ),
   constraint ai_consulting_memories_provenance_valid
@@ -280,13 +222,9 @@ create table if not exists public.ai_consulting_memories (
 create index if not exists ai_consulting_memories_user_profile_active_idx
   on public.ai_consulting_memories (user_id, profile_id, updated_at desc)
   where status = 'active';
-
 create index if not exists ai_consulting_memories_tags_gin_idx
   on public.ai_consulting_memories using gin (tags);
 
--- ---------------------------------------------------------------------------
--- updated_at maintenance with explicit search_path.
--- ---------------------------------------------------------------------------
 create or replace function public.set_ai_consulting_updated_at()
 returns trigger
 language plpgsql
@@ -300,30 +238,21 @@ $$;
 
 revoke all on function public.set_ai_consulting_updated_at() from public, anon, authenticated;
 
-for_grants: begin
-  drop trigger if exists ai_consulting_grants_set_updated_at on public.ai_consulting_grants;
-  create trigger ai_consulting_grants_set_updated_at
-    before update on public.ai_consulting_grants
-    for each row execute function public.set_ai_consulting_updated_at();
-end for_grants;
+drop trigger if exists ai_consulting_grants_set_updated_at on public.ai_consulting_grants;
+create trigger ai_consulting_grants_set_updated_at
+  before update on public.ai_consulting_grants
+  for each row execute function public.set_ai_consulting_updated_at();
 
-for_threads: begin
-  drop trigger if exists ai_consulting_threads_set_updated_at on public.ai_consulting_threads;
-  create trigger ai_consulting_threads_set_updated_at
-    before update on public.ai_consulting_threads
-    for each row execute function public.set_ai_consulting_updated_at();
-end for_threads;
+drop trigger if exists ai_consulting_threads_set_updated_at on public.ai_consulting_threads;
+create trigger ai_consulting_threads_set_updated_at
+  before update on public.ai_consulting_threads
+  for each row execute function public.set_ai_consulting_updated_at();
 
-for_memories: begin
-  drop trigger if exists ai_consulting_memories_set_updated_at on public.ai_consulting_memories;
-  create trigger ai_consulting_memories_set_updated_at
-    before update on public.ai_consulting_memories
-    for each row execute function public.set_ai_consulting_updated_at();
-end for_memories;
+drop trigger if exists ai_consulting_memories_set_updated_at on public.ai_consulting_memories;
+create trigger ai_consulting_memories_set_updated_at
+  before update on public.ai_consulting_memories
+  for each row execute function public.set_ai_consulting_updated_at();
 
--- ---------------------------------------------------------------------------
--- RLS: read-own only for authenticated clients; writes are server-only.
--- ---------------------------------------------------------------------------
 alter table public.ai_consulting_grants enable row level security;
 alter table public.ai_consulting_threads enable row level security;
 alter table public.ai_consulting_messages enable row level security;
@@ -369,13 +298,9 @@ grant select, insert, update, delete on public.ai_consulting_threads to service_
 grant select, insert, update, delete on public.ai_consulting_messages to service_role;
 grant select, insert, update, delete on public.ai_consulting_memories to service_role;
 
--- ---------------------------------------------------------------------------
--- Account-closure personal-data cleanup extension.
--- Consultation text, titles and long-term memories are personal data and must
--- not survive the existing DB scrub boundary. Commercial grant metadata is
--- revoked here and remains only until the later Auth-user cascade removes it.
--- Existing financial checks and public function signature are unchanged.
--- ---------------------------------------------------------------------------
+-- Account-closure extension: delete consultation text/title/memory before profile
+-- anonymization, revoke commercial grant metadata, preserve existing financial
+-- blocker checks and the public function signature.
 create or replace function public.execute_account_closure_db_cleanup(p_user_id uuid)
 returns public.account_lifecycles
 language plpgsql
@@ -419,7 +344,6 @@ begin
   delete from public.ai_consulting_memories
   where user_id = p_user_id;
 
-  -- Deleting threads cascades all consultation messages.
   delete from public.ai_consulting_threads
   where user_id = p_user_id;
 

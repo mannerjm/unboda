@@ -50,11 +50,23 @@ export default function GuestResultPage() {
       <ResultViewerContext.Provider value={{ analysis, onProductSelected: (productId) => void selectProduct(productId), onRetryMainAnalysis: retryMainAnalysis }}>
         <ResultPageContent />
       </ResultViewerContext.Provider>
+
+      {!intentSaved ? <main className="bg-[#f7f3ea] px-5 pb-14 text-stone-900"><div className="mx-auto w-full max-w-3xl"><section className="rounded-3xl border border-stone-300 bg-white p-6 shadow-sm">
+        <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">SAVE YOUR RESULT</p>
+        <h2 className="mt-2 text-xl font-bold">방금 조회한 사주 정보를 내 프로필로 저장하시겠어요?</h2>
+        <p className="mt-3 text-sm leading-7 text-stone-600">로그인하거나 회원가입하면 지금 확인한 출생 정보와 무료 분석 결과를 계정에 연결해 마이페이지에서 다시 볼 수 있습니다.</p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <Link href="/auth/login?returnTo=/auth/complete-guest-analysis&origin=guest-result" className="rounded-xl bg-stone-900 px-5 py-4 text-center font-semibold text-white">로그인하고 저장하기</Link>
+          <Link href="/auth/signup?returnTo=/auth/complete-guest-analysis&origin=guest-result" className="rounded-xl border border-stone-300 px-5 py-4 text-center font-semibold">회원가입하고 저장하기</Link>
+        </div>
+        <p className="mt-4 text-xs leading-5 text-stone-500">지금 저장하지 않아도 무료 결과는 현재 화면에서 계속 확인할 수 있습니다.</p>
+      </section></div></main> : null}
+
       {intentSaved && selectedProductId ? <main className="bg-[#f7f3ea] px-5 pb-14 text-stone-900"><div className="mx-auto w-full max-w-3xl"><section className="rounded-3xl border border-stone-300 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-bold">심층 분석을 보려면 로그인 또는 회원가입이 필요합니다.</h2>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <Link href="/auth/login?returnTo=/auth/complete-guest-analysis" className="rounded-xl bg-stone-900 px-5 py-4 text-center font-semibold text-white">기존 회원 로그인</Link>
-            <Link href="/auth/signup?returnTo=/auth/complete-guest-analysis" className="rounded-xl border border-stone-300 px-5 py-4 text-center font-semibold">회원가입</Link>
+            <Link href="/auth/login?returnTo=/auth/complete-guest-analysis&origin=guest-result" className="rounded-xl bg-stone-900 px-5 py-4 text-center font-semibold text-white">기존 회원 로그인</Link>
+            <Link href="/auth/signup?returnTo=/auth/complete-guest-analysis&origin=guest-result" className="rounded-xl border border-stone-300 px-5 py-4 text-center font-semibold">회원가입</Link>
           </div>
         </section></div></main> : null}
       {error ? <p className="fixed bottom-5 left-1/2 -translate-x-1/2 rounded-xl bg-white px-4 py-3 text-sm text-red-600 shadow">{error}</p> : null}

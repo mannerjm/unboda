@@ -27,7 +27,7 @@ function ForgotPasswordContent() {
   return (
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
       <div className="mx-auto w-full max-w-xl">
-        <Link href="/auth/login" className="text-sm font-semibold text-stone-600">로그인으로 돌아가기</Link>
+        <Link href={`/auth/login?returnTo=${encodeURIComponent(returnTo)}`} className="text-sm font-semibold text-stone-600">← 로그인으로 돌아가기</Link>
         <h1 className="mt-10 text-3xl font-bold">비밀번호 재설정</h1>
         <p className="mt-4 text-sm leading-7 text-stone-600">가입할 때 사용한 이메일을 입력해 주세요.</p>
         <section className="mt-8 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">

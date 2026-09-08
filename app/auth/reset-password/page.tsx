@@ -15,6 +15,7 @@ function ResetPasswordContent() {
   const [ready, setReady] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     const client = createClient();
@@ -29,21 +30,30 @@ function ResetPasswordContent() {
     if (password.length < 8) { setMessage("비밀번호는 8자 이상이어야 합니다."); return; }
     if (password !== confirmation) { setMessage("비밀번호가 일치하지 않습니다."); return; }
     setIsLoading(true); setMessage(null);
-    const { error } = await createClient().auth.updateUser({ password });
+    const client = createClient();
+    const { error } = await client.auth.updateUser({ password });
+    if (error) {
+      setIsLoading(false);
+      setMessage("재설정 링크가 만료되었거나 유효하지 않습니다.");
+      return;
+    }
+    await client.auth.signOut({ scope: "global" });
     setIsLoading(false);
-    if (error) { setMessage("재설정 링크가 만료되었거나 유효하지 않습니다."); return; }
-    await createClient().auth.signOut({ scope: "global" });
-    router.replace(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
+    setIsComplete(true);
   }
 
   return (
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
       <div className="mx-auto w-full max-w-xl">
-        <Link href="/auth/login" className="text-sm font-semibold text-stone-600">로그인으로 돌아가기</Link>
-        <h1 className="mt-10 text-3xl font-bold">새 비밀번호 설정</h1>
-        <p className="mt-4 text-sm leading-7 text-stone-600">새 비밀번호를 입력하면 모든 기기에서 다시 로그인해야 합니다.</p>
+        {!isComplete ? <Link href={`/auth/login?returnTo=${encodeURIComponent(returnTo)}`} className="text-sm font-semibold text-stone-600">← 로그인으로 돌아가기</Link> : null}
+        <h1 className="mt-10 text-3xl font-bold">{isComplete ? "비밀번호 변경 완료" : "새 비밀번호 설정"}</h1>
+        <p className="mt-4 text-sm leading-7 text-stone-600">
+          {isComplete ? "비밀번호가 안전하게 변경되었습니다. 새 비밀번호로 다시 로그인해 주세요." : "새 비밀번호를 입력하면 모든 기기에서 다시 로그인해야 합니다."}
+        </p>
         <section className="mt-8 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          {!ready ? <p className="text-sm leading-6 text-stone-600">재설정 링크를 확인하고 있습니다. 링크를 다시 요청해 주세요.</p> : (
+          {isComplete ? (
+            <button type="button" onClick={() => router.replace(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`)} className="w-full rounded-xl bg-stone-900 px-5 py-3 font-semibold text-white">새 비밀번호로 로그인하기</button>
+          ) : !ready ? <p className="text-sm leading-6 text-stone-600">재설정 링크를 확인하고 있습니다. 링크를 다시 요청해 주세요.</p> : (
             <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void updatePassword(); }}>
               <label className="block text-sm font-semibold" htmlFor="password">새 비밀번호
                 <input id="password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 font-normal outline-none focus:border-stone-900" required />

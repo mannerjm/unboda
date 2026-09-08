@@ -65,9 +65,7 @@ export type AiConsultingAnswerResult =
       answer: string;
       userMessageId: string;
       assistantMessageId: string;
-      questionsUsed: number;
       questionsRemaining: number;
-      grantStatus: "active" | "exhausted" | "revoked" | "expired";
       model: string;
     };
 
@@ -115,16 +113,17 @@ async function loadThreadBoundary(input: {
     .maybeSingle<GrantRow>();
 
   if (grantError || !grant) {
-    throw new Error(grantError?.message ?? "AI_CONSULTING_GRANT_NOT_FOUND");
+    throw new Error(grantError?.message ?? "AI_CONSULTING_ACCESS_GRANT_NOT_FOUND");
   }
 
   if (
     grant.user_id !== input.userId ||
     grant.profile_id !== input.profileId ||
     grant.base_product_id !== thread.base_product_id ||
-    grant.analysis_edition_key !== thread.analysis_edition_key
+    grant.analysis_edition_key !== thread.analysis_edition_key ||
+    grant.status !== "active"
   ) {
-    throw new Error("AI_CONSULTING_GRANT_THREAD_BOUNDARY_MISMATCH");
+    throw new Error("AI_CONSULTING_ACCESS_BOUNDARY_MISMATCH");
   }
 
   return { thread, grant };
@@ -247,10 +246,10 @@ async function generateConsultingAnswer(prompt: string): Promise<{
 }
 
 /**
- * Phase 8 server-only orchestration. Scope is classified before any model call.
+ * Server-only orchestration. Scope is classified before any model call.
  * Non-ALLOW questions are persisted without reserving/charging. ALLOW questions
- * reserve one slot, load only bounded context, and convert that reservation into
- * a used question only after the assistant answer is persisted atomically.
+ * reserve one profile credit, load only bounded context, and consume that credit
+ * only after the assistant answer is persisted atomically.
  */
 export async function answerAiConsultingQuestion(input: {
   userId: string;
@@ -352,9 +351,7 @@ export async function answerAiConsultingQuestion(input: {
       answer: generated.text,
       userMessageId: reservation.messageId,
       assistantMessageId: completion.assistantMessageId,
-      questionsUsed: completion.questionsUsed,
-      questionsRemaining: Math.max(0, completion.questionLimit - completion.questionsUsed),
-      grantStatus: completion.grantStatus,
+      questionsRemaining: completion.questionsRemaining,
       model: AI_CONSULTING_MODEL,
     };
   } catch (error) {

@@ -2,6 +2,10 @@ import { getCanonicalPremiumProductId } from "../premiumProductRegistry";
 import { getActiveEntitlementForProfileEdition } from "../purchases/server";
 import { getPaidReport } from "../paidReports/server";
 import { createAdminClient } from "../supabase/admin";
+import {
+  ensureAiConsultingAccessGrant,
+  getAiConsultingCreditBalance,
+} from "./server";
 
 export type AiConsultingSessionMessage = {
   id: string;
@@ -14,13 +18,11 @@ export type AiConsultingSessionMessage = {
 
 export type AiConsultingSessionState =
   | { state: "report_required"; productId: string; analysisEditionKey: string }
-  | { state: "grant_required"; productId: string; analysisEditionKey: string }
   | {
-      state: "unavailable";
+      state: "credit_required";
       productId: string;
       analysisEditionKey: string;
-      reason: "revoked" | "expired" | "exhausted";
-      questionsRemaining: number;
+      questionsRemaining: 0;
       threadId: string | null;
       messages: AiConsultingSessionMessage[];
     }
@@ -28,11 +30,8 @@ export type AiConsultingSessionState =
       state: "ready";
       productId: string;
       analysisEditionKey: string;
-      grantId: string;
+      grantId: string | null;
       threadId: string | null;
-      questionLimit: number;
-      questionsUsed: number;
-      questionsReserved: number;
       questionsRemaining: number;
       messages: AiConsultingSessionMessage[];
     };
@@ -40,10 +39,6 @@ export type AiConsultingSessionState =
 type GrantRow = {
   id: string;
   status: "active" | "exhausted" | "revoked" | "expired";
-  question_limit: number;
-  questions_used: number;
-  questions_reserved: number;
-  expires_at: string | null;
   created_at: string;
 };
 
@@ -88,6 +83,47 @@ async function loadMessages(input: {
   }));
 }
 
+async function findAccessThread(input: {
+  userId: string;
+  profileId: string;
+  productId: string;
+  analysisEditionKey: string;
+}): Promise<{ grantId: string | null; threadId: string | null }> {
+  const supabase = createAdminClient();
+  const { data: grant, error: grantError } = await supabase
+    .from("ai_consulting_grants")
+    .select("id,status,created_at")
+    .eq("user_id", input.userId)
+    .eq("profile_id", input.profileId)
+    .eq("base_product_id", input.productId)
+    .eq("analysis_edition_key", input.analysisEditionKey)
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<GrantRow>();
+
+  if (grantError) {
+    throw new Error(`AI_CONSULTING_ACCESS_GRANT_READ_FAILED: ${grantError.message}`);
+  }
+  if (!grant) return { grantId: null, threadId: null };
+
+  const { data: thread, error: threadError } = await supabase
+    .from("ai_consulting_threads")
+    .select("id")
+    .eq("user_id", input.userId)
+    .eq("profile_id", input.profileId)
+    .eq("grant_id", grant.id)
+    .eq("status", "active")
+    .limit(1)
+    .maybeSingle<ThreadRow>();
+
+  if (threadError) {
+    throw new Error(`AI_CONSULTING_THREAD_READ_FAILED: ${threadError.message}`);
+  }
+
+  return { grantId: grant.id, threadId: thread?.id ?? null };
+}
+
 export async function getAiConsultingSessionState(input: {
   userId: string;
   profileId: string;
@@ -121,69 +157,29 @@ export async function getAiConsultingSessionState(input: {
     };
   }
 
-  const supabase = createAdminClient();
-  const { data: grant, error: grantError } = await supabase
-    .from("ai_consulting_grants")
-    .select("id,status,question_limit,questions_used,questions_reserved,expires_at,created_at")
-    .eq("user_id", input.userId)
-    .eq("profile_id", input.profileId)
-    .eq("base_product_id", productId)
-    .eq("analysis_edition_key", input.analysisEditionKey)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle<GrantRow>();
-
-  if (grantError) {
-    throw new Error(`AI_CONSULTING_GRANT_READ_FAILED: ${grantError.message}`);
-  }
-
-  if (!grant) {
-    return {
-      state: "grant_required",
-      productId,
-      analysisEditionKey: input.analysisEditionKey,
-    };
-  }
-
-  const { data: thread, error: threadError } = await supabase
-    .from("ai_consulting_threads")
-    .select("id")
-    .eq("user_id", input.userId)
-    .eq("profile_id", input.profileId)
-    .eq("grant_id", grant.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle<ThreadRow>();
-
-  if (threadError) {
-    throw new Error(`AI_CONSULTING_THREAD_READ_FAILED: ${threadError.message}`);
-  }
-
+  const access = await findAccessThread({
+    userId: input.userId,
+    profileId: input.profileId,
+    productId,
+    analysisEditionKey: input.analysisEditionKey,
+  });
   const messages = await loadMessages({
     userId: input.userId,
     profileId: input.profileId,
-    threadId: thread?.id ?? null,
+    threadId: access.threadId,
   });
-  const questionsRemaining = Math.max(
-    0,
-    grant.question_limit - grant.questions_used - grant.questions_reserved,
-  );
-  const expiredByTime = Boolean(grant.expires_at && new Date(grant.expires_at).getTime() <= Date.now());
+  const questionsRemaining = await getAiConsultingCreditBalance({
+    userId: input.userId,
+    profileId: input.profileId,
+  });
 
-  if (grant.status !== "active" || expiredByTime || questionsRemaining <= 0) {
-    const reason = grant.status === "revoked"
-      ? "revoked"
-      : grant.status === "expired" || expiredByTime
-        ? "expired"
-        : "exhausted";
-
+  if (questionsRemaining <= 0) {
     return {
-      state: "unavailable",
+      state: "credit_required",
       productId,
       analysisEditionKey: input.analysisEditionKey,
-      reason,
-      questionsRemaining,
-      threadId: thread?.id ?? null,
+      questionsRemaining: 0,
+      threadId: access.threadId,
       messages,
     };
   }
@@ -192,24 +188,59 @@ export async function getAiConsultingSessionState(input: {
     state: "ready",
     productId,
     analysisEditionKey: input.analysisEditionKey,
-    grantId: grant.id,
-    threadId: thread?.id ?? null,
-    questionLimit: grant.question_limit,
-    questionsUsed: grant.questions_used,
-    questionsReserved: grant.questions_reserved,
+    grantId: access.grantId,
+    threadId: access.threadId,
     questionsRemaining,
     messages,
   };
 }
 
-export async function getOrCreateAiConsultingThread(input: {
-  grantId: string;
+export async function ensureAiConsultingThreadForAnalysis(input: {
+  userId: string;
+  profileId: string;
+  productId: string;
+  analysisEditionKey: string;
   title?: string | null;
 }): Promise<string> {
+  const productId = getCanonicalPremiumProductId(input.productId);
+  const entitlement = await getActiveEntitlementForProfileEdition(
+    input.userId,
+    input.profileId,
+    productId,
+    input.analysisEditionKey,
+  );
+  if (!entitlement) {
+    throw new Error("AI_CONSULTING_BASE_ENTITLEMENT_REQUIRED");
+  }
+
+  const report = await getPaidReport(
+    input.userId,
+    input.profileId,
+    productId,
+    input.analysisEditionKey,
+  );
+  if (!report || report.status !== "completed" || !report.content) {
+    throw new Error("AI_CONSULTING_PAID_REPORT_UNAVAILABLE");
+  }
+
+  const balance = await getAiConsultingCreditBalance({
+    userId: input.userId,
+    profileId: input.profileId,
+  });
+  if (balance <= 0) {
+    throw new Error("AI_CONSULTING_NO_PROFILE_CREDIT");
+  }
+
+  const grant = await ensureAiConsultingAccessGrant({
+    userId: input.userId,
+    profileId: input.profileId,
+    baseEntitlementId: entitlement.id,
+  });
+
   const { data, error } = await createAdminClient().rpc(
     "get_or_create_ai_consulting_thread",
     {
-      p_grant_id: input.grantId,
+      p_grant_id: grant.id,
       p_title: input.title ?? null,
     },
   );

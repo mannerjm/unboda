@@ -5,8 +5,8 @@ import { isProfileId } from "@/app/lib/profiles/types";
 import { getCanonicalPremiumProductId, getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import {
+  ensureAiConsultingThreadForAnalysis,
   getAiConsultingSessionState,
-  getOrCreateAiConsultingThread,
 } from "@/app/lib/aiConsulting/session";
 
 type SessionInput = {
@@ -95,8 +95,11 @@ export async function POST(request: Request) {
     }
 
     if (!initial.threadId) {
-      await getOrCreateAiConsultingThread({
-        grantId: initial.grantId,
+      await ensureAiConsultingThreadForAnalysis({
+        userId: boundary.user.id,
+        profileId: boundary.profile.id,
+        productId: boundary.productId,
+        analysisEditionKey: boundary.edition,
         title: `${boundary.productId} AI 상담`,
       });
     }
@@ -110,6 +113,10 @@ export async function POST(request: Request) {
     return NextResponse.json(state);
   } catch (error) {
     console.error("[ai-consulting-session] start failed", error);
+    const message = error instanceof Error ? error.message : "AI_CONSULTING_SESSION_START_FAILED";
+    if (message.includes("NO_PROFILE_CREDIT")) {
+      return NextResponse.json({ error: "사용 가능한 AI 질문권이 없습니다." }, { status: 409 });
+    }
     return NextResponse.json({ error: "AI 상담을 시작하지 못했습니다." }, { status: 500 });
   }
 }

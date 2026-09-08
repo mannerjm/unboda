@@ -58,13 +58,19 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[ai-consulting-question] failed", error);
     const message = error instanceof Error ? error.message : "AI_CONSULTING_QUESTION_FAILED";
-    const status = message.includes("EXHAUSTED") || message.includes("NOT_ACTIVE") || message.includes("EXPIRED")
+    const status = message.includes("NO_PROFILE_CREDIT")
       ? 409
       : message.includes("BOUNDARY") || message.includes("ENTITLEMENT")
         ? 403
         : 500;
     return NextResponse.json(
-      { error: status === 500 ? "AI 상담 답변을 완료하지 못했습니다. 질문 횟수는 차감되지 않습니다." : "현재 이 상담을 계속 이용할 수 없습니다." },
+      {
+        error: status === 500
+          ? "AI 상담 답변을 완료하지 못했습니다. 질문 횟수는 차감되지 않습니다."
+          : status === 409
+            ? "사용 가능한 AI 질문권이 없습니다."
+            : "현재 이 상담을 계속 이용할 수 없습니다.",
+      },
       { status },
     );
   }

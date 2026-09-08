@@ -30,16 +30,18 @@ export type AiConsultingReservation = {
 
 export type AiConsultingCompletion = {
   assistantMessageId: string;
-  questionsUsed: number;
-  questionsReserved: number;
-  questionLimit: number;
-  grantStatus: "active" | "exhausted" | "revoked" | "expired";
+  questionsRemaining: number;
 };
 
 function firstRow<T>(data: unknown): T | null {
   return Array.isArray(data) && data.length > 0 ? (data[0] as T) : null;
 }
 
+/**
+ * Legacy Phase 6 grant issuer. Kept for compatibility with historical data and
+ * diagnostics. Phase 10b runtime uses ensureAiConsultingAccessGrant instead so
+ * commercial capacity comes from the profile credit ledger, not grant counters.
+ */
 export async function issueAiConsultingGrant(input: {
   sourcePurchaseId: string;
   baseEntitlementId: string;
@@ -64,6 +66,39 @@ export async function issueAiConsultingGrant(input: {
   return row;
 }
 
+export async function ensureAiConsultingAccessGrant(input: {
+  userId: string;
+  profileId: string;
+  baseEntitlementId: string;
+}): Promise<AiConsultingGrantRpcRow> {
+  const { data, error } = await createAdminClient().rpc("ensure_ai_consulting_access_grant", {
+    p_user_id: input.userId,
+    p_profile_id: input.profileId,
+    p_base_entitlement_id: input.baseEntitlementId,
+  });
+
+  const row = firstRow<AiConsultingGrantRpcRow>(data);
+  if (error || !row) {
+    throw new Error(error?.message ?? "AI_CONSULTING_ACCESS_GRANT_FAILED");
+  }
+  return row;
+}
+
+export async function getAiConsultingCreditBalance(input: {
+  userId: string;
+  profileId: string;
+}): Promise<number> {
+  const { data, error } = await createAdminClient().rpc("get_ai_consulting_credit_balance", {
+    p_user_id: input.userId,
+    p_profile_id: input.profileId,
+  });
+
+  if (error || typeof data !== "number") {
+    throw new Error(error?.message ?? "AI_CONSULTING_CREDIT_BALANCE_FAILED");
+  }
+  return Math.max(0, data);
+}
+
 export async function reserveAiConsultingQuestion(input: {
   threadId: string;
   requestId: string;
@@ -72,7 +107,7 @@ export async function reserveAiConsultingQuestion(input: {
   scopeReasonCode?: string | null;
   reservationTtlSeconds?: number;
 }): Promise<AiConsultingReservation> {
-  const { data, error } = await createAdminClient().rpc("reserve_ai_consulting_question", {
+  const { data, error } = await createAdminClient().rpc("reserve_ai_consulting_credit_question", {
     p_thread_id: input.threadId,
     p_request_id: input.requestId,
     p_content: input.content,
@@ -98,7 +133,7 @@ export async function reserveAiConsultingQuestion(input: {
     reservationToken: row.reservation_token,
     reservationExpiresAt: row.reservation_expires_at,
     chargeable: row.chargeable,
-    questionsRemaining: row.questions_remaining,
+    questionsRemaining: Math.max(0, row.questions_remaining),
   };
 }
 
@@ -107,7 +142,7 @@ export async function releaseAiConsultingQuestionReservation(input: {
   reservationToken: string;
 }): Promise<boolean> {
   const { data, error } = await createAdminClient().rpc(
-    "release_ai_consulting_question_reservation",
+    "release_ai_consulting_credit_reservation",
     {
       p_user_message_id: input.userMessageId,
       p_reservation_token: input.reservationToken,
@@ -128,7 +163,7 @@ export async function completeAiConsultingAnswer(input: {
   inputTokens?: number | null;
   outputTokens?: number | null;
 }): Promise<AiConsultingCompletion> {
-  const { data, error } = await createAdminClient().rpc("complete_ai_consulting_answer", {
+  const { data, error } = await createAdminClient().rpc("complete_ai_consulting_credit_answer", {
     p_user_message_id: input.userMessageId,
     p_reservation_token: input.reservationToken,
     p_assistant_content: input.assistantContent,
@@ -139,10 +174,7 @@ export async function completeAiConsultingAnswer(input: {
 
   const row = firstRow<{
     assistant_message_id: string;
-    questions_used: number;
-    questions_reserved: number;
-    question_limit: number;
-    grant_status: AiConsultingCompletion["grantStatus"];
+    questions_remaining: number;
   }>(data);
 
   if (error || !row) {
@@ -151,9 +183,6 @@ export async function completeAiConsultingAnswer(input: {
 
   return {
     assistantMessageId: row.assistant_message_id,
-    questionsUsed: row.questions_used,
-    questionsReserved: row.questions_reserved,
-    questionLimit: row.question_limit,
-    grantStatus: row.grant_status,
+    questionsRemaining: Math.max(0, row.questions_remaining),
   };
 }

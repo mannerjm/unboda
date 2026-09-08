@@ -13,13 +13,12 @@ type Message = {
 };
 
 type Session =
-  | { state: "report_required" | "grant_required"; productId: string; analysisEditionKey: string }
+  | { state: "report_required"; productId: string; analysisEditionKey: string }
   | {
-      state: "unavailable";
+      state: "credit_required";
       productId: string;
       analysisEditionKey: string;
-      reason: "revoked" | "expired" | "exhausted";
-      questionsRemaining: number;
+      questionsRemaining: 0;
       threadId: string | null;
       messages: Message[];
     }
@@ -28,9 +27,6 @@ type Session =
       productId: string;
       analysisEditionKey: string;
       threadId: string | null;
-      questionLimit: number;
-      questionsUsed: number;
-      questionsReserved: number;
       questionsRemaining: number;
       messages: Message[];
     };
@@ -130,7 +126,7 @@ export default function AiConsultingChatClient({
           <p className="text-xs font-semibold tracking-[0.2em] text-amber-300">UNBODA AI CONSULTING</p>
           <h1 className="mt-3 text-2xl font-bold sm:text-3xl">구매한 분석에서 이어지는 AI 상담</h1>
           <p className="mt-3 text-sm leading-7 text-stone-300">
-            구매한 분석 범위 안에서만 답하고, 정상 답변이 저장된 질문만 횟수에서 차감합니다.
+            AI 질문권은 이 프로필에서 구매한 심층 분석들에 공통으로 사용할 수 있고, 정상 답변이 저장된 질문만 1회 차감합니다.
           </p>
         </header>
 
@@ -145,14 +141,14 @@ export default function AiConsultingChatClient({
           </section>
         ) : null}
 
-        {!isLoading && session?.state === "grant_required" ? (
+        {!isLoading && session?.state === "credit_required" && !session.threadId ? (
           <section className="mt-6 rounded-[2rem] bg-white p-8 shadow-sm">
-            <h2 className="text-lg font-bold">AI 상담 이용권이 필요합니다</h2>
-            <p className="mt-3 text-sm leading-7 text-stone-600">상담 이용권 결제·발급 단계가 연결된 뒤 이 화면에서 상담을 시작할 수 있습니다.</p>
+            <h2 className="text-lg font-bold">AI 질문권이 필요합니다</h2>
+            <p className="mt-3 text-sm leading-7 text-stone-600">현재 사용 가능한 질문권이 없습니다. 결제 연결이 완료되면 이 프로필의 질문권을 구매해 사용할 수 있습니다.</p>
           </section>
         ) : null}
 
-        {!isLoading && session && (session.state === "ready" || session.state === "unavailable") ? (
+        {!isLoading && session && (session.state === "ready" || (session.state === "credit_required" && session.threadId)) ? (
           <>
             <section className="mt-6 flex items-center justify-between rounded-2xl border border-stone-200 bg-white px-5 py-4 shadow-sm">
               <span className="text-sm font-semibold">상담 기록</span>
@@ -210,7 +206,7 @@ export default function AiConsultingChatClient({
               </form>
             ) : (
               <section className="mt-6 rounded-2xl bg-stone-200 px-5 py-4 text-sm leading-7 text-stone-700">
-                현재 새 질문은 사용할 수 없지만 기존 상담 기록은 계속 확인할 수 있습니다.
+                질문권을 모두 사용했습니다. 기존 상담 기록은 계속 확인할 수 있습니다.
               </section>
             )}
           </>

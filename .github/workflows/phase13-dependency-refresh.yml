@@ -1,0 +1,51 @@
+name: Phase 13 Dependency Refresh
+
+on:
+  push:
+    branches:
+      - "launch/phase13-security-hardening"
+    paths:
+      - ".github/workflows/phase13-dependency-refresh.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout working branch
+        uses: actions/checkout@v4
+        with:
+          ref: launch/phase13-security-hardening
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install patched Next.js line
+        run: npm install next@16.3.4 eslint-config-next@16.3.4 --save-exact
+
+      - name: Apply non-breaking audit fixes
+        run: npm audit fix
+
+      - name: Verify production dependency audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit dependency lock refresh
+        run: |
+          if git diff --quiet -- package.json package-lock.json; then
+            echo "No dependency changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git commit -m "Upgrade Next.js to patched release"
+          git push origin HEAD:launch/phase13-security-hardening

@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { answerAiConsultingQuestion } from "@/app/lib/aiConsulting/answerPipeline";
+import {
+  recordAiConsultingFailureOutcome,
+  recordAiConsultingSuccessOutcome,
+} from "@/app/lib/aiConsulting/operations";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
@@ -54,8 +58,39 @@ export async function POST(request: Request) {
       requestId: input.requestId,
       question: input.question.trim(),
     });
+
+    if (result.state === "answered") {
+      try {
+        await recordAiConsultingSuccessOutcome({
+          userId: user.id,
+          profileId: profile.id,
+          threadId: input.threadId,
+          requestId: input.requestId,
+          assistantMessageId: result.assistantMessageId,
+        });
+      } catch (telemetryError) {
+        console.error("[ai-consulting-question] success telemetry failed", {
+          message: telemetryError instanceof Error ? telemetryError.message : "unknown-telemetry-error",
+        });
+      }
+    }
+
     return NextResponse.json(result);
   } catch (error) {
+    try {
+      await recordAiConsultingFailureOutcome({
+        userId: user.id,
+        profileId: profile.id,
+        threadId: input.threadId,
+        requestId: input.requestId,
+        error,
+      });
+    } catch (telemetryError) {
+      console.error("[ai-consulting-question] failure telemetry failed", {
+        message: telemetryError instanceof Error ? telemetryError.message : "unknown-telemetry-error",
+      });
+    }
+
     console.error("[ai-consulting-question] failed", error);
     const message = error instanceof Error ? error.message : "AI_CONSULTING_QUESTION_FAILED";
     const status = message.includes("NO_PROFILE_CREDIT")

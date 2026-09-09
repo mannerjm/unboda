@@ -12,17 +12,15 @@ create table if not exists public.ai_consulting_attempts (
   thread_id uuid not null,
   user_id uuid not null,
   profile_id uuid not null,
-  status text not null default 'started',
+  status text not null,
   failure_stage text,
   failure_code text,
   model text,
   input_tokens integer,
   output_tokens integer,
   duration_ms integer,
-  reservation_release_failed boolean not null default false,
-  release_failure_code text,
-  started_at timestamptz not null default now(),
-  completed_at timestamptz,
+  started_at timestamptz not null,
+  completed_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
 
@@ -36,21 +34,16 @@ create table if not exists public.ai_consulting_attempts (
     references public.ai_consulting_threads (id, user_id, profile_id)
     on delete cascade,
   constraint ai_consulting_attempts_status_valid
-    check (status in ('started', 'succeeded', 'failed', 'timed_out')),
+    check (status in ('succeeded', 'failed', 'timed_out')),
   constraint ai_consulting_attempts_failure_stage_valid
     check (
       failure_stage is null
       or failure_stage in ('context', 'model', 'output', 'completion', 'unknown')
     ),
-  constraint ai_consulting_attempts_finished_metadata
-    check (
-      (status = 'started' and completed_at is null)
-      or (status <> 'started' and completed_at is not null)
-    ),
   constraint ai_consulting_attempts_failure_metadata
     check (
       (status in ('failed', 'timed_out') and failure_stage is not null and failure_code is not null)
-      or (status not in ('failed', 'timed_out') and failure_stage is null and failure_code is null)
+      or (status = 'succeeded' and failure_stage is null and failure_code is null)
     ),
   constraint ai_consulting_attempts_model_length
     check (model is null or (length(btrim(model)) > 0 and length(model) <= 120)),
@@ -60,12 +53,7 @@ create table if not exists public.ai_consulting_attempts (
       and (output_tokens is null or output_tokens >= 0)
     ),
   constraint ai_consulting_attempts_duration_non_negative
-    check (duration_ms is null or duration_ms >= 0),
-  constraint ai_consulting_attempts_release_failure_metadata
-    check (
-      (reservation_release_failed and release_failure_code is not null)
-      or (not reservation_release_failed and release_failure_code is null)
-    )
+    check (duration_ms is null or duration_ms >= 0)
 );
 
 create index if not exists ai_consulting_attempts_started_idx

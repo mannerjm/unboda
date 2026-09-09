@@ -17,6 +17,8 @@
     "test:ai-consulting-memory": "npx tsx scripts/ai-consulting-long-term-memory-regression.ts",
     "test:ai-consulting-quality-cost": "npx tsx scripts/ai-consulting-quality-cost-regression.ts",
     "test:ai-consulting-operations": "npx tsx scripts/ai-consulting-operations-regression.ts",
+    "test:ai-consulting-e2e-contract": "npx tsx scripts/ai-consulting-e2e-contract-regression.ts",
+    "test:ai-consulting-e2e": "npm run test:ai-consulting-credit-checkout && npm run test:ai-consulting-credit-history && npm run test:ai-consulting-memory && npm run test:ai-consulting-quality-cost && npm run test:ai-consulting-operations && npm run test:ai-consulting-e2e-contract",
     "test:paid-all": "npm run test:paid-money && npm run test:paid-career && npm run test:paid-relationship && npm run test:paid-health"
   },
   "dependencies": {

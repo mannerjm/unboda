@@ -28,9 +28,10 @@ assert.ok(
   !migration.includes("grant select on public.ai_consulting_attempts to authenticated"),
   "attempt telemetry must stay service-role-only",
 );
+const migrationWithoutComments = migration.replace(/^--.*$/gm, "");
 assert.ok(
-  !migration.includes("content text") && !migration.includes("question text") && !migration.includes("answer text"),
-  "attempt telemetry must not duplicate consultation text",
+  !/\b(content|question|answer)\s+text\b/i.test(migrationWithoutComments),
+  "attempt telemetry must not define consultation text columns",
 );
 
 for (const required of [

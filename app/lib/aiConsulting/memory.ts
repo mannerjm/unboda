@@ -19,6 +19,12 @@ export type AiConsultingMemoryRpcRow = {
   updated_at: string;
 };
 
+export type AiConsultingUserMemoryRow = AiConsultingMemoryRpcRow & {
+  provenance: "USER_STATED";
+  status: "active" | "superseded" | "deleted";
+  created_at: string;
+};
+
 function firstRow<T>(data: unknown): T | null {
   return Array.isArray(data) && data.length > 0 ? (data[0] as T) : null;
 }
@@ -82,6 +88,62 @@ export async function saveAiConsultingMemory(input: {
     throw new Error(error?.message ?? "AI_CONSULTING_MEMORY_SAVE_FAILED");
   }
   return row;
+}
+
+export async function getAiConsultingUserMemories(input: {
+  userId: string;
+  profileId: string;
+  limit?: number;
+}): Promise<AiConsultingUserMemoryRow[]> {
+  const limit = input.limit ?? 20;
+  if (!Number.isInteger(limit) || limit < 1 || limit > 30) {
+    throw new Error("AI_CONSULTING_USER_MEMORY_LIMIT_OUT_OF_RANGE");
+  }
+
+  const { data, error } = await createAdminClient()
+    .from("ai_consulting_memories")
+    .select(
+      "id,kind,provenance,content,tags,source_thread_id,source_message_id,supersedes_memory_id,status,created_at,updated_at",
+    )
+    .eq("user_id", input.userId)
+    .eq("profile_id", input.profileId)
+    .eq("provenance", "USER_STATED")
+    .eq("status", "active")
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(`AI_CONSULTING_USER_MEMORY_READ_FAILED: ${error.message}`);
+  }
+
+  return (data ?? []) as AiConsultingUserMemoryRow[];
+}
+
+export async function deleteAiConsultingUserMemory(input: {
+  userId: string;
+  profileId: string;
+  memoryId: string;
+}): Promise<AiConsultingUserMemoryRow> {
+  const { data, error } = await createAdminClient()
+    .from("ai_consulting_memories")
+    .update({ status: "deleted", updated_at: new Date().toISOString() })
+    .eq("id", input.memoryId)
+    .eq("user_id", input.userId)
+    .eq("profile_id", input.profileId)
+    .eq("provenance", "USER_STATED")
+    .eq("status", "active")
+    .select(
+      "id,kind,provenance,content,tags,source_thread_id,source_message_id,supersedes_memory_id,status,created_at,updated_at",
+    )
+    .maybeSingle<AiConsultingUserMemoryRow>();
+
+  if (error) {
+    throw new Error(`AI_CONSULTING_USER_MEMORY_DELETE_FAILED: ${error.message}`);
+  }
+  if (!data) {
+    throw new Error("AI_CONSULTING_USER_MEMORY_NOT_FOUND");
+  }
+  return data;
 }
 
 export async function getAiConsultingContextMemories(input: {

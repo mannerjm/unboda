@@ -17,7 +17,7 @@ permissions:
 jobs:
   security:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,5 +35,12 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
 
       - name: Report full dependency audit
+        if: ${{ always() }}
         continue-on-error: true
         run: npm audit --audit-level=moderate
+
+      - name: Run launch security regression
+        run: npm run test:launch-security
+
+      - name: Build
+        run: npm run build

@@ -1,0 +1,36 @@
+name: AI Consulting E2E Contract
+
+on:
+  pull_request:
+    paths:
+      - "app/ai-consulting/**"
+      - "app/api/ai-consulting/**"
+      - "app/lib/aiConsulting/**"
+      - "scripts/ai-consulting-*.ts"
+      - "supabase/migrations/04*_ai_consulting_*.sql"
+      - "package.json"
+      - ".github/workflows/ai-consulting-e2e-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run AI consulting E2E contract suite
+        run: npm run test:ai-consulting-e2e

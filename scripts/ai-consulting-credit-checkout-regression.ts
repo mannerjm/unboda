@@ -56,6 +56,7 @@ assert(reconcileRoute.includes("PAYMENT_RECONCILIATION_SECRET"), "combined recon
 
 const chat = read("app/ai-consulting/AiConsultingChatClient.tsx");
 assert(chat.includes("NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED"), "credit purchase entry must remain feature-gated until live approval");
-assert(chat.includes("AI 질문권 구매하기"), "zero-balance chat state must expose the checkout only when enabled");
+assert(chat.includes("AI 질문권 구매·내역"), "zero-balance chat state must expose the checkout entry only when enabled");
+assert(chat.includes("질문권 내역 보기"), "zero-balance chat state must keep history accessible while checkout is disabled");
 
 console.log("ai consulting credit checkout regression passed");

@@ -52,6 +52,7 @@ export default function AiConsultingChatClient({
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const creditCheckoutEnabled = process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true";
 
   const loadSession = useCallback(async () => {
     const response = await fetch("/api/ai-consulting/session", {
@@ -114,6 +115,7 @@ export default function AiConsultingChatClient({
   }
 
   const reportHref = `/paid-analysis/${encodeURIComponent(productId)}/report?${new URLSearchParams({ profileId, edition }).toString()}`;
+  const creditCheckoutHref = `/ai-consulting/credits?${new URLSearchParams({ profileId, productId, edition }).toString()}`;
 
   return (
     <main className="min-h-screen bg-[#f7f2e8] px-5 py-8 text-stone-900">
@@ -144,7 +146,16 @@ export default function AiConsultingChatClient({
         {!isLoading && session?.state === "credit_required" && !session.threadId ? (
           <section className="mt-6 rounded-[2rem] bg-white p-8 shadow-sm">
             <h2 className="text-lg font-bold">AI 질문권이 필요합니다</h2>
-            <p className="mt-3 text-sm leading-7 text-stone-600">현재 사용 가능한 질문권이 없습니다. 결제 연결이 완료되면 이 프로필의 질문권을 구매해 사용할 수 있습니다.</p>
+            <p className="mt-3 text-sm leading-7 text-stone-600">
+              {creditCheckoutEnabled
+                ? "현재 사용 가능한 질문권이 없습니다. 이 프로필의 공통 질문권을 구매하면 상담을 시작할 수 있습니다."
+                : "현재 사용 가능한 질문권이 없습니다. AI 질문권 결제는 준비 중입니다."}
+            </p>
+            {creditCheckoutEnabled ? (
+              <Link href={creditCheckoutHref} className="mt-5 inline-flex rounded-2xl bg-stone-950 px-5 py-3 text-sm font-semibold text-white">
+                AI 질문권 구매하기
+              </Link>
+            ) : null}
           </section>
         ) : null}
 
@@ -206,7 +217,12 @@ export default function AiConsultingChatClient({
               </form>
             ) : (
               <section className="mt-6 rounded-2xl bg-stone-200 px-5 py-4 text-sm leading-7 text-stone-700">
-                질문권을 모두 사용했습니다. 기존 상담 기록은 계속 확인할 수 있습니다.
+                <p>질문권을 모두 사용했습니다. 기존 상담 기록은 계속 확인할 수 있습니다.</p>
+                {creditCheckoutEnabled ? (
+                  <Link href={creditCheckoutHref} className="mt-3 inline-flex font-semibold text-stone-950 underline underline-offset-4">
+                    AI 질문권 추가 구매하기
+                  </Link>
+                ) : null}
               </section>
             )}
           </>

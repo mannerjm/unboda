@@ -133,19 +133,28 @@ assert.ok(
 );
 
 for (const required of [
-  "AI가 기억하는 내용",
-  "기억에 추가",
+  "AI가 기억하는 내 상황",
   "이 내용 기억하기",
   "기억에서 삭제",
-  "내가 직접 저장한 내용만 사용자 사실로 참고합니다",
-  "질문이나 추측은 지우고",
+  "내가 직접 저장한 내용만 다음 상담의 현재 상황으로 참고합니다",
+  "AI가 임의로 내용을 만들거나 자동 저장하지 않습니다",
   "최대 8개",
 ]) {
-  assert.ok(chatClient.includes(required), `missing explicit memory UX: ${required}`);
+  assert.ok(chatClient.includes(required), `missing simplified memory UX: ${required}`);
 }
 assert.ok(
   chatClient.includes('method: "POST"') && chatClient.includes('method: "DELETE"'),
   "chat must expose explicit save and delete actions",
+);
+assert.ok(
+  chatClient.includes('kind: "user_fact"'),
+  "simplified memory UX must store new explicit memories as the neutral internal user_fact kind",
+);
+assert.ok(
+  !chatClient.includes("MemoryDraft") &&
+    !chatClient.includes("MEMORY_KIND_LABELS") &&
+    !chatClient.includes("<select"),
+  "users must not be asked to classify or edit a message before saving it as memory",
 );
 assert.ok(
   !chatClient.includes("saveAiConsultingMemory"),

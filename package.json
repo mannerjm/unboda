@@ -14,6 +14,7 @@
     "test:paid-product-id-mapping": "npx tsx scripts/paid-analysis-product-id-mapping-regression.ts",
     "test:ai-consulting-credit-checkout": "npx tsx scripts/ai-consulting-credit-checkout-regression.ts",
     "test:ai-consulting-credit-history": "npx tsx scripts/ai-consulting-credit-history-ui-regression.ts",
+    "test:ai-consulting-memory": "npx tsx scripts/ai-consulting-long-term-memory-regression.ts",
     "test:paid-all": "npm run test:paid-money && npm run test:paid-career && npm run test:paid-relationship && npm run test:paid-health"
   },
   "dependencies": {

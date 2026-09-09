@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { reconcileAiConsultingCreditPaymentsBatch } from "@/app/lib/aiConsulting/creditCheckout";
 import { reconcilePaymentsBatch } from "@/app/lib/purchases/server";
 
 export const dynamic = "force-dynamic";
@@ -17,9 +18,11 @@ async function reconcile(request: Request) {
 
   try {
     const summary = await reconcilePaymentsBatch();
-    return NextResponse.json(summary, {
-      headers: { "Cache-Control": "no-store" },
-    });
+    const aiConsultingCredits = await reconcileAiConsultingCreditPaymentsBatch();
+    return NextResponse.json(
+      { ...summary, aiConsultingCredits },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   } catch {
     return NextResponse.json(
       { error: "결제 reconciliation을 실행하지 못했습니다." },

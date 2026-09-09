@@ -127,11 +127,16 @@ export default async function AiConsultingCreditsPage({
     );
   }
 
-  const history = await listAiConsultingCreditHistory({
-    userId: user.id,
-    profileId: profile.id,
-    limit: 50,
-  }).catch(() => []);
+  let history: AiConsultingCreditHistoryEntry[] | null = null;
+  try {
+    history = await listAiConsultingCreditHistory({
+      userId: user.id,
+      profileId: profile.id,
+      limit: 50,
+    });
+  } catch {
+    history = null;
+  }
 
   let providerReady = false;
   if (isAiConsultingCreditCheckoutEnabled()) {
@@ -182,7 +187,11 @@ export default async function AiConsultingCreditsPage({
             정상 AI 답변이 저장되어 실제 차감된 경우에만 사용 내역이 기록됩니다. 최근 50건을 표시합니다.
           </p>
 
-          {history.length === 0 ? (
+          {history === null ? (
+            <div className="mt-6 rounded-2xl bg-rose-50 px-5 py-5 text-sm leading-7 text-rose-800">
+              질문권 내역을 불러오지 못했습니다. 현재 잔액은 그대로 유지되며, 잠시 후 다시 확인해 주세요.
+            </div>
+          ) : history.length === 0 ? (
             <div className="mt-6 rounded-2xl border border-dashed border-stone-300 px-5 py-8 text-center text-sm leading-7 text-stone-500">
               아직 질문권 구매 또는 사용 내역이 없습니다.
             </div>

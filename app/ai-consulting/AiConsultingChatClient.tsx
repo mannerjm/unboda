@@ -151,19 +151,22 @@ export default function AiConsultingChatClient({
                 ? "현재 사용 가능한 질문권이 없습니다. 이 프로필의 공통 질문권을 구매하면 상담을 시작할 수 있습니다."
                 : "현재 사용 가능한 질문권이 없습니다. AI 질문권 결제는 준비 중입니다."}
             </p>
-            {creditCheckoutEnabled ? (
-              <Link href={creditCheckoutHref} className="mt-5 inline-flex rounded-2xl bg-stone-950 px-5 py-3 text-sm font-semibold text-white">
-                AI 질문권 구매하기
-              </Link>
-            ) : null}
+            <Link href={creditCheckoutHref} className="mt-5 inline-flex rounded-2xl bg-stone-950 px-5 py-3 text-sm font-semibold text-white">
+              {creditCheckoutEnabled ? "AI 질문권 구매·내역" : "질문권 내역 보기"}
+            </Link>
           </section>
         ) : null}
 
         {!isLoading && session && (session.state === "ready" || (session.state === "credit_required" && session.threadId)) ? (
           <>
-            <section className="mt-6 flex items-center justify-between rounded-2xl border border-stone-200 bg-white px-5 py-4 shadow-sm">
+            <section className="mt-6 flex flex-col gap-3 rounded-2xl border border-stone-200 bg-white px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
               <span className="text-sm font-semibold">상담 기록</span>
-              <span className="text-sm text-stone-600">남은 질문 {session.questionsRemaining}회</span>
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-stone-600">남은 질문 {session.questionsRemaining}회</span>
+                <Link href={creditCheckoutHref} className="text-sm font-semibold text-stone-900 underline underline-offset-4">
+                  질문권 내역
+                </Link>
+              </div>
             </section>
 
             <div className="mt-4 space-y-4">
@@ -218,11 +221,9 @@ export default function AiConsultingChatClient({
             ) : (
               <section className="mt-6 rounded-2xl bg-stone-200 px-5 py-4 text-sm leading-7 text-stone-700">
                 <p>질문권을 모두 사용했습니다. 기존 상담 기록은 계속 확인할 수 있습니다.</p>
-                {creditCheckoutEnabled ? (
-                  <Link href={creditCheckoutHref} className="mt-3 inline-flex font-semibold text-stone-950 underline underline-offset-4">
-                    AI 질문권 추가 구매하기
-                  </Link>
-                ) : null}
+                <Link href={creditCheckoutHref} className="mt-3 inline-flex font-semibold text-stone-950 underline underline-offset-4">
+                  {creditCheckoutEnabled ? "AI 질문권 추가 구매·내역" : "질문권 내역 보기"}
+                </Link>
               </section>
             )}
           </>

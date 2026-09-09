@@ -2,14 +2,15 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const migration = readFileSync(
-  join(process.cwd(), "supabase/migrations/041_ai_consulting_long_term_memory.sql"),
-  "utf8",
-);
-const server = readFileSync(
-  join(process.cwd(), "app/lib/aiConsulting/memory.ts"),
-  "utf8",
-);
+function read(path: string): string {
+  return readFileSync(join(process.cwd(), path), "utf8");
+}
+
+const migration = read("supabase/migrations/041_ai_consulting_long_term_memory.sql");
+const server = read("app/lib/aiConsulting/memory.ts");
+const memoryRoute = read("app/api/ai-consulting/memories/route.ts");
+const chatClient = read("app/ai-consulting/AiConsultingChatClient.tsx");
+const answerPipeline = read("app/lib/aiConsulting/answerPipeline.ts");
 
 for (const required of [
   "write_request_id uuid",
@@ -82,6 +83,8 @@ assert.ok(
 for (const required of [
   "saveAiConsultingMemory",
   "getAiConsultingContextMemories",
+  "getAiConsultingUserMemories",
+  "deleteAiConsultingUserMemory",
   "partitionAiConsultingMemoriesForPrompt",
   'createAdminClient().rpc("save_ai_consulting_memory"',
   '"get_ai_consulting_context_memories"',
@@ -92,5 +95,72 @@ for (const required of [
 ]) {
   assert.ok(server.includes(required), `missing server memory guard: ${required}`);
 }
+
+assert.ok(
+  server.includes('.eq("user_id", input.userId)') &&
+    server.includes('.eq("profile_id", input.profileId)') &&
+    server.includes('.eq("provenance", "USER_STATED")') &&
+    server.includes('.eq("status", "active")'),
+  "user-visible memories must remain user/profile scoped, USER_STATED, and active-only",
+);
+assert.ok(
+  server.includes('.update({ status: "deleted"') && !server.includes('.delete()'),
+  "memory removal must soft-delete rather than erase provenance history",
+);
+
+for (const required of [
+  "getCurrentUser",
+  "getActiveProfile",
+  "getUserProfile",
+  'eq("role", "user")',
+  'provenance: "USER_STATED"',
+  "USER_MEMORY_MAX_CHARS = 300",
+  "sourceThreadId: thread.id",
+  "sourceMessageId: sourceMessage.id",
+  "deleteAiConsultingUserMemory",
+]) {
+  assert.ok(memoryRoute.includes(required), `missing memory API boundary: ${required}`);
+}
+assert.ok(
+  !memoryRoute.includes("getOpenAIClient") &&
+    !memoryRoute.includes("reserveAiConsultingQuestion") &&
+    !memoryRoute.includes("completeAiConsultingAnswer"),
+  "memory management must not call the model or mutate question credits",
+);
+assert.ok(
+  memoryRoute.includes('eq("source_message_id", sourceMessage.id)') && memoryRoute.includes("status: 409"),
+  "one active explicit memory per source user message must prevent accidental duplicates",
+);
+
+for (const required of [
+  "AI가 기억하는 내용",
+  "기억에 추가",
+  "이 내용 기억하기",
+  "기억에서 삭제",
+  "내가 직접 저장한 내용만 사용자 사실로 참고합니다",
+  "질문이나 추측은 지우고",
+  "최대 8개",
+]) {
+  assert.ok(chatClient.includes(required), `missing explicit memory UX: ${required}`);
+}
+assert.ok(
+  chatClient.includes('method: "POST"') && chatClient.includes('method: "DELETE"'),
+  "chat must expose explicit save and delete actions",
+);
+assert.ok(
+  !chatClient.includes("saveAiConsultingMemory"),
+  "browser must never call server memory persistence helpers directly",
+);
+
+assert.ok(
+  answerPipeline.includes("getAiConsultingContextMemories") &&
+    answerPipeline.includes("partitionAiConsultingMemoriesForPrompt") &&
+    answerPipeline.includes("사용자가 직접 말한 사실(USER_STATED)만 사용자 사실로 다룬다"),
+  "answer pipeline must keep using provenance-separated memories safely",
+);
+assert.ok(
+  !answerPipeline.includes("saveAiConsultingMemory"),
+  "answer generation must not auto-save long-term memory",
+);
 
 console.log("AI consulting long-term memory regression passed");

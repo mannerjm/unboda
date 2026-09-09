@@ -158,12 +158,19 @@ assert.ok(
 const chat = read("app/ai-consulting/AiConsultingChatClient.tsx");
 for (const required of [
   "이전 상담 이어보기",
-  "이전 상담 기록 보기",
   "AI가 기억하는 내 상황",
   "이 내용 기억하기",
   "기억에서 삭제",
 ]) {
-  assert.ok(chat.includes(required), `continuity/memory UX checkpoint missing: ${required}`);
+  assert.ok(chat.includes(required), `chat continuity/memory UX checkpoint missing: ${required}`);
+}
+const reportEntry = read("app/paid-analysis/[productId]/report/AiConsultingEntryCard.tsx");
+for (const required of [
+  "이전 상담 기록 보기",
+  "이전 상담 이어보기",
+  "이전 상담 기록은 계속 볼 수 있습니다",
+]) {
+  assert.ok(reportEntry.includes(required), `report continuation entry checkpoint missing: ${required}`);
 }
 
 const memoryRoute = read("app/api/ai-consulting/memories/route.ts");

@@ -174,6 +174,11 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
   }));
   const resolvedAnalysisNavItems = navigationItems(analysisNavItems);
   const resolvedMobileNavItems = navigationItems(mobileNavItems);
+  const aiCreditBalanceLabel = aiCreditBalanceError
+    ? "확인 불가"
+    : aiCreditBalance === null
+      ? "확인 중"
+      : `${aiCreditBalance}회`;
 
   return (
     <div className="min-h-screen bg-[#fbfbfa] text-stone-900">
@@ -225,6 +230,12 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                 );
               })}
             </div>
+            {pathname === "/mypage" && isGuest === false && profileId ? (
+              <div className="mx-1 mt-3 flex items-center justify-between rounded-xl border border-stone-200 bg-white/80 px-3 py-2.5">
+                <span className="text-xs font-medium text-stone-500">AI 질문권</span>
+                <strong className="text-sm text-stone-900">{aiCreditBalanceLabel}</strong>
+              </div>
+            ) : null}
           </nav>
 
           <div className="mt-auto border-t border-stone-200 pt-4">
@@ -238,21 +249,12 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
         <div className="min-w-0 flex-1 lg:pl-60">
           <header className="flex h-14 items-center justify-between border-b border-stone-200 bg-white px-5 lg:hidden">
             <Link href="/" className="text-lg font-bold tracking-tight text-stone-900">운보다</Link>
-            <span className="text-xs font-medium text-stone-500">명리 분석</span>
+            {pathname === "/mypage" && isGuest === false && profileId ? (
+              <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-700">AI 질문권 {aiCreditBalanceLabel}</span>
+            ) : (
+              <span className="text-xs font-medium text-stone-500">명리 분석</span>
+            )}
           </header>
-          {pathname === "/mypage" && isGuest === false && profileId ? (
-            <div className="px-5 pt-4 sm:px-8">
-              <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white px-4 py-3 shadow-sm">
-                <div>
-                  <p className="text-xs font-semibold tracking-[0.14em] text-stone-500">AI 질문권</p>
-                  <p className="mt-1 text-sm text-stone-600">현재 분석 대상 프로필 기준</p>
-                </div>
-                <strong className="shrink-0 text-base text-stone-950">
-                  {aiCreditBalanceError ? "확인 불가" : aiCreditBalance === null ? "확인 중" : `${aiCreditBalance}회 남음`}
-                </strong>
-              </div>
-            </div>
-          ) : null}
           <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
             {children}
           </div>

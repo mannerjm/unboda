@@ -9,8 +9,8 @@ function read(path: string): string {
 
 function indexAfter(source: string, first: string, second: string, message: string): void {
   const firstIndex = source.indexOf(first);
-  const secondIndex = source.indexOf(second);
   assert.ok(firstIndex >= 0, `${message}: missing first checkpoint`);
+  const secondIndex = source.indexOf(second, firstIndex + first.length);
   assert.ok(secondIndex > firstIndex, `${message}: second checkpoint must occur after first`);
 }
 

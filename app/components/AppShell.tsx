@@ -76,6 +76,8 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
   const [isGuest, setIsGuest] = useState<boolean | null>(null);
   const [hasGuestResult, setHasGuestResult] = useState(false);
   const [memberSajuHref, setMemberSajuHref] = useState("/saju");
+  const [aiCreditBalance, setAiCreditBalance] = useState<number | null>(null);
+  const [aiCreditBalanceError, setAiCreditBalanceError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -118,6 +120,34 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
 
     return () => { cancelled = true; };
   }, [isGuest, profileId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (pathname !== "/mypage" || isGuest !== false || !profileId) {
+      setAiCreditBalance(null);
+      setAiCreditBalanceError(false);
+      return () => { cancelled = true; };
+    }
+
+    setAiCreditBalance(null);
+    setAiCreditBalanceError(false);
+    void fetch(`/api/ai-consulting/credits/balance?profileId=${encodeURIComponent(profileId)}`)
+      .then(async (response) => {
+        const body = await response.json().catch(() => null) as { balance?: number } | null;
+        if (cancelled) return;
+        if (!response.ok || typeof body?.balance !== "number") {
+          setAiCreditBalanceError(true);
+          return;
+        }
+        setAiCreditBalance(Math.max(0, body.balance));
+      })
+      .catch(() => {
+        if (!cancelled) setAiCreditBalanceError(true);
+      });
+
+    return () => { cancelled = true; };
+  }, [isGuest, pathname, profileId]);
 
   const guestContext = isGuest === true && hasGuestResult;
   const guestOrigin = guestContext ? "guest-result-navigation" : "guest-navigation";
@@ -210,6 +240,19 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
             <Link href="/" className="text-lg font-bold tracking-tight text-stone-900">운보다</Link>
             <span className="text-xs font-medium text-stone-500">명리 분석</span>
           </header>
+          {pathname === "/mypage" && isGuest === false && profileId ? (
+            <div className="px-5 pt-4 sm:px-8">
+              <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white px-4 py-3 shadow-sm">
+                <div>
+                  <p className="text-xs font-semibold tracking-[0.14em] text-stone-500">AI 질문권</p>
+                  <p className="mt-1 text-sm text-stone-600">현재 분석 대상 프로필 기준</p>
+                </div>
+                <strong className="shrink-0 text-base text-stone-950">
+                  {aiCreditBalanceError ? "확인 불가" : aiCreditBalance === null ? "확인 중" : `${aiCreditBalance}회 남음`}
+                </strong>
+              </div>
+            </div>
+          ) : null}
           <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
             {children}
           </div>

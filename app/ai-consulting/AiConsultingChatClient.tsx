@@ -31,28 +31,12 @@ type Session =
       messages: Message[];
     };
 
-type MemoryKind = "user_fact" | "life_event" | "goal" | "preference";
-
 type UserMemory = {
   id: string;
-  kind: MemoryKind;
   content: string;
   sourceMessageId: string | null;
   createdAt: string;
   updatedAt: string;
-};
-
-type MemoryDraft = {
-  sourceMessageId: string;
-  kind: MemoryKind;
-  content: string;
-};
-
-const MEMORY_KIND_LABELS: Record<MemoryKind, string> = {
-  user_fact: "나에 대한 사실",
-  life_event: "중요한 사건",
-  goal: "목표",
-  preference: "선호",
 };
 
 function policyMessage(decision: Message["scopeDecision"]): string | null {
@@ -92,8 +76,7 @@ export default function AiConsultingChatClient({
   const [memories, setMemories] = useState<UserMemory[]>([]);
   const [isMemoryLoading, setIsMemoryLoading] = useState(true);
   const [memoryError, setMemoryError] = useState<string | null>(null);
-  const [memoryDraft, setMemoryDraft] = useState<MemoryDraft | null>(null);
-  const [isSavingMemory, setIsSavingMemory] = useState(false);
+  const [savingMemoryMessageId, setSavingMemoryMessageId] = useState<string | null>(null);
   const [deletingMemoryId, setDeletingMemoryId] = useState<string | null>(null);
   const creditCheckoutEnabled = process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true";
 
@@ -191,21 +174,12 @@ export default function AiConsultingChatClient({
     }
   }
 
-  function beginMemoryDraft(message: Message) {
-    setMemoryError(null);
-    setMemoryDraft({
-      sourceMessageId: message.id,
-      kind: "user_fact",
-      content: message.content.slice(0, 300),
-    });
-  }
-
-  async function saveMemory() {
-    if (!memoryDraft || !session || !("threadId" in session) || !session.threadId) return;
-    const content = memoryDraft.content.trim();
+  async function saveMemory(message: Message) {
+    if (!session || !("threadId" in session) || !session.threadId || message.role !== "user") return;
+    const content = message.content.trim();
     if (!content || content.length > 300) return;
 
-    setIsSavingMemory(true);
+    setSavingMemoryMessageId(message.id);
     setMemoryError(null);
     try {
       const response = await fetch("/api/ai-consulting/memories", {
@@ -214,20 +188,19 @@ export default function AiConsultingChatClient({
         body: JSON.stringify({
           profileId,
           threadId: session.threadId,
-          sourceMessageId: memoryDraft.sourceMessageId,
+          sourceMessageId: message.id,
           writeRequestId: crypto.randomUUID(),
-          kind: memoryDraft.kind,
+          kind: "user_fact",
           content,
         }),
       });
       const body = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(body.error ?? "AI 기억을 저장하지 못했습니다.");
-      setMemoryDraft(null);
       await loadMemories();
     } catch (reason) {
       setMemoryError(reason instanceof Error ? reason.message : "AI 기억을 저장하지 못했습니다.");
     } finally {
-      setIsSavingMemory(false);
+      setSavingMemoryMessageId(null);
     }
   }
 
@@ -319,9 +292,9 @@ export default function AiConsultingChatClient({
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold tracking-[0.16em] text-stone-500">LONG-TERM MEMORY</p>
-                  <h2 className="mt-2 text-base font-bold text-stone-950">AI가 기억하는 내용</h2>
+                  <h2 className="mt-2 text-base font-bold text-stone-950">AI가 기억하는 내 상황</h2>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">
-                    내가 직접 저장한 내용만 사용자 사실로 참고합니다. 운보다의 명리 해석이나 AI의 추정은 사용자 사실로 저장하지 않습니다.
+                    내가 직접 저장한 내용만 다음 상담의 현재 상황으로 참고합니다. AI가 임의로 내용을 만들거나 자동 저장하지 않습니다.
                   </p>
                 </div>
                 <span className="shrink-0 rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-700">
@@ -331,7 +304,7 @@ export default function AiConsultingChatClient({
 
               {!isMemoryLoading && memories.length === 0 ? (
                 <div className="mt-4 rounded-2xl bg-stone-50 px-4 py-4 text-sm leading-6 text-stone-500">
-                  아직 저장한 기억이 없습니다. 상담 중 내가 작성한 메시지의 <strong className="font-semibold text-stone-700">기억에 추가</strong>를 눌러 필요한 내용만 직접 저장할 수 있습니다.
+                  아직 기억한 내용이 없습니다. 상담 중 내가 작성한 메시지에서 <strong className="font-semibold text-stone-700">이 내용 기억하기</strong>를 누르면 그대로 저장됩니다.
                 </div>
               ) : null}
 
@@ -339,10 +312,7 @@ export default function AiConsultingChatClient({
                 <div className="mt-4 space-y-2">
                   {memories.map((memory) => (
                     <div key={memory.id} className="flex flex-col gap-3 rounded-2xl bg-stone-50 px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0">
-                        <span className="text-xs font-semibold text-stone-500">{MEMORY_KIND_LABELS[memory.kind]}</span>
-                        <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-stone-800">{memory.content}</p>
-                      </div>
+                      <p className="min-w-0 whitespace-pre-wrap text-sm leading-6 text-stone-800">{memory.content}</p>
                       <button
                         type="button"
                         onClick={() => void deleteMemory(memory)}
@@ -371,7 +341,7 @@ export default function AiConsultingChatClient({
               {messages.map((message) => {
                 const policy = message.role === "user" ? policyMessage(message.scopeDecision) : null;
                 const remembered = message.role === "user" && rememberedSourceMessageIds.has(message.id);
-                const editingMemory = message.role === "user" && memoryDraft?.sourceMessageId === message.id;
+                const savingMemory = message.role === "user" && savingMemoryMessageId === message.id;
                 return (
                   <div key={message.id} className="space-y-2">
                     <div
@@ -384,63 +354,17 @@ export default function AiConsultingChatClient({
                     {message.role === "user" ? (
                       <div className="ml-auto flex max-w-[88%] justify-end">
                         {remembered ? (
-                          <span className="text-xs font-semibold text-stone-500">✓ AI 기억에 저장됨</span>
+                          <span className="text-xs font-semibold text-stone-500">✓ AI가 기억 중</span>
                         ) : (
                           <button
                             type="button"
-                            onClick={() => beginMemoryDraft(message)}
-                            className="text-xs font-semibold text-stone-600 underline underline-offset-4"
+                            onClick={() => void saveMemory(message)}
+                            disabled={savingMemory}
+                            className="text-xs font-semibold text-stone-600 underline underline-offset-4 disabled:opacity-50"
                           >
-                            기억에 추가
+                            {savingMemory ? "저장 중" : "이 내용 기억하기"}
                           </button>
                         )}
-                      </div>
-                    ) : null}
-                    {editingMemory && memoryDraft ? (
-                      <div className="ml-auto max-w-[88%] rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
-                        <p className="text-sm font-semibold text-stone-900">다음 상담에서도 기억할 내용만 남겨주세요.</p>
-                        <p className="mt-1 text-xs leading-5 text-stone-500">질문이나 추측은 지우고, 내가 직접 확인한 사실·사건·목표·선호만 저장하는 것을 권장합니다.</p>
-                        <div className="mt-3 grid gap-3 sm:grid-cols-[9rem_1fr]">
-                          <select
-                            value={memoryDraft.kind}
-                            onChange={(event) => setMemoryDraft({ ...memoryDraft, kind: event.target.value as MemoryKind })}
-                            disabled={isSavingMemory}
-                            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm outline-none focus:border-stone-500"
-                          >
-                            {Object.entries(MEMORY_KIND_LABELS).map(([value, label]) => (
-                              <option key={value} value={value}>{label}</option>
-                            ))}
-                          </select>
-                          <textarea
-                            value={memoryDraft.content}
-                            onChange={(event) => setMemoryDraft({ ...memoryDraft, content: event.target.value.slice(0, 300) })}
-                            maxLength={300}
-                            rows={3}
-                            disabled={isSavingMemory}
-                            className="resize-none rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm leading-6 outline-none focus:border-stone-500"
-                          />
-                        </div>
-                        <div className="mt-3 flex items-center justify-between gap-3">
-                          <span className="text-xs text-stone-500">{memoryDraft.content.length}/300</span>
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setMemoryDraft(null)}
-                              disabled={isSavingMemory}
-                              className="rounded-xl px-3 py-2 text-xs font-semibold text-stone-600 disabled:opacity-50"
-                            >
-                              취소
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => void saveMemory()}
-                              disabled={isSavingMemory || memoryDraft.content.trim().length === 0}
-                              className="rounded-xl bg-stone-950 px-4 py-2 text-xs font-semibold text-white disabled:opacity-40"
-                            >
-                              {isSavingMemory ? "저장 중" : "이 내용 기억하기"}
-                            </button>
-                          </div>
-                        </div>
                       </div>
                     ) : null}
                     {policy ? (

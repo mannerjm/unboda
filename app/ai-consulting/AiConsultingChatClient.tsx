@@ -38,6 +38,19 @@ function policyMessage(decision: Message["scopeDecision"]): string | null {
   return null;
 }
 
+function formatRecentActivity(value: string | undefined): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
 export default function AiConsultingChatClient({
   profileId,
   productId,
@@ -84,6 +97,11 @@ export default function AiConsultingChatClient({
     if (!session || !("messages" in session)) return [];
     return session.messages;
   }, [session]);
+  const hasPreviousConversation = messages.length > 0;
+  const lastActivityAt = useMemo(
+    () => formatRecentActivity(messages[messages.length - 1]?.createdAt),
+    [messages],
+  );
 
   async function submitQuestion(event: FormEvent) {
     event.preventDefault();
@@ -160,7 +178,16 @@ export default function AiConsultingChatClient({
         {!isLoading && session && (session.state === "ready" || (session.state === "credit_required" && session.threadId)) ? (
           <>
             <section className="mt-6 flex flex-col gap-3 rounded-2xl border border-stone-200 bg-white px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-              <span className="text-sm font-semibold">상담 기록</span>
+              <div>
+                <span className="text-sm font-semibold">
+                  {hasPreviousConversation ? "이전 상담 이어보기" : "상담 기록"}
+                </span>
+                {hasPreviousConversation ? (
+                  <p className="mt-1 text-xs leading-5 text-stone-500">
+                    이전 대화 {messages.length}개를 불러왔습니다{lastActivityAt ? ` · 최근 상담 ${lastActivityAt}` : ""}.
+                  </p>
+                ) : null}
+              </div>
               <div className="flex items-center gap-4">
                 <span className="text-sm text-stone-600">남은 질문 {session.questionsRemaining}회</span>
                 <Link href={creditCheckoutHref} className="text-sm font-semibold text-stone-900 underline underline-offset-4">
@@ -202,7 +229,9 @@ export default function AiConsultingChatClient({
                 <textarea
                   value={question}
                   onChange={(event) => setQuestion(event.target.value.slice(0, 300))}
-                  placeholder="이 분석에서 더 궁금한 점을 질문해 주세요."
+                  placeholder={hasPreviousConversation
+                    ? "지난 상담에서 이어서 궁금한 점을 질문해 주세요."
+                    : "이 분석에서 더 궁금한 점을 질문해 주세요."}
                   rows={3}
                   disabled={isSending}
                   className="w-full resize-none rounded-2xl bg-stone-100 px-4 py-3 text-sm leading-6 outline-none ring-stone-900 focus:ring-1 disabled:opacity-60"

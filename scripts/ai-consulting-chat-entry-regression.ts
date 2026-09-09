@@ -28,6 +28,7 @@ assert(sessionService.includes('report.status !== "completed"'), "session must r
 assert(sessionService.includes("getAiConsultingCreditBalance"), "session must read the shared profile credit balance");
 assert(sessionService.includes("ensureAiConsultingAccessGrant"), "session must create only an access binding after credit and entitlement checks");
 assert(sessionService.includes("get_or_create_ai_consulting_thread"), "session service must use atomic thread RPC");
+assert(sessionService.includes("loadMessages"), "session must reload persisted messages for an existing thread");
 
 assert(sessionRoute.includes("getCurrentUser"), "session API must authenticate first");
 assert(sessionRoute.includes("getActiveProfile"), "session API must enforce the active profile boundary");
@@ -36,10 +37,16 @@ assert(questionRoute.includes("answerAiConsultingQuestion"), "question API must 
 assert(questionRoute.includes("crypto") === false, "server question API must never generate hidden retries on behalf of the browser");
 assert(questionRoute.includes("300"), "question API must enforce the 300-char cap");
 
-assert(entryCard.includes('session.state === "credit_required"') && entryCard.includes("return null"), "report CTA must stay hidden when no credit and no prior thread exists");
+assert(entryCard.includes('session.state === "credit_required"') && entryCard.includes("return null"), "report CTA must stay hidden when no credit and no readable prior conversation exists");
+assert(entryCard.includes("session.messages.length > 0"), "report CTA must distinguish an actual prior conversation from an empty thread");
+assert(entryCard.includes("이전 상담 이어보기") && entryCard.includes("이전 상담 기록 보기"), "report CTA must expose explicit continuation and history-reading actions");
+assert(entryCard.includes("최근"), "report CTA must show recent prior-conversation activity when available");
 assert(reportPage.includes("AiConsultingEntryCard"), "paid report page must wire the credit-gated entry card");
 assert(chatClient.includes("crypto.randomUUID()"), "each browser submission must get an idempotency request id");
 assert(chatClient.includes("scopeDecision") && chatClient.includes("차감되지 않았습니다"), "non-chargeable scope outcomes must be visible without pretending they are answers");
+assert(chatClient.includes("hasPreviousConversation") && chatClient.includes("이전 상담 이어보기"), "chat must visibly distinguish a resumed conversation from a first consultation");
+assert(chatClient.includes("최근 상담") && chatClient.includes("이전 대화"), "chat must orient the user with prior-conversation activity metadata");
+assert(chatClient.includes("지난 상담에서 이어서 궁금한 점을 질문해 주세요."), "resumed chat composer must explicitly invite continuation");
 assert(chatClient.includes("whitespace-pre-wrap"), "assistant answers must render as text rather than injected HTML");
 assert(!chatClient.includes("dangerouslySetInnerHTML"), "chat must not render model output as raw HTML");
 

@@ -21,7 +21,11 @@ assert(crons[0]?.schedule === "0 * * * *", "cron must run at most hourly");
 
 const dispatcherRoute = read("app/api/internal/reconcile/route.ts");
 const schedulerAuth = read("app/lib/internal/schedulerAuth.ts");
-assert(schedulerAuth.includes("PAYMENT_RECONCILIATION_SECRET"), "scheduler route must require a secret");
+assert(schedulerAuth.includes("CRON_SECRET"), "shared scheduler must support the Vercel CRON_SECRET contract");
+assert(
+  schedulerAuth.includes("process.env.CRON_SECRET ?? process.env.PAYMENT_RECONCILIATION_SECRET"),
+  "shared scheduler must prefer CRON_SECRET and only retain the payment secret as a compatibility fallback",
+);
 assert(schedulerAuth.includes("Bearer"), "scheduler route must accept Vercel Cron bearer authentication");
 assert(dispatcherRoute.includes("export async function GET"), "scheduler route must expose GET for Vercel Cron");
 assert(dispatcherRoute.includes("force-dynamic") && dispatcherRoute.includes("no-store"), "cron mutation route must be dynamic and uncached");

@@ -130,11 +130,20 @@ async function dispatch(request: Request) {
     recipientCount?: number;
     errorCode?: string;
   }>;
+  const operatorAlertConfigured = Boolean(process.env.RESEND_API_KEY?.trim());
   try {
     const summary = await sendOwnerReviewAlertIfNeeded();
     operatorAlerts = { ok: true, ...summary };
+    console.info("[owner-alert]", {
+      configured: operatorAlertConfigured,
+      status: summary.status,
+      incidentCount: summary.incidentCount,
+      recipientCount: "recipientCount" in summary ? summary.recipientCount : undefined,
+      errorCode: "errorCode" in summary ? summary.errorCode : undefined,
+    });
   } catch {
     operatorAlerts = { ok: false };
+    console.error("[owner-alert]", { configured: operatorAlertConfigured, status: "worker_failed" });
   }
 
   const ok = payments.ok && refunds.ok && accountClosures.ok && guestCleanup.ok;

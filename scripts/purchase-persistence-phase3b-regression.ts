@@ -159,11 +159,11 @@ assert(detailRoute.includes("status: 403"), "detail route must return 403 withou
 
 const authIndex = detailRoute.indexOf("getCurrentUser");
 const entitlementIndex = detailRoute.indexOf("getActiveEntitlementForProfile");
-const generateIndex = detailRoute.indexOf("generatePaidAnalysisDetailV2(");
+const generateIndex = detailRoute.indexOf("generatePaidAnalysisDetailForPurchasedRuntime(");
 assert(authIndex !== -1 && entitlementIndex !== -1 && generateIndex !== -1, "detail route markers present");
 assert(
   authIndex < generateIndex && entitlementIndex < generateIndex,
-  "auth + entitlement checks must run before the OpenAI generation call",
+  "auth + entitlement checks must run before the paid analysis runtime generation call",
 );
 console.log("6. /api/paid-analysis-detail-v2 gated by auth + entitlement before OpenAI ✓");
 

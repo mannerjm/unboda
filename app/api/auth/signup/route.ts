@@ -18,6 +18,7 @@ type SignupRequest = {
   termsAccepted?: unknown;
   age14OrOlderConfirmed?: unknown;
   returnTo?: unknown;
+  captchaToken?: unknown;
 };
 
 function invalidRequest(message: string) {
@@ -38,6 +39,15 @@ export async function POST(request: NextRequest) {
 
   const safeReturnTo = getSafeReturnTo(typeof body.returnTo === "string" ? body.returnTo : undefined);
   const currentUser = await getCurrentUser();
+  const captchaRequired = process.env.NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED === "true";
+
+  if (
+    !currentUser
+    && captchaRequired
+    && (typeof body.captchaToken !== "string" || !body.captchaToken.trim())
+  ) {
+    return invalidRequest("보안 확인을 완료해 주세요.");
+  }
 
   try {
     let userId = currentUser?.id;
@@ -65,6 +75,9 @@ export async function POST(request: NextRequest) {
             options: {
               data: { signupAttemptId: attemptId },
               emailRedirectTo: `${request.nextUrl.origin}/auth/callback?signupPolicy=required&returnTo=${encodeURIComponent(safeReturnTo)}`,
+              captchaToken: captchaRequired && typeof body.captchaToken === "string"
+                ? body.captchaToken
+                : undefined,
             },
           });
           return { user: data.user, error };

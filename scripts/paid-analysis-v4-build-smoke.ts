@@ -1,5 +1,6 @@
 import { generateCalibrationProduct } from "../app/lib/paidAnalysisV4CalibrationHarness";
 
+// This Preview-only runner intentionally generates exactly one synthetic V4 product.
 const SHOULD_RUN =
   process.env.VERCEL_ENV === "preview" &&
   process.env.VERCEL_GIT_COMMIT_REF === "test/v4-one-product-smoke" &&

@@ -58,11 +58,13 @@ export default function AdminOperationsOverview({
   aiOperations,
   aiQuality,
   operatorAlertConfigured,
+  supportQueueCount,
 }: {
   failureSummary: FailureSummary | null;
   aiOperations: AiOperationsSnapshot | null;
   aiQuality: AiQualitySnapshot | null;
   operatorAlertConfigured: boolean;
+  supportQueueCount: number | null;
 }) {
   const operationalAttention = failureSummary
     ? Object.values(failureSummary).reduce((sum, count) => sum + count, 0)
@@ -128,7 +130,12 @@ export default function AdminOperationsOverview({
         />
       </div>
 
-      <div className="mt-4 grid gap-3 lg:grid-cols-4">
+      <div className="mt-4 grid gap-3 lg:grid-cols-5">
+        <div className={`border p-4 ${supportQueueCount === 0 ? "border-emerald-200 bg-emerald-50" : supportQueueCount === null ? "border-amber-200 bg-amber-50" : "border-stone-200 bg-white"}`}>
+          <p className="text-xs font-semibold text-stone-600">고객지원 요청</p>
+          <p className="mt-2 text-lg font-bold">{supportQueueCount === null ? "-" : `${number(supportQueueCount)}건`}</p>
+          <p className="mt-2 text-xs leading-5 text-stone-600">자동 해결 안내로 해결되지 않아 접수된 진행 중 문의입니다.</p>
+        </div>
         <div className={`border p-4 ${operatorAlertConfigured ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
           <p className="text-xs font-semibold text-stone-600">대표 예외 이메일 알림</p>
           <p className="mt-2 text-lg font-bold">{operatorAlertConfigured ? "설정됨" : "설정 필요"}</p>
@@ -152,6 +159,7 @@ export default function AdminOperationsOverview({
       </div>
 
       <nav className="mt-5 flex flex-wrap gap-2" aria-label="운영자 바로가기">
+        <Link href="/admin/support" className="border border-stone-900 bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white">고객지원 요청 {supportQueueCount === null ? "-" : `${number(supportQueueCount)}건`}</Link>
         <Link href="/admin/guide" className="border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800">대표 운영 가이드</Link>
         <Link href="/admin/ai-consulting/operations" className="border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800">AI 상담 운영</Link>
         <Link href="/admin/ai-consulting" className="border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800">AI 품질·비용</Link>

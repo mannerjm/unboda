@@ -3,6 +3,7 @@ import { getAiConsultingOperationsReport } from "@/app/lib/aiConsulting/operatio
 import { getAiConsultingQualityCostReport } from "@/app/lib/aiConsulting/qualityCost";
 import { getOperationalFailureSummary } from "@/app/lib/operators/failureVisibilityServer";
 import { OperatorAuthorizationError, requireOperator } from "@/app/lib/operators/server";
+import { getActiveSupportRequestCount } from "@/app/lib/support/operatorServer";
 import AdminLookupConsole from "./AdminLookupConsole";
 import AdminOperationsOverview from "./AdminOperationsOverview";
 
@@ -27,15 +28,17 @@ export default async function AdminPage() {
     );
   }
 
-  const [failureResult, operationsResult, qualityResult] = await Promise.allSettled([
+  const [failureResult, operationsResult, qualityResult, supportResult] = await Promise.allSettled([
     getOperationalFailureSummary(),
     getAiConsultingOperationsReport(24),
     getAiConsultingQualityCostReport(100),
+    getActiveSupportRequestCount(),
   ]);
 
   const failureSummary = failureResult.status === "fulfilled" ? failureResult.value : null;
   const operations = operationsResult.status === "fulfilled" ? operationsResult.value : null;
   const quality = qualityResult.status === "fulfilled" ? qualityResult.value : null;
+  const supportQueueCount = supportResult.status === "fulfilled" ? supportResult.value : null;
 
   const chargeIntegrityIssueCount = operations
     ? operations.chargeIntegrity.chargedWithoutAssistant
@@ -71,6 +74,7 @@ export default async function AdminPage() {
           aiOperations={aiOperations}
           aiQuality={aiQuality}
           operatorAlertConfigured={Boolean(process.env.RESEND_API_KEY?.trim())}
+          supportQueueCount={supportQueueCount}
         />
         <AdminLookupConsole initialFailureSummary={failureSummary} />
       </div>

@@ -50,7 +50,7 @@ export type PaidGenerationAttempt = {
   productId: string;
   productFamily: PaidGenerationProductFamily;
   commercialBand: PaidGenerationCommercialBand;
-  generationContractVersion: "V3";
+  generationContractVersion: "V3" | "V4";
   model: string;
   reasoningEffort: "low";
   maxOutputTokens: number;
@@ -77,7 +77,7 @@ export type PaidGenerationAttemptRow = {
   product_id: string;
   product_family: PaidGenerationProductFamily;
   commercial_band: PaidGenerationCommercialBand;
-  generation_contract_version: "V3";
+  generation_contract_version: "V3" | "V4";
   model: string;
   reasoning_effort: "low";
   max_output_tokens: number;

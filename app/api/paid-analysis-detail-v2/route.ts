@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import {
-  generatePaidAnalysisDetailV2,
-} from "@/app/lib/paidAnalysisDetailService";
+import { generatePaidAnalysisDetailForPurchasedRuntime } from "@/app/lib/paidAnalysisV4Runtime";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { resolvePurchasableProduct } from "@/app/lib/purchases/products";
 import {
@@ -204,7 +202,7 @@ export async function POST(request: Request) {
     }
 
     const paidInput = buildPaidAnalysisInputFromProfile(generationProfile, resolved.productId, referenceSnapshot?.anchorDate);
-    const detail = await generatePaidAnalysisDetailV2(paidInput, {
+    const detail = await generatePaidAnalysisDetailForPurchasedRuntime(paidInput, {
       attemptId: telemetryAttemptId,
       reportId: claim.report.id,
       generationId: claim.report.id,

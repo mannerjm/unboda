@@ -35,6 +35,32 @@ for (const status of [429, 500, 502, 503, 504]) {
   );
 }
 
+assert(
+  shouldRetryPaidAnalysisV4TransientError({
+    status: 429,
+    code: "rate_limit_exceeded",
+    type: "rate_limit_error",
+  }),
+  "ordinary 429 rate limits must remain retryable",
+);
+
+for (const quotaError of [
+  {
+    status: 429,
+    code: "credit_balance_exhausted",
+    type: "insufficient_quota",
+  },
+  { status: 429, code: "credit_balance_exhausted" },
+  { status: 429, code: "insufficient_quota" },
+  { status: 429, type: "insufficient_quota" },
+  { status: "429", code: "CREDIT_BALANCE_EXHAUSTED", type: "INSUFFICIENT_QUOTA" },
+]) {
+  assert(
+    !shouldRetryPaidAnalysisV4TransientError(quotaError),
+    "quota and credit exhaustion must fail immediately instead of retrying",
+  );
+}
+
 for (const status of [400, 401, 403, 404, 409, 422]) {
   assert(
     !shouldRetryPaidAnalysisV4TransientError({ status }),

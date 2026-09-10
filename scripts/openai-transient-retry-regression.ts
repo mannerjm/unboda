@@ -71,14 +71,39 @@ const generatorSource = readFileSync(
   join(process.cwd(), "app/lib/ai/generateAnalysisText.ts"),
   "utf8",
 );
-assert(
-  generatorSource.includes('console.warn("[generateAnalysisText] transient-retry"'),
-  "retry telemetry log must exist",
+const retryWarnMatch = generatorSource.match(
+  /console\.warn\("\[generateAnalysisText\] transient-retry",\s*\{[\s\S]*?\}\s*\);/,
 );
-assert(
-  !generatorSource.includes("retryPrompt") &&
-    !generatorSource.includes("prompt:"),
-  "retry telemetry must not log prompt content",
-);
+assert(Boolean(retryWarnMatch), "retry telemetry log must exist");
+
+const retryWarnPayload = retryWarnMatch![0].slice(retryWarnMatch![0].indexOf("{"));
+for (const forbidden of [
+  "prompt",
+  "input",
+  "responseText",
+  "birthData",
+  "saju",
+  "userConcern",
+]) {
+  assert(
+    !retryWarnPayload.includes(forbidden),
+    `retry telemetry must not log ${forbidden} content`,
+  );
+}
+
+for (const allowed of [
+  "callType",
+  "model",
+  "retryAttempt",
+  "retryLimit",
+  "retryDelayMs",
+  "errorStatus",
+  "errorCode",
+]) {
+  assert(
+    retryWarnPayload.includes(allowed),
+    `retry telemetry should include ${allowed}`,
+  );
+}
 
 console.log("\n✅ V4 transient OpenAI retry policy regression passed");

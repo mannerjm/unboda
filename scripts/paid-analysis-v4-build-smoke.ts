@@ -1,48 +1,35 @@
 import { buildPaidAnalysisInputFromProfile } from "../app/lib/paidAnalysisProfileInput";
 import { generatePaidAnalysisDetailV4WithConsistencyRetry } from "../app/lib/paidAnalysisV4ConsistencyRetry";
+import {
+  auditPaidAnalysisV4ActualOutputTier,
+  auditPaidAnalysisV4ActualTierSample,
+  type PaidAnalysisV4ActualTierSample,
+} from "../app/lib/paidAnalysisV4ActualOutputTierQuality";
 import { getPaidAnalysisEngine } from "../app/lib/paidAnalysisEngine";
-import { getLaunchProductIds } from "../app/lib/paidAnalysisTopicConfig";
-import { reviewEvidenceLinkage } from "../app/lib/paidAnalysisV4QualityValidators";
 import { validatePaidAnalysisV4HealthSafety } from "../app/lib/paidAnalysisV4HealthSafetyValidator";
+import { getProductPricing } from "../app/lib/productPricing";
 import type { PaidAnalysisResponseTelemetry } from "../app/lib/ai/generateAnalysisText";
 import type { ProfileDto } from "../app/lib/profiles/types";
 
-const BATCH_SIZE = 9;
-const BATCH_COUNT = 6;
-const CONSISTENCY_SMOKE_PRODUCT_ID = "money-income-stability";
-const commitMessage = process.env.VERCEL_GIT_COMMIT_MESSAGE ?? "";
-const batchMessageMatch = commitMessage.match(/^Run V4 launch batch ([1-6])$/);
-const batchNumber = batchMessageMatch ? Number(batchMessageMatch[1]) : null;
-const isConsistencySmoke = commitMessage === "Run V4 consistency smoke";
+const RUN_MESSAGE = "Run V4 price-tier output calibration";
 const SHOULD_RUN =
   process.env.VERCEL_ENV === "preview" &&
   process.env.VERCEL_GIT_COMMIT_REF === "test/v4-one-product-smoke" &&
-  (batchNumber !== null || isConsistencySmoke);
+  process.env.VERCEL_GIT_COMMIT_MESSAGE === RUN_MESSAGE;
 
-const launchProductIds = getLaunchProductIds();
-if (launchProductIds.length !== 54) {
-  throw new Error(`Expected exactly 54 Launch products, got ${launchProductIds.length}`);
-}
-
-const PRODUCT_IDS = isConsistencySmoke
-  ? [CONSISTENCY_SMOKE_PRODUCT_ID]
-  : batchNumber === null
-    ? []
-    : launchProductIds.slice((batchNumber - 1) * BATCH_SIZE, batchNumber * BATCH_SIZE);
-
-if (batchNumber !== null && PRODUCT_IDS.length !== BATCH_SIZE) {
-  throw new Error(
-    `Launch batch ${batchNumber}/${BATCH_COUNT} must contain exactly ${BATCH_SIZE} products`,
-  );
-}
-
-const runLabel = isConsistencySmoke
-  ? "consistency-smoke"
-  : `batch-${batchNumber ?? "none"}`;
+// First live threshold calibration: one representative from every price family.
+// All 54 products were already generated in the earlier six-batch Launch smoke;
+// this run tests the new price-value validator before widening the sample.
+const PRODUCT_IDS = [
+  "career-job-change", // CORE 9,900
+  "relationship-current", // DEEP 16,900
+  "yearly-current", // LONG_RANGE 29,900
+  "lifetime-overview", // SIGNATURE 39,900
+] as const;
 
 const SYNTHETIC_PROFILE: ProfileDto = {
   id: "00000000-0000-0000-0000-000000000000",
-  label: "Synthetic V4 launch calibration persona",
+  label: "Synthetic V4 price-tier calibration persona",
   relationshipType: "self",
   birthDate: "1995-05-20",
   birthTime: "09:00",
@@ -53,124 +40,19 @@ const SYNTHETIC_PROFILE: ProfileDto = {
   updatedAt: "2026-01-01T00:00:00.000Z",
 };
 
-type ProductResult = {
-  productId: string;
-  engine: string | undefined;
-  signature: string;
-  outputChars: number;
-  linkageWarningCount: number;
-  usage: PaidAnalysisResponseTelemetry | null;
-};
-
-function tokenSet(value: string): Set<string> {
-  return new Set(
-    value
-      .replace(/[^\p{L}\p{N}]+/gu, " ")
-      .split(/\s+/)
-      .map((token) => token.trim())
-      .filter((token) => token.length >= 2),
-  );
-}
-
-function overlap(left: string, right: string): number {
-  const leftTokens = tokenSet(left);
-  const rightTokens = tokenSet(right);
-  if (leftTokens.size === 0 || rightTokens.size === 0) return 0;
-  const shared = [...leftTokens].filter((token) => rightTokens.has(token)).length;
-  return shared / Math.max(leftTokens.size, rightTokens.size);
-}
-
-async function generateOne(productId: string): Promise<ProductResult> {
-  const engine = getPaidAnalysisEngine(productId);
-  let usage: PaidAnalysisResponseTelemetry | null = null;
-  const input = buildPaidAnalysisInputFromProfile(
-    SYNTHETIC_PROFILE,
-    productId,
-    "2026-08-25",
-  );
-
-  console.log(`[v4-launch-batch] START run=${runLabel} productId=${productId} engine=${engine ?? "unknown"}`);
-  const result = await generatePaidAnalysisDetailV4WithConsistencyRetry(input, {
-    onResponseTelemetry: (telemetry) => {
-      usage = telemetry;
-    },
-  });
-
-  if (engine === "HEALTH") {
-    const healthSafety = validatePaidAnalysisV4HealthSafety(result);
-    if (!healthSafety.ok) {
-      throw new Error(
-        `${productId}: V4 health safety failed: ${healthSafety.issues
-          .map((issue) => `${issue.field}:${issue.message}`)
-          .join(" | ")}`,
-      );
-    }
-  }
-
-  const linkageWarnings = reviewEvidenceLinkage(result);
-  if (linkageWarnings.length > 0) {
-    console.log("[v4-launch-batch] LINKAGE_DIAGNOSTIC", {
-      runLabel,
-      productId,
-      direction: result.conclusion.direction,
-      focus: result.conclusion.focus,
-      warnings: linkageWarnings.map((warning) => {
-        const match = warning.field.match(/^evidence\[(\d+)\]\.linkage$/);
-        const index = match ? Number(match[1]) : -1;
-        return {
-          field: warning.field,
-          linkage: index >= 0 ? result.evidence[index]?.linkage ?? "" : "",
-        };
-      }),
-    });
-  }
-
-  const signature = [
-    result.conclusion.focus,
-    result.coreProblem.title,
-    ...result.timeline.map((item) => item.label),
-    ...result.action.map((item) => item.target),
-  ].join(" | ");
-  const outputChars = JSON.stringify(result).length;
-
-  console.log("[v4-launch-batch] PRODUCT_PASS", {
-    runLabel,
-    productId,
-    engine,
-    direction: result.conclusion.direction,
-    evidenceCount: result.evidence.length,
-    timelineCount: result.timeline.length,
-    actionCount: result.action.length,
-    decisionCheckCount: result.decisionCheck?.length ?? 0,
-    strictLinkageWarningCount: linkageWarnings.length,
-    outputChars,
-    usage,
-  });
-
-  return {
-    productId,
-    engine,
-    signature,
-    outputChars,
-    linkageWarningCount: linkageWarnings.length,
-    usage,
-  };
-}
-
 async function main(): Promise<void> {
   if (!SHOULD_RUN) {
-    console.log("[v4-launch-batch] skipped");
+    console.log("[v4-price-output-calibration] skipped");
     return;
   }
 
   console.log(
-    `[v4-launch-batch] START run=${runLabel} count=${PRODUCT_IDS.length} ids=${PRODUCT_IDS.join(",")}`,
+    `[v4-price-output-calibration] START count=${PRODUCT_IDS.length} ids=${PRODUCT_IDS.join(",")}`,
   );
 
-  const results: ProductResult[] = [];
+  const samples: PaidAnalysisV4ActualTierSample[] = [];
   const failures: Array<{ productId: string; error: string }> = [];
   let nextIndex = 0;
-  const workerCount = isConsistencySmoke ? 1 : 2;
 
   async function worker(): Promise<void> {
     while (true) {
@@ -178,69 +60,109 @@ async function main(): Promise<void> {
       nextIndex += 1;
       if (index >= PRODUCT_IDS.length) return;
       const productId = PRODUCT_IDS[index];
+      const pricing = getProductPricing(productId);
+      const engine = getPaidAnalysisEngine(productId);
+      let usage: PaidAnalysisResponseTelemetry | null = null;
+
       try {
-        results.push(await generateOne(productId));
+        console.log(
+          `[v4-price-output-calibration] PRODUCT_START productId=${productId} family=${pricing.family} engine=${engine ?? "unknown"}`,
+        );
+        const input = buildPaidAnalysisInputFromProfile(
+          SYNTHETIC_PROFILE,
+          productId,
+          "2026-08-25",
+        );
+        const output = await generatePaidAnalysisDetailV4WithConsistencyRetry(input, {
+          onResponseTelemetry: (telemetry) => {
+            usage = telemetry;
+          },
+        });
+
+        if (engine === "HEALTH") {
+          const healthSafety = validatePaidAnalysisV4HealthSafety(output);
+          if (!healthSafety.ok) {
+            throw new Error(
+              `health safety failed: ${healthSafety.issues
+                .map((issue) => `${issue.field}:${issue.message}`)
+                .join(" | ")}`,
+            );
+          }
+        }
+
+        const audit = auditPaidAnalysisV4ActualOutputTier(productId, output);
+        const warnings = audit.issues.filter((issue) => issue.severity === "warning");
+        const errors = audit.issues.filter((issue) => issue.severity === "error");
+
+        console.log("[v4-price-output-calibration] PRODUCT_RESULT", {
+          productId,
+          family: pricing.family,
+          ok: audit.ok,
+          direction: output.conclusion.direction,
+          focus: output.conclusion.focus,
+          depthUnits: audit.metrics.depthUnits,
+          evidence: `${audit.metrics.distinctEvidenceKeyCount}/${audit.metrics.evidenceCount}`,
+          actions: `${audit.metrics.distinctActionTargetCount}/${audit.metrics.actionCount}`,
+          ownershipFocusHits: audit.metrics.ownershipFocusHitCount,
+          ownershipActionHits: audit.metrics.ownershipActionHitCount,
+          periodTimelineItems: audit.metrics.periodTimelineItemCount,
+          periodKeyPoints: audit.metrics.periodKeyPointCount,
+          periodSegmentsWithActions: audit.metrics.periodSegmentActionCount,
+          periodSegmentsWithCautions: audit.metrics.periodSegmentCautionCount,
+          decisionCheckCount: audit.metrics.decisionCheckCount,
+          linkageWarningCount: audit.metrics.linkageWarningCount,
+          warnings: warnings.map((issue) => `${issue.field}:${issue.message}`),
+          errors: errors.map((issue) => `${issue.field}:${issue.message}`),
+          usage,
+        });
+
+        if (!audit.ok) {
+          throw new Error(
+            errors.map((issue) => `${issue.field}:${issue.message}`).join(" | "),
+          );
+        }
+
+        samples.push({ productId, output });
       } catch (error) {
         failures.push({
           productId,
           error: error instanceof Error ? error.message : "unknown failure",
         });
-        console.error("[v4-launch-batch] PRODUCT_FAIL", failures[failures.length - 1]);
+        console.error(
+          "[v4-price-output-calibration] PRODUCT_FAIL",
+          failures[failures.length - 1],
+        );
       }
     }
   }
 
-  await Promise.all(Array.from({ length: workerCount }, () => worker()));
-
-  const similarityWarnings: Array<{ left: string; right: string; overlap: number }> = [];
-  for (let leftIndex = 0; leftIndex < results.length; leftIndex += 1) {
-    for (let rightIndex = leftIndex + 1; rightIndex < results.length; rightIndex += 1) {
-      const left = results[leftIndex];
-      const right = results[rightIndex];
-      if (left.engine !== right.engine) continue;
-      const score = overlap(left.signature, right.signature);
-      if (score >= 0.65) {
-        similarityWarnings.push({
-          left: left.productId,
-          right: right.productId,
-          overlap: Number(score.toFixed(3)),
-        });
-      }
-    }
-  }
-
-  console.log("[v4-launch-batch] BATCH_SUMMARY", {
-    runLabel,
-    requested: PRODUCT_IDS.length,
-    passed: results.length,
-    failed: failures.length,
-    failures,
-    similarityWarnings,
-    totalLinkageWarnings: results.reduce(
-      (sum, item) => sum + item.linkageWarningCount,
-      0,
-    ),
-    totalInputTokens: results.reduce(
-      (sum, item) => sum + (item.usage?.inputTokens ?? 0),
-      0,
-    ),
-    totalOutputTokens: results.reduce(
-      (sum, item) => sum + (item.usage?.outputTokens ?? 0),
-      0,
-    ),
-    outputChars: results.map((item) => ({
-      productId: item.productId,
-      outputChars: item.outputChars,
-    })),
-  });
+  await Promise.all([worker(), worker()]);
 
   if (failures.length > 0) {
+    console.error("[v4-price-output-calibration] SAMPLE_FAIL", { failures });
     process.exitCode = 1;
+    return;
   }
+
+  const sampleAudit = auditPaidAnalysisV4ActualTierSample(samples);
+  console.log("[v4-price-output-calibration] FAMILY_RESULT", {
+    ok: sampleAudit.ok,
+    familyAverageDepthUnits: sampleAudit.familyAverageDepthUnits,
+    errors: sampleAudit.issues.map((issue) => `${issue.field}:${issue.message}`),
+  });
+
+  if (!sampleAudit.ok) {
+    process.exitCode = 1;
+    return;
+  }
+
+  console.log(
+    `[v4-price-output-calibration] PASS count=${samples.length} CORE=${sampleAudit.familyAverageDepthUnits.CORE} DEEP=${sampleAudit.familyAverageDepthUnits.DEEP} LONG_RANGE=${sampleAudit.familyAverageDepthUnits.LONG_RANGE} SIGNATURE=${sampleAudit.familyAverageDepthUnits.SIGNATURE}`,
+  );
 }
 
 main().catch((error) => {
-  console.error("[v4-launch-batch] UNEXPECTED_FAILURE", {
+  console.error("[v4-price-output-calibration] UNEXPECTED_FAILURE", {
     error: error instanceof Error ? error.message : "unknown",
   });
   process.exitCode = 1;

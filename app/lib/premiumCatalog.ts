@@ -64,7 +64,7 @@ export function groupTopicCatalogProductsByCategory(): readonly PremiumCatalogCa
 
     groups.push({
       category: product.category,
-      label: getPremiumCategoryLabel(product.category),
+      label: product.category === "relationship" ? "연애운" : getPremiumCategoryLabel(product.category),
       products: [product],
     });
   }

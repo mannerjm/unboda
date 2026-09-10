@@ -98,7 +98,7 @@ export default function SupportCenterClient({
       setMessage("");
       setOrderId("");
       setShowForm(false);
-      setFeedback("문의가 접수되었습니다. 답변은 이 고객지원 센터에서 확인할 수 있습니다.");
+      setFeedback("문의가 접수되었습니다. 답변이 등록되면 가입 이메일로 알려드리며, 답변 내용은 이 고객지원 센터에서 확인할 수 있습니다.");
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "문의를 접수하지 못했습니다.");
     } finally {

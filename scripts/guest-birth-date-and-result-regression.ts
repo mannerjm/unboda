@@ -27,6 +27,13 @@ assert(!isGuestBirthDateInRange("1899-12-31"), "birth date below the guest minim
 assert(!validateProfileInput({ ...base, birthDate: "2026-02-29" }).valid, "nonexistent calendar date must be rejected");
 assert(!isGuestBirthDateInRange("2027-01-01"), "future birth date must be rejected");
 
+const justBeforeKoreaMidnight = new Date("2026-09-10T14:59:59.999Z");
+const koreaMidnight = new Date("2026-09-10T15:00:00.000Z");
+assert(getGuestBirthDateMax(justBeforeKoreaMidnight) === "2026-09-10", "guest max date must remain the prior Korea calendar date before KST midnight");
+assert(getGuestBirthDateMax(koreaMidnight) === "2026-09-11", "guest max date must advance exactly at KST midnight");
+assert(isGuestBirthDateInRange("2026-09-11", koreaMidnight), "the current Korea calendar date must be accepted at KST midnight");
+assert(!isGuestBirthDateInRange("2026-09-12", koreaMidnight), "the next Korea calendar date must remain rejected as future");
+
 const guestSaju = read("app/guest-saju/page.tsx");
 const guestResult = read("app/guest-result/page.tsx");
 const authenticatedResult = read("app/result/page.tsx");
@@ -48,6 +55,7 @@ assert(guestGenerateRoute.includes("buildFreeAnalysisResponse") && guestGenerate
 assert(guestLoading.includes('fetch("/api/guest-free-analysis/generate"') && guestLoading.includes("분석에는 약 1~2분 정도 소요될 수 있습니다.") && guestLoading.includes("w-16 h-16 border-4") && guestLoading.includes('router.replace("/guest-result")'), "guest loading must reuse the existing loading UI then route to the server-backed result");
 
 console.log(`guest date browser bounds: ${GUEST_BIRTH_DATE_MIN} to ${getGuestBirthDateMax()} ✓`);
+console.log("guest KST midnight date boundary: true");
 console.log("guest date range and calendar validation: true");
 console.log("guest mounts the exact authenticated result DOM renderer: true");
 console.log("guest server-backed restore and paid intent retained: true");

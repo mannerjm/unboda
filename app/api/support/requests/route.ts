@@ -4,6 +4,7 @@ import {
   listCurrentUserSupportRequests,
   SupportRequestError,
 } from "@/app/lib/support/server";
+import { dispatchSupportNotificationDeliveries } from "@/app/lib/support/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,14 @@ export async function POST(request: Request) {
       message: body.message,
       orderId: body.orderId,
     });
+
+    try {
+      const notification = await dispatchSupportNotificationDeliveries({ requestId: created.id, batchLimit: 2 });
+      console.info("[support-email]", { trigger: "customer_intake", requestId: created.id, ...notification });
+    } catch {
+      console.error("[support-email]", { trigger: "customer_intake", requestId: created.id, status: "worker_failed" });
+    }
+
     return NextResponse.json({ request: created }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     return errorResponse(error);

@@ -24,6 +24,46 @@ export type PaidAnalysisResponseTelemetry = {
   durationMs: number;
 };
 
+const PAID_ANALYSIS_V4_TRANSIENT_RETRY_STATUSES = new Set([
+  429,
+  500,
+  502,
+  503,
+  504,
+]);
+const PAID_ANALYSIS_V4_TRANSIENT_RETRY_DELAYS_MS = [400, 1200] as const;
+
+export function resolveTransientRetryLimit(
+  callType?: AnalysisTextCallType,
+): number {
+  return callType === "paid-analysis-detail-v4"
+    ? PAID_ANALYSIS_V4_TRANSIENT_RETRY_DELAYS_MS.length
+    : 0;
+}
+
+export function resolveTransientRetryDelayMs(retryAttempt: number): number {
+  return PAID_ANALYSIS_V4_TRANSIENT_RETRY_DELAYS_MS[retryAttempt - 1] ?? 0;
+}
+
+function resolveOpenAIErrorStatus(error: unknown): number | null {
+  const status = (error as { status?: unknown } | null)?.status;
+
+  if (typeof status === "number" && Number.isInteger(status)) {
+    return status;
+  }
+
+  if (typeof status === "string" && /^\d{3}$/.test(status)) {
+    return Number(status);
+  }
+
+  return null;
+}
+
+export function shouldRetryPaidAnalysisV4TransientError(error: unknown): boolean {
+  const status = resolveOpenAIErrorStatus(error);
+  return status !== null && PAID_ANALYSIS_V4_TRANSIENT_RETRY_STATUSES.has(status);
+}
+
 export function resolveMaxOutputTokens(
   callType?: AnalysisTextCallType,
 ): number {
@@ -102,6 +142,8 @@ export async function generateAnalysisText(
   const promptLength = prompt.length;
   const startedAt = Date.now();
   const controller = new AbortController();
+  const transientRetryLimit = resolveTransientRetryLimit(callType);
+  let transientRetryCount = 0;
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   let response;
 
@@ -110,19 +152,50 @@ export async function generateAnalysisText(
       controller.abort();
     }, timeoutMs);
 
-    response = await getOpenAIClient().responses.create(
-      {
-        model,
-        input: prompt,
-        max_output_tokens: maxOutputTokens,
-        reasoning: {
-          effort: "low",
-        },
-      },
-      {
-        signal: controller.signal,
-      },
-    );
+    while (true) {
+      try {
+        response = await getOpenAIClient().responses.create(
+          {
+            model,
+            input: prompt,
+            max_output_tokens: maxOutputTokens,
+            reasoning: {
+              effort: "low",
+            },
+          },
+          {
+            signal: controller.signal,
+          },
+        );
+        break;
+      } catch (error) {
+        if (
+          transientRetryCount >= transientRetryLimit ||
+          !shouldRetryPaidAnalysisV4TransientError(error)
+        ) {
+          throw error;
+        }
+
+        transientRetryCount += 1;
+        const retryDelayMs = resolveTransientRetryDelayMs(transientRetryCount);
+        const errorMeta = extractOpenAIErrorMeta(error);
+
+        console.warn("[generateAnalysisText] transient-retry", {
+          callType,
+          model,
+          retryAttempt: transientRetryCount,
+          retryLimit: transientRetryLimit,
+          retryDelayMs,
+          errorStatus: errorMeta.status,
+          errorCode: errorMeta.code,
+          errorType: errorMeta.type,
+        });
+
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, retryDelayMs);
+        });
+      }
+    }
 
     if (options?.onResponseTelemetry) {
       options.onResponseTelemetry({
@@ -152,6 +225,7 @@ export async function generateAnalysisText(
       promptLength,
       maxOutputTokens,
       timeoutMs,
+      transientRetryCount,
       startedAt: new Date(startedAt).toISOString(),
       finishedAt: new Date().toISOString(),
       elapsedMs: Date.now() - startedAt,
@@ -169,6 +243,7 @@ export async function generateAnalysisText(
       promptLength,
       maxOutputTokens,
       timeoutMs,
+      transientRetryCount,
       startedAt: new Date(startedAt).toISOString(),
       finishedAt: new Date().toISOString(),
       elapsedMs: Date.now() - startedAt,

@@ -21,6 +21,7 @@
     "test:ai-consulting-e2e": "npm run test:ai-consulting-credit-checkout && npm run test:ai-consulting-credit-history && npm run test:ai-consulting-memory && npm run test:ai-consulting-quality-cost && npm run test:ai-consulting-operations && npm run test:ai-consulting-e2e-contract",
     "test:launch-security": "tsx scripts/launch-security-regression.ts",
     "test:operator-alerts": "tsx scripts/operator-alert-email-regression.ts",
+    "test:operator-triage": "tsx scripts/operator-exception-triage-regression.ts",
     "test:paid-all": "npm run test:paid-money && npm run test:paid-career && npm run test:paid-relationship && npm run test:paid-health"
   },
   "dependencies": {

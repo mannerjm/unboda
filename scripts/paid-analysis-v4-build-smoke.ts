@@ -1,15 +1,6 @@
 import { buildPaidAnalysisInputFromProfile } from "../app/lib/paidAnalysisProfileInput";
-import { generatePaidAnalysisDetailV4WithConsistencyRetry } from "../app/lib/paidAnalysisV4ConsistencyRetry";
-import {
-  auditPaidAnalysisV4ActualOutputTier,
-  auditPaidAnalysisV4ActualTierSample,
-  type PaidAnalysisV4ActualTierSample,
-} from "../app/lib/paidAnalysisV4ActualOutputTierQuality";
-import { getPaidAnalysisEngine } from "../app/lib/paidAnalysisEngine";
-import { validatePaidAnalysisV4HealthSafety } from "../app/lib/paidAnalysisV4HealthSafetyValidator";
+import type { PaidAnalysisEvidenceKey } from "../app/lib/paidAnalysisDetailOutput";
 import { resolvePaidAnalysisLaunchSpecialization } from "../app/lib/paidAnalysisTopicConfig";
-import { getProductPricing } from "../app/lib/productPricing";
-import type { PaidAnalysisResponseTelemetry } from "../app/lib/ai/generateAnalysisText";
 import type { ProfileDto } from "../app/lib/profiles/types";
 
 const RUN_MESSAGE = "Run V4 price-tier output calibration";
@@ -18,8 +9,8 @@ const SHOULD_RUN =
   process.env.VERCEL_GIT_COMMIT_REF === "test/v4-one-product-smoke" &&
   process.env.VERCEL_GIT_COMMIT_MESSAGE === RUN_MESSAGE;
 
-// Diagnostic replay for the three DEEP products that failed required evidence ownership.
-// Preview-only, synthetic profile, no Production DB/customer data.
+// Deterministic evidence-availability check for the three DEEP failures.
+// No OpenAI call, no Production DB/customer data.
 const PRODUCT_IDS = [
   "health-stress-regulation",
   "relationship-boundary",
@@ -39,135 +30,69 @@ const SYNTHETIC_PROFILE: ProfileDto = {
   updatedAt: "2026-01-01T00:00:00.000Z",
 };
 
-async function main(): Promise<void> {
-  if (!SHOULD_RUN) {
-    console.log("[v4-price-output-calibration] skipped");
-    return;
-  }
-
-  console.log(
-    `[v4-price-output-calibration] START count=${PRODUCT_IDS.length} ids=${PRODUCT_IDS.join(",")}`,
-  );
-
-  const samples: PaidAnalysisV4ActualTierSample[] = [];
-  const failures: Array<{ productId: string; error: string }> = [];
-  let nextIndex = 0;
-
-  async function worker(): Promise<void> {
-    while (true) {
-      const index = nextIndex;
-      nextIndex += 1;
-      if (index >= PRODUCT_IDS.length) return;
-      const productId = PRODUCT_IDS[index];
-      const pricing = getProductPricing(productId);
-      const engine = getPaidAnalysisEngine(productId);
-      const specialization = resolvePaidAnalysisLaunchSpecialization(productId);
-      const requiredEvidenceKeys =
-        specialization.kind === "topic" ? specialization.config.evidenceFocus : [];
-      let usage: PaidAnalysisResponseTelemetry | null = null;
-
-      try {
-        console.log(
-          `[v4-price-output-calibration] PRODUCT_START productId=${productId} family=${pricing.family} engine=${engine ?? "unknown"}`,
-        );
-        const input = buildPaidAnalysisInputFromProfile(
-          SYNTHETIC_PROFILE,
-          productId,
-          "2026-08-25",
-        );
-        const output = await generatePaidAnalysisDetailV4WithConsistencyRetry(input, {
-          onResponseTelemetry: (telemetry) => {
-            usage = telemetry;
-          },
-        });
-
-        if (engine === "HEALTH") {
-          const healthSafety = validatePaidAnalysisV4HealthSafety(output);
-          if (!healthSafety.ok) {
-            throw new Error(
-              `health safety failed: ${healthSafety.issues
-                .map((issue) => `${issue.field}:${issue.message}`)
-                .join(" | ")}`,
-            );
-          }
-        }
-
-        const audit = auditPaidAnalysisV4ActualOutputTier(productId, output);
-        const warnings = audit.issues.filter((issue) => issue.severity === "warning");
-        const errors = audit.issues.filter((issue) => issue.severity === "error");
-
-        console.log("[v4-price-output-calibration] PRODUCT_RESULT", {
-          productId,
-          family: pricing.family,
-          ok: audit.ok,
-          direction: output.conclusion.direction,
-          focus: output.conclusion.focus,
-          depthUnits: audit.metrics.depthUnits,
-          evidence: `${audit.metrics.distinctEvidenceKeyCount}/${audit.metrics.evidenceCount}`,
-          actualEvidenceKeys: output.evidence.map((item) => item.evidenceKey),
-          requiredEvidenceKeys,
-          actions: `${audit.metrics.distinctActionTargetCount}/${audit.metrics.actionCount}`,
-          ownershipFocusHits: audit.metrics.ownershipFocusHitCount,
-          ownershipActionHits: audit.metrics.ownershipActionHitCount,
-          periodTimelineItems: audit.metrics.periodTimelineItemCount,
-          periodKeyPoints: audit.metrics.periodKeyPointCount,
-          periodSegmentsWithActions: audit.metrics.periodSegmentActionCount,
-          periodSegmentsWithCautions: audit.metrics.periodSegmentCautionCount,
-          decisionCheckCount: audit.metrics.decisionCheckCount,
-          linkageWarningCount: audit.metrics.linkageWarningCount,
-          warnings: warnings.map((issue) => `${issue.field}:${issue.message}`),
-          errors: errors.map((issue) => `${issue.field}:${issue.message}`),
-          usage,
-        });
-
-        if (!audit.ok) {
-          throw new Error(
-            errors.map((issue) => `${issue.field}:${issue.message}`).join(" | "),
-          );
-        }
-
-        samples.push({ productId, output });
-      } catch (error) {
-        failures.push({
-          productId,
-          error: error instanceof Error ? error.message : "unknown failure",
-        });
-        console.error(
-          "[v4-price-output-calibration] PRODUCT_FAIL",
-          failures[failures.length - 1],
-        );
-      }
-    }
-  }
-
-  await Promise.all([worker(), worker()]);
-
-  if (failures.length > 0) {
-    console.error("[v4-price-output-calibration] SAMPLE_FAIL", { failures });
-    process.exitCode = 1;
-    return;
-  }
-
-  const sampleAudit = auditPaidAnalysisV4ActualTierSample(samples);
-  console.log("[v4-price-output-calibration] FAMILY_RESULT", {
-    ok: sampleAudit.ok,
-    familyAverageDepthUnits: sampleAudit.familyAverageDepthUnits,
-    errors: sampleAudit.issues.map((issue) => `${issue.field}:${issue.message}`),
-  });
-
-  if (!sampleAudit.ok) {
-    process.exitCode = 1;
-    return;
-  }
-
-  console.log(
-    `[v4-price-output-calibration] PASS count=${samples.length} CORE=${sampleAudit.familyAverageDepthUnits.CORE} DEEP=${sampleAudit.familyAverageDepthUnits.DEEP} LONG_RANGE=${sampleAudit.familyAverageDepthUnits.LONG_RANGE} SIGNATURE=${sampleAudit.familyAverageDepthUnits.SIGNATURE}`,
-  );
+function availableEvidenceKeys(
+  facts: NonNullable<ReturnType<typeof buildPaidAnalysisInputFromProfile>["evidenceFacts"]>,
+): PaidAnalysisEvidenceKey[] {
+  return [
+    facts.strength ? "strength" : null,
+    facts.yongshin ? "yongshin" : null,
+    facts.gyeokguk ? "gyeokguk" : null,
+    facts.elementBalance ? "element_balance" : null,
+    facts.fortuneFlow ? "fortune_flow" : null,
+    facts.daeun ? "daeun" : null,
+    facts.seun ? "seun" : null,
+    facts.elementRelations?.items.length ? "element_relations" : null,
+    facts.fortuneBrain &&
+    (facts.fortuneBrain.strengths.length > 0 || facts.fortuneBrain.weaknesses.length > 0)
+      ? "fortune_brain"
+      : null,
+  ].filter((key): key is PaidAnalysisEvidenceKey => key !== null);
 }
 
-main().catch((error) => {
-  console.error("[v4-price-output-calibration] UNEXPECTED_FAILURE", {
-    error: error instanceof Error ? error.message : "unknown",
-  });
-  process.exitCode = 1;
-});
+function main(): void {
+  if (!SHOULD_RUN) {
+    console.log("[v4-evidence-availability] skipped");
+    return;
+  }
+
+  let failed = false;
+
+  for (const productId of PRODUCT_IDS) {
+    const specialization = resolvePaidAnalysisLaunchSpecialization(productId);
+    if (specialization.kind !== "topic") {
+      throw new Error(`${productId} must resolve to a topic specialization`);
+    }
+
+    const input = buildPaidAnalysisInputFromProfile(
+      SYNTHETIC_PROFILE,
+      productId,
+      "2026-08-25",
+    );
+    if (!input.evidenceFacts) {
+      throw new Error(`${productId} must have deterministic evidence facts`);
+    }
+
+    const available = availableEvidenceKeys(input.evidenceFacts);
+    const required = specialization.config.evidenceFocus;
+    const missing = required.filter((key) => !available.includes(key));
+
+    console.log("[v4-evidence-availability] PRODUCT", {
+      productId,
+      requiredEvidenceKeys: required,
+      availableEvidenceKeys: available,
+      missingRequiredEvidenceKeys: missing,
+    });
+
+    if (missing.length > 0) failed = true;
+  }
+
+  if (failed) {
+    console.error("[v4-evidence-availability] FAIL required product evidence is unavailable");
+    process.exitCode = 1;
+    return;
+  }
+
+  console.log(`[v4-evidence-availability] PASS count=${PRODUCT_IDS.length}`);
+}
+
+main();

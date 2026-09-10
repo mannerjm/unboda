@@ -169,9 +169,11 @@ function familyMinimums(family: PricingFamily): {
   action: number;
   confidenceEvidence: number;
 } {
+  // confidence.strongestEvidence follows the canonical V4 2+ contract;
+  // paid-tier depth is enforced separately by evidence/action/ownership/period gates.
   return family === "CORE"
     ? { evidence: 3, action: 2, confidenceEvidence: 2 }
-    : { evidence: 4, action: 3, confidenceEvidence: 3 };
+    : { evidence: 4, action: 3, confidenceEvidence: 2 };
 }
 
 function computeDepthUnits(

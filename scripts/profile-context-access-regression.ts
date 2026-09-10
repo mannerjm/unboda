@@ -49,7 +49,13 @@ for (const [name, source] of [["paid page", paidPage]] as const) {
 assert(accessPanel.includes("getUserProfile(profileId, user.id)"), "standalone access panel must verify the profile before rendering product state");
 assert(checkoutPage.includes("searchParams") && checkoutPage.includes("profileId"), "checkout page must read and preserve profileId query context");
 assert(checkoutPanel.includes("profileId?: string") && checkoutPanel.includes("{profileId ? ("), "checkout must render payment only after explicit profile selection");
-assert(checkoutPanel.includes("JSON.stringify({ productId: canonicalProductId, profileId })"), "checkout must send selected profileId to orders API");
+assert(
+  checkoutPanel.includes("productId: canonicalProductId") &&
+    checkoutPanel.includes("profileId,") &&
+    checkoutPanel.includes("immediateGenerationAcknowledged: true") &&
+    !checkoutPanel.includes("body.userId"),
+  "checkout must send only the selected product/profile context plus acknowledgement to orders API",
+);
 assert(checkoutPanel.includes("?profileId=${profileId}"), "checkout success navigation must preserve profileId");
 assert(ordersRoute.includes("getUserProfile(rawProfileId, user.id)"), "orders API must ownership-verify profileId");
 console.log("3. checkout requires and preserves selected profileId ✓");

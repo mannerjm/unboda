@@ -34,10 +34,14 @@ assert(completeGuestAnalysis.includes('body.transferStatus === "pending_existing
 assert(shell.includes("hasGuestResult") && shell.includes('item.href === "/saju"') && shell.includes('hasGuestResult ? "/guest-result" : "/guest-saju"'), "Guest 내 분석 selects result when available and Guest entry otherwise");
 assert(shell.includes('item.href === "/deep-analysis"') && shell.includes('return "/deep-analysis"'), "Guest deep-analysis navigation remains public");
 assert(shell.includes('item.activeHref !== "/saju"') && shell.includes('item.activeHref !== "/deep-analysis"'), "Guest lock treatment excludes public Guest analysis destinations");
-assert(shell.includes('origin=${guestOrigin}') && shell.includes('item.href)}&origin'), "Guest member-only navigation uses safe login boundaries");
+assert(shell.includes('origin=${guestOrigin}') && shell.includes('item.href)}&origin'), "confirmed Guest member-only navigation uses safe login boundaries");
 assert(shell.includes('guestOrigin = guestContext ? "guest-result-navigation" : "guest-navigation"'), "valid Guest-result navigation uses a result-preserving origin");
-assert(shell.includes('useState<boolean | null>(pathname === "/mypage" ? false : null)') && shell.includes("My Page mounts AppShell only after its authenticated account-status gate succeeds"), "authenticated My Page navigation does not transiently render Guest login destinations");
-assert(shell.includes('fetch("/api/account/status")') && shell.includes('fetch("/api/guest-free-analysis")'), "navigation derives Guest state from existing server-backed endpoints");
+assert(shell.includes('useState<boolean | null>(pathname === "/mypage" ? false : null)') && shell.includes("My Page mounts AppShell only after its authenticated account-status gate succeeds"), "authenticated My Page navigation keeps its known member state");
+assert(shell.includes("response.status === 401") && shell.includes("A transient server failure is not proof that the browser session is signed out"), "only an authoritative 401 response downgrades shared navigation to Guest");
+assert(shell.includes("Keep auth unresolved on network errors") && shell.includes("setIsGuest(null)"), "network and transient account-status failures do not manufacture a signed-out state");
+assert(shell.includes('const recommendationHref = isGuest === true') && shell.includes(': "/recommendations";'), "unresolved recommendation navigation uses the canonical protected route instead of a login URL");
+assert(shell.includes('if (isGuest === true)') && shell.includes("While auth is unresolved, use canonical destinations instead of manufacturing a login URL"), "only confirmed Guests receive Guest login destinations");
+assert(shell.includes('fetch("/api/account/status")') && shell.includes('fetch("/api/guest-free-analysis")'), "navigation derives confirmed Guest state from existing server-backed endpoints");
 assert(myPage.includes('fetch("/api/account/status")') && myPage.includes('router.replace("/auth/login?returnTo=/mypage&origin=guest-navigation")') && myPage.includes("!isAuthChecked"), "direct Guest My Page access has a deterministic login gate");
 assert(getSafeReturnTo("/recommendations") === "/recommendations" && getSafeReturnTo("/guest-result") === "/guest-result", "context destinations remain safe internal paths");
 

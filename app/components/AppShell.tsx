@@ -85,14 +85,29 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
     let cancelled = false;
     void fetch("/api/account/status")
       .then((response) => {
-        if (!cancelled) setIsGuest(!response.ok);
-        return response.ok ? null : fetch("/api/guest-free-analysis");
+        if (cancelled) return null;
+        if (response.ok) {
+          setIsGuest(false);
+          return null;
+        }
+        if (response.status === 401) {
+          setIsGuest(true);
+          return fetch("/api/guest-free-analysis");
+        }
+        // A transient server failure is not proof that the browser session is signed out.
+        setIsGuest(null);
+        setHasGuestResult(false);
+        return null;
       })
       .then((response) => {
         if (!cancelled && response) setHasGuestResult(response.ok);
       })
       .catch(() => {
-        if (!cancelled) { setIsGuest(true); setHasGuestResult(false); }
+        if (!cancelled) {
+          // Keep auth unresolved on network errors. Protected destinations verify auth server-side.
+          setIsGuest(null);
+          setHasGuestResult(false);
+        }
       });
     return () => { cancelled = true; };
   }, []);
@@ -153,21 +168,28 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
 
   const guestContext = isGuest === true && hasGuestResult;
   const guestOrigin = guestContext ? "guest-result-navigation" : "guest-navigation";
-  const recommendationHref = isGuest !== false
+  const recommendationHref = isGuest === true
     ? `/auth/login?returnTo=/recommendations${guestContext ? "&origin=guest-result-navigation" : "&origin=guest-navigation"}`
-    : profileId ? `/recommendations?profileId=${encodeURIComponent(profileId)}` : "/mypage";
+    : profileId
+      ? `/recommendations?profileId=${encodeURIComponent(profileId)}`
+      : isGuest === false
+        ? "/mypage"
+        : "/recommendations";
   const deepAnalysisHref = profileId ? `/deep-analysis?profileId=${encodeURIComponent(profileId)}` : "/deep-analysis";
   const navigationHref = (item: NavItem): string => {
-    if (isGuest === false) {
-      if (item.href === "/saju") return memberSajuHref;
+    if (isGuest === true) {
+      if (item.href === "/saju") return hasGuestResult ? "/guest-result" : "/guest-saju";
       if (item.href === "/recommendations") return recommendationHref;
-      if (item.href === "/deep-analysis") return deepAnalysisHref;
-      return item.href;
+      if (item.href === "/deep-analysis") return "/deep-analysis";
+      return `/auth/login?returnTo=${encodeURIComponent(item.href)}&origin=${guestOrigin}`;
     }
-    if (item.href === "/saju") return hasGuestResult ? "/guest-result" : "/guest-saju";
+
+    // While auth is unresolved, use canonical destinations instead of manufacturing a login URL.
+    // Their server boundaries remain authoritative and redirect real Guests when necessary.
+    if (item.href === "/saju") return isGuest === false ? memberSajuHref : "/saju";
     if (item.href === "/recommendations") return recommendationHref;
-    if (item.href === "/deep-analysis") return "/deep-analysis";
-    return `/auth/login?returnTo=${encodeURIComponent(item.href)}&origin=${guestOrigin}`;
+    if (item.href === "/deep-analysis") return deepAnalysisHref;
+    return item.href;
   };
   const navigationItems = (items: NavItem[]) => items.map((item) => ({
     ...item,

@@ -57,10 +57,12 @@ export default function AdminOperationsOverview({
   failureSummary,
   aiOperations,
   aiQuality,
+  operatorAlertConfigured,
 }: {
   failureSummary: FailureSummary | null;
   aiOperations: AiOperationsSnapshot | null;
   aiQuality: AiQualitySnapshot | null;
+  operatorAlertConfigured: boolean;
 }) {
   const operationalAttention = failureSummary
     ? Object.values(failureSummary).reduce((sum, count) => sum + count, 0)
@@ -76,7 +78,17 @@ export default function AdminOperationsOverview({
     ? failureSummary.REFUND_RETRY + failureSummary.REPORT_STALE + failureSummary.CLOSURE_RETRY
     : null;
   const unavailable = failureSummary === null || aiOperations === null || aiQuality === null;
-  const allClear = !unavailable && (operationalAttention ?? 0) === 0 && (aiOperations?.chargeIntegrityIssueCount ?? 0) === 0;
+  const allClear = !unavailable
+    && operatorAlertConfigured
+    && (operationalAttention ?? 0) === 0
+    && (aiOperations?.chargeIntegrityIssueCount ?? 0) === 0;
+  const bannerText = !operatorAlertConfigured
+    ? "대표 예외 이메일 알림 설정 필요"
+    : allClear
+      ? "현재 확인된 운영 이상 없음"
+      : unavailable
+        ? "일부 운영 현황 조회 불가"
+        : "확인이 필요한 항목이 있습니다";
 
   return (
     <section className="border-b border-stone-200 pb-8" aria-labelledby="operator-overview-heading">
@@ -88,8 +100,8 @@ export default function AdminOperationsOverview({
             정상 항목은 시스템이 자동 처리합니다. 숫자가 0이면 손대지 않아도 됩니다. 대표 확인이 필요한 예외만 아래에서 확인하세요.
           </p>
         </div>
-        <div className={`border px-4 py-3 text-sm font-bold ${allClear ? "border-emerald-200 bg-emerald-50 text-emerald-800" : unavailable ? "border-amber-200 bg-amber-50 text-amber-800" : "border-red-200 bg-red-50 text-red-800"}`}>
-          {allClear ? "현재 확인된 운영 이상 없음" : unavailable ? "일부 운영 현황 조회 불가" : "확인이 필요한 항목이 있습니다"}
+        <div className={`border px-4 py-3 text-sm font-bold ${allClear ? "border-emerald-200 bg-emerald-50 text-emerald-800" : unavailable || !operatorAlertConfigured ? "border-amber-200 bg-amber-50 text-amber-800" : "border-red-200 bg-red-50 text-red-800"}`}>
+          {bannerText}
         </div>
       </div>
 
@@ -116,7 +128,12 @@ export default function AdminOperationsOverview({
         />
       </div>
 
-      <div className="mt-4 grid gap-3 lg:grid-cols-3">
+      <div className="mt-4 grid gap-3 lg:grid-cols-4">
+        <div className={`border p-4 ${operatorAlertConfigured ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
+          <p className="text-xs font-semibold text-stone-600">대표 예외 이메일 알림</p>
+          <p className="mt-2 text-lg font-bold">{operatorAlertConfigured ? "설정됨" : "설정 필요"}</p>
+          <p className="mt-2 text-xs leading-5 text-stone-600">자동 복구 건은 알리지 않고, 대표 판단이 필요한 예외가 생길 때만 활성 운영자에게 알립니다.</p>
+        </div>
         <div className="border border-stone-200 bg-white p-4">
           <p className="text-xs font-semibold text-stone-500">AI 질문권 무결성</p>
           <p className="mt-2 text-lg font-bold">{aiOperations ? `${number(aiOperations.chargeIntegrityIssueCount)}건` : "-"}</p>

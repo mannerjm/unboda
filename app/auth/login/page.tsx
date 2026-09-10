@@ -17,6 +17,11 @@ function LoginPageContent() {
   const isGuestResultOrigin = searchParams.get("origin") === "guest-result";
   const isGuestNavigationOrigin = searchParams.get("origin") === "guest-navigation";
   const isGuestResultNavigationOrigin = searchParams.get("origin") === "guest-result-navigation";
+  const isGuestRecommendationContinuation = safeReturnTo === "/recommendations"
+    && (isGuestResultOrigin || isGuestResultNavigationOrigin);
+  const postLoginReturnTo = isGuestRecommendationContinuation
+    ? "/auth/complete-guest-analysis?next=recommendations"
+    : safeReturnTo;
   // Back link is a distinct navigation target from the post-login redirect: it must never dead-end on /result.
   const backHref = isGuestResultOrigin || isGuestResultNavigationOrigin ? "/guest-result" : isGuestNavigationOrigin ? "/guest-saju" : getSafeReturnTo(returnTo, "/");
   const guestContextCopy = safeReturnTo === "/recommendations"
@@ -71,7 +76,7 @@ function LoginPageContent() {
       return;
     }
 
-    router.push(safeReturnTo);
+    router.push(postLoginReturnTo);
     router.refresh();
   }
 
@@ -159,7 +164,7 @@ function LoginPageContent() {
           </form>
 
           <Link
-            href={`/auth/forgot-password?returnTo=${encodeURIComponent(safeReturnTo)}`}
+            href={`/auth/forgot-password?returnTo=${encodeURIComponent(postLoginReturnTo)}`}
             className="mt-4 block text-center text-sm font-semibold text-stone-600 underline"
           >
             비밀번호를 잊으셨나요?

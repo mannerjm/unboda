@@ -39,6 +39,7 @@ const analysisNavItems: NavItem[] = [
 
 const managementNavItems: NavItem[] = [
   { href: "/mypage", label: "마이페이지", icon: "user" },
+  { href: "/support", label: "고객지원 센터", icon: "book" },
 ];
 
 const mobileNavItems: NavItem[] = [
@@ -249,7 +250,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                         : "text-stone-600 hover:bg-white/70 hover:text-stone-900"
                     }`}
                   >
-                    <NavIcon icon={item.icon} />{isGuest ? <LockIcon /> : null}<span>{item.label}</span>
+                    <NavIcon icon={item.icon} />{isGuest && item.href === "/mypage" ? <LockIcon /> : null}<span>{item.label}</span>
                   </Link>
                 );
               })}

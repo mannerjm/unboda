@@ -96,7 +96,8 @@ function Footer() {
   return (
     <footer className="flex flex-col gap-3 border-t border-[#e7dece] pt-5 text-xs text-[#82786a] sm:flex-row sm:items-center sm:justify-between">
       <p>운보다 · 참고용 명리 분석 서비스</p>
-      <nav className="flex gap-4" aria-label="법적 문서">
+      <nav className="flex flex-wrap gap-4" aria-label="서비스 및 법적 문서">
+        <Link href="/support" className="transition hover:text-[#2d2923]">고객지원</Link>
         <Link href="/terms" className="transition hover:text-[#2d2923]">이용약관</Link>
         <Link href="/privacy" className="transition hover:text-[#2d2923]">개인정보처리방침</Link>
         <Link href="/refund" className="transition hover:text-[#2d2923]">환불정책</Link>

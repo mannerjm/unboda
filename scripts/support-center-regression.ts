@@ -12,6 +12,8 @@ const server = read("app/lib/support/server.ts");
 const operator = read("app/lib/support/operatorServer.ts");
 const notifications = read("app/lib/support/notifications.ts");
 const supportPage = read("app/support/SupportCenterClient.tsx");
+const appShell = read("app/components/AppShell.tsx");
+const homeExperience = read("app/components/HomeExperience.tsx");
 const publicRoute = read("app/api/support/requests/route.ts");
 const adminRoute = read("app/api/internal/admin/support/requests/[requestId]/route.ts");
 const dispatcher = read("app/api/internal/reconcile/route.ts");
@@ -73,6 +75,11 @@ for (const category of ["PAYMENT_REFUND", "PAID_ANALYSIS", "ACCOUNT_ACCESS", "PR
 assert.match(supportPage, /비밀번호 재설정/);
 assert.match(supportPage, /진행 중 문의는 최대 3건/);
 assert.match(supportPage, /비밀번호, 카드번호, 결제키/);
+
+assert.match(appShell, /href: "\/support", label: "고객지원 센터"/);
+assert.match(appShell, /isGuest && item\.href === "\/mypage"/);
+assert.match(homeExperience, /href="\/support"/);
+assert.match(homeExperience, />고객지원<\/Link>/);
 
 for (const legal of [terms, privacy, refund]) assert.match(legal, /\/support/);
 

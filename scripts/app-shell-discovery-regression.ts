@@ -8,7 +8,6 @@ const recommendationPageSource = readFileSync("app/recommendations/page.tsx", "u
 const fakeRoutes = [
   "/faq",
   "/customer-center",
-  "/support",
   "/notifications",
   "/payment-methods",
   "/orders",
@@ -28,6 +27,7 @@ for (const requiredText of [
   "추천 분석",
   "심층 분석",
   "마이페이지",
+  "고객지원 센터",
 ]) {
   if (!appShellSource.includes(requiredText)) {
     throw new Error(`Missing nav copy: ${requiredText}`);
@@ -46,12 +46,16 @@ if (!premiumCatalogSource.includes("주제별 분석") || !premiumCatalogSource.
   throw new Error("Topic and period catalog controls missing");
 }
 
-if (!appShellSource.includes('grid-cols-4')) {
-  throw new Error("Mobile navigation should use four real core destinations");
+if (!appShellSource.includes('grid-cols-6')) {
+  throw new Error("Mobile navigation should preserve six real core destinations");
 }
 
 if (!appShellSource.includes('href: "/deep-analysis"')) {
   throw new Error("Deep analysis navigation must target a real dedicated view");
+}
+
+if (!appShellSource.includes('href: "/support"')) {
+  throw new Error("Customer support navigation must target the real support center");
 }
 
 if (!readFileSync("app/deep-analysis/page.tsx", "utf8").includes("PremiumCatalogSection")) {

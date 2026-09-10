@@ -1,31 +1,40 @@
 import { buildPaidAnalysisInputFromProfile } from "../app/lib/paidAnalysisProfileInput";
 import { generatePaidAnalysisDetailV4 } from "../app/lib/paidAnalysisDetailService";
 import { getPaidAnalysisEngine } from "../app/lib/paidAnalysisEngine";
+import { getLaunchProductIds } from "../app/lib/paidAnalysisTopicConfig";
 import { reviewEvidenceLinkage } from "../app/lib/paidAnalysisV4QualityValidators";
 import { validatePaidAnalysisV4HealthSafety } from "../app/lib/paidAnalysisV4HealthSafetyValidator";
 import type { PaidAnalysisResponseTelemetry } from "../app/lib/ai/generateAnalysisText";
 import type { ProfileDto } from "../app/lib/profiles/types";
 
+const BATCH_SIZE = 9;
+const BATCH_COUNT = 6;
+const commitMessage = process.env.VERCEL_GIT_COMMIT_MESSAGE ?? "";
+const batchMessageMatch = commitMessage.match(/^Run V4 launch batch ([1-6])$/);
+const batchNumber = batchMessageMatch ? Number(batchMessageMatch[1]) : null;
 const SHOULD_RUN =
   process.env.VERCEL_ENV === "preview" &&
   process.env.VERCEL_GIT_COMMIT_REF === "test/v4-one-product-smoke" &&
-  process.env.VERCEL_GIT_COMMIT_MESSAGE === "Run V4 representative batch calibration";
+  batchNumber !== null;
 
-const PRODUCT_IDS = [
-  "career-job-change",
-  "study-learning-strategy",
-  "money-leak-risk",
-  "relationship-current",
-  "health-stress-regulation",
-  "business-startup-readiness",
-  "monthly-current",
-  "annual-3years",
-  "lifetime-overview",
-] as const;
+const launchProductIds = getLaunchProductIds();
+if (launchProductIds.length !== 54) {
+  throw new Error(`Expected exactly 54 Launch products, got ${launchProductIds.length}`);
+}
+
+const PRODUCT_IDS = batchNumber === null
+  ? []
+  : launchProductIds.slice((batchNumber - 1) * BATCH_SIZE, batchNumber * BATCH_SIZE);
+
+if (batchNumber !== null && PRODUCT_IDS.length !== BATCH_SIZE) {
+  throw new Error(
+    `Launch batch ${batchNumber}/${BATCH_COUNT} must contain exactly ${BATCH_SIZE} products`,
+  );
+}
 
 const SYNTHETIC_PROFILE: ProfileDto = {
   id: "00000000-0000-0000-0000-000000000000",
-  label: "Synthetic V4 representative calibration persona",
+  label: "Synthetic V4 launch calibration persona",
   relationshipType: "self",
   birthDate: "1995-05-20",
   birthTime: "09:00",
@@ -41,6 +50,8 @@ type ProductResult = {
   engine: string | undefined;
   signature: string;
   outputChars: number;
+  linkageWarningCount: number;
+  usage: PaidAnalysisResponseTelemetry | null;
 };
 
 function tokenSet(value: string): Set<string> {
@@ -70,7 +81,7 @@ async function generateOne(productId: string): Promise<ProductResult> {
     "2026-08-25",
   );
 
-  console.log(`[v4-batch-smoke] START productId=${productId} engine=${engine ?? "unknown"}`);
+  console.log(`[v4-launch-batch] START batch=${batchNumber} productId=${productId} engine=${engine ?? "unknown"}`);
   const result = await generatePaidAnalysisDetailV4(input, {
     onResponseTelemetry: (telemetry) => {
       usage = telemetry;
@@ -90,7 +101,8 @@ async function generateOne(productId: string): Promise<ProductResult> {
 
   const linkageWarnings = reviewEvidenceLinkage(result);
   if (linkageWarnings.length > 0) {
-    console.log("[v4-batch-smoke] LINKAGE_DIAGNOSTIC", {
+    console.log("[v4-launch-batch] LINKAGE_DIAGNOSTIC", {
+      batchNumber,
       productId,
       direction: result.conclusion.direction,
       focus: result.conclusion.focus,
@@ -113,7 +125,8 @@ async function generateOne(productId: string): Promise<ProductResult> {
   ].join(" | ");
   const outputChars = JSON.stringify(result).length;
 
-  console.log("[v4-batch-smoke] PRODUCT_PASS", {
+  console.log("[v4-launch-batch] PRODUCT_PASS", {
+    batchNumber,
     productId,
     engine,
     direction: result.conclusion.direction,
@@ -126,21 +139,30 @@ async function generateOne(productId: string): Promise<ProductResult> {
     usage,
   });
 
-  return { productId, engine, signature, outputChars };
+  return {
+    productId,
+    engine,
+    signature,
+    outputChars,
+    linkageWarningCount: linkageWarnings.length,
+    usage,
+  };
 }
 
 async function main(): Promise<void> {
   if (!SHOULD_RUN) {
-    console.log("[v4-batch-smoke] skipped");
+    console.log("[v4-launch-batch] skipped");
     return;
   }
 
-  console.log(`[v4-batch-smoke] representative batch start count=${PRODUCT_IDS.length}`);
+  console.log(
+    `[v4-launch-batch] START batch=${batchNumber}/${BATCH_COUNT} count=${PRODUCT_IDS.length} ids=${PRODUCT_IDS.join(",")}`,
+  );
 
   const results: ProductResult[] = [];
   const failures: Array<{ productId: string; error: string }> = [];
   let nextIndex = 0;
-  const workerCount = 3;
+  const workerCount = 2;
 
   async function worker(): Promise<void> {
     while (true) {
@@ -155,7 +177,7 @@ async function main(): Promise<void> {
           productId,
           error: error instanceof Error ? error.message : "unknown failure",
         });
-        console.error("[v4-batch-smoke] PRODUCT_FAIL", failures[failures.length - 1]);
+        console.error("[v4-launch-batch] PRODUCT_FAIL", failures[failures.length - 1]);
       }
     }
   }
@@ -179,12 +201,25 @@ async function main(): Promise<void> {
     }
   }
 
-  console.log("[v4-batch-smoke] BATCH_SUMMARY", {
+  console.log("[v4-launch-batch] BATCH_SUMMARY", {
+    batchNumber,
     requested: PRODUCT_IDS.length,
     passed: results.length,
     failed: failures.length,
     failures,
     similarityWarnings,
+    totalLinkageWarnings: results.reduce(
+      (sum, item) => sum + item.linkageWarningCount,
+      0,
+    ),
+    totalInputTokens: results.reduce(
+      (sum, item) => sum + (item.usage?.inputTokens ?? 0),
+      0,
+    ),
+    totalOutputTokens: results.reduce(
+      (sum, item) => sum + (item.usage?.outputTokens ?? 0),
+      0,
+    ),
     outputChars: results.map((item) => ({
       productId: item.productId,
       outputChars: item.outputChars,
@@ -197,7 +232,7 @@ async function main(): Promise<void> {
 }
 
 main().catch((error) => {
-  console.error("[v4-batch-smoke] UNEXPECTED_FAILURE", {
+  console.error("[v4-launch-batch] UNEXPECTED_FAILURE", {
     error: error instanceof Error ? error.message : "unknown",
   });
   process.exitCode = 1;

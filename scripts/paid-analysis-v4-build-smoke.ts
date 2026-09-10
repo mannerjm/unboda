@@ -7,6 +7,7 @@ import {
 } from "../app/lib/paidAnalysisV4ActualOutputTierQuality";
 import { getPaidAnalysisEngine } from "../app/lib/paidAnalysisEngine";
 import { validatePaidAnalysisV4HealthSafety } from "../app/lib/paidAnalysisV4HealthSafetyValidator";
+import { resolvePaidAnalysisLaunchSpecialization } from "../app/lib/paidAnalysisTopicConfig";
 import { getProductPricing } from "../app/lib/productPricing";
 import type { PaidAnalysisResponseTelemetry } from "../app/lib/ai/generateAnalysisText";
 import type { ProfileDto } from "../app/lib/profiles/types";
@@ -17,22 +18,12 @@ const SHOULD_RUN =
   process.env.VERCEL_GIT_COMMIT_REF === "test/v4-one-product-smoke" &&
   process.env.VERCEL_GIT_COMMIT_MESSAGE === RUN_MESSAGE;
 
-// Broader live price-value sample after the four-family representative run passed.
-// Keep this Preview-only and synthetic: 4 CORE, 4 DEEP, all 4 LONG_RANGE, 1 SIGNATURE.
+// Diagnostic replay for the three DEEP products that failed required evidence ownership.
+// Preview-only, synthetic profile, no Production DB/customer data.
 const PRODUCT_IDS = [
-  "career-job-change", // CORE 9,900
-  "money-saving-discipline", // CORE 9,900
-  "career-promotion-readiness", // CORE 9,900
-  "money-income-stability", // CORE 9,900
-  "relationship-current", // DEEP 16,900
-  "health-stress-regulation", // DEEP 16,900
-  "business-startup-readiness", // DEEP 16,900
-  "relationship-boundary", // DEEP 16,900
-  "yearly-current", // LONG_RANGE 29,900
-  "annual-next", // LONG_RANGE 29,900
-  "annual-3years", // LONG_RANGE 29,900
-  "daeun-current", // LONG_RANGE 29,900
-  "lifetime-overview", // SIGNATURE 39,900
+  "health-stress-regulation",
+  "relationship-boundary",
+  "business-startup-readiness",
 ] as const;
 
 const SYNTHETIC_PROFILE: ProfileDto = {
@@ -70,6 +61,9 @@ async function main(): Promise<void> {
       const productId = PRODUCT_IDS[index];
       const pricing = getProductPricing(productId);
       const engine = getPaidAnalysisEngine(productId);
+      const specialization = resolvePaidAnalysisLaunchSpecialization(productId);
+      const requiredEvidenceKeys =
+        specialization.kind === "topic" ? specialization.config.evidenceFocus : [];
       let usage: PaidAnalysisResponseTelemetry | null = null;
 
       try {
@@ -110,6 +104,8 @@ async function main(): Promise<void> {
           focus: output.conclusion.focus,
           depthUnits: audit.metrics.depthUnits,
           evidence: `${audit.metrics.distinctEvidenceKeyCount}/${audit.metrics.evidenceCount}`,
+          actualEvidenceKeys: output.evidence.map((item) => item.evidenceKey),
+          requiredEvidenceKeys,
           actions: `${audit.metrics.distinctActionTargetCount}/${audit.metrics.actionCount}`,
           ownershipFocusHits: audit.metrics.ownershipFocusHitCount,
           ownershipActionHits: audit.metrics.ownershipActionHitCount,

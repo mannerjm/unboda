@@ -17,8 +17,16 @@ assert.match(migration, /status in \('PENDING','SENDING','FAILED_RETRYING','SENT
 assert.match(migration, /alter table public\.operator_alert_deliveries enable row level security/);
 assert.match(migration, /revoke all on public\.operator_alert_deliveries from anon, authenticated/);
 assert.match(migration, /grant select, insert, update, delete on public\.operator_alert_deliveries to service_role/);
+
+const tableStart = migration.indexOf("create table if not exists public.operator_alert_deliveries (");
+const tableEnd = migration.indexOf("\n);", tableStart);
+assert.ok(tableStart >= 0 && tableEnd > tableStart, "operator alert ledger table definition must be parseable");
+const tableDefinition = migration.slice(tableStart, tableEnd + 3);
 for (const forbidden of ["email", "order_id", "user_id", "content", "payment_key", "provider_payload"]) {
-  assert.ok(!migration.includes(`${forbidden} `), `alert ledger must not persist ${forbidden}`);
+  assert.ok(
+    !new RegExp(`^\\s*${forbidden}\\s+`, "m").test(tableDefinition),
+    `alert ledger must not persist ${forbidden}`,
+  );
 }
 
 assert.match(alerts, /import "server-only"/);

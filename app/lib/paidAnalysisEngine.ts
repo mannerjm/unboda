@@ -137,6 +137,13 @@ const PERIOD_ENGINE_RULES = `[PERIOD Engine 규칙]
 - 기준 기간에 제시되지 않은 간지나 순번을 추정해 만들지 않는다.
 - 특정 사건의 발생을 확정하지 않는다.`;
 
+const TOPIC_EVIDENCE_REALIZATION_RULES = `[상품 evidence 실현 규칙]
+- TopicConfig의 evidenceFocus는 단순 추천 목록이 아니라 이 상품이 실제 출력에서 우선 실현해야 하는 근거 계약이다.
+- [선택 가능한 결정론 근거 요약]에 evidenceFocus의 서로 다른 key가 4개 이상 실제 존재하면 evidence는 정확히 4개를 작성하고, 그 4개를 모두 evidenceFocus에서 선택한다.
+- evidenceFocus에서 실제 사용 가능한 key가 4개 미만일 때만 부족한 수만큼 허용된 다른 실제 key로 보완하며, 입력에 없는 근거는 만들지 않는다.
+- element_relations와 fortune_brain도 strength, yongshin, gyeokguk, element_balance, fortune_flow, daeun, seun과 동일하게 유효한 evidenceKey다.
+- 같은 evidenceKey를 반복해서 개수만 채우지 않는다.`;
+
 const DIRECTION_ACTION_CONSISTENCY_RULES = `[결론-행동 일관성 규칙]
 - conclusion.direction을 정한 뒤 conclusion.immediateAction과 action[].action을 다시 읽고 같은 방향인지 최종 확인한다.
 - direction이 "보류"이면 실행 행동에서 분석 대상 자체를 확대·늘리기·적극 추진·바로 시작·즉시 실행하는 지시를 하지 않는다. 대신 비교, 기록, 점검, 조건 확인, 손실 제한처럼 보류 상태에서 가능한 검증 행동만 제시한다.
@@ -157,5 +164,8 @@ const ENGINE_RULES: Record<PaidAnalysisEngine, string> = {
 export function getPaidAnalysisEngineRules(
   engine: PaidAnalysisEngine,
 ): string {
-  return `${ENGINE_RULES[engine]}\n${DIRECTION_ACTION_CONSISTENCY_RULES}`;
+  const topicEvidenceRules =
+    engine === "PERIOD" ? "" : `\n${TOPIC_EVIDENCE_REALIZATION_RULES}`;
+
+  return `${ENGINE_RULES[engine]}${topicEvidenceRules}\n${DIRECTION_ACTION_CONSISTENCY_RULES}`;
 }

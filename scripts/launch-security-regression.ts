@@ -85,7 +85,7 @@ assert.ok(
   authCaptcha.includes("NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED")
     && authCaptcha.includes("NEXT_PUBLIC_TURNSTILE_SITE_KEY")
     && authCaptcha.includes("https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit")
-    && authCaptcha.includes("window.turnstile.render"),
+    && authCaptcha.includes("api.render("),
   "Auth CAPTCHA must remain feature-gated and use explicit Cloudflare Turnstile rendering",
 );
 for (const [label, source] of [

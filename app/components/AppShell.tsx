@@ -73,7 +73,9 @@ function isActivePath(pathname: string, href: string): boolean {
 function AppShellContent({ children, activeProfileId }: { children: ReactNode; activeProfileId?: string | null }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isGuest, setIsGuest] = useState<boolean | null>(null);
+  // My Page mounts AppShell only after its authenticated account-status gate succeeds.
+  // Seed that known state so a fast first click cannot be misrouted through a Guest login link.
+  const [isGuest, setIsGuest] = useState<boolean | null>(pathname === "/mypage" ? false : null);
   const [hasGuestResult, setHasGuestResult] = useState(false);
   const [memberSajuHref, setMemberSajuHref] = useState("/saju");
   const [aiCreditBalance, setAiCreditBalance] = useState<number | null>(null);

@@ -2,6 +2,7 @@ import type {
   PaidAnalysisEvidenceKey,
   ResolvedPaidAnalysisDetailV4,
 } from "../app/lib/paidAnalysisDetailOutput";
+import { buildPaidAnalysisDetailPromptV4 } from "../app/lib/paidAnalysisDetailPrompt";
 import {
   auditPaidAnalysisV4ActualOutputTier,
   auditPaidAnalysisV4ActualTierSample,
@@ -170,6 +171,62 @@ const duplicateActionAudit = auditPaidAnalysisV4ActualOutputTier(
   duplicateActionDeep,
 );
 assert(!duplicateActionAudit.ok, "DEEP output with duplicate action targets must fail");
+
+const stressPrompt = buildPaidAnalysisDetailPromptV4({
+  productId: "health-stress-regulation",
+  analysisType: "스트레스 반응 조절 분석",
+  birthData: "synthetic birth",
+  originalChart: "synthetic chart",
+  coreInterpretation: "synthetic core",
+  fortuneTiming: "synthetic timing",
+  sajuSummary: "synthetic summary",
+  currentFortuneFlow: "synthetic flow",
+  evidenceFacts: {
+    strength: {
+      level: "중화",
+      dayElement: "목",
+      supportScore: 50,
+      opposingScore: 50,
+    },
+    fortuneFlow: {
+      currentFlow: "균형",
+      opportunityScore: 3,
+      cautionScore: 3,
+      yongshinLevel: "중간",
+      daeunFlow: "중립",
+      seunFlow: "중립",
+      relations: [],
+    },
+    elementRelations: {
+      items: [
+        { source: "목", target: "화", type: "생", strength: "보통" },
+      ],
+    },
+    fortuneBrain: {
+      structure: "균형",
+      strengths: ["조절"],
+      weaknesses: ["과부하"],
+    },
+  },
+});
+assert(
+  stressPrompt.includes("[상품 evidence 실현 규칙]"),
+  "topic V4 prompt must include the evidence realization contract",
+);
+assert(
+  stressPrompt.includes(
+    "evidenceFocus의 서로 다른 key가 4개 이상 실제 존재하면 evidence는 정확히 4개",
+  ),
+  "topic V4 prompt must require four available contract evidence keys",
+);
+assert(
+  stressPrompt.includes("element_relations와 fortune_brain도"),
+  "topic V4 prompt must explicitly recognize the newer evidence keys",
+);
+assert(
+  stressPrompt.includes("strength, element_relations, fortune_brain, fortune_flow"),
+  "health stress prompt must expose its four product-contract evidence keys",
+);
 
 console.log(
   `[v4-actual-output-tier] PASS coreDepth=${coreAudit.metrics.depthUnits} richCoreDepth=${richCoreAudit.metrics.depthUnits} deepDepth=${deepAudit.metrics.depthUnits}`,

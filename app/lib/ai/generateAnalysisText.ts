@@ -31,6 +31,13 @@ const PAID_ANALYSIS_V4_TRANSIENT_RETRY_STATUSES = new Set([
   503,
   504,
 ]);
+const PAID_ANALYSIS_V4_NON_RETRYABLE_ERROR_CODES = new Set([
+  "credit_balance_exhausted",
+  "insufficient_quota",
+]);
+const PAID_ANALYSIS_V4_NON_RETRYABLE_ERROR_TYPES = new Set([
+  "insufficient_quota",
+]);
 const PAID_ANALYSIS_V4_TRANSIENT_RETRY_DELAYS_MS = [400, 1200] as const;
 
 export function resolveTransientRetryLimit(
@@ -59,7 +66,25 @@ function resolveOpenAIErrorStatus(error: unknown): number | null {
   return null;
 }
 
+function resolveOpenAIErrorStringField(
+  error: unknown,
+  field: "code" | "type",
+): string | null {
+  const value = (error as { code?: unknown; type?: unknown } | null)?.[field];
+  return typeof value === "string" ? value.trim().toLowerCase() : null;
+}
+
 export function shouldRetryPaidAnalysisV4TransientError(error: unknown): boolean {
+  const errorCode = resolveOpenAIErrorStringField(error, "code");
+  const errorType = resolveOpenAIErrorStringField(error, "type");
+
+  if (
+    (errorCode !== null && PAID_ANALYSIS_V4_NON_RETRYABLE_ERROR_CODES.has(errorCode)) ||
+    (errorType !== null && PAID_ANALYSIS_V4_NON_RETRYABLE_ERROR_TYPES.has(errorType))
+  ) {
+    return false;
+  }
+
   const status = resolveOpenAIErrorStatus(error);
   return status !== null && PAID_ANALYSIS_V4_TRANSIENT_RETRY_STATUSES.has(status);
 }

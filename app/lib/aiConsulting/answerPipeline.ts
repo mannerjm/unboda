@@ -15,7 +15,7 @@ import {
   type AiConsultingMemoryRpcRow,
 } from "./memory";
 
-const AI_CONSULTING_MODEL = resolveModel("paid-analysis-detail");
+const AI_CONSULTING_MODEL = resolveModel("ai-consulting");
 const AI_CONSULTING_MAX_OUTPUT_TOKENS = 1600;
 const AI_CONSULTING_TIMEOUT_MS = 60_000;
 const AI_CONSULTING_REPORT_CONTEXT_CHAR_CAP = 24_000;

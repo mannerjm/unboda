@@ -121,7 +121,7 @@ export default function SupportCenterClient({
         <header className="mt-8 border-b border-stone-200 pb-7">
           <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">SUPPORT CENTER</p>
           <h1 className="mt-3 text-3xl font-bold sm:text-4xl">고객지원 센터</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-600">반복되는 문제는 먼저 자동 해결 경로로 안내합니다. 그래도 해결되지 않는 경우에만 문의를 접수해 대표가 필요한 예외만 확인하도록 운영합니다.</p>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-600">반복되는 문제는 먼저 자동 해결 경로로 안내합니다. 그래도 해결되지 않는 경우에만 문의를 접수해 필요한 지원을 받을 수 있도록 운영합니다.</p>
         </header>
 
         <section className="mt-7">

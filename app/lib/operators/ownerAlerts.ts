@@ -7,7 +7,8 @@ const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const ALERT_FROM = "운보다 운영 알림 <noreply@mail.unboda.kr>";
 const ADMIN_URL = "https://unboda.kr/admin";
 const AI_WINDOW_HOURS = 24;
-const MAX_ALERT_ATTEMPTS = 5;
+const MAX_ALERT_ATTEMPTS = 10;
+const STALE_SENDING_MS = 15 * 60 * 1000;
 
 type IncidentKind =
   | "PAYMENT_OWNER_REVIEW"
@@ -22,23 +23,27 @@ type Incident = {
   version: string;
 };
 
+type DeliveryStatus = "PENDING" | "SENDING" | "FAILED_RETRYING" | "SENT" | "FAILED_FINAL";
+
 type DeliveryRow = {
   id: string;
   alert_key: string;
   incident_count: number;
-  status: "PENDING" | "SENDING" | "FAILED_RETRYING" | "SENT" | "FAILED_FINAL";
+  status: DeliveryStatus;
   attempt_count: number;
   max_attempt_count: number;
   next_retry_at: string | null;
+  updated_at: string;
 };
+
+const DELIVERY_SELECT = "id,alert_key,incident_count,status,attempt_count,max_attempt_count,next_retry_at,updated_at";
 
 export type OwnerAlertResult =
   | { status: "idle"; incidentCount: 0 }
-  | { status: "unconfigured"; incidentCount: number }
-  | { status: "no_recipients"; incidentCount: number }
-  | { status: "already_sent" | "not_due" | "claim_lost"; incidentCount: number }
+  | { status: "unconfigured" | "no_recipients"; incidentCount: number }
+  | { status: "already_sent" | "not_due" | "claim_lost" | "failed_final"; incidentCount: number }
   | { status: "sent"; incidentCount: number; recipientCount: number }
-  | { status: "retrying" | "failed_final"; incidentCount: number; errorCode: string };
+  | { status: "retrying"; incidentCount: number; errorCode: string };
 
 function digest(value: string): string {
   return createHash("sha256").update(value).digest("hex");
@@ -96,28 +101,23 @@ async function collectAiChargeIntegrityIncidents(): Promise<Incident[]> {
     const id = row.id as string;
     const charged = Boolean(row.charged);
     const createdAt = normalizeVersion(row.created_at as string | null);
-    const integrityProblems = [
+    const integrityProblem = [
       charged && !replies.has(id),
       charged && !consumes.has(id),
       !charged && replies.has(id),
       !charged && consumes.has(id),
     ].some(Boolean);
-
     const expiresAt = row.reservation_expires_at as string | null;
+    const expiresMs = expiresAt ? new Date(expiresAt).getTime() : Number.NaN;
     const staleReservation = !charged
       && Boolean(row.reservation_token)
       && !row.reservation_released_at
-      && Boolean(expiresAt)
-      && Number.isFinite(new Date(expiresAt as string).getTime())
-      && new Date(expiresAt as string).getTime() <= nowMs;
+      && Number.isFinite(expiresMs)
+      && expiresMs <= nowMs;
     const releasedWithoutFailureTelemetry = !charged && Boolean(row.reservation_released_at) && !attempts.has(id);
 
-    if (integrityProblems || staleReservation || releasedWithoutFailureTelemetry) {
-      incidents.push({
-        kind: "AI_CHARGE_INTEGRITY",
-        reference: digest(id),
-        version: createdAt,
-      });
+    if (integrityProblem || staleReservation || releasedWithoutFailureTelemetry) {
+      incidents.push({ kind: "AI_CHARGE_INTEGRITY", reference: digest(id), version: createdAt });
     }
   }
 
@@ -142,7 +142,6 @@ async function collectOwnerReviewIncidents(): Promise<Incident[]> {
       .eq("closure_owner_review_required", true),
     collectAiChargeIntegrityIncidents(),
   ]);
-
   if (paymentResult.error || refundResult.error || reportResult.error || closureResult.error) {
     throw new Error("OWNER_ALERT_OPERATIONAL_READ_FAILED");
   }
@@ -170,15 +169,13 @@ async function collectOwnerReviewIncidents(): Promise<Incident[]> {
     })),
     ...aiIncidents,
   ];
-
   incidents.sort((a, b) => `${a.kind}:${a.reference}:${a.version}`.localeCompare(`${b.kind}:${b.reference}:${b.version}`));
   return incidents;
 }
 
 async function activeOperatorEmails(): Promise<string[]> {
   const db = createAdminClient();
-  const { data, error } = await db
-    .from("operator_roles")
+  const { data, error } = await db.from("operator_roles")
     .select("auth_user_id")
     .eq("role", "CS_OPERATOR")
     .eq("is_active", true)
@@ -196,8 +193,7 @@ async function activeOperatorEmails(): Promise<string[]> {
 }
 
 function retryDelayMs(attemptCount: number): number {
-  const minutes = Math.min(60, 5 * 2 ** Math.max(0, attemptCount - 1));
-  return minutes * 60 * 1000;
+  return Math.min(60, 5 * 2 ** Math.max(0, attemptCount - 1)) * 60 * 1000;
 }
 
 function safeErrorCode(error: unknown): string {
@@ -217,29 +213,52 @@ async function ensureDelivery(alertKey: string, incidentCount: number): Promise<
   if (insertError) throw new Error("OWNER_ALERT_LEDGER_INSERT_FAILED");
 
   const { data, error } = await db.from("operator_alert_deliveries")
-    .select("id,alert_key,incident_count,status,attempt_count,max_attempt_count,next_retry_at")
+    .select(DELIVERY_SELECT)
     .eq("alert_key", alertKey)
     .single<DeliveryRow>();
   if (error || !data) throw new Error("OWNER_ALERT_LEDGER_READ_FAILED");
   return data;
 }
 
-async function claimDelivery(row: DeliveryRow): Promise<DeliveryRow | null> {
-  if (row.status === "SENT" || row.status === "FAILED_FINAL" || row.status === "SENDING") return null;
-  if (row.next_retry_at && new Date(row.next_retry_at).getTime() > Date.now()) return null;
+async function recoverStaleSending(row: DeliveryRow): Promise<DeliveryRow | null> {
+  if (row.status !== "SENDING") return row;
+  const updatedMs = new Date(row.updated_at).getTime();
+  if (!Number.isFinite(updatedMs) || Date.now() - updatedMs < STALE_SENDING_MS) return null;
 
-  const nextAttempt = row.attempt_count + 1;
+  const db = createAdminClient();
+  const { data, error } = await db.from("operator_alert_deliveries")
+    .update({
+      status: "FAILED_RETRYING",
+      next_retry_at: new Date().toISOString(),
+      last_error_code: "OWNER_ALERT_STALE_SENDING_RECOVERED",
+    })
+    .eq("id", row.id)
+    .eq("status", "SENDING")
+    .eq("updated_at", row.updated_at)
+    .select(DELIVERY_SELECT)
+    .maybeSingle<DeliveryRow>();
+  if (error) throw new Error("OWNER_ALERT_STALE_RECOVERY_FAILED");
+  return data ?? null;
+}
+
+async function claimDelivery(input: DeliveryRow): Promise<DeliveryRow | null> {
+  const row = await recoverStaleSending(input);
+  if (!row || row.status === "SENT" || row.status === "FAILED_FINAL" || row.status === "SENDING") return null;
+  if (row.next_retry_at && new Date(row.next_retry_at).getTime() > Date.now()) return null;
+  if (row.attempt_count >= row.max_attempt_count) return null;
+
   const db = createAdminClient();
   const { data, error } = await db.from("operator_alert_deliveries")
     .update({
       status: "SENDING",
-      attempt_count: nextAttempt,
+      attempt_count: row.attempt_count + 1,
       next_retry_at: null,
       last_error_code: null,
     })
     .eq("id", row.id)
     .eq("status", row.status)
-    .select("id,alert_key,incident_count,status,attempt_count,max_attempt_count,next_retry_at")
+    .eq("attempt_count", row.attempt_count)
+    .select(DELIVERY_SELECT)
     .maybeSingle<DeliveryRow>();
   if (error) throw new Error("OWNER_ALERT_LEDGER_CLAIM_FAILED");
   return data ?? null;
@@ -278,11 +297,11 @@ function renderAlert(incidents: readonly Incident[]): { subject: string; text: s
     ["AI 질문권 무결성", counts.AI_CHARGE_INTEGRITY],
   ].filter(([, count]) => Number(count) > 0) as Array<[string, number]>;
   const summary = lines.map(([label, count]) => `${label}: ${count}건`).join("\n");
-  const escapedSummary = lines.map(([label, count]) => `<li>${label}: <strong>${count}건</strong></li>`).join("");
+  const htmlSummary = lines.map(([label, count]) => `<li>${label}: <strong>${count}건</strong></li>`).join("");
   return {
     subject: `[운보다] 대표 확인이 필요한 운영 예외 ${incidents.length}건`,
     text: `운보다에서 대표 확인이 필요한 운영 예외가 감지되었습니다.\n\n${summary}\n\n고객 개인정보나 주문 식별자는 이메일에 포함하지 않았습니다. 관리자 화면에서 확인하세요.\n${ADMIN_URL}`,
-    html: `<div style="font-family:Arial,sans-serif;line-height:1.6"><h2>운보다 운영 확인 필요</h2><p>대표 확인이 필요한 예외가 감지되었습니다.</p><ul>${escapedSummary}</ul><p>고객 개인정보나 주문 식별자는 이메일에 포함하지 않았습니다.</p><p><a href="${ADMIN_URL}">운영 대시보드에서 확인하기</a></p></div>`,
+    html: `<div style="font-family:Arial,sans-serif;line-height:1.6"><h2>운보다 운영 확인 필요</h2><p>대표 확인이 필요한 예외가 감지되었습니다.</p><ul>${htmlSummary}</ul><p>고객 개인정보나 주문 식별자는 이메일에 포함하지 않았습니다.</p><p><a href="${ADMIN_URL}">운영 대시보드에서 확인하기</a></p></div>`,
   };
 }
 
@@ -299,9 +318,8 @@ export async function sendOwnerReviewAlertIfNeeded(): Promise<OwnerAlertResult> 
   const fingerprint = incidents.map((incident) => `${incident.kind}:${incident.reference}:${incident.version}`).join("|");
   const alertKey = `owner-review/${digest(fingerprint)}`;
   const delivery = await ensureDelivery(alertKey, incidents.length);
-  if (delivery.status === "SENT" || delivery.status === "FAILED_FINAL") {
-    return { status: "already_sent", incidentCount: incidents.length };
-  }
+  if (delivery.status === "SENT") return { status: "already_sent", incidentCount: incidents.length };
+  if (delivery.status === "FAILED_FINAL") return { status: "failed_final", incidentCount: incidents.length };
   if (delivery.next_retry_at && new Date(delivery.next_retry_at).getTime() > Date.now()) {
     return { status: "not_due", incidentCount: incidents.length };
   }
@@ -330,7 +348,7 @@ export async function sendOwnerReviewAlertIfNeeded(): Promise<OwnerAlertResult> 
 
     if (!response.ok) {
       const errorCode = `OWNER_ALERT_RESEND_HTTP_${response.status}`;
-      const retryable = response.status === 408 || response.status === 409 || response.status === 429 || response.status >= 500;
+      const retryable = response.status !== 400 && response.status !== 422;
       const status = await markFailed(claimed, errorCode, retryable);
       return { status, incidentCount: incidents.length, errorCode };
     }

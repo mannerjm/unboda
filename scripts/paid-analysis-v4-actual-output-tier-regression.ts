@@ -2,7 +2,10 @@ import type {
   PaidAnalysisEvidenceKey,
   ResolvedPaidAnalysisDetailV4,
 } from "../app/lib/paidAnalysisDetailOutput";
-import { auditPaidAnalysisV4ActualOutputTier } from "../app/lib/paidAnalysisV4ActualOutputTierQuality";
+import {
+  auditPaidAnalysisV4ActualOutputTier,
+  auditPaidAnalysisV4ActualTierSample,
+} from "../app/lib/paidAnalysisV4ActualOutputTierQuality";
 import { resolvePaidAnalysisLaunchSpecialization } from "../app/lib/paidAnalysisTopicConfig";
 
 function assert(condition: boolean, message: string): void {
@@ -118,7 +121,28 @@ const deep = makeTopicOutput("relationship-current", 4, 3, 2);
 const deepAudit = auditPaidAnalysisV4ActualOutputTier("relationship-current", deep);
 assert(deepAudit.ok, `valid DEEP fixture with canonical 2+ confidence evidence must pass: ${JSON.stringify(deepAudit.issues)}`);
 assert(deepAudit.metrics.confidenceEvidenceCount === 2, "DEEP regression must exercise the canonical two-item confidence minimum");
-assert(deepAudit.metrics.depthUnits > coreAudit.metrics.depthUnits, "DEEP fixture must own more actual depth units than CORE fixture");
+assert(deepAudit.metrics.depthUnits > coreAudit.metrics.depthUnits, "DEEP fixture must own more actual depth units than the minimum CORE fixture");
+
+const richCore = makeTopicOutput("career-job-change", 4, 3, 4);
+const richCoreAudit = auditPaidAnalysisV4ActualOutputTier("career-job-change", richCore);
+assert(richCoreAudit.ok, `richer valid CORE fixture must still pass its own tier gate: ${JSON.stringify(richCoreAudit.issues)}`);
+assert(
+  richCoreAudit.metrics.depthUnits >= deepAudit.metrics.depthUnits,
+  "regression must exercise a valid CORE raw depth score that is not lower than DEEP",
+);
+const mixedFamilyAudit = auditPaidAnalysisV4ActualTierSample([
+  { productId: "career-job-change", output: richCore },
+  { productId: "relationship-current", output: deep },
+]);
+assert(
+  mixedFamilyAudit.ok,
+  `cross-family raw depth ordering must remain diagnostic only: ${JSON.stringify(mixedFamilyAudit.issues)}`,
+);
+assert(
+  mixedFamilyAudit.familyAverageDepthUnits.CORE !== undefined &&
+    mixedFamilyAudit.familyAverageDepthUnits.DEEP !== undefined,
+  "sample audit must continue reporting family depth diagnostics",
+);
 
 const shallowDeep: ResolvedPaidAnalysisDetailV4 = {
   ...deep,
@@ -148,5 +172,5 @@ const duplicateActionAudit = auditPaidAnalysisV4ActualOutputTier(
 assert(!duplicateActionAudit.ok, "DEEP output with duplicate action targets must fail");
 
 console.log(
-  `[v4-actual-output-tier] PASS coreDepth=${coreAudit.metrics.depthUnits} deepDepth=${deepAudit.metrics.depthUnits}`,
+  `[v4-actual-output-tier] PASS coreDepth=${coreAudit.metrics.depthUnits} richCoreDepth=${richCoreAudit.metrics.depthUnits} deepDepth=${deepAudit.metrics.depthUnits}`,
 );

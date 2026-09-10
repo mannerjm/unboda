@@ -52,7 +52,14 @@ assert(guestResult.includes('fetch("/api/guest-free-analysis")') && !guestResult
 assert(guestResult.includes("/api/guest-free-analysis/intent") && guestResult.includes("/auth/login?returnTo=/auth/complete-guest-analysis"), "guest paid intent and auth continuation must remain intact");
 assert(guestStartRoute.includes("createGuestFreeAnalysis") && guestStartRoute.includes("GUEST_ANALYSIS_COOKIE_NAME"), "guest start route must create the server-backed analysis and credential before loading");
 assert(guestGenerateRoute.includes("buildFreeAnalysisResponse") && guestGenerateRoute.includes("completeGuestFreeAnalysis"), "guest generation route must complete the existing server-backed row");
-assert(guestLoading.includes('fetch("/api/guest-free-analysis/generate"') && guestLoading.includes("분석에는 약 1~2분 정도 소요될 수 있습니다.") && guestLoading.includes("w-16 h-16 border-4") && guestLoading.includes('router.replace("/guest-result")'), "guest loading must reuse the existing loading UI then route to the server-backed result");
+assert(
+  guestLoading.includes('fetch("/api/guest-free-analysis/generate"') &&
+    guestLoading.includes('router.replace("/guest-result")') &&
+    guestLoading.includes('router.replace("/guest-saju")') &&
+    guestLoading.includes("완료되면 결과 화면으로 자동 이동합니다.") &&
+    guestLoading.includes("animate-spin"),
+  "guest loading must generate server-side, route to result on success, recover on failure, and show progress UI",
+);
 
 console.log(`guest date browser bounds: ${GUEST_BIRTH_DATE_MIN} to ${getGuestBirthDateMax()} ✓`);
 console.log("guest KST midnight date boundary: true");

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "tsx scripts/paid-analysis-v4-launch-audit-regression.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -23,6 +24,7 @@
     "test:operator-alerts": "tsx scripts/operator-alert-email-regression.ts",
     "test:operator-triage": "tsx scripts/operator-exception-triage-regression.ts",
     "test:support-center": "tsx scripts/support-center-regression.ts",
+    "test:v4-launch-audit": "tsx scripts/paid-analysis-v4-launch-audit-regression.ts",
     "test:paid-all": "npm run test:paid-money && npm run test:paid-career && npm run test:paid-relationship && npm run test:paid-health"
   },
   "dependencies": {

@@ -45,7 +45,7 @@ const guestLoading = read("app/guest-loading/page.tsx");
 assert(guestSaju.includes("min={GUEST_BIRTH_DATE_MIN}") && guestSaju.includes("max={getGuestBirthDateMax()}"), "guest date input must enforce browser min/max bounds");
 assert(guestRoute.includes("validateGuestProfileInput"), "guest server route must enforce the same guest date range policy");
 assert(guestResult.includes("ResultPageContent") && guestResult.includes("ResultViewerContext.Provider"), "guest must mount the exact authenticated result renderer through its data context");
-for (const fragment of ["FOUR PILLARS", "지장간", "pillar.stage", "pillar.spirit", "pillar.nobles", "DAEUN ANALYSIS", "selectedDaeunOrder", "ganjiToHanja", "오행 분석", "신강·신약 참고 지표", "용신 분석", "격국 분석", "오행 상생·상극", "AI ANALYSIS", "RECOMMENDED ANALYSIS", "심층 분석 확인하기"]) {
+for (const fragment of ["FOUR PILLARS", "지장간", "pillar.stage", "pillar.spirit", "pillar.nobles", "DAEUN ANALYSIS", "selectedDaeunOrder", "ganjiToHanja", "오행 분석", "신강·신약 분석", "용신 분석", "격국 분석", "오행 상생·상극", "AI ANALYSIS", "RECOMMENDED ANALYSIS", "심층 분석 확인하기"]) {
   assert(authenticatedResult.includes(fragment), `authenticated original renderer must retain ${fragment}`);
 }
 assert(guestResult.includes('fetch("/api/guest-free-analysis")') && !guestResult.includes("sessionStorage"), "guest result must remain server-backed without browser analysis storage");

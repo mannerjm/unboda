@@ -1,9 +1,11 @@
 import { getPeriodAnalysisStrategy } from "./analysisPeriodStrategy";
+import { getRelationshipPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/relationshipPrompt";
 import {
   getLaunchProductIds,
   getPaidAnalysisPremiumDepthContract,
   getPaidAnalysisTopicConfig,
   resolvePaidAnalysisLaunchSpecialization,
+  type PaidAnalysisTopicConfig,
 } from "./paidAnalysisTopicConfig";
 import {
   getProductPricing,
@@ -39,6 +41,11 @@ const FAMILY_RANK: Readonly<Record<PricingFamily, number>> = {
   SIGNATURE: 4,
 };
 
+const RELATIONSHIP_DECISION_SAFETY_MARKERS = [
+  '"어느 선택이 맞는가"보다',
+  '"무엇이 확인되면 어느 선택이 더 합리적인가"',
+] as const;
+
 function pushIf(errors: string[], condition: boolean, message: string): void {
   if (condition) errors.push(message);
 }
@@ -62,6 +69,21 @@ function overlap(left: string, right: string): number {
   if (leftTokens.size === 0 || rightTokens.size === 0) return 0;
   const shared = [...leftTokens].filter((token) => rightTokens.has(token)).length;
   return shared / Math.max(leftTokens.size, rightTokens.size);
+}
+
+function hasRelationshipEngineDecisionSafety(): boolean {
+  const rules = getRelationshipPaidAnalysisPromptRules();
+  return RELATIONSHIP_DECISION_SAFETY_MARKERS.every((marker) =>
+    rules.includes(marker),
+  );
+}
+
+function effectiveSafetyBoundaryCount(config: PaidAnalysisTopicConfig): number {
+  const engineBoundaryCount =
+    config.engine === "RELATIONSHIP" && hasRelationshipEngineDecisionSafety()
+      ? 1
+      : 0;
+  return config.prohibitedClaims.length + engineBoundaryCount;
 }
 
 function periodValueSignature(productId: string): string {
@@ -128,12 +150,13 @@ export function auditPaidAnalysisV4PriceTiers(): PaidAnalysisV4PriceTierAuditRep
       const distinctEvidenceKeys = new Set(
         depthContract.insightOwnership.map((item) => item.evidenceKey),
       );
+      const safetyBoundaryCount = effectiveSafetyBoundaryCount(config);
 
       pushIf(errors, config.analysisFocus.length < 3, `${productId}: DEEP 분석 초점은 최소 3개여야 합니다.`);
       pushIf(errors, config.requiredInsights.length < 4, `${productId}: DEEP 필수 통찰은 최소 4개여야 합니다.`);
       pushIf(errors, config.actionFocus.length < 3, `${productId}: DEEP 행동 책임은 최소 3개여야 합니다.`);
       pushIf(errors, (config.excludedFocus?.length ?? 0) < 3, `${productId}: DEEP 인접상품 경계는 최소 3개여야 합니다.`);
-      pushIf(errors, config.prohibitedClaims.length < 4, `${productId}: DEEP 안전·과장 금지 경계는 최소 4개여야 합니다.`);
+      pushIf(errors, safetyBoundaryCount < 4, `${productId}: DEEP 안전·과장 금지 경계는 상품별 계약과 적용 엔진 규칙을 합쳐 최소 4개여야 합니다.`);
       pushIf(errors, depthContract.insightOwnership.length < 4, `${productId}: DEEP 통찰별 깊이 책임은 최소 4개여야 합니다.`);
       pushIf(errors, distinctEvidenceKeys.size < 4, `${productId}: DEEP 핵심 통찰은 최소 4개의 서로 다른 명리 근거 축에 연결되어야 합니다.`);
       pushIf(errors, !customerConfig, `${productId}: DEEP 고객용 구매 가치 설명이 없습니다.`);

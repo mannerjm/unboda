@@ -34,7 +34,12 @@ assert.match(alerts, /paid_reports/);
 assert.match(alerts, /closure_owner_review_required/);
 assert.match(alerts, /AI_CHARGE_INTEGRITY/);
 assert.match(alerts, /auth\.admin\.getUserById/);
-assert.match(alerts, /customer.*personal|고객 개인정보/);
+assert.match(alerts, /고객 개인정보/);
+assert.match(alerts, /MAX_ALERT_ATTEMPTS = 10/);
+assert.match(alerts, /STALE_SENDING_MS = 15 \* 60 \* 1000/);
+assert.match(alerts, /OWNER_ALERT_STALE_SENDING_RECOVERED/);
+assert.match(alerts, /\.eq\("updated_at", row\.updated_at\)/);
+assert.match(alerts, /response\.status !== 400 && response\.status !== 422/);
 assert.ok(!alerts.includes("NEXT_PUBLIC_RESEND"), "Resend credential must remain server-only");
 
 assert.match(dispatcher, /sendOwnerReviewAlertIfNeeded/);

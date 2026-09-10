@@ -1,4 +1,4 @@
-import type { PaidAnalysisDetailOutputV3 } from "../paidAnalysisDetailOutput";
+import type { StoredPaidAnalysisDetail } from "../paidAnalysisDetailOutput";
 import {
   getCanonicalPremiumProductId,
   getPremiumProduct,
@@ -16,7 +16,7 @@ export type PaidReportRecord = {
   productId: string;
   purchaseId: string | null;
   status: PaidReportStatus;
-  content: PaidAnalysisDetailOutputV3 | null;
+  content: StoredPaidAnalysisDetail | null;
   errorCode: string | null;
   createdAt: string;
   updatedAt: string;
@@ -32,7 +32,7 @@ type PaidReportRow = {
   product_id: string;
   purchase_id: string | null;
   status: PaidReportStatus;
-  content: PaidAnalysisDetailOutputV3 | null;
+  content: StoredPaidAnalysisDetail | null;
   error_code: string | null;
   created_at: string;
   updated_at: string;
@@ -273,7 +273,7 @@ export async function completePaidReport(input: {
   userId: string;
   profileId: string;
   productId: string;
-  content: PaidAnalysisDetailOutputV3;
+  content: StoredPaidAnalysisDetail;
 }): Promise<PaidReportRecord> {
   const supabase = createAdminClient();
   const { data, error } = await supabase

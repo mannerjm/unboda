@@ -5,6 +5,7 @@ import { reconcileRefundsBatch } from "@/app/lib/refunds/server";
 import { reconcileAccountClosureFinalizations } from "@/app/lib/accounts/server";
 import { cleanupExpiredGuestFreeAnalyses } from "@/app/lib/guestFreeAnalyses/server";
 import { sendOwnerReviewAlertIfNeeded } from "@/app/lib/operators/ownerAlerts";
+import { dispatchSupportNotificationDeliveries } from "@/app/lib/support/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -15,9 +16,9 @@ type WorkerReport<T> = { ok: true } & T | { ok: false };
  *
  * One shared scheduler transport credential authenticates this request, then
  * reconciliation workers are invoked as direct server-side function calls.
- * Each worker is isolated from the others. Owner alert delivery is best-effort:
- * an email transport failure is reported but never rolls back or marks otherwise
- * successful payment/refund/account/guest recovery work as failed.
+ * Each worker is isolated from the others. Email notification workers are
+ * best-effort: transport failures are reported but never roll back otherwise
+ * successful payment/refund/account/guest recovery work.
  */
 async function dispatch(request: Request) {
   if (!isAuthorizedSchedulerRequest(request)) {
@@ -146,10 +147,27 @@ async function dispatch(request: Request) {
     console.error("[owner-alert]", { configured: operatorAlertConfigured, status: "worker_failed" });
   }
 
+  let supportNotifications: WorkerReport<{
+    configured: boolean;
+    scanned: number;
+    sent: number;
+    retrying: number;
+    failedFinal: number;
+    skipped: number;
+  }>;
+  try {
+    const summary = await dispatchSupportNotificationDeliveries({ batchLimit: 10 });
+    supportNotifications = { ok: true, ...summary };
+    console.info("[support-email]", { trigger: "scheduled_retry", ...summary });
+  } catch {
+    supportNotifications = { ok: false };
+    console.error("[support-email]", { trigger: "scheduled_retry", status: "worker_failed" });
+  }
+
   const ok = payments.ok && refunds.ok && accountClosures.ok && guestCleanup.ok;
 
   return NextResponse.json(
-    { ok, payments, refunds, accountClosures, guestCleanup, operatorAlerts },
+    { ok, payments, refunds, accountClosures, guestCleanup, operatorAlerts, supportNotifications },
     { status: ok ? 200 : 500, headers: { "Cache-Control": "no-store" } },
   );
 }

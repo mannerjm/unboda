@@ -3,6 +3,7 @@ import { getPaidAnalysisEngine } from "./paidAnalysisEngine";
 import {
   getLaunchProductIds,
   getPaidAnalysisPremiumDepthContract,
+  getPaidAnalysisTopicConfig,
   resolvePaidAnalysisLaunchSpecialization,
 } from "./paidAnalysisTopicConfig";
 import {
@@ -68,6 +69,10 @@ export function auditPaidAnalysisV4LaunchCatalog(): PaidAnalysisV4LaunchAuditRep
     pushIf(errors, pricing.amount <= 0, `${productId}: 판매 가격이 0 이하입니다.`);
     pushIf(errors, specialization.kind === "none", `${productId}: Launch V4 전문화 계약이 없습니다.`);
 
+    if (!engine) {
+      continue;
+    }
+
     if (specialization.kind === "topic") {
       const config = specialization.config;
       products.push({ productId, kind: "topic", engine, pricingFamily: pricing.family });
@@ -89,12 +94,16 @@ export function auditPaidAnalysisV4LaunchCatalog(): PaidAnalysisV4LaunchAuditRep
       pushIf(errors, config.actionFocus.some((item) => !hasText(item)), `${productId}: 비어 있는 행동 책임이 있습니다.`);
       pushIf(errors, config.prohibitedClaims.some((item) => !hasText(item)), `${productId}: 비어 있는 금지 주장이 있습니다.`);
 
-      const purchaseDecision = config.purchaseDecision;
-      pushIf(errors, purchaseDecision.recommendedFor.length < 3, `${productId}: 구매 추천 상황이 3개 미만입니다.`);
-      pushIf(errors, purchaseDecision.whatItAnalyzes.length < 3, `${productId}: 구매 전 분석 범위 설명이 3개 미만입니다.`);
-      pushIf(errors, purchaseDecision.expectedUnderstanding.length < 3, `${productId}: 구매 후 기대 이해가 3개 미만입니다.`);
-      pushIf(errors, !hasText(purchaseDecision.distinction), `${productId}: 인접 상품 차이 설명이 없습니다.`);
-      pushIf(errors, !hasText(purchaseDecision.decisionQuestion), `${productId}: 구매 판단 질문이 없습니다.`);
+      const customerConfig = getPaidAnalysisTopicConfig(productId);
+      pushIf(errors, !customerConfig, `${productId}: 고객용 구매 판단 계약을 확인할 수 없습니다.`);
+      if (customerConfig) {
+        const purchaseDecision = customerConfig.purchaseDecision;
+        pushIf(errors, purchaseDecision.recommendedFor.length < 3, `${productId}: 구매 추천 상황이 3개 미만입니다.`);
+        pushIf(errors, purchaseDecision.whatItAnalyzes.length < 3, `${productId}: 구매 전 분석 범위 설명이 3개 미만입니다.`);
+        pushIf(errors, purchaseDecision.expectedUnderstanding.length < 3, `${productId}: 구매 후 기대 이해가 3개 미만입니다.`);
+        pushIf(errors, !hasText(purchaseDecision.distinction), `${productId}: 인접 상품 차이 설명이 없습니다.`);
+        pushIf(errors, !hasText(purchaseDecision.decisionQuestion), `${productId}: 구매 판단 질문이 없습니다.`);
+      }
 
       const normalizedQuestion = config.userQuestion.replace(/\s+/g, " ").trim();
       const previousQuestionProduct = topicQuestions.get(normalizedQuestion);

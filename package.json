@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:profile-scope": "tsx scripts/profile-scoped-purchase-migration-regression.ts && tsx scripts/profile-scoped-purchase-server-regression.ts && tsx scripts/profile-context-access-regression.ts && tsx scripts/profile-api-phase7b-regression.ts && tsx scripts/purchase-persistence-phase3b-regression.ts --static-only",
     "test:paid-money": "tsx scripts/paid-analysis-detail-prompt-regression.ts && tsx scripts/paid-analysis-money-output-quality-regression.ts && tsx scripts/paid-analysis-self-review-regression.ts && tsx scripts/paid-analysis-health-safety-validator-regression.ts",
     "test:paid-career": "tsx scripts/paid-analysis-detail-prompt-regression.ts && tsx scripts/paid-analysis-career-output-quality-regression.ts && tsx scripts/paid-analysis-self-review-regression.ts && tsx scripts/paid-analysis-health-safety-validator-regression.ts",
     "test:paid-relationship": "tsx scripts/paid-analysis-detail-prompt-regression.ts && tsx scripts/paid-analysis-relationship-output-quality-regression.ts && tsx scripts/paid-analysis-self-review-regression.ts && tsx scripts/paid-analysis-health-safety-validator-regression.ts",

@@ -97,7 +97,7 @@ async function main(): Promise<void> {
   }
 
   let retryCalls = 0;
-  let mergedTelemetry: PaidAnalysisResponseTelemetry | null = null;
+  const mergedTelemetryEvents: PaidAnalysisResponseTelemetry[] = [];
   const sentinel = {} as ResolvedPaidAnalysisDetailV4;
 
   const result = await generatePaidAnalysisDetailV4WithConsistencyRetry(input, {
@@ -112,14 +112,16 @@ async function main(): Promise<void> {
       return sentinel;
     },
     onResponseTelemetry: (telemetry) => {
-      mergedTelemetry = telemetry;
+      mergedTelemetryEvents.push(telemetry);
     },
   });
 
   assert(result === sentinel, "the successful regenerated V4 result must be returned");
   assert(retryCalls === 2, "one consistency failure must cause exactly one regeneration");
-  assert(mergedTelemetry !== null, "telemetry must be emitted after regeneration");
-  const successfulTelemetry = mergedTelemetry as PaidAnalysisResponseTelemetry;
+  const successfulTelemetry = mergedTelemetryEvents.at(-1);
+  if (!successfulTelemetry) {
+    throw new Error("FAIL: telemetry must be emitted after regeneration");
+  }
   assert(successfulTelemetry.inputTokens === 210, "input token usage must include both model calls");
   assert(successfulTelemetry.outputTokens === 90, "output token usage must include both model calls");
   assert(successfulTelemetry.reasoningTokens === 11, "reasoning token usage must include both model calls");

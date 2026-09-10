@@ -87,7 +87,7 @@ function makeTopicOutput(
     })),
     avoid: [0, 1].map((index) => ({
       type: index === 0 ? "misjudgment" : "risky_action",
-      behavior: `${focus}를 한 번의 신호만으로 결론 내리는 행동 ${index + 1}`, 
+      behavior: `${focus}를 한 번의 신호만으로 결론 내리는 행동 ${index + 1}`,
       reason: `${secondaryFocus}와 비교할 근거가 부족해 판단을 왜곡할 수 있습니다.`,
     })),
     decisionCheck:
@@ -114,9 +114,10 @@ const core = makeTopicOutput("career-job-change", 3, 2, 2);
 const coreAudit = auditPaidAnalysisV4ActualOutputTier("career-job-change", core);
 assert(coreAudit.ok, `valid CORE fixture must pass: ${JSON.stringify(coreAudit.issues)}`);
 
-const deep = makeTopicOutput("relationship-current", 4, 3, 3);
+const deep = makeTopicOutput("relationship-current", 4, 3, 2);
 const deepAudit = auditPaidAnalysisV4ActualOutputTier("relationship-current", deep);
-assert(deepAudit.ok, `valid DEEP fixture must pass: ${JSON.stringify(deepAudit.issues)}`);
+assert(deepAudit.ok, `valid DEEP fixture with canonical 2+ confidence evidence must pass: ${JSON.stringify(deepAudit.issues)}`);
+assert(deepAudit.metrics.confidenceEvidenceCount === 2, "DEEP regression must exercise the canonical two-item confidence minimum");
 assert(deepAudit.metrics.depthUnits > coreAudit.metrics.depthUnits, "DEEP fixture must own more actual depth units than CORE fixture");
 
 const shallowDeep: ResolvedPaidAnalysisDetailV4 = {

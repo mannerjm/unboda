@@ -57,8 +57,8 @@ const PRODUCT_ENGINE_MAP: Record<string, PaidAnalysisEngine> = {
   "business-team-management": "BUSINESS",
   "daeun-current": "PERIOD",
   "monthly-current": "PERIOD",
-    "yearly-current": "PERIOD",
-    "monthly-next": "PERIOD",
+  "yearly-current": "PERIOD",
+  "monthly-next": "PERIOD",
   "annual-next": "PERIOD",
   "annual-3years": "PERIOD",
   "lifetime-overview": "PERIOD",
@@ -137,6 +137,13 @@ const PERIOD_ENGINE_RULES = `[PERIOD Engine 규칙]
 - 기준 기간에 제시되지 않은 간지나 순번을 추정해 만들지 않는다.
 - 특정 사건의 발생을 확정하지 않는다.`;
 
+const DIRECTION_ACTION_CONSISTENCY_RULES = `[결론-행동 일관성 규칙]
+- conclusion.direction을 정한 뒤 conclusion.immediateAction과 action[].action을 다시 읽고 같은 방향인지 최종 확인한다.
+- direction이 "보류"이면 실행 행동에서 분석 대상 자체를 확대·늘리기·적극 추진·바로 시작·즉시 실행하는 지시를 하지 않는다. 대신 비교, 기록, 점검, 조건 확인, 손실 제한처럼 보류 상태에서 가능한 검증 행동만 제시한다.
+- direction이 "확대"이면 실행 행동에서 분석 대상 자체를 보류·유보·중단·멈추거나 하지 말라는 지시를 하지 않는다. 위험을 줄이는 조건이나 점검은 가능하지만 확대 방향 자체를 뒤집지 않는다.
+- "비교 대상을 확대한다", "확인 범위를 늘린다"처럼 판단을 위한 정보 수집 범위를 넓히는 것은 실행 대상 확대와 구분한다.
+- target, condition, completionCriteria는 판단 전환 조건을 설명할 수 있으므로 반대 방향 단어가 등장할 수 있지만, action 필드 자체는 현재 direction과 반드시 일치해야 한다.`;
+
 const ENGINE_RULES: Record<PaidAnalysisEngine, string> = {
   CAREER: CAREER_ENGINE_RULES,
   MONEY: MONEY_ENGINE_RULES,
@@ -150,5 +157,5 @@ const ENGINE_RULES: Record<PaidAnalysisEngine, string> = {
 export function getPaidAnalysisEngineRules(
   engine: PaidAnalysisEngine,
 ): string {
-  return ENGINE_RULES[engine];
+  return `${ENGINE_RULES[engine]}\n${DIRECTION_ACTION_CONSISTENCY_RULES}`;
 }

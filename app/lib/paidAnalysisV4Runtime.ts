@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import {
   generatePaidAnalysisDetailV2,
-  generatePaidAnalysisDetailV4,
 } from "./paidAnalysisDetailService";
+import { generatePaidAnalysisDetailV4WithConsistencyRetry } from "./paidAnalysisV4ConsistencyRetry";
 import type {
   PaidAnalysisDetailOutputV3,
   ResolvedPaidAnalysisDetailV4,
@@ -143,7 +143,7 @@ export async function generatePaidAnalysisDetailV4ForPaidReport(
   let failureStage: PaidGenerationFailureStage | null = "request";
 
   try {
-    const detail = await generatePaidAnalysisDetailV4(input, {
+    const detail = await generatePaidAnalysisDetailV4WithConsistencyRetry(input, {
       onResponseTelemetry: (telemetry) => {
         responseTelemetry = telemetry;
       },

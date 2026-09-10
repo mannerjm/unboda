@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/openai-transient-retry-regression.ts",
+    "prebuild": "tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -26,6 +26,7 @@
     "test:support-center": "tsx scripts/support-center-regression.ts",
     "test:v4-launch-audit": "tsx scripts/paid-analysis-v4-launch-audit-regression.ts",
     "test:openai-transient-retry": "tsx scripts/openai-transient-retry-regression.ts",
+    "test:v4-consistency-retry": "tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
     "test:paid-all": "npm run test:paid-money && npm run test:paid-career && npm run test:paid-relationship && npm run test:paid-health"
   },
   "dependencies": {

@@ -15,7 +15,11 @@ assert(page.includes("접근 권한 없음") && !page.includes("AppShell"), "non
 assert(page.includes("getOperationalFailureSummary") && page.includes("getAiConsultingOperationsReport") && page.includes("getAiConsultingQualityCostReport"), "admin home must aggregate CS, AI operations, and AI quality/cost health");
 assert(page.includes("Promise.allSettled"), "admin home must degrade safely when one operational data source is unavailable");
 assert(!shell.includes('href: "/admin"') && !shell.includes("CS CONSOLE"), "/admin must not appear in normal or mobile navigation");
-assert(consoleUi.includes('/api/internal/admin/customers?email=${encodeURIComponent(email.trim())}') && consoleUi.includes('/api/internal/admin/orders/${encodeURIComponent(orderId.trim())}'), "admin UI must call only approved exact-match lookup APIs");
+assert(
+  consoleUi.includes('/api/internal/admin/customers?email=${encodeURIComponent(exactEmail.trim())}') &&
+    consoleUi.includes('/api/internal/admin/orders/${encodeURIComponent(exactOrderId.trim())}'),
+  "admin UI must call only approved exact-match lookup APIs",
+);
 assert(consoleUi.includes('credentials: "same-origin"') && consoleUi.includes('cache: "no-store"') && !consoleUi.includes("localStorage") && !consoleUi.includes("sessionStorage"), "admin lookup results must use same-origin no-store fetches without browser persistence");
 assert(consoleUi.includes("initialFailureSummary") && consoleUi.includes("analysisEditionLabel") && consoleUi.includes("분석 회차"), "admin console must show the initial health summary and exact analysis edition");
 assert(overview.includes('href="/admin/guide"') && overview.includes('href="/admin/ai-consulting/operations"') && overview.includes('href="/admin/ai-consulting"'), "operator dashboard must link to the guide and AI operations surfaces");

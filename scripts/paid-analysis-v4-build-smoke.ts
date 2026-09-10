@@ -17,12 +17,22 @@ const SHOULD_RUN =
   process.env.VERCEL_GIT_COMMIT_REF === "test/v4-one-product-smoke" &&
   process.env.VERCEL_GIT_COMMIT_MESSAGE === RUN_MESSAGE;
 
-// Focused live recheck for the three DEEP products that failed the broader sample.
+// Broader live price-family recheck after tightening topic evidence realization.
 // Uses only the synthetic profile; no Production DB/customer data.
 const PRODUCT_IDS = [
-  "health-stress-regulation",
-  "relationship-boundary",
-  "business-startup-readiness",
+  "career-job-change", // CORE / CAREER
+  "money-saving-discipline", // CORE / MONEY
+  "career-promotion-readiness", // CORE / CAREER
+  "money-income-stability", // CORE / MONEY
+  "relationship-current", // DEEP / RELATIONSHIP
+  "health-stress-regulation", // DEEP / HEALTH
+  "business-startup-readiness", // DEEP / BUSINESS
+  "relationship-boundary", // DEEP / RELATIONSHIP
+  "yearly-current", // LONG_RANGE / PERIOD
+  "annual-next", // LONG_RANGE / PERIOD
+  "annual-3years", // LONG_RANGE / PERIOD
+  "daeun-current", // LONG_RANGE / PERIOD
+  "lifetime-overview", // SIGNATURE / PERIOD
 ] as const;
 
 const SYNTHETIC_PROFILE: ProfileDto = {
@@ -104,6 +114,10 @@ async function main(): Promise<void> {
           actions: `${audit.metrics.distinctActionTargetCount}/${audit.metrics.actionCount}`,
           ownershipFocusHits: audit.metrics.ownershipFocusHitCount,
           ownershipActionHits: audit.metrics.ownershipActionHitCount,
+          periodTimelineItems: audit.metrics.periodTimelineItemCount,
+          periodKeyPoints: audit.metrics.periodKeyPointCount,
+          periodSegmentsWithActions: audit.metrics.periodSegmentActionCount,
+          periodSegmentsWithCautions: audit.metrics.periodSegmentCautionCount,
           decisionCheckCount: audit.metrics.decisionCheckCount,
           linkageWarningCount: audit.metrics.linkageWarningCount,
           warnings: warnings.map((issue) => `${issue.field}:${issue.message}`),
@@ -152,7 +166,7 @@ async function main(): Promise<void> {
   }
 
   console.log(
-    `[v4-price-output-calibration] PASS count=${samples.length} DEEP=${sampleAudit.familyAverageDepthUnits.DEEP}`,
+    `[v4-price-output-calibration] PASS count=${samples.length} CORE=${sampleAudit.familyAverageDepthUnits.CORE} DEEP=${sampleAudit.familyAverageDepthUnits.DEEP} LONG_RANGE=${sampleAudit.familyAverageDepthUnits.LONG_RANGE} SIGNATURE=${sampleAudit.familyAverageDepthUnits.SIGNATURE}`,
   );
 }
 

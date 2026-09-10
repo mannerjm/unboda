@@ -90,6 +90,16 @@ export default async function AdminGuidePage() {
           <div className="border border-red-200 bg-red-50 p-4"><p className="text-xs font-semibold text-red-700">대표 확인 필요</p><p className="mt-2 font-bold">증거 확인 후 보수적으로 판단</p><p className="mt-2 text-xs leading-5 text-red-800">금전·계정·질문권 모순은 임의 DB 수정 없이 원인을 확인합니다.</p></div>
         </section>
 
+        <section className="mt-6 border border-stone-200 bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-bold">대표 예외 이메일 알림은 이렇게 동작합니다</h2>
+          <p className="mt-3 text-sm leading-7 text-stone-700">
+            자동 재시도 중인 정상 복구 건에는 이메일을 보내지 않습니다. 결제 상태가 최종 불일치로 멈춤, 환불 수동 확인, 유료 분석 생성 실패, 계정 종료 수동 확인, AI 질문권 무결성 이상처럼 대표 판단이 필요한 경우에만 활성 운영자 계정 이메일로 알립니다. 이메일에는 고객 이메일·주문 ID·사주·상담 내용 같은 식별 정보를 넣지 않고 건수만 전달합니다.
+          </p>
+          <p className="mt-3 text-sm leading-7 text-stone-700">
+            이메일은 승인 버튼이 아니라 “관리자 화면을 확인하라”는 신호입니다. 메일을 받은 뒤 <Link href="/admin" className="font-semibold underline underline-offset-4">운영 대시보드</Link>에서 해당 분류를 열어 실제 상태를 확인하고, 자동 처리 중이면 기다리며, 수동 확인 상태라면 증거를 보존한 채 안전한 후속 절차를 결정합니다.
+          </p>
+        </section>
+
         <section className="mt-8 space-y-4">
           {cases.map((item) => (
             <article key={item.title} className="border border-stone-200 bg-white p-5 shadow-sm">

@@ -4,6 +4,7 @@ import { reconcilePaymentsBatch } from "@/app/lib/purchases/server";
 import { reconcileRefundsBatch } from "@/app/lib/refunds/server";
 import { reconcileAccountClosureFinalizations } from "@/app/lib/accounts/server";
 import { cleanupExpiredGuestFreeAnalyses } from "@/app/lib/guestFreeAnalyses/server";
+import { sendOwnerReviewAlertIfNeeded } from "@/app/lib/operators/ownerAlerts";
 
 export const dynamic = "force-dynamic";
 
@@ -13,10 +14,10 @@ type WorkerReport<T> = { ok: true } & T | { ok: false };
  * STEP 57D-46 PHASE 3E-3: Single Vercel Cron entry point.
  *
  * One shared scheduler transport credential authenticates this request, then
- * both reconciliation workers are invoked as direct server-side function calls
- * (no internal HTTP hop, no client-selected job name). Each worker's failure is
- * isolated from the other — neither runs inside a shared DB transaction, and a
- * failure in one never blocks or hides the result of the other.
+ * reconciliation workers are invoked as direct server-side function calls.
+ * Each worker is isolated from the others. Owner alert delivery is best-effort:
+ * an email transport failure is reported but never rolls back or marks otherwise
+ * successful payment/refund/account/guest recovery work as failed.
  */
 async function dispatch(request: Request) {
   if (!isAuthorizedSchedulerRequest(request)) {
@@ -123,10 +124,32 @@ async function dispatch(request: Request) {
     guestCleanup = { ok: false };
   }
 
+  let operatorAlerts: WorkerReport<{
+    status: string;
+    incidentCount: number;
+    recipientCount?: number;
+    errorCode?: string;
+  }>;
+  const operatorAlertConfigured = Boolean(process.env.RESEND_API_KEY?.trim());
+  try {
+    const summary = await sendOwnerReviewAlertIfNeeded();
+    operatorAlerts = { ok: true, ...summary };
+    console.info("[owner-alert]", {
+      configured: operatorAlertConfigured,
+      status: summary.status,
+      incidentCount: summary.incidentCount,
+      recipientCount: "recipientCount" in summary ? summary.recipientCount : undefined,
+      errorCode: "errorCode" in summary ? summary.errorCode : undefined,
+    });
+  } catch {
+    operatorAlerts = { ok: false };
+    console.error("[owner-alert]", { configured: operatorAlertConfigured, status: "worker_failed" });
+  }
+
   const ok = payments.ok && refunds.ok && accountClosures.ok && guestCleanup.ok;
 
   return NextResponse.json(
-    { ok, payments, refunds, accountClosures, guestCleanup },
+    { ok, payments, refunds, accountClosures, guestCleanup, operatorAlerts },
     { status: ok ? 200 : 500, headers: { "Cache-Control": "no-store" } },
   );
 }

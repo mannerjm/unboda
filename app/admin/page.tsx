@@ -70,6 +70,7 @@ export default async function AdminPage() {
           failureSummary={failureSummary}
           aiOperations={aiOperations}
           aiQuality={aiQuality}
+          operatorAlertConfigured={Boolean(process.env.RESEND_API_KEY?.trim())}
         />
         <AdminLookupConsole initialFailureSummary={failureSummary} />
       </div>

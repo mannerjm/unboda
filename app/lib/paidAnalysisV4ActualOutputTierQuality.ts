@@ -627,34 +627,9 @@ export function auditPaidAnalysisV4ActualTierSample(
     );
   }
 
-  const coreDepth = familyAverageDepthUnits.CORE;
-  const deepDepth = familyAverageDepthUnits.DEEP;
-  const longRangeDepth = familyAverageDepthUnits.LONG_RANGE;
-  const signatureDepth = familyAverageDepthUnits.SIGNATURE;
-
-  pushIssue(
-    issues,
-    coreDepth !== undefined && deepDepth !== undefined && deepDepth <= coreDepth,
-    "familyDepth.DEEP",
-    `DEEP 평균 실제 책임 깊이(${deepDepth})가 CORE(${coreDepth})보다 높지 않습니다.`,
-  );
-  pushIssue(
-    issues,
-    deepDepth !== undefined &&
-      longRangeDepth !== undefined &&
-      longRangeDepth <= deepDepth,
-    "familyDepth.LONG_RANGE",
-    `LONG_RANGE 평균 실제 책임 깊이(${longRangeDepth})가 DEEP(${deepDepth})보다 높지 않습니다.`,
-  );
-  pushIssue(
-    issues,
-    longRangeDepth !== undefined &&
-      signatureDepth !== undefined &&
-      signatureDepth < longRangeDepth,
-    "familyDepth.SIGNATURE",
-    `SIGNATURE 실제 책임 깊이(${signatureDepth})가 LONG_RANGE 평균(${longRangeDepth})보다 낮습니다.`,
-  );
-
+  // depthUnits remains a diagnostic summary only. Topic and period price families
+  // own different value architectures, so scalar cross-family ordering must not
+  // override the family-specific evidence/action/ownership/period release gates.
   for (const result of results) {
     for (const issue of result.issues.filter((item) => item.severity === "error")) {
       issues.push({

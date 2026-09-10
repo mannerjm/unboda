@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSafeReturnTo } from "@/app/lib/auth";
 import { getSignupCompletionState } from "@/app/lib/signupPolicy/completion";
+import { AUTH_CAPTCHA_ENABLED, AuthCaptcha } from "@/app/auth/AuthCaptcha";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -22,6 +23,8 @@ function SignupPageContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(initialError);
   const [isConfirmationSent, setIsConfirmationSent] = useState(false);
@@ -53,6 +56,10 @@ function SignupPageContent() {
       setErrorMessage("비밀번호는 8자 이상이어야 합니다.");
       return;
     }
+    if (AUTH_CAPTCHA_ENABLED && !captchaToken) {
+      setErrorMessage("보안 확인을 완료해 주세요.");
+      return;
+    }
 
     setIsLoading(true);
     setErrorMessage(null);
@@ -60,11 +67,22 @@ function SignupPageContent() {
     const response = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, termsAccepted, age14OrOlderConfirmed, returnTo: safeReturnTo }),
+      body: JSON.stringify({
+        email,
+        password,
+        termsAccepted,
+        age14OrOlderConfirmed,
+        returnTo: safeReturnTo,
+        captchaToken: AUTH_CAPTCHA_ENABLED ? captchaToken : undefined,
+      }),
     });
     const body = await response.json() as { error?: string; policyComplete?: boolean; emailVerified?: boolean };
 
     setIsLoading(false);
+    if (AUTH_CAPTCHA_ENABLED) {
+      setCaptchaToken(null);
+      setCaptchaResetSignal((value) => value + 1);
+    }
 
     if (!response.ok) {
       setErrorMessage(body.error ?? "가입을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.");
@@ -207,6 +225,8 @@ function SignupPageContent() {
               </label>
             </fieldset>
 
+            <AuthCaptcha onToken={setCaptchaToken} resetSignal={captchaResetSignal} />
+
             {errorMessage && (
               <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                 {errorMessage}
@@ -215,7 +235,7 @@ function SignupPageContent() {
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || (AUTH_CAPTCHA_ENABLED && !captchaToken)}
               className="w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:opacity-60"
             >
               {isLoading ? "가입 중..." : "회원가입"}

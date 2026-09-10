@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSafeReturnTo } from "@/app/lib/auth";
 import { createClient } from "@/app/lib/supabase/client";
+import { AUTH_CAPTCHA_ENABLED, AuthCaptcha } from "@/app/auth/AuthCaptcha";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -29,6 +30,8 @@ function LoginPageContent() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(
     urlError === "auth_failed" ? "인증에 실패했습니다. 다시 시도해 주세요." : null,
@@ -39,19 +42,32 @@ function LoginPageContent() {
       setErrorMessage("이메일과 비밀번호를 입력해 주세요.");
       return;
     }
+    if (AUTH_CAPTCHA_ENABLED && !captchaToken) {
+      setErrorMessage("보안 확인을 완료해 주세요.");
+      return;
+    }
 
     setIsLoading(true);
     setErrorMessage(null);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const credentials = AUTH_CAPTCHA_ENABLED
+      ? { email, password, options: { captchaToken: captchaToken ?? undefined } }
+      : { email, password };
+    const { error } = await supabase.auth.signInWithPassword(credentials);
 
     setIsLoading(false);
+    if (AUTH_CAPTCHA_ENABLED) {
+      setCaptchaToken(null);
+      setCaptchaResetSignal((value) => value + 1);
+    }
 
     if (error) {
-      setErrorMessage(error.message === "Invalid login credentials"
-        ? "이메일 또는 비밀번호가 올바르지 않습니다."
-        : error.message);
+      setErrorMessage(/captcha/i.test(error.message)
+        ? "보안 확인에 실패했습니다. 다시 확인해 주세요."
+        : error.message === "Invalid login credentials"
+          ? "이메일 또는 비밀번호가 올바르지 않습니다."
+          : error.message);
       return;
     }
 
@@ -77,7 +93,7 @@ function LoginPageContent() {
           운보다에 로그인
         </h1>
 
-          <p className="mt-5 text-sm leading-7 text-stone-600">
+        <p className="mt-5 text-sm leading-7 text-stone-600">
           {isGuestResultOrigin || isGuestResultNavigationOrigin || isGuestNavigationOrigin
             ? guestContextCopy
             : "구매한 심층 분석을 보관하고 다시 확인하려면 계정에 로그인해 주세요."}
@@ -125,6 +141,8 @@ function LoginPageContent() {
               />
             </div>
 
+            <AuthCaptcha onToken={setCaptchaToken} resetSignal={captchaResetSignal} />
+
             {errorMessage && (
               <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                 {errorMessage}
@@ -133,7 +151,7 @@ function LoginPageContent() {
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || (AUTH_CAPTCHA_ENABLED && !captchaToken)}
               className="w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:opacity-60"
             >
               {isLoading ? "로그인 중..." : "로그인"}

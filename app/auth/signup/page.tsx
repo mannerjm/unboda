@@ -14,6 +14,11 @@ function SignupPageContent() {
   const safeReturnTo = getSafeReturnTo(returnTo, "/saju");
   const origin = searchParams.get("origin");
   const isGuestOrigin = origin === "guest-result" || origin === "guest-result-navigation" || origin === "guest-navigation";
+  const isGuestRecommendationContinuation = safeReturnTo === "/recommendations"
+    && (origin === "guest-result" || origin === "guest-result-navigation");
+  const postSignupReturnTo = isGuestRecommendationContinuation
+    ? "/auth/complete-guest-analysis?next=recommendations"
+    : safeReturnTo;
   // Back link is a distinct navigation target from the post-signup redirect: it must never dead-end on /result.
   const backHref = origin === "guest-result" || origin === "guest-result-navigation" ? "/guest-result" : origin === "guest-navigation" ? "/guest-saju" : getSafeReturnTo(returnTo, "/");
   const initialError = searchParams.get("error") === "policy_incomplete"
@@ -72,7 +77,7 @@ function SignupPageContent() {
         password,
         termsAccepted,
         age14OrOlderConfirmed,
-        returnTo: safeReturnTo,
+        returnTo: postSignupReturnTo,
         captchaToken: AUTH_CAPTCHA_ENABLED ? captchaToken : undefined,
       }),
     });
@@ -95,7 +100,7 @@ function SignupPageContent() {
     });
 
     if (completionState === "SIGNUP_COMPLETE") {
-      router.push(safeReturnTo);
+      router.push(postSignupReturnTo);
       router.refresh();
       return;
     }

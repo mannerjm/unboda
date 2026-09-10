@@ -171,8 +171,10 @@ assert(
   "topic grouping must not repeat a category",
 );
 assert(
-  topicGroups.every((group) => group.label === getPremiumCategoryLabel(group.category)),
-  "every group label must come from getPremiumCategoryLabel, not a hardcoded string",
+  topicGroups.every((group) =>
+    group.label === (group.category === "relationship" ? "연애운" : getPremiumCategoryLabel(group.category)),
+  ),
+  "catalog category labels must use 연애운 for relationship and canonical labels elsewhere",
 );
 assert(
   topicGroups.reduce((total, group) => total + group.products.length, 0) === topicProducts.length,

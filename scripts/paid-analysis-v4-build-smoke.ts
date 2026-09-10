@@ -17,13 +17,21 @@ const SHOULD_RUN =
   process.env.VERCEL_GIT_COMMIT_REF === "test/v4-one-product-smoke" &&
   process.env.VERCEL_GIT_COMMIT_MESSAGE === RUN_MESSAGE;
 
-// First live threshold calibration: one representative from every price family.
-// All 54 products were already generated in the earlier six-batch Launch smoke;
-// this run tests the new price-value validator before widening the sample.
+// Broader live price-value sample after the four-family representative run passed.
+// Keep this Preview-only and synthetic: 4 CORE, 4 DEEP, all 4 LONG_RANGE, 1 SIGNATURE.
 const PRODUCT_IDS = [
   "career-job-change", // CORE 9,900
+  "money-saving-discipline", // CORE 9,900
+  "career-promotion-readiness", // CORE 9,900
+  "money-income-stability", // CORE 9,900
   "relationship-current", // DEEP 16,900
+  "health-stress-regulation", // DEEP 16,900
+  "business-startup-readiness", // DEEP 16,900
+  "relationship-boundary", // DEEP 16,900
   "yearly-current", // LONG_RANGE 29,900
+  "annual-next", // LONG_RANGE 29,900
+  "annual-3years", // LONG_RANGE 29,900
+  "daeun-current", // LONG_RANGE 29,900
   "lifetime-overview", // SIGNATURE 39,900
 ] as const;
 

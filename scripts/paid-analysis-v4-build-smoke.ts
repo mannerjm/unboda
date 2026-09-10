@@ -1,5 +1,5 @@
 import { buildPaidAnalysisInputFromProfile } from "../app/lib/paidAnalysisProfileInput";
-import { generatePaidAnalysisDetailV4 } from "../app/lib/paidAnalysisDetailService";
+import { generatePaidAnalysisDetailV4WithConsistencyRetry } from "../app/lib/paidAnalysisV4ConsistencyRetry";
 import { getPaidAnalysisEngine } from "../app/lib/paidAnalysisEngine";
 import { getLaunchProductIds } from "../app/lib/paidAnalysisTopicConfig";
 import { reviewEvidenceLinkage } from "../app/lib/paidAnalysisV4QualityValidators";
@@ -9,28 +9,36 @@ import type { ProfileDto } from "../app/lib/profiles/types";
 
 const BATCH_SIZE = 9;
 const BATCH_COUNT = 6;
+const CONSISTENCY_SMOKE_PRODUCT_ID = "money-income-stability";
 const commitMessage = process.env.VERCEL_GIT_COMMIT_MESSAGE ?? "";
 const batchMessageMatch = commitMessage.match(/^Run V4 launch batch ([1-6])$/);
 const batchNumber = batchMessageMatch ? Number(batchMessageMatch[1]) : null;
+const isConsistencySmoke = commitMessage === "Run V4 consistency smoke";
 const SHOULD_RUN =
   process.env.VERCEL_ENV === "preview" &&
   process.env.VERCEL_GIT_COMMIT_REF === "test/v4-one-product-smoke" &&
-  batchNumber !== null;
+  (batchNumber !== null || isConsistencySmoke);
 
 const launchProductIds = getLaunchProductIds();
 if (launchProductIds.length !== 54) {
   throw new Error(`Expected exactly 54 Launch products, got ${launchProductIds.length}`);
 }
 
-const PRODUCT_IDS = batchNumber === null
-  ? []
-  : launchProductIds.slice((batchNumber - 1) * BATCH_SIZE, batchNumber * BATCH_SIZE);
+const PRODUCT_IDS = isConsistencySmoke
+  ? [CONSISTENCY_SMOKE_PRODUCT_ID]
+  : batchNumber === null
+    ? []
+    : launchProductIds.slice((batchNumber - 1) * BATCH_SIZE, batchNumber * BATCH_SIZE);
 
 if (batchNumber !== null && PRODUCT_IDS.length !== BATCH_SIZE) {
   throw new Error(
     `Launch batch ${batchNumber}/${BATCH_COUNT} must contain exactly ${BATCH_SIZE} products`,
   );
 }
+
+const runLabel = isConsistencySmoke
+  ? "consistency-smoke"
+  : `batch-${batchNumber ?? "none"}`;
 
 const SYNTHETIC_PROFILE: ProfileDto = {
   id: "00000000-0000-0000-0000-000000000000",
@@ -81,8 +89,8 @@ async function generateOne(productId: string): Promise<ProductResult> {
     "2026-08-25",
   );
 
-  console.log(`[v4-launch-batch] START batch=${batchNumber} productId=${productId} engine=${engine ?? "unknown"}`);
-  const result = await generatePaidAnalysisDetailV4(input, {
+  console.log(`[v4-launch-batch] START run=${runLabel} productId=${productId} engine=${engine ?? "unknown"}`);
+  const result = await generatePaidAnalysisDetailV4WithConsistencyRetry(input, {
     onResponseTelemetry: (telemetry) => {
       usage = telemetry;
     },
@@ -102,7 +110,7 @@ async function generateOne(productId: string): Promise<ProductResult> {
   const linkageWarnings = reviewEvidenceLinkage(result);
   if (linkageWarnings.length > 0) {
     console.log("[v4-launch-batch] LINKAGE_DIAGNOSTIC", {
-      batchNumber,
+      runLabel,
       productId,
       direction: result.conclusion.direction,
       focus: result.conclusion.focus,
@@ -126,7 +134,7 @@ async function generateOne(productId: string): Promise<ProductResult> {
   const outputChars = JSON.stringify(result).length;
 
   console.log("[v4-launch-batch] PRODUCT_PASS", {
-    batchNumber,
+    runLabel,
     productId,
     engine,
     direction: result.conclusion.direction,
@@ -156,13 +164,13 @@ async function main(): Promise<void> {
   }
 
   console.log(
-    `[v4-launch-batch] START batch=${batchNumber}/${BATCH_COUNT} count=${PRODUCT_IDS.length} ids=${PRODUCT_IDS.join(",")}`,
+    `[v4-launch-batch] START run=${runLabel} count=${PRODUCT_IDS.length} ids=${PRODUCT_IDS.join(",")}`,
   );
 
   const results: ProductResult[] = [];
   const failures: Array<{ productId: string; error: string }> = [];
   let nextIndex = 0;
-  const workerCount = 2;
+  const workerCount = isConsistencySmoke ? 1 : 2;
 
   async function worker(): Promise<void> {
     while (true) {
@@ -202,7 +210,7 @@ async function main(): Promise<void> {
   }
 
   console.log("[v4-launch-batch] BATCH_SUMMARY", {
-    batchNumber,
+    runLabel,
     requested: PRODUCT_IDS.length,
     passed: results.length,
     failed: failures.length,

@@ -79,8 +79,8 @@ assert(detailRoute.includes("getUserProfile(input.profileId, user.id)"), "detail
 assert(detailRoute.includes("getActiveProfile(user.id)") && detailRoute.includes("activeProfile.id !== profile.id"), "detail API must reject a report request for a non-active profile");
 assert(detailRoute.includes("getActiveEntitlementForProfile"), "detail API must use strict profile entitlement lookup");
 const entitlementIndex = detailRoute.indexOf("getActiveEntitlementForProfile");
-const generateIndex = detailRoute.indexOf("generatePaidAnalysisDetailV2(");
-assert(entitlementIndex !== -1 && generateIndex !== -1 && entitlementIndex < generateIndex, "detail entitlement check must precede OpenAI generation");
+const generateIndex = detailRoute.indexOf("generatePaidAnalysisDetailForPurchasedRuntime(");
+assert(entitlementIndex !== -1 && generateIndex !== -1 && entitlementIndex < generateIndex, "detail entitlement check must precede paid analysis runtime generation");
 assert(detailRoute.includes("status: 400") && detailRoute.includes("status: 404") && detailRoute.includes("status: 403"), "detail API must distinguish invalid, foreign, and no-entitlement requests");
 console.log("5. detail API verifies profile entitlement before OpenAI ✓");
 

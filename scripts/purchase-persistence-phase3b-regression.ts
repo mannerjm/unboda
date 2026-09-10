@@ -159,11 +159,11 @@ assert(detailRoute.includes("status: 403"), "detail route must return 403 withou
 
 const authIndex = detailRoute.indexOf("getCurrentUser");
 const entitlementIndex = detailRoute.indexOf("getActiveEntitlementForProfile");
-const generateIndex = detailRoute.indexOf("generatePaidAnalysisDetailV2(");
+const generateIndex = detailRoute.indexOf("generatePaidAnalysisDetailForPurchasedRuntime(");
 assert(authIndex !== -1 && entitlementIndex !== -1 && generateIndex !== -1, "detail route markers present");
 assert(
   authIndex < generateIndex && entitlementIndex < generateIndex,
-  "auth + entitlement checks must run before the OpenAI generation call",
+  "auth + entitlement checks must run before the paid analysis runtime generation call",
 );
 console.log("6. /api/paid-analysis-detail-v2 gated by auth + entitlement before OpenAI ✓");
 
@@ -234,7 +234,7 @@ for (const table of ["orders", "purchases", "entitlements"]) {
   );
   assert(
     migration.includes(`alter table public.${table} enable row level security`),
-    `migration must enable RLS on public.${table}`,
+    `migration must enable RLS on ${table}`,
   );
   assert(
     migration.includes(`"${table}_select_own"`),
@@ -344,6 +344,7 @@ const integrationUserId = process.env.PHASE3B_TEST_USER_ID;
 const otherUserId = process.env.PHASE3B_TEST_OTHER_USER_ID;
 const integrationProfileId = process.env.PHASE3B_TEST_PROFILE_ID;
 const otherProfileId = process.env.PHASE3B_TEST_OTHER_PROFILE_ID;
+const staticOnly = process.argv.includes("--static-only");
 
 const missingEnv = [
   supabaseUrl ? null : "NEXT_PUBLIC_SUPABASE_URL",
@@ -483,7 +484,9 @@ async function runIntegration(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  if (missingEnv.length > 0) {
+  if (staticOnly) {
+    console.log("11. DB integration SKIPPED (static-only): --static-only prevents all live Supabase writes.");
+  } else if (missingEnv.length > 0) {
     console.log(
       `11. DB integration SKIPPED (not a pass): missing env ${missingEnv.join(", ")}. ` +
         "Set these to run the live Supabase integration checks.",

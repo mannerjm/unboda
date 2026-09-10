@@ -49,7 +49,13 @@ for (const [name, source] of [["paid page", paidPage]] as const) {
 assert(accessPanel.includes("getUserProfile(profileId, user.id)"), "standalone access panel must verify the profile before rendering product state");
 assert(checkoutPage.includes("searchParams") && checkoutPage.includes("profileId"), "checkout page must read and preserve profileId query context");
 assert(checkoutPanel.includes("profileId?: string") && checkoutPanel.includes("{profileId ? ("), "checkout must render payment only after explicit profile selection");
-assert(checkoutPanel.includes("JSON.stringify({ productId: canonicalProductId, profileId })"), "checkout must send selected profileId to orders API");
+assert(
+  checkoutPanel.includes("productId: canonicalProductId") &&
+    checkoutPanel.includes("profileId,") &&
+    checkoutPanel.includes("immediateGenerationAcknowledged: true") &&
+    !checkoutPanel.includes("body.userId"),
+  "checkout must send only the selected product/profile context plus acknowledgement to orders API",
+);
 assert(checkoutPanel.includes("?profileId=${profileId}"), "checkout success navigation must preserve profileId");
 assert(ordersRoute.includes("getUserProfile(rawProfileId, user.id)"), "orders API must ownership-verify profileId");
 console.log("3. checkout requires and preserves selected profileId ✓");
@@ -79,8 +85,8 @@ assert(detailRoute.includes("getUserProfile(input.profileId, user.id)"), "detail
 assert(detailRoute.includes("getActiveProfile(user.id)") && detailRoute.includes("activeProfile.id !== profile.id"), "detail API must reject a report request for a non-active profile");
 assert(detailRoute.includes("getActiveEntitlementForProfile"), "detail API must use strict profile entitlement lookup");
 const entitlementIndex = detailRoute.indexOf("getActiveEntitlementForProfile");
-const generateIndex = detailRoute.indexOf("generatePaidAnalysisDetailV2(");
-assert(entitlementIndex !== -1 && generateIndex !== -1 && entitlementIndex < generateIndex, "detail entitlement check must precede OpenAI generation");
+const generateIndex = detailRoute.indexOf("generatePaidAnalysisDetailForPurchasedRuntime(");
+assert(entitlementIndex !== -1 && generateIndex !== -1 && entitlementIndex < generateIndex, "detail entitlement check must precede paid analysis runtime generation");
 assert(detailRoute.includes("status: 400") && detailRoute.includes("status: 404") && detailRoute.includes("status: 403"), "detail API must distinguish invalid, foreign, and no-entitlement requests");
 console.log("5. detail API verifies profile entitlement before OpenAI ✓");
 

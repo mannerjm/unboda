@@ -21,6 +21,8 @@ function assert(condition: boolean, message: string): void {
 const root = process.cwd();
 const harnessSource = readFileSync(path.join(root, "app/lib/paidAnalysisV4CalibrationHarness.ts"), "utf8");
 const routeSource = readFileSync(path.join(root, "app/api/paid-analysis-detail-v2/route.ts"), "utf8");
+const runtimeSource = readFileSync(path.join(root, "app/lib/paidAnalysisV4Runtime.ts"), "utf8");
+const paidReportSource = readFileSync(path.join(root, "app/lib/paidReports/server.ts"), "utf8");
 const pricingSource = readFileSync(path.join(root, "app/lib/productPricing.ts"), "utf8");
 
 validateCalibrationSet();
@@ -49,8 +51,13 @@ assert(parseHarnessArgs(["--generate", "--product", "career-job-change"]).produc
 assert(CALIBRATION_ARTIFACT_DIRECTORY.includes(".tmp\\") || CALIBRATION_ARTIFACT_DIRECTORY.includes(".tmp/"), "artifacts must stay under .tmp");
 assert(!harnessSource.includes("claimPaidReport") && !harnessSource.includes("completePaidReport") && !harnessSource.includes("failPaidReport"), "harness must not call report persistence");
 assert(!harnessSource.includes("createAdminClient") && !harnessSource.includes("supabase"), "harness must not import Supabase");
-assert(routeSource.includes("generatePaidAnalysisDetailV2"), "live route must remain on V3 generator path");
-assert(!routeSource.includes("generatePaidAnalysisDetailV4"), "live route must not switch to V4");
+assert(routeSource.includes("generatePaidAnalysisDetailForPurchasedRuntime"), "live route must use the guarded paid runtime boundary");
+assert(!routeSource.includes("generatePaidAnalysisDetailV4("), "live route must not call the V4 generator directly");
+assert(runtimeSource.includes('PAID_ANALYSIS_V4_RUNTIME_FLAG = "PAID_ANALYSIS_V4_RUNTIME_ENABLED"'), "runtime must use a server-only opt-in flag");
+assert(runtimeSource.includes('environment[PAID_ANALYSIS_V4_RUNTIME_FLAG] === "true"'), "V4 runtime must default off unless explicitly true");
+assert(runtimeSource.includes("return generatePaidAnalysisDetailV2(input, telemetryContext);"), "runtime must preserve the V3 fallback");
+assert(runtimeSource.includes("return generatePaidAnalysisDetailV4ForPaidReport(input, telemetryContext);"), "runtime must have one guarded V4 entry point");
+assert(paidReportSource.includes("StoredPaidAnalysisDetail"), "paid report persistence must preserve both V3 and V4 stored shapes");
 assert(pricingSource.includes("amount: 9900"), "production price must remain 9,900 KRW");
 assert(getCalibrationInput("career-job-change").productId === "career-job-change", "synthetic input must resolve product");
 

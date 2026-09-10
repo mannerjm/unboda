@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "tsx scripts/paid-analysis-v4-launch-audit-regression.ts",
+    "prebuild": "tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-build-smoke.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

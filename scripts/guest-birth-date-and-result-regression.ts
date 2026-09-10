@@ -27,6 +27,13 @@ assert(!isGuestBirthDateInRange("1899-12-31"), "birth date below the guest minim
 assert(!validateProfileInput({ ...base, birthDate: "2026-02-29" }).valid, "nonexistent calendar date must be rejected");
 assert(!isGuestBirthDateInRange("2027-01-01"), "future birth date must be rejected");
 
+const justBeforeKoreaMidnight = new Date("2026-09-10T14:59:59.999Z");
+const koreaMidnight = new Date("2026-09-10T15:00:00.000Z");
+assert(getGuestBirthDateMax(justBeforeKoreaMidnight) === "2026-09-10", "guest max date must remain the prior Korea calendar date before KST midnight");
+assert(getGuestBirthDateMax(koreaMidnight) === "2026-09-11", "guest max date must advance exactly at KST midnight");
+assert(isGuestBirthDateInRange("2026-09-11", koreaMidnight), "the current Korea calendar date must be accepted at KST midnight");
+assert(!isGuestBirthDateInRange("2026-09-12", koreaMidnight), "the next Korea calendar date must remain rejected as future");
+
 const guestSaju = read("app/guest-saju/page.tsx");
 const guestResult = read("app/guest-result/page.tsx");
 const authenticatedResult = read("app/result/page.tsx");
@@ -38,16 +45,24 @@ const guestLoading = read("app/guest-loading/page.tsx");
 assert(guestSaju.includes("min={GUEST_BIRTH_DATE_MIN}") && guestSaju.includes("max={getGuestBirthDateMax()}"), "guest date input must enforce browser min/max bounds");
 assert(guestRoute.includes("validateGuestProfileInput"), "guest server route must enforce the same guest date range policy");
 assert(guestResult.includes("ResultPageContent") && guestResult.includes("ResultViewerContext.Provider"), "guest must mount the exact authenticated result renderer through its data context");
-for (const fragment of ["FOUR PILLARS", "지장간", "pillar.stage", "pillar.spirit", "pillar.nobles", "DAEUN ANALYSIS", "selectedDaeunOrder", "ganjiToHanja", "오행 분석", "신강·신약 참고 지표", "용신 분석", "격국 분석", "오행 상생·상극", "AI ANALYSIS", "RECOMMENDED ANALYSIS", "심층 분석 확인하기"]) {
+for (const fragment of ["FOUR PILLARS", "지장간", "pillar.stage", "pillar.spirit", "pillar.nobles", "DAEUN ANALYSIS", "selectedDaeunOrder", "ganjiToHanja", "오행 분석", "신강·신약 분석", "용신 분석", "격국 분석", "오행 상생·상극", "AI ANALYSIS", "RECOMMENDED ANALYSIS", "심층 분석 확인하기"]) {
   assert(authenticatedResult.includes(fragment), `authenticated original renderer must retain ${fragment}`);
 }
 assert(guestResult.includes('fetch("/api/guest-free-analysis")') && !guestResult.includes("sessionStorage"), "guest result must remain server-backed without browser analysis storage");
 assert(guestResult.includes("/api/guest-free-analysis/intent") && guestResult.includes("/auth/login?returnTo=/auth/complete-guest-analysis"), "guest paid intent and auth continuation must remain intact");
 assert(guestStartRoute.includes("createGuestFreeAnalysis") && guestStartRoute.includes("GUEST_ANALYSIS_COOKIE_NAME"), "guest start route must create the server-backed analysis and credential before loading");
 assert(guestGenerateRoute.includes("buildFreeAnalysisResponse") && guestGenerateRoute.includes("completeGuestFreeAnalysis"), "guest generation route must complete the existing server-backed row");
-assert(guestLoading.includes('fetch("/api/guest-free-analysis/generate"') && guestLoading.includes("분석에는 약 1~2분 정도 소요될 수 있습니다.") && guestLoading.includes("w-16 h-16 border-4") && guestLoading.includes('router.replace("/guest-result")'), "guest loading must reuse the existing loading UI then route to the server-backed result");
+assert(
+  guestLoading.includes('fetch("/api/guest-free-analysis/generate"') &&
+    guestLoading.includes('router.replace("/guest-result")') &&
+    guestLoading.includes('router.replace("/guest-saju")') &&
+    guestLoading.includes("완료되면 결과 화면으로 자동 이동합니다.") &&
+    guestLoading.includes("animate-spin"),
+  "guest loading must generate server-side, route to result on success, recover on failure, and show progress UI",
+);
 
 console.log(`guest date browser bounds: ${GUEST_BIRTH_DATE_MIN} to ${getGuestBirthDateMax()} ✓`);
+console.log("guest KST midnight date boundary: true");
 console.log("guest date range and calendar validation: true");
 console.log("guest mounts the exact authenticated result DOM renderer: true");
 console.log("guest server-backed restore and paid intent retained: true");

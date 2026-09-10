@@ -13,6 +13,7 @@ const rootPage = read("app/page.tsx");
 const guestSaju = read("app/guest-saju/page.tsx");
 const guestResult = read("app/guest-result/page.tsx");
 const completePage = read("app/auth/complete-guest-analysis/page.tsx");
+const transferRoute = read("app/api/guest-free-analysis/transfer/route.ts");
 const sajuPage = read("app/saju/page.tsx");
 const resultPage = read("app/result/page.tsx");
 const checkoutPage = read("app/checkout/[productId]/page.tsx");
@@ -41,8 +42,12 @@ console.log("3. guest result restore, paid intent, and auth return flow present 
 assert(completePage.includes('fetch("/api/guest-free-analysis/transfer"') && completePage.includes("router.replace"), "auth completion must call server transfer then navigate");
 assert(completePage.includes("/checkout/${body.selectedProductId}?profileId=${body.resolvedProfileId}") && completePage.includes("/result?profileId=${body.resolvedProfileId}"), "transfer completion must route to checkout or resolved Profile result");
 assert(completePage.includes("pending_existing_result") && completePage.includes('"/saju"'), "pending existing results must respect authenticated generation without new guest AI work");
-assert(completePage.includes("SELF_PROFILE_CONFLICT") && completePage.includes("이 계정에는 이미 본인 프로필이 있습니다."), "self Profile conflict must remain user-visible");
-console.log("4. auth completion transfer, checkout, pending, and self conflict handling present ✓");
+assert(completePage.includes("SELF_PROFILE_CONFLICT") && completePage.includes("등록된 본인 정보와 입력한 정보가 다릅니다."), "self Profile mismatch must stay user-visible without automatic overwrite");
+assert(completePage.includes("마이페이지에서 기존 정보를 확인한 후 직접 변경해 주세요.") && completePage.includes('href="/mypage"'), "self Profile mismatch must guide correction through My Page");
+assert(!completePage.includes("guest 관계 변경 API") && !completePage.includes('["배우자", "자녀", "부모", "형제자매", "기타"]'), "developer-only relationship-change placeholder must not be shown to users");
+assert(completePage.includes("PROFILE_LIMIT_REACHED") && completePage.includes("프로필은 계정당 최대 10명까지 관리할 수 있습니다."), "guest transfer must explain the account Profile limit");
+assert(transferRoute.includes("PROFILE_LIMIT_REACHED") && transferRoute.includes("transferErrorCode"), "transfer route must preserve typed Profile-limit blockers");
+console.log("4. auth completion transfer, checkout, pending, and safe Profile blocker guidance present ✓");
 
 assert(!sajuPage.includes("guest-free-analysis") && !resultPage.includes("guest-free-analysis") && !checkoutPage.includes("guest-free-analysis"), "authenticated saju, result, and checkout flows must stay independent from guest APIs");
 console.log("5. existing authenticated Profile flow remains separated ✓");

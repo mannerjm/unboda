@@ -75,6 +75,35 @@ assert.ok(
   "Production Toss must require a matching live client/secret pair",
 );
 
+const authCaptcha = read("app/auth/AuthCaptcha.tsx");
+const loginPage = read("app/auth/login/page.tsx");
+const signupPage = read("app/auth/signup/page.tsx");
+const signupRoute = read("app/api/auth/signup/route.ts");
+const forgotPasswordPage = read("app/auth/forgot-password/page.tsx");
+
+assert.ok(
+  authCaptcha.includes("NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED")
+    && authCaptcha.includes("NEXT_PUBLIC_TURNSTILE_SITE_KEY")
+    && authCaptcha.includes("https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit")
+    && authCaptcha.includes("window.turnstile.render"),
+  "Auth CAPTCHA must remain feature-gated and use explicit Cloudflare Turnstile rendering",
+);
+for (const [label, source] of [
+  ["login", loginPage],
+  ["signup", signupPage],
+  ["password recovery", forgotPasswordPage],
+] as const) {
+  assert.ok(
+    source.includes("AUTH_CAPTCHA_ENABLED") && source.includes("captchaToken") && source.includes("AuthCaptcha"),
+    `${label} must remain wired to the shared CAPTCHA boundary`,
+  );
+}
+assert.ok(
+  signupRoute.includes('process.env.NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED === "true"')
+    && signupRoute.includes("captchaToken: captchaRequired"),
+  "server signup boundary must forward CAPTCHA tokens to Supabase Auth when enforcement is enabled",
+);
+
 const gitignore = read(".gitignore");
 assert.ok(gitignore.includes(".env*"), "environment files must stay ignored by default");
 assert.ok(gitignore.includes("*.pem"), "private key material must stay ignored by default");
@@ -84,6 +113,8 @@ const forbiddenClientSecrets = [
   "TOSS_SECRET_KEY",
   "OPENAI_API_KEY",
   "PAYMENT_RECONCILIATION_SECRET",
+  "TURNSTILE_SECRET_KEY",
+  "CLOUDFLARE_TURNSTILE_SECRET_KEY",
 ];
 
 for (const path of walk(join(process.cwd(), "app"))) {

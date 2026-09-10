@@ -23,7 +23,21 @@ assert(generateAnalysisText.includes("incomplete_details?.reason"), "incomplete 
 assert(generateAnalysisText.includes("trim()"), "output_text must be trimmed before emptiness check");
 assert(generateAnalysisText.includes("if (!outputText)"), "empty output text must fail explicitly");
 assert(generateAnalysisText.includes('const model = resolveModel(callType)'), "model must be resolved per callType");
-assert(generateAnalysisText.includes('return "gpt-5.6-luna";'), "main-analysis must use gpt-5.6-luna");
+assert(
+  generateAnalysisText.includes('callType === "main-analysis" || callType === "recommendation-analysis"')
+    && generateAnalysisText.includes('return "gpt-5.6-luna";'),
+  "free analysis and recommendation explanation must use gpt-5.6-luna",
+);
+assert(
+  generateAnalysisText.includes('callType === "paid-analysis-detail" || callType === "paid-analysis-detail-v4"')
+    && generateAnalysisText.includes('return "gpt-5.6-sol";'),
+  "paid report generation must use gpt-5.6-sol",
+);
+assert(
+  generateAnalysisText.includes('callType === "ai-consulting"')
+    && generateAnalysisText.includes('return "gpt-5.6-terra";'),
+  "AI consulting must use gpt-5.6-terra",
+);
 assert(!generateAnalysisText.includes('const model = "gpt-5"'), "model must not be hardcoded to gpt-5 for every callType");
 assert(generateAnalysisText.includes("return 6000;"), "main-analysis max output tokens must be 6000");
 assert(generateAnalysisText.includes("return 4800;"), "paid-analysis-detail max output tokens must remain 4800");

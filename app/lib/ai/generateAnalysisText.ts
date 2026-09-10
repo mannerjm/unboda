@@ -11,7 +11,8 @@ export type AnalysisTextCallType =
   | "main-analysis"
   | "recommendation-analysis"
   | "paid-analysis-detail"
-  | "paid-analysis-detail-v4";
+  | "paid-analysis-detail-v4"
+  | "ai-consulting";
 
 export type PaidAnalysisResponseTelemetry = {
   status: string;
@@ -42,8 +43,16 @@ export function resolveMaxOutputTokens(
 }
 
 export function resolveModel(callType?: AnalysisTextCallType): string {
-  if (callType === "main-analysis") {
+  if (callType === "main-analysis" || callType === "recommendation-analysis") {
     return "gpt-5.6-luna";
+  }
+
+  if (callType === "paid-analysis-detail" || callType === "paid-analysis-detail-v4") {
+    return "gpt-5.6-sol";
+  }
+
+  if (callType === "ai-consulting") {
+    return "gpt-5.6-terra";
   }
 
   return "gpt-5";

@@ -30,6 +30,9 @@ export class OperationalFailureError extends Error {
 export type OperationalFailureSummary = Record<OperationalFailureCategory, number>;
 export type OperationalFailureQueueItem = {
   referenceId: string;
+  referenceType: "ORDER" | "REPORT" | "ACCOUNT";
+  orderId: string | null;
+  accountUserId: string | null;
   productLabel: string | null;
   editionLabel: string | null;
   status: string;
@@ -37,6 +40,26 @@ export type OperationalFailureQueueItem = {
   nextRetryAt: string | null;
   failureCode: string | null;
   updatedAt: string;
+};
+
+type OperationalFailureRow = {
+  id?: string;
+  order_id?: string;
+  user_id?: string;
+  product_id?: string;
+  purchase_id?: string | null;
+  analysis_edition_key?: string | null;
+  status?: string;
+  reconciliation_status?: string;
+  retry_count?: number;
+  next_retry_at?: string | null;
+  last_provider_error_code?: string | null;
+  error_code?: string | null;
+  closure_retry_count?: number;
+  closure_next_retry_at?: string | null;
+  closure_last_error_code?: string | null;
+  updated_at?: string;
+  created_at?: string;
 };
 
 function isCategory(value: unknown): value is OperationalFailureCategory {
@@ -51,15 +74,26 @@ async function auditOrFail(category: string, outcome: "SUCCESS" | "ERROR"): Prom
   }
 }
 
-function toItem(row: { id?: string; order_id?: string; user_id?: string; product_id?: string; analysis_edition_key?: string | null; status?: string; reconciliation_status?: string; retry_count?: number; next_retry_at?: string | null; last_provider_error_code?: string | null; error_code?: string | null; closure_last_error_code?: string | null; updated_at?: string; created_at?: string }): OperationalFailureQueueItem {
+function toItem(
+  row: OperationalFailureRow,
+  category: OperationalFailureCategory,
+  purchaseOrderById: ReadonlyMap<string, string>,
+): OperationalFailureQueueItem {
   const product = row.product_id ? getPremiumProduct(row.product_id) : null;
+  const isReport = category === "REPORT_FAILED" || category === "REPORT_STALE";
+  const isClosure = category === "CLOSURE_RETRY" || category === "CLOSURE_OWNER_REVIEW";
+  const linkedOrderId = row.order_id ?? (row.purchase_id ? purchaseOrderById.get(row.purchase_id) ?? null : null);
+
   return {
     referenceId: row.order_id ?? row.id ?? row.user_id ?? "",
+    referenceType: isReport ? "REPORT" : isClosure ? "ACCOUNT" : "ORDER",
+    orderId: linkedOrderId,
+    accountUserId: isClosure ? row.user_id ?? null : null,
     productLabel: product?.title ?? row.product_id ?? null,
     editionLabel: row.analysis_edition_key ? formatAnalysisEditionLabel(row.analysis_edition_key) : null,
     status: row.status ?? row.reconciliation_status ?? "UNKNOWN",
-    retryCount: row.retry_count ?? null,
-    nextRetryAt: row.next_retry_at ?? null,
+    retryCount: row.retry_count ?? row.closure_retry_count ?? null,
+    nextRetryAt: row.next_retry_at ?? row.closure_next_retry_at ?? null,
     failureCode: row.last_provider_error_code ?? row.error_code ?? row.closure_last_error_code ?? null,
     updatedAt: row.updated_at ?? row.created_at ?? "",
   };
@@ -103,14 +137,30 @@ export async function getOperationalFailureQueue(category: unknown): Promise<Ope
       case "PAYMENT_RECONCILIATION": result = await supabase.from("toss_payment_records").select("order_id,reconciliation_status,retry_count,next_retry_at,last_provider_error_code,updated_at").in("reconciliation_status", ["reconciliation_required", "reconciliation_failed", "terminal_mismatch"]).order("updated_at", { ascending: true }).limit(QUEUE_LIMIT); break;
       case "REFUND_RETRY": result = await supabase.from("refund_workflows").select("order_id,product_id,status,retry_count,next_retry_at,last_provider_error_code,updated_at").eq("status", "REFUND_FAILED_RETRYING").order("updated_at", { ascending: true }).limit(QUEUE_LIMIT); break;
       case "REFUND_OWNER_REVIEW": result = await supabase.from("refund_workflows").select("order_id,product_id,status,retry_count,next_retry_at,last_provider_error_code,updated_at").eq("status", "OWNER_REVIEW_REQUIRED").order("updated_at", { ascending: true }).limit(QUEUE_LIMIT); break;
-      case "REPORT_FAILED": result = await supabase.from("paid_reports").select("id,product_id,analysis_edition_key,status,error_code,updated_at").eq("status", "failed").order("updated_at", { ascending: true }).limit(QUEUE_LIMIT); break;
-      case "REPORT_STALE": result = await supabase.from("paid_reports").select("id,product_id,analysis_edition_key,status,updated_at").eq("status", "generating").lt("updated_at", staleBefore).order("updated_at", { ascending: true }).limit(QUEUE_LIMIT); break;
+      case "REPORT_FAILED": result = await supabase.from("paid_reports").select("id,purchase_id,product_id,analysis_edition_key,status,error_code,updated_at").eq("status", "failed").order("updated_at", { ascending: true }).limit(QUEUE_LIMIT); break;
+      case "REPORT_STALE": result = await supabase.from("paid_reports").select("id,purchase_id,product_id,analysis_edition_key,status,updated_at").eq("status", "generating").lt("updated_at", staleBefore).order("updated_at", { ascending: true }).limit(QUEUE_LIMIT); break;
       case "CLOSURE_RETRY": result = await supabase.from("account_lifecycles").select("user_id,status,closure_retry_count,closure_next_retry_at,closure_last_error_code,updated_at").eq("status", "DELETION_REQUESTED").eq("closure_owner_review_required", false).not("closure_next_retry_at", "is", null).order("updated_at", { ascending: true }).limit(QUEUE_LIMIT); break;
       case "CLOSURE_OWNER_REVIEW": result = await supabase.from("account_lifecycles").select("user_id,status,closure_retry_count,closure_next_retry_at,closure_last_error_code,updated_at").eq("status", "DELETION_REQUESTED").eq("closure_owner_review_required", true).order("updated_at", { ascending: true }).limit(QUEUE_LIMIT); break;
     }
     if (!result || result.error) throw new Error("failure queue unavailable");
+
+    const rows = (result.data ?? []) as OperationalFailureRow[];
+    const purchaseIds = [...new Set(rows.map((row) => row.purchase_id).filter((value): value is string => Boolean(value)))];
+    const purchaseOrderById = new Map<string, string>();
+
+    if (purchaseIds.length > 0) {
+      const { data: purchases, error: purchasesError } = await supabase
+        .from("purchases")
+        .select("id,order_id")
+        .in("id", purchaseIds);
+      if (purchasesError) throw new Error("linked order lookup unavailable");
+      for (const purchase of (purchases ?? []) as Array<{ id: string; order_id: string }>) {
+        purchaseOrderById.set(purchase.id, purchase.order_id);
+      }
+    }
+
     await auditOrFail(category, "SUCCESS");
-    return (result.data ?? []).map((row) => toItem(row));
+    return rows.map((row) => toItem(row, category, purchaseOrderById));
   } catch (error) {
     if (error instanceof OperationalFailureError) throw error;
     await auditOrFail(category, "ERROR");

@@ -4,6 +4,7 @@ import {
   OperatorSupportError,
   updateSupportRequestForOperator,
 } from "@/app/lib/support/operatorServer";
+import { dispatchSupportNotificationDeliveries } from "@/app/lib/support/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,14 @@ export async function PATCH(request: Request, context: { params: Promise<{ reque
       status: body.status,
       response: body.response,
     });
+
+    try {
+      const notification = await dispatchSupportNotificationDeliveries({ requestId, batchLimit: 3 });
+      console.info("[support-email]", { trigger: "operator_reply", requestId, ...notification });
+    } catch {
+      console.error("[support-email]", { trigger: "operator_reply", requestId, status: "worker_failed" });
+    }
+
     return NextResponse.json({ request: updated }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     return errorResponse(error);

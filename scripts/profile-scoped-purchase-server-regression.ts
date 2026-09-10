@@ -59,8 +59,14 @@ assert(!grantEntitlementSource.includes("ignoreDuplicates: true"), "repeat purch
 assert(!purchaseServer.includes("profile_id: undefined") && !purchaseServer.includes("profileId ??"), "profile persistence must not have a legacy fallback");
 console.log("5. profile-scoped entitlement lookup and latest-purchase upsert contract present ✓");
 
-assert(checkoutPanel.includes("profileId?: string") && checkoutPanel.includes("disabled={isPaying}") && checkoutPanel.includes("{profileId ? ("), "checkout must require an explicit profileId (button only renders once a profile is selected)");
+assert(
+  checkoutPanel.includes("profileId?: string") &&
+    checkoutPanel.includes("{profileId ? (") &&
+    checkoutPanel.includes("if (!immediateGenerationAcknowledged)") &&
+    checkoutPanel.includes("disabled={isPaying || !immediateGenerationAcknowledged}"),
+  "checkout must require an explicit profileId and acknowledgement before payment",
+);
 assert(!checkoutPanel.includes("profiles[0]") && !checkoutPanel.includes("relationshipType === \"self\""), "checkout must not invent a self or first-profile fallback");
-console.log("6. checkout requires explicit profile context without a fallback ✓");
+console.log("6. checkout requires explicit profile context and acknowledgement without a fallback ✓");
 
 console.log("\nprofile-scoped-purchase-server-regression passed ✓");

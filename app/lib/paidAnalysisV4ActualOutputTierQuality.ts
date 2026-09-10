@@ -169,14 +169,14 @@ function familyMinimums(family: PricingFamily): {
   action: number;
   confidenceEvidence: number;
 } {
-  if (family === "CORE") {
-    return { evidence: 3, action: 2, confidenceEvidence: 2 };
-  }
-
-  return { evidence: 4, action: 3, confidenceEvidence: 3 };
+  return family === "CORE"
+    ? { evidence: 3, action: 2, confidenceEvidence: 2 }
+    : { evidence: 4, action: 3, confidenceEvidence: 3 };
 }
 
-function computeDepthUnits(metrics: Omit<PaidAnalysisV4ActualTierMetrics, "depthUnits">): number {
+function computeDepthUnits(
+  metrics: Omit<PaidAnalysisV4ActualTierMetrics, "depthUnits">,
+): number {
   return (
     metrics.distinctEvidenceKeyCount * 3 +
     metrics.distinctCauseReasonCount * 2 +
@@ -193,6 +193,32 @@ function computeDepthUnits(metrics: Omit<PaidAnalysisV4ActualTierMetrics, "depth
   );
 }
 
+function emptyMetrics(): PaidAnalysisV4ActualTierMetrics {
+  return {
+    evidenceCount: 0,
+    distinctEvidenceKeyCount: 0,
+    causeReasonCount: 0,
+    distinctCauseReasonCount: 0,
+    actionCount: 0,
+    distinctActionTargetCount: 0,
+    distinctActionCompletionCount: 0,
+    currentObservableSignalCount: 0,
+    distinctCurrentObservableSignalCount: 0,
+    timelineCount: 0,
+    distinctTimelineLabelCount: 0,
+    decisionCheckCount: 0,
+    confidenceEvidenceCount: 0,
+    linkageWarningCount: 0,
+    ownershipFocusHitCount: 0,
+    ownershipActionHitCount: 0,
+    periodTimelineItemCount: 0,
+    periodKeyPointCount: 0,
+    periodSegmentActionCount: 0,
+    periodSegmentCautionCount: 0,
+    depthUnits: 0,
+  };
+}
+
 export function auditPaidAnalysisV4ActualOutputTier(
   productId: string,
   output: ResolvedPaidAnalysisDetailV4,
@@ -207,29 +233,7 @@ export function auditPaidAnalysisV4ActualOutputTier(
       ok: false,
       productId,
       family: pricing.family,
-      metrics: {
-        evidenceCount: 0,
-        distinctEvidenceKeyCount: 0,
-        causeReasonCount: 0,
-        distinctCauseReasonCount: 0,
-        actionCount: 0,
-        distinctActionTargetCount: 0,
-        distinctActionCompletionCount: 0,
-        currentObservableSignalCount: 0,
-        distinctCurrentObservableSignalCount: 0,
-        timelineCount: 0,
-        distinctTimelineLabelCount: 0,
-        decisionCheckCount: 0,
-        confidenceEvidenceCount: 0,
-        linkageWarningCount: 0,
-        ownershipFocusHitCount: 0,
-        ownershipActionHitCount: 0,
-        periodTimelineItemCount: 0,
-        periodKeyPointCount: 0,
-        periodSegmentActionCount: 0,
-        periodSegmentCautionCount: 0,
-        depthUnits: 0,
-      },
+      metrics: emptyMetrics(),
       issues: [
         {
           field: "productId",
@@ -267,13 +271,15 @@ export function auditPaidAnalysisV4ActualOutputTier(
       (focus) => sharedTokenCount(focus, actionText) >= 1,
     ).length;
   } else {
-    const strategy = specialization.strategy;
-    ownershipFocusHitCount = strategy.focus.filter(
-      (focus) => sharedTokenCount(focus, ownershipText) >= 1,
-    ).length;
-    ownershipActionHitCount = strategy.requiredInsights.filter(
-      (item) => sharedTokenCount(item.actionResponsibility, actionText) >= 1,
-    ).length;
+    const strategy = getPeriodAnalysisStrategy(productId);
+    if (strategy) {
+      ownershipFocusHitCount = strategy.focus.filter(
+        (focus) => sharedTokenCount(focus, ownershipText) >= 1,
+      ).length;
+      ownershipActionHitCount = strategy.requiredInsights.filter(
+        (item) => sharedTokenCount(item.actionResponsibility, actionText) >= 1,
+      ).length;
+    }
   }
 
   const periodTimelineItems = output.periodAnalysis?.timelineItems ?? [];
@@ -331,7 +337,7 @@ export function auditPaidAnalysisV4ActualOutputTier(
     issues,
     metrics.distinctCauseReasonCount !== metrics.causeReasonCount,
     "cause.reasons",
-    "원인 분석 3개가 서로 다른 메커니즘으로 분리되지 않았습니다.",
+    "원인 분석이 서로 다른 메커니즘으로 분리되지 않았습니다.",
   );
   pushIssue(
     issues,
@@ -498,7 +504,6 @@ export function auditPaidAnalysisV4ActualOutputTier(
           "periodAnalysis.timelineItems",
           `기간 출력은 전략 계약의 ${strategy.timelineSpec.labels.length}개 구간을 정확히 보존해야 합니다.`,
         );
-
         const labelsMatch =
           output.periodAnalysis.timelineItems.length ===
             strategy.timelineSpec.labels.length &&
@@ -534,13 +539,15 @@ export function auditPaidAnalysisV4ActualOutputTier(
         );
         pushIssue(
           issues,
-          metrics.periodSegmentActionCount < Math.min(3, metrics.periodTimelineItemCount),
+          metrics.periodSegmentActionCount <
+            Math.min(3, metrics.periodTimelineItemCount),
           "periodAnalysis.timelineItems.actions",
           "LONG_RANGE 실제 출력은 최소 3개 기간 구간에 실행 책임을 연결해야 합니다.",
         );
         pushIssue(
           issues,
-          metrics.periodSegmentCautionCount < Math.min(3, metrics.periodTimelineItemCount),
+          metrics.periodSegmentCautionCount <
+            Math.min(3, metrics.periodTimelineItemCount),
           "periodAnalysis.timelineItems.cautions",
           "LONG_RANGE 실제 출력은 최소 3개 기간 구간에 주의 기준을 연결해야 합니다.",
         );

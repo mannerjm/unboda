@@ -33,6 +33,7 @@ export type OperationalFailureQueueItem = {
   referenceType: "ORDER" | "REPORT" | "ACCOUNT";
   orderId: string | null;
   accountUserId: string | null;
+  accountEmail: string | null;
   productLabel: string | null;
   editionLabel: string | null;
   status: string;
@@ -78,17 +79,20 @@ function toItem(
   row: OperationalFailureRow,
   category: OperationalFailureCategory,
   purchaseOrderById: ReadonlyMap<string, string>,
+  accountEmailByUserId: ReadonlyMap<string, string>,
 ): OperationalFailureQueueItem {
   const product = row.product_id ? getPremiumProduct(row.product_id) : null;
   const isReport = category === "REPORT_FAILED" || category === "REPORT_STALE";
   const isClosure = category === "CLOSURE_RETRY" || category === "CLOSURE_OWNER_REVIEW";
   const linkedOrderId = row.order_id ?? (row.purchase_id ? purchaseOrderById.get(row.purchase_id) ?? null : null);
+  const accountUserId = isClosure ? row.user_id ?? null : null;
 
   return {
     referenceId: row.order_id ?? row.id ?? row.user_id ?? "",
     referenceType: isReport ? "REPORT" : isClosure ? "ACCOUNT" : "ORDER",
     orderId: linkedOrderId,
-    accountUserId: isClosure ? row.user_id ?? null : null,
+    accountUserId,
+    accountEmail: accountUserId ? accountEmailByUserId.get(accountUserId) ?? null : null,
     productLabel: product?.title ?? row.product_id ?? null,
     editionLabel: row.analysis_edition_key ? formatAnalysisEditionLabel(row.analysis_edition_key) : null,
     status: row.status ?? row.reconciliation_status ?? "UNKNOWN",
@@ -146,7 +150,9 @@ export async function getOperationalFailureQueue(category: unknown): Promise<Ope
 
     const rows = (result.data ?? []) as OperationalFailureRow[];
     const purchaseIds = [...new Set(rows.map((row) => row.purchase_id).filter((value): value is string => Boolean(value)))];
+    const accountUserIds = [...new Set(rows.map((row) => row.user_id).filter((value): value is string => Boolean(value)))];
     const purchaseOrderById = new Map<string, string>();
+    const accountEmailByUserId = new Map<string, string>();
 
     if (purchaseIds.length > 0) {
       const { data: purchases, error: purchasesError } = await supabase
@@ -159,8 +165,19 @@ export async function getOperationalFailureQueue(category: unknown): Promise<Ope
       }
     }
 
+    if (accountUserIds.length > 0) {
+      const authUsers = await Promise.all(accountUserIds.map(async (userId) => {
+        const result = await supabase.auth.admin.getUserById(userId);
+        if (result.error || !result.data.user) throw new Error("linked account lookup unavailable");
+        return { userId, email: result.data.user.email ?? "" };
+      }));
+      for (const account of authUsers) {
+        if (account.email) accountEmailByUserId.set(account.userId, account.email);
+      }
+    }
+
     await auditOrFail(category, "SUCCESS");
-    return rows.map((row) => toItem(row, category, purchaseOrderById));
+    return rows.map((row) => toItem(row, category, purchaseOrderById, accountEmailByUserId));
   } catch (error) {
     if (error instanceof OperationalFailureError) throw error;
     await auditOrFail(category, "ERROR");

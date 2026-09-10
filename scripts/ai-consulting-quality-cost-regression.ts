@@ -21,22 +21,28 @@ for (const heading of [
 }
 
 assert.ok(
-  answerPipeline.includes('resolveModel("paid-analysis-detail")'),
-  "AI consulting must continue to resolve its model through the paid-analysis-detail model boundary",
+  answerPipeline.includes('resolveModel("ai-consulting")'),
+  "AI consulting must resolve through its dedicated model boundary",
 );
 assert.ok(
-  modelResolver.includes('return "gpt-5";'),
-  "current paid-analysis-detail model expectation changed; review the Phase 12A price table before proceeding",
+  modelResolver.includes('callType === "ai-consulting"')
+    && modelResolver.includes('return "gpt-5.6-terra";'),
+  "AI consulting must use gpt-5.6-terra",
+);
+assert.ok(
+  modelResolver.includes('callType === "paid-analysis-detail" || callType === "paid-analysis-detail-v4"')
+    && modelResolver.includes('return "gpt-5.6-sol";'),
+  "paid analysis must use gpt-5.6-sol",
 );
 assert.ok(
   quality.includes('"gpt-5": { inputUsdPerMillion: 1.25, outputUsdPerMillion: 10 }'),
-  "current GPT-5 API rate snapshot must remain explicit for cost estimation",
+  "legacy GPT-5 API rate must remain explicit for historical telemetry",
 );
 assert.ok(
   quality.includes('"gpt-5.6-luna": { inputUsdPerMillion: 0.2, outputUsdPerMillion: 1.2 }')
     && quality.includes('"gpt-5.6-terra": { inputUsdPerMillion: 2, outputUsdPerMillion: 12 }')
     && quality.includes('"gpt-5.6-sol": { inputUsdPerMillion: 4, outputUsdPerMillion: 20 }'),
-  "GPT-5.6 fallback pricing references must remain explicit",
+  "current GPT-5.6 pricing references must remain explicit",
 );
 assert.ok(
   quality.includes('checkedAt: "2026-09-09"'),

@@ -15,9 +15,16 @@ import {
 
 function transferErrorStatus(message: string): number {
   if (message.includes("SELF_PROFILE_CONFLICT")) return 409;
+  if (message.includes("PROFILE_LIMIT_REACHED")) return 409;
   if (message.includes("GUEST_ANALYSIS_ALREADY_CONSUMED")) return 409;
   if (message.includes("GUEST_ANALYSIS_EXPIRED") || message.includes("GUEST_ANALYSIS_NOT_FOUND")) return 404;
   return 500;
+}
+
+function transferErrorCode(message: string): string | undefined {
+  if (message.includes("SELF_PROFILE_CONFLICT")) return "SELF_PROFILE_CONFLICT";
+  if (message.includes("PROFILE_LIMIT_REACHED")) return "PROFILE_LIMIT_REACHED";
+  return undefined;
 }
 
 // supabase.rpc() without throwOnError() resolves its error as a plain
@@ -51,10 +58,9 @@ export async function POST() {
     return response;
   } catch (error) {
     const message = extractErrorMessage(error, "비회원 분석 결과를 이전하지 못했습니다.");
-    const status = transferErrorStatus(message);
-    const errorCode = message.includes("SELF_PROFILE_CONFLICT")
-      ? "SELF_PROFILE_CONFLICT"
-      : undefined;
-    return NextResponse.json({ error: message, code: errorCode }, { status });
+    return NextResponse.json(
+      { error: message, code: transferErrorCode(message) },
+      { status: transferErrorStatus(message) },
+    );
   }
 }

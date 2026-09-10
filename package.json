@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-price-tier-audit-regression.ts && tsx scripts/paid-analysis-v4-actual-output-tier-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
+    "prebuild": "tsx scripts/toss-confirm-failure-observability-regression.ts && tsx scripts/toss-cancellation-foundation-regression.ts && tsx scripts/refund-reconciliation-failure-injection-regression.ts && tsx scripts/refund-reconciliation-scheduler-regression.ts && tsx scripts/local-reconciliation-worker-readiness-regression.ts && tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-price-tier-audit-regression.ts && tsx scripts/paid-analysis-v4-actual-output-tier-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

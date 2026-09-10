@@ -4,7 +4,7 @@ import { generateCalibrationProduct } from "../app/lib/paidAnalysisV4Calibration
 const SHOULD_RUN =
   process.env.VERCEL_ENV === "preview" &&
   process.env.VERCEL_GIT_COMMIT_REF === "test/v4-one-product-smoke" &&
-  process.env.VERCEL_GIT_COMMIT_MESSAGE === "Run one V4 smoke calibration";
+  process.env.VERCEL_GIT_COMMIT_MESSAGE === "Inspect V4 smoke evidence linkage";
 
 async function main(): Promise<void> {
   if (!SHOULD_RUN) {
@@ -36,27 +36,16 @@ async function main(): Promise<void> {
     contractVersion: artifact.contractVersion,
     conclusion: {
       direction: result.conclusion.direction,
-      headline: result.conclusion.headline,
       focus: result.conclusion.focus,
-      rationale: result.conclusion.rationale,
-      immediateAction: result.conclusion.immediateAction,
     },
-    coreProblem: {
-      title: result.coreProblem.title,
-      description: result.coreProblem.description,
-      whyItMatters: result.coreProblem.whyItMatters,
-    },
-    evidenceCount: result.evidence.length,
-    timeline: result.timeline.map((item) => item.label),
-    actions: result.action.map((item) => ({
-      action: item.action,
-      target: item.target,
-      condition: item.condition,
-      completionCriteria: item.completionCriteria,
+    evidence: result.evidence.map((item, index) => ({
+      index,
+      evidenceKey: item.evidenceKey,
+      meaning: item.meaning,
+      linkage: item.linkage,
+      containsDirection: item.linkage.includes(result.conclusion.direction),
+      containsExactFocus: item.linkage.includes(result.conclusion.focus),
     })),
-    avoidCount: result.avoid.length,
-    decisionCheckCount: result.decisionCheck?.length ?? 0,
-    confidence: result.confidence,
     usage: artifact.usage,
   });
 }

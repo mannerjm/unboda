@@ -33,6 +33,9 @@ assert(privacy.includes("생성 시각 기준 최대 7일까지") && privacy.inc
 assert(privacy.includes("필요한 권한 또는 합법적인 근거") && privacy.includes("객관적으로 확인하지 않습니다"), "Privacy separates third-person authority from service verification");
 assert(privacy.includes("NICE평가정보") && privacy.includes("만 19세 이상 여부만 판정") && privacy.includes("CI·DI"), "Privacy discloses NICE adult verification and raw-identity minimization");
 assert(privacy.includes("서비스 계약과 설정에 따라 달라질 수 있습니다") && privacy.includes("애플리케이션 데이터베이스에 저장하지 않습니다"), "Privacy avoids inventing NICE contract return fields while stating actual persistence behavior");
+assert(privacy.includes("Vercel Inc.") && privacy.includes("Washington, D.C.") && privacy.includes("privacy@vercel.com"), "Privacy discloses the verified Vercel overseas processing recipient and current US function region");
+assert(privacy.includes("암호화된 네트워크") && privacy.includes("서비스 이용을 중단") && privacy.includes("주요 기능은 제공하기 어렵습니다"), "Privacy states overseas transfer method, refusal path, and service impact");
+assert(privacy.includes("Production Supabase") && privacy.includes("서울 리전(ap-northeast-2)") && privacy.includes("Vultr 인스턴스의 정확한 계정 리전"), "Privacy separates verified domestic primary storage from the still-unverified Vultr account region");
 assert(!privacy.includes("FACT-PENDING") && !privacy.includes("[사업자") && !privacy.includes("[이메일"), "Privacy omits unavailable factual provider/business fields");
 assert(refund.includes("결제 전") && refund.includes("개인화 분석 생성이 즉시 시작") && refund.includes("중복 결제"), "Refund covers payment and immediate-generation states");
 assert(refund.includes("실질적으로 다르거나 결함") && refund.includes("일시적인 처리 지연") && refund.includes("부분 환불을 자동 처리하지 않습니다"), "Refund covers inconsistent supply, temporary delay, and V1 partial-refund behavior");

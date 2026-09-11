@@ -204,6 +204,7 @@ async function generateConsultingAnswer(prompt: string): Promise<{
       {
         model: AI_CONSULTING_MODEL,
         input: prompt,
+        store: false,
         max_output_tokens: AI_CONSULTING_MAX_OUTPUT_TOKENS,
         reasoning: { effort: "low" },
       },

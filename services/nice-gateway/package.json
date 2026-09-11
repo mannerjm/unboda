@@ -1,0 +1,14 @@
+{
+  "name": "@unboda/nice-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "probe:nice": "node scripts/probe-nice-token.mjs",
+    "test": "node --test"
+  }
+}

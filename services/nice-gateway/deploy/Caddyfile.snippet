@@ -1,0 +1,16 @@
+nice-gateway.unboda.kr {
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+
+	@health path /health
+	respond @health "ok" 200
+
+	@niceApi path /v1/nice/*
+	reverse_proxy @niceApi 127.0.0.1:8787
+
+	respond "Not Found" 404
+}

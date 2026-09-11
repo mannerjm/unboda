@@ -1,6 +1,7 @@
 import { listTopicCatalogProducts, listPeriodCatalogProducts } from "../app/lib/premiumCatalog";
 import { getLaunchProductIds, getPaidAnalysisTopicConfig } from "../app/lib/paidAnalysisTopicConfig";
 import { getProductPricing } from "../app/lib/productPricing";
+import { formatTopicExpectedUnderstanding } from "../app/lib/purchaseDecisionCopy";
 import { readFileSync } from "node:fs";
 
 const topicProducts = listTopicCatalogProducts();
@@ -22,6 +23,12 @@ for (const config of configs) {
   if (!decision || decision.recommendedFor.length < 2 || decision.whatItAnalyzes.length < 3 || decision.expectedUnderstanding.length < 3 || !decision.distinction || !decision.decisionQuestion) {
     throw new Error(`Incomplete Topic purchase-decision metadata: ${config?.productId}`);
   }
+  for (const item of decision.expectedUnderstanding) {
+    const formatted = formatTopicExpectedUnderstanding(item);
+    if (/(을|를)\s+에 대한/.test(formatted) || /한다 확인할 수 있습니다/.test(formatted)) {
+      throw new Error(`Malformed Topic expected-understanding copy: ${config?.productId} / ${formatted}`);
+    }
+  }
 }
 
 const periodIds = listPeriodCatalogProducts().map((product) => product.id);
@@ -39,6 +46,9 @@ for (const required of ["TopicDiscovery", "이 분석 시작하기"]) {
 }
 for (const required of ["recommendedFor", "whatItAnalyzes", "expectedUnderstanding", "distinction", "decisionQuestion"]) {
   if (!sharedDetail.includes(required)) throw new Error(`Shared Topic decision-first UI contract missing: ${required}`);
+}
+if (!sharedDetail.includes("formatTopicExpectedUnderstanding")) {
+  throw new Error("Topic customer-facing expected-understanding copy must use the shared formatter");
 }
 if (!topicUi.includes("selectedProductId") || !topicUi.includes("분석 내용 보기")) {
   throw new Error("Topic selection must be separate from purchase action");

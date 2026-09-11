@@ -22,6 +22,14 @@ for (const required of [
   }
 }
 
+if (!landingSource.includes('secondaryHref: `/recommendations?profileId=${state.profileId}`')) {
+  throw new Error("Completed-analysis landing recommendation CTA must open the dedicated recommendations page");
+}
+
+if (landingSource.includes('#recommendations')) {
+  throw new Error("Landing recommendation CTA must not rely on the result-page recommendations hash");
+}
+
 for (const forbidden of [
   "PremiumCatalogSection",
   "/checkout/",

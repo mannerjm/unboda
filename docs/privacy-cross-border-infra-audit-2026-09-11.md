@@ -70,53 +70,52 @@ Supabase 공식 문서는 특정 region 선택이 primary project data 저장 �
 - Supabase 사업자의 모든 지원·운영·하위처리·관제 활동이 대한민국 안에서만 이뤄진다는 뜻으로 확대 해석하지 않는다.
 - 별도의 국외 처리 사실이 확인되기 전에는 Supabase를 공개 국외 이전 표의 해외 수령자로 임의 기재하지 않는다.
 
-## 4. Vultr NICE gateway — 정확한 계정 리전은 아직 미확정
+## 4. Vultr NICE gateway — Production 인스턴스 서울 리전 확인
 
-현재 NICE gateway는 Vultr 인스턴스에서 동작하며, NICE 인증 결과 복호화와 만 19세 판정이 이 gateway에서 수행된다. 따라서 gateway가 위치한 국가는 본인확인 원문 개인정보의 일시적 처리 위치와 직접 관련된다.
+현재 NICE gateway는 Vultr 인스턴스에서 동작하며, NICE 인증 결과 복호화와 만 19세 판정이 이 gateway에서 수행된다. 따라서 gateway 위치는 본인확인 원문 개인정보의 일시적 처리 위치와 직접 관련된다.
 
-현재 확보된 증거:
-
-- 운영 gateway의 고정 IP 대역은 공개 IP 지리정보 서비스에서 대한민국으로 식별된다.
-- 그러나 IP 지리정보는 계정의 실제 instance region을 확정하는 계약·관리화면 증거가 아니다.
+2026-09-11 운영자 Vultr Dashboard 확인 화면에서 Production NICE gateway 인스턴스의 `Location`이 `Seoul, KR (APAC)`로 표시되는 것을 확인했다. 이 확인은 IP 지리정보 추정이 아니라 실제 계정의 인스턴스 관리 화면 증거다.
 
 현재 결론:
 
-- Vultr NICE gateway를 `대한민국 리전`이라고 공개 문구에 확정하지 않는다.
-- 반대로 국외라고 추정하지도 않는다.
-- Vultr Dashboard의 instance location/region 화면 또는 Vultr 계정 문서에서 정확한 리전을 한 번 확인한 뒤 공개 문구 여부를 결정한다.
+- Production NICE gateway의 현재 인스턴스 위치는 대한민국 서울이다.
+- NICE 결과 중 gateway에서 복호화되는 원문 개인정보는 이 국내 gateway에서 일시 처리되고, gateway는 생년월일을 이용해 만 19세 이상 여부를 판정한다.
+- gateway에서 Vercel 애플리케이션으로는 `adult`, 정책 버전, 증거 버전 등 정규화 결과만 반환한다.
+- 원문 성명·생년월일·휴대폰번호·CI/DI는 Vercel 애플리케이션으로 반환하지 않는다.
+- 이 사실만으로 Vultr 사업자의 모든 지원·운영·백업·하위처리 활동이 대한민국 안에서만 이뤄진다고 확대 해석하지 않는다.
 
 ## 5. NICE와 Vercel 데이터 경계
 
 NICE 원문 본인확인 데이터 흐름에서 확인된 경계는 다음과 같다.
 
-1. NICE 인증 결과는 Vultr NICE gateway에서 무결성 검증 및 복호화된다.
+1. NICE 인증 결과는 대한민국 서울의 Vultr NICE gateway에서 무결성 검증 및 복호화된다.
 2. gateway는 생년월일을 이용해 한국 시간 기준 만 19세 이상 여부를 판정한다.
 3. Vercel 애플리케이션에는 `adult`, 정책 버전, 증거 버전 등 정규화 결과만 반환한다.
 4. 원문 성명·생년월일·휴대폰번호·CI/DI는 Vercel 애플리케이션 DB에 저장하지 않는다.
 
 따라서 Vercel의 국외 처리 공개 항목에 NICE 원문 성명·생년월일·휴대폰번호·CI/DI가 Vercel로 이전된다고 쓰면 현재 구현과 맞지 않는다.
 
-## 6. 공개 개인정보처리방침 1차 반영 원칙
+## 6. 공개 개인정보처리방침 반영 원칙
 
-현재 증거만으로는 다음을 공개할 수 있다.
+현재 증거로 다음을 공개할 수 있다.
 
 - Vercel Inc.를 이용한다는 사실
 - 현재 Production Functions가 미국 Washington, D.C. (`iad1`)에서 실행된다는 사실
 - 서버 요청에 포함된 서비스 정보가 해당 Function에서 처리될 수 있다는 사실
 - 이전받는 자·국가·시기/방법·목적·보유 기준·거부 영향
 - Production Supabase의 주 데이터 저장 위치가 서울이라는 사실
-- Vultr region은 정확한 계정 증거가 없어 아직 공개 국가를 확정하지 않는다는 사실
+- Production Vultr NICE gateway가 서울에 배치되어 있고, NICE 원문 본인확인 정보는 이 gateway에서 일시 처리된 뒤 Vercel로 반환되지 않는다는 사실
 
 현재 단계에서 하지 않는 것:
 
 - `국외이전 없음`이라고 단정하지 않는다.
-- Vultr를 IP 지리정보만으로 국내 리전이라고 확정하지 않는다.
 - Vercel의 모든 하위처리자 국가를 운보다에 실제 적용되는지 검증 없이 복사하지 않는다.
+- Supabase 또는 Vultr의 모든 지원·운영·백업이 국내라고 확대 해석하지 않는다.
 - NICE 원문 본인확인 정보가 Vercel로 넘어간다고 잘못 기재하지 않는다.
 
 ## 7. 다음 확인 순서
 
-1. Vultr Dashboard에서 NICE gateway의 실제 instance region/location을 확인한다.
-2. Vercel 하위처리자 및 서비스 생성 로그/백업 범위를 운보다 사용 기능에 맞춰 확인한다.
+1. Vercel 하위처리자 및 서비스 생성 로그/백업 범위를 운보다 사용 기능에 맞춰 확인한다.
+2. Supabase와 Vultr의 지원·운영·백업·하위처리 범위를 실제 사용 기능 기준으로 추가 확인한다.
 3. OpenAI 등 분석 생성 제공자와 결제 제공자의 국외 처리/이전 사실을 별도 감사한다.
 4. 사업자 정보·연락처·시행일이 확정되면 개인정보처리방침의 정식 버전/시행일을 활성화한다.

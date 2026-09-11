@@ -34,7 +34,11 @@ assert(privacy.includes("필요한 권한 또는 합법적인 근거") && privac
 assert(privacy.includes("NICE평가정보") && privacy.includes("만 19세 이상 여부만 판정") && privacy.includes("CI·DI"), "Privacy discloses NICE adult verification and raw-identity minimization");
 assert(privacy.includes("서비스 계약과 설정에 따라 달라질 수 있습니다") && privacy.includes("애플리케이션 데이터베이스에 저장하지 않습니다"), "Privacy avoids inventing NICE contract return fields while stating actual persistence behavior");
 assert(privacy.includes("Vercel Inc.") && privacy.includes("Washington, D.C.") && privacy.includes("privacy@vercel.com"), "Privacy discloses the verified Vercel overseas processing recipient and current US function region");
-assert(privacy.includes("암호화된 네트워크") && privacy.includes("서비스 이용을 중단") && privacy.includes("주요 기능은 제공하기 어렵습니다"), "Privacy states overseas transfer method, refusal path, and service impact");
+assert(privacy.includes("OpenAI OpCo, LLC") && privacy.includes("Project Residency") && privacy.includes("Global") && privacy.includes("대한민국 전용 데이터 레지던시는 적용되지 않습니다"), "Privacy discloses the verified OpenAI Global project residency without inventing a single processing country");
+assert(privacy.includes("Zero Data Retention") && privacy.includes("abuse-monitoring") && privacy.includes("최대 30일"), "Privacy distinguishes OpenAI response no-store behavior from separate abuse-monitoring retention");
+assert(privacy.includes("Plus Five Five, Inc.") && privacy.includes("고객 데이터 저장 위치를 미국") && privacy.includes("Open Tracking") && privacy.includes("Click Tracking"), "Privacy discloses verified Resend storage and tracking settings");
+assert(privacy.includes("Free·Pro·Scale 플랜은 30일") && privacy.includes("Enterprise는 별도 설정"), "Privacy bounds Resend retention to provider plan policy instead of inventing the account plan");
+assert(privacy.includes("암호화된 네트워크") && privacy.includes("서비스 이용을 중단") && privacy.includes("해당 외부 서비스에 의존하는 기능은 제공하기 어렵거나 제한될 수 있습니다"), "Privacy states overseas transfer method, refusal path, and service impact");
 assert(privacy.includes("Production Supabase") && privacy.includes("서울 리전(ap-northeast-2)") && privacy.includes("Vultr gateway도 현재 대한민국 서울 리전") && privacy.includes("정규화된 성인 이용 자격 결과만 전달"), "Privacy records the verified Seoul primary database and NICE gateway processing boundary");
 assert(!privacy.includes("정확한 계정 리전은 별도 증거를 추가 확인 중"), "Privacy removes the resolved Vultr region placeholder");
 assert(!privacy.includes("FACT-PENDING") && !privacy.includes("[사업자") && !privacy.includes("[이메일"), "Privacy omits unavailable factual provider/business fields");

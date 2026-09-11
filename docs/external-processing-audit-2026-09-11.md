@@ -11,24 +11,36 @@
 - 따라서 OpenAI API에는 이메일·NICE 원문 본인확인 정보가 아니라, 분석 생성에 필요한 프로필 정보와 사용자가 상담에서 입력한 내용이 전달될 수 있다.
 - 핵심 분석 Responses API 호출과 AI 상담 Responses API 호출은 현재 모두 `store: false`를 사용한다.
 
+### 계정 화면에서 확인된 실제 프로젝트 설정
+
+- 2026-09-11 OpenAI Platform의 운보다 사용 프로젝트 `Project Settings > General` 화면에서 `Project Residency = Global`을 직접 확인했다.
+- 프로젝트 ID나 API Key 값은 이 감사 문서에 기록하지 않는다.
+- 따라서 현재 운보다 OpenAI API 프로젝트에는 대한민국 전용 데이터 레지던시가 적용되어 있지 않다.
+- `Global`은 특정 단일 국가에 처리·저장 위치가 고정된 프로젝트로 해석하지 않는다.
+
 ### OpenAI 공식 문서로 확인된 사실
 
 - API 고객 데이터는 기본적으로 모델 학습에 사용되지 않으며, 고객이 명시적으로 opt-in한 경우를 제외한다.
-- Responses API의 `store` 기본값은 true이고, `store: false`는 생성 응답을 API의 저장 응답 상태로 남기지 않도록 하는 설정이다.
-- `store: false`는 Zero Data Retention과 동일하지 않다. 기본 abuse-monitoring 로그는 별도 정책에 따라 최대 30일 보관될 수 있으며, ZDR은 별도 자격·승인이 필요한 통제다.
-- OpenAI는 API용 데이터 레지던시 기능을 제공하지만, 현재 운보다 API 프로젝트에 특정 데이터 레지던시/처리 리전이 활성화되어 있는지는 이 감사에서 확인하지 못했다.
-- OpenAI는 API 처리에 여러 하위처리자를 사용하며 공식 sub-processor 목록에 다수 국가가 공개되어 있다. 현재 계정 설정을 확인하지 않은 상태에서 단일 처리 국가를 임의로 확정하지 않는다.
+- Responses API는 기본적으로 application state를 보관할 수 있으나, 운보다의 실제 Responses 호출은 `store: false`를 명시한다.
+- `store: false`는 Zero Data Retention과 동일하지 않다. 기본 abuse-monitoring 로그에는 프롬프트·응답 등 고객 콘텐츠가 포함될 수 있고, 기본적으로 최대 30일 보관될 수 있다.
+- OpenAI 문서상 데이터 레지던시는 프로젝트별 설정이며, 특정 리전을 설정한 프로젝트에만 해당 지역 저장·처리 통제가 적용된다. 현재 운보다 프로젝트는 `Global`이므로 특정 지역 레지던시를 적용한 상태로 표시하지 않는다.
+- OpenAI는 API 처리에 여러 하위처리자를 사용하며, 공식 sub-processor 목록에 미국·대한민국·일본·싱가포르·유럽권 등을 포함한 복수 국가의 처리 위치가 공개되어 있다. 따라서 현재 운보다 프로젝트의 API 처리를 특정 국가 하나로 단정하지 않는다.
+- 공개 Services Agreement와 DPA에서 EEA·스위스 외 고객의 OpenAI 계약 당사자는 OpenAI OpCo, LLC로 안내된다.
 
 공식 근거:
-- https://developers.openai.com/api/reference/cli/resources/responses/methods/create
-- https://openai.com/enterprise-privacy/
-- https://platform.openai.com/docs/models/default-usage-policies-by-endpoint
+- https://developers.openai.com/api/docs/guides/your-data
+- https://openai.com/policies/services-agreement/
+- https://openai.com/policies/data-processing-addendum/
 - https://openai.com/policies/sub-processor-list/
 
-### 남은 확인
+### 공개 문구에 반영 가능한 결론
 
-- OpenAI API 프로젝트의 실제 Data Residency/processing 설정을 계정 화면에서 확인해야 한다.
-- 그 확인 전에는 개인정보처리방침에 OpenAI 처리 국가를 특정 국가 하나로 단정하지 않는다.
+- 운보다는 분석 및 AI 상담 생성을 위해 OpenAI API를 사용한다.
+- OpenAI로 전달될 수 있는 범위는 분석 생성에 필요한 생년월일·출생시간·성별·계산된 사주 정보와 AI 상담 입력·대화 내용이다.
+- 계정 이메일과 NICE 원문 본인확인 정보는 현재 분석·상담 생성 프롬프트에 포함하지 않는다.
+- 현재 API 프로젝트의 Project Residency는 `Global`이며 대한민국 전용 데이터 레지던시는 적용되지 않는다.
+- 특정 단일 처리 국가를 기재하지 않고, OpenAI 및 공식 하위처리자가 공개한 복수 국가에서 처리될 수 있음을 설명한다.
+- 운보다의 Responses 호출은 `store: false`이지만 기본 abuse-monitoring 등 OpenAI의 별도 보존 통제가 존재할 수 있다는 점을 함께 설명한다.
 
 ## 2. Resend 이메일
 
@@ -36,7 +48,7 @@
 
 - 실제 발송 도메인: `mail.unboda.kr`.
 - Resend 계정에서 해당 도메인은 verified, sending enabled, receiving disabled 상태다.
-- 발송 리전은 `ap-northeast-1`이다. Resend 공식 문서상 이 값은 이메일 라우팅/발송 리전을 의미하며 저장 위치를 의미하지 않는다.
+- 발송 리전은 `ap-northeast-1`이다. 이 값은 이메일 라우팅/발송 리전이며 저장 위치를 의미하지 않는 것으로 구분한다.
 - Open Tracking과 Click Tracking은 모두 비활성화되어 있다.
 - 고객지원 알림은 수신자 이메일 주소와 최소한의 알림 제목/본문만 Resend로 전달한다.
 - 새 문의 운영자 알림 이메일에는 고객 이메일, 주문번호, 문의 본문을 넣지 않는다.
@@ -49,23 +61,27 @@
 
 ### Resend 공식 문서로 확인된 사실
 
-- Resend는 Customer Data의 processor로 동작할 수 있다고 DPA에서 설명한다.
-- Resend는 고객 데이터 저장을 미국에서 수행한다고 안내한다. 도메인 발송 리전 선택은 저장 위치를 바꾸지 않는다.
-- Free/Pro/Scale 플랜은 활성 계정의 email/log data를 30일 보관한다고 안내하고, 계정 종료 후 남은 customer data는 DPA상 90일 이내 삭제한다고 설명한다. Enterprise는 별도 보존 설정이 가능하다.
+- Resend의 DPA상 법인명은 Plus Five Five, Inc.이며, 고객을 위한 이메일 발송 처리에서 processor/sub-processor 관계를 설명한다.
+- Resend는 고객 데이터 저장 위치를 미국으로 안내한다.
+- Resend 공개 정책상 Free/Pro/Scale 플랜의 이메일·로그 데이터는 30일 보관되고, Enterprise는 별도 설정이 가능하다.
+- 계정 종료 후 남은 customer data는 DPA상 90일 이내 삭제한다고 안내한다.
+- 백업은 공개 GDPR 안내상 7일 지속된다고 안내한다.
 - 하위처리자 목록이 공개되어 있다.
 
 공식 근거:
 - https://resend.com/security/gdpr
 - https://resend.com/legal/dpa
 - https://resend.com/legal/subprocessors
+- https://resend.com/pricing
 
 ### 공개 문구에 반영 가능한 결론
 
-- 운보다가 Resend를 거래·고객지원·운영 알림 발송에 사용한다는 사실.
+- 운보다가 Resend를 고객지원·운영 알림 이메일 발송에 사용한다는 사실.
 - 수신자 이메일 주소와 최소 알림 내용이 Resend로 전달된다는 사실.
-- 저장 위치는 미국이라는 Resend 공식 설명.
-- `ap-northeast-1`은 발송 리전이며 저장 위치가 아니라는 점.
+- Resend가 고객 데이터 저장 위치를 미국으로 공개한다는 사실.
+- `ap-northeast-1`은 현재 운보다 발송 리전이며 저장 위치와 동일한 의미로 쓰지 않는다.
 - 운보다 설정에서 open/click tracking이 꺼져 있다는 점.
+- 실제 계정 플랜을 이 감사에서 확정하지 않았으므로 공개 문구에서는 특정 플랜의 30일 보존을 운보다 계정의 확정값처럼 단정하지 않고, Resend 공개 정책 및 계약·플랜에 따른다고 설명한다.
 
 ## 3. Toss Payments
 
@@ -111,13 +127,14 @@
 - Supabase Production DB 주 리전은 서울.
 - Vercel Production Functions는 `iad1`.
 - OpenAI 핵심 분석·AI 상담 Responses 호출은 `store: false`.
+- OpenAI 실제 API 프로젝트의 Project Residency는 `Global`.
 - Resend는 고객지원/운영 이메일에서 본문 개인정보를 최소화하고 tracking을 비활성화함.
+- Resend는 고객 데이터 저장 위치를 미국으로 공개하고 있음.
 - Toss 코드 경계는 최소 주문 식별자·금액 위주로 구성되어 있음.
 
 판매 전 남은 개인정보/외부처리 확인:
-1. OpenAI API 프로젝트의 실제 Data Residency/processing 설정 확인.
-2. 사업자 정보와 개인정보 보호 책임 연락처 확정.
-3. Toss 가맹점 live 상태 확인 후 최신 결제 개인정보 문구 확정.
-4. 위 사실을 근거로 공개 `/privacy`의 OpenAI·Resend·Toss 설명을 최종 반영.
+1. 사업자 정보와 개인정보 보호 책임 연락처 확정.
+2. Toss 가맹점 live 상태 확인 후 최신 결제 개인정보 문구 확정.
+3. OpenAI·Resend 공개 설명은 이번 확인 결과를 근거로 `/privacy`에 반영하고, 제공자 정책 또는 실제 계정 설정이 바뀌면 갱신한다.
 
 이 문서는 기술·사실확인 메모이며 법률자문을 대신하지 않는다.

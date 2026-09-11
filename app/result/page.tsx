@@ -31,6 +31,7 @@ import {
 import ProfileSelector from "@/app/components/ProfileSelector";
 import AppShell from "@/app/components/AppShell";
 import SajuRelationStarsSection from "@/app/components/SajuRelationStarsSection";
+import FortuneCycleSections from "@/app/components/FortuneCycleSections";
 
 type SajuResult = ReturnType<typeof getSaju>;
 
@@ -906,113 +907,14 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
   </p>
 </section>
 <SajuRelationStarsSection relationStars={relationStars} />
-{daeunAnalysis && (
-  <div className="mt-5 rounded-3xl border border-stone-200 bg-white p-5">
-    <p className="text-sm tracking-[0.25em] text-stone-500">
-      DAEUN ANALYSIS
-    </p>
-
-    <h2 className="mt-1 text-2xl font-bold">
-      대운 분석
-    </h2>
-
-    <div className="mt-5 grid grid-cols-2 gap-3">
-      <div className="rounded-2xl bg-stone-50 p-4">
-        <p className="text-sm text-stone-500">
-          대운 방향
-        </p>
-        <p className="mt-2 text-lg font-bold">
-          {daeunAnalysis.direction}
-        </p>
-      </div>
-
-      <div className="rounded-2xl bg-stone-50 p-4">
-        <p className="text-sm text-stone-500">
-          대운 시작
-        </p>
-        <p className="mt-2 text-lg font-bold">
-          {daeunAnalysis.startAge}세
-        </p>
-      </div>
-    </div>
-
-    <div className="mt-5">
-    <div className="grid grid-cols-10 gap-1.5">
-    {[...daeunAnalysis.daeuns]
-      .reverse()
-      .map((daeun: { order: number; ganji: string }) => {
-        const hanja = ganjiToHanja(daeun.ganji);
-
-        return (
-          <div
-  key={daeun.order}
-  onClick={() => setSelectedDaeunOrder(daeun.order)}
-  className={`flex min-w-0 cursor-pointer flex-col items-center rounded-2xl px-2 py-4 transition ${
-    effectiveDaeunOrder === daeun.order
-      ? "bg-stone-900 text-white"
-              : "bg-stone-50"
-  }`}
->
-            <span className={`text-xs font-semibold ${effectiveDaeunOrder === daeun.order ? "text-white/70" : "text-stone-600"}`}>
-              {daeun.order}대운
-            </span>
-
-            <div className="mt-3 flex flex-col items-center text-2xl font-bold leading-none">
-              <span className={getFiveElementStyle(hanja[0], effectiveDaeunOrder === daeun.order).textClass}>{hanja[0]}</span>
-              <span className={`mt-1 ${getFiveElementStyle(hanja[1], effectiveDaeunOrder === daeun.order).textClass}`}>{hanja[1]}</span>
-            </div>
-
-            <span className={`mt-3 text-xs ${effectiveDaeunOrder === daeun.order ? "text-white/60" : "text-stone-500"}`}>
-              {daeunAnalysis.startAge +
-  (daeun.order - 1) * 10}
-              세
-            </span>
-          </div>
-        );
-      })}
-  </div>
-</div>
-</div>
-)}
-{displayedSeun && (
-  <div className="mt-5 rounded-3xl border border-stone-200 bg-white p-5">
-    <p className="text-sm tracking-[0.25em] text-stone-500">
-      SEUN ANALYSIS
-    </p>
-
-    <h2 className="mt-1 text-2xl font-bold">
-      세운 분석
-    </h2>
-
-    <div className="mt-5 grid grid-cols-10 gap-1.5">
-      {[...displayedSeun.items].reverse().map(
-        (item: { year: number; age: number; ganji: string }) => {
-          const hanja = ganjiToHanja(item.ganji);
-
-          return (
-            <div
-              key={item.year}
-              className="flex min-w-0 flex-col items-center rounded-2xl bg-stone-50 px-2 py-4"
-            >
-              <span className="text-xs font-semibold text-stone-600">
-                {item.year}
-              </span>
-
-              <div className="mt-3 flex flex-col items-center text-2xl font-bold leading-none">
-                <span className={getFiveElementStyle(hanja[0]).textClass}>{hanja[0]}</span>
-                <span className={`mt-1 ${getFiveElementStyle(hanja[1]).textClass}`}>{hanja[1]}</span>
-              </div>
-
-              <span className="mt-3 text-xs text-stone-500">
-                {item.age}세
-              </span>
-            </div>
-          );
-        }
-      )}
-    </div>
-  </div>
-)}
+<FortuneCycleSections
+  daeunAnalysis={daeunAnalysis}
+  displayedSeun={displayedSeun}
+  dayStem={freeAnalysis?.dayStem ?? sajuData.dayStem}
+  dayBranch={freeAnalysis?.dayBranch ?? sajuData.dayBranch}
+  effectiveDaeunOrder={effectiveDaeunOrder}
+  onSelectDaeun={setSelectedDaeunOrder}
+/>
 
 <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
   <div className="mb-5 flex items-end justify-between gap-4">

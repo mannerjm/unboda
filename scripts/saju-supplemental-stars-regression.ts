@@ -9,6 +9,7 @@ import {
   calculateSajuRelationStars,
   getDayPillarVoidBranches,
 } from "../app/lib/sajuRelationStars";
+import { getFortuneCycleIndicators } from "../app/lib/fortuneCycleIndicators";
 
 function stars(dayStem: string, targetBranch: string, pillarHanja = "", isDayPillar = false) {
   return getSupplementalPillarStars({
@@ -99,6 +100,22 @@ assert.equal(noMatchedVoid?.basis, "申·酉", "癸未 day-pillar void informati
 assert.deepEqual(noMatchedVoid?.positions, [], "unmatched day-pillar void information must report no original-chart position");
 assert.deepEqual(noMatchedVoid?.branches, [], "unmatched day-pillar void information must report no matched branch");
 
+const currentDaeunIndicators = getFortuneCycleIndicators({
+  dayStem: "癸",
+  dayBranch: "未",
+  ganji: "을사",
+});
+assert.deepEqual(
+  currentDaeunIndicators,
+  {
+    stemTenGod: "식신",
+    branchTenGod: "정재",
+    twelveStage: "태",
+    twelveSpirit: "역마살",
+  },
+  "癸未 기준 乙巳 대운은 십성·십이운성·십이신살을 같은 규칙으로 계산해야 한다",
+);
+
 // Production screenshot contract: 1987-02-03 22:30 (solar, male) currently renders
 // 丙寅 / 辛丑 / 癸未 / 癸亥. The benefic rules must enrich that existing chart
 // without replacing its current 12신살 calculation. Relation V1 should additionally
@@ -141,4 +158,4 @@ assert.deepEqual(
   "sample chart should expose 寅未 귀문관살 plus day-pillar void basis 申酉 with no original-chart match",
 );
 
-console.log("saju supplemental and relation star regression passed ✓");
+console.log("saju supplemental, relation, and fortune-cycle indicator regression passed ✓");

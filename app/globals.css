@@ -24,3 +24,44 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/*
+ * The four-pillars grid appears in both the signed-in result view and the
+ * guest/free-analysis presentation with this exact four-column layout.
+ * Keep the dense supporting labels readable without changing the large
+ * stem/branch characters or unrelated cards elsewhere in the product.
+ */
+.grid.grid-cols-4.gap-2.sm\:gap-4 .text-\[10px\],
+.grid.grid-cols-4.gap-2.sm\:gap-4 .text-\[11px\],
+.grid.grid-cols-4.gap-2.sm\:gap-4 .text-xs {
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+}
+
+.grid.grid-cols-4.gap-2.sm\:gap-4 .text-stone-400 {
+  color: #57534e;
+}
+
+.grid.grid-cols-4.gap-2.sm\:gap-4 .text-stone-500 {
+  color: #44403c;
+}
+
+.grid.grid-cols-4.gap-2.sm\:gap-4 .opacity-60 {
+  opacity: 0.8;
+}
+
+.grid.grid-cols-4.gap-2.sm\:gap-4 .text-white\/50 {
+  color: rgb(255 255 255 / 0.74);
+}
+
+.grid.grid-cols-4.gap-2.sm\:gap-4 .text-white\/60 {
+  color: rgb(255 255 255 / 0.8);
+}
+
+.grid.grid-cols-4.gap-2.sm\:gap-4 .text-white\/70 {
+  color: rgb(255 255 255 / 0.88);
+}
+
+.grid.grid-cols-4.gap-2.sm\:gap-4 .text-white\/75 {
+  color: rgb(255 255 255 / 0.92);
+}

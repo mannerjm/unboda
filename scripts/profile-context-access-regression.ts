@@ -23,6 +23,7 @@ const purchaseServer = read("app/lib/purchases/server.ts");
 const selector = read("app/components/ProfileSelector.tsx");
 const purchasedAnalysesPage = read("app/purchased-analyses/page.tsx");
 const mypage = read("app/mypage/page.tsx");
+const notFoundPage = read("app/not-found.tsx");
 
 assert(selector.includes('fetch("/api/profiles")'), "selector must load profiles through the Profile API");
 assert(!selector.includes("localStorage") && !selector.includes("sessionStorage"), "selector must not persist profile ownership in browser storage");
@@ -40,6 +41,11 @@ console.log("2. result requires explicit Profile selection before paid-analysis 
 
 assert(checkoutPage.includes("<ProfileSelector") && checkoutPage.includes("user && !profileId"), "checkout may show explicit ProfileSelector only when authenticated profile context is absent");
 assert(!checkoutPage.includes("getActiveProfile("), "checkout must not auto-select an active profile");
+for (const [name, source] of [["checkout page", checkoutPage], ["paid page", paidPage]] as const) {
+  assert(source.includes("if (!product) {") && source.includes("notFound();"), `${name} must return an HTTP 404 for an invalid product`);
+}
+assert(notFoundPage.includes("페이지를 찾을 수 없습니다.") && notFoundPage.includes('href="/deep-analysis"'), "shared 404 page must provide Korean recovery guidance");
+console.log("2b. invalid paid product routes use the shared 404 contract ✓");
 
 for (const [name, source] of [["paid page", paidPage]] as const) {
   assert(source.includes("getUserProfile(profileId, user.id)"), `${name} must server-verify selected profile ownership`);

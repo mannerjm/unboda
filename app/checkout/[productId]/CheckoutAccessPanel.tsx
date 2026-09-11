@@ -2,12 +2,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
-  getAuthUserAccessLevel,
   guestAuthState,
   type AuthState,
 } from "@/app/lib/auth";
 import { createClient } from "@/app/lib/supabase/client";
-import { getUserAccessPermissions } from "@/app/lib/userAccess";
 import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 
 declare global {
@@ -74,9 +72,6 @@ export default function CheckoutAccessPanel({
       }
     });
   }, []);
-
-  const userAccessLevel = getAuthUserAccessLevel(authState);
-  const permissions = getUserAccessPermissions(userAccessLevel);
 
   const canonicalProductId = getCanonicalPremiumProductId(productId);
 
@@ -257,11 +252,6 @@ export default function CheckoutAccessPanel({
           ) : null}
         </>
       )}
-
-      <p className="mt-5 text-xs leading-5 text-stone-500">
-        유료 분석 구매 가능 상태:{" "}
-        {permissions.canPurchasePaidAnalysis ? "가능" : "불가"}
-      </p>
     </section>
   );
 }

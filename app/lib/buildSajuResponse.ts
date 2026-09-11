@@ -1,9 +1,10 @@
 import type { getSaju } from "./manse";
+import { enrichSupplementalPillarStars } from "./sajuSupplementalStars";
 
 type SajuResult = ReturnType<typeof getSaju>;
 
 export function buildSajuResponse(saju: SajuResult) {
-  return {
+  return enrichSupplementalPillarStars({
     evaluationContext: saju.evaluationContext,
     solarDate: saju.solarDate,
 
@@ -64,17 +65,17 @@ export function buildSajuResponse(saju: SajuResult) {
     seunAnalysis: saju.seunAnalysis,
     currentSeun: saju.currentSeun,
     fortuneFlowAnalysis: saju.fortuneFlowAnalysis as
-  | {
-      summary: string;
-      opportunities: string[];
-      cautions: string[];
-      topicGuides: {
-        career: string;
-        wealth: string;
-        relationship: string;
-        health: string;
-      };
-    }
-  | null,
-  };
+      | {
+          summary: string;
+          opportunities: string[];
+          cautions: string[];
+          topicGuides: {
+            career: string;
+            wealth: string;
+            relationship: string;
+            health: string;
+          };
+        }
+      | null,
+  });
 }

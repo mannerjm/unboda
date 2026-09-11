@@ -10,6 +10,7 @@ import { createEvaluationContext } from "@/app/lib/evaluationContext";
 import { hasCurrentEvaluationPeriod } from "@/app/lib/freeAnalysisResults/server";
 import type { AnalyzeSuccessResponse } from "@/app/lib/analyzeApiTypes";
 import type { ProfileDto } from "@/app/lib/profiles/types";
+import { enrichSupplementalPillarStars } from "@/app/lib/sajuSupplementalStars";
 
 type RouteContext = {
   params: Promise<{ profileId: string }>;
@@ -19,8 +20,15 @@ function withCurrentProfile(
   analysis: AnalyzeSuccessResponse,
   profile: ProfileDto,
 ): AnalyzeSuccessResponse {
+  const enrichedSaju = enrichSupplementalPillarStars(analysis.saju);
+  const enrichedFreeAnalysis = analysis.freeAnalysis
+    ? enrichSupplementalPillarStars(analysis.freeAnalysis)
+    : undefined;
+
   return {
     ...analysis,
+    saju: enrichedSaju,
+    ...(enrichedFreeAnalysis ? { freeAnalysis: enrichedFreeAnalysis } : {}),
     profile: {
       id: profile.id,
       label: profile.label,

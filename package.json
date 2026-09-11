@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-price-tier-audit-regression.ts && tsx scripts/paid-analysis-v4-actual-output-tier-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
+    "prebuild": "tsx scripts/saju-supplemental-stars-regression.ts && tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-price-tier-audit-regression.ts && tsx scripts/paid-analysis-v4-actual-output-tier-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -21,6 +21,7 @@
     "test:ai-consulting-operations": "tsx scripts/ai-consulting-operations-regression.ts",
     "test:ai-consulting-e2e-contract": "tsx scripts/ai-consulting-e2e-contract-regression.ts",
     "test:ai-consulting-e2e": "npm run test:ai-consulting-credit-checkout && npm run test:ai-consulting-credit-history && npm run test:ai-consulting-memory && npm run test:ai-consulting-quality-cost && npm run test:ai-consulting-operations && npm run test:ai-consulting-e2e-contract",
+    "test:saju-stars": "tsx scripts/saju-supplemental-stars-regression.ts",
     "test:launch-security": "tsx scripts/launch-security-regression.ts",
     "test:operator-alerts": "tsx scripts/operator-alert-email-regression.ts",
     "test:operator-triage": "tsx scripts/operator-exception-triage-regression.ts",

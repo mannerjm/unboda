@@ -19,7 +19,12 @@ assert(refresh.includes('allowPeriodRefresh: true'), "only explicit refresh opts
 assert(refresh.includes("completeFreeAnalysisResult") && refresh.includes("buildFreeAnalysisResponse"), "refresh regenerates and persists complete response");
 assert(refresh.includes("failFreeAnalysisResult") && refresh.includes("period-refresh-failed"), "refresh failure keeps retryable state");
 assert(!refresh.includes("purchases") && !refresh.includes("entitlements") && !refresh.includes("paid_reports"), "refresh does not touch paid data");
-assert(getRoute.includes("analysis: cached.content") && getRoute.includes('freshness: "STALE"'), "ordinary GET preserves stale content and metadata");
+assert(
+  getRoute.includes("const analysis = withCurrentProfile(cached.content, profile);")
+    && getRoute.includes("analysis,")
+    && getRoute.includes('freshness: "STALE"'),
+  "ordinary GET preserves stale content with current profile metadata and freshness metadata",
+);
 assert(!getRoute.includes("claimFreeAnalysisResult") && !getRoute.includes("buildFreeAnalysisResponse"), "ordinary GET does not claim or generate");
 assert(analyze.includes('claim.state === "stale"') && analyze.includes('refreshAvailable: true'), "analyze stale response requires explicit refresh");
 assert(results.includes('if (!input.allowPeriodRefresh) return { state: "stale", record: existing };'), "stale claim is opt-in");

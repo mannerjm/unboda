@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Suspense } from "react";
 import type { ReactNode } from "react";
+import MonthlyFreeAnalysisRefreshNotice from "@/app/components/MonthlyFreeAnalysisRefreshNotice";
 
 type NavItem = {
   href: string;
@@ -204,6 +205,11 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
     : aiCreditBalance === null
       ? "확인 중"
       : `${aiCreditBalance}회`;
+  const refreshNoticeSurface = pathname === "/result"
+    ? "result"
+    : pathname === "/mypage" || pathname === "/recommendations"
+      ? "compact"
+      : null;
 
   return (
     <div className="min-h-screen bg-[#fbfbfa] text-stone-900">
@@ -281,6 +287,9 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
             )}
           </header>
           <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+            {isGuest === false && profileId && refreshNoticeSurface ? (
+              <MonthlyFreeAnalysisRefreshNotice profileId={profileId} surface={refreshNoticeSurface} />
+            ) : null}
             {children}
           </div>
         </div>

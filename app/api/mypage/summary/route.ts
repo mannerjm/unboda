@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import {
+  getProfileFingerprint,
   listUserFreeAnalysisResults,
   resolveProfileFreeAnalysisStatus,
 } from "@/app/lib/freeAnalysisResults/server";
@@ -24,10 +25,30 @@ export async function GET() {
       listUserPurchaseHistory(user.id),
       listUserRefundSummaries(user.id),
     ]);
-    const freeAnalysisResults = profiles.map((profile) => ({
-      profileId: profile.id,
-      status: resolveProfileFreeAnalysisStatus(profile, summaries, evaluationContext),
-    }));
+    const freeAnalysisResults = profiles.map((profile) => {
+      const summary = summaries.find((item) => item.profileId === profile.id);
+      const status = resolveProfileFreeAnalysisStatus(profile, summaries, evaluationContext);
+      const periodRefreshAvailable = Boolean(
+        status === "stale"
+          && summary?.status === "completed"
+          && summary.profileFingerprint === getProfileFingerprint(profile)
+          && (
+            summary.evaluationYear !== evaluationContext.evaluationYear
+            || summary.evaluationMonth !== evaluationContext.evaluationMonth
+          ),
+      );
+
+      return {
+        profileId: profile.id,
+        // A period change does not invalidate the saved result. My Page keeps the
+        // existing result marked completed while AppShell presents the monthly
+        // refresh invitation. Birth-input changes still remain true stale states.
+        status: periodRefreshAvailable ? "completed" : status,
+        periodRefreshAvailable,
+        currentEvaluationYear: evaluationContext.evaluationYear,
+        currentEvaluationMonth: evaluationContext.evaluationMonth,
+      };
+    });
     // UX hint only: DELETE /api/profiles/[profileId] re-checks the same rules.
     const profileDeletability = profiles.map((profile) => {
       const reason = deleteBlockers.get(profile.id);

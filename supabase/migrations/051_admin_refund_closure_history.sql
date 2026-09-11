@@ -29,6 +29,60 @@ alter table public.service_analytics_events
     )
   );
 
+create or replace function public.stamp_account_closure_transition()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  if old.status = 'ACTIVE' and new.status = 'DELETION_REQUESTED' then
+    new.closure_requested_at := now();
+    new.closure_canceled_at := null;
+  elsif old.status = 'DELETION_REQUESTED' and new.status = 'ACTIVE' then
+    new.closure_canceled_at := now();
+  end if;
+  return new;
+end;
+$$;
+
+create or replace function public.record_account_closure_transition_event()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  if old.status = 'ACTIVE' and new.status = 'DELETION_REQUESTED' then
+    insert into public.service_analytics_events (event_name, actor_kind)
+    values ('ACCOUNT_CLOSURE_REQUESTED', 'member');
+  elsif old.status = 'DELETION_REQUESTED' and new.status = 'ACTIVE' then
+    insert into public.service_analytics_events (event_name, actor_kind)
+    values ('ACCOUNT_CLOSURE_CANCELED', 'member');
+  end if;
+  return null;
+end;
+$$;
+
+drop trigger if exists account_closure_transition_stamp on public.account_lifecycles;
+create trigger account_closure_transition_stamp
+before update of status on public.account_lifecycles
+for each row
+when (old.status is distinct from new.status)
+execute function public.stamp_account_closure_transition();
+
+drop trigger if exists account_closure_transition_event on public.account_lifecycles;
+create trigger account_closure_transition_event
+after update of status on public.account_lifecycles
+for each row
+when (old.status is distinct from new.status)
+execute function public.record_account_closure_transition_event();
+
+revoke all on function public.stamp_account_closure_transition() from public, anon, authenticated;
+revoke all on function public.record_account_closure_transition_event() from public, anon, authenticated;
+grant execute on function public.stamp_account_closure_transition() to service_role;
+grant execute on function public.record_account_closure_transition_event() to service_role;
+
 create or replace function public.get_admin_refund_closure_dashboard(p_limit integer default 20)
 returns jsonb
 language sql

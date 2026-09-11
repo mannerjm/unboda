@@ -1,10 +1,11 @@
 import type { getSaju } from "./manse";
 import { enrichSupplementalPillarStars } from "./sajuSupplementalStars";
+import { enrichSajuRelationStars } from "./sajuRelationStars";
 
 type SajuResult = ReturnType<typeof getSaju>;
 
 export function buildSajuResponse(saju: SajuResult) {
-  return enrichSupplementalPillarStars({
+  return enrichSajuRelationStars(enrichSupplementalPillarStars({
     evaluationContext: saju.evaluationContext,
     solarDate: saju.solarDate,
 
@@ -77,5 +78,5 @@ export function buildSajuResponse(saju: SajuResult) {
           };
         }
       | null,
-  });
+  }));
 }

@@ -1,0 +1,37 @@
+name: NICE Gateway
+
+on:
+  pull_request:
+    paths:
+      - "services/nice-gateway/**"
+      - ".github/workflows/nice-gateway.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: services/nice-gateway
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run offline gateway tests
+        run: npm test
+
+      - name: Syntax check runtime entrypoints
+        run: |
+          node --check src/server.mjs
+          node --check src/niceClient.mjs
+          node --check src/security.mjs
+          node --check scripts/probe-nice-token.mjs

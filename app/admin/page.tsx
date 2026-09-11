@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getAdminGrowthDashboard } from "@/app/lib/analytics/server";
+import { getAdminGrowthDashboard, getAdminRefundClosureDashboard } from "@/app/lib/analytics/server";
 import { getAiConsultingCreditBundle } from "@/app/lib/aiConsulting/commercialPolicy";
 import { getAiConsultingOperationsReport } from "@/app/lib/aiConsulting/operations";
 import { getAiConsultingQualityCostReport } from "@/app/lib/aiConsulting/qualityCost";
@@ -8,6 +8,7 @@ import { OperatorAuthorizationError, requireOperator } from "@/app/lib/operators
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getActiveSupportRequestCount } from "@/app/lib/support/operatorServer";
 import AdminGrowthOverview from "./AdminGrowthOverview";
+import AdminRefundClosureOverview from "./AdminRefundClosureOverview";
 import AdminLookupConsole from "./AdminLookupConsole";
 import AdminOperationsOverview from "./AdminOperationsOverview";
 
@@ -32,8 +33,9 @@ export default async function AdminPage() {
     );
   }
 
-  const [growthResult, failureResult, operationsResult, qualityResult, supportResult] = await Promise.allSettled([
+  const [growthResult, refundClosureResult, failureResult, operationsResult, qualityResult, supportResult] = await Promise.allSettled([
     getAdminGrowthDashboard(30),
+    getAdminRefundClosureDashboard(20),
     getOperationalFailureSummary(),
     getAiConsultingOperationsReport(24),
     getAiConsultingQualityCostReport(100),
@@ -41,6 +43,7 @@ export default async function AdminPage() {
   ]);
 
   const growth = growthResult.status === "fulfilled" ? growthResult.value : null;
+  const refundClosure = refundClosureResult.status === "fulfilled" ? refundClosureResult.value : null;
   const failureSummary = failureResult.status === "fulfilled" ? failureResult.value : null;
   const operations = operationsResult.status === "fulfilled" ? operationsResult.value : null;
   const quality = qualityResult.status === "fulfilled" ? qualityResult.value : null;
@@ -72,13 +75,17 @@ export default async function AdminPage() {
     estimatedAverageCostUsd: quality.estimatedAverageCostUsd,
   } : null;
 
-  const productLabels = growth?.topProducts.map((item) => {
-    const premium = getPremiumProduct(item.productId);
-    if (premium) return { productId: item.productId, label: premium.title };
-    const credit = getAiConsultingCreditBundle(item.productId);
-    if (credit) return { productId: item.productId, label: `AI 질문권 ${credit.questions}회` };
-    return { productId: item.productId, label: item.productId };
-  }) ?? [];
+  const productIds = new Set<string>([
+    ...(growth?.topProducts.map((item) => item.productId) ?? []),
+    ...(refundClosure?.recentRefunds.map((item) => item.productId) ?? []),
+  ]);
+  const productLabels = [...productIds].map((productId) => {
+    const premium = getPremiumProduct(productId);
+    if (premium) return { productId, label: premium.title };
+    const credit = getAiConsultingCreditBundle(productId);
+    if (credit) return { productId, label: `AI 질문권 ${credit.questions}회` };
+    return { productId, label: productId };
+  });
 
   return (
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-10 text-stone-900 sm:px-8 sm:py-14">
@@ -91,6 +98,18 @@ export default async function AdminPage() {
             <h1 className="mt-3 text-3xl font-bold">서비스 성장·매출 현황</h1>
             <div className="mt-5 border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
               성장·매출 지표를 불러오지 못했습니다. 아래 운영 상태는 계속 확인할 수 있습니다.
+            </div>
+          </section>
+        )}
+
+        {refundClosure ? (
+          <AdminRefundClosureOverview report={refundClosure} productLabels={productLabels} />
+        ) : (
+          <section className="border-b border-stone-200 py-10">
+            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">REFUNDS & ACCOUNT CLOSURES</p>
+            <h2 className="mt-3 text-2xl font-bold">환불·회원 탈퇴 현황</h2>
+            <div className="mt-5 border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              환불·회원 탈퇴 현황을 불러오지 못했습니다. 아래 운영 예외 조회는 계속 사용할 수 있습니다.
             </div>
           </section>
         )}

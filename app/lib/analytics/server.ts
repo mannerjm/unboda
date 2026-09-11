@@ -5,7 +5,9 @@ export type ServiceAnalyticsEventName =
   | "FREE_ANALYSIS_STARTED"
   | "FREE_ANALYSIS_COMPLETED"
   | "SIGNUP_COMPLETED"
-  | "FREE_ANALYSIS_REFRESH_COMPLETED";
+  | "FREE_ANALYSIS_REFRESH_COMPLETED"
+  | "ACCOUNT_CLOSURE_REQUESTED"
+  | "ACCOUNT_CLOSURE_CANCELED";
 
 export type ServiceAnalyticsActorKind = "guest" | "member";
 
@@ -138,4 +140,71 @@ export async function getAdminGrowthDashboard(days = 30): Promise<AdminGrowthDas
   }
 
   return data as AdminGrowthDashboard;
+}
+
+export type AdminRefundClosurePeriod = {
+  startDate: string;
+  endDate: string;
+  refundCompleted: number;
+  refundAmountKrw: number;
+  closureRequested: number;
+  closureCanceled: number;
+  closureCompleted: number;
+};
+
+export type AdminRecentRefund = {
+  orderId: string;
+  productId: string;
+  requestedAmountKrw: number;
+  status: string;
+  providerStatus: string | null;
+  requestedAt: string;
+  completedAt: string | null;
+  retryCount: number;
+  ownerReviewRequired: boolean;
+};
+
+export type AdminRecentClosure = {
+  accountUserId: string;
+  generation: number;
+  status: string;
+  requestedAt: string | null;
+  canceledAt: string | null;
+  finalizationStartedAt: string | null;
+  finalizedAt: string | null;
+  retryCount: number;
+  ownerReviewRequired: boolean;
+};
+
+export type AdminRefundClosureDashboard = {
+  generatedAt: string;
+  timezone: "Asia/Seoul";
+  periods: {
+    today: AdminRefundClosurePeriod;
+    week: AdminRefundClosurePeriod;
+    month: AdminRefundClosurePeriod;
+  };
+  totals: {
+    refundCompleted: number;
+    refundAmountKrw: number;
+    closureRequestedTracked: number;
+    closureCanceledTracked: number;
+    closureCompleted: number;
+    currentClosurePending: number;
+    closureOwnerReview: number;
+  };
+  recentRefunds: AdminRecentRefund[];
+  recentClosures: AdminRecentClosure[];
+};
+
+export async function getAdminRefundClosureDashboard(limit = 20): Promise<AdminRefundClosureDashboard> {
+  const { data, error } = await createAdminClient().rpc("get_admin_refund_closure_dashboard", {
+    p_limit: limit,
+  });
+
+  if (error || !data) {
+    throw new Error(`환불·회원 탈퇴 현황을 불러오지 못했습니다: ${error?.message ?? "unknown"}`);
+  }
+
+  return data as AdminRefundClosureDashboard;
 }

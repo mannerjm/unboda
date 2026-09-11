@@ -24,6 +24,9 @@ for (const route of ["app/terms/page.tsx", "app/privacy/page.tsx", "app/refund/p
 }
 assert(shell.includes("<h1") && shell.includes("aria-label=\"정책 문서\""), "shared legal surface has one H1 and labeled policy navigation");
 assert(shell.includes("focus:ring-2") && shell.includes("max-w-3xl"), "shared legal surface has visible focus and readable desktop width");
+assert(shell.includes("사업자 정보") && shell.includes("사업자등록번호") && shell.includes("201-28-96364"), "shared legal surface publishes the verified business registration number");
+assert(shell.includes("대표자") && shell.includes("반희") && shell.includes("충남 천안시 서북구 백석4길12 10층 1001-B52호"), "shared legal surface publishes the verified representative and business address");
+assert(!shell.includes("FACT-PENDING") && !shell.includes("[사업자") && !shell.includes("[대표자"), "shared legal surface contains no business identity placeholders");
 assert(terms.includes("만 14세 이상") && terms.includes("분석 대상 프로필에는 별도 연령 제한"), "Terms separates direct-user age from subject age");
 assert(terms.includes("회원가입 없이") && terms.includes("24시간") && terms.includes("생성 시점") && terms.includes("최대 7일"), "Terms distinguishes Guest 24-hour access from seven-day backend retention");
 assert(terms.includes("실질적으로 다르거나 결함") && terms.includes("권리를 배제하지 않습니다"), "Terms preserves contract-inconsistent supply rights");

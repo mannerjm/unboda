@@ -23,6 +23,15 @@ export default function LegalDocumentPage({ eyebrow, title, summary, children }:
         <div className="legal-document mt-8 space-y-8 text-[15px] leading-[1.75] text-stone-700 sm:mt-10 sm:space-y-10 sm:text-base sm:leading-8 [&_h2]:border-l-2 [&_h2]:border-stone-900 [&_h2]:pl-3 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:leading-7 [&_h2]:text-stone-950 sm:[&_h2]:pl-4 sm:[&_h2]:text-xl sm:[&_h2]:leading-8 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-stone-950 [&_li]:pl-0 [&_ol]:list-decimal [&_ol]:space-y-1.5 [&_ol]:pl-5 sm:[&_ol]:space-y-2 sm:[&_ol]:pl-6 [&_p]:max-w-2xl [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5 sm:[&_ul]:space-y-2 sm:[&_ul]:pl-6">
           {children}
         </div>
+        <section aria-labelledby="business-info-heading" className="mt-12 border-t border-stone-300 pt-8 sm:mt-16">
+          <h2 id="business-info-heading" className="text-lg font-bold text-stone-950">사업자 정보</h2>
+          <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm leading-6 text-stone-600 sm:grid-cols-[9rem_1fr]">
+            <dt className="font-semibold text-stone-800">상호</dt><dd>운보다</dd>
+            <dt className="font-semibold text-stone-800">대표자</dt><dd>반희</dd>
+            <dt className="font-semibold text-stone-800">사업자등록번호</dt><dd>201-28-96364</dd>
+            <dt className="font-semibold text-stone-800">사업장 소재지</dt><dd>충남 천안시 서북구 백석4길12 10층 1001-B52호</dd>
+          </dl>
+        </section>
         <nav aria-label="정책 문서" className="mt-12 border-t border-stone-300 pt-6 text-sm text-stone-600 sm:mt-16">
           <ul className="flex flex-wrap gap-x-5 gap-y-2">
             <li><Link className="underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-stone-900 focus:ring-offset-2" href="/terms">이용약관</Link></li>

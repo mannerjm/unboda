@@ -1,5 +1,6 @@
 
 import { NextResponse } from "next/server";
+import { recordServiceAnalyticsEvent } from "@/app/lib/analytics/server";
 import { validateAnalyzeInput } from "@/app/lib/validateAnalyzeInput";
 import { getAnalyzeErrorStatus } from "@/app/lib/getAnalyzeErrorStatus";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
@@ -118,6 +119,7 @@ if (productId === undefined) {
   }
 
   claimedFreeResult = claim.record;
+  await recordServiceAnalyticsEvent({ eventName: "FREE_ANALYSIS_STARTED", actorKind: "member" });
 }
 
 const responseData: AnalyzeSuccessResponse = await buildFreeAnalysisResponse({
@@ -139,6 +141,7 @@ if (claimedFreeResult) {
     record: claimedFreeResult,
     content: responseData,
   });
+  await recordServiceAnalyticsEvent({ eventName: "FREE_ANALYSIS_COMPLETED", actorKind: "member" });
 }
 
 const response = NextResponse.json(responseData);

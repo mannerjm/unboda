@@ -7,6 +7,7 @@ import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import { getProductPricing } from "@/app/lib/productPricing";
 import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
+import { formatTopicExpectedUnderstanding } from "@/app/lib/purchaseDecisionCopy";
 
 type PremiumProductDetailProps = {
   product: PremiumProductDefinition;
@@ -82,7 +83,7 @@ export default function PremiumProductDetail({
     : topicDecision?.whatItAnalyzes.slice(0, 4);
   const expectedUnderstanding = isPeriod
     ? periodDecision?.expectedUnderstanding
-    : topicDecision?.expectedUnderstanding.slice(0, 3);
+    : topicDecision?.expectedUnderstanding.slice(0, 3).map(formatTopicExpectedUnderstanding);
   const distinction = isPeriod
     ? periodDecision?.distinction
     : topicDecision?.distinction;

@@ -34,4 +34,5 @@ jobs:
           node --check src/server.mjs
           node --check src/niceClient.mjs
           node --check src/security.mjs
+          node --check src/verification.mjs
           node --check scripts/probe-nice-token.mjs

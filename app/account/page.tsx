@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { AccountLifecycleStatus, PaidEligibilityStatus } from "@/app/lib/accounts/server";
 import AppShell from "@/app/components/AppShell";
+import NiceAdultVerificationButton from "./NiceAdultVerificationButton";
 import type { ReactNode } from "react";
 
 const statusLabels: Record<AccountLifecycleStatus, string> = {
@@ -319,6 +320,11 @@ export default function AccountPage() {
             </div>
             <p className="mt-3 text-sm leading-6 text-stone-600">{eligibilityGuidance[account.paidEligibilityStatus]}</p>
             <p className="mt-2 text-xs leading-5 text-stone-500">분석 프로필의 생년월일과 계정 본인 인증은 별개입니다.</p>
+            <NiceAdultVerificationButton
+              accountStatus={account.status}
+              emailVerified={emailVerified}
+              eligibilityStatus={account.paidEligibilityStatus}
+            />
           </div>
 
           {/* 계정 상태 */}

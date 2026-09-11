@@ -1,6 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { base64UrlEncode, NiceProviderError, probeNiceAccessToken, requestNiceAccessToken } from "../src/niceClient.mjs";
+import {
+  base64UrlEncode,
+  NiceProviderError,
+  probeNiceAccessToken,
+  requestNiceAccessToken,
+  requestNiceAuthUrl,
+  requestNiceResult,
+} from "../src/niceClient.mjs";
 
 const clientId = "client-id-example";
 const clientSecret = "client-secret-example";
@@ -39,6 +46,77 @@ test("token request uses NICE basic base64url and returns secrets only to caller
   });
   assert.equal(result.accessToken, "access-token");
   assert.equal(result.ticket, "ticket-value");
+});
+
+test("auth URL request is restricted to mobile verification and GET callback", async () => {
+  let captured;
+  const result = await requestNiceAuthUrl({
+    accessToken: "access-token",
+    requestNo: "A1234567890123456789",
+    returnUrl: "https://unboda.kr/api/identity/nice/callback?state=state-value",
+    closeUrl: "https://unboda.kr/api/identity/nice/close?state=state-value",
+    svcTypes: ["M"],
+    fetchImpl: async (url, init) => {
+      captured = { url, init };
+      return {
+        ok: true,
+        status: 200,
+        async json() {
+          return {
+            result_code: "0000",
+            request_no: "A1234567890123456789",
+            auth_url: "https://auth.niceid.co.kr/ido/cert/request/example",
+            transaction_id: "transaction-id",
+          };
+        },
+      };
+    },
+  });
+
+  assert.equal(captured.url, "https://auth.niceid.co.kr/ido/intc/v1.0/auth/url");
+  assert.equal(captured.init.headers.authorization, "Bearer access-token");
+  const body = JSON.parse(captured.init.body);
+  assert.deepEqual(body.svc_types, ["M"]);
+  assert.equal(body.method_type, "GET");
+  assert.deepEqual(body.exp_mods, ["closeButtonOn"]);
+  assert.equal(result.transactionId, "transaction-id");
+});
+
+test("result request sends only NICE transaction identifiers", async () => {
+  let captured;
+  const result = await requestNiceResult({
+    accessToken: "access-token",
+    webTransactionId: "web-transaction-id",
+    transactionId: "transaction-id",
+    requestNo: "A1234567890123456789",
+    fetchImpl: async (url, init) => {
+      captured = { url, init };
+      return {
+        ok: true,
+        status: 200,
+        async json() {
+          return {
+            result_code: "0000",
+            enc_data: "encrypted-result",
+            integrity_value: "integrity-value",
+          };
+        },
+      };
+    },
+  });
+
+  assert.equal(captured.url, "https://auth.niceid.co.kr/ido/intc/v1.0/auth/result");
+  assert.equal(captured.init.headers.authorization, "Bearer access-token");
+  assert.deepEqual(JSON.parse(captured.init.body), {
+    web_transaction_id: "web-transaction-id",
+    transaction_id: "transaction-id",
+    request_no: "A1234567890123456789",
+  });
+  assert.deepEqual(result, {
+    resultCode: "0000",
+    encData: "encrypted-result",
+    integrityValue: "integrity-value",
+  });
 });
 
 test("probe output never exposes access token or ticket", async () => {

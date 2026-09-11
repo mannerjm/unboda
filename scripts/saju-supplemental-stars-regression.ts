@@ -5,6 +5,10 @@ import {
   enrichSupplementalPillarStars,
   getSupplementalPillarStars,
 } from "../app/lib/sajuSupplementalStars";
+import {
+  calculateSajuRelationStars,
+  getDayPillarVoidBranches,
+} from "../app/lib/sajuRelationStars";
 
 function stars(dayStem: string, targetBranch: string, pillarHanja = "", isDayPillar = false) {
   return getSupplementalPillarStars({
@@ -59,9 +63,33 @@ assert.equal(legacy.yearSpirit, "망신살 · 홍염살", "special stars must re
 assert.ok(legacy.daySpecialStars.includes("양인살"), "day-pillar special stars must remain independently classified");
 assert.equal(legacy.daySpirit, "년살 · 양인살", "12신살 and special stars must share neutral visual treatment without losing either value");
 
+assert.deepEqual(getDayPillarVoidBranches("甲子"), ["戌", "亥"], "甲子旬 공망 must be 戌亥");
+assert.deepEqual(getDayPillarVoidBranches("癸未"), ["申", "酉"], "癸未 in 甲戌旬 must use 申酉 공망");
+
+const relationFixture = calculateSajuRelationStars({
+  yearBranch: "子",
+  monthBranch: "未",
+  dayBranch: "酉",
+  hourBranch: "亥",
+  dayPillarHanja: "甲子",
+});
+assert.ok(
+  relationFixture.some((item) => item.name === "원진살" && item.positions.join("-") === "year-month"),
+  "子未 must be detected as 원진살",
+);
+assert.ok(
+  relationFixture.some((item) => item.name === "귀문관살" && item.positions.join("-") === "year-day"),
+  "子酉 must be detected as 귀문관살",
+);
+assert.ok(
+  relationFixture.some((item) => item.name === "공망" && item.positions.includes("hour") && item.basis === "戌·亥"),
+  "甲子旬 must mark an original-chart 亥 branch as 공망",
+);
+
 // Production screenshot contract: 1987-02-03 22:30 (solar, male) currently renders
 // 丙寅 / 辛丑 / 癸未 / 癸亥. The benefic rules must enrich that existing chart
-// without replacing its current 12신살 calculation.
+// without replacing its current 12신살 calculation. Relation V1 should additionally
+// detect the 寅未 귀문관살 and should not invent 공망 when 申酉 are absent.
 const sample = buildSajuResponse(
   getSaju("1987-02-03", "22:30", "양력", "평달", "남성", "2026-09-11"),
 );
@@ -78,5 +106,16 @@ assert.deepEqual(sample.yearSpecialStars, [], "sample year pillar should not inv
 assert.deepEqual(sample.monthSpecialStars, [], "sample month pillar should not invent a special star");
 assert.deepEqual(sample.daySpecialStars, [], "sample day pillar should not invent a special star");
 assert.deepEqual(sample.hourSpecialStars, [], "sample hour pillar should not invent a special star");
+assert.deepEqual(
+  sample.relationStars,
+  [{
+    name: "귀문관살",
+    kind: "pair",
+    positions: ["year", "day"],
+    branches: ["寅", "未"],
+    basis: "寅·未",
+  }],
+  "sample chart should expose only the 寅未 귀문관살 relation in V1",
+);
 
-console.log("saju supplemental star category regression passed ✓");
+console.log("saju supplemental and relation star regression passed ✓");

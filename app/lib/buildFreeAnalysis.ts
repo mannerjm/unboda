@@ -51,6 +51,7 @@ export type FreeAnalysisResponse = Pick<
   | "hourNoble"
   | "hourNobles"
   | "hourSpecialStars"
+  | "relationStars"
   | "elementAnalysis"
   | "strengthAnalysis"
   | "elementInterpretation"
@@ -121,6 +122,7 @@ export function buildFreeAnalysis(
     hourNobles: full.hourNobles,
     hourSpecialStars: full.hourSpecialStars,
 
+    relationStars: full.relationStars,
     elementAnalysis: full.elementAnalysis,
     strengthAnalysis: full.strengthAnalysis,
     elementInterpretation: full.elementInterpretation,

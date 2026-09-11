@@ -24,6 +24,14 @@ assert.ok(
   answerPipeline.includes('resolveModel("ai-consulting")'),
   "AI consulting must resolve through its dedicated model boundary",
 );
+const consultingResponseCalls = (answerPipeline.match(/responses\.create\(/g) ?? []).length;
+const consultingNoStoreSettings = (answerPipeline.match(/store:\s*false/g) ?? []).length;
+assert.equal(consultingResponseCalls, 1, "AI consulting must keep one bounded Responses API call");
+assert.equal(
+  consultingNoStoreSettings,
+  consultingResponseCalls,
+  "every AI consulting Responses API call must explicitly set store: false",
+);
 assert.ok(
   modelResolver.includes('callType === "ai-consulting"')
     && modelResolver.includes('return "gpt-5.6-terra";'),

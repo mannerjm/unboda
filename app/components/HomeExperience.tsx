@@ -73,7 +73,7 @@ function Benefits() {
   const items = [
     { icon: "person" as const, title: "무료 사주 분석", detail: "간편하게 나의 기본 흐름을 확인" },
     { icon: "bars" as const, title: "AI 심층 분석", detail: "직업, 재물, 관계 등 더 깊은 분석" },
-    { icon: "folder" as const, title: "프로필 관리", detail: "여러 분석 대상을 한곳에서 관리" },
+    { icon: "folder" as const, title: "기억하는 AI 상담", detail: "이전 상담과 저장한 기억을 이어서 상담" },
     { icon: "book" as const, title: "안전한 데이터", detail: "분석 데이터를 안전하게 관리" },
   ];
 
@@ -150,9 +150,9 @@ function NewHome({ state, copy }: { state: LandingState; copy: LandingCopy }) {
         <Header returning={false} />
         <section className="grid min-h-[470px] items-center gap-2 py-0 lg:grid-cols-[0.84fr_1.16fr] lg:gap-0 xl:gap-1">
           <div className="relative z-10 lg:pl-7">
-            <p className="inline-flex rounded-full border border-[#dfcda9] bg-white/45 px-4 py-2 text-xs font-bold tracking-[0.18em] text-[#a47735]">AI 명리 분석 플랫폼</p>
-            <h1 className="mt-5 max-w-[28rem] font-serif text-[2.65rem] font-semibold leading-[1.12] tracking-[-0.045em] text-[#191817] sm:text-[3.35rem]">내 사주의 <span className="text-[#b8893c]">흐름</span>을<br />정확하고 깊이 있게</h1>
-            <p className="mt-5 max-w-[25rem] text-[14px] leading-7 text-[#6f665a] sm:text-[15px]">전통 명리의 해석과 AI 분석을 바탕으로<br className="hidden sm:block" /> 삶의 흐름과 필요한 분석을 함께 살펴봅니다.</p>
+            <p className="inline-flex rounded-full border border-[#dfcda9] bg-white/45 px-4 py-2 text-xs font-bold tracking-[0.18em] text-[#a47735]">나를 기억하는 AI 명리 플랫폼</p>
+            <h1 className="mt-5 max-w-[31rem] font-serif text-[2.65rem] font-semibold leading-[1.12] tracking-[-0.045em] text-[#191817] sm:text-[3.35rem]">내 사주와 이야기를 <span className="text-[#b8893c]">기억하는</span><br />나만의 AI 운세</h1>
+            <p className="mt-5 max-w-[31rem] text-[14px] leading-7 text-[#6f665a] sm:text-[15px]">한 번 보고 끝나는 운세가 아닙니다. 내 사주 분석과 이전 상담,<br className="hidden sm:block" /> 내가 저장한 중요한 이야기를 이어서 다음 상담에도 반영합니다.</p>
             <div className="mt-7 flex max-w-[17.5rem] flex-col gap-2.5">
               <Link href={copy.primaryHref} className="inline-flex h-11 items-center justify-center gap-3 rounded-xl bg-[#b8893c] px-5 text-sm font-bold text-white shadow-[0_10px_22px_rgba(159,113,42,0.17)] transition hover:bg-[#9d722d]">무료 사주 분석 시작하기<Icon name="arrow" /></Link>
               <Link href={copy.secondaryHref} className="inline-flex h-11 items-center justify-center rounded-xl border border-[#dfcfb5] bg-white/75 px-5 text-sm font-bold text-[#51483c] transition hover:bg-white">{copy.secondary}</Link>

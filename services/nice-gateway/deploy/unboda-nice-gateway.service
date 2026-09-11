@@ -1,0 +1,36 @@
+[Unit]
+Description=Unboda NICE identity gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nicegateway
+Group=nicegateway
+WorkingDirectory=/opt/unboda/services/nice-gateway
+EnvironmentFile=/etc/unboda-nice-gateway.env
+Environment=NICE_GATEWAY_HOST=127.0.0.1
+Environment=NICE_GATEWAY_PORT=8787
+ExecStart=/usr/bin/node src/server.mjs
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=10
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

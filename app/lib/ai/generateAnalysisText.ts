@@ -183,6 +183,7 @@ export async function generateAnalysisText(
           {
             model,
             input: prompt,
+            store: false,
             max_output_tokens: maxOutputTokens,
             reasoning: {
               effort: "low",
@@ -325,6 +326,7 @@ export async function generatePaidAnalysisTextWithUsage(
       {
         model,
         input: prompt,
+        store: false,
         max_output_tokens: maxOutputTokens,
         reasoning: { effort: "low" },
       },

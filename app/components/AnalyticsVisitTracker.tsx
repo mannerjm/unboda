@@ -16,9 +16,17 @@ function getOrCreateVisitorId(): string | null {
   }
 }
 
+function isOperatorNavigation(): boolean {
+  if (window.location.pathname.startsWith("/admin")) return true;
+  if (window.location.pathname !== "/auth/login") return false;
+
+  const returnTo = new URLSearchParams(window.location.search).get("returnTo");
+  return returnTo === "/admin" || returnTo?.startsWith("/admin/") === true;
+}
+
 export default function AnalyticsVisitTracker() {
   useEffect(() => {
-    if (window.location.pathname.startsWith("/admin")) return;
+    if (isOperatorNavigation()) return;
     const visitorId = getOrCreateVisitorId();
     if (!visitorId) return;
 

@@ -34,7 +34,13 @@ assert(migration.includes("revoke all on function public.get_admin_growth_dashbo
 assert(visitRoute.includes("UUID_PATTERN") && visitRoute.includes("recordDailyVisitor(visitorId)"), "public visit endpoint must only accept a validated random visitor id");
 assert(!visitRoute.includes("eventName") && !visitRoute.includes("actorKind"), "public visit endpoint must not accept arbitrary analytics events");
 assert(tracker.includes("localStorage") && tracker.includes("crypto.randomUUID()"), "visitor identity must be first-party random browser state");
-assert(tracker.includes('startsWith("/admin")'), "operator visits must not inflate customer visitor counts");
+assert(tracker.includes('startsWith("/admin")'), "operator admin pages must not inflate customer visitor counts");
+assert(
+  tracker.includes('window.location.pathname !== "/auth/login"')
+    && tracker.includes('returnTo === "/admin"')
+    && tracker.includes('returnTo?.startsWith("/admin/")'),
+  "operator login redirects must not inflate customer visitor counts",
+);
 assert(layout.includes("<AnalyticsVisitTracker />"), "visitor tracker must be mounted globally");
 
 assert(migration.includes("from public.orders") && migration.includes("status = 'paid'") && migration.includes("paid_at is not null"), "revenue must come from actually paid orders");

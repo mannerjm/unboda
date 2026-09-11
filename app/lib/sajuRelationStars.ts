@@ -23,7 +23,8 @@ const stemOrder = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬"
 // 운보다 관계형 신살 V1 정책:
 // - 원진살: 子未·丑午·寅酉·卯申·辰亥·巳戌
 // - 귀문관살: 子酉·丑午·寅未·卯申·辰亥·巳戌
-// - 공망: 일주가 속한 旬의 두 공망 지지를 원국 네 지지에서 찾는다.
+// - 공망: 일주가 속한 旬의 두 공망 지지를 항상 계산하고,
+//   원국 네 지지에서 실제 해당 위치가 있으면 함께 표시한다.
 // 관계형 신살은 단일 기둥 배지에 섞지 않고 별도 영역으로 노출한다.
 const wonjinPairs = new Set(["子未", "丑午", "寅酉", "卯申", "辰亥", "巳戌"]);
 const gwimunPairs = new Set(["子酉", "丑午", "寅未", "卯申", "辰亥", "巳戌"]);
@@ -86,15 +87,13 @@ export function calculateSajuRelationStars(value: RelationCarrier): SajuRelation
   const voidBranches = getDayPillarVoidBranches(value.dayPillarHanja);
   if (voidBranches.length === 2) {
     const matchedPillars = pillars.filter((pillar) => voidBranches.includes(pillar.branch));
-    if (matchedPillars.length > 0) {
-      results.push({
-        name: "공망",
-        kind: "void",
-        positions: matchedPillars.map((pillar) => pillar.position),
-        branches: matchedPillars.map((pillar) => pillar.branch),
-        basis: voidBranches.join("·"),
-      });
-    }
+    results.push({
+      name: "공망",
+      kind: "void",
+      positions: matchedPillars.map((pillar) => pillar.position),
+      branches: matchedPillars.map((pillar) => pillar.branch),
+      basis: voidBranches.join("·"),
+    });
   }
 
   return results;

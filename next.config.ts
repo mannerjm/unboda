@@ -9,6 +9,10 @@ const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "off" },
 ];
 
+const apiNoStoreHeaders = [
+  { key: "Cache-Control", value: "private, no-store, max-age=0" },
+];
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   async headers() {
@@ -16,6 +20,10 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      {
+        source: "/api/:path*",
+        headers: apiNoStoreHeaders,
       },
     ];
   },

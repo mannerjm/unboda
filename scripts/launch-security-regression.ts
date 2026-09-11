@@ -57,6 +57,8 @@ for (const required of [
   'key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()"',
   'key: "X-DNS-Prefetch-Control", value: "off"',
   'source: "/:path*"',
+  'source: "/api/:path*"',
+  'key: "Cache-Control", value: "private, no-store, max-age=0"',
 ]) {
   assert.ok(nextConfig.includes(required), `missing baseline browser hardening: ${required}`);
 }

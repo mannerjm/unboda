@@ -45,7 +45,13 @@ assert(migration.includes("gross_revenue_krw") && migration.includes("refund_amo
 
 assert(adminPage.indexOf("await requireOperator()") < adminPage.indexOf("getAdminGrowthDashboard(30)"), "growth metrics must remain behind operator authorization");
 assert(dashboard.includes("오늘 방문자") && dashboard.includes("오늘 무료분석 완료") && dashboard.includes("오늘 신규 회원가입") && dashboard.includes("오늘 성인인증 완료") && dashboard.includes("오늘 구매 고객"), "admin must expose the core daily funnel");
-assert(dashboard.includes("이번 달 순매출") && dashboard.includes("누적 순매출") && dashboard.includes("최근 7일") && dashboard.includes("최근 30일"), "admin must expose requested revenue and trend horizons");
+assert(
+  dashboard.includes("이번 달 순매출")
+    && dashboard.includes("누적 순매출")
+    && dashboard.includes("[7, 30]")
+    && dashboard.includes("최근 {days}일"),
+  "admin must expose requested revenue and 7/30-day trend horizons",
+);
 assert(dashboard.includes("코호트 전환율이 아니라 당일 퍼널"), "same-day ratios must not be mislabeled as cohort conversion");
 
 assert(signup.includes('eventName: "SIGNUP_COMPLETED"') && signup.includes("createdNewSignup && policyComplete"), "signup metric must record only completed new signups");

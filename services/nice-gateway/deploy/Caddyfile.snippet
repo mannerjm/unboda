@@ -6,11 +6,15 @@ nice-gateway.unboda.kr {
 		-Server
 	}
 
-	@health path /health
-	respond @health "ok" 200
+	handle /health {
+		respond "ok" 200
+	}
 
-	@niceApi path /v1/nice/*
-	reverse_proxy @niceApi 127.0.0.1:8787
+	handle /v1/nice/* {
+		reverse_proxy 127.0.0.1:8787
+	}
 
-	respond "Not Found" 404
+	handle {
+		respond "Not Found" 404
+	}
 }

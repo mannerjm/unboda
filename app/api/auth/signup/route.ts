@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getSafeReturnTo } from "@/app/lib/auth";
+import { recordServiceAnalyticsEvent } from "@/app/lib/analytics/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { createClient } from "@/app/lib/supabase/server";
 import {
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
   try {
     let userId = currentUser?.id;
     let emailVerified = false;
+    let createdNewSignup = false;
 
     if (userId) {
       const supabase = await createClient();
@@ -105,6 +107,7 @@ export async function POST(request: NextRequest) {
 
       userId = signup.user.id;
       emailVerified = Boolean(signup.user.email_confirmed_at);
+      createdNewSignup = true;
     }
 
     if (currentUser) {
@@ -116,7 +119,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ policyComplete: await isSignupPolicyComplete(userId), emailVerified, returnTo: safeReturnTo });
+    const policyComplete = await isSignupPolicyComplete(userId);
+    if (createdNewSignup && policyComplete) {
+      await recordServiceAnalyticsEvent({ eventName: "SIGNUP_COMPLETED" });
+    }
+
+    return NextResponse.json({ policyComplete, emailVerified, returnTo: safeReturnTo });
   } catch (error) {
     if (error instanceof SignupPolicyAcceptanceError) {
       return NextResponse.json({ code: "SIGNUP_POLICY_INCOMPLETE", error: "가입 정책 확인을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요." }, { status: 503 });

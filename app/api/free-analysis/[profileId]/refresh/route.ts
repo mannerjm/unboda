@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recordServiceAnalyticsEvent } from "@/app/lib/analytics/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import {
@@ -30,6 +31,7 @@ export async function POST(_request: Request, context: { params: Promise<{ profi
         evaluationDate: evaluationContext.evaluationDate,
       });
       await completeFreeAnalysisResult({ record: claim.record, content: analysis });
+      await recordServiceAnalyticsEvent({ eventName: "FREE_ANALYSIS_REFRESH_COMPLETED", actorKind: "member" });
       return NextResponse.json({ status: "current", analysis, refreshAvailable: false });
     } catch (error) {
       try { await failFreeAnalysisResult({ record: claim.record, errorCode: "period-refresh-failed" }); } catch (persistError) { console.error("[free-analysis-refresh] failure state update failed", persistError); }

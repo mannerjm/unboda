@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import AnalyticsVisitTracker from "@/app/components/AnalyticsVisitTracker";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,7 +28,10 @@ export default function RootLayout({
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#f7f3ea] text-stone-900">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#f7f3ea] text-stone-900">
+        <AnalyticsVisitTracker />
+        {children}
+      </body>
     </html>
   );
 }

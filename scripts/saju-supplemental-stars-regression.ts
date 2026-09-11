@@ -86,10 +86,24 @@ assert.ok(
   "甲子旬 must mark an original-chart 亥 branch as 공망",
 );
 
+const noMatchedVoidFixture = calculateSajuRelationStars({
+  yearBranch: "寅",
+  monthBranch: "丑",
+  dayBranch: "未",
+  hourBranch: "亥",
+  dayPillarHanja: "癸未",
+});
+const noMatchedVoid = noMatchedVoidFixture.find((item) => item.kind === "void");
+assert.ok(noMatchedVoid, "valid day pillars must expose day-pillar void information even without an original-chart match");
+assert.equal(noMatchedVoid?.basis, "申·酉", "癸未 day-pillar void information must expose 申酉");
+assert.deepEqual(noMatchedVoid?.positions, [], "unmatched day-pillar void information must report no original-chart position");
+assert.deepEqual(noMatchedVoid?.branches, [], "unmatched day-pillar void information must report no matched branch");
+
 // Production screenshot contract: 1987-02-03 22:30 (solar, male) currently renders
 // 丙寅 / 辛丑 / 癸未 / 癸亥. The benefic rules must enrich that existing chart
 // without replacing its current 12신살 calculation. Relation V1 should additionally
-// detect the 寅未 귀문관살 and should not invent 공망 when 申酉 are absent.
+// detect the 寅未 귀문관살 and always expose the 癸未 day-pillar void basis 申酉,
+// while reporting that neither void branch occurs in the original chart.
 const sample = buildSajuResponse(
   getSaju("1987-02-03", "22:30", "양력", "평달", "남성", "2026-09-11"),
 );
@@ -108,14 +122,23 @@ assert.deepEqual(sample.daySpecialStars, [], "sample day pillar should not inven
 assert.deepEqual(sample.hourSpecialStars, [], "sample hour pillar should not invent a special star");
 assert.deepEqual(
   sample.relationStars,
-  [{
-    name: "귀문관살",
-    kind: "pair",
-    positions: ["year", "day"],
-    branches: ["寅", "未"],
-    basis: "寅·未",
-  }],
-  "sample chart should expose only the 寅未 귀문관살 relation in V1",
+  [
+    {
+      name: "귀문관살",
+      kind: "pair",
+      positions: ["year", "day"],
+      branches: ["寅", "未"],
+      basis: "寅·未",
+    },
+    {
+      name: "공망",
+      kind: "void",
+      positions: [],
+      branches: [],
+      basis: "申·酉",
+    },
+  ],
+  "sample chart should expose 寅未 귀문관살 plus day-pillar void basis 申酉 with no original-chart match",
 );
 
 console.log("saju supplemental and relation star regression passed ✓");

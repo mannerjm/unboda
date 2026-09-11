@@ -45,5 +45,9 @@ assert(generateAnalysisText.includes("return 3200;"), "default max output tokens
 assert(!generateAnalysisText.includes('callType === "main-analysis" || callType === "paid-analysis-detail"'), "main-analysis and paid-analysis-detail token budgets must be resolved separately");
 assert(generateAnalysisText.includes("? 120000"), "main-analysis timeout must remain 120000ms");
 assert(generateAnalysisText.includes('effort: "low"'), "reasoning.effort must remain low for this step");
+assert(
+  (generateAnalysisText.match(/store:\s*false/g) ?? []).length === 2,
+  "all core analysis Responses API calls disable stored response application state",
+);
 
 console.log("ai-call-contract-regression passed ✓");

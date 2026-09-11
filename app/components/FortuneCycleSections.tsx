@@ -113,41 +113,41 @@ function IndicatorCard({
 }) {
   const hanja = toHanja(ganji);
   const indicators = getFortuneCycleIndicators({ dayStem, dayBranch, ganji });
-  const subdued = selected ? "text-white/65" : "text-stone-500";
-  const detail = selected ? "text-white/75" : "text-stone-600";
+  const subdued = selected ? "text-white/70" : "text-stone-500";
+  const detail = selected ? "text-white/80" : "text-stone-600";
 
   return (
     <button
       type="button"
       disabled={!onClick}
       onClick={onClick}
-      className={`flex min-w-0 flex-col items-center rounded-2xl px-2 py-3 text-center transition ${
+      className={`flex min-w-0 flex-col items-center rounded-2xl px-3 py-4 text-center transition ${
         selected ? "bg-stone-900 text-white" : "bg-stone-50 text-stone-900"
       } ${onClick ? "cursor-pointer" : "cursor-default"}`}
     >
-      <span className={`text-xs font-semibold ${selected ? "text-white/75" : "text-stone-600"}`}>
+      <span className={`text-sm font-semibold ${selected ? "text-white/80" : "text-stone-700"}`}>
         {label}
       </span>
 
-      <span className={`mt-2 min-h-4 text-[10px] font-medium ${subdued}`}>
+      <span className={`mt-2 min-h-5 text-xs font-semibold ${subdued}`}>
         {indicators.stemTenGod || " "}
       </span>
 
-      <div className="mt-1 flex flex-col items-center text-2xl font-bold leading-none">
+      <div className="mt-1 flex flex-col items-center text-3xl font-bold leading-none">
         <span className={cycleElementClass(hanja[0] ?? "", selected)}>{hanja[0]}</span>
         <span className={`mt-1 ${cycleElementClass(hanja[1] ?? "", selected)}`}>{hanja[1]}</span>
       </div>
 
-      <span className={`mt-2 min-h-4 text-[10px] font-medium ${subdued}`}>
+      <span className={`mt-2 min-h-5 text-xs font-semibold ${subdued}`}>
         {indicators.branchTenGod || " "}
       </span>
 
-      <div className={`mt-1 flex min-h-9 flex-col items-center justify-start text-[10px] leading-4 ${detail}`}>
+      <div className={`mt-1 flex min-h-11 flex-col items-center justify-start text-xs font-medium leading-5 ${detail}`}>
         <span>{indicators.twelveStage || " "}</span>
         <span>{indicators.twelveSpirit || " "}</span>
       </div>
 
-      <span className={`mt-2 text-xs ${subdued}`}>{footer}</span>
+      <span className={`mt-2 text-[13px] font-medium ${subdued}`}>{footer}</span>
     </button>
   );
 }
@@ -186,7 +186,7 @@ export default function FortuneCycleSections({
           </div>
 
           <div className="mt-5 overflow-x-auto pb-1">
-            <div className="grid min-w-[900px] grid-cols-10 gap-1.5">
+            <div className="grid min-w-[980px] grid-cols-10 gap-2">
               {[...daeunAnalysis.daeuns].reverse().map((daeun) => (
                 <IndicatorCard
                   key={daeun.order}
@@ -202,7 +202,7 @@ export default function FortuneCycleSections({
             </div>
           </div>
 
-          <p className="mt-3 text-[11px] leading-5 text-stone-500">
+          <p className="mt-3 text-xs leading-5 text-stone-500">
             각 대운은 위에서부터 천간 십성, 간지, 지지 십성, 십이운성, 십이신살 순으로 표시합니다.
           </p>
         </div>
@@ -214,7 +214,7 @@ export default function FortuneCycleSections({
           <h2 className="mt-1 text-2xl font-bold">세운 분석</h2>
 
           <div className="mt-5 overflow-x-auto pb-1">
-            <div className="grid min-w-[900px] grid-cols-10 gap-1.5">
+            <div className="grid min-w-[980px] grid-cols-10 gap-2">
               {[...displayedSeun.items].reverse().map((item) => (
                 <IndicatorCard
                   key={item.year}
@@ -228,7 +228,7 @@ export default function FortuneCycleSections({
             </div>
           </div>
 
-          <p className="mt-3 text-[11px] leading-5 text-stone-500">
+          <p className="mt-3 text-xs leading-5 text-stone-500">
             세운도 일간·일지 기준으로 천간/지지 십성, 십이운성, 십이신살을 함께 표시합니다.
           </p>
         </div>

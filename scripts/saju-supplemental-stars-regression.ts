@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { getSaju } from "../app/lib/manse";
 import { buildSajuResponse } from "../app/lib/buildSajuResponse";
 import {
+  enrichSupplementalPillarStars,
   getSupplementalPillarStars,
 } from "../app/lib/sajuSupplementalStars";
 
@@ -15,22 +16,51 @@ function stars(dayStem: string, targetBranch: string, pillarHanja = "", isDayPil
   });
 }
 
-assert.ok(stars("甲", "巳").includes("문창귀인"), "甲 day stem should find 문창귀인 at 巳");
-assert.ok(stars("甲", "亥").includes("문곡귀인"), "甲 day stem should find 문곡귀인 at 亥");
-assert.ok(stars("甲", "亥").includes("학당귀인"), "甲 day stem should find 학당귀인 at 亥");
-assert.ok(stars("癸", "申").includes("태극귀인"), "癸 day stem should find 태극귀인 at 申");
-assert.ok(stars("癸", "亥").includes("협록"), "癸 day stem should find 협록 at 亥");
-assert.ok(stars("癸", "丑").includes("암록"), "癸 day stem should find 암록 at 丑");
-assert.ok(stars("癸", "寅").includes("금여"), "癸 day stem should find 금여 at 寅");
-assert.ok(stars("癸", "申").includes("홍염살"), "癸 day stem should find 홍염살 at 申");
-assert.ok(stars("甲", "卯").includes("양인살"), "甲 day stem should find 양인살 at 卯");
-assert.ok(!stars("癸", "丑").includes("양인살"), "V1 should not assign 양인살 to yin day stems");
-assert.ok(stars("甲", "辰", "甲辰").includes("백호대살"), "甲辰 pillar should find 백호대살");
-assert.ok(stars("庚", "辰", "庚辰", true).includes("괴강살"), "庚辰 day pillar should find 괴강살");
-assert.ok(!stars("庚", "辰", "庚辰", false).includes("괴강살"), "V1 괴강살 should remain a day-pillar rule");
+assert.ok(stars("甲", "巳").beneficStars.includes("문창귀인"), "甲 day stem should find 문창귀인 at 巳");
+assert.ok(stars("甲", "亥").beneficStars.includes("문곡귀인"), "甲 day stem should find 문곡귀인 at 亥");
+assert.ok(stars("甲", "亥").beneficStars.includes("학당귀인"), "甲 day stem should find 학당귀인 at 亥");
+assert.ok(stars("癸", "申").beneficStars.includes("태극귀인"), "癸 day stem should find 태극귀인 at 申");
+assert.ok(stars("癸", "亥").beneficStars.includes("협록"), "癸 day stem should find 협록 at 亥");
+assert.ok(stars("癸", "丑").beneficStars.includes("암록"), "癸 day stem should find 암록 at 丑");
+assert.ok(stars("癸", "寅").beneficStars.includes("금여"), "癸 day stem should find 금여 at 寅");
+assert.ok(stars("癸", "申").specialStars.includes("홍염살"), "癸 day stem should classify 홍염살 as a special star");
+assert.ok(stars("甲", "卯").specialStars.includes("양인살"), "甲 day stem should classify 양인살 as a special star");
+assert.ok(!stars("癸", "丑").specialStars.includes("양인살"), "V2 should not assign 양인살 to yin day stems");
+assert.ok(stars("甲", "辰", "甲辰").specialStars.includes("백호대살"), "甲辰 pillar should classify 백호대살 as a special star");
+assert.ok(stars("庚", "辰", "庚辰", true).specialStars.includes("괴강살"), "庚辰 day pillar should classify 괴강살 as a special star");
+assert.ok(!stars("庚", "辰", "庚辰", false).specialStars.includes("괴강살"), "V2 괴강살 should remain a day-pillar rule");
+
+const legacy = enrichSupplementalPillarStars({
+  dayStem: "甲",
+  yearStem: "甲",
+  yearBranch: "午",
+  yearPillarHanja: "甲午",
+  yearSpirit: "망신살",
+  yearNobles: ["천을귀인", "홍염살"],
+  monthStem: "乙",
+  monthBranch: "丑",
+  monthPillarHanja: "乙丑",
+  monthSpirit: "반안살",
+  monthNobles: [],
+  dayBranch: "卯",
+  dayPillarHanja: "甲卯",
+  daySpirit: "년살",
+  dayNobles: [],
+  hourStem: "丙",
+  hourBranch: "辰",
+  hourPillarHanja: "丙辰",
+  hourSpirit: "월살",
+  hourNobles: [],
+});
+
+assert.ok(!legacy.yearNobles.includes("홍염살"), "legacy special stars must be removed from the gold benefic list");
+assert.ok(legacy.yearSpecialStars.includes("홍염살"), "legacy 홍염살 must move into the special-star category");
+assert.equal(legacy.yearSpirit, "망신살 · 홍염살", "special stars must render with the neutral spirit badge");
+assert.ok(legacy.daySpecialStars.includes("양인살"), "day-pillar special stars must remain independently classified");
+assert.equal(legacy.daySpirit, "년살 · 양인살", "12신살 and special stars must share neutral visual treatment without losing either value");
 
 // Production screenshot contract: 1987-02-03 22:30 (solar, male) currently renders
-// 丙寅 / 辛丑 / 癸未 / 癸亥. The supplemental rules must enrich that existing chart
+// 丙寅 / 辛丑 / 癸未 / 癸亥. The benefic rules must enrich that existing chart
 // without replacing its current 12신살 calculation.
 const sample = buildSajuResponse(
   getSaju("1987-02-03", "22:30", "양력", "평달", "남성", "2026-09-11"),
@@ -40,9 +70,13 @@ assert.equal(sample.yearPillarHanja, "丙寅", "sample year pillar must stay sta
 assert.equal(sample.monthPillarHanja, "辛丑", "sample month pillar must stay stable");
 assert.equal(sample.dayPillarHanja, "癸未", "sample day pillar must stay stable");
 assert.equal(sample.hourPillarHanja, "癸亥", "sample hour pillar must stay stable");
-assert.equal(sample.daySpirit, "화개살", "existing 12신살 result must remain intact");
-assert.ok(sample.yearNobles.includes("금여"), "sample year pillar should add 금여");
-assert.ok(sample.monthNobles.includes("협록") && sample.monthNobles.includes("암록"), "sample month pillar should add 협록 and 암록");
-assert.ok(sample.hourNobles.includes("협록"), "sample hour pillar should add 협록");
+assert.equal(sample.daySpirit, "화개살", "existing 12신살 result must remain intact when no special star applies");
+assert.ok(sample.yearNobles.includes("금여"), "sample year pillar should add 금여 as a benefic star");
+assert.ok(sample.monthNobles.includes("협록") && sample.monthNobles.includes("암록"), "sample month pillar should add 협록 and 암록 as benefic stars");
+assert.ok(sample.hourNobles.includes("협록"), "sample hour pillar should add 협록 as a benefic star");
+assert.deepEqual(sample.yearSpecialStars, [], "sample year pillar should not invent a special star");
+assert.deepEqual(sample.monthSpecialStars, [], "sample month pillar should not invent a special star");
+assert.deepEqual(sample.daySpecialStars, [], "sample day pillar should not invent a special star");
+assert.deepEqual(sample.hourSpecialStars, [], "sample hour pillar should not invent a special star");
 
-console.log("saju supplemental stars regression passed ✓");
+console.log("saju supplemental star category regression passed ✓");

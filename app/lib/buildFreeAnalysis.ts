@@ -20,36 +20,37 @@ export type FreeAnalysisResponse = Pick<
   | "hourStem"
   | "hourBranch"
   | "yearHiddenStems"
-| "yearTenGod"
-| "yearBranchTenGod"
-| "yearStage"
-| "yearSpirit"
-| "yearNoble"
-| "yearNobles"
-
-| "monthHiddenStems"
-| "monthTenGod"
-| "monthBranchTenGod"
-| "monthStage"
-| "monthSpirit"
-| "monthNoble"
-| "monthNobles"
-
-| "dayHiddenStems"
-| "dayTenGod"
-| "dayBranchTenGod"
-| "dayStage"
-| "daySpirit"
-| "dayNoble"
-| "dayNobles"
-
-| "hourHiddenStems"
-| "hourTenGod"
-| "hourBranchTenGod"
-| "hourStage"
-| "hourSpirit"
-| "hourNoble"
-| "hourNobles"
+  | "yearTenGod"
+  | "yearBranchTenGod"
+  | "yearStage"
+  | "yearSpirit"
+  | "yearNoble"
+  | "yearNobles"
+  | "yearSpecialStars"
+  | "monthHiddenStems"
+  | "monthTenGod"
+  | "monthBranchTenGod"
+  | "monthStage"
+  | "monthSpirit"
+  | "monthNoble"
+  | "monthNobles"
+  | "monthSpecialStars"
+  | "dayHiddenStems"
+  | "dayTenGod"
+  | "dayBranchTenGod"
+  | "dayStage"
+  | "daySpirit"
+  | "dayNoble"
+  | "dayNobles"
+  | "daySpecialStars"
+  | "hourHiddenStems"
+  | "hourTenGod"
+  | "hourBranchTenGod"
+  | "hourStage"
+  | "hourSpirit"
+  | "hourNoble"
+  | "hourNobles"
+  | "hourSpecialStars"
   | "elementAnalysis"
   | "strengthAnalysis"
   | "elementInterpretation"
@@ -59,7 +60,7 @@ export type FreeAnalysisResponse = Pick<
   | "currentDaeun"
   | "seunAnalysis"
   | "currentSeun"
- | "fortuneFlowAnalysis"
+  | "fortuneFlowAnalysis"
 >;
 
 export function buildFreeAnalysis(
@@ -83,37 +84,43 @@ export function buildFreeAnalysis(
     dayBranch: full.dayBranch,
     hourStem: full.hourStem,
     hourBranch: full.hourBranch,
-yearHiddenStems: full.yearHiddenStems,
-yearTenGod: full.yearTenGod,
-yearBranchTenGod: full.yearBranchTenGod,
-yearStage: full.yearStage,
-yearSpirit: full.yearSpirit,
-yearNoble: full.yearNoble,
-yearNobles: full.yearNobles,
 
-monthHiddenStems: full.monthHiddenStems,
-monthTenGod: full.monthTenGod,
-monthBranchTenGod: full.monthBranchTenGod,
-monthStage: full.monthStage,
-monthSpirit: full.monthSpirit,
-monthNoble: full.monthNoble,
-monthNobles: full.monthNobles,
+    yearHiddenStems: full.yearHiddenStems,
+    yearTenGod: full.yearTenGod,
+    yearBranchTenGod: full.yearBranchTenGod,
+    yearStage: full.yearStage,
+    yearSpirit: full.yearSpirit,
+    yearNoble: full.yearNoble,
+    yearNobles: full.yearNobles,
+    yearSpecialStars: full.yearSpecialStars,
 
-dayHiddenStems: full.dayHiddenStems,
-dayTenGod: full.dayTenGod,
-dayBranchTenGod: full.dayBranchTenGod,
-dayStage: full.dayStage,
-daySpirit: full.daySpirit,
-dayNoble: full.dayNoble,
-dayNobles: full.dayNobles,
+    monthHiddenStems: full.monthHiddenStems,
+    monthTenGod: full.monthTenGod,
+    monthBranchTenGod: full.monthBranchTenGod,
+    monthStage: full.monthStage,
+    monthSpirit: full.monthSpirit,
+    monthNoble: full.monthNoble,
+    monthNobles: full.monthNobles,
+    monthSpecialStars: full.monthSpecialStars,
 
-hourHiddenStems: full.hourHiddenStems,
-hourTenGod: full.hourTenGod,
-hourBranchTenGod: full.hourBranchTenGod,
-hourStage: full.hourStage,
-hourSpirit: full.hourSpirit,
-hourNoble: full.hourNoble,
-hourNobles: full.hourNobles,
+    dayHiddenStems: full.dayHiddenStems,
+    dayTenGod: full.dayTenGod,
+    dayBranchTenGod: full.dayBranchTenGod,
+    dayStage: full.dayStage,
+    daySpirit: full.daySpirit,
+    dayNoble: full.dayNoble,
+    dayNobles: full.dayNobles,
+    daySpecialStars: full.daySpecialStars,
+
+    hourHiddenStems: full.hourHiddenStems,
+    hourTenGod: full.hourTenGod,
+    hourBranchTenGod: full.hourBranchTenGod,
+    hourStage: full.hourStage,
+    hourSpirit: full.hourSpirit,
+    hourNoble: full.hourNoble,
+    hourNobles: full.hourNobles,
+    hourSpecialStars: full.hourSpecialStars,
+
     elementAnalysis: full.elementAnalysis,
     strengthAnalysis: full.strengthAnalysis,
     elementInterpretation: full.elementInterpretation,

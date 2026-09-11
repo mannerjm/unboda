@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-price-tier-audit-regression.ts && tsx scripts/paid-analysis-v4-actual-output-tier-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
+    "prebuild": "tsx scripts/admin-growth-analytics-regression.ts && tsx scripts/admin-refund-closure-regression.ts && npm run test:launch-security && npm run test:profile-scope && tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-price-tier-audit-regression.ts && tsx scripts/paid-analysis-v4-actual-output-tier-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { AccountLifecycleStatus, PaidEligibilityStatus } from "@/app/lib/accounts/server";
 
 type Props = {
@@ -28,13 +28,24 @@ export default function NiceAdultVerificationButton({
 }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<VerificationMessage>(null);
+  const popupCloseWatcherRef = useRef<number | null>(null);
+  const callbackReceivedRef = useRef(false);
 
   useEffect(() => {
+    function stopPopupCloseWatcher() {
+      if (popupCloseWatcherRef.current !== null) {
+        window.clearInterval(popupCloseWatcherRef.current);
+        popupCloseWatcherRef.current = null;
+      }
+    }
+
     function onMessage(event: MessageEvent) {
       if (event.origin !== window.location.origin) return;
       const data = event.data as { type?: string; status?: string; message?: string } | null;
       if (!data || data.type !== "unboda:nice-verification") return;
 
+      callbackReceivedRef.current = true;
+      stopPopupCloseWatcher();
       setSubmitting(false);
       if (data.status === "success") {
         setMessage({ type: "success", text: data.message || "본인/성인 인증이 완료되었습니다." });
@@ -53,7 +64,10 @@ export default function NiceAdultVerificationButton({
     }
 
     window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
+    return () => {
+      window.removeEventListener("message", onMessage);
+      stopPopupCloseWatcher();
+    };
   }, []);
 
   if (eligibilityStatus === "VERIFIED_ADULT") return null;
@@ -64,6 +78,12 @@ export default function NiceAdultVerificationButton({
     if (disabled) return;
     setSubmitting(true);
     setMessage(null);
+    callbackReceivedRef.current = false;
+
+    if (popupCloseWatcherRef.current !== null) {
+      window.clearInterval(popupCloseWatcherRef.current);
+      popupCloseWatcherRef.current = null;
+    }
 
     const popup = window.open(
       "about:blank",
@@ -77,6 +97,19 @@ export default function NiceAdultVerificationButton({
       return;
     }
 
+    popupCloseWatcherRef.current = window.setInterval(() => {
+      if (!popup.closed) return;
+
+      if (popupCloseWatcherRef.current !== null) {
+        window.clearInterval(popupCloseWatcherRef.current);
+        popupCloseWatcherRef.current = null;
+      }
+      if (callbackReceivedRef.current) return;
+
+      setSubmitting(false);
+      setMessage({ type: "info", text: "본인확인 창이 닫혔습니다. 다시 시도해 주세요." });
+    }, 500);
+
     try {
       popup.document.title = "NICE 본인확인 준비 중";
       popup.document.body.innerHTML = "<p style='font-family:sans-serif;padding:24px'>본인확인 창을 준비하고 있습니다...</p>";
@@ -88,6 +121,10 @@ export default function NiceAdultVerificationButton({
       });
       const json = (await response.json()) as { authUrl?: string; error?: string };
       if (!response.ok || typeof json.authUrl !== "string") {
+        if (popupCloseWatcherRef.current !== null) {
+          window.clearInterval(popupCloseWatcherRef.current);
+          popupCloseWatcherRef.current = null;
+        }
         popup.close();
         setSubmitting(false);
         setMessage({ type: "error", text: json.error || "본인확인을 시작하지 못했습니다." });
@@ -96,14 +133,32 @@ export default function NiceAdultVerificationButton({
 
       const authUrl = new URL(json.authUrl);
       if (authUrl.protocol !== "https:" || !allowedNiceHosts.has(authUrl.hostname)) {
+        if (popupCloseWatcherRef.current !== null) {
+          window.clearInterval(popupCloseWatcherRef.current);
+          popupCloseWatcherRef.current = null;
+        }
         popup.close();
         setSubmitting(false);
         setMessage({ type: "error", text: "본인확인 주소를 확인하지 못했습니다." });
         return;
       }
 
+      if (popup.closed) {
+        if (popupCloseWatcherRef.current !== null) {
+          window.clearInterval(popupCloseWatcherRef.current);
+          popupCloseWatcherRef.current = null;
+        }
+        setSubmitting(false);
+        setMessage({ type: "info", text: "본인확인 창이 닫혔습니다. 다시 시도해 주세요." });
+        return;
+      }
+
       popup.location.replace(authUrl.toString());
     } catch {
+      if (popupCloseWatcherRef.current !== null) {
+        window.clearInterval(popupCloseWatcherRef.current);
+        popupCloseWatcherRef.current = null;
+      }
       popup.close();
       setSubmitting(false);
       setMessage({ type: "error", text: "본인확인 요청 중 오류가 발생했습니다." });

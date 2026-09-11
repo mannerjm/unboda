@@ -69,7 +69,7 @@ function getLandingCopy(state: LandingState) {
         primary: "내 분석 이어보기",
         primaryHref: `/result?profileId=${state.profileId}`,
         secondary: "현재 추천 보기",
-        secondaryHref: `/result?profileId=${state.profileId}#recommendations`,
+        secondaryHref: `/recommendations?profileId=${state.profileId}`,
       };
     case "analysis_stale":
       return {

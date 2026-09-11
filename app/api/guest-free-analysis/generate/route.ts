@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { recordServiceAnalyticsEvent } from "@/app/lib/analytics/server";
 import { GUEST_ANALYSIS_COOKIE_NAME, hashGuestAnalysisSecret, parseGuestAnalysisCredential } from "@/app/lib/guestFreeAnalyses/cookie";
 import { completeGuestFreeAnalysis, failGuestFreeAnalysis, getGuestFreeAnalysis, isUsableGuestFreeAnalysis, toGuestAnalyzeProfile } from "@/app/lib/guestFreeAnalyses/server";
 import { buildFreeAnalysisResponse } from "@/app/lib/freeAnalysisPipeline/server";
@@ -16,6 +17,7 @@ export async function POST() {
   try {
     const content = await buildFreeAnalysisResponse({ profile: toGuestAnalyzeProfile(record.profileInput, record.id) });
     await completeGuestFreeAnalysis(record, content);
+    await recordServiceAnalyticsEvent({ eventName: "FREE_ANALYSIS_COMPLETED", actorKind: "guest" });
     return NextResponse.json({ analysis: content });
   } catch (error) {
     await failGuestFreeAnalysis(record);

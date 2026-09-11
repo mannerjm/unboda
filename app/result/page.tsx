@@ -30,6 +30,7 @@ import {
 } from "@/app/lib/freeAnalysisAIInterpretation";
 import ProfileSelector from "@/app/components/ProfileSelector";
 import AppShell from "@/app/components/AppShell";
+import SajuRelationStarsSection from "@/app/components/SajuRelationStarsSection";
 
 type SajuResult = ReturnType<typeof getSaju>;
 
@@ -518,6 +519,10 @@ const gyeokgukAnalysis =
 const daeunAnalysis =
   freeAnalysis?.daeunAnalysis ?? sajuData.daeunAnalysis;
 const elementRelations = sajuData.elementRelations;
+const relationStars =
+  freeAnalysis?.relationStars ??
+  (sajuData as SajuResult & { relationStars?: AnalyzeFreeResponse["relationStars"] }).relationStars ??
+  [];
 
 const elementItems = [
   { key: "목", label: "목" },
@@ -900,6 +905,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
     일주는 본인을 중심으로 보는 기둥이므로 화면에서 강조해 표시했습니다.
   </p>
 </section>
+<SajuRelationStarsSection relationStars={relationStars} />
 {daeunAnalysis && (
   <div className="mt-5 rounded-3xl border border-stone-200 bg-white p-5">
     <p className="text-sm tracking-[0.25em] text-stone-500">

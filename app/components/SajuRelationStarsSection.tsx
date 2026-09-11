@@ -7,16 +7,48 @@ const positionLabels: Record<SajuPillarPosition, string> = {
   hour: "시지",
 };
 
-function formatPairRelation(relation: SajuRelationStar): string {
-  return relation.positions
-    .map((position, index) => `${positionLabels[position]} ${relation.branches[index] ?? ""}`.trim())
+type PairRelationGroup = {
+  key: string;
+  positions: SajuPillarPosition[];
+  branches: string[];
+  names: string[];
+};
+
+function groupPairRelations(relations: SajuRelationStar[]): PairRelationGroup[] {
+  const groups = new Map<string, PairRelationGroup>();
+
+  for (const relation of relations) {
+    const key = `${relation.positions.join("-")}|${relation.branches.join("-")}`;
+    const existing = groups.get(key);
+
+    if (existing) {
+      if (!existing.names.includes(relation.name)) {
+        existing.names.push(relation.name);
+      }
+      continue;
+    }
+
+    groups.set(key, {
+      key,
+      positions: relation.positions,
+      branches: relation.branches,
+      names: [relation.name],
+    });
+  }
+
+  return Array.from(groups.values());
+}
+
+function formatPairGroup(group: PairRelationGroup): string {
+  return group.positions
+    .map((position, index) => `${positionLabels[position]} ${group.branches[index] ?? ""}`.trim())
     .join(" ↔ ");
 }
 
 export default function SajuRelationStarsSection({ relationStars }: { relationStars: SajuRelationStar[] }) {
-  const pairRelations = relationStars.filter((relation) => relation.kind === "pair");
+  const pairGroups = groupPairRelations(relationStars.filter((relation) => relation.kind === "pair"));
   const dayVoid = relationStars.find((relation) => relation.kind === "void");
-  const hasContent = pairRelations.length > 0 || Boolean(dayVoid);
+  const hasContent = pairGroups.length > 0 || Boolean(dayVoid);
 
   return (
     <section className="mb-8 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
@@ -30,19 +62,28 @@ export default function SajuRelationStarsSection({ relationStars }: { relationSt
 
       {hasContent ? (
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          {pairRelations.map((relation, index) => (
+          {pairGroups.map((group) => (
             <div
-              key={`${relation.name}-${relation.positions.join("-")}-${index}`}
+              key={group.key}
               className="rounded-2xl border border-stone-200 bg-stone-50 p-4"
             >
-              <span className="inline-flex rounded-full bg-stone-900 px-3 py-1 text-xs font-semibold text-white">
-                {relation.name}
-              </span>
+              <div className="flex flex-wrap gap-2">
+                {group.names.map((name) => (
+                  <span
+                    key={name}
+                    className="inline-flex rounded-full bg-stone-900 px-3 py-1 text-xs font-semibold text-white"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
               <p className="mt-3 text-sm font-semibold leading-6 text-stone-800">
-                {formatPairRelation(relation)}
+                {formatPairGroup(group)}
               </p>
               <p className="mt-2 text-xs leading-5 text-stone-500">
-                원국의 두 지지 관계로 성립하는 신살입니다.
+                {group.names.length > 1
+                  ? "같은 지지쌍에서 함께 성립하는 관계 신살입니다."
+                  : "원국의 두 지지 관계로 성립하는 신살입니다."}
               </p>
             </div>
           ))}

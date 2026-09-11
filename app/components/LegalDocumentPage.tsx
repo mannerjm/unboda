@@ -30,6 +30,8 @@ export default function LegalDocumentPage({ eyebrow, title, summary, children }:
             <dt className="font-semibold text-stone-800">대표자</dt><dd>반희</dd>
             <dt className="font-semibold text-stone-800">사업자등록번호</dt><dd>201-28-96364</dd>
             <dt className="font-semibold text-stone-800">사업장 소재지</dt><dd>충남 천안시 서북구 백석4길12 10층 1001-B52호</dd>
+            <dt className="font-semibold text-stone-800">고객센터</dt><dd>070-4792-8900</dd>
+            <dt className="font-semibold text-stone-800">공식 지원 이메일</dt><dd>support@unboda.kr</dd>
           </dl>
         </section>
         <nav aria-label="정책 문서" className="mt-12 border-t border-stone-300 pt-6 text-sm text-stone-600 sm:mt-16">

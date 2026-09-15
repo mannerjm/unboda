@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { PurchasedAnalysisProductGroup } from "@/app/lib/purchasedAnalysesGrouping";
+import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 
 const statusLabels: Record<string, string> = {
   none: "분석 준비 중",
@@ -45,11 +46,13 @@ export default function PurchasedAnalysesList({
 
   return (
     <div className="mt-8 space-y-8 border-y border-stone-200">
-      {groups.map((group) => (
+      {groups.map((group) => {
+        const displayTitle = getPremiumProductDisplayTitle(group.productId, group.productName);
+        return (
         <div key={`${group.productId}`} className="py-6 first:pt-0 last:pb-0">
           {/* Product header */}
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-stone-900">{group.productName}</h2>
+            <h2 className="text-lg font-semibold text-stone-900">{displayTitle}</h2>
           </div>
 
           {/* Editions list */}
@@ -99,7 +102,8 @@ export default function PurchasedAnalysesList({
             })}
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

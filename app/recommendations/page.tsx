@@ -16,6 +16,7 @@ import { isProfileId, type ProfileDto } from "@/app/lib/profiles/types";
 import { getSaju } from "@/app/lib/manse";
 import { buildPremiumAnalysis } from "@/app/lib/buildPremiumAnalysis";
 import { createEvaluationContext } from "@/app/lib/evaluationContext";
+import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 
 type RecommendationsPageProps = {
   searchParams: Promise<{ profileId?: string }>;
@@ -118,6 +119,9 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
     : null;
   const recommendationExplanation = analysisRecord?.content?.recommendationExplanation ?? null;
   const paidSummaries = await listUserPaidAnalysisSummaries(user.id);
+  const primaryProductTitle = primaryProduct
+    ? getPremiumProductDisplayTitle(primaryProduct.id, primaryProduct.title)
+    : null;
 
   return (
     <AppShell activeProfileId={profile.id}>
@@ -127,8 +131,8 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
             <p className="text-xs font-semibold tracking-[0.22em] text-stone-500">PERSONAL RECOMMENDATION</p>
             <h1 className="mt-4 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">무료 분석에서 이어서 확인할 분석</h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">
-              {primaryProduct
-                ? `무료 분석에서 가장 크게 드러난 문제는 ${primaryProduct.title}에서 먼저 이어서 확인하고, 나머지는 실제 계산 근거가 있는 다른 분야를 우선해 함께 보여드려요. 필요하면 같은 분야의 다른 문제도 추천될 수 있어요.`
+              {primaryProductTitle
+                ? `무료 분석에서 가장 크게 드러난 문제는 ${primaryProductTitle}에서 먼저 이어서 확인하고, 나머지는 실제 계산 근거가 있는 다른 분야를 우선해 함께 보여드려요. 필요하면 같은 분야의 다른 문제도 추천될 수 있어요.`
                 : "무료 분석에서 드러난 핵심 문제와 같은 계산 근거를 따라, 이어서 확인하면 좋은 심층 분석을 보여드려요."}
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-500">

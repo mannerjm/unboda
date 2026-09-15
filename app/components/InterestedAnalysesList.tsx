@@ -7,6 +7,7 @@ import type {
   InterestedAnalysisRecord,
 } from "@/app/lib/interestedAnalyses/server";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
+import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import { removeAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
 
 type InterestedAnalysesListProps = {
@@ -60,14 +61,16 @@ export default function InterestedAnalysesList({
 
   return (
     <ul className="mt-8 divide-y divide-stone-200 border-y border-stone-200">
-      {displayAnalyses.map(({ record, product, currentState }) => (
+      {displayAnalyses.map(({ record, product, currentState }) => {
+        const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
+        return (
         <li
           key={record.id}
           className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between"
         >
           <div className="min-w-0 flex-1">
             <p className="text-base font-semibold text-stone-900">
-              {product.title}
+              {displayTitle}
             </p>
             {product.description && (
               <p className="mt-2 text-sm text-stone-600">
@@ -100,7 +103,8 @@ export default function InterestedAnalysesList({
             </button>
           </div>
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }

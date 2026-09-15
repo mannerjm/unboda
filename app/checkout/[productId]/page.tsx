@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import {
   getPremiumProduct,
 } from "@/app/lib/premiumProductRegistry";
+import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
 import { resolveAnalysisEditionForOrder } from "@/app/lib/analysisEditionForOrder";
 import { formatAnalysisEditionLabel } from "@/app/lib/analysisEditionLabel";
@@ -50,6 +51,7 @@ export default async function CheckoutPage({
   }
 
   const pricing = getProductPricing(product.id);
+  const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
   const edition = user && profile
     ? await resolveAnalysisEditionForOrder({
         userId: user.id,
@@ -78,7 +80,7 @@ export default async function CheckoutPage({
         </p>
 
         <h1 className="mt-3 text-3xl font-bold">
-          {product.title}
+          {displayTitle}
         </h1>
 
         <p className="mt-5 text-sm leading-7 text-stone-600">
@@ -94,7 +96,7 @@ export default async function CheckoutPage({
         <CheckoutAccessPanel
           productId={product.id}
           profileId={profileId}
-          productTitle={product.title}
+          productTitle={displayTitle}
           profileLabel={profile?.label}
           priceLabel={`${pricing?.amount.toLocaleString("ko-KR")}원`}
           editionLabel={checkoutEditionLabel}

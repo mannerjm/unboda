@@ -83,7 +83,8 @@ export const CompatibilityReportOutputSchema = z.object({
     summary: z.string().trim().min(40).max(1000),
     evidenceRefs: EvidenceRefsSchema,
   }),
-  strengths: z.array(CompatibilityNarrativeItemSchema).min(2).max(3),
+  // Do not force positive copy when the engine does not contain enough support evidence.
+  strengths: z.array(CompatibilityNarrativeItemSchema).max(3),
   conflict: CompatibilitySectionSchema,
   recovery: CompatibilitySectionSchema,
   longTerm: CompatibilitySectionSchema,
@@ -118,11 +119,15 @@ const FAMILY_BY_SECTION: Readonly<
 };
 
 const FORBIDDEN_VISIBLE_PATTERNS: ReadonlyArray<{ pattern: RegExp; label: string }> = [
-  { pattern: /\b\d{1,3}\s*점\b/u, label: "numeric score" },
-  { pattern: /\b\d{1,3}\s*%/u, label: "numeric percentage" },
-  { pattern: /100\s*%/u, label: "certainty percentage" },
-  { pattern: /\b(?:무조건|반드시|확실히|절대로)\b/u, label: "deterministic claim" },
+  { pattern: /\d{1,3}\s*점/u, label: "numeric score" },
+  { pattern: /\d{1,3}\s*%/u, label: "numeric percentage" },
+  { pattern: /(?:무조건|반드시|확실히|절대로)/u, label: "deterministic claim" },
   { pattern: /(?:헤어진다|이혼한다|결혼한다|결혼하게 된다|파국이다)/u, label: "fixed relationship outcome" },
+  { pattern: /\b(?:A|B)\b/u, label: "internal person role" },
+  {
+    pattern: /\b(?:supportive|adjustment_needed|insufficient_evidence|mutually_supported|jointly_pressured)\b/u,
+    label: "internal engine state",
+  },
 ];
 
 function round(value: number, digits = 3): number {
@@ -288,7 +293,7 @@ function addTimingLoadFacts(
 ): void {
   for (const role of ["A", "B"] as const) {
     const timing = result.individualTiming[role];
-    const cycleLabels = timing.cycles.map((cycle) => `${cycle.cycle}:${cycle.ganji}`);
+    const cycles = timing.cycles.map((cycle) => cycle.cycle);
 
     addFact(facts, {
       id: `report:timing-load:${role}`,
@@ -299,7 +304,7 @@ function addTimingLoadFacts(
       payload: {
         person: role,
         level: timing.level,
-        cycles: cycleLabels,
+        cycles,
         supportPressure: timing.supportPressure,
         burdenPressure: timing.burdenPressure,
         neutralPressure: timing.neutralPressure,
@@ -384,9 +389,7 @@ function addTimingRelationFacts(
         relation: evidence.relation,
         sourcePerson: evidence.sourcePerson,
         sourceCycle: evidence.sourceCycle,
-        sourceGanji: evidence.sourceGanji,
         targetPerson: evidence.targetPerson,
-        targetGanji: evidence.targetGanji,
         targetCycle: evidence.targetCycle ?? null,
         targetPosition: evidence.targetPosition ?? null,
         strength: evidence.strength,
@@ -500,13 +503,8 @@ export function buildCompatibilityReportJsonContract(): string {
   },
   "strengths": [
     {
-      "title": "잘 맞는 부분의 짧은 제목",
+      "title": "실제 support 근거가 있을 때만 강점 제목",
       "body": "왜 강점으로 작동하는지 생활 언어로 설명",
-      "evidenceRefs": ["natal/structure evidence id"]
-    },
-    {
-      "title": "두 번째 강점",
-      "body": "근거가 있는 범위에서 설명",
       "evidenceRefs": ["natal/structure evidence id"]
     }
   ],
@@ -526,7 +524,7 @@ export function buildCompatibilityReportJsonContract(): string {
     "evidenceRefs": ["natal/structure evidence id"]
   },
   "currentTiming": {
-    "headline": "${"현재 시기 관계 흐름의 핵심"}",
+    "headline": "현재 시기 관계 흐름의 핵심",
     "summary": "evaluationYear의 대운·세운 근거만 사용해 현재 시기를 설명",
     "keyPoints": ["현재 시기에 확인할 신호"],
     "evidenceRefs": ["timing evidence id"]
@@ -558,17 +556,19 @@ export function buildCompatibilityReportPrompt(
 계산하거나 추측하지 말고 제공된 structured evidence만 설명하세요.
 
 필수 규칙:
-1. A는 사용자(나), B는 상대방으로 표현합니다. A/B 같은 내부 역할명을 사용자 문장에 노출하지 않습니다.
+1. A는 사용자(나), B는 상대방으로 해석하되 A/B 같은 내부 역할명을 사용자 문장에 노출하지 않습니다.
 2. 전체 궁합 점수, 백분율, 등급 합산값을 새로 만들지 않습니다.
-3. "무조건", "반드시", "100%", "헤어진다", "결혼한다"처럼 미래나 관계 결과를 확정하지 않습니다.
-4. 합·충·형·파·해, 용신, 신강·신약 같은 전문용어를 설명의 중심에 두지 말고 먼저 생활 언어로 의미를 설명합니다.
-5. 모든 핵심 주장과 행동 제안에는 evidenceRefs를 넣고, evidenceFacts에 없는 id를 만들지 않습니다.
-6. relationshipCore, strengths, conflict, recovery, longTerm은 natal_domain / natal_relation / personal_structure 근거만 사용합니다.
-7. currentTiming은 timing_load / timing_domain / timing_relation 근거만 사용하며 evaluationYear 외의 시점을 새로 만들지 않습니다.
-8. timingDataQuality가 unavailable이면 currentTiming은 null로 둡니다. 그 외에는 현재 시기 섹션을 작성하되 누락 데이터가 있으면 확신을 낮춰 표현합니다.
-9. 출생시간이나 운 데이터가 누락되었다고 해서 임의의 값을 채우지 않습니다.
-10. evidenceRefs는 내부 검증용이며 body/summary/headline 문장 안에 id를 그대로 복사하지 않습니다.
-11. 결과는 JSON 하나만 출력하고, 아래 계약에 없는 필드를 추가하지 않습니다.`;
+3. confidence, pressure, usefulnessScore, contribution 같은 내부 수치를 사용자 문장에 그대로 표시하지 않습니다.
+4. "무조건", "반드시", "100%", "헤어진다", "결혼한다"처럼 미래나 관계 결과를 확정하지 않습니다.
+5. 합·충·형·파·해, 용신, 신강·신약 같은 전문용어를 설명의 중심에 두지 말고 먼저 생활 언어로 의미를 설명합니다.
+6. 모든 핵심 주장과 행동 제안에는 evidenceRefs를 넣고, evidenceFacts에 없는 id를 만들지 않습니다.
+7. relationshipCore, strengths, conflict, recovery, longTerm은 natal_domain / natal_relation / personal_structure 근거만 사용합니다.
+8. strengths는 실제 support 근거가 있을 때만 작성하고, 충분한 근거가 없으면 빈 배열을 사용합니다.
+9. currentTiming은 timing_load / timing_domain / timing_relation 근거만 사용하며 evaluationYear 외의 시점을 새로 만들지 않습니다.
+10. timingDataQuality가 unavailable이면 currentTiming은 null로 둡니다. 그 외에는 현재 시기 섹션을 작성하되 누락 데이터가 있으면 확신을 낮춰 표현합니다.
+11. 출생시간이나 운 데이터가 누락되었다고 해서 임의의 값을 채우지 않습니다.
+12. evidenceRefs는 내부 검증용이며 body/summary/headline 문장 안에 id를 그대로 복사하지 않습니다.
+13. 결과는 JSON 하나만 출력하고, 아래 계약에 없는 필드를 추가하지 않습니다.`;
 
   const user = `다음 궁합 엔진 컨텍스트만 사용해 한국어 리포트를 작성하세요.
 
@@ -577,6 +577,8 @@ ${JSON.stringify(context, null, 2)}
 
 [OUTPUT_JSON_CONTRACT]
 ${buildCompatibilityReportJsonContract()}
+
+currentTiming 규칙: timingDataQuality.level이 unavailable이면 null, 그 외에는 위 object 형식으로 작성하세요.
 
 [SECTION_ORDER]
 ${COMPATIBILITY_REPORT_SECTION_ORDER.join(" -> ")}

@@ -34,7 +34,14 @@ assertEqual(
   "generating product route",
 );
 
-for (const required of ["useSearchParams", "activeProfileId", "recommendationHref", "/recommendations", "/deep-analysis"]) {
+for (const required of [
+  "useSearchParams",
+  "activeProfileId",
+  "recommendationHref",
+  "/recommendations",
+  "/deep-analysis",
+  "/special-analysis",
+]) {
   if (!appShellSource.includes(required)) throw new Error(`shell navigation contract missing: ${required}`);
 }
 if (!recommendationSource.includes("getPremiumAnalysisHref") || !recommendationSource.includes("href={href}")) {

@@ -1,10 +1,12 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
+import type { CompatibilityPairPerspectives } from "@/app/lib/compatibilityPairPerspective";
 import type { CompatibilityReportOutput } from "@/app/lib/compatibilityReportContract";
 
 type CompatibilityResponse = {
   report: CompatibilityReportOutput;
+  perspectives: CompatibilityPairPerspectives;
   meta: {
     evaluationYear: number;
     myProfileLabel: string;
@@ -99,7 +101,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
         }),
       });
       const body = await response.json().catch(() => null) as CompatibilityResponse | { error?: string } | null;
-      if (!response.ok || !body || !("report" in body)) {
+      if (!response.ok || !body || !("report" in body) || !("perspectives" in body)) {
         throw new Error(body && "error" in body && body.error ? body.error : "궁합 분석을 완료하지 못했습니다.");
       }
       setResult(body);
@@ -112,14 +114,14 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
   };
 
   if (result) {
-    const { report, meta } = result;
+    const { report, perspectives, meta } = result;
     return (
       <div ref={resultRef} className="mt-8 scroll-mt-6">
         <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4 border-b border-stone-200 pb-6">
             <div>
               <p className="text-xs font-semibold tracking-[0.16em] text-stone-400">궁합 분석</p>
-              <h2 className="mt-2 text-2xl font-bold text-stone-950 sm:text-3xl">{report.relationshipCore.headline}</h2>
+              <h2 className="mt-2 max-w-2xl text-2xl font-bold text-stone-950 sm:text-3xl">{report.relationshipCore.headline}</h2>
               <p className="mt-3 text-sm text-stone-500">{meta.myProfileLabel} · {meta.partnerLabel}</p>
             </div>
             <button
@@ -154,6 +156,31 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
               </div>
             </section>
           ) : null}
+
+          <section className="border-t border-stone-200 py-7">
+            <h3 className="text-lg font-bold text-stone-950">서로에게 미치는 방식</h3>
+            <p className="mt-2 text-sm leading-7 text-stone-500">
+              같은 관계라도 내가 상대에게 주는 영향과 상대가 나에게 주는 영향은 다르게 나타날 수 있습니다.
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <article className="rounded-2xl border border-stone-200 bg-white p-4">
+                <p className="text-xs font-semibold text-stone-500">{meta.myProfileLabel} → {meta.partnerLabel}</p>
+                <h4 className="mt-2 font-bold text-stone-900">{perspectives.meToPartner.headline}</h4>
+                <p className="mt-2 text-sm leading-7 text-stone-600">{perspectives.meToPartner.summary}</p>
+                <ul className="mt-3 space-y-1.5 text-xs leading-6 text-stone-500">
+                  {perspectives.meToPartner.signals.map((signal) => <li key={signal}>• {signal}</li>)}
+                </ul>
+              </article>
+              <article className="rounded-2xl border border-stone-200 bg-white p-4">
+                <p className="text-xs font-semibold text-stone-500">{meta.partnerLabel} → {meta.myProfileLabel}</p>
+                <h4 className="mt-2 font-bold text-stone-900">{perspectives.partnerToMe.headline}</h4>
+                <p className="mt-2 text-sm leading-7 text-stone-600">{perspectives.partnerToMe.summary}</p>
+                <ul className="mt-3 space-y-1.5 text-xs leading-6 text-stone-500">
+                  {perspectives.partnerToMe.signals.map((signal) => <li key={signal}>• {signal}</li>)}
+                </ul>
+              </article>
+            </div>
+          </section>
 
           <SectionCard title="부딪히기 쉬운 부분" summary={report.conflict.summary} points={report.conflict.keyPoints} />
           <SectionCard title="관계를 회복시키는 조건" summary={report.recovery.summary} points={report.recovery.keyPoints} />

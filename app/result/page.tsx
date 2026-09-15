@@ -327,8 +327,8 @@ const aiInterpretation: FreeAnalysisAIInterpretation =
   parseFreeAnalysisAIInterpretation(aiResult);
 const aiSummary = aiInterpretation.summary?.replace(/^#{1,6}\s+/gm, "").trim();
 const aiSummarySections = [
+  { title: "사주의 특성", text: aiInterpretation.strength },
   { title: "한눈에 보는 핵심", text: aiInterpretation.overview },
-  { title: "원국과 신강·신약", text: aiInterpretation.strength },
   { title: "오행 분석", text: aiInterpretation.fiveElements },
   { title: "용신 해석", text: aiInterpretation.yongshin },
   { title: "격국 해석", text: aiInterpretation.gyeokguk },
@@ -1226,7 +1226,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
           ) : (
             <>
               {aiSummarySections.length > 0 ? (
-                  <div className="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid items-start gap-3 sm:grid-cols-2">
                   {aiSummarySections.map((section) => (
                     <AISummarySectionCard
                       key={section.title}

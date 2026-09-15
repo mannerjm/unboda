@@ -27,6 +27,15 @@ const STRICT_CARDINALITY_LIMITS = `[STRICT_CARDINALITY_LIMITS]
 - actionGuide 각 항목의 evidenceRefs: 1~3개
 위 개수 제한을 반드시 지키고, 같은 evidence id를 불필요하게 반복하지 마세요.`;
 
+const CUSTOMER_COPY_GUIDE = `[CUSTOMER_COPY_GUIDE]
+- relationshipCore.headline은 한 문장, 가능하면 55자 안팎으로 압축합니다.
+- strengths는 이 두 사람의 근거에서 실제로 확인되는 차별점만 쓰고, 일반 연애 조언처럼 들리는 문장을 피합니다.
+- conflict는 갈등이 시작되는 패턴만, recovery는 갈등 뒤 다시 연결되는 조건만, longTerm은 반복해서 합의할 생활 기준만 다룹니다.
+- currentTiming은 기본 궁합을 반복하지 말고 해당 연도에 무엇을 늘리고 무엇을 줄일지 중심으로 설명합니다.
+- actionGuide는 위 섹션의 문장을 그대로 되풀이하지 말고 실제로 해볼 행동으로 바꿉니다.
+- 같은 조언(예: 감정 진정, 한 번에 하나씩 대화하기)을 여러 섹션에서 반복하지 않습니다.
+- doNext는 가장 중요한 2~3개, avoid는 1~2개만 우선 작성합니다.`;
+
 function extractJsonObject(text: string): unknown {
   const trimmed = text.trim();
   const withoutFence = trimmed
@@ -57,7 +66,7 @@ function buildGenerationRequest(
     ? ""
     : `\n\n[REPAIR_INSTRUCTION]\n직전 응답은 배열 개수 제한을 초과했습니다. 내용과 근거 관계는 유지하되 아래 개수 제한에 맞춰 가장 중요한 항목만 남겨 JSON 전체를 다시 작성하세요.`;
 
-  return `[SYSTEM]\n${prompt.system}\n\n${STRICT_CARDINALITY_LIMITS}${retryInstruction}\n\n[USER]\n${prompt.user}`;
+  return `[SYSTEM]\n${prompt.system}\n\n${STRICT_CARDINALITY_LIMITS}\n\n${CUSTOMER_COPY_GUIDE}${retryInstruction}\n\n[USER]\n${prompt.user}`;
 }
 
 export async function generateCompatibilityReport(

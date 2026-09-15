@@ -568,7 +568,7 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     id: "social-conflict",
     category: "social",
     title: "대인 갈등과 거리 조절",
-    shortDescription: "연애가 아닌 일반 대인관계에서 반복되는 갈등과 거리·대화·역할 조정 기준을 분석합니다.",
+    shortDescription: "대인관계에서 반복되는 갈등과 거리·대화·역할 조정 기준을 분석합니다.",
     riskLevel: "standard",
     details: [
       "일반 대인관계에서 갈등을 시작시키는 상황·말·요청의 반복 패턴",
@@ -582,7 +582,7 @@ export const ANALYSIS_TOPICS: AnalysisTopicDefinition[] = [
     id: "social-network-expansion",
     category: "social",
     title: "새로운 인맥과 관계 확장",
-    shortDescription: "새로운 비연애 인맥이 실제 연결로 이어지는 접점과 후속 교류 기준을 분석합니다.",
+    shortDescription: "새로운 인맥이 실제 연결로 이어지는 접점과 후속 교류 기준을 분석합니다.",
     riskLevel: "standard",
     details: [
       "새로운 인맥이 생기는 활동·환경·공동 관심사와 반복 접점",

@@ -1868,7 +1868,7 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     productId: "social-helper", engine: "RELATIONSHIP",
     userQuestion: "주변 관계에서 실제로 도움을 주고받을 수 있는 관계를 어떤 신뢰 신호로 구분하고, 지원을 요청하거나 받아들일 기준을 어떻게 세워야 하는가?",
     analysisFocus: [
-      "비연애 대인관계에서 도움·조언·소개·협력이 오가는 지원 패턴",
+      "대인관계에서 도움·조언·소개·협력이 오가는 지원 패턴",
       "말뿐인 호의와 실제 후속 이행을 구분하는 신뢰·상호성 신호",
       "도움을 요청·수용·되돌려줄 때 과도한 의존을 피하는 지원 경계",
     ],
@@ -1879,9 +1879,9 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       { id: "social-support-maintenance-action", prompt: "작은 요청·제안·후속 확인으로 지원 관계를 시험하고 유지·재조정할 구체 행동을 제시한다." },
     ],
     excludedFocus: [
-      { id: "romantic-new-connection", prompt: "새로운 연애 상대와의 접점·호감·연애 가능성을 탐색하는 분석" },
       { id: "friendship-only-recalibration", prompt: "기존 친구 관계의 감정 노동·상호성·교류 빈도를 재조정하는 분석" },
       { id: "network-expansion-reach", prompt: "새 모임·활동·접점을 늘려 인맥의 폭과 지속 연결을 확장하는 분석" },
+      { id: "romantic-new-connection", prompt: "새로운 연애 상대와의 접점·호감·연애 가능성을 탐색하는 분석" },
     ],
     evidenceFocus: ["element_relations", "fortune_flow", "strength", "fortune_brain"],
     decisionCriteria: {
@@ -1905,9 +1905,9 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
   },
   {
     productId: "social-conflict", engine: "RELATIONSHIP",
-    userQuestion: "연애가 아닌 일반 대인관계에서 어떤 상호작용이 갈등을 반복시키고, 어느 거리·대화·역할 기준을 조정해야 하는가?",
+    userQuestion: "대인관계에서 어떤 상호작용이 갈등을 반복시키고, 어느 거리·대화·역할 기준을 조정해야 하는가?",
     analysisFocus: [
-      "비연애 대인관계에서 갈등을 시작시키는 상황·말·요청과 반복 반응 순서",
+      "대인관계에서 갈등을 시작시키는 상황·말·요청과 반복 반응 순서",
       "충돌을 키우는 회피·과잉 대응·역할 혼선과 완화되는 관찰 신호",
       "관계를 끊는 결론이 아니라 거리·대화·요청·역할 경계를 재조정하는 기준",
     ],
@@ -1918,9 +1918,9 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       { id: "social-conflict-reset-action", prompt: "갈등 장면을 기록하고 거리·대화·역할 기준을 다시 시험할 구체 행동을 제시한다." },
     ],
     excludedFocus: [
-      { id: "romantic-conflict-recovery", prompt: "현재 연애 관계의 갈등 후 회복 가능성·대화 재개·관계 지속을 판단하는 분석" },
       { id: "friendship-reciprocity", prompt: "친구 관계의 연락·도움·감정 노동과 상호성을 중심으로 재조정하는 분석" },
       { id: "workplace-performance-collaboration", prompt: "상사·동료·업무 이해관계자와의 협업을 성과·책임·에스컬레이션 관점에서 분석하는 범위" },
+      { id: "romantic-conflict-recovery", prompt: "현재 연애 관계의 갈등 후 회복 가능성·대화 재개·관계 지속을 판단하는 분석" },
     ],
     evidenceFocus: ["element_relations", "fortune_flow", "strength", "gyeokguk"],
     decisionCriteria: {
@@ -1946,7 +1946,7 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
     productId: "social-network-expansion", engine: "RELATIONSHIP",
     userQuestion: "새로운 인맥을 넓힐 때 어떤 접점과 교류 방식이 실제 연결로 이어지며, 관계의 넓이와 깊이를 어떻게 조절해야 하는가?",
     analysisFocus: [
-      "비연애 새로운 인맥이 생기는 활동·환경·공동 관심사와 반복 접점",
+      "새로운 인맥이 생기는 활동·환경·공동 관심사와 반복 접점",
       "첫 만남 이후 후속 연락·공동 활동·상호 반응이 지속 연결로 이어지는 신호",
       "관계 수를 늘리는 것과 신뢰 가능한 연결을 깊게 만드는 것 사이의 균형 기준",
     ],
@@ -1957,9 +1957,9 @@ const LAUNCH_TOPIC_CONFIGS: PaidAnalysisTopicConfig[] = [
       { id: "social-network-expansion-action", prompt: "접점·후속 반응·신뢰를 기록하며 지속 가능한 인맥 확장을 시험할 구체 행동을 제시한다." },
     ],
     excludedFocus: [
-      { id: "romantic-new-connection", prompt: "새로운 연애 상대의 호감·접근·초기 신뢰를 중심으로 하는 분석" },
       { id: "existing-friend-family-recalibration", prompt: "이미 형성된 친구·가족 관계의 역할·상호성·거리 문제를 재조정하는 분석" },
       { id: "career-business-network-outcome", prompt: "취업·승진·영업·고객 확보 같은 직업·사업 성과를 위한 네트워킹 결과를 판단하는 분석" },
+      { id: "romantic-new-connection", prompt: "새로운 연애 상대의 호감·접근·초기 신뢰를 중심으로 하는 분석" },
     ],
     evidenceFocus: ["fortune_flow", "element_relations", "fortune_brain", "strength"],
     decisionCriteria: {

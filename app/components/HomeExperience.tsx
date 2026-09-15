@@ -94,14 +94,21 @@ function Benefits() {
 
 function Footer() {
   return (
-    <footer className="flex flex-col gap-3 border-t border-[#e7dece] pt-5 text-xs text-[#82786a] sm:flex-row sm:items-center sm:justify-between">
-      <p>운보다 · 참고용 명리 분석 서비스</p>
-      <nav className="flex flex-wrap gap-4" aria-label="서비스 및 법적 문서">
-        <Link href="/support" className="transition hover:text-[#2d2923]">고객지원</Link>
-        <Link href="/terms" className="transition hover:text-[#2d2923]">이용약관</Link>
-        <Link href="/privacy" className="transition hover:text-[#2d2923]">개인정보처리방침</Link>
-        <Link href="/refund" className="transition hover:text-[#2d2923]">환불정책</Link>
-      </nav>
+    <footer className="border-t border-[#e7dece] pt-5 text-xs text-[#82786a]">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="max-w-3xl space-y-1.5 leading-5">
+          <p className="font-semibold text-[#5f564b]">운보다 · 참고용 명리 분석 서비스</p>
+          <p>상호 운보다 · 대표자 반희 · 사업자등록번호 201-28-96364</p>
+          <p>사업장 소재지 충청남도 천안시 서북구 백석4길 12, 10층 1001-B52호(백석동, 거성캐슬B빌딩)</p>
+          <p>고객센터 070-4792-8900 · 공식 지원 이메일 support@unboda.kr</p>
+        </div>
+        <nav className="flex shrink-0 flex-wrap gap-4" aria-label="서비스 및 법적 문서">
+          <Link href="/support" className="transition hover:text-[#2d2923]">고객지원</Link>
+          <Link href="/terms" className="transition hover:text-[#2d2923]">이용약관</Link>
+          <Link href="/privacy" className="transition hover:text-[#2d2923]">개인정보처리방침</Link>
+          <Link href="/refund" className="transition hover:text-[#2d2923]">환불정책</Link>
+        </nav>
+      </div>
     </footer>
   );
 }

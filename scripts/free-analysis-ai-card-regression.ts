@@ -217,6 +217,10 @@ assert(prompt.includes("핵심 문제 1개") && prompt.includes("보조 문제 1
 assert(prompt.includes("직업·재물·관계·건강을 모두 나열하지 않는다"), "overview must not list all topic domains");
 assert(prompt.includes("여러 문제가 동시에 움직인다") && prompt.includes("가장 우선인 문제"), "overview must distinguish the primary current problem from secondary pressure");
 assert(prompt.includes("'구조', '배치', '기운', '신호', '작용', '보완'"), "prompt must discourage abstract jargon-like phrasing");
+assert(prompt.includes("실제 행동과 감정으로 이해되는 문장"), "traits must translate engine facts into observable everyday behavior and feelings");
+assert(prompt.includes("현재의 10년 흐름과 올해 흐름") && prompt.includes("사용자가 체감할 수 있는 현재 상황부터 바로 말한다"), "overview must start from lived current circumstances instead of explaining calculation mechanics");
+assert(prompt.includes("'일/직업', '돈/재정', '관계', '건강·생활'") && prompt.includes("분명히 이름 붙인다"), "overview must explicitly name the primary problem domain in plain language");
+assert(prompt.includes("일시적인 흔들림인지 앞으로 방향을 바꿀 만큼 이어지는 변화인지"), "overview ending must leave a concrete unresolved question without giving the answer");
 assert(prompt.includes("기회보다 주의가 더 크다"), "prompt must prohibit fear-based opportunity-versus-caution comparisons");
 assert(prompt.includes("해결책을 절대 제시하지 마세요"), "free prompt must explicitly prohibit solutions");
 assert(prompt.includes("약 600~850자 내외"), "free prompt must cap the two-card diagnosis to a concise character target");

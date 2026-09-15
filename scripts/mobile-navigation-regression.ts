@@ -17,6 +17,7 @@ for (const [label, href] of [
   ["내 분석", 'href: "/saju"'],
   ["추천", 'href: "/recommendations"'],
   ["심층", 'href: "/deep-analysis"'],
+  ["전문", 'href: "/special-analysis"'],
   ["관심", 'href: "/interests"'],
   ["구매", 'href: "/purchased-analyses"'],
   ["내 정보", 'href: "/mypage"'],
@@ -24,8 +25,8 @@ for (const [label, href] of [
   assert(mobileNavItems.includes(href) && mobileNavItems.includes(`shortLabel: "${label}"`), `mobile navigation must expose ${label}`);
 }
 
-assert((mobileNavItems.match(/shortLabel:/g) ?? []).length === 6, "mobile navigation must contain exactly six direct destinations");
-assert(mobileNavigation.includes("grid-cols-6") && !mobileNavigation.includes("grid-cols-5"), "mobile navigation must use one six-column row rather than a wrapping five-column grid");
+assert((mobileNavItems.match(/shortLabel:/g) ?? []).length === 7, "mobile navigation must contain exactly seven direct destinations");
+assert(mobileNavigation.includes("grid-cols-7") && !mobileNavigation.includes("grid-cols-6"), "mobile navigation must use one seven-column row for all direct destinations");
 assert(!mobileNavigation.includes("더보기") && !mobileNavigation.includes("More"), "mobile navigation must not hide destinations behind a More menu");
 assert(shell.includes("min-h-[56px]"), "each mobile navigation item must retain a usable minimum touch height");
 assert(shell.includes("env(safe-area-inset-bottom)") && shell.includes("pb-[calc(5.5rem+env(safe-area-inset-bottom))]"), "fixed navigation safe area and one-row content clearance must remain aligned");

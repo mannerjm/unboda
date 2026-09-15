@@ -51,12 +51,37 @@ function getQuickOverviewItems(product: PremiumProductDefinition): readonly stri
   return product.purchaseDecision?.analysisScope.slice(0, 3) ?? [];
 }
 
+function withSubjectParticle(value: string): string {
+  const trimmed = value.trim();
+  const last = trimmed.at(-1);
+  if (!last) return trimmed;
+
+  const code = last.charCodeAt(0);
+  const hasBatchim = code >= 0xac00 && code <= 0xd7a3
+    ? (code - 0xac00) % 28 !== 0
+    : false;
+
+  return `${trimmed}${hasBatchim ? "이" : "가"}`;
+}
+
+function getTopicRelevanceItems(product: PremiumProductDefinition): readonly string[] {
+  const subject = getPremiumProductDisplayTitle(product.id, product.title)
+    .replace(/\s*심층\s*분석$/, "")
+    .replace(/\s*분석$/, "")
+    .trim();
+
+  return [
+    `${withSubjectParticle(subject)} 지금 내 상황에서 어떻게 나타나는지 궁금할 때`,
+    "무엇을 유지하고 무엇을 조정해야 할지 판단 기준이 필요할 때",
+  ];
+}
+
 function getRecommendedFor(product: PremiumProductDefinition): readonly string[] {
   if (product.kind === "PERIOD") {
     return product.purchaseDecision?.recommendedFor.slice(0, 2) ?? [];
   }
 
-  return getPaidAnalysisTopicConfig(product.id)?.purchaseDecision?.recommendedFor.slice(0, 2) ?? [];
+  return getTopicRelevanceItems(product);
 }
 
 function getExpectedUnderstanding(product: PremiumProductDefinition): readonly string[] {

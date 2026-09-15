@@ -4,7 +4,7 @@
 
 This document defines the deterministic foundation for the future `전문 분석 > 궁합` product.
 
-The current phase is **engine foundation + internal domain aggregation only**. It does not add a customer-facing menu, product, checkout item, recommendation candidate, or paid-report route.
+The current phase is **engine foundation + domain aggregation + personal-structure adjustment only**. It does not add a customer-facing menu, product, checkout item, recommendation candidate, or paid-report route.
 
 ## Product principle
 
@@ -15,7 +15,11 @@ The intended pipeline is:
 ```text
 Person A saju calculation
         \
-         -> deterministic relationship evidence -> domain aggregation -> personal-structure adjustment -> structured report data
+         -> deterministic relationship evidence
+         -> domain aggregation
+         -> personal-structure adjustment
+         -> timing layer
+         -> structured report data
         /
 Person B saju calculation
 
@@ -46,8 +50,6 @@ The engine intentionally does not accept names or other personally identifying d
    - control
    - controlled_by
 
-   A -> B and B -> A are stored separately because relationship experience is directional.
-
 2. **Heavenly-stem combinations**
    - 甲己
    - 乙庚
@@ -68,17 +70,13 @@ The engine intentionally does not accept names or other personally identifying d
    - 寅午戌 -> 화
    - 巳酉丑 -> 금
 
-   A full 삼합 is recorded only when both charts contribute at least one member. A 삼합 contained entirely inside one person's chart is not compatibility evidence.
-
 5. **Directional cross-chart 십성**
 
-   Person A's day stem is used to interpret Person B's stems, and the reverse direction is calculated independently.
+A -> B and B -> A are stored separately because the relationship experience is directional.
 
 ### Position strength
 
 Position strength is stored as evidence salience, not as a final compatibility score.
-
-Current contract:
 
 | Cross position | Strength |
 | --- | ---: |
@@ -93,13 +91,13 @@ Current contract:
 | month-year | 0.40 |
 | year-hour | 0.35 |
 
-These are Unboda engine weights for consistent interpretation. They are not presented to customers as an absolute traditional-myeongri formula.
+These are Unboda engine calibration values. They are not presented as one universally accepted traditional-myeongri formula.
 
 ## Phase 2: relationship-domain aggregation
 
 Implemented in `app/lib/compatibilityDomainAggregation.ts`.
 
-Phase 2 converts Phase 1 evidence into five separate internal result domains:
+Phase 2 converts Phase 1 evidence into five separate internal domains:
 
 - `communication`
 - `conflict`
@@ -115,34 +113,14 @@ Every domain retains evidence in four separate channels:
 
 - `support` — supportive relationship evidence
 - `tension` — tension-producing evidence
-- `mixed` — evidence that can create both activation and friction and must not be forced positive/negative
-- `context` — descriptive relationship evidence such as directional 십성 that is retained for interpretation but does not by itself manufacture a positive/negative judgment
+- `mixed` — evidence that can create activation and friction at the same time
+- `context` — descriptive evidence such as directional 십성 that does not manufacture a positive/negative judgment by itself
 
 This prevents a rule such as `충 = bad` or `합 = good` from becoming the whole result.
 
-### Internal domain score
+### Internal domain result
 
-An internal 0-100 balance score is allowed only at the individual-domain level.
-
-The score is derived from support versus tension, while mixed pressure remains in the denominator and therefore reduces polarity. Context pressure does not move the score.
-
-Examples:
-
-```text
-support only -> high domain balance
-
-tension only -> low domain balance
-
-mixed only -> neutral internal balance + mixed classification
-
-context only -> no score / insufficient directional evidence
-```
-
-These scores are engine values for stable downstream behavior. They are not currently customer-visible and are not combined into one total compatibility score.
-
-### Domain levels
-
-Each domain resolves to one of:
+Each domain may expose an internal 0-100 balance score plus one of:
 
 - `supportive`
 - `steady`
@@ -150,58 +128,113 @@ Each domain resolves to one of:
 - `adjustment_needed`
 - `insufficient_evidence`
 
-`mixed` takes precedence when mixed pressure is substantial or when meaningful support and tension coexist near the middle. This is intentional: conflicting signals must remain visible instead of being averaged away.
+The score remains an internal engine value and is not combined into one compatibility total.
 
-### Evidence-to-domain salience
+Each domain also stores confidence, all contributing evidence IDs, and up to three leading signals for each pressure channel.
 
-Phase 2 applies domain-specific salience on top of Phase 1 position strength.
+## Phase 3: personal-structure adjustment
 
-Examples:
+Implemented in `app/lib/compatibilityPersonalStructure.ts`.
 
-- 육합 contributes most strongly to intimacy, then recovery and long-term stability
-- 충 contributes to communication and conflict as mixed pressure
-- 형 contributes to conflict and long-term tension
-- 해 contributes to communication and conflict tension
-- 파 contributes to recovery and long-term mixed pressure
-- completed 삼합 contributes to recovery and long-term support
-- 천간합 contributes to communication and intimacy support
-- directional 일간 오행 and cross-chart 십성 remain comparatively light contextual signals at this stage
+Phase 3 answers a different question from Phase 1 and 2:
 
-The exact values are Unboda engine calibration values, not claims of one universally accepted traditional weighting formula.
+> When this specific partner's element distribution reaches this specific person, is that influence structurally supportive, burdensome, or mixed for that receiver?
 
-### Confidence is separate from balance
+The answer is directional. `A receives B` and `B receives A` are calculated independently.
 
-Each domain also gets a 0-1 confidence value.
+### Existing Unboda engines are reused
 
-Confidence depends on:
+For each person, Phase 3 reuses the existing deterministic calculations rather than inventing a new compatibility-only version of myeongri logic:
 
-1. how much weighted evidence is available for the domain
-2. the Phase 1 data-completeness score
+1. `calculateWeightedElements`
+   - weighted five-element distribution including the existing branch / hidden-stem weights
 
-Missing birth time therefore lowers confidence. It does not rewrite identical existing evidence into a different balance judgment.
+2. `calculateStrength`
+   - day-master support versus opposing balance
+   - 매우 신강 / 신강 / 중화 / 신약 / 매우 신약
 
-### Auditable leading signals
+3. `analyzeYongshin`
+   - strength direction
+   - current five-element balance
+   - seasonal effect
+   - climate adjustment
+   - passage / mediation adjustment
+   - excess-element penalty
 
-Each domain stores:
+This means the compatibility layer does **not** use the shortcut:
 
-- all contributing evidence ids
-- up to three strongest support signals
-- up to three strongest tension signals
-- up to three strongest mixed signals
-- up to three strongest context signals
+```text
+missing element -> partner has that element -> automatically good
+```
 
-This is required for the later structured report layer so the explanation model can say *why* a domain was classified a certain way without inventing reasons.
+Instead it uses:
+
+```text
+receiver-specific usefulness of the element
+x
+partner's actual weighted supply of that element
+=
+directional structural influence
+```
+
+### Directional element influence
+
+For every one of the five elements, the engine stores:
+
+- partner/provider share
+- receiver's own current share
+- receiver-specific normalized usefulness score
+- signed preference from -1 to +1
+- support contribution
+- burden contribution
+- neutral contribution
+
+An element with a low natal share can still create burden if the receiver's existing strength / yongshin structure ranks that element as low usefulness.
+
+Conversely, a relatively abundant element can still remain useful if the receiver's structural calculation ranks it highly.
+
+### Directional structure result
+
+Each direction exposes:
+
+- `balanceScore` — internal directional structure balance only
+- `supportive | mixed | burdensome | neutral`
+- confidence
+- support pressure
+- burden pressure
+- neutral pressure
+- all five element contributions
+- up to three leading support elements
+- up to three leading burden elements
+
+This is **not an overall compatibility score**. It describes only how one person's weighted element supply interacts with the other person's personal structure.
+
+### Phase 2 domain scores are intentionally not rewritten
+
+Phase 3 does not silently modify the Phase 2 communication / conflict / recovery / intimacy / long-term scores.
+
+The two layers represent different evidence families:
+
+```text
+traditional cross-chart relations -> Phase 2 domain balance
+personal weighted structure -> Phase 3 directional influence
+```
+
+They remain separate and auditable so the future report contract can explain both without double-counting the same signal.
 
 ## Mixed evidence is preserved
 
 The engine deliberately does not collapse every relation into `good` or `bad`.
 
-For example, 寅-亥 can produce both combination and break evidence under the current rule registry. Both remain in the evidence set and Phase 2 can retain support and mixed pressure simultaneously in the relevant domains.
+For example, a pair can simultaneously contain supportive combination evidence, tension evidence, and a partner element supply that is burdensome for one receiver but supportive for the other.
 
-This is a core design requirement:
+The target model is:
 
 ```text
-support + tension + mixed + context -> domain-specific interpretation
+cross-chart support/tension/mixed/context
++
+directional personal-structure influence
+-> structured relationship interpretation
 ```
 
 not:
@@ -212,55 +245,29 @@ positive count - negative count -> one compatibility score
 
 ## Unknown birth time
 
-Compatibility must remain usable when one or both people do not know their birth time.
+Compatibility remains usable when one or both people do not know birth time.
 
 Rules:
 
 - never invent or substitute a noon/midnight hour pillar
-- omit hour-derived evidence completely
+- omit hour-derived evidence and weighted-element input completely
 - expose deterministic data completeness
 - both known hours: `full`
 - one or both unknown hours: `standard`
-- domain confidence reflects the reduced completeness
+- confidence cannot exceed the completeness contract
 
 The current completeness score uses 8 possible pillar slots across two people. Year/month/day are required; hour is optional.
 
-## Evidence shape
-
-Every relationship signal records:
-
-- stable evidence id
-- evidence kind
-- traditional relation label where relevant
-- support/tension/mixed/context tone
-- positional strength
-- affected interpretation domains
-- exact A/B pillar components that generated the evidence
-- optional metadata such as direction, element, observer, or completed 삼합
-
-This makes future explanations auditable and keeps repeated runs deterministic.
-
 ## Explicitly not implemented yet
 
-The following are intentionally deferred to later phases:
+The following are intentionally deferred:
 
-1. element-balance adjustment using each person's full weighted element structure
-
-2. useful-element / unfavorable-element interaction
-
-3. strength/weakness load adjustment
-
-4. daeun and seun relationship timing
-
-5. customer-visible compatibility labels or scores
-
-6. AI report prompt
-
-7. database persistence
-
-8. pricing, checkout, product registry entry, recommendation integration
-
-9. `전문 분석` customer UI
+1. daeun and seun relationship timing
+2. customer-visible compatibility labels or scores
+3. structured AI report prompt and output contract
+4. database persistence
+5. pricing, checkout, product registry entry, recommendation integration
+6. `전문 분석` customer UI
 
 ## Planned sequence
 
@@ -270,19 +277,19 @@ Implemented.
 
 ### Phase 2 — domain aggregation
 
-Implemented internally. Evidence is now separated into communication, conflict, recovery, intimacy, and long-term domains while preserving support/tension/mixed/context channels.
+Implemented internally.
 
 ### Phase 3 — personal-structure adjustment
 
-Use each person's existing Unboda calculations such as weighted element balance and strength so that partner influence is interpreted in context rather than by `missing element = automatically good` logic.
+Implemented internally. Weighted element balance, strength, and yongshin are now reused to calculate partner influence in both directions without the `missing element = automatically good` shortcut.
 
 ### Phase 4 — timing layer
 
-Add current daeun/seun interaction separately from natal compatibility. Basic compatibility and current relationship timing must remain distinguishable.
+Add current daeun/seun interaction separately from natal compatibility. Basic compatibility, personal-structure influence, and current relationship timing must remain distinguishable.
 
 ### Phase 5 — structured compatibility report contract
 
-Create the JSON contract consumed by the explanation model. The model must be constrained to supplied evidence.
+Create the JSON contract consumed by the explanation model. The model must be constrained to supplied evidence and structure results.
 
 ### Phase 6 — 전문 분석 UI and product flow
 
@@ -296,4 +303,4 @@ Only after the engine contract is stable:
 - generate report
 - later connect pricing/payment/recommendations
 
-Until that phase, this engine remains non-customer-facing and does not change the currently reviewed Toss payment catalog.
+Until Phase 6, this engine remains non-customer-facing and does not change the currently reviewed Toss payment catalog.

@@ -7,7 +7,7 @@
 
 ## 1. Purpose
 
-54개 Launch 상품(TOPIC 47 + PERIOD 7)을 단일 가격(9,900원)으로만 운영하는 현재 상태에서,
+57개 Launch 상품(TOPIC 50 + PERIOD 7)을 단일 가격(9,900원)으로만 운영하는 현재 상태에서,
 tiered pricing / bundle / repeat purchase / solo-operator 자동화로 확장하기 위한
 가격·매출·운영 설계를 CURRENT / NEXT RELEASE / PLANNED / LONG-TERM으로 구분해 기록한다.
 

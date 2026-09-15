@@ -3,11 +3,11 @@ import { getLaunchProductIds } from "../app/lib/paidAnalysisTopicConfig";
 
 const report = assertPaidAnalysisV4LaunchCatalogReady();
 
-if (report.launchProductCount !== 54) {
-  throw new Error(`expected 54 launch products, got ${report.launchProductCount}`);
+if (report.launchProductCount !== 57) {
+  throw new Error(`expected 57 launch products, got ${report.launchProductCount}`);
 }
-if (report.topicProductCount !== 47) {
-  throw new Error(`expected 47 topic products, got ${report.topicProductCount}`);
+if (report.topicProductCount !== 50) {
+  throw new Error(`expected 50 topic products, got ${report.topicProductCount}`);
 }
 if (report.periodProductCount !== 7) {
   throw new Error(`expected 7 period products, got ${report.periodProductCount}`);

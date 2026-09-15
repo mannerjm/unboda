@@ -1,7 +1,7 @@
 # UNBODA PRODUCT ROADMAP
 
 > **CURRENT PRODUCTION (2026-08-24 기준)**: Launch 판매 카탈로그는 `getLaunchProductIds()`
-> 기준 총 **54개(TOPIC 47 + PERIOD 7)**로 확정되었다. 가격은 전 상품 **9,900원 고정**이다
+> 기준 총 **57개(TOPIC 50 + PERIOD 7)**로 확정되었다. 가격은 전 상품 **9,900원 고정**이다
 > (`app/lib/productPricing.ts`). 아래 문서 내 "15,000원 가치 기준"은 **판매가가 아니라**
 > 당시 품질 검증용 historical value criterion이었다. Tiered pricing(ENTRY/CORE/DEEP/PREMIUM)은
 > **NEXT RELEASE candidate**일 뿐 아직 production에 적용되지 않았으며, 상세는

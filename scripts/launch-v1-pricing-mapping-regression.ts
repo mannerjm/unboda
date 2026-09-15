@@ -14,7 +14,7 @@ function assert(condition: boolean, message: string): void {
 
 const launchIds = getLaunchProductIds();
 const launchIdSet = new Set(launchIds);
-assert(launchIds.length === 54, `Launch V1 must contain 54 products, got ${launchIds.length}`);
+assert(launchIds.length === 57, `Launch V1 must contain 57 products, got ${launchIds.length}`);
 assert(launchIdSet.size === launchIds.length, "Launch V1 product IDs must be unique");
 
 const entryIds = [

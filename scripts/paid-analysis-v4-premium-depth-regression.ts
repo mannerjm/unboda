@@ -22,7 +22,7 @@ function assertRejected(
 }
 
 const launchProductIds = getLaunchProductIds();
-assert(launchProductIds.length === 54, "Final launch set must contain 47 topics and 7 period products");
+assert(launchProductIds.length === 57, "Final launch set must contain 50 topics and 7 period products");
 
 const topicContracts: PaidAnalysisPremiumDepthContract[] = [];
 
@@ -61,7 +61,7 @@ for (const productId of launchProductIds) {
   assert(result.ok, `${productId} period premium-depth contract failed`);
 }
 
-assert(topicContracts.length === 47, "47 final launch entries must be TopicConfigs");
+assert(topicContracts.length === 50, "50 final launch entries must be TopicConfigs");
 assert(
   launchProductIds.includes("daeun-current") && !getPaidAnalysisTopicConfig("daeun-current"),
   "daeun-current must stay period-specialized rather than a TopicConfig",

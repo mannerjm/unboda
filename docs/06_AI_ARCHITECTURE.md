@@ -55,8 +55,8 @@ Safety Check — **HEALTH 플러그인 상품에 한해서만** `validatePaidAna
 - `app/lib/premiumProductRegistry.ts`는 이 taxonomy + legacy 4종(`career`/`wealth`/`relationship`/`health`)을 하나의 조회 가능한 registry(`ALL_PREMIUM_PRODUCTS`, `getPremiumProduct()`)로 통합한다.
 - `app/lib/paidAnalysisTopicConfig.ts`의 `getLaunchProductIds()`가 **판매 대상(Launch) 54종(TOPIC 47 + PERIOD 7)의 source of truth**다.
 - `app/lib/premiumCatalog.ts`(`listTopicCatalogProducts()`/`listPeriodCatalogProducts()`)는 registry 전체가 아니라 `getLaunchProductIds()`와 교집합인 상품만 `/result` Premium Catalog에 노출한다.
-- `/checkout/[productId]`, `/paid-analysis/[productId]`, `/paid-analysis/[productId]/report`는 registry 전체(88+legacy)를 대상으로 동작하는 **범용 dynamic route**이며, Launch 54종으로 제한되어 있지 않다. 즉 카탈로그 노출은 54종으로 제한되어 있지만, 그 외 상품도 URL을 직접 알면 상세/구매 페이지 자체는 열린다.
-- `getPaidAnalysisEngine()`(`app/lib/paidAnalysisEngine.ts`)의 `PRODUCT_ENGINE_MAP`도 정확히 Launch 54종만 매핑하며, 나머지 taxonomy 상품(Phase 2)은 의도적으로 제외되어 있다("Launch-scope mapping only; Phase 2 products are intentionally absent").
+- `/checkout/[productId]`, `/paid-analysis/[productId]`, `/paid-analysis/[productId]/report`는 registry 전체(88+legacy)를 대상으로 동작하는 **범용 dynamic route**이며, Launch 57종으로 제한되어 있지 않다. 즉 카탈로그 노출은 54종으로 제한되어 있지만, 그 외 상품도 URL을 직접 알면 상세/구매 페이지 자체는 열린다.
+- `getPaidAnalysisEngine()`(`app/lib/paidAnalysisEngine.ts`)의 `PRODUCT_ENGINE_MAP`도 정확히 Launch 57종만 매핑하며, 나머지 taxonomy 상품(Phase 2)은 의도적으로 제외되어 있다("Launch-scope mapping only; Phase 2 products are intentionally absent").
 
 ## 4. 공용 OpenAI 호출 지점
 

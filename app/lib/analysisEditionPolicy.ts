@@ -70,6 +70,9 @@ const ANALYSIS_EDITION_POLICY_BY_PRODUCT_ID: Readonly<Record<string, AnalysisEdi
   // TOPIC — social
   "relationship-friendship": "YEARLY",
   "relationship-family-role": "YEARLY",
+  "social-helper": "YEARLY",
+  "social-conflict": "MONTHLY",
+  "social-network-expansion": "MONTHLY",
 
   // TOPIC — health
   "health-energy-recovery": "MONTHLY",

@@ -15,6 +15,10 @@ const accessPanel = readFileSync("app/paid-analysis/[productId]/PaidAnalysisAcce
 for (const required of [
   "product.description",
   "getPaidAnalysisTopicConfig",
+  "getTopicRelevanceItems",
+  "withSubjectParticle",
+  "지금 내 상황에서 어떻게 나타나는지 궁금할 때",
+  "무엇을 유지하고 무엇을 조정해야 할지 판단 기준이 필요할 때",
   "recommendedFor.slice(0, 2)",
   "product.details.slice(0, 3)",
   "analysisScope.slice(0, 3)",
@@ -33,8 +37,9 @@ for (const removedCustomerCopy of [
   "다른 기간 분석과의 차이",
   "그래서 이 분석으로",
   "decision.distinction",
+  "관련 내용을 구체적으로 살펴보고 싶을 때",
 ]) {
-  assert(!sharedDetail.includes(removedCustomerCopy), `shared product detail must not render repetitive comparison copy: ${removedCustomerCopy}`);
+  assert(!sharedDetail.includes(removedCustomerCopy), `shared product detail must not render dense/internal purchase copy: ${removedCustomerCopy}`);
 }
 
 for (const state of ["not_purchased", "none", "generating", "completed", "failed"]) {
@@ -48,10 +53,12 @@ for (const productId of getLaunchProductIds()) {
 
   assert(product.description.trim().length > 0, `${productId} must have a concise customer description`);
 
-  const recommendedFor = product.kind === "PERIOD"
-    ? product.purchaseDecision?.recommendedFor.slice(0, 2) ?? []
-    : getPaidAnalysisTopicConfig(productId)?.purchaseDecision?.recommendedFor.slice(0, 2) ?? [];
-  assert(recommendedFor.length > 0 && recommendedFor.length <= 2, `${productId} must support a maximum-two-item relevance section`);
+  if (product.kind === "PERIOD") {
+    const recommendedFor = product.purchaseDecision?.recommendedFor.slice(0, 2) ?? [];
+    assert(recommendedFor.length > 0 && recommendedFor.length <= 2, `${productId} must support a maximum-two-item period relevance section`);
+  } else {
+    assert(product.title.trim().length > 0, `${productId} must support title-based plain-language relevance copy`);
+  }
 
   const quickOverviewItems = product.details?.slice(0, 3)
     ?? product.purchaseDecision?.analysisScope.slice(0, 3)

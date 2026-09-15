@@ -2,11 +2,11 @@
 
 ## Status
 
-This document defines the deterministic foundation for the future `전문 분석 > 궁합` product.
+This document defines the deterministic foundation and first customer flow for `전문 분석 > 궁합`.
 
-The current phase includes **deterministic relationship evidence, domain aggregation, personal-structure adjustment, current timing analysis, and a structured report contract for the explanation model**.
+Phases 1-5 provide **deterministic relationship evidence, domain aggregation, personal-structure adjustment, current timing analysis, and a structured report contract**. Phase 6 now exposes that stack through a member-only customer flow.
 
-It still does not add a customer-facing menu, product, checkout item, recommendation candidate, database report persistence, or paid-report route.
+Phase 6 still does **not** add compatibility to the current paid product registry, Toss checkout catalog, recommendation scoring, or purchased-analysis persistence.
 
 ## Product principle
 
@@ -26,7 +26,7 @@ Person A saju calculation
         /
 Person B saju calculation
 
-structured report contract -> AI explanation -> runtime validation
+structured report contract -> AI explanation -> runtime validation -> customer report
 ```
 
 AI is an explanation layer. It must not invent compatibility evidence that is absent from deterministic engine output.
@@ -115,7 +115,7 @@ Natal compatibility, personal-structure influence, and current timing remain sep
 
 Implemented in `app/lib/compatibilityReportContract.ts`.
 
-Phase 5 does **not** generate a report by itself. It defines what evidence the future explanation model is allowed to see, what JSON it must return, and how returned output is validated before it can become customer-facing content.
+Phase 5 defines what evidence the explanation model is allowed to see, what JSON it must return, and how returned output is validated before it becomes customer-facing content.
 
 ### Closed evidence context
 
@@ -135,8 +135,6 @@ Every fact gets a stable report evidence ID.
 The context exposes `allowedEvidenceRefs`, and the model is required to reference only those IDs. Unknown references fail validation.
 
 The model does not receive names or a free-form relationship story from which it can invent facts. A is fixed as the user and B as the partner only as an internal role contract.
-
-Timing report facts also avoid passing unnecessary raw ganji into the explanation context once the deterministic engine has already resolved the relationship signal.
 
 ### Customer report order
 
@@ -209,7 +207,7 @@ If timing data is partial or limited, the model may describe only the supplied t
 
 ### Explanation prompt contract
 
-`buildCompatibilityReportPrompt()` produces a provider-independent system/user prompt pair but does not call OpenAI or another model.
+`buildCompatibilityReportPrompt()` produces a provider-independent system/user prompt pair.
 
 The prompt explicitly prohibits:
 
@@ -221,11 +219,78 @@ The prompt explicitly prohibits:
 - using technical myeongri vocabulary as the center of the explanation
 - creating dates or timing outside the supplied evaluation year
 
-Phase 5 therefore keeps the future AI call replaceable while preserving one deterministic validation boundary.
+## Phase 6 — 전문 분석 customer flow
+
+Implemented through:
+
+- `app/special-analysis/page.tsx`
+- `app/special-analysis/compatibility/page.tsx`
+- `app/components/CompatibilityAnalysisClient.tsx`
+- `app/api/special-analysis/compatibility/route.ts`
+- `app/lib/compatibilityCustomerInput.ts`
+- `app/lib/compatibilityReportService.ts`
+
+### Discovery and access
+
+The shared application navigation now exposes `전문 분석` as a top-level destination. The professional-analysis hub currently exposes only `궁합 분석`; future engines are not shown as unusable placeholder cards.
+
+Compatibility is member-only and uses the user's current active profile as Person A.
+
+### Partner input and privacy boundary
+
+Person B is entered for the current request with:
+
+- a local display label
+- birth date
+- known / unknown birth-time state
+- gender
+- solar / lunar calendar
+- leap-month state where applicable
+
+The endpoint does not persist this partner input to a profile or compatibility-report table in Phase 6. Raw partner birth data is not included in the report explanation context; the model receives the closed calculated evidence context from Phase 5.
+
+### Unknown partner birth time
+
+No default noon value is inserted.
+
+For an unknown partner birth time, the adapter calculates the date at all 24 hours and verifies that year / month / day pillars are stable across the day. If those date pillars are not stable, the request fails closed and asks for a known birth time rather than guessing.
+
+When the date pillars are stable:
+
+- year / month / day pillars may be used
+- hour pillar remains `null`
+- partner daeun remains unavailable because it cannot be safely resolved without time
+- the current seun may still be calculated from the stable day stem and explicit evaluation year
+
+The report UI explicitly tells the customer when this reduced scope applies.
+
+### Explicit current-date boundary
+
+The customer API resolves an explicit Korean service date (`Asia/Seoul`) and passes that date / year into the existing saju and compatibility timing calculations. Phase 4 itself remains free from a hidden system-clock dependency.
+
+### Explanation generation and validation
+
+`compatibilityReportService.ts` sends only the Phase 5 closed context and output contract through the existing bounded customer-facing generation lane, then runs `validateCompatibilityReportOutput()` before anything is returned to the browser.
+
+The UI never renders internal evidence IDs.
+
+### Payment boundary
+
+Phase 6 is intentionally **not** a paid product integration yet.
+
+It does not:
+
+- add a compatibility product ID to the current premium registry
+- add or change a Toss checkout item
+- change current paid prices
+- insert compatibility into recommendation scoring
+- store the generated report in purchased analyses
+
+Those decisions belong to a separate paid-product / entitlement phase after the customer flow and Toss-review impact are explicitly approved.
 
 ## Separation of evidence families
 
-The architecture now intentionally keeps the following layers distinguishable:
+The architecture intentionally keeps the following layers distinguishable:
 
 ```text
 Phase 1: raw natal relationship evidence
@@ -233,19 +298,21 @@ Phase 2: natal relationship domains
 Phase 3: directional personal-structure influence
 Phase 4: current relationship timing
 Phase 5: closed explanation context + validated report contract
+Phase 6: temporary customer input -> engine -> validated report UI
 ```
 
 The report can explain all of them, but they must not be double-counted into one opaque score.
 
-## Explicitly not implemented yet
+## Deferred work
 
 The following are intentionally deferred:
 
-1. actual AI-provider call for compatibility report generation
-2. customer-visible compatibility report UI
-3. database persistence for compatibility reports / temporary partner data
-4. pricing, checkout, product registry entry, recommendation integration
-5. `전문 분석` customer UI and partner-entry flow
+1. compatibility pricing / entitlement
+2. Toss checkout / product registry integration
+3. compatibility report persistence and purchased-analysis history
+4. recommendation integration
+5. saved partner / relationship profiles
+6. request throttling appropriate for a paid or quota-controlled launch
 
 ## Planned sequence
 
@@ -267,19 +334,8 @@ Implemented.
 
 ### Phase 5 — structured compatibility report contract
 
-Implemented internally. The future explanation model receives a closed evidence context, must return the fixed JSON structure with evidence references, and its output must pass runtime grounding and customer-safety validation.
+Implemented.
 
-### Phase 6 — 전문 분석 UI and product flow
+### Phase 6 — 전문 분석 UI and customer flow
 
-Only after the engine contract is stable:
-
-- add `전문 분석` hub
-- expose 궁합 first
-- select my stored profile
-- enter or temporarily use partner birth data
-- support unknown partner birth time
-- calculate available current timing without filling missing inputs
-- generate and validate the structured compatibility report
-- later connect pricing/payment/recommendations
-
-Until Phase 6, this engine remains non-customer-facing and does not change the currently reviewed Toss payment catalog.
+Implemented as a member-only, non-persisted compatibility flow. Payment/catalog integration remains intentionally separate.

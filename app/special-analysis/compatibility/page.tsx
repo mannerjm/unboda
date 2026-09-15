@@ -36,7 +36,7 @@ export default async function CompatibilityAnalysisPage() {
           <div className="mx-auto w-full max-w-3xl">
             <Link href="/special-analysis" className="text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4">← 전문 분석</Link>
             <header className="mt-7 border-b border-stone-200 pb-6">
-              <p className="text-xs font-semibold tracking-[0.16em] text-stone-400">COMPATIBILITY</p>
+              <p className="text-xs font-semibold tracking-[0.16em] text-stone-400">전문 분석 · 궁합</p>
               <h1 className="mt-2 text-3xl font-bold text-stone-950 sm:text-4xl">궁합 분석</h1>
               <p className="mt-4 text-sm leading-7 text-stone-600">
                 연인·배우자 관계에서 잘 맞는 점, 부딪히기 쉬운 지점, 회복 방식과 현재 관계 흐름을 함께 살펴봅니다.

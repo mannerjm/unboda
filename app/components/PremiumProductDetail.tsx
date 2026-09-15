@@ -2,13 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
 import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import { getProductPricing } from "@/app/lib/productPricing";
 import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
-import { formatTopicExpectedUnderstanding } from "@/app/lib/purchaseDecisionCopy";
 
 type PremiumProductDetailProps = {
   product: PremiumProductDefinition;
@@ -30,15 +28,23 @@ function formatPrice(productId: string): string {
   return `${getProductPricing(productId).amount.toLocaleString("ko-KR")}원`;
 }
 
-function DetailList({ title, items }: { title: string; items: readonly string[] }) {
+function DetailList({ items }: { items: readonly string[] }) {
   return (
     <div className="mt-5">
-      <p className="text-xs font-semibold text-stone-700">{title}</p>
-      <ul className="mt-2 space-y-1 text-sm leading-6 text-stone-600">
+      <p className="text-xs font-semibold text-stone-700">이 분석에서 보는 것</p>
+      <ul className="mt-2 space-y-1.5 text-sm leading-6 text-stone-600">
         {items.map((item) => <li key={item}>· {item}</li>)}
       </ul>
     </div>
   );
+}
+
+function getQuickOverviewItems(product: PremiumProductDefinition): readonly string[] {
+  if (product.details?.length) {
+    return product.details.slice(0, 3);
+  }
+
+  return product.purchaseDecision?.analysisScope.slice(0, 3) ?? [];
 }
 
 export default function PremiumProductDetail({
@@ -70,30 +76,10 @@ export default function PremiumProductDetail({
     }
   };
 
-  const topicDecision = getPaidAnalysisTopicConfig(product.id)?.purchaseDecision;
-  const periodDecision = product.purchaseDecision;
   const isPeriod = product.kind === "PERIOD";
   const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
-  const primaryQuestion = isPeriod
-    ? periodDecision?.primaryQuestion
-    : topicDecision?.decisionQuestion;
-  const recommendedFor = isPeriod
-    ? periodDecision?.recommendedFor
-    : topicDecision?.recommendedFor.slice(0, 3);
-  const analysisScope = isPeriod
-    ? periodDecision?.analysisScope
-    : topicDecision?.whatItAnalyzes.slice(0, 4);
-  const expectedUnderstanding = isPeriod
-    ? periodDecision?.expectedUnderstanding
-    : topicDecision?.expectedUnderstanding.slice(0, 3).map(formatTopicExpectedUnderstanding);
-  const distinction = isPeriod
-    ? periodDecision?.distinction
-    : topicDecision?.distinction;
+  const quickOverviewItems = getQuickOverviewItems(product);
   const href = getPremiumAnalysisHref(product.id, state, profileId);
-
-  if (!primaryQuestion || !recommendedFor || !analysisScope || !expectedUnderstanding || !distinction) {
-    return null;
-  }
 
   return (
     <section className="mt-6 rounded-xl border border-[#cdbb98] bg-[#fffdf8] p-5 sm:p-6" aria-labelledby="selected-product-title">
@@ -110,19 +96,10 @@ export default function PremiumProductDetail({
           </button>
         ) : null}
       </div>
-      <p className="mt-4 text-sm font-semibold leading-6 text-stone-900">{primaryQuestion}</p>
-      <DetailList title={isPeriod ? "이런 때 살펴보세요" : "이런 고민이 있다면"} items={recommendedFor} />
-      <DetailList title="이 분석이 확인하는 것" items={analysisScope} />
-      <DetailList title={isPeriod ? "분석 후 이해할 수 있는 것" : "분석을 받고 나면"} items={expectedUnderstanding} />
-      <div className="mt-5 border-t border-stone-200 pt-4">
-        <p className="text-xs font-semibold text-stone-700">{isPeriod ? "다른 기간 분석과의 차이" : "비슷한 분석과의 차이"}</p>
-        <p className="mt-2 text-sm leading-6 text-stone-600">{distinction}</p>
-      </div>
-      {!isPeriod ? (
-        <p className="mt-5 border-t border-stone-200 pt-4 text-sm leading-6 text-stone-700">
-          그래서 이 분석으로 {expectedUnderstanding[0]}
-        </p>
-      ) : null}
+
+      <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-700">{product.description}</p>
+      {quickOverviewItems.length > 0 ? <DetailList items={quickOverviewItems} /> : null}
+
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-4">
         <span className="text-sm font-medium text-stone-500">{formatPrice(product.id)}</span>
         <div className="flex flex-wrap gap-2">

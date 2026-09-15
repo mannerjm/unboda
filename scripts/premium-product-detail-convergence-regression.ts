@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { getLaunchProductIds } from "../app/lib/paidAnalysisTopicConfig";
 import { getPremiumProduct } from "../app/lib/premiumProductRegistry";
 import { resolveLaunchPurchasableProduct } from "../app/lib/purchases/products";
 
@@ -12,22 +13,44 @@ const standalonePage = readFileSync("app/paid-analysis/[productId]/page.tsx", "u
 const accessPanel = readFileSync("app/paid-analysis/[productId]/PaidAnalysisAccessPanel.tsx", "utf8");
 
 for (const required of [
-  "getPaidAnalysisTopicConfig",
-  "product.purchaseDecision",
-  "이런 고민이 있다면",
-  "이런 때 살펴보세요",
-  "이 분석이 확인하는 것",
-  "분석을 받고 나면",
-  "분석 후 이해할 수 있는 것",
-  "비슷한 분석과의 차이",
-  "다른 기간 분석과의 차이",
+  "product.description",
+  "product.details.slice(0, 3)",
+  "product.purchaseDecision?.analysisScope.slice(0, 3)",
+  "이 분석에서 보는 것",
   "getPremiumAnalysisHref(product.id, state, profileId)",
 ]) {
   assert(sharedDetail.includes(required), `shared product detail missing ${required}`);
 }
 
+for (const removedCustomerCopy of [
+  "이런 고민이 있다면",
+  "이런 때 살펴보세요",
+  "분석을 받고 나면",
+  "분석 후 이해할 수 있는 것",
+  "비슷한 분석과의 차이",
+  "다른 기간 분석과의 차이",
+  "그래서 이 분석으로",
+]) {
+  assert(!sharedDetail.includes(removedCustomerCopy), `shared product detail must not render dense/repetitive section: ${removedCustomerCopy}`);
+}
+
+assert(!sharedDetail.includes("getPaidAnalysisTopicConfig"), "customer detail must not depend on internal topic decision-contract copy");
+assert(!sharedDetail.includes("formatTopicExpectedUnderstanding"), "customer detail must not re-expand internal expected-understanding copy");
+
 for (const state of ["not_purchased", "none", "generating", "completed", "failed"]) {
   assert(sharedDetail.includes(state), `shared product detail must support ${state}`);
+}
+
+for (const productId of getLaunchProductIds()) {
+  const product = getPremiumProduct(productId);
+  assert(Boolean(product), `${productId} must resolve from the premium registry`);
+  if (!product) continue;
+
+  assert(product.description.trim().length > 0, `${productId} must have a concise customer description`);
+  const quickOverviewItems = product.details?.slice(0, 3)
+    ?? product.purchaseDecision?.analysisScope.slice(0, 3)
+    ?? [];
+  assert(quickOverviewItems.length > 0 && quickOverviewItems.length <= 3, `${productId} must support a maximum-three-item quick overview`);
 }
 
 assert(catalog.includes('import PremiumProductDetail from "@/app/components/PremiumProductDetail"'), "deep-analysis catalog must use the shared detail");

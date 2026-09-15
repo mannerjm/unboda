@@ -4,6 +4,8 @@ import {
   buildProfileCompatibilitySnapshot,
   validateCompatibilityPartnerInput,
 } from "../app/lib/compatibilityCustomerInput";
+import { buildCompatibilityPairPerspectives } from "../app/lib/compatibilityPairPerspective";
+import { buildCompatibilityTiming } from "../app/lib/compatibilityTiming";
 import type { ProfileDto } from "../app/lib/profiles/types";
 
 function assert(condition: boolean, message: string): asserts condition {
@@ -50,6 +52,18 @@ const mine = buildProfileCompatibilitySnapshot(profile, evaluationDate);
 assert(Boolean(mine.person.pillars.hour), "stored profile with known time must retain hour pillar");
 assert(Boolean(mine.timing.seunGanji), "stored profile must expose current seun for the explicit evaluation date");
 
+const knownSnapshot = buildPartnerCompatibilitySnapshot(knownPartner.value, evaluationDate);
+const timing = buildCompatibilityTiming(mine.person, knownSnapshot.person, {
+  evaluationYear: 2026,
+  A: mine.timing,
+  B: knownSnapshot.timing,
+});
+const perspectives = buildCompatibilityPairPerspectives(timing);
+assert(perspectives.meToPartner.direction === "me_to_partner", "pair perspective must preserve user-to-partner direction");
+assert(perspectives.partnerToMe.direction === "partner_to_me", "pair perspective must preserve partner-to-user direction");
+assert(perspectives.meToPartner.headline.length > 0 && perspectives.partnerToMe.headline.length > 0, "pair perspective must expose customer-facing directional headlines");
+assert(!/\d{1,3}\s*(?:점|%)/u.test(`${perspectives.meToPartner.summary}${perspectives.partnerToMe.summary}`), "pair perspective must not expose numeric compatibility scoring");
+
 const unknownSnapshot = buildPartnerCompatibilitySnapshot(unknownPartner.value, evaluationDate);
 assert(unknownSnapshot.person.pillars.hour === null, "unknown partner time must keep hour pillar absent");
 assert(unknownSnapshot.timing.daeunGanji === null, "unknown partner time must not synthesize current daeun");
@@ -68,6 +82,7 @@ const compatibilityPage = readFileSync("app/special-analysis/compatibility/page.
 const client = readFileSync("app/components/CompatibilityAnalysisClient.tsx", "utf8");
 const api = readFileSync("app/api/special-analysis/compatibility/route.ts", "utf8");
 const service = readFileSync("app/lib/compatibilityReportService.ts", "utf8");
+const perspectiveSource = readFileSync("app/lib/compatibilityPairPerspective.ts", "utf8");
 const adapter = readFileSync("app/lib/compatibilityCustomerInput.ts", "utf8");
 
 assert(shell.includes('href: "/special-analysis"') && shell.includes('label: "전문 분석"'), "AppShell must expose professional analysis");
@@ -86,6 +101,7 @@ assert(compatibilityPage.includes("연인·배우자 관계에서") && compatibi
 assert(!compatibilityPage.includes("단순 점수 대신"), "compatibility page must not explain the product through an internal scoring contrast");
 assert(api.includes("getCurrentUser") && api.includes("getActiveProfile"), "compatibility API must be member and active-profile scoped");
 assert(api.includes("buildCompatibilityTiming") && api.includes("generateCompatibilityReport"), "compatibility API must use the deterministic engine before explanation generation");
+assert(api.includes("buildCompatibilityPairPerspectives") && api.includes("perspectives,"), "compatibility API must expose deterministic directional perspectives alongside the report");
 assert(api.includes('timeZone: "Asia/Seoul"'), "customer timing evaluation date must be explicit in the Korean service timezone");
 assert(!api.includes(".from("), "temporary partner data must not be persisted by the compatibility endpoint");
 assert(!api.includes("checkout") && !api.includes("premiumProductRegistry"), "Phase 6 must not silently add compatibility to the current Toss-reviewed catalog");
@@ -100,6 +116,7 @@ assert(client.includes("상대방 이름 또는 별칭") && client.includes('pla
 assert(client.includes('<option value="" disabled>선택해 주세요</option>'), "gender select must expose a neutral selection prompt");
 assert(client.includes("현재 궁합 분석은 연인·배우자 관계를 기준으로 살펴봅니다."), "input form must state the current romantic/partner scope");
 assert(client.includes("disabled={loading || !canSubmit}"), "analysis CTA must remain disabled until the required deliberate inputs are complete");
+assert(client.includes("서로에게 미치는 방식") && client.includes("perspectives.meToPartner") && client.includes("perspectives.partnerToMe"), "result UI must make the engine's asymmetric pair influence visible to customers");
 assert(!client.includes("상대방 구분 이름"), "customer form must not expose system-like partner label wording");
 assert(!client.includes("evidenceRefs}"), "internal evidence references must never be rendered to customers");
 assert(service.includes('callType: "recommendation-analysis"'), "compatibility explanation must use the bounded customer-facing generation lane");
@@ -107,7 +124,10 @@ assert(service.includes("validateCompatibilityReportOutput"), "model output must
 assert(service.includes("COMPATIBILITY_REPORT_GENERATION_MAX_ATTEMPTS = 2"), "compatibility report generation must use one bounded schema-repair retry");
 assert(service.includes('issue.code === "too_big"'), "compatibility retry must be limited to schema cardinality overflow rather than arbitrary validation failures");
 assert(service.includes("[STRICT_CARDINALITY_LIMITS]"), "compatibility generation prompt must state strict array limits before the first model call");
+assert(service.includes("[CUSTOMER_COPY_GUIDE]") && service.includes("같은 조언") && service.includes("55자"), "compatibility generation must guard concise, non-repetitive customer copy");
 assert(service.includes("직전 응답은 배열 개수 제한을 초과했습니다"), "compatibility repair retry must explicitly correct only array cardinality overflow");
+assert(perspectiveSource.includes("BReceivesFromA") && perspectiveSource.includes("AReceivesFromB"), "directional presentation must preserve the two engine directions rather than flatten them");
+assert(!perspectiveSource.includes("Math.random") && !perspectiveSource.includes("generateAnalysisText"), "directional perspective layer must remain deterministic and evidence-derived");
 assert(adapter.includes("Array.from({ length: 24 }") && adapter.includes("signatures.size !== 1"), "unknown-time handling must verify stable date pillars rather than inject noon");
 assert(!adapter.includes('birthTime: "12:00"'), "server adapter must never synthesize noon for unknown birth time");
 

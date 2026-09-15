@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { buildCompatibilityTiming } from "@/app/lib/compatibilityTiming";
+import { buildCompatibilityPairPerspectives } from "@/app/lib/compatibilityPairPerspective";
 import {
   buildPartnerCompatibilitySnapshot,
   buildProfileCompatibilitySnapshot,
@@ -60,8 +61,10 @@ export async function POST(request: Request) {
 
   try {
     const generated = await generateCompatibilityReport(timingResult);
+    const perspectives = buildCompatibilityPairPerspectives(timingResult);
     return NextResponse.json({
       report: generated.report,
+      perspectives,
       meta: {
         evaluationYear,
         myProfileLabel: activeProfile.label,

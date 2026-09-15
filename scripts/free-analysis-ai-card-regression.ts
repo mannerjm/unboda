@@ -212,10 +212,16 @@ for (const forbiddenOutputHeading of ["현재 대운 해석 3)", "현재 세운 
 assert(prompt.includes("대운: 대운팩트") && prompt.includes("세운: 세운팩트"), "daeun and seun facts must remain in the prompt even though they no longer get separate output cards");
 assert(prompt.includes("활성관계") && prompt.includes("기회근거") && prompt.includes("주의근거"), "current-flow evidence must remain available to the concise overview");
 assert(prompt.includes("서로 다른 근거를 최소 3가지 이상 연결"), "traits section must preserve multiple independent engine facts instead of becoming generic copy");
+assert(prompt.includes("사주의 특성에는 현재 대운·세운") && prompt.includes("타고난 특성만 설명"), "traits card must stay independent from current fortune and current problems");
+assert(prompt.includes("핵심 문제 1개") && prompt.includes("보조 문제 1개"), "overview must prioritize one or two current problems instead of listing every domain");
+assert(prompt.includes("직업·재물·관계·건강을 모두 나열하지 않는다"), "overview must not list all topic domains");
+assert(prompt.includes("여러 문제가 동시에 움직인다") && prompt.includes("가장 우선인 문제"), "overview must distinguish the primary current problem from secondary pressure");
+assert(prompt.includes("'구조', '배치', '기운', '신호', '작용', '보완'"), "prompt must discourage abstract jargon-like phrasing");
+assert(prompt.includes("기회보다 주의가 더 크다"), "prompt must prohibit fear-based opportunity-versus-caution comparisons");
 assert(prompt.includes("해결책을 절대 제시하지 마세요"), "free prompt must explicitly prohibit solutions");
-assert(prompt.includes("약 700~1000자 내외"), "free prompt must cap the two-card diagnosis to a concise character target");
+assert(prompt.includes("약 600~850자 내외"), "free prompt must cap the two-card diagnosis to a concise character target");
 assert(prompt.includes("영어 단어를 사용자에게 절대 노출하지 마세요"), "free prompt must prohibit accidental English leakage");
 assert(prompt.includes("화면 위쪽에 이미 표시된") && prompt.includes("그대로 반복"), "free prompt must prohibit repeating deterministic engine output");
-console.log("10. prompt keeps engine facts while requesting stable two-card diagnosis sections ✓");
+console.log("10. prompt separates stable traits from prioritized current problems in plain language ✓");
 
 console.log("\nfree-analysis-ai-card-regression passed ✓");

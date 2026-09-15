@@ -4,7 +4,7 @@
 
 This document defines the deterministic foundation for the future `전문 분석 > 궁합` product.
 
-The current phase is **engine foundation + domain aggregation + personal-structure adjustment only**. It does not add a customer-facing menu, product, checkout item, recommendation candidate, or paid-report route.
+The current phase includes **deterministic relationship evidence, domain aggregation, personal-structure adjustment, and current timing analysis**. It still does not add a customer-facing menu, product, checkout item, recommendation candidate, or paid-report route.
 
 ## Product principle
 
@@ -18,7 +18,7 @@ Person A saju calculation
          -> deterministic relationship evidence
          -> domain aggregation
          -> personal-structure adjustment
-         -> timing layer
+         -> current daeun / seun timing layer
          -> structured report data
         /
 Person B saju calculation
@@ -26,78 +26,29 @@ Person B saju calculation
 structured report data -> AI explanation
 ```
 
-AI is an explanation layer. It must not invent compatibility evidence that is absent from the deterministic engine output.
+AI is an explanation layer. It must not invent compatibility evidence that is absent from deterministic engine output.
 
-## Phase 1: deterministic evidence foundation
+## Phase 1 — deterministic evidence foundation
 
 Implemented in `app/lib/compatibilityEngine.ts`.
 
-Input uses already-calculated four-pillar ganji values for each person:
+The engine receives already-calculated natal pillars for both people and creates auditable relationship evidence from:
 
-- year pillar
-- month pillar
-- day pillar
-- hour pillar when known
+- directional day-stem element relationship
+- heavenly-stem combinations
+- branch 육합 / 충 / 형 / 해 / 파
+- completed cross-chart 삼합
+- directional cross-chart 십성
 
-The engine intentionally does not accept names or other personally identifying display data.
+A -> B and B -> A remain separate where direction matters.
 
-### Evidence currently calculated
+Birth time is optional. An unknown hour is omitted; noon or midnight is never synthesized.
 
-1. **Directional day-stem element relationship**
-   - same
-   - generate
-   - generated_by
-   - control
-   - controlled_by
-
-2. **Heavenly-stem combinations**
-   - 甲己
-   - 乙庚
-   - 丙辛
-   - 丁壬
-   - 戊癸
-
-3. **Earthly-branch relationships**
-   - 육합
-   - 충
-   - 형, including supported self-punishment cases
-   - 해
-   - 파
-
-4. **Completed 삼합 across the two charts**
-   - 申子辰 -> 수
-   - 亥卯未 -> 목
-   - 寅午戌 -> 화
-   - 巳酉丑 -> 금
-
-5. **Directional cross-chart 십성**
-
-A -> B and B -> A are stored separately because the relationship experience is directional.
-
-### Position strength
-
-Position strength is stored as evidence salience, not as a final compatibility score.
-
-| Cross position | Strength |
-| --- | ---: |
-| day-day | 1.00 |
-| month-month | 0.75 |
-| day-month | 0.70 |
-| day-hour | 0.60 |
-| hour-hour | 0.55 |
-| day-year | 0.50 |
-| month-hour | 0.50 |
-| year-year | 0.40 |
-| month-year | 0.40 |
-| year-hour | 0.35 |
-
-These are Unboda engine calibration values. They are not presented as one universally accepted traditional-myeongri formula.
-
-## Phase 2: relationship-domain aggregation
+## Phase 2 — relationship-domain aggregation
 
 Implemented in `app/lib/compatibilityDomainAggregation.ts`.
 
-Phase 2 converts Phase 1 evidence into five separate internal domains:
+Natal relationship evidence is aggregated into five separate internal domains:
 
 - `communication`
 - `conflict`
@@ -105,22 +56,125 @@ Phase 2 converts Phase 1 evidence into five separate internal domains:
 - `intimacy`
 - `long_term`
 
-There is deliberately **no overall compatibility score**.
+Each domain preserves four channels:
 
-### Four pressure channels
+- `support`
+- `tension`
+- `mixed`
+- `context`
 
-Every domain retains evidence in four separate channels:
+There is deliberately no overall compatibility score. A clash is not automatically converted into `bad`, and conflicting evidence is not deleted merely to create a single answer.
 
-- `support` — supportive relationship evidence
-- `tension` — tension-producing evidence
-- `mixed` — evidence that can create activation and friction at the same time
-- `context` — descriptive evidence such as directional 십성 that does not manufacture a positive/negative judgment by itself
+## Phase 3 — personal-structure adjustment
 
-This prevents a rule such as `충 = bad` or `합 = good` from becoming the whole result.
+Implemented in `app/lib/compatibilityPersonalStructure.ts`.
 
-### Internal domain result
+Phase 3 reuses the existing Unboda calculations for each person:
 
-Each domain may expose an internal 0-100 balance score plus one of:
+- `calculateWeightedElements`
+- `calculateStrength`
+- `analyzeYongshin`
+
+This layer asks whether the partner's actual weighted element supply is supportive, burdensome, or mixed **for that specific receiver**.
+
+The result is directional:
+
+```text
+A receives B
+B receives A
+```
+
+A missing element is not an automatic compatibility bonus. Direction is determined from the receiver's existing strength / yongshin usefulness calculation. Natal scarcity is retained as context only.
+
+Phase 2 domain results are not rewritten by Phase 3. Traditional cross-chart relations and personal weighted-structure influence remain separate evidence families.
+
+## Phase 4 — current relationship timing
+
+Implemented in `app/lib/compatibilityTiming.ts`.
+
+Phase 4 keeps basic natal compatibility separate from current timing. It answers:
+
+> Given the already-calculated current daeun and seun for both people, what relationship pressure is active in the supplied evaluation year?
+
+### Timing input contract
+
+The timing layer accepts an explicit `evaluationYear` and optional current-cycle ganji for each person:
+
+```text
+A.daeunGanji
+A.seunGanji
+B.daeunGanji
+B.seunGanji
+```
+
+The layer intentionally does **not** call the system clock and does not calculate a hidden current date. The caller must supply the evaluation year and current cycles from the existing Unboda fortune calculations.
+
+This keeps repeated runs deterministic and prevents a report generated later from silently changing because server time changed.
+
+### Hangul / Hanja normalization
+
+Existing Unboda daeun and seun modules use Korean ganji such as `갑자`, while compatibility natal pillars use Hanja such as `甲子`.
+
+Phase 4 accepts either form and normalizes both to one Hanja contract before analysis.
+
+### Individual timing load
+
+For each person, current daeun and seun stem / branch elements are evaluated against that person's Phase 3 yongshin usefulness scores.
+
+This produces separate current-period values for:
+
+- support pressure
+- burden pressure
+- neutral pressure
+- internal timing balance
+- timing level
+- confidence
+
+The existing Phase 3 `scoreCompatibilityElementSupply` rule is reused, so a current-cycle element is not treated as beneficial merely because it is scarce in the natal chart.
+
+Daeun and seun remain distinct horizons. Seun has greater short-term timing salience, while daeun provides broader background pressure.
+
+### Cycle-to-partner natal activation
+
+Each supplied current cycle is compared with the other person's natal branches.
+
+Target-position salience follows the same product principle used elsewhere:
+
+- day branch strongest
+- month next
+- hour and year lower
+
+The timing layer reuses the existing `fortuneRelations` rules for:
+
+- 합
+- 충
+- 형
+- 파
+- 해
+
+Multiple simultaneous relations remain multiple evidence items. For example, a relation that qualifies for both 합 and 파 is not forced into only one category.
+
+### Same-horizon cycle alignment
+
+When both people have current daeun, the two daeun branches are compared.
+
+When both people have current seun, the two seun branches are compared.
+
+This captures whether the pair is experiencing a broadly supportive, activating, or pressured relationship environment at the same horizon without mixing natal compatibility and current timing into one number.
+
+### Relationship timing domains
+
+Cross-person timing evidence is aggregated separately into the same five domains:
+
+- communication
+- conflict
+- recovery
+- intimacy
+- long-term stability
+
+These are exposed as `relationshipTimingDomains`, not as replacements for the natal Phase 2 domains.
+
+A timing domain may expose an internal balance score and one of:
 
 - `supportive`
 - `steady`
@@ -128,146 +182,64 @@ Each domain may expose an internal 0-100 balance score plus one of:
 - `adjustment_needed`
 - `insufficient_evidence`
 
-The score remains an internal engine value and is not combined into one compatibility total.
+There is still no total compatibility score.
 
-Each domain also stores confidence, all contributing evidence IDs, and up to three leading signals for each pressure channel.
+### Pair timing pattern
 
-## Phase 3: personal-structure adjustment
+The two individual timing loads are summarized only as a coarse state:
 
-Implemented in `app/lib/compatibilityPersonalStructure.ts`.
+- `mutually_supported`
+- `jointly_pressured`
+- `asymmetric`
+- `mixed`
+- `insufficient`
 
-Phase 3 answers a different question from Phase 1 and 2:
+This is a timing-state label, not a prediction that a relationship will succeed or fail.
 
-> When this specific partner's element distribution reaches this specific person, is that influence structurally supportive, burdensome, or mixed for that receiver?
+### Timing data completeness
 
-The answer is directional. `A receives B` and `B receives A` are calculated independently.
-
-### Existing Unboda engines are reused
-
-For each person, Phase 3 reuses the existing deterministic calculations rather than inventing a new compatibility-only version of myeongri logic:
-
-1. `calculateWeightedElements`
-   - weighted five-element distribution including the existing branch / hidden-stem weights
-
-2. `calculateStrength`
-   - day-master support versus opposing balance
-   - 매우 신강 / 신강 / 중화 / 신약 / 매우 신약
-
-3. `analyzeYongshin`
-   - strength direction
-   - current five-element balance
-   - seasonal effect
-   - climate adjustment
-   - passage / mediation adjustment
-   - excess-element penalty
-
-This means the compatibility layer does **not** use the shortcut:
+There are four possible timing slots across the pair:
 
 ```text
-missing element -> partner has that element -> automatically good
+A daeun
+A seun
+B daeun
+B seun
 ```
 
-Instead it uses:
+The engine exposes timing completeness independently from natal completeness:
+
+- all four: `full`
+- two or three: `partial`
+- one: `limited`
+- zero: `unavailable`
+
+Missing current cycles are never synthesized.
+
+This is particularly important when a partner's birth time is unknown and an exact current daeun cannot be safely resolved. Available seun or other current-cycle data may still be analyzed without inventing the missing layer.
+
+## Separation of evidence families
+
+The final engine architecture now intentionally keeps four families distinct:
 
 ```text
-receiver-specific usefulness of the element
-x
-partner's actual weighted supply of that element
-=
-directional structural influence
+Phase 1: raw natal relationship evidence
+Phase 2: natal relationship domains
+Phase 3: directional personal-structure influence
+Phase 4: current relationship timing
 ```
 
-### Directional element influence
-
-For every one of the five elements, the engine stores:
-
-- partner/provider share
-- receiver's own current share
-- receiver-specific normalized usefulness score
-- signed preference from -1 to +1
-- support contribution
-- burden contribution
-- neutral contribution
-
-An element with a low natal share can still create burden if the receiver's existing strength / yongshin structure ranks that element as low usefulness.
-
-Conversely, a relatively abundant element can still remain useful if the receiver's structural calculation ranks it highly.
-
-### Directional structure result
-
-Each direction exposes:
-
-- `balanceScore` — internal directional structure balance only
-- `supportive | mixed | burdensome | neutral`
-- confidence
-- support pressure
-- burden pressure
-- neutral pressure
-- all five element contributions
-- up to three leading support elements
-- up to three leading burden elements
-
-This is **not an overall compatibility score**. It describes only how one person's weighted element supply interacts with the other person's personal structure.
-
-### Phase 2 domain scores are intentionally not rewritten
-
-Phase 3 does not silently modify the Phase 2 communication / conflict / recovery / intimacy / long-term scores.
-
-The two layers represent different evidence families:
-
-```text
-traditional cross-chart relations -> Phase 2 domain balance
-personal weighted structure -> Phase 3 directional influence
-```
-
-They remain separate and auditable so the future report contract can explain both without double-counting the same signal.
-
-## Mixed evidence is preserved
-
-The engine deliberately does not collapse every relation into `good` or `bad`.
-
-For example, a pair can simultaneously contain supportive combination evidence, tension evidence, and a partner element supply that is burdensome for one receiver but supportive for the other.
-
-The target model is:
-
-```text
-cross-chart support/tension/mixed/context
-+
-directional personal-structure influence
--> structured relationship interpretation
-```
-
-not:
-
-```text
-positive count - negative count -> one compatibility score
-```
-
-## Unknown birth time
-
-Compatibility remains usable when one or both people do not know birth time.
-
-Rules:
-
-- never invent or substitute a noon/midnight hour pillar
-- omit hour-derived evidence and weighted-element input completely
-- expose deterministic data completeness
-- both known hours: `full`
-- one or both unknown hours: `standard`
-- confidence cannot exceed the completeness contract
-
-The current completeness score uses 8 possible pillar slots across two people. Year/month/day are required; hour is optional.
+A future report can explain all four, but they must not be double-counted into one opaque score.
 
 ## Explicitly not implemented yet
 
 The following are intentionally deferred:
 
-1. daeun and seun relationship timing
-2. customer-visible compatibility labels or scores
-3. structured AI report prompt and output contract
-4. database persistence
-5. pricing, checkout, product registry entry, recommendation integration
-6. `전문 분석` customer UI
+1. structured compatibility report contract for the explanation model
+2. customer-visible compatibility wording and report sections
+3. database persistence for compatibility reports / temporary partner data
+4. pricing, checkout, product registry entry, recommendation integration
+5. `전문 분석` customer UI
 
 ## Planned sequence
 
@@ -277,19 +249,19 @@ Implemented.
 
 ### Phase 2 — domain aggregation
 
-Implemented internally.
+Implemented.
 
 ### Phase 3 — personal-structure adjustment
 
-Implemented internally. Weighted element balance, strength, and yongshin are now reused to calculate partner influence in both directions without the `missing element = automatically good` shortcut.
+Implemented.
 
 ### Phase 4 — timing layer
 
-Add current daeun/seun interaction separately from natal compatibility. Basic compatibility, personal-structure influence, and current relationship timing must remain distinguishable.
+Implemented internally. Current daeun / seun are accepted as explicit calculated inputs, personal timing load is evaluated against the existing yongshin structure, and cross-person timing evidence remains separate from natal compatibility.
 
 ### Phase 5 — structured compatibility report contract
 
-Create the JSON contract consumed by the explanation model. The model must be constrained to supplied evidence and structure results.
+Create the JSON contract consumed by the explanation model. The model must be constrained to supplied natal, structural, and timing evidence and must not invent relationship events or future outcomes.
 
 ### Phase 6 — 전문 분석 UI and product flow
 
@@ -300,6 +272,7 @@ Only after the engine contract is stable:
 - select my stored profile
 - enter or temporarily use partner birth data
 - support unknown partner birth time
+- calculate available current timing without filling missing inputs
 - generate report
 - later connect pricing/payment/recommendations
 

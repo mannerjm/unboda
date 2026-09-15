@@ -73,7 +73,16 @@ const adapter = readFileSync("app/lib/compatibilityCustomerInput.ts", "utf8");
 assert(shell.includes('href: "/special-analysis"') && shell.includes('label: "전문 분석"'), "AppShell must expose professional analysis");
 assert(shell.includes("grid-cols-7"), "mobile navigation must include professional analysis without hiding it");
 assert(hub.includes("궁합 분석") && hub.includes('href="/special-analysis/compatibility"'), "professional hub must expose compatibility");
+assert(hub.includes("궁합 분석 시작하기"), "professional hub must expose a clear customer CTA");
+assert(hub.includes("출생시간을 몰라도 분석 가능"), "professional hub must explain unknown-time support in customer language");
+assert(hub.includes("소통·갈등·회복까지 확인"), "professional hub must explain compatibility scope in customer language");
+assert(hub.includes("현재 관계 흐름 함께 확인"), "professional hub must explain timing value in customer language");
+for (const internalCopy of ["전문 엔진", "단일 총점 없음", "현재 시기 별도 분석", "원국 관계", "대운·세운"]) {
+  assert(!hub.includes(internalCopy), `professional hub must not expose internal copy: ${internalCopy}`);
+}
 assert(compatibilityPage.includes("CompatibilityAnalysisClient"), "compatibility page must mount the customer flow");
+assert(compatibilityPage.includes("잘 맞는 점") && compatibilityPage.includes("회복 방식") && compatibilityPage.includes("현재 관계 흐름"), "compatibility page intro must describe customer value directly");
+assert(!compatibilityPage.includes("단순 점수 대신"), "compatibility page must not explain the product through an internal scoring contrast");
 assert(api.includes("getCurrentUser") && api.includes("getActiveProfile"), "compatibility API must be member and active-profile scoped");
 assert(api.includes("buildCompatibilityTiming") && api.includes("generateCompatibilityReport"), "compatibility API must use the deterministic engine before explanation generation");
 assert(api.includes('timeZone: "Asia/Seoul"'), "customer timing evaluation date must be explicit in the Korean service timezone");

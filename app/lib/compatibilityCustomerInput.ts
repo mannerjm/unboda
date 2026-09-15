@@ -1,6 +1,7 @@
 import { calculateSaju, lunarToSolar } from "@fullstackfamily/manseryeok";
 import { getSaju } from "./manse";
 import { calculateSeun } from "./seun";
+import { GUEST_BIRTH_DATE_MIN, isGuestBirthDateInRange } from "./guestFreeAnalyses/date";
 import type {
   ProfileAppCalendarType,
   ProfileAppGender,
@@ -55,8 +56,15 @@ export function validateCompatibilityPartnerInput(input: unknown):
     return { valid: false, error: "상대방을 구분할 이름을 40자 이내로 입력해 주세요." };
   }
 
-  if (typeof raw.birthDate !== "string" || !isRealDate(raw.birthDate)) {
-    return { valid: false, error: "상대방의 생년월일을 확인해 주세요." };
+  if (
+    typeof raw.birthDate !== "string"
+      || !isRealDate(raw.birthDate)
+      || !isGuestBirthDateInRange(raw.birthDate)
+  ) {
+    return {
+      valid: false,
+      error: `${GUEST_BIRTH_DATE_MIN.slice(0, 4)}년 이후의 실제 생년월일을 선택해 주세요.`,
+    };
   }
 
   if (typeof raw.birthTimeKnown !== "boolean") {

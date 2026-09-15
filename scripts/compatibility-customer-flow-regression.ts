@@ -99,6 +99,7 @@ for (const internalCopy of ["전문 엔진", "단일 총점 없음", "현재 시
 assert(compatibilityPage.includes("CompatibilityAnalysisClient"), "compatibility page must mount the customer flow");
 assert(compatibilityPage.includes("연인·배우자 관계에서") && compatibilityPage.includes("회복 방식") && compatibilityPage.includes("현재 관계 흐름"), "compatibility page intro must state the customer scope and value directly");
 assert(!compatibilityPage.includes("단순 점수 대신"), "compatibility page must not explain the product through an internal scoring contrast");
+assert(compatibilityPage.includes("max-w-5xl") && compatibilityPage.includes("max-w-3xl"), "compatibility page must reserve a wider canvas for the premium result while keeping intro/input readable");
 assert(api.includes("getCurrentUser") && api.includes("getActiveProfile"), "compatibility API must be member and active-profile scoped");
 assert(api.includes("buildCompatibilityTiming") && api.includes("generateCompatibilityReport"), "compatibility API must use the deterministic engine before explanation generation");
 assert(api.includes("buildCompatibilityPairPerspectives") && api.includes("perspectives,"), "compatibility API must expose deterministic directional perspectives alongside the report");
@@ -117,6 +118,13 @@ assert(client.includes('<option value="" disabled>선택해 주세요</option>')
 assert(client.includes("현재 궁합 분석은 연인·배우자 관계를 기준으로 살펴봅니다."), "input form must state the current romantic/partner scope");
 assert(client.includes("disabled={loading || !canSubmit}"), "analysis CTA must remain disabled until the required deliberate inputs are complete");
 assert(client.includes("서로에게 미치는 방식") && client.includes("perspectives.meToPartner") && client.includes("perspectives.partnerToMe"), "result UI must make the engine's asymmetric pair influence visible to customers");
+assert(client.includes('data-section="pair-perspective"'), "directional compatibility section must have a stable result marker and remain a first-class report section");
+assert(client.includes("궁합 리포트") && client.includes("관계 핵심 요약") && client.includes("RELATIONSHIP CORE"), "result hero must read like a premium report instead of a raw developer output");
+assert(client.includes("오래 가려면 맞춰야 할 기준") && client.includes("갈등 뒤 회복 방식"), "premium result hierarchy must translate technical sections into customer-readable editorial sections");
+assert(client.includes("shadow-xl") && client.includes("rounded-[32px]") && client.includes("bg-[linear-gradient"), "premium result surface must retain the designed report shell, hierarchy, and hero treatment");
+assert(client.includes("lg:grid-cols-3") && client.includes("lg:grid-cols-2"), "premium result must use responsive summary and detail card layouts rather than a document-only column");
+assert(client.includes('className="mx-auto mt-8 max-w-3xl'), "input form must remain constrained even though the result canvas is wider");
+assert(!client.includes("function SectionCard"), "premium result must not fall back to the old generic developer-style section renderer");
 assert(!client.includes("상대방 구분 이름"), "customer form must not expose system-like partner label wording");
 assert(!client.includes("evidenceRefs}"), "internal evidence references must never be rendered to customers");
 assert(service.includes('callType: "recommendation-analysis"'), "compatibility explanation must use the bounded customer-facing generation lane");

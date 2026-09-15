@@ -29,7 +29,7 @@ const INITIAL_FORM: FormState = {
   label: "상대방",
   birthDate: "",
   birthTimeKnown: true,
-  birthTime: "12:00",
+  birthTime: "",
   gender: "여성",
   calendarType: "양력",
   isLeapMonth: false,
@@ -221,16 +221,18 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
           />
         </label>
 
-        <label>
-          <span className="text-sm font-semibold text-stone-800">출생시간</span>
-          <input
-            type="time"
-            value={form.birthTime}
-            disabled={!form.birthTimeKnown}
-            onChange={(event) => setForm((current) => ({ ...current, birthTime: event.target.value }))}
-            required={form.birthTimeKnown}
-            className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none transition disabled:bg-stone-100 disabled:text-stone-400 focus:border-stone-500"
-          />
+        <div>
+          <label className="block">
+            <span className="text-sm font-semibold text-stone-800">출생시간</span>
+            <input
+              type="time"
+              value={form.birthTime}
+              disabled={!form.birthTimeKnown}
+              onChange={(event) => setForm((current) => ({ ...current, birthTime: event.target.value }))}
+              required={form.birthTimeKnown}
+              className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none transition disabled:bg-stone-100 disabled:text-stone-400 focus:border-stone-500"
+            />
+          </label>
           <label className="mt-3 flex items-center gap-2 text-sm text-stone-600">
             <input
               type="checkbox"
@@ -239,7 +241,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
             />
             출생시간을 몰라요
           </label>
-        </label>
+        </div>
 
         <label>
           <span className="text-sm font-semibold text-stone-800">성별</span>
@@ -253,20 +255,22 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
           </select>
         </label>
 
-        <label>
-          <span className="text-sm font-semibold text-stone-800">달력 기준</span>
-          <select
-            value={form.calendarType}
-            onChange={(event) => setForm((current) => ({
-              ...current,
-              calendarType: event.target.value as FormState["calendarType"],
-              isLeapMonth: event.target.value === "음력" ? current.isLeapMonth : false,
-            }))}
-            className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none focus:border-stone-500"
-          >
-            <option value="양력">양력</option>
-            <option value="음력">음력</option>
-          </select>
+        <div>
+          <label className="block">
+            <span className="text-sm font-semibold text-stone-800">달력 기준</span>
+            <select
+              value={form.calendarType}
+              onChange={(event) => setForm((current) => ({
+                ...current,
+                calendarType: event.target.value as FormState["calendarType"],
+                isLeapMonth: event.target.value === "음력" ? current.isLeapMonth : false,
+              }))}
+              className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none focus:border-stone-500"
+            >
+              <option value="양력">양력</option>
+              <option value="음력">음력</option>
+            </select>
+          </label>
           {form.calendarType === "음력" ? (
             <label className="mt-3 flex items-center gap-2 text-sm text-stone-600">
               <input
@@ -277,7 +281,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
               윤달
             </label>
           ) : null}
-        </label>
+        </div>
       </div>
 
       <div className="mt-7 rounded-2xl bg-stone-50 px-4 py-4 text-sm leading-7 text-stone-600">

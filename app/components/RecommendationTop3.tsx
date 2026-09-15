@@ -11,6 +11,7 @@ import type { AnalysisProductRecommendation } from "@/app/lib/analysisProductRec
 import type { PaidAnalysisSummary } from "@/app/lib/paidReports/server";
 import type { AnalysisRecommendationOutput } from "@/app/lib/analysisRecommendationOutput";
 import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
+import { formatTopicExpectedUnderstanding } from "@/app/lib/purchaseDecisionCopy";
 
 type RecommendationTop3Props = {
   recommendations: readonly AnalysisProductRecommendation[];
@@ -18,6 +19,20 @@ type RecommendationTop3Props = {
   paidSummaries: readonly PaidAnalysisSummary[];
   explanation?: AnalysisRecommendationOutput | null;
 };
+
+function getReadableRecommendationReason(
+  recommendation: AnalysisProductRecommendation | undefined,
+  productId: string,
+): string {
+  const readableReason = recommendation?.reasons.find((reason) =>
+    !/^[a-z0-9_-]+:[a-zA-Z0-9_-]+$/.test(reason)
+    && !/(fortuneFlowAnalysis|elementAnalysis|elementRelations|health_stress|wealth_risk|relationship_conflict)/.test(reason),
+  );
+
+  return readableReason
+    ?? getPaidAnalysisTopicConfig(productId)?.purchaseDecision?.recommendedFor[0]
+    ?? "현재 무료 분석에서 확인된 흐름과 연결되는 주제입니다.";
+}
 
 export default function RecommendationTop3({
   recommendations,
@@ -35,15 +50,6 @@ export default function RecommendationTop3({
 
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const effectiveSelectedProductId = selectedProductId ?? validRecommendations[0]?.product.id ?? null;
-
-  function getReason(recommendation: AnalysisProductRecommendation, productId: string): string {
-    const readableReason = recommendation.reasons.find((reason) =>
-      !/^[a-z0-9_-]+:[a-zA-Z0-9_-]+$/.test(reason)
-      && !/(fortuneFlowAnalysis|elementAnalysis|elementRelations|health_stress|wealth_risk|relationship_conflict)/.test(reason),
-    );
-
-    return readableReason ?? getPaidAnalysisTopicConfig(productId)?.purchaseDecision?.recommendedFor[0] ?? "현재 분석 결과와 관련된 주제를 기준으로 추천되었습니다.";
-  }
 
   const selectedRecommendation = effectiveSelectedProductId
     ? validRecommendations.find((entry) => entry.product.id === effectiveSelectedProductId)
@@ -94,7 +100,7 @@ export default function RecommendationTop3({
               <Rank index={index} />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold text-stone-900">{displayTitle}</span>
-                <span className="mt-1 block truncate text-xs text-stone-500">{getReason(recommendation, product.id)}</span>
+                <span className="mt-1 block truncate text-xs text-stone-500">{getReadableRecommendationReason(recommendation, product.id)}</span>
               </span>
               <span className="shrink-0 text-[11px] font-medium text-stone-500">{getProductPricing(product.id).amount.toLocaleString("ko-KR")}원</span>
             </button>
@@ -138,8 +144,12 @@ function RecommendationDetail({
   const summary = paidSummaries.find((item) => item.profileId === profileId && item.productId === productId);
   const state = toPremiumAnalysisProductState(summary?.reportStatus);
   const href = getPremiumAnalysisHref(product.id, state, profileId);
-  const reason = recommendation?.reasons.find((item) => !/^[a-z0-9_-]+:[a-zA-Z0-9_-]+$/.test(item)) ?? decision.recommendedFor[0];
+  const reason = getReadableRecommendationReason(recommendation, productId);
   const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
+  const overviewItems = product.details?.slice(0, 3) ?? decision.whatItAnalyzes.slice(0, 3);
+  const expectedUnderstanding = decision.expectedUnderstanding
+    .slice(0, 2)
+    .map(formatTopicExpectedUnderstanding);
 
   return (
     <section className="mt-5 rounded-xl border border-[#cdbb98] bg-[#fffdf8] p-5" aria-labelledby="recommendation-detail-title">
@@ -148,12 +158,17 @@ function RecommendationDetail({
           <p className="text-[10px] font-semibold tracking-[0.16em] text-stone-500">{isPrimary ? "가장 먼저 확인할 분석" : "선택한 추천 분석"}</p>
           <h3 id="recommendation-detail-title" className="mt-2 text-xl font-bold text-stone-900">{displayTitle}</h3>
         </div>
-        <span className="text-xs text-stone-500">왜 지금 추천하나요?</span>
+        <span className="text-xs text-stone-500">무료 분석에서 이어진 추천</span>
       </div>
-      <p className="mt-4 text-sm leading-6 text-stone-700">{reason}</p>
-      <DetailList title="이 분석에서 확인하는 것" items={decision.whatItAnalyzes.slice(0, 3)} />
-      <DetailList title="분석을 받고 나면" items={decision.expectedUnderstanding.slice(0, 2)} />
-      <p className="mt-4 border-t border-stone-200 pt-4 text-sm leading-6 text-stone-600">{decision.distinction}</p>
+
+      <p className="mt-4 text-sm font-medium leading-6 text-stone-800">{product.description}</p>
+      <div className="mt-4 rounded-lg bg-[#fbf7ef] px-4 py-3">
+        <p className="text-xs font-semibold text-stone-700">왜 지금 추천됐나요</p>
+        <p className="mt-1.5 text-sm leading-6 text-stone-600">{reason}</p>
+      </div>
+      <DetailList title="이 분석에서 보는 것" items={overviewItems} />
+      <DetailList title="분석 후 알 수 있는 것" items={expectedUnderstanding} />
+
       <div className="mt-5 flex items-center justify-between gap-3 border-t border-stone-200 pt-4">
         <span className="text-sm font-medium text-stone-500">{getProductPricing(productId).amount.toLocaleString("ko-KR")}원</span>
         {state === "generating" ? <span className="rounded-lg bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-500">생성 중</span> : href ? <Link href={href} className="rounded-lg bg-stone-900 px-4 py-2.5 text-xs font-semibold text-white hover:bg-stone-800">{state === "not_purchased" ? "이 분석 자세히 보기" : "리포트 보기"}</Link> : null}
@@ -163,5 +178,5 @@ function RecommendationDetail({
 }
 
 function DetailList({ title, items }: { title: string; items: readonly string[] }) {
-  return <div className="mt-4"><p className="text-xs font-semibold text-stone-700">{title}</p><ul className="mt-2 space-y-1 text-sm leading-6 text-stone-600">{items.map((item) => <li key={item}>· {item}</li>)}</ul></div>;
+  return <div className="mt-4"><p className="text-xs font-semibold text-stone-700">{title}</p><ul className="mt-2 space-y-1.5 text-sm leading-6 text-stone-600">{items.map((item) => <li key={item}>· {item}</li>)}</ul></div>;
 }

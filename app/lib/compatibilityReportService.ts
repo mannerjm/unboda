@@ -36,7 +36,7 @@ export async function generateCompatibilityReport(
   const prompt = buildCompatibilityReportPrompt(context);
   const outputText = await generateAnalysisText(
     `[SYSTEM]\n${prompt.system}\n\n[USER]\n${prompt.user}`,
-    { callType: "compatibility-report" },
+    { callType: "recommendation-analysis" },
   );
   const parsed = extractJsonObject(outputText);
   const report = validateCompatibilityReportOutput(parsed, context);

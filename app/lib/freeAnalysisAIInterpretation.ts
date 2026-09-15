@@ -16,6 +16,7 @@ type SectionKey = keyof FreeAnalysisAIInterpretation;
 
 const headingMap: Record<string, SectionKey> = {
   "한눈에 보는 핵심": "overview",
+  "사주의 특성": "strength",
   "오행 분석": "fiveElements",
   "원국 결과와 신강·신약의 맥락": "strength",
   "신강·신약": "strength",

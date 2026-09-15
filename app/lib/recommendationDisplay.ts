@@ -1,4 +1,5 @@
 import { getPremiumProduct } from "./premiumProductRegistry";
+import { getPremiumProductDisplayTitle } from "./premiumPresentation";
 
 const signalLabels: Record<string, string> = {
   career_change: "변화와 이동의 흐름",
@@ -24,7 +25,8 @@ const internalTokenPattern = /\b[a-z][a-z0-9_-]*:[A-Za-z][A-Za-z0-9]*\b/g;
 const productSlugPattern = /\b[a-z][a-z0-9-]*-[a-z0-9-]+\b/g;
 
 export function getRecommendationProductDisplayName(productId: string): string {
-  return getPremiumProduct(productId)?.title ?? "추천 심층 분석";
+  const product = getPremiumProduct(productId);
+  return getPremiumProductDisplayTitle(productId, product?.title ?? "추천 심층 분석");
 }
 
 export function formatRecommendationEvidence(value: string): string {

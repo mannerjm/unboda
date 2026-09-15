@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "tsx scripts/compatibility-engine-foundation-regression.ts && tsx scripts/compatibility-domain-aggregation-regression.ts && tsx scripts/compatibility-personal-structure-regression.ts && tsx scripts/compatibility-timing-regression.ts && tsx scripts/social-launch-expansion-regression.ts && tsx scripts/premium-presentation-regression.ts && tsx scripts/saju-supplemental-stars-regression.ts && tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-price-tier-audit-regression.ts && tsx scripts/paid-analysis-v4-actual-output-tier-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
+    "prebuild": "tsx scripts/compatibility-engine-foundation-regression.ts && tsx scripts/compatibility-domain-aggregation-regression.ts && tsx scripts/compatibility-personal-structure-regression.ts && tsx scripts/compatibility-timing-regression.ts && tsx scripts/compatibility-report-contract-regression.ts && tsx scripts/social-launch-expansion-regression.ts && tsx scripts/premium-presentation-regression.ts && tsx scripts/saju-supplemental-stars-regression.ts && tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-price-tier-audit-regression.ts && tsx scripts/paid-analysis-v4-actual-output-tier-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -26,6 +26,7 @@
     "test:compatibility-domains": "tsx scripts/compatibility-domain-aggregation-regression.ts",
     "test:compatibility-structure": "tsx scripts/compatibility-personal-structure-regression.ts",
     "test:compatibility-timing": "tsx scripts/compatibility-timing-regression.ts",
+    "test:compatibility-report": "tsx scripts/compatibility-report-contract-regression.ts",
     "test:launch-security": "tsx scripts/launch-security-regression.ts",
     "test:operator-alerts": "tsx scripts/operator-alert-email-regression.ts",
     "test:operator-triage": "tsx scripts/operator-exception-triage-regression.ts",

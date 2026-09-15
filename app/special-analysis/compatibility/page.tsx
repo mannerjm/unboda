@@ -38,7 +38,7 @@ export default async function CompatibilityAnalysisPage() {
             <p className="text-xs font-semibold tracking-[0.16em] text-stone-400">COMPATIBILITY</p>
             <h1 className="mt-2 text-3xl font-bold text-stone-950 sm:text-4xl">궁합 분석</h1>
             <p className="mt-4 text-sm leading-7 text-stone-600">
-              단순 점수 대신 두 사람 사이의 소통, 갈등, 회복, 친밀감, 장기 관계와 현재 시기를 각각 확인합니다.
+              두 사람의 관계에서 잘 맞는 점, 부딪히기 쉬운 지점, 회복 방식과 현재 관계 흐름을 함께 살펴봅니다.
             </p>
           </header>
           <CompatibilityAnalysisClient myProfileLabel={activeProfile.label} />

@@ -7,11 +7,25 @@ import { buildPremiumAnalysis } from "../buildPremiumAnalysis";
 import { buildAnalysisProductRecommendations } from "../analysisProductRecommendations";
 import { buildAnalysisRecommendation } from "../analysisRecommendationBuilder";
 import { buildDeterministicRecommendationExplanation } from "../generateAnalysisRecommendation";
-import { buildMainAnalysisPrompt } from "../mainAnalysisPrompt";
+import { buildMainAnalysisPrompt, type MainAnalysisRecommendationFocus } from "../mainAnalysisPrompt";
 import { buildMainAnalysisCompactFacts } from "../mainAnalysisCompactFacts";
 import { generateMainAnalysis, type MainAnalysisGenerationResult } from "../analysisAIService";
 import type { AnalyzeProfileMetadata, AnalyzeSuccessResponse } from "../analyzeApiTypes";
 import { createEvaluationContext } from "../evaluationContext";
+
+function buildRecommendationFocus(
+  recommendation: ReturnType<typeof buildAnalysisRecommendation>,
+): MainAnalysisRecommendationFocus {
+  const primaryContext = recommendation.recommendationContext?.find(
+    (item) => item.productId === recommendation.recommendedProductId,
+  );
+  const fallbackTitle = recommendation.headline.replace(/\s*심층 분석이 우선 추천됩니다\.?$/, "").trim();
+
+  return {
+    title: primaryContext?.title?.trim() || fallbackTitle || "현재 핵심 문제",
+    reason: recommendation.recommendedReason,
+  };
+}
 
 export async function buildFreeAnalysisResponse(input: {
   profile: AnalyzeProfileMetadata;
@@ -47,8 +61,11 @@ export async function buildFreeAnalysisResponse(input: {
   const recommendation = buildAnalysisRecommendation({
     engineResult: productRecommendations.engineResult,
   });
+  const recommendationFocus = buildRecommendationFocus(recommendation);
   const recommendationExplanation = buildDeterministicRecommendationExplanation(recommendation);
-  const mainAnalysis = await generateMainAnalysis(buildMainAnalysisPrompt({ compactFacts }));
+  const mainAnalysis = await generateMainAnalysis(
+    buildMainAnalysisPrompt({ compactFacts, recommendationFocus }),
+  );
 
   return {
     result: mainAnalysis.text,
@@ -67,12 +84,13 @@ export async function buildFreeAnalysisResponse(input: {
 /**
  * Regenerates only the main-analysis AI text from an already-stored response.
  * Recomputes `getSaju()` locally (no OpenAI cost) to rebuild the compact facts,
- * reuses the stored `freeAnalysis` as-is, and calls the AI exactly once.
- * Does not touch recommendations, premium analysis, or issue any other AI call.
+ * reuses the stored `freeAnalysis` and recommendation result as-is, and calls
+ * the AI exactly once. Does not recalculate recommendation ranking, touch
+ * premium analysis, or issue any other AI call.
  * Carries no auth/ownership concerns; callers must verify ownership first.
  */
 export async function regenerateMainAnalysis(
-  content: Pick<AnalyzeSuccessResponse, "profile" | "freeAnalysis">,
+  content: Pick<AnalyzeSuccessResponse, "profile" | "freeAnalysis" | "productRecommendations">,
 ): Promise<MainAnalysisGenerationResult> {
   if (!content.freeAnalysis) {
     throw new Error("저장된 무료 분석 결과가 없어 다시 생성할 수 없습니다.");
@@ -87,6 +105,11 @@ export async function regenerateMainAnalysis(
     content.profile.gender,
   );
   const compactFacts = buildMainAnalysisCompactFacts({ saju, freeAnalysis: content.freeAnalysis });
+  const recommendationFocus = content.productRecommendations?.engineResult
+    ? buildRecommendationFocus(
+        buildAnalysisRecommendation({ engineResult: content.productRecommendations.engineResult }),
+      )
+    : undefined;
 
-  return generateMainAnalysis(buildMainAnalysisPrompt({ compactFacts }));
+  return generateMainAnalysis(buildMainAnalysisPrompt({ compactFacts, recommendationFocus }));
 }

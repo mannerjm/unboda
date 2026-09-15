@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
 import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
+import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import { getProductPricing } from "@/app/lib/productPricing";
 import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
 import { formatTopicExpectedUnderstanding } from "@/app/lib/purchaseDecisionCopy";
@@ -72,6 +73,7 @@ export default function PremiumProductDetail({
   const topicDecision = getPaidAnalysisTopicConfig(product.id)?.purchaseDecision;
   const periodDecision = product.purchaseDecision;
   const isPeriod = product.kind === "PERIOD";
+  const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
   const primaryQuestion = isPeriod
     ? periodDecision?.primaryQuestion
     : topicDecision?.decisionQuestion;
@@ -100,7 +102,7 @@ export default function PremiumProductDetail({
           <p className="text-[10px] font-semibold tracking-[0.16em] text-stone-500">
             {isPeriod ? "선택한 기간 분석" : "선택한 분석"}
           </p>
-          <h3 id="selected-product-title" className="mt-2 text-xl font-bold text-stone-900">{product.title}</h3>
+          <h3 id="selected-product-title" className="mt-2 text-xl font-bold text-stone-900">{displayTitle}</h3>
         </div>
         {onClear ? (
           <button type="button" onClick={onClear} className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs text-stone-600">

@@ -98,6 +98,7 @@ for (const internalCopy of ["전문 엔진", "단일 총점 없음", "현재 시
 }
 assert(compatibilityPage.includes("CompatibilityAnalysisClient"), "compatibility page must mount the customer flow");
 assert(compatibilityPage.includes("연인·배우자 관계에서") && compatibilityPage.includes("회복 방식") && compatibilityPage.includes("현재 관계 흐름"), "compatibility page intro must state the customer scope and value directly");
+assert(compatibilityPage.includes("전문 분석 · 궁합") && !compatibilityPage.includes(">COMPATIBILITY<"), "compatibility page eyebrow must use Korean customer language");
 assert(!compatibilityPage.includes("단순 점수 대신"), "compatibility page must not explain the product through an internal scoring contrast");
 assert(compatibilityPage.includes("max-w-5xl") && compatibilityPage.includes("max-w-3xl"), "compatibility page must reserve a wider canvas for the premium result while keeping intro/input readable");
 assert(api.includes("getCurrentUser") && api.includes("getActiveProfile"), "compatibility API must be member and active-profile scoped");
@@ -119,7 +120,11 @@ assert(client.includes("현재 궁합 분석은 연인·배우자 관계를 기�
 assert(client.includes("disabled={loading || !canSubmit}"), "analysis CTA must remain disabled until the required deliberate inputs are complete");
 assert(client.includes("서로에게 미치는 방식") && client.includes("perspectives.meToPartner") && client.includes("perspectives.partnerToMe"), "result UI must make the engine's asymmetric pair influence visible to customers");
 assert(client.includes('data-section="pair-perspective"'), "directional compatibility section must have a stable result marker and remain a first-class report section");
-assert(client.includes("궁합 리포트") && client.includes("관계 핵심 요약") && client.includes("RELATIONSHIP CORE"), "result hero must read like a premium report instead of a raw developer output");
+assert(client.includes("궁합 리포트") && client.includes("관계 핵심 요약") && client.includes("관계 핵심"), "result hero must read like a premium report instead of a raw developer output");
+for (const templateLabel of ["RELATIONSHIP CORE", "AT A GLANCE", "STRENGTHS", "DIRECTION", "FRICTION", "RECOVERY", "LONG TERM", "ACTION "]) {
+  assert(!client.includes(templateLabel), `premium report must not expose template-style English label: ${templateLabel}`);
+}
+assert(client.includes("두 사람의 관계 패턴") && client.includes("년 흐름 함께 보기"), "hero badges must describe customer value rather than implementation details");
 assert(client.includes("오래 가려면 맞춰야 할 기준") && client.includes("갈등 뒤 회복 방식"), "premium result hierarchy must translate technical sections into customer-readable editorial sections");
 assert(client.includes("shadow-xl") && client.includes("rounded-[32px]") && client.includes("bg-[linear-gradient"), "premium result surface must retain the designed report shell, hierarchy, and hero treatment");
 assert(client.includes("lg:grid-cols-3") && client.includes("lg:grid-cols-2"), "premium result must use responsive summary and detail card layouts rather than a document-only column");
@@ -133,8 +138,11 @@ assert(service.includes("COMPATIBILITY_REPORT_GENERATION_MAX_ATTEMPTS = 2"), "co
 assert(service.includes('issue.code === "too_big"'), "compatibility retry must be limited to schema cardinality overflow rather than arbitrary validation failures");
 assert(service.includes("[STRICT_CARDINALITY_LIMITS]"), "compatibility generation prompt must state strict array limits before the first model call");
 assert(service.includes("[CUSTOMER_COPY_GUIDE]") && service.includes("같은 조언") && service.includes("55자"), "compatibility generation must guard concise, non-repetitive customer copy");
+assert(service.includes("'운영', '관리'") && service.includes("'조율', '균형', '속도', '흐름'"), "current timing copy must avoid system-like relationship language");
 assert(service.includes("직전 응답은 배열 개수 제한을 초과했습니다"), "compatibility repair retry must explicitly correct only array cardinality overflow");
 assert(perspectiveSource.includes("BReceivesFromA") && perspectiveSource.includes("AReceivesFromB"), "directional presentation must preserve the two engine directions rather than flatten them");
+assert(perspectiveSource.includes("ELEMENT_LABELS") && perspectiveSource.includes('leadingSupport[0]?.element') && perspectiveSource.includes('leadingBurden[0]?.element'), "directional customer copy must use each receiver's leading support and burden elements instead of generic duplicate signals");
+assert(perspectiveSource.includes("보완적으로 작용하는 쪽") && perspectiveSource.includes("부담으로 커질 수 있습니다"), "directional signal copy must explain the pair-specific difference in customer language");
 assert(!perspectiveSource.includes("Math.random") && !perspectiveSource.includes("generateAnalysisText"), "directional perspective layer must remain deterministic and evidence-derived");
 assert(adapter.includes("Array.from({ length: 24 }") && adapter.includes("signatures.size !== 1"), "unknown-time handling must verify stable date pillars rather than inject noon");
 assert(!adapter.includes('birthTime: "12:00"'), "server adapter must never synthesize noon for unknown birth time");

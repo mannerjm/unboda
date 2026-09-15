@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import CompatibilityBirthDateField from "@/app/components/CompatibilityBirthDateField";
 import type { CompatibilityPairPerspectives } from "@/app/lib/compatibilityPairPerspective";
 import type { CompatibilityReportOutput } from "@/app/lib/compatibilityReportContract";
 
@@ -194,6 +195,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
     const firstStrength = report.strengths[0];
     const conflictPoint = report.conflict.keyPoints[0] ?? report.conflict.summary;
     const timingPoint = report.currentTiming?.keyPoints[0] ?? report.currentTiming?.summary ?? "현재 관계 흐름은 두 사람의 기본 관계 구조와 함께 살펴봅니다.";
+    const strengthGridClass = report.strengths.length <= 2 ? "lg:grid-cols-2" : "lg:grid-cols-3";
 
     return (
       <div ref={resultRef} className="mt-8 scroll-mt-6">
@@ -273,7 +275,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
                 title="잘 맞는 부분"
                 description="두 사람 사이에서 자연스럽게 연결되거나 함께 살릴 수 있는 강점입니다."
               />
-              <div className="mt-6 grid gap-4 lg:grid-cols-3">
+              <div className={`mt-6 grid gap-4 ${strengthGridClass}`}>
                 {report.strengths.map((item, index) => (
                   <article key={item.title} className="rounded-3xl bg-stone-50 p-5 ring-1 ring-stone-200/70 sm:p-6">
                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-900 text-xs font-bold text-white">{String(index + 1).padStart(2, "0")}</span>
@@ -385,120 +387,135 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
   }
 
   return (
-    <form onSubmit={submit} className="mx-auto mt-8 max-w-3xl rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-      <div className="border-b border-stone-200 pb-6">
-        <p className="text-xs font-semibold tracking-[0.16em] text-stone-400">나의 프로필</p>
-        <p className="mt-2 text-lg font-bold text-stone-950">{myProfileLabel}</p>
-        <p className="mt-2 text-sm leading-6 text-stone-500">현재 분석 대상으로 선택된 내 사주를 기준으로 비교합니다.</p>
-      </div>
+    <form onSubmit={submit} className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-[32px] border border-stone-200/80 bg-[#fffdfa] shadow-xl shadow-stone-200/60">
+      <header className="relative overflow-hidden bg-[linear-gradient(135deg,#f8f2e7_0%,#fffdf8_60%,#f2ece3_100%)] px-6 py-7 sm:px-8 sm:py-8">
+        <div aria-hidden="true" className="absolute -right-14 -top-16 h-48 w-48 rounded-full bg-white/60 blur-3xl" />
+        <div className="relative flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-bold tracking-[0.18em] text-stone-400">궁합 분석 준비</p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">상대방 정보를 입력해 주세요</h2>
+            <p className="mt-2 text-sm leading-6 text-stone-500">두 사람의 사주를 비교해 관계 패턴과 현재 흐름을 살펴봅니다.</p>
+          </div>
+          <div className="rounded-2xl border border-stone-200/80 bg-white/75 px-4 py-3 shadow-sm">
+            <p className="text-[10px] font-bold tracking-[0.14em] text-stone-400">내 분석 기준</p>
+            <p className="mt-1 text-sm font-bold text-stone-900">{myProfileLabel}</p>
+          </div>
+        </div>
+      </header>
 
-      <div className="mt-6 rounded-2xl bg-[#f7f3ea] px-4 py-3 text-sm leading-6 text-stone-600">
-        현재 궁합 분석은 연인·배우자 관계를 기준으로 살펴봅니다.
-      </div>
-
-      <div className="mt-7 grid gap-5 sm:grid-cols-2">
-        <label className="sm:col-span-2">
-          <span className="text-sm font-semibold text-stone-800">상대방 이름 또는 별칭</span>
-          <input
-            value={form.label}
-            onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))}
-            maxLength={40}
-            required
-            className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-stone-500"
-            placeholder="예: 지민, 배우자"
-          />
-        </label>
-
-        <label>
-          <span className="text-sm font-semibold text-stone-800">생년월일</span>
-          <input
-            type="date"
-            value={form.birthDate}
-            onChange={(event) => setForm((current) => ({ ...current, birthDate: event.target.value }))}
-            required
-            className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-stone-500"
-          />
-        </label>
-
-        <div>
-          <label className="block">
-            <span className="text-sm font-semibold text-stone-800">출생시간</span>
-            <input
-              type="time"
-              value={form.birthTime}
-              disabled={!form.birthTimeKnown}
-              onChange={(event) => setForm((current) => ({ ...current, birthTime: event.target.value }))}
-              required={form.birthTimeKnown}
-              className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none transition disabled:bg-stone-100 disabled:text-stone-400 focus:border-stone-500"
-            />
-          </label>
-          <label className="mt-3 flex items-center gap-2 text-sm text-stone-600">
-            <input
-              type="checkbox"
-              checked={!form.birthTimeKnown}
-              onChange={(event) => setForm((current) => ({ ...current, birthTimeKnown: !event.target.checked }))}
-            />
-            출생시간을 몰라요
-          </label>
+      <div className="px-6 py-7 sm:px-8 sm:py-8">
+        <div className="rounded-2xl border border-[#eadfc9] bg-[#f8f3e9] px-4 py-3.5 text-sm leading-6 text-stone-600">
+          현재 궁합 분석은 <span className="font-semibold text-stone-800">연인·배우자 관계</span>를 기준으로 살펴봅니다.
         </div>
 
-        <label>
-          <span className="text-sm font-semibold text-stone-800">성별</span>
-          <select
-            value={form.gender}
-            onChange={(event) => setForm((current) => ({ ...current, gender: event.target.value as FormState["gender"] }))}
-            required
-            className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none focus:border-stone-500"
-          >
-            <option value="" disabled>선택해 주세요</option>
-            <option value="여성">여성</option>
-            <option value="남성">남성</option>
-          </select>
-        </label>
-
-        <div>
-          <label className="block">
-            <span className="text-sm font-semibold text-stone-800">달력 기준</span>
-            <select
-              value={form.calendarType}
-              onChange={(event) => setForm((current) => ({
-                ...current,
-                calendarType: event.target.value as FormState["calendarType"],
-                isLeapMonth: event.target.value === "음력" ? current.isLeapMonth : false,
-              }))}
-              className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none focus:border-stone-500"
-            >
-              <option value="양력">양력</option>
-              <option value="음력">음력</option>
-            </select>
+        <div className="mt-7 grid gap-5 sm:grid-cols-2">
+          <label className="sm:col-span-2">
+            <span className="text-sm font-semibold text-stone-800">상대방 이름 또는 별칭</span>
+            <input
+              value={form.label}
+              onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))}
+              maxLength={40}
+              required
+              className="mt-2.5 w-full rounded-2xl border border-stone-200 bg-white px-4 py-3.5 text-sm shadow-sm outline-none transition placeholder:text-stone-300 hover:border-stone-300 focus:border-stone-500 focus:ring-4 focus:ring-stone-100"
+              placeholder="예: 지민, 배우자"
+            />
           </label>
-          {form.calendarType === "음력" ? (
-            <label className="mt-3 flex items-center gap-2 text-sm text-stone-600">
+
+          <CompatibilityBirthDateField
+            value={form.birthDate}
+            onChange={(birthDate) => setForm((current) => ({ ...current, birthDate }))}
+          />
+
+          <div>
+            <label className="block">
+              <span className="text-sm font-semibold text-stone-800">출생시간</span>
+              <input
+                type="time"
+                value={form.birthTime}
+                disabled={!form.birthTimeKnown}
+                onChange={(event) => setForm((current) => ({ ...current, birthTime: event.target.value }))}
+                required={form.birthTimeKnown}
+                className="mt-2.5 w-full rounded-2xl border border-stone-200 bg-white px-4 py-3.5 text-sm shadow-sm outline-none transition disabled:bg-stone-50 disabled:text-stone-300 hover:border-stone-300 focus:border-stone-500 focus:ring-4 focus:ring-stone-100"
+              />
+            </label>
+            <label className="mt-3 inline-flex items-center gap-2 rounded-full bg-stone-50 px-3 py-2 text-sm text-stone-600 ring-1 ring-stone-200/80">
               <input
                 type="checkbox"
-                checked={form.isLeapMonth}
-                onChange={(event) => setForm((current) => ({ ...current, isLeapMonth: event.target.checked }))}
+                checked={!form.birthTimeKnown}
+                onChange={(event) => setForm((current) => ({ ...current, birthTimeKnown: !event.target.checked }))}
+                className="h-4 w-4 rounded border-stone-300"
               />
-              윤달
+              출생시간을 몰라요
             </label>
-          ) : null}
+          </div>
+
+          <label>
+            <span className="text-sm font-semibold text-stone-800">성별</span>
+            <select
+              value={form.gender}
+              onChange={(event) => setForm((current) => ({ ...current, gender: event.target.value as FormState["gender"] }))}
+              required
+              className="mt-2.5 w-full rounded-2xl border border-stone-200 bg-white px-4 py-3.5 text-sm shadow-sm outline-none transition hover:border-stone-300 focus:border-stone-500 focus:ring-4 focus:ring-stone-100"
+            >
+              <option value="" disabled>선택해 주세요</option>
+              <option value="여성">여성</option>
+              <option value="남성">남성</option>
+            </select>
+          </label>
+
+          <div className="sm:col-span-2">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block">
+                <span className="text-sm font-semibold text-stone-800">달력 기준</span>
+                <select
+                  value={form.calendarType}
+                  onChange={(event) => setForm((current) => ({
+                    ...current,
+                    calendarType: event.target.value as FormState["calendarType"],
+                    isLeapMonth: event.target.value === "음력" ? current.isLeapMonth : false,
+                  }))}
+                  className="mt-2.5 w-full rounded-2xl border border-stone-200 bg-white px-4 py-3.5 text-sm shadow-sm outline-none transition hover:border-stone-300 focus:border-stone-500 focus:ring-4 focus:ring-stone-100"
+                >
+                  <option value="양력">양력</option>
+                  <option value="음력">음력</option>
+                </select>
+              </label>
+
+              {form.calendarType === "음력" ? (
+                <label className="flex h-full items-end">
+                  <span className="inline-flex w-full items-center gap-2 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3.5 text-sm text-stone-600">
+                    <input
+                      type="checkbox"
+                      checked={form.isLeapMonth}
+                      onChange={(event) => setForm((current) => ({ ...current, isLeapMonth: event.target.checked }))}
+                      className="h-4 w-4 rounded border-stone-300"
+                    />
+                    윤달로 태어났어요
+                  </span>
+                </label>
+              ) : (
+                <div className="hidden sm:block" aria-hidden="true" />
+              )}
+            </div>
+          </div>
         </div>
+
+        <div className="mt-7 flex gap-3 rounded-2xl bg-stone-50 px-4 py-4 text-sm leading-7 text-stone-600 ring-1 ring-stone-200/70">
+          <span aria-hidden="true" className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-stone-500 ring-1 ring-stone-200">i</span>
+          <p>상대방 정보는 이번 궁합 계산과 리포트 생성에만 사용하며 별도 프로필이나 궁합 기록으로 저장하지 않습니다.</p>
+        </div>
+
+        {error ? <p className="mt-5 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-100">{error}</p> : null}
+
+        <button
+          type="submit"
+          disabled={loading || !canSubmit}
+          className="mt-7 inline-flex w-full items-center justify-center rounded-2xl bg-stone-900 px-5 py-4 text-sm font-bold text-white shadow-lg shadow-stone-300/40 transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:shadow-none"
+        >
+          {loading ? "두 사람의 관계를 분석하고 있어요..." : "궁합 분석하기"}
+        </button>
+        <p className="mt-3 text-center text-xs leading-5 text-stone-400">입력한 정보가 모두 맞는지 확인한 뒤 분석을 시작해 주세요.</p>
       </div>
-
-      <div className="mt-7 rounded-2xl bg-stone-50 px-4 py-4 text-sm leading-7 text-stone-600">
-        상대방 정보는 이번 궁합 계산과 리포트 생성에만 사용하며 별도 프로필이나 궁합 기록으로 저장하지 않습니다.
-      </div>
-
-      {error ? <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
-
-      <button
-        type="submit"
-        disabled={loading || !canSubmit}
-        className="mt-7 inline-flex w-full items-center justify-center rounded-2xl bg-stone-900 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
-      >
-        {loading ? "두 사람의 관계를 분석하고 있어요..." : "궁합 분석하기"}
-      </button>
-      <p className="mt-3 text-center text-xs leading-5 text-stone-400">분석에는 잠시 시간이 걸릴 수 있습니다.</p>
     </form>
   );
 }

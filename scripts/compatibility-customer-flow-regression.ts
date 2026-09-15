@@ -104,6 +104,10 @@ assert(!client.includes("상대방 구분 이름"), "customer form must not expo
 assert(!client.includes("evidenceRefs}"), "internal evidence references must never be rendered to customers");
 assert(service.includes('callType: "recommendation-analysis"'), "compatibility explanation must use the bounded customer-facing generation lane");
 assert(service.includes("validateCompatibilityReportOutput"), "model output must pass the Phase 5 closed report contract");
+assert(service.includes("COMPATIBILITY_REPORT_GENERATION_MAX_ATTEMPTS = 2"), "compatibility report generation must use one bounded schema-repair retry");
+assert(service.includes('issue.code === "too_big"'), "compatibility retry must be limited to schema cardinality overflow rather than arbitrary validation failures");
+assert(service.includes("[STRICT_CARDINALITY_LIMITS]"), "compatibility generation prompt must state strict array limits before the first model call");
+assert(service.includes("직전 응답은 배열 개수 제한을 초과했습니다"), "compatibility repair retry must explicitly correct only array cardinality overflow");
 assert(adapter.includes("Array.from({ length: 24 }") && adapter.includes("signatures.size !== 1"), "unknown-time handling must verify stable date pillars rather than inject noon");
 assert(!adapter.includes('birthTime: "12:00"'), "server adapter must never synthesize noon for unknown birth time");
 

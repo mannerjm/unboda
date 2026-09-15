@@ -43,7 +43,8 @@ function sanitize(text: string): string {
 
 function normalizeHeading(value: string): string {
   const normalized = value
-    .replace(/^\s*(?:#{1,6}\s*|[-*+]\s+)/, "")
+    .trim()
+    .replace(/^(?:#{1,6}\s*|[-*+]\s+)/, "")
     .replace(/^\*\*|\*\*$/g, "")
     .replace(/^__|__$/g, "")
     .replace(/^(?:\d+|[①②③④⑤⑥⑦⑧⑨⑩⑪])\s*[.)、:：-]\s*/, "")

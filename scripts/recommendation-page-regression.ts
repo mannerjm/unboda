@@ -20,14 +20,20 @@ if (deep.includes("RecommendationTop3") || deep.includes("productRecommendations
   throw new Error("Deep analysis should remain manual discovery, not duplicate the full recommendation view");
 }
 
-if (!page.includes("무료 분석에서 이어서 확인할 분석") || !page.includes("무료 분석에서 드러난 핵심 문제와 같은 계산 근거")) {
+if (!page.includes("무료 분석에서 이어서 확인할 분석") || !page.includes("무료 분석에서 가장 크게 드러난 문제")) {
   throw new Error("Recommendation page must explicitly continue the free-analysis problem diagnosis");
+}
+if (!page.includes("buildCurrentRecommendations") || !page.includes("mergeRecommendationStoryline") || !page.includes("selectedCategories")) {
+  throw new Error("Recommendation page must refresh deterministic recommendations and avoid repeated recommendation categories");
+}
+if (!page.includes("storedRecommendations[0]") || !page.includes("tryAdd(storedPrimary, false)")) {
+  throw new Error("Recommendation refresh must preserve the stored primary problem that the free analysis already diagnosed");
 }
 if (!cards.includes("무료 분석에서 이어지는 추천 TOP 3") || !cards.includes("무료 분석과 같은 계산 근거로 선정")) {
   throw new Error("Top 3 cards must explain that recommendation ranking continues the free-analysis evidence");
 }
-if (!cards.includes("validRecommendations[0]?.product.id ?? null") || !cards.includes("가장 먼저 확인할 분석")) {
-  throw new Error("Primary recommendation must be expanded by default as the first follow-up analysis");
+if (!cards.includes("effectiveSelectedProductId") || !cards.includes("validRecommendations[0]?.product.id ?? null") || !cards.includes("가장 먼저 확인할 분석")) {
+  throw new Error("Primary recommendation detail must always be visible before the user selects another card");
 }
 
 const launchTopicIds = new Set(listTopicCatalogProducts().map((product) => product.id));

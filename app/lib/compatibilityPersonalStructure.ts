@@ -183,32 +183,43 @@ function buildStructureSnapshot(
   };
 }
 
+export function scoreCompatibilityElementSupply(input: {
+  element: Element;
+  providerShare: number;
+  receiverOwnShare: number;
+  usefulnessScore: number;
+}): CompatibilityElementInfluence {
+  const providerShare = round(clamp(input.providerShare, 0, 1));
+  const receiverOwnShare = round(clamp(input.receiverOwnShare, 0, 1));
+  const usefulnessScore = round(clamp(input.usefulnessScore, 0, 100), 1);
+
+  // Only receiver-specific usefulness sets direction. Scarcity is recorded for explanation,
+  // but receiverOwnShare is deliberately absent from the preference formula.
+  const preference = round(clamp((usefulnessScore - 50) / 50, -1, 1));
+  const signedImpact = round(providerShare * preference);
+
+  return {
+    element: input.element,
+    providerShare,
+    receiverOwnShare,
+    usefulnessScore,
+    preference,
+    supportContribution: round(Math.max(0, signedImpact)),
+    burdenContribution: round(Math.max(0, -signedImpact)),
+    neutralContribution: round(providerShare * (1 - Math.abs(preference))),
+  };
+}
+
 function calculateElementInfluence(
   receiver: CompatibilityStructureSnapshot,
   provider: CompatibilityStructureSnapshot,
 ): CompatibilityElementInfluence[] {
-  return ELEMENTS.map((element) => {
-    const providerShare = round(provider.elements.percentages[element] / 100);
-    const receiverOwnShare = round(receiver.elements.percentages[element] / 100);
-    const usefulnessScore = receiver.yongshin.normalizedScores[element];
-
-    // 용신 엔진의 개인 구조 판정을 관계 영향의 기준으로 사용한다.
-    // 부족한 오행 자체를 가점하지 않으며, 개인의 신강·신약 / 계절 / 균형 / 조후 /
-    // 통관 / 과다 보정을 모두 반영한 유용도만 방향성을 결정한다.
-    const preference = round(clamp((usefulnessScore - 50) / 50, -1, 1));
-    const signedImpact = round(providerShare * preference);
-
-    return {
-      element,
-      providerShare,
-      receiverOwnShare,
-      usefulnessScore,
-      preference,
-      supportContribution: round(Math.max(0, signedImpact)),
-      burdenContribution: round(Math.max(0, -signedImpact)),
-      neutralContribution: round(providerShare * (1 - Math.abs(preference))),
-    };
-  });
+  return ELEMENTS.map((element) => scoreCompatibilityElementSupply({
+    element,
+    providerShare: provider.elements.percentages[element] / 100,
+    receiverOwnShare: receiver.elements.percentages[element] / 100,
+    usefulnessScore: receiver.yongshin.normalizedScores[element],
+  }));
 }
 
 function classifyDirectionalInfluence(

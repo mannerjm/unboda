@@ -81,6 +81,9 @@ assert(!api.includes(".from("), "temporary partner data must not be persisted by
 assert(!api.includes("checkout") && !api.includes("premiumProductRegistry"), "Phase 6 must not silently add compatibility to the current Toss-reviewed catalog");
 assert(client.includes("별도 프로필이나 궁합 기록으로 저장하지 않습니다"), "customer UI must explain temporary partner-data handling");
 assert(client.includes("출생시간을 몰라요"), "customer UI must support unknown partner birth time");
+assert(client.includes('birthTime: ""'), "known-time form must require deliberate time entry rather than defaulting to noon");
+assert(!client.includes('birthTime: "12:00"'), "customer form must not suggest a fake noon value");
+assert(!client.includes("<label>\n          <span className=\"text-sm font-semibold text-stone-800\">출생시간</span>"), "birth-time checkbox must not be nested inside another label");
 assert(!client.includes("evidenceRefs}"), "internal evidence references must never be rendered to customers");
 assert(service.includes('callType: "recommendation-analysis"'), "compatibility explanation must use the bounded customer-facing generation lane");
 assert(service.includes("validateCompatibilityReportOutput"), "model output must pass the Phase 5 closed report contract");

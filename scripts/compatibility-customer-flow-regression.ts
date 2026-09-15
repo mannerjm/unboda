@@ -77,11 +77,12 @@ assert(hub.includes("궁합 분석 시작하기"), "professional hub must expose
 assert(hub.includes("출생시간을 몰라도 분석 가능"), "professional hub must explain unknown-time support in customer language");
 assert(hub.includes("소통·갈등·회복까지 확인"), "professional hub must explain compatibility scope in customer language");
 assert(hub.includes("현재 관계 흐름 함께 확인"), "professional hub must explain timing value in customer language");
+assert(hub.includes("연인·배우자 관계에서"), "professional hub must clearly scope the first compatibility product to romantic/partner relationships");
 for (const internalCopy of ["전문 엔진", "단일 총점 없음", "현재 시기 별도 분석", "원국 관계", "대운·세운"]) {
   assert(!hub.includes(internalCopy), `professional hub must not expose internal copy: ${internalCopy}`);
 }
 assert(compatibilityPage.includes("CompatibilityAnalysisClient"), "compatibility page must mount the customer flow");
-assert(compatibilityPage.includes("잘 맞는 점") && compatibilityPage.includes("회복 방식") && compatibilityPage.includes("현재 관계 흐름"), "compatibility page intro must describe customer value directly");
+assert(compatibilityPage.includes("연인·배우자 관계에서") && compatibilityPage.includes("회복 방식") && compatibilityPage.includes("현재 관계 흐름"), "compatibility page intro must state the customer scope and value directly");
 assert(!compatibilityPage.includes("단순 점수 대신"), "compatibility page must not explain the product through an internal scoring contrast");
 assert(api.includes("getCurrentUser") && api.includes("getActiveProfile"), "compatibility API must be member and active-profile scoped");
 assert(api.includes("buildCompatibilityTiming") && api.includes("generateCompatibilityReport"), "compatibility API must use the deterministic engine before explanation generation");
@@ -93,6 +94,13 @@ assert(client.includes("출생시간을 몰라요"), "customer UI must support u
 assert(client.includes('birthTime: ""'), "known-time form must require deliberate time entry rather than defaulting to noon");
 assert(!client.includes('birthTime: "12:00"'), "customer form must not suggest a fake noon value");
 assert(!client.includes("<label>\n          <span className=\"text-sm font-semibold text-stone-800\">출생시간</span>"), "birth-time checkbox must not be nested inside another label");
+assert(client.includes('label: ""'), "partner label must start empty so the user deliberately names the other person");
+assert(client.includes('gender: ""'), "partner gender must start unselected rather than defaulting to a value");
+assert(client.includes("상대방 이름 또는 별칭") && client.includes('placeholder="예: 지민, 배우자"'), "partner naming field must use natural customer language without requiring a real name");
+assert(client.includes('<option value="" disabled>선택해 주세요</option>'), "gender select must expose a neutral selection prompt");
+assert(client.includes("현재 궁합 분석은 연인·배우자 관계를 기준으로 살펴봅니다."), "input form must state the current romantic/partner scope");
+assert(client.includes("disabled={loading || !canSubmit}"), "analysis CTA must remain disabled until the required deliberate inputs are complete");
+assert(!client.includes("상대방 구분 이름"), "customer form must not expose system-like partner label wording");
 assert(!client.includes("evidenceRefs}"), "internal evidence references must never be rendered to customers");
 assert(service.includes('callType: "recommendation-analysis"'), "compatibility explanation must use the bounded customer-facing generation lane");
 assert(service.includes("validateCompatibilityReportOutput"), "model output must pass the Phase 5 closed report contract");

@@ -108,4 +108,27 @@ const romanticConnectionQuestion = getPaidAnalysisTopicConfig("relationship-new-
 assert(networkQuestion !== romanticConnectionQuestion, "general network expansion must remain distinct from romantic new connection");
 assert(networkQuestion.includes("인맥"), "network expansion must own general social-network scope");
 
+const helperMetadata = [
+  getPremiumProduct("social-helper")?.title,
+  getPremiumProduct("social-helper")?.description,
+  ...(getPremiumProduct("social-helper")?.details ?? []),
+].join("\n");
+for (const forbidden of ["귀인", "어떤 사람에게", "유리한 시기"]) {
+  assert(!helperMetadata.includes(forbidden), `social-helper metadata must not promise ${forbidden}`);
+}
+
+const conflictMetadata = [
+  getPremiumProduct("social-conflict")?.description,
+  ...(getPremiumProduct("social-conflict")?.details ?? []),
+].join("\n");
+assert(conflictMetadata.includes("일반 대인관계"), "social-conflict metadata must own general non-romantic scope");
+
+const networkMetadata = [
+  getPremiumProduct("social-network-expansion")?.description,
+  ...(getPremiumProduct("social-network-expansion")?.details ?? []),
+].join("\n");
+for (const forbidden of ["인연", "시기와 환경"]) {
+  assert(!networkMetadata.includes(forbidden), `social-network-expansion metadata must not promise ${forbidden}`);
+}
+
 console.log("social-launch-expansion-regression passed ✓");

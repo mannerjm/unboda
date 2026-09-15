@@ -20,7 +20,7 @@ export default async function SpecialAnalysisPage() {
             <p className="text-xs font-semibold tracking-[0.16em] text-stone-400">SPECIAL ANALYSIS</p>
             <h1 className="mt-2 text-3xl font-bold text-stone-950 sm:text-4xl">전문 분석</h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-600">
-              한 사람의 운세를 넘어 두 사람의 관계, 중요한 시기, 이름과 공간처럼 입력 구조가 다른 분석을 별도 전문 엔진으로 살펴봅니다.
+              한 사람의 운세를 넘어, 두 사람의 관계와 중요한 시기처럼 더 구체적인 주제를 깊이 살펴봅니다.
             </p>
           </header>
 
@@ -44,20 +44,21 @@ export default async function SpecialAnalysisPage() {
                 href="/special-analysis/compatibility"
                 className="group block rounded-3xl border border-stone-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md sm:p-8"
               >
-                <div className="flex flex-wrap items-start justify-between gap-5">
+                <div className="flex flex-wrap items-start justify-between gap-6">
                   <div className="max-w-2xl">
-                    <span className="inline-flex rounded-full bg-[#eee5d5] px-3 py-1 text-xs font-bold text-stone-700">첫 번째 전문 엔진</span>
-                    <h2 className="mt-4 text-2xl font-bold text-stone-950">궁합 분석</h2>
+                    <h2 className="text-2xl font-bold text-stone-950">궁합 분석</h2>
                     <p className="mt-3 text-sm leading-7 text-stone-600">
-                      두 사람의 원국 관계, 소통·갈등·회복·친밀감·장기 관계와 현재 대운·세운 흐름을 분리해서 분석합니다.
+                      두 사람의 관계에서 잘 맞는 점, 부딪히기 쉬운 지점, 회복 방식과 현재 관계 흐름을 함께 살펴봅니다.
                     </p>
                     <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
-                      <span className="rounded-full bg-stone-100 px-3 py-1.5">출생시간 모름 지원</span>
-                      <span className="rounded-full bg-stone-100 px-3 py-1.5">단일 총점 없음</span>
-                      <span className="rounded-full bg-stone-100 px-3 py-1.5">현재 시기 별도 분석</span>
+                      <span className="rounded-full bg-stone-100 px-3 py-1.5">출생시간을 몰라도 분석 가능</span>
+                      <span className="rounded-full bg-stone-100 px-3 py-1.5">소통·갈등·회복까지 확인</span>
+                      <span className="rounded-full bg-stone-100 px-3 py-1.5">현재 관계 흐름 함께 확인</span>
                     </div>
                   </div>
-                  <span className="text-sm font-bold text-stone-900 group-hover:underline">분석 시작 →</span>
+                  <span className="inline-flex shrink-0 items-center rounded-2xl bg-stone-900 px-4 py-2.5 text-sm font-bold text-white transition group-hover:bg-stone-800">
+                    궁합 분석 시작하기 →
+                  </span>
                 </div>
               </Link>
             </section>

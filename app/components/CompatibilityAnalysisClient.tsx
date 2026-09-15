@@ -19,7 +19,9 @@ type CompatibilityResponse = {
 
 type FormState = {
   label: string;
-  birthDate: string;
+  birthYear: string;
+  birthMonth: string;
+  birthDay: string;
   birthTimeKnown: boolean;
   birthTime: string;
   gender: "" | "남성" | "여성";
@@ -27,15 +29,169 @@ type FormState = {
   isLeapMonth: boolean;
 };
 
+type BirthDateParts = Pick<FormState, "birthYear" | "birthMonth" | "birthDay">;
+
 const INITIAL_FORM: FormState = {
   label: "",
-  birthDate: "",
+  birthYear: "",
+  birthMonth: "",
+  birthDay: "",
   birthTimeKnown: true,
   birthTime: "",
   gender: "",
   calendarType: "양력",
   isLeapMonth: false,
 };
+
+const MIN_BIRTH_YEAR = 1900;
+const KOREA_UTC_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+function getKoreaTodayParts(): { year: number; month: number; day: number } {
+  const koreaTime = new Date(Date.now() + KOREA_UTC_OFFSET_MS);
+  return {
+    year: koreaTime.getUTCFullYear(),
+    month: koreaTime.getUTCMonth() + 1,
+    day: koreaTime.getUTCDate(),
+  };
+}
+
+function getBirthDayLimit(
+  birthYear: string,
+  birthMonth: string,
+  calendarType: FormState["calendarType"],
+): number {
+  if (!birthYear || !birthMonth) return calendarType === "음력" ? 30 : 31;
+  if (calendarType === "음력") return 30;
+  return new Date(Date.UTC(Number(birthYear), Number(birthMonth), 0)).getUTCDate();
+}
+
+function buildBirthDate(parts: BirthDateParts): string {
+  if (!parts.birthYear || !parts.birthMonth || !parts.birthDay) return "";
+  return `${parts.birthYear}-${parts.birthMonth}-${parts.birthDay}`;
+}
+
+function BirthDateSelector({
+  birthYear,
+  birthMonth,
+  birthDay,
+  calendarType,
+  onChange,
+}: BirthDateParts & {
+  calendarType: FormState["calendarType"];
+  onChange: (next: BirthDateParts) => void;
+}) {
+  const today = getKoreaTodayParts();
+  const selectedYear = Number(birthYear);
+  const selectedMonth = Number(birthMonth);
+  const maxMonth = selectedYear === today.year ? today.month : 12;
+  const naturalDayLimit = getBirthDayLimit(birthYear, birthMonth, calendarType);
+  const maxDay = calendarType === "양력" && selectedYear === today.year && selectedMonth === today.month
+    ? Math.min(naturalDayLimit, today.day)
+    : naturalDayLimit;
+  const yearOptions = Array.from(
+    { length: today.year - MIN_BIRTH_YEAR + 1 },
+    (_, index) => String(today.year - index),
+  );
+  const monthOptions = Array.from({ length: maxMonth }, (_, index) => String(index + 1).padStart(2, "0"));
+  const dayOptions = Array.from({ length: maxDay }, (_, index) => String(index + 1).padStart(2, "0"));
+
+  const updatePart = (part: keyof BirthDateParts, value: string) => {
+    const next: BirthDateParts = { birthYear, birthMonth, birthDay, [part]: value };
+    const nextYear = Number(next.birthYear);
+
+    if (part === "birthYear") {
+      const nextMonthLimit = nextYear === today.year ? today.month : 12;
+      if (next.birthMonth && Number(next.birthMonth) > nextMonthLimit) {
+        next.birthMonth = "";
+        next.birthDay = "";
+      }
+    }
+
+    if (part === "birthMonth" && !value) {
+      next.birthDay = "";
+    }
+
+    if (next.birthYear && next.birthMonth && next.birthDay) {
+      const dayLimit = getBirthDayLimit(next.birthYear, next.birthMonth, calendarType);
+      const currentMonthLimit = calendarType === "양력"
+        && Number(next.birthYear) === today.year
+        && Number(next.birthMonth) === today.month
+        ? Math.min(dayLimit, today.day)
+        : dayLimit;
+      if (Number(next.birthDay) > currentMonthLimit) next.birthDay = "";
+    }
+
+    onChange(next);
+  };
+
+  const selectClass = "w-full appearance-none rounded-2xl border border-[#e3d9c8] bg-white px-4 py-3.5 pr-9 text-sm font-semibold text-stone-800 outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400";
+
+  return (
+    <div className="sm:col-span-2">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <span className="text-sm font-semibold text-stone-800">생년월일</span>
+        {birthYear && birthMonth && birthDay ? (
+          <span className="text-xs font-medium text-stone-500">
+            {birthYear}년 {Number(birthMonth)}월 {Number(birthDay)}일
+          </span>
+        ) : null}
+      </div>
+      <div className="mt-2 rounded-3xl border border-[#e7ddcd] bg-[linear-gradient(135deg,#fbf8f2_0%,#fffdfa_100%)] p-4 shadow-sm sm:p-5">
+        <div className="grid grid-cols-[1.35fr_1fr_1fr] gap-2 sm:gap-3">
+          <label className="relative">
+            <span className="sr-only">출생년도</span>
+            <select
+              aria-label="출생년도"
+              value={birthYear}
+              onChange={(event) => updatePart("birthYear", event.target.value)}
+              required
+              className={selectClass}
+            >
+              <option value="">년도</option>
+              {yearOptions.map((year) => <option key={year} value={year}>{year}년</option>)}
+            </select>
+            <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400">⌄</span>
+          </label>
+
+          <label className="relative">
+            <span className="sr-only">출생월</span>
+            <select
+              aria-label="출생월"
+              value={birthMonth}
+              disabled={!birthYear}
+              onChange={(event) => updatePart("birthMonth", event.target.value)}
+              required
+              className={selectClass}
+            >
+              <option value="">월</option>
+              {monthOptions.map((month) => <option key={month} value={month}>{Number(month)}월</option>)}
+            </select>
+            <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400">⌄</span>
+          </label>
+
+          <label className="relative">
+            <span className="sr-only">출생일</span>
+            <select
+              aria-label="출생일"
+              value={birthDay}
+              disabled={!birthYear || !birthMonth}
+              onChange={(event) => updatePart("birthDay", event.target.value)}
+              required
+              className={selectClass}
+            >
+              <option value="">일</option>
+              {dayOptions.map((day) => <option key={day} value={day}>{Number(day)}일</option>)}
+            </select>
+            <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400">⌄</span>
+          </label>
+        </div>
+        <p className="mt-3 text-xs leading-6 text-stone-500">
+          년·월·일을 순서대로 선택해 주세요. 선택한 날짜만 정확하게 분석에 사용합니다.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function ReportSectionHeader({
   eyebrow,
@@ -146,17 +302,18 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
+  const birthDate = buildBirthDate(form);
 
   const canSubmit = Boolean(
     form.label.trim()
-      && form.birthDate
+      && birthDate
       && form.gender
       && (!form.birthTimeKnown || form.birthTime),
   );
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (loading || !canSubmit) return;
+    if (loading || !canSubmit || !birthDate) return;
     setLoading(true);
     setError(null);
 
@@ -167,7 +324,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
         body: JSON.stringify({
           partner: {
             label: form.label,
-            birthDate: form.birthDate,
+            birthDate,
             birthTimeKnown: form.birthTimeKnown,
             birthTime: form.birthTimeKnown ? form.birthTime : null,
             gender: form.gender,
@@ -194,6 +351,11 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
     const firstStrength = report.strengths[0];
     const conflictPoint = report.conflict.keyPoints[0] ?? report.conflict.summary;
     const timingPoint = report.currentTiming?.keyPoints[0] ?? report.currentTiming?.summary ?? "현재 관계 흐름은 두 사람의 기본 관계 구조와 함께 살펴봅니다.";
+    const strengthGridClass = report.strengths.length === 1
+      ? "lg:max-w-xl lg:grid-cols-1"
+      : report.strengths.length === 2
+        ? "lg:grid-cols-2"
+        : "lg:grid-cols-3";
 
     return (
       <div ref={resultRef} className="mt-8 scroll-mt-6">
@@ -237,7 +399,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
 
           {!meta.partnerBirthTimeKnown ? (
             <div className="border-t border-[#eadfc9] bg-[#f8f1e4] px-6 py-4 text-sm leading-7 text-stone-600 sm:px-10">
-              상대방 출생시간이 없어 시주와 상대방 대운은 제외하고, 확인 가능한 원국과 세운 범위만 반영했습니다.
+              상대방 출생시간이 없어 시간대에 따라 달라지는 세부 요소와 일부 장기 흐름은 제외하고, 확인 가능한 생년월일 기준과 올해 흐름을 반영했습니다.
             </div>
           ) : null}
 
@@ -273,7 +435,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
                 title="잘 맞는 부분"
                 description="두 사람 사이에서 자연스럽게 연결되거나 함께 살릴 수 있는 강점입니다."
               />
-              <div className="mt-6 grid gap-4 lg:grid-cols-3">
+              <div className={`mt-6 grid gap-4 ${strengthGridClass}`}>
                 {report.strengths.map((item, index) => (
                   <article key={item.title} className="rounded-3xl bg-stone-50 p-5 ring-1 ring-stone-200/70 sm:p-6">
                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-900 text-xs font-bold text-white">{String(index + 1).padStart(2, "0")}</span>
@@ -409,16 +571,13 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
           />
         </label>
 
-        <label>
-          <span className="text-sm font-semibold text-stone-800">생년월일</span>
-          <input
-            type="date"
-            value={form.birthDate}
-            onChange={(event) => setForm((current) => ({ ...current, birthDate: event.target.value }))}
-            required
-            className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-stone-500"
-          />
-        </label>
+        <BirthDateSelector
+          birthYear={form.birthYear}
+          birthMonth={form.birthMonth}
+          birthDay={form.birthDay}
+          calendarType={form.calendarType}
+          onChange={(next) => setForm((current) => ({ ...current, ...next }))}
+        />
 
         <div>
           <label className="block">
@@ -461,11 +620,15 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
             <span className="text-sm font-semibold text-stone-800">달력 기준</span>
             <select
               value={form.calendarType}
-              onChange={(event) => setForm((current) => ({
-                ...current,
-                calendarType: event.target.value as FormState["calendarType"],
-                isLeapMonth: event.target.value === "음력" ? current.isLeapMonth : false,
-              }))}
+              onChange={(event) => {
+                const calendarType = event.target.value as FormState["calendarType"];
+                setForm((current) => ({
+                  ...current,
+                  calendarType,
+                  birthDay: calendarType === "음력" && Number(current.birthDay) > 30 ? "" : current.birthDay,
+                  isLeapMonth: calendarType === "음력" ? current.isLeapMonth : false,
+                }));
+              }}
               className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none focus:border-stone-500"
             >
               <option value="양력">양력</option>

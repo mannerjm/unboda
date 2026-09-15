@@ -22,16 +22,13 @@ type RecommendationTop3Props = {
 
 function getReadableRecommendationReason(
   recommendation: AnalysisProductRecommendation | undefined,
-  productId: string,
 ): string {
   const readableReason = recommendation?.reasons.find((reason) =>
     !/^[a-z0-9_-]+:[a-zA-Z0-9_-]+$/.test(reason)
     && !/(fortuneFlowAnalysis|elementAnalysis|elementRelations|health_stress|wealth_risk|relationship_conflict)/.test(reason),
   );
 
-  return readableReason
-    ?? getPaidAnalysisTopicConfig(productId)?.purchaseDecision?.recommendedFor[0]
-    ?? "현재 무료 분석에서 확인된 흐름과 연결되는 주제입니다.";
+  return readableReason ?? "현재 무료 분석에서 확인된 흐름과 연결되는 주제라 우선 추천했어요.";
 }
 
 export default function RecommendationTop3({
@@ -100,7 +97,7 @@ export default function RecommendationTop3({
               <Rank index={index} />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold text-stone-900">{displayTitle}</span>
-                <span className="mt-1 block truncate text-xs text-stone-500">{getReadableRecommendationReason(recommendation, product.id)}</span>
+                <span className="mt-1 block truncate text-xs text-stone-500">{getReadableRecommendationReason(recommendation)}</span>
               </span>
               <span className="shrink-0 text-[11px] font-medium text-stone-500">{getProductPricing(product.id).amount.toLocaleString("ko-KR")}원</span>
             </button>
@@ -144,7 +141,7 @@ function RecommendationDetail({
   const summary = paidSummaries.find((item) => item.profileId === profileId && item.productId === productId);
   const state = toPremiumAnalysisProductState(summary?.reportStatus);
   const href = getPremiumAnalysisHref(product.id, state, profileId);
-  const reason = getReadableRecommendationReason(recommendation, productId);
+  const reason = getReadableRecommendationReason(recommendation);
   const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
   const overviewItems = product.details?.slice(0, 3) ?? decision.whatItAnalyzes.slice(0, 3);
   const expectedUnderstanding = decision.expectedUnderstanding

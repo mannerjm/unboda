@@ -62,6 +62,7 @@ export async function POST(_request: Request, context: RouteContext) {
       generation = await regenerateMainAnalysis({
         profile: claimed.content!.profile,
         freeAnalysis: claimed.content!.freeAnalysis,
+        productRecommendations: claimed.content!.productRecommendations,
       });
     } catch (error) {
       console.error("[retry-main-analysis] generation failed", error);

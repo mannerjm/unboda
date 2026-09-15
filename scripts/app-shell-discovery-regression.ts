@@ -26,6 +26,7 @@ for (const requiredText of [
   "내 분석",
   "추천 분석",
   "심층 분석",
+  "전문 분석",
   "마이페이지",
   "고객지원 센터",
 ]) {
@@ -46,12 +47,16 @@ if (!premiumCatalogSource.includes("주제별 분석") || !premiumCatalogSource.
   throw new Error("Topic and period catalog controls missing");
 }
 
-if (!appShellSource.includes('grid-cols-6')) {
-  throw new Error("Mobile navigation should preserve six real core destinations");
+if (!appShellSource.includes('grid-cols-7')) {
+  throw new Error("Mobile navigation should preserve seven real core destinations including professional analysis");
 }
 
 if (!appShellSource.includes('href: "/deep-analysis"')) {
   throw new Error("Deep analysis navigation must target a real dedicated view");
+}
+
+if (!appShellSource.includes('href: "/special-analysis"')) {
+  throw new Error("Professional analysis navigation must target the dedicated hub");
 }
 
 if (!appShellSource.includes('href: "/support"')) {
@@ -60,6 +65,10 @@ if (!appShellSource.includes('href: "/support"')) {
 
 if (!readFileSync("app/deep-analysis/page.tsx", "utf8").includes("PremiumCatalogSection")) {
   throw new Error("Dedicated deep analysis view must reuse the canonical catalog");
+}
+
+if (!readFileSync("app/special-analysis/page.tsx", "utf8").includes("/special-analysis/compatibility")) {
+  throw new Error("Professional analysis hub must expose the compatibility engine");
 }
 
 const recommendationComponentSource = readFileSync("app/components/RecommendationTop3.tsx", "utf8");

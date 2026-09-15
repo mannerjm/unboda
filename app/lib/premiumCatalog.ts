@@ -7,6 +7,10 @@ import {
   type PremiumProductDefinition,
 } from "./premiumProductRegistry";
 import { getLaunchProductIds } from "./paidAnalysisTopicConfig";
+import {
+  getPremiumCategoryDisplayLabel,
+  presentPremiumProduct,
+} from "./premiumPresentation";
 
 export type PremiumCatalogCategoryGroup = {
   category: PremiumProductCategory;
@@ -38,7 +42,7 @@ export function listTopicCatalogProducts(): readonly PremiumProductDefinition[] 
     (product) => product.kind === "TOPIC" && launchIds.has(product.id),
   );
 
-  return [...taxonomyTopics, ...legacyTopics];
+  return [...taxonomyTopics, ...legacyTopics].map(presentPremiumProduct);
 }
 
 /** Period products in registry order, restricted to the Launch catalog. */
@@ -64,7 +68,10 @@ export function groupTopicCatalogProductsByCategory(): readonly PremiumCatalogCa
 
     groups.push({
       category: product.category,
-      label: product.category === "relationship" ? "연애운" : getPremiumCategoryLabel(product.category),
+      label: getPremiumCategoryDisplayLabel(
+        product.category,
+        getPremiumCategoryLabel(product.category),
+      ),
       products: [product],
     });
   }

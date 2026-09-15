@@ -138,9 +138,9 @@ const tripleHarmonyPair = buildCompatibilityFoundation(
 const waterHarmony = tripleHarmonyPair.evidence.find(
   (item) => item.kind === "branch_triple_harmony" && item.metadata?.element === "수",
 );
-assert(Boolean(waterHarmony), "申-子-辰 spanning both charts must create water triple-harmony evidence");
+assert(waterHarmony !== undefined, "申-子-辰 spanning both charts must create water triple-harmony evidence");
 assert(
-  waterHarmony?.participants.some((participant) => participant.person === "A")
+  waterHarmony.participants.some((participant) => participant.person === "A")
     && waterHarmony.participants.some((participant) => participant.person === "B"),
   "triple harmony must represent a cross-chart relationship, not one chart alone",
 );

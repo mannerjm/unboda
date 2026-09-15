@@ -41,16 +41,19 @@ function ReportSectionHeader({
   eyebrow,
   title,
   description,
+  tone = "light",
 }: {
   eyebrow: string;
   title: string;
   description?: string;
+  tone?: "light" | "dark";
 }) {
+  const dark = tone === "dark";
   return (
     <div className="max-w-3xl">
-      <p className="text-[11px] font-bold tracking-[0.18em] text-stone-400">{eyebrow}</p>
-      <h3 className="mt-2 text-xl font-bold tracking-tight text-stone-950 sm:text-2xl">{title}</h3>
-      {description ? <p className="mt-2 text-sm leading-7 text-stone-500">{description}</p> : null}
+      <p className={`text-[11px] font-bold tracking-[0.18em] ${dark ? "text-stone-400" : "text-stone-400"}`}>{eyebrow}</p>
+      <h3 className={`mt-2 text-xl font-bold tracking-tight sm:text-2xl ${dark ? "text-white" : "text-stone-950"}`}>{title}</h3>
+      {description ? <p className={`mt-2 text-sm leading-7 ${dark ? "text-stone-300" : "text-stone-500"}`}>{description}</p> : null}
     </div>
   );
 }
@@ -288,6 +291,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
               eyebrow="02 · DIRECTION"
               title="서로에게 미치는 방식"
               description="같은 관계라도 내가 상대에게 주는 영향과 상대가 나에게 주는 영향은 다르게 나타날 수 있습니다."
+              tone="dark"
             />
             <div className="mt-7 grid gap-4 lg:grid-cols-2">
               <PerspectiveCard

@@ -20,17 +20,17 @@ type FormState = {
   birthDate: string;
   birthTimeKnown: boolean;
   birthTime: string;
-  gender: "남성" | "여성";
+  gender: "" | "남성" | "여성";
   calendarType: "양력" | "음력";
   isLeapMonth: boolean;
 };
 
 const INITIAL_FORM: FormState = {
-  label: "상대방",
+  label: "",
   birthDate: "",
   birthTimeKnown: true,
   birthTime: "",
-  gender: "여성",
+  gender: "",
   calendarType: "양력",
   isLeapMonth: false,
 };
@@ -69,9 +69,16 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
   const [loading, setLoading] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
+  const canSubmit = Boolean(
+    form.label.trim()
+      && form.birthDate
+      && form.gender
+      && (!form.birthTimeKnown || form.birthTime),
+  );
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (loading) return;
+    if (loading || !canSubmit) return;
     setLoading(true);
     setError(null);
 
@@ -197,16 +204,20 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
         <p className="mt-2 text-sm leading-6 text-stone-500">현재 분석 대상으로 선택된 내 사주를 기준으로 비교합니다.</p>
       </div>
 
+      <div className="mt-6 rounded-2xl bg-[#f7f3ea] px-4 py-3 text-sm leading-6 text-stone-600">
+        현재 궁합 분석은 연인·배우자 관계를 기준으로 살펴봅니다.
+      </div>
+
       <div className="mt-7 grid gap-5 sm:grid-cols-2">
         <label className="sm:col-span-2">
-          <span className="text-sm font-semibold text-stone-800">상대방 구분 이름</span>
+          <span className="text-sm font-semibold text-stone-800">상대방 이름 또는 별칭</span>
           <input
             value={form.label}
             onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))}
             maxLength={40}
             required
             className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-stone-500"
-            placeholder="예: 배우자, 연인, 상대방"
+            placeholder="예: 지민, 배우자"
           />
         </label>
 
@@ -248,8 +259,10 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
           <select
             value={form.gender}
             onChange={(event) => setForm((current) => ({ ...current, gender: event.target.value as FormState["gender"] }))}
+            required
             className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm outline-none focus:border-stone-500"
           >
+            <option value="" disabled>선택해 주세요</option>
             <option value="여성">여성</option>
             <option value="남성">남성</option>
           </select>
@@ -292,7 +305,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || !canSubmit}
         className="mt-7 inline-flex w-full items-center justify-center rounded-2xl bg-stone-900 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
       >
         {loading ? "두 사람의 관계를 분석하고 있어요..." : "궁합 분석하기"}

@@ -23,6 +23,9 @@ if (deep.includes("RecommendationTop3") || deep.includes("productRecommendations
 if (!page.includes("무료 분석에서 이어서 확인할 분석") || !page.includes("무료 분석에서 가장 크게 드러난 문제")) {
   throw new Error("Recommendation page must explicitly continue the free-analysis problem diagnosis");
 }
+if (!page.includes("실제 계산 근거가 있는 다른 분야를 우선") || !page.includes("같은 분야의 다른 문제도 추천될 수 있어요")) {
+  throw new Error("Recommendation copy must describe category diversity as evidence-based priority, not a guarantee");
+}
 if (!page.includes("buildCurrentRecommendations") || !page.includes("mergeRecommendationStoryline") || !page.includes("selectedCategories")) {
   throw new Error("Recommendation page must refresh deterministic recommendations and avoid repeated recommendation categories");
 }

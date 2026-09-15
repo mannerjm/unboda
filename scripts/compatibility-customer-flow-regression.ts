@@ -48,6 +48,18 @@ const unknownPartner = validateCompatibilityPartnerInput({
 });
 assert(unknownPartner.valid, "unknown-time partner input must validate without a fake time");
 
+const malformedBirthDate = validateCompatibilityPartnerInput({
+  ...knownPartner.value,
+  birthDate: "199548",
+});
+assert(!malformedBirthDate.valid, "malformed six-digit birth date input must be rejected");
+
+const futureBirthDate = validateCompatibilityPartnerInput({
+  ...knownPartner.value,
+  birthDate: "2999-01-01",
+});
+assert(!futureBirthDate.valid, "future birth date input must be rejected");
+
 const mine = buildProfileCompatibilitySnapshot(profile, evaluationDate);
 assert(Boolean(mine.person.pillars.hour), "stored profile with known time must retain hour pillar");
 assert(Boolean(mine.timing.seunGanji), "stored profile must expose current seun for the explicit evaluation date");
@@ -118,6 +130,11 @@ assert(client.includes("상대방 이름 또는 별칭") && client.includes('pla
 assert(client.includes('<option value="" disabled>선택해 주세요</option>'), "gender select must expose a neutral selection prompt");
 assert(client.includes("현재 궁합 분석은 연인·배우자 관계를 기준으로 살펴봅니다."), "input form must state the current romantic/partner scope");
 assert(client.includes("disabled={loading || !canSubmit}"), "analysis CTA must remain disabled until the required deliberate inputs are complete");
+assert(client.includes("function BirthDateSelector") && client.includes('aria-label="출생년도"') && client.includes('aria-label="출생월"') && client.includes('aria-label="출생일"'), "birth date must use deliberate year/month/day selectors");
+assert(client.includes("년·월·일을 순서대로 선택해 주세요"), "birth date selector must explain the deliberate date entry flow");
+assert(!client.includes('type="date"'), "compatibility input must not use the browser-native date picker that permits malformed partial display states");
+assert(client.includes("MIN_BIRTH_YEAR = 1900") && client.includes("KOREA_UTC_OFFSET_MS"), "birth date selector must constrain customer choices to a supported range in Korean service time");
+assert(adapter.includes("isGuestBirthDateInRange"), "server validation must reject malformed or future compatibility birth dates independently of the browser UI");
 assert(client.includes("서로에게 미치는 방식") && client.includes("perspectives.meToPartner") && client.includes("perspectives.partnerToMe"), "result UI must make the engine's asymmetric pair influence visible to customers");
 assert(client.includes('data-section="pair-perspective"'), "directional compatibility section must have a stable result marker and remain a first-class report section");
 assert(client.includes("궁합 리포트") && client.includes("관계 핵심 요약") && client.includes("관계 핵심"), "result hero must read like a premium report instead of a raw developer output");
@@ -127,11 +144,13 @@ for (const templateLabel of ["RELATIONSHIP CORE", "AT A GLANCE", "STRENGTHS", "D
 assert(client.includes("두 사람의 관계 패턴") && client.includes("년 흐름 함께 보기"), "hero badges must describe customer value rather than implementation details");
 assert(client.includes("오래 가려면 맞춰야 할 기준") && client.includes("갈등 뒤 회복 방식"), "premium result hierarchy must translate technical sections into customer-readable editorial sections");
 assert(client.includes("shadow-xl") && client.includes("rounded-[32px]") && client.includes("bg-[linear-gradient"), "premium result surface must retain the designed report shell, hierarchy, and hero treatment");
+assert(client.includes('report.strengths.length === 2') && client.includes('"lg:grid-cols-2"'), "two strength cards must expand to a balanced two-column layout without leaving an empty premium-report column");
 assert(client.includes("lg:grid-cols-3") && client.includes("lg:grid-cols-2"), "premium result must use responsive summary and detail card layouts rather than a document-only column");
 assert(client.includes('className="mx-auto mt-8 max-w-3xl'), "input form must remain constrained even though the result canvas is wider");
 assert(!client.includes("function SectionCard"), "premium result must not fall back to the old generic developer-style section renderer");
 assert(!client.includes("상대방 구분 이름"), "customer form must not expose system-like partner label wording");
 assert(!client.includes("evidenceRefs}"), "internal evidence references must never be rendered to customers");
+assert(!client.includes("시주와 상대방 대운") && !client.includes("원국과 세운 범위"), "unknown-time customer notice must avoid internal technical terminology");
 assert(service.includes('callType: "recommendation-analysis"'), "compatibility explanation must use the bounded customer-facing generation lane");
 assert(service.includes("validateCompatibilityReportOutput"), "model output must pass the Phase 5 closed report contract");
 assert(service.includes("COMPATIBILITY_REPORT_GENERATION_MAX_ATTEMPTS = 2"), "compatibility report generation must use one bounded schema-repair retry");
@@ -141,8 +160,9 @@ assert(service.includes("[CUSTOMER_COPY_GUIDE]") && service.includes("같은 조
 assert(service.includes("'운영', '관리'") && service.includes("'조율', '균형', '속도', '흐름'"), "current timing copy must avoid system-like relationship language");
 assert(service.includes("직전 응답은 배열 개수 제한을 초과했습니다"), "compatibility repair retry must explicitly correct only array cardinality overflow");
 assert(perspectiveSource.includes("BReceivesFromA") && perspectiveSource.includes("AReceivesFromB"), "directional presentation must preserve the two engine directions rather than flatten them");
-assert(perspectiveSource.includes("ELEMENT_LABELS") && perspectiveSource.includes('leadingSupport[0]?.element') && perspectiveSource.includes('leadingBurden[0]?.element'), "directional customer copy must use each receiver's leading support and burden elements instead of generic duplicate signals");
-assert(perspectiveSource.includes("보완적으로 작용하는 쪽") && perspectiveSource.includes("부담으로 커질 수 있습니다"), "directional signal copy must explain the pair-specific difference in customer language");
+assert(perspectiveSource.includes("ELEMENT_CUSTOMER_LABELS") && perspectiveSource.includes('leadingSupport[0]?.element') && perspectiveSource.includes('leadingBurden[0]?.element'), "directional customer copy must use each receiver's leading support and burden elements without exposing raw engine labels");
+assert(perspectiveSource.includes("관계의 흐름과 유연성") && perspectiveSource.includes("기준과 결정 방식"), "directional element evidence must be translated into everyday relationship language");
+assert(!perspectiveSource.includes("목(木)") && !perspectiveSource.includes("화(火)") && !perspectiveSource.includes("토(土)") && !perspectiveSource.includes("금(金)") && !perspectiveSource.includes("수(水)"), "directional cards must not lead with technical five-element notation");
 assert(!perspectiveSource.includes("Math.random") && !perspectiveSource.includes("generateAnalysisText"), "directional perspective layer must remain deterministic and evidence-derived");
 assert(adapter.includes("Array.from({ length: 24 }") && adapter.includes("signatures.size !== 1"), "unknown-time handling must verify stable date pillars rather than inject noon");
 assert(!adapter.includes('birthTime: "12:00"'), "server adapter must never synthesize noon for unknown birth time");

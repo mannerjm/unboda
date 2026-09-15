@@ -39,7 +39,7 @@ assert(
   "AI consulting must use gpt-5.6-terra",
 );
 assert(!generateAnalysisText.includes('const model = "gpt-5"'), "model must not be hardcoded to gpt-5 for every callType");
-assert(generateAnalysisText.includes("return 6000;"), "main-analysis max output tokens must be 6000");
+assert(generateAnalysisText.includes("return 1800;"), "main-analysis max output tokens must be reduced to 1800 for the concise diagnosis contract");
 assert(generateAnalysisText.includes("return 4800;"), "paid-analysis-detail max output tokens must remain 4800");
 assert(generateAnalysisText.includes("return 3200;"), "default max output tokens must remain 3200");
 assert(!generateAnalysisText.includes('callType === "main-analysis" || callType === "paid-analysis-detail"'), "main-analysis and paid-analysis-detail token budgets must be resolved separately");

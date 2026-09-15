@@ -101,11 +101,44 @@ assert(
 const socialConflictQuestion = getPaidAnalysisTopicConfig("social-conflict")?.userQuestion ?? "";
 const romanticConflictQuestion = getPaidAnalysisTopicConfig("relationship-conflict")?.userQuestion ?? "";
 assert(socialConflictQuestion !== romanticConflictQuestion, "general social conflict must remain distinct from romantic conflict");
-assert(socialConflictQuestion.includes("연애가 아닌"), "social conflict scope must explicitly exclude romantic conflict");
+assert(!socialConflictQuestion.includes("연애") && !socialConflictQuestion.includes("비연애"), "social conflict customer question must focus on interpersonal conflict without romantic contrast wording");
 
 const networkQuestion = getPaidAnalysisTopicConfig("social-network-expansion")?.userQuestion ?? "";
 const romanticConnectionQuestion = getPaidAnalysisTopicConfig("relationship-new-connection")?.userQuestion ?? "";
 assert(networkQuestion !== romanticConnectionQuestion, "general network expansion must remain distinct from romantic new connection");
 assert(networkQuestion.includes("인맥"), "network expansion must own general social-network scope");
+
+const helperMetadata = [
+  getPremiumProduct("social-helper")?.title,
+  getPremiumProduct("social-helper")?.description,
+  ...(getPremiumProduct("social-helper")?.details ?? []),
+].join("\n");
+for (const forbidden of ["귀인", "어떤 사람에게", "유리한 시기"]) {
+  assert(!helperMetadata.includes(forbidden), `social-helper metadata must not promise ${forbidden}`);
+}
+
+const conflictMetadata = [
+  getPremiumProduct("social-conflict")?.description,
+  ...(getPremiumProduct("social-conflict")?.details ?? []),
+].join("\n");
+assert(conflictMetadata.includes("대인관계"), "social-conflict metadata must clearly own interpersonal scope");
+assert(!conflictMetadata.includes("연애") && !conflictMetadata.includes("비연애"), "social-conflict customer metadata must not use romantic contrast wording");
+
+const networkMetadata = [
+  getPremiumProduct("social-network-expansion")?.description,
+  ...(getPremiumProduct("social-network-expansion")?.details ?? []),
+].join("\n");
+for (const forbidden of ["인연", "시기와 환경", "연애", "비연애"]) {
+  assert(!networkMetadata.includes(forbidden), `social-network-expansion metadata must not promise or contrast with ${forbidden}`);
+}
+
+for (const productId of activatedSocialIds) {
+  const config = getPaidAnalysisTopicConfig(productId)!;
+  const customerFacingContractText = [config.userQuestion, ...config.analysisFocus].join("\n");
+  assert(!customerFacingContractText.includes("연애") && !customerFacingContractText.includes("비연애"), `${productId} customer-facing contract text must stay focused on 대인관계 itself`);
+  const firstExcluded = config.excludedFocus?.[0]?.prompt ?? "";
+  assert(!firstExcluded.includes("연애"), `${productId} first comparison shown to customers must not contrast against romance`);
+  assert((config.excludedFocus ?? []).some((item) => item.id.startsWith("romantic-")), `${productId} must retain an internal romantic-scope exclusion`);
+}
 
 console.log("social-launch-expansion-regression passed ✓");

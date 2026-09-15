@@ -6,13 +6,87 @@ import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { getFreeAnalysisResult } from "@/app/lib/freeAnalysisResults/server";
-import { resolveCanonicalRecommendationProduct } from "@/app/lib/analysisProductRecommendations";
+import {
+  buildAnalysisProductRecommendations,
+  resolveCanonicalRecommendationProduct,
+  type AnalysisProductRecommendation,
+} from "@/app/lib/analysisProductRecommendations";
 import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
-import { isProfileId } from "@/app/lib/profiles/types";
+import { isProfileId, type ProfileDto } from "@/app/lib/profiles/types";
+import { getSaju } from "@/app/lib/manse";
+import { buildPremiumAnalysis } from "@/app/lib/buildPremiumAnalysis";
+import { createEvaluationContext } from "@/app/lib/evaluationContext";
 
 type RecommendationsPageProps = {
   searchParams: Promise<{ profileId?: string }>;
 };
+
+function mergeRecommendationStoryline(
+  storedRecommendations: readonly AnalysisProductRecommendation[],
+  refreshedRecommendations: readonly AnalysisProductRecommendation[],
+): AnalysisProductRecommendation[] {
+  const selected: AnalysisProductRecommendation[] = [];
+  const selectedProductIds = new Set<string>();
+  const selectedCategories = new Set<string>();
+
+  const tryAdd = (recommendation: AnalysisProductRecommendation, requireNewCategory: boolean) => {
+    const product = resolveCanonicalRecommendationProduct(recommendation.productId);
+    if (!product || selectedProductIds.has(product.id)) return;
+    if (requireNewCategory && selectedCategories.has(product.category)) return;
+
+    selected.push({ ...recommendation, productId: product.id });
+    selectedProductIds.add(product.id);
+    selectedCategories.add(product.category);
+  };
+
+  const storedPrimary = storedRecommendations[0];
+  if (storedPrimary) tryAdd(storedPrimary, false);
+
+  for (const recommendation of refreshedRecommendations) {
+    if (selected.length >= 3) break;
+    tryAdd(recommendation, true);
+  }
+
+  for (const recommendation of storedRecommendations.slice(1)) {
+    if (selected.length >= 3) break;
+    tryAdd(recommendation, true);
+  }
+
+  for (const recommendation of refreshedRecommendations) {
+    if (selected.length >= 3) break;
+    tryAdd(recommendation, false);
+  }
+
+  for (const recommendation of storedRecommendations.slice(1)) {
+    if (selected.length >= 3) break;
+    tryAdd(recommendation, false);
+  }
+
+  return selected.slice(0, 3);
+}
+
+function buildCurrentRecommendations(profile: ProfileDto): AnalysisProductRecommendation[] {
+  const evaluationContext = createEvaluationContext();
+  const isLeapMonth = profile.isLeapMonth ? "윤달" : "평달";
+  const saju = getSaju(
+    profile.birthDate,
+    profile.birthTime,
+    profile.calendarType,
+    isLeapMonth,
+    profile.gender,
+    evaluationContext.evaluationDate,
+  );
+  const recommendationAnalysis = buildPremiumAnalysis(saju);
+
+  return buildAnalysisProductRecommendations({
+    fortuneBrain: recommendationAnalysis.fortuneBrain,
+    strengthAnalysis: recommendationAnalysis.strengthAnalysis,
+    elementRelations: recommendationAnalysis.elementRelations,
+    fortuneFlow: recommendationAnalysis.fortuneFlowAnalysis,
+    elementAnalysis: recommendationAnalysis.elementAnalysis,
+    evaluationContext,
+  }).recommendations;
+}
 
 export default async function RecommendationsPage({ searchParams }: RecommendationsPageProps) {
   const user = await getCurrentUser();
@@ -28,7 +102,17 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
   if (!profile) redirect("/mypage");
 
   const analysisRecord = await getFreeAnalysisResult(user.id, profile.id);
-  const recommendations = (analysisRecord?.content?.productRecommendations?.recommendations ?? []).filter((recommendation) => resolveCanonicalRecommendationProduct(recommendation.productId));
+  const storedRecommendations = (analysisRecord?.content?.productRecommendations?.recommendations ?? [])
+    .filter((recommendation) => resolveCanonicalRecommendationProduct(recommendation.productId));
+
+  let recommendations = storedRecommendations;
+  try {
+    const refreshedRecommendations = buildCurrentRecommendations(profile);
+    recommendations = mergeRecommendationStoryline(storedRecommendations, refreshedRecommendations);
+  } catch (error) {
+    console.error("[recommendations] failed to refresh deterministic recommendation storyline", error);
+  }
+
   const primaryProduct = recommendations[0]
     ? resolveCanonicalRecommendationProduct(recommendations[0].productId)
     : null;
@@ -44,7 +128,7 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
             <h1 className="mt-4 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">무료 분석에서 이어서 확인할 분석</h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">
               {primaryProduct
-                ? `무료 분석에서 드러난 핵심 문제와 같은 계산 근거를 따라, ${primaryProduct.title}을 가장 먼저 포함한 심층 분석 3가지를 보여드려요.`
+                ? `무료 분석에서 가장 크게 드러난 문제는 ${primaryProduct.title}에서 먼저 이어서 확인하고, 나머지 추천은 같은 분야가 겹치지 않도록 현재 흐름의 다른 문제를 함께 보여드려요.`
                 : "무료 분석에서 드러난 핵심 문제와 같은 계산 근거를 따라, 이어서 확인하면 좋은 심층 분석을 보여드려요."}
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-500">

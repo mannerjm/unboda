@@ -61,17 +61,29 @@ assert(Boolean(interpretation.summary), "summary field must parse");
 console.log("1. legacy eleven-field free-AI responses remain parseable ✓");
 
 const conciseMarkdown = `
-## 한눈에 보는 핵심
-현재 상황과 문제를 계산 사실에 근거해 압축한 설명입니다.
-
 ## 사주의 특성
 타고난 성향과 강점, 취약점을 쉬운 말로 설명합니다.
+
+## 한눈에 보는 핵심
+현재 상황과 문제를 계산 사실에 근거해 압축한 설명입니다.
 `;
 const concise = parseFreeAnalysisAIInterpretation(conciseMarkdown);
-assert(concise.overview === "현재 상황과 문제를 계산 사실에 근거해 압축한 설명입니다.", "concise overview must parse");
 assert(concise.strength === "타고난 성향과 강점, 취약점을 쉬운 말로 설명합니다.", "사주의 특성 heading must map to the traits/strength field");
+assert(concise.overview === "현재 상황과 문제를 계산 사실에 근거해 압축한 설명입니다.", "concise overview must parse");
 assert(!concise.daeun && !concise.seun && !concise.summary, "new concise output must not fabricate legacy sections");
-console.log("2. new two-card free-AI response parses into overview and traits only ✓");
+console.log("2. new two-card free-AI response parses into traits and overview only ✓");
+
+const indentedNumberedConcise = `
+  1) 사주의 특성
+들여쓰기된 특성 제목도 별도 카드로 파싱되어야 합니다.
+
+  2) 한눈에 보는 핵심
+들여쓰기된 핵심 제목도 별도 카드로 파싱되어야 합니다.
+`;
+const indentedConcise = parseFreeAnalysisAIInterpretation(indentedNumberedConcise);
+assert(indentedConcise.strength === "들여쓰기된 특성 제목도 별도 카드로 파싱되어야 합니다.", "indented numbered traits heading must parse");
+assert(indentedConcise.overview === "들여쓰기된 핵심 제목도 별도 카드로 파싱되어야 합니다.", "indented numbered overview heading must parse");
+console.log("3. indented numbered concise headings split into two cards ✓");
 
 const numberedBoldMarkdown = `
 **1) 한눈에 보는 핵심**
@@ -114,27 +126,27 @@ for (const field of ["overview", "strength", "fiveElements", "yongshin", "gyeokg
 }
 assert(numberedBold.summary === "최종 결론입니다.", "summary must not contain the complete numbered/bold response");
 assert(!numberedBold.summary?.includes("오행의 의미"), "summary must not duplicate section content");
-console.log("3. numbered and bold legacy headings remain compatible ✓");
+console.log("4. numbered and bold legacy headings remain compatible ✓");
 
 const partial = parseFreeAnalysisAIInterpretation("## 오행 분석\n오행 구조 설명입니다.");
 assert(Boolean(partial.fiveElements), "partial field must parse");
 assert(!partial.strength && !partial.summary, "missing card fields must remain optional");
-console.log("4. missing AI fields do not fabricate card content ✓");
+console.log("5. missing AI fields do not fabricate card content ✓");
 
 const legacyCombinedFlow = parseFreeAnalysisAIInterpretation(
   "## 현재 대운과 세운 해석\n기존 응답의 대운과 세운을 함께 설명하는 흐름입니다.",
 );
 assert(Boolean(legacyCombinedFlow.daeun) && Boolean(legacyCombinedFlow.seun), "legacy combined daeun/seun heading must remain visible in both cards");
-console.log("5. legacy combined daeun/seun heading remains visible ✓");
+console.log("6. legacy combined daeun/seun heading remains visible ✓");
 
 const rawInternal = parseFreeAnalysisAIInterpretation("## 종합/마무리\nrelationship_conflict:fortuneFlowAnalysis을 확인합니다.");
 assert(!rawInternal.summary?.includes("relationship_conflict"), "raw internal keys must not reach UI fields");
 assert(!rawInternal.summary?.includes("fortuneFlowAnalysis"), "raw source keys must not reach UI fields");
-console.log("6. raw internal tokens are sanitized ✓");
+console.log("7. raw internal tokens are sanitized ✓");
 
 const legacy = parseFreeAnalysisAIInterpretation("기존 형식의 AI 분석 내용입니다.");
 assert(legacy.summary === "기존 형식의 AI 분석 내용입니다.", "unstructured legacy response must use safe summary fallback");
-console.log("7. legacy unstructured response uses summary fallback ✓");
+console.log("8. legacy unstructured response uses summary fallback ✓");
 
 const resultPage = read("app/result/page.tsx");
 for (const [field, card] of [
@@ -150,11 +162,15 @@ for (const [field, card] of [
 for (const field of ["overview", "strength", "fiveElements", "yongshin", "gyeokguk", "daeun", "seun", "wealth", "relationship", "health"] as const) {
   assert(resultPage.includes(`text: aiInterpretation.${field}`), `${field} must remain supported in the bottom summary section cards for stored legacy results`);
 }
+const traitsCardIndex = resultPage.indexOf('{ title: "사주의 특성", text: aiInterpretation.strength }');
+const overviewCardIndex = resultPage.indexOf('{ title: "한눈에 보는 핵심", text: aiInterpretation.overview }');
+assert(traitsCardIndex >= 0 && overviewCardIndex >= 0 && traitsCardIndex < overviewCardIndex, "new free analysis must render 사주의 특성 before 한눈에 보는 핵심");
+assert(resultPage.includes('className="grid items-start gap-3 sm:grid-cols-2"'), "two-card free analysis must use an even two-column desktop layout");
 assert(resultPage.includes("운보다 AI 종합 해석"), "bottom panel must use summary title");
 assert(resultPage.includes("formatUnbodaMessage(aiSummary)"), "bottom panel must remain compatible with legacy summary output");
 assert(resultPage.includes("AISummarySectionCard"), "bottom panel must render independent section subcards");
 assert(!resultPage.includes("AIInterpretationSection"), "deterministic cards must not render duplicate AI sections");
-console.log("8. result UI remains backward-compatible with stored free analyses ✓");
+console.log("9. result UI renders separate traits then overview cards while preserving legacy fields ✓");
 
 const prompt = buildMainAnalysisPrompt({
   compactFacts: {
@@ -188,7 +204,8 @@ const prompt = buildMainAnalysisPrompt({
   },
 });
 
-assert(prompt.includes("1) 한눈에 보는 핵심 2) 사주의 특성"), "prompt must request exactly the two concise free-analysis headings");
+assert(prompt.includes("1) 사주의 특성 2) 한눈에 보는 핵심"), "prompt must request exactly the two concise free-analysis headings in reading order");
+assert(prompt.includes("정확히 '## 사주의 특성', '## 한눈에 보는 핵심'"), "prompt must require stable markdown headings so the two cards split reliably");
 for (const forbiddenOutputHeading of ["현재 대운 해석 3)", "현재 세운 해석 4)", "종합/마무리 5)", "재물 흐름 3)", "관계 흐름 3)", "건강·생활 리듬 3)"]) {
   assert(!prompt.includes(forbiddenOutputHeading), `prompt must not request legacy long-form heading ${forbiddenOutputHeading}`);
 }
@@ -199,6 +216,6 @@ assert(prompt.includes("해결책을 절대 제시하지 마세요"), "free prom
 assert(prompt.includes("약 700~1000자 내외"), "free prompt must cap the two-card diagnosis to a concise character target");
 assert(prompt.includes("영어 단어를 사용자에게 절대 노출하지 마세요"), "free prompt must prohibit accidental English leakage");
 assert(prompt.includes("화면 위쪽에 이미 표시된") && prompt.includes("그대로 반복"), "free prompt must prohibit repeating deterministic engine output");
-console.log("9. prompt keeps engine facts while requesting only two concise diagnosis sections ✓");
+console.log("10. prompt keeps engine facts while requesting stable two-card diagnosis sections ✓");
 
 console.log("\nfree-analysis-ai-card-regression passed ✓");

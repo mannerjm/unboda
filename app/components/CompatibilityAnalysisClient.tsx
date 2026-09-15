@@ -219,7 +219,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
               </div>
 
               <div className="mt-8 max-w-4xl">
-                <p className="text-[11px] font-bold tracking-[0.2em] text-stone-400">RELATIONSHIP CORE</p>
+                <p className="text-[11px] font-bold tracking-[0.2em] text-stone-400">관계 핵심</p>
                 <h2 className="mt-3 text-3xl font-bold leading-[1.3] tracking-tight text-stone-950 sm:text-4xl lg:text-[42px]">
                   {report.relationshipCore.headline}
                 </h2>
@@ -229,9 +229,8 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
               </div>
 
               <div className="mt-7 flex flex-wrap gap-2">
-                <span className="rounded-full bg-white/75 px-3 py-2 text-xs font-semibold text-stone-600 ring-1 ring-stone-200">소통·갈등·회복 분석</span>
-                <span className="rounded-full bg-white/75 px-3 py-2 text-xs font-semibold text-stone-600 ring-1 ring-stone-200">{meta.evaluationYear}년 관계 흐름 포함</span>
-                <span className="rounded-full bg-white/75 px-3 py-2 text-xs font-semibold text-stone-600 ring-1 ring-stone-200">{meta.partnerBirthTimeKnown ? "출생시간 반영" : "확인 가능한 범위로 분석"}</span>
+                <span className="rounded-full bg-white/75 px-3 py-2 text-xs font-semibold text-stone-600 ring-1 ring-stone-200">두 사람의 관계 패턴</span>
+                <span className="rounded-full bg-white/75 px-3 py-2 text-xs font-semibold text-stone-600 ring-1 ring-stone-200">{meta.evaluationYear}년 흐름 함께 보기</span>
               </div>
             </div>
           </header>
@@ -244,7 +243,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
 
           <section className="bg-[#faf8f4] px-6 py-9 sm:px-10 sm:py-10">
             <ReportSectionHeader
-              eyebrow="AT A GLANCE"
+              eyebrow="한눈에 보기"
               title="관계 핵심 요약"
               description="길게 읽기 전에 두 사람 관계에서 먼저 확인할 세 가지 포인트입니다."
             />
@@ -270,7 +269,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
           {report.strengths.length ? (
             <section className="border-t border-stone-200/80 px-6 py-10 sm:px-10 sm:py-12">
               <ReportSectionHeader
-                eyebrow="01 · STRENGTHS"
+                eyebrow="01 · 잘 맞는 부분"
                 title="잘 맞는 부분"
                 description="두 사람 사이에서 자연스럽게 연결되거나 함께 살릴 수 있는 강점입니다."
               />
@@ -288,7 +287,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
 
           <section data-section="pair-perspective" className="border-t border-stone-200/80 bg-stone-900 px-6 py-10 text-white sm:px-10 sm:py-12">
             <ReportSectionHeader
-              eyebrow="02 · DIRECTION"
+              eyebrow="02 · 서로에게 미치는 방식"
               title="서로에게 미치는 방식"
               description="같은 관계라도 내가 상대에게 주는 영향과 상대가 나에게 주는 영향은 다르게 나타날 수 있습니다."
               tone="dark"
@@ -310,7 +309,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
           </section>
 
           <EditorialSection
-            eyebrow="03 · FRICTION"
+            eyebrow="03 · 부딪히기 쉬운 부분"
             title="부딪히기 쉬운 부분"
             summary={report.conflict.summary}
             points={report.conflict.keyPoints}
@@ -319,12 +318,12 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
           <section className="border-t border-stone-200/80 bg-[#faf8f4] px-6 py-10 sm:px-10 sm:py-12">
             <div className="grid gap-8 lg:grid-cols-2 lg:gap-6">
               <div className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-7">
-                <ReportSectionHeader eyebrow="04 · RECOVERY" title="갈등 뒤 회복 방식" />
+                <ReportSectionHeader eyebrow="04 · 갈등 뒤 회복" title="갈등 뒤 회복 방식" />
                 <p className="mt-5 text-[15px] leading-8 text-stone-700">{report.recovery.summary}</p>
                 <PointList points={report.recovery.keyPoints} />
               </div>
               <div className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-7">
-                <ReportSectionHeader eyebrow="05 · LONG TERM" title="오래 가려면 맞춰야 할 기준" />
+                <ReportSectionHeader eyebrow="05 · 오래 가는 기준" title="오래 가려면 맞춰야 할 기준" />
                 <p className="mt-5 text-[15px] leading-8 text-stone-700">{report.longTerm.summary}</p>
                 <PointList points={report.longTerm.keyPoints} />
               </div>
@@ -333,7 +332,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
 
           {report.currentTiming ? (
             <section className="border-t border-[#e4d6bb] bg-[#f5ecdc] px-6 py-10 sm:px-10 sm:py-12">
-              <ReportSectionHeader eyebrow="06 · NOW" title={`${meta.evaluationYear}년 현재 관계 흐름`} />
+              <ReportSectionHeader eyebrow="06 · 현재 흐름" title={`${meta.evaluationYear}년 현재 관계 흐름`} />
               <div className="mt-6 rounded-3xl border border-[#dfcfaf] bg-white/70 p-6 sm:p-8">
                 <p className="text-xl font-bold leading-8 text-stone-950 sm:text-2xl">{report.currentTiming.headline}</p>
                 <p className="mt-4 max-w-3xl text-[15px] leading-8 text-stone-700">{report.currentTiming.summary}</p>
@@ -350,14 +349,14 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
 
           <section className="border-t border-stone-200/80 px-6 py-10 sm:px-10 sm:py-12">
             <ReportSectionHeader
-              eyebrow="07 · ACTION"
+              eyebrow="07 · 지금 해볼 것"
               title="지금 해볼 것"
               description="관계를 바꾸는 건 큰 결심보다 반복 가능한 작은 행동에 가깝습니다."
             />
             <div className="mt-6 grid gap-4 lg:grid-cols-3">
               {report.actionGuide.doNext.map((item, index) => (
                 <article key={`${item.action}-${item.reason}`} className="rounded-3xl bg-[#f8f3e9] p-5 ring-1 ring-[#eadfc9] sm:p-6">
-                  <p className="text-[11px] font-bold tracking-[0.16em] text-stone-400">ACTION {String(index + 1).padStart(2, "0")}</p>
+                  <p className="text-[11px] font-bold tracking-[0.16em] text-stone-400">실천 {String(index + 1).padStart(2, "0")}</p>
                   <p className="mt-3 font-bold leading-7 text-stone-950">{item.action}</p>
                   <p className="mt-3 text-sm leading-7 text-stone-600">{item.reason}</p>
                 </article>

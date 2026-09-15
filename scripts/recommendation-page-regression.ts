@@ -20,6 +20,16 @@ if (deep.includes("RecommendationTop3") || deep.includes("productRecommendations
   throw new Error("Deep analysis should remain manual discovery, not duplicate the full recommendation view");
 }
 
+if (!page.includes("무료 분석에서 이어서 확인할 분석") || !page.includes("무료 분석에서 드러난 핵심 문제와 같은 계산 근거")) {
+  throw new Error("Recommendation page must explicitly continue the free-analysis problem diagnosis");
+}
+if (!cards.includes("무료 분석에서 이어지는 추천 TOP 3") || !cards.includes("무료 분석과 같은 계산 근거로 선정")) {
+  throw new Error("Top 3 cards must explain that recommendation ranking continues the free-analysis evidence");
+}
+if (!cards.includes("validRecommendations[0]?.product.id ?? null") || !cards.includes("가장 먼저 확인할 분석")) {
+  throw new Error("Primary recommendation must be expanded by default as the first follow-up analysis");
+}
+
 const launchTopicIds = new Set(listTopicCatalogProducts().map((product) => product.id));
 for (const id of ["career", "wealth", "relationship", "job-change", "marriage"]) {
   const product = resolveCanonicalRecommendationProduct(id);

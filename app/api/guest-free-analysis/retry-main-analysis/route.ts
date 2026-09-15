@@ -50,6 +50,7 @@ export async function POST() {
       generation = await regenerateMainAnalysis({
         profile: claimed.content!.profile,
         freeAnalysis: claimed.content!.freeAnalysis,
+        productRecommendations: claimed.content!.productRecommendations,
       });
     } catch (error) {
       console.error("[guest-retry-main-analysis] generation failed", error);

@@ -24,8 +24,6 @@ export default function RecommendationTop3({
   paidSummaries,
   explanation,
 }: RecommendationTop3Props) {
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
-
   const validRecommendations = recommendations
     .slice(0, 3)
     .map((recommendation) => ({
@@ -33,6 +31,10 @@ export default function RecommendationTop3({
       product: resolveCanonicalRecommendationProduct(recommendation.productId),
     }))
     .filter((entry): entry is { recommendation: AnalysisProductRecommendation; product: NonNullable<typeof entry.product> } => Boolean(entry.product));
+
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(
+    () => validRecommendations[0]?.product.id ?? null,
+  );
 
   function getReason(recommendation: AnalysisProductRecommendation, productId: string): string {
     const readableReason = recommendation.reasons.find((reason) =>
@@ -42,6 +44,13 @@ export default function RecommendationTop3({
 
     return readableReason ?? getPaidAnalysisTopicConfig(productId)?.purchaseDecision?.recommendedFor[0] ?? "현재 분석 결과와 관련된 주제를 기준으로 추천되었습니다.";
   }
+
+  const selectedRecommendation = selectedProductId
+    ? validRecommendations.find((entry) => entry.product.id === selectedProductId)
+    : undefined;
+  const isPrimarySelection = Boolean(
+    selectedProductId && validRecommendations[0]?.product.id === selectedProductId,
+  );
 
   return (
     <section className="mt-8" aria-labelledby="recommendation-top3-title">
@@ -54,14 +63,13 @@ export default function RecommendationTop3({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[10px] font-semibold tracking-[0.18em] text-stone-500">PERSONAL RECOMMENDATION</p>
-          <h2 id="recommendation-top3-title" className="mt-2 text-xl font-bold text-stone-900">지금 나에게 추천된 분석 TOP 3</h2>
+          <h2 id="recommendation-top3-title" className="mt-2 text-xl font-bold text-stone-900">무료 분석에서 이어지는 추천 TOP 3</h2>
         </div>
-        <span className="text-xs text-stone-500">사주와 현재 흐름을 기준으로 선정</span>
+        <span className="text-xs text-stone-500">무료 분석과 같은 계산 근거로 선정</span>
       </div>
 
       <div className="mt-4 grid gap-3 md:grid-cols-3">
         {validRecommendations.map(({ recommendation, product }, index) => {
-
           const summary = paidSummaries.find(
             (item) => item.profileId === profileId && item.productId === product.id,
           );
@@ -92,7 +100,15 @@ export default function RecommendationTop3({
           );
         })}
       </div>
-      {selectedProductId ? <RecommendationDetail productId={selectedProductId} profileId={profileId} paidSummaries={paidSummaries} recommendation={validRecommendations.find((entry) => entry.product.id === selectedProductId)?.recommendation} /> : null}
+      {selectedProductId ? (
+        <RecommendationDetail
+          productId={selectedProductId}
+          profileId={profileId}
+          paidSummaries={paidSummaries}
+          recommendation={selectedRecommendation?.recommendation}
+          isPrimary={isPrimarySelection}
+        />
+      ) : null}
     </section>
   );
 }
@@ -101,21 +117,33 @@ function Rank({ index }: { index: number }) {
   return <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f3eee4] text-xs font-bold text-[#9a8050]">{index + 1}</span>;
 }
 
-function RecommendationDetail({ productId, profileId, paidSummaries, recommendation }: { productId: string; profileId: string; paidSummaries: readonly PaidAnalysisSummary[]; recommendation?: AnalysisProductRecommendation }) {
+function RecommendationDetail({
+  productId,
+  profileId,
+  paidSummaries,
+  recommendation,
+  isPrimary,
+}: {
+  productId: string;
+  profileId: string;
+  paidSummaries: readonly PaidAnalysisSummary[];
+  recommendation?: AnalysisProductRecommendation;
+  isPrimary: boolean;
+}) {
   const product = getPremiumProduct(productId);
   const decision = getPaidAnalysisTopicConfig(productId)?.purchaseDecision;
   if (!product || !decision) return null;
 
   const summary = paidSummaries.find((item) => item.profileId === profileId && item.productId === productId);
   const state = toPremiumAnalysisProductState(summary?.reportStatus);
-  const href = getPremiumAnalysisHref(productId, state, profileId);
+  const href = getPremiumAnalysisHref(product.id, state, profileId);
   const reason = recommendation?.reasons.find((item) => !/^[a-z0-9_-]+:[a-zA-Z0-9_-]+$/.test(item)) ?? decision.recommendedFor[0];
 
   return (
     <section className="mt-5 rounded-xl border border-[#cdbb98] bg-[#fffdf8] p-5" aria-labelledby="recommendation-detail-title">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] font-semibold tracking-[0.16em] text-stone-500">선택한 추천 분석</p>
+          <p className="text-[10px] font-semibold tracking-[0.16em] text-stone-500">{isPrimary ? "가장 먼저 확인할 분석" : "선택한 추천 분석"}</p>
           <h3 id="recommendation-detail-title" className="mt-2 text-xl font-bold text-stone-900">{product.title}</h3>
         </div>
         <span className="text-xs text-stone-500">왜 지금 추천하나요?</span>

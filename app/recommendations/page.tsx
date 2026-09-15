@@ -29,6 +29,9 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
 
   const analysisRecord = await getFreeAnalysisResult(user.id, profile.id);
   const recommendations = (analysisRecord?.content?.productRecommendations?.recommendations ?? []).filter((recommendation) => resolveCanonicalRecommendationProduct(recommendation.productId));
+  const primaryProduct = recommendations[0]
+    ? resolveCanonicalRecommendationProduct(recommendations[0].productId)
+    : null;
   const recommendationExplanation = analysisRecord?.content?.recommendationExplanation ?? null;
   const paidSummaries = await listUserPaidAnalysisSummaries(user.id);
 
@@ -38,8 +41,12 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
         <div className="mx-auto w-full max-w-6xl">
           <header className="border-b border-stone-200 pb-6">
             <p className="text-xs font-semibold tracking-[0.22em] text-stone-500">PERSONAL RECOMMENDATION</p>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">지금 나에게 추천된 분석</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">현재 분석 결과와 흐름을 기준으로 먼저 살펴보면 좋은 심층 분석 3가지를 보여드려요.</p>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">무료 분석에서 이어서 확인할 분석</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">
+              {primaryProduct
+                ? `무료 분석에서 드러난 핵심 문제와 같은 계산 근거를 따라, ${primaryProduct.title}을 가장 먼저 포함한 심층 분석 3가지를 보여드려요.`
+                : "무료 분석에서 드러난 핵심 문제와 같은 계산 근거를 따라, 이어서 확인하면 좋은 심층 분석을 보여드려요."}
+            </p>
             <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-500">
               <span className="font-semibold text-stone-900">{profile.label}</span>
               <span>현재 분석 대상</span>

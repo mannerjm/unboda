@@ -1,6 +1,9 @@
 import { readFileSync } from "node:fs";
 import { buildCompatibilityDomains } from "../app/lib/compatibilityDomainAggregation";
-import { buildCompatibilityPersonalStructure } from "../app/lib/compatibilityPersonalStructure";
+import {
+  buildCompatibilityPersonalStructure,
+  scoreCompatibilityElementSupply,
+} from "../app/lib/compatibilityPersonalStructure";
 
 function assert(condition: boolean, message: string): asserts condition {
   if (!condition) throw new Error(`FAIL: ${message}`);
@@ -38,26 +41,25 @@ assert(first.people.B.includedPillars.length === 4, "complete B chart must use a
 assert(first.people.A.strength.level.includes("신강"), "wood-dominant fixture should exercise strong-chart logic");
 assert(first.people.A.yongshin.primary.length > 0, "personal structure must reuse the existing yongshin engine");
 
-const aReceivesWater = first.directionalInfluence.AReceivesFromB.elements.find(
-  (item) => item.element === "수",
-);
-assert(Boolean(aReceivesWater), "directional influence must include water");
-assert(
-  first.people.A.elements.percentages.수 === 0,
-  "wood-dominant fixture should have no natal water for the scarcity guard",
-);
-assert(
-  (aReceivesWater?.usefulnessScore ?? 100) < 50,
-  "an absent element must be allowed to remain low-priority after strength/yongshin analysis",
-);
-assert(
-  (aReceivesWater?.burdenContribution ?? 0) > 0,
-  "partner supply of an absent but low-usefulness element must create burden, not an automatic bonus",
-);
-assert(
-  (aReceivesWater?.supportContribution ?? 1) === 0,
-  "missing-element scarcity alone must never force support contribution",
-);
+const absentButLowUsefulness = scoreCompatibilityElementSupply({
+  element: "수",
+  providerShare: 0.8,
+  receiverOwnShare: 0,
+  usefulnessScore: 20,
+});
+assert(absentButLowUsefulness.receiverOwnShare === 0, "scarcity guard fixture must represent an absent element");
+assert(absentButLowUsefulness.supportContribution === 0, "scarcity alone must not create support");
+assert(absentButLowUsefulness.burdenContribution > 0, "an absent low-usefulness element must be allowed to create burden");
+
+const abundantButHighUsefulness = scoreCompatibilityElementSupply({
+  element: "목",
+  providerShare: 0.4,
+  receiverOwnShare: 0.45,
+  usefulnessScore: 90,
+});
+assert(abundantButHighUsefulness.receiverOwnShare > 0.4, "abundance guard fixture must represent a substantial natal share");
+assert(abundantButHighUsefulness.supportContribution > 0, "abundance alone must not suppress a high-usefulness element");
+assert(abundantButHighUsefulness.burdenContribution === 0, "high usefulness must remain supportive even when already present");
 
 for (const direction of [
   first.directionalInfluence.AReceivesFromB,
@@ -172,6 +174,10 @@ assert(source.includes("calculateWeightedElements"), "Phase 3 must reuse the exi
 assert(source.includes("calculateStrength"), "Phase 3 must reuse the existing strength engine");
 assert(source.includes("analyzeYongshin"), "Phase 3 must reuse the existing yongshin engine");
 assert(source.includes("yongshin.normalizedScores"), "partner influence must be keyed to receiver-specific usefulness");
+assert(
+  source.includes("receiverOwnShare is deliberately absent from the preference formula"),
+  "the source must document that scarcity is explanatory rather than a scoring shortcut",
+);
 assert(!source.includes("openai"), "personal-structure calculation must not depend on an AI model");
 assert(!source.includes("Math.random"), "personal-structure calculation must be deterministic");
 

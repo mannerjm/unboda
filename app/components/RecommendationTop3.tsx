@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
+import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import { getProductPricing } from "@/app/lib/productPricing";
 import { getPremiumAnalysisHref, toPremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
 import { resolveCanonicalRecommendationProduct } from "@/app/lib/analysisProductRecommendations";
@@ -74,12 +75,13 @@ export default function RecommendationTop3({
           );
           const state = toPremiumAnalysisProductState(summary?.reportStatus);
           const href = getPremiumAnalysisHref(product.id, state, profileId);
+          const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
 
           if (!href) {
             return (
               <div key={product.id} className="flex min-w-0 items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-4 text-stone-500">
                 <Rank index={index} />
-                <span className="min-w-0 flex-1 truncate text-sm font-semibold">{product.title}</span>
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold">{displayTitle}</span>
                 <span className="shrink-0 text-xs">생성 중</span>
               </div>
             );
@@ -91,7 +93,7 @@ export default function RecommendationTop3({
             <button key={product.id} type="button" aria-pressed={selected} onClick={() => setSelectedProductId(product.id)} className={`flex min-w-0 items-center gap-3 rounded-xl border px-4 py-4 text-left transition hover:border-[#cdbb98] hover:bg-[#fbf7ef] ${selected ? "border-[#cdbb98] bg-[#fbf7ef]" : "border-stone-200 bg-white"}`}>
               <Rank index={index} />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold text-stone-900">{product.title}</span>
+                <span className="block truncate text-sm font-semibold text-stone-900">{displayTitle}</span>
                 <span className="mt-1 block truncate text-xs text-stone-500">{getReason(recommendation, product.id)}</span>
               </span>
               <span className="shrink-0 text-[11px] font-medium text-stone-500">{getProductPricing(product.id).amount.toLocaleString("ko-KR")}원</span>
@@ -137,13 +139,14 @@ function RecommendationDetail({
   const state = toPremiumAnalysisProductState(summary?.reportStatus);
   const href = getPremiumAnalysisHref(product.id, state, profileId);
   const reason = recommendation?.reasons.find((item) => !/^[a-z0-9_-]+:[a-zA-Z0-9_-]+$/.test(item)) ?? decision.recommendedFor[0];
+  const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
 
   return (
     <section className="mt-5 rounded-xl border border-[#cdbb98] bg-[#fffdf8] p-5" aria-labelledby="recommendation-detail-title">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[10px] font-semibold tracking-[0.16em] text-stone-500">{isPrimary ? "가장 먼저 확인할 분석" : "선택한 추천 분석"}</p>
-          <h3 id="recommendation-detail-title" className="mt-2 text-xl font-bold text-stone-900">{product.title}</h3>
+          <h3 id="recommendation-detail-title" className="mt-2 text-xl font-bold text-stone-900">{displayTitle}</h3>
         </div>
         <span className="text-xs text-stone-500">왜 지금 추천하나요?</span>
       </div>

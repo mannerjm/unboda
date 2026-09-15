@@ -32,9 +32,8 @@ export default function RecommendationTop3({
     }))
     .filter((entry): entry is { recommendation: AnalysisProductRecommendation; product: NonNullable<typeof entry.product> } => Boolean(entry.product));
 
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(
-    () => validRecommendations[0]?.product.id ?? null,
-  );
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const effectiveSelectedProductId = selectedProductId ?? validRecommendations[0]?.product.id ?? null;
 
   function getReason(recommendation: AnalysisProductRecommendation, productId: string): string {
     const readableReason = recommendation.reasons.find((reason) =>
@@ -45,11 +44,11 @@ export default function RecommendationTop3({
     return readableReason ?? getPaidAnalysisTopicConfig(productId)?.purchaseDecision?.recommendedFor[0] ?? "현재 분석 결과와 관련된 주제를 기준으로 추천되었습니다.";
   }
 
-  const selectedRecommendation = selectedProductId
-    ? validRecommendations.find((entry) => entry.product.id === selectedProductId)
+  const selectedRecommendation = effectiveSelectedProductId
+    ? validRecommendations.find((entry) => entry.product.id === effectiveSelectedProductId)
     : undefined;
   const isPrimarySelection = Boolean(
-    selectedProductId && validRecommendations[0]?.product.id === selectedProductId,
+    effectiveSelectedProductId && validRecommendations[0]?.product.id === effectiveSelectedProductId,
   );
 
   return (
@@ -86,7 +85,7 @@ export default function RecommendationTop3({
             );
           }
 
-          const selected = selectedProductId === product.id;
+          const selected = effectiveSelectedProductId === product.id;
 
           return (
             <button key={product.id} type="button" aria-pressed={selected} onClick={() => setSelectedProductId(product.id)} className={`flex min-w-0 items-center gap-3 rounded-xl border px-4 py-4 text-left transition hover:border-[#cdbb98] hover:bg-[#fbf7ef] ${selected ? "border-[#cdbb98] bg-[#fbf7ef]" : "border-stone-200 bg-white"}`}>
@@ -100,9 +99,9 @@ export default function RecommendationTop3({
           );
         })}
       </div>
-      {selectedProductId ? (
+      {effectiveSelectedProductId ? (
         <RecommendationDetail
-          productId={selectedProductId}
+          productId={effectiveSelectedProductId}
           profileId={profileId}
           paidSummaries={paidSummaries}
           recommendation={selectedRecommendation?.recommendation}

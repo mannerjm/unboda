@@ -48,7 +48,7 @@ export default async function SpecialAnalysisPage() {
                   <div className="max-w-2xl">
                     <h2 className="text-2xl font-bold text-stone-950">궁합 분석</h2>
                     <p className="mt-3 text-sm leading-7 text-stone-600">
-                      두 사람의 관계에서 잘 맞는 점, 부딪히기 쉬운 지점, 회복 방식과 현재 관계 흐름을 함께 살펴봅니다.
+                      연인·배우자 관계에서 잘 맞는 점, 부딪히기 쉬운 지점, 회복 방식과 현재 관계 흐름을 함께 살펴봅니다.
                     </p>
                     <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
                       <span className="rounded-full bg-stone-100 px-3 py-1.5">출생시간을 몰라도 분석 가능</span>

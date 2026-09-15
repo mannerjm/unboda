@@ -10,9 +10,9 @@ function assert(condition: boolean, message: string): void {
 }
 
 const knownSlug = getRecommendationProductDisplayName("relationship-conflict");
-assert(knownSlug === "갈등 패턴과 회복 방식", "known product slug must use registry product title");
+assert(knownSlug === "연애 갈등 패턴과 회복 방식", "known product slug must use the customer-facing relationship title");
 assert(getRecommendationProductDisplayName("unknown-product") === "추천 심층 분석", "unknown product must not fall back to its raw slug");
-console.log("1. product display names use registry titles and safe fallback ✓");
+console.log("1. product display names use customer-facing titles and safe fallback ✓");
 
 const rawEvidence = "relationship_conflict:fortuneFlowAnalysis relationship_recovery:fortuneFlowAnalysis";
 const safeEvidence = formatRecommendationEvidence(rawEvidence);
@@ -25,7 +25,7 @@ assert(unknownEvidence.includes("현재 사주와 운의 흐름"), "unknown evid
 console.log("2. known and unknown evidence keys are presentation-safe ✓");
 
 const rawHeadline = formatRecommendationPresentationText("relationship-conflict 심층분석이 우선 추천됩니다.");
-assert(rawHeadline.includes("갈등 패턴과 회복 방식") && !rawHeadline.includes("relationship-conflict"), "raw product slugs in text must be replaced with registry titles");
+assert(rawHeadline.includes("연애 갈등 패턴과 회복 방식") && !rawHeadline.includes("relationship-conflict"), "raw product slugs in text must be replaced with customer-facing titles");
 assert(!formatRecommendationPresentationText(rawEvidence).includes("relationship_conflict"), "raw key text must be sanitized at render time");
 console.log("3. presentation formatter removes stale internal product and evidence tokens ✓");
 

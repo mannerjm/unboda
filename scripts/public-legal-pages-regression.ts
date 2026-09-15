@@ -14,9 +14,12 @@ const terms = read("app/terms/page.tsx");
 const privacy = read("app/privacy/page.tsx");
 const refund = read("app/refund/page.tsx");
 const shell = read("app/components/LegalDocumentPage.tsx");
+const home = read("app/components/HomeExperience.tsx");
 const signup = read("app/auth/signup/page.tsx");
 const checkout = read("app/checkout/[productId]/CheckoutAccessPanel.tsx");
 const policyConfig = read("app/lib/signupPolicy/config.ts");
+
+const verifiedBusinessAddress = "충청남도 천안시 서북구 백석4길 12, 10층 1001-B52호(백석동, 거성캐슬B빌딩)";
 
 for (const route of ["app/terms/page.tsx", "app/privacy/page.tsx", "app/refund/page.tsx"]) {
   assert(read(route).includes("LegalDocumentPage"), `${route} uses the shared public legal document surface`);
@@ -25,8 +28,11 @@ for (const route of ["app/terms/page.tsx", "app/privacy/page.tsx", "app/refund/p
 assert(shell.includes("<h1") && shell.includes("aria-label=\"정책 문서\""), "shared legal surface has one H1 and labeled policy navigation");
 assert(shell.includes("focus:ring-2") && shell.includes("max-w-3xl"), "shared legal surface has visible focus and readable desktop width");
 assert(shell.includes("사업자 정보") && shell.includes("사업자등록번호") && shell.includes("201-28-96364"), "shared legal surface publishes the verified business registration number");
-assert(shell.includes("대표자") && shell.includes("반희") && shell.includes("충남 천안시 서북구 백석4길12 10층 1001-B52호"), "shared legal surface publishes the verified representative and business address");
+assert(shell.includes("대표자") && shell.includes("반희") && shell.includes(verifiedBusinessAddress), "shared legal surface publishes the verified representative and current business address");
 assert(shell.includes("고객센터") && shell.includes("070-4792-8900") && shell.includes("support@unboda.kr"), "shared legal surface publishes the verified customer support phone and email");
+assert(home.includes("상호 운보다") && home.includes("대표자 반희") && home.includes("사업자등록번호 201-28-96364"), "homepage footer publishes merchant identity for payment review");
+assert(home.includes(verifiedBusinessAddress) && home.includes("고객센터 070-4792-8900") && home.includes("support@unboda.kr"), "homepage footer publishes current business address and support contacts");
+assert(!home.includes("910602") && !shell.includes("910602"), "public business surfaces do not expose representative resident-registration data");
 assert(!shell.includes("FACT-PENDING") && !shell.includes("[사업자") && !shell.includes("[대표자"), "shared legal surface contains no business identity placeholders");
 assert(terms.includes("만 14세 이상") && terms.includes("분석 대상 프로필에는 별도 연령 제한"), "Terms separates direct-user age from subject age");
 assert(terms.includes("회원가입 없이") && terms.includes("24시간") && terms.includes("생성 시점") && terms.includes("최대 7일"), "Terms distinguishes Guest 24-hour access from seven-day backend retention");

@@ -40,7 +40,7 @@ Consistency 검증 — `validatePaidAnalysisConsistency()`
 ↓
 Self Review — `reviewPaidAnalysisDetail()` (`app/lib/paidAnalysisSelfReview.ts`)
 ↓
-Safety Check — **HEALTH 플러그인 상품에 한해서만** `validatePaidAnalysisHealthSafety()` 실행(전체 54종 공통 단계 아님)
+Safety Check — **HEALTH 플러그인 상품에 한해서만** `validatePaidAnalysisHealthSafety()` 실행(전체 57종 공통 단계 아님)
 ↓
 `/paid-analysis/{productId}/report` 페이지 렌더
 
@@ -49,14 +49,14 @@ Safety Check — **HEALTH 플러그인 상품에 한해서만** `validatePaidAna
 `generatePaidAnalysisDetailV4()`(V4 계약: Prompt Builder V4 → GPT → Parser → Consistency → Self Review → 품질 검증들 → evidence linkage)는 코드와 regression에는 존재하지만,
 `paidAnalysisDetailService.ts` 주석에 명시된 대로 **API 라우트에 아직 연결되지 않았다**("Not wired into the API route yet"). 현재 리포트 UI는 V3 결과 형태를 읽으므로, production에서 실제로 도는 것은 V2/V3 흐름이다. V4는 "Planned" 상태로 표기한다.
 
-## 3. 54-Product Launch Catalog와의 관계
+## 3. 57-Product Launch Catalog와의 관계
 
 - `app/lib/analysisTopics.ts`(`ANALYSIS_TOPICS`, 80개)와 `app/lib/analysisPeriodProducts.ts`(`PERIOD_ANALYSIS_PRODUCTS`, 8개)는 **전체 taxonomy**이며 판매 카탈로그가 아니다.
 - `app/lib/premiumProductRegistry.ts`는 이 taxonomy + legacy 4종(`career`/`wealth`/`relationship`/`health`)을 하나의 조회 가능한 registry(`ALL_PREMIUM_PRODUCTS`, `getPremiumProduct()`)로 통합한다.
-- `app/lib/paidAnalysisTopicConfig.ts`의 `getLaunchProductIds()`가 **판매 대상(Launch) 54종(TOPIC 47 + PERIOD 7)의 source of truth**다.
+- `app/lib/paidAnalysisTopicConfig.ts`의 `getLaunchProductIds()`가 **판매 대상(Launch) 57종(TOPIC 50 + PERIOD 7)의 source of truth**다.
 - `app/lib/premiumCatalog.ts`(`listTopicCatalogProducts()`/`listPeriodCatalogProducts()`)는 registry 전체가 아니라 `getLaunchProductIds()`와 교집합인 상품만 `/result` Premium Catalog에 노출한다.
-- `/checkout/[productId]`, `/paid-analysis/[productId]`, `/paid-analysis/[productId]/report`는 registry 전체(88+legacy)를 대상으로 동작하는 **범용 dynamic route**이며, Launch 54종으로 제한되어 있지 않다. 즉 카탈로그 노출은 54종으로 제한되어 있지만, 그 외 상품도 URL을 직접 알면 상세/구매 페이지 자체는 열린다.
-- `getPaidAnalysisEngine()`(`app/lib/paidAnalysisEngine.ts`)의 `PRODUCT_ENGINE_MAP`도 정확히 Launch 54종만 매핑하며, 나머지 taxonomy 상품(Phase 2)은 의도적으로 제외되어 있다("Launch-scope mapping only; Phase 2 products are intentionally absent").
+- `/checkout/[productId]`와 `/paid-analysis/[productId]`의 신규 판매 진입은 `resolveLaunchPurchasableProduct()`를 사용하므로 **Launch 57종으로 제한**된다. registry에는 남아 있는 비Launch 상품을 URL로 직접 입력해도 신규 구매 대상으로 우회할 수 없다. 과거 구매·권한·리포트 호환 경로는 별도의 canonical product resolver를 유지한다.
+- `getPaidAnalysisEngine()`(`app/lib/paidAnalysisEngine.ts`)의 `PRODUCT_ENGINE_MAP`도 정확히 Launch 57종만 매핑하며, 나머지 taxonomy 상품은 의도적으로 제외되어 있다("Launch-scope mapping only; Phase 2 products are intentionally absent").
 
 ## 4. 공용 OpenAI 호출 지점
 

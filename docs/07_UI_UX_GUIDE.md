@@ -134,16 +134,16 @@ Premium Product Registry(`app/lib/premiumProductRegistry.ts`)에서 읽는다.
 
 UI는 Registry를 표시하는 역할만 담당한다.
 
-### Catalog source of truth와 Launch 54종 제한
+### Catalog source of truth와 Launch 57종 제한
 
 `/result`의 Premium Catalog가 실제로 노출하는 상품은 Registry 전체가 아니라
-**`app/lib/paidAnalysisTopicConfig.ts`의 `getLaunchProductIds()`가 반환하는 Launch 54종으로 제한**된다
+**`app/lib/paidAnalysisTopicConfig.ts`의 `getLaunchProductIds()`가 반환하는 Launch 57종으로 제한**된다
 (`app/lib/premiumCatalog.ts`의 `listTopicCatalogProducts()`/`listPeriodCatalogProducts()`가 이 제한을 적용한다).
 
-- TOPIC 47 + PERIOD 7 = 총 54개
-- 카테고리별 TOPIC 개수(브라우저 QA로 확인됨): 성장운 4 / 사업운 4 / 건강운 6 / 재물운 10 / 직업운 10 / 대인관계운 2 / 관계운 11
-- legacy 일반형 `career`, `wealth`, `relationship`은 Launch 54종에 포함되어 정상 노출된다
-- legacy 일반형 `health`와 period `monthly-12months`는 Launch 54종이 아니므로 카탈로그에 노출되지 않는다(taxonomy에는 남아있는 Phase 2/dormant 데이터)
+- TOPIC 50 + PERIOD 7 = 총 57개
+- 카테고리별 TOPIC 개수(브라우저 QA로 확인됨): 성장운 4 / 사업운 4 / 건강운 6 / 재물운 10 / 직업운 10 / 대인관계운 5 / 연애운 11
+- legacy 일반형 `career`, `wealth`, `relationship`은 Launch 57종에 포함되어 정상 노출된다
+- legacy 일반형 `health`와 period `monthly-12months`는 Launch 57종이 아니므로 카탈로그에 노출되지 않는다(taxonomy에는 남아있는 Phase 2/dormant 데이터)
 
 ANALYSIS_TOPICS(80개)/PERIOD_ANALYSIS_PRODUCTS(8개) 전체 taxonomy에 상품을 추가해도,
 `getLaunchProductIds()`에 추가하지 않는 한 카탈로그 노출은 자동으로 늘어나지 않는다.

@@ -46,7 +46,7 @@ export function auditPaidAnalysisV4LaunchCatalog(): PaidAnalysisV4LaunchAuditRep
   const products: PaidAnalysisV4LaunchAuditProduct[] = [];
   const uniqueIds = new Set(launchIds);
 
-  pushIf(errors, launchIds.length !== 54, `Launch 상품은 정확히 54개여야 합니다. 현재 ${launchIds.length}개입니다.`);
+  pushIf(errors, launchIds.length !== 57, `Launch 상품은 정확히 57개여야 합니다. 현재 ${launchIds.length}개입니다.`);
   pushIf(errors, uniqueIds.size !== launchIds.length, "Launch 상품 ID가 중복됩니다.");
 
   const topicContracts: Array<{
@@ -179,9 +179,9 @@ export function auditPaidAnalysisV4LaunchCatalog(): PaidAnalysisV4LaunchAuditRep
 
   const topicProductCount = products.filter((item) => item.kind === "topic").length;
   const periodProductCount = products.filter((item) => item.kind === "period").length;
-  pushIf(errors, topicProductCount !== 47, `주제별 Launch 상품은 정확히 47개여야 합니다. 현재 ${topicProductCount}개입니다.`);
+  pushIf(errors, topicProductCount !== 50, `주제별 Launch 상품은 정확히 50개여야 합니다. 현재 ${topicProductCount}개입니다.`);
   pushIf(errors, periodProductCount !== 7, `기간별 Launch 상품은 정확히 7개여야 합니다. 현재 ${periodProductCount}개입니다.`);
-  pushIf(errors, products.length !== 54, `V4 감사 대상이 정확히 54개여야 합니다. 현재 ${products.length}개입니다.`);
+  pushIf(errors, products.length !== 57, `V4 감사 대상이 정확히 57개여야 합니다. 현재 ${products.length}개입니다.`);
 
   return {
     launchProductCount: launchIds.length,
@@ -195,7 +195,7 @@ export function auditPaidAnalysisV4LaunchCatalog(): PaidAnalysisV4LaunchAuditRep
 export function assertPaidAnalysisV4LaunchCatalogReady(): PaidAnalysisV4LaunchAuditReport {
   const report = auditPaidAnalysisV4LaunchCatalog();
   if (report.errors.length > 0) {
-    throw new Error(`V4 Launch 54 상품 정적 감사 실패:\n${report.errors.join("\n")}`);
+    throw new Error(`V4 Launch 57 상품 정적 감사 실패:\n${report.errors.join("\n")}`);
   }
   return report;
 }

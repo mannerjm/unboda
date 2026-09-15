@@ -19,7 +19,7 @@ function assert(condition: boolean, message: string): void {
 
 const LAUNCH_PRODUCT_IDS = getLaunchProductIds();
 
-assert(LAUNCH_PRODUCT_IDS.length === 54, "Final launch set must contain 47 topics and 7 period products");
+assert(LAUNCH_PRODUCT_IDS.length === 57, "Final launch set must contain 50 topics and 7 period products");
 
 for (const productId of [
   "career",
@@ -55,6 +55,9 @@ for (const productId of [
   "relationship-unrequited",
   "relationship-friendship",
   "relationship-family-role",
+  "social-helper",
+  "social-conflict",
+  "social-network-expansion",
   "health-energy-recovery",
   "health-sleep-rhythm",
   "health-stress-regulation",
@@ -120,6 +123,9 @@ const EXPECTED_ENGINES: Record<string, string> = {
   "relationship-unrequited": "RELATIONSHIP",
   "relationship-friendship": "RELATIONSHIP",
   "relationship-family-role": "RELATIONSHIP",
+  "social-helper": "RELATIONSHIP",
+  "social-conflict": "RELATIONSHIP",
+  "social-network-expansion": "RELATIONSHIP",
   "health-energy-recovery": "HEALTH",
   "health-sleep-rhythm": "HEALTH",
   "health-stress-regulation": "HEALTH",

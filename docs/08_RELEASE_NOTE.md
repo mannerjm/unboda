@@ -20,8 +20,8 @@ Prompt Builder 추가
 
 사용자 대상
 
-- Result Premium Catalog 상품 구성을 54종(Launch 상품)으로 확정
-  - TOPIC 47 / PERIOD 7
+- Result Premium Catalog 상품 구성을 57종(Launch 상품)으로 확정
+  - TOPIC 50 / PERIOD 7
   - `career`, `wealth`, `relationship` 종합 분석 정상 노출
   - legacy `health` 종합 분석, `monthly-12months`(앞으로 12개월)는 이번 노출 대상에서 제외
 

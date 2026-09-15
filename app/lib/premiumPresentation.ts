@@ -9,6 +9,7 @@ const PRODUCT_TITLE_OVERRIDES: Readonly<Record<string, string>> = {
   "relationship-conflict": "연애 갈등 패턴과 회복 방식",
   "relationship-boundary": "연애 관계의 거리 조절과 경계",
   "relationship-intimacy": "연애 관계의 친밀감 형성 속도",
+  "social-helper": "도움 관계와 신뢰 분석",
 };
 
 const CATEGORY_LABEL_OVERRIDES: Partial<Record<PremiumProductCategory, string>> = {

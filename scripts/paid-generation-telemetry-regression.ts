@@ -66,9 +66,9 @@ const bands = launchIds.map((productId) => ({
   band: getPaidGenerationCommercialBand(productId),
 }));
 
-assert(bands.length === 54, "all launch products must be classified");
-assert(new Set(bands.map((item) => item.productId)).size === 54, "launch IDs must be unique");
-assert(bands.filter((item) => item.family === "TOPIC").length === 47, "47 topics must be classified");
+assert(bands.length === 57, "all 57 launch products must be classified");
+assert(new Set(bands.map((item) => item.productId)).size === 57, "launch IDs must be unique");
+assert(bands.filter((item) => item.family === "TOPIC").length === 50, "50 topics must be classified");
 assert(bands.filter((item) => item.family === "PERIOD").length === 7, "7 periods must be classified");
 assert(!bands.some((item) => item.productId === "monthly-12months"), "non-launch monthly series must stay absent");
 assert(getPaidGenerationCommercialBand("monthly-current") === "MONTHLY", "monthly band must map");

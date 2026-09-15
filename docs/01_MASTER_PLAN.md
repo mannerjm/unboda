@@ -283,8 +283,8 @@ Premium 상품 체계는 크게 다음 두 종류로 구분한다.
    - 12개월 월별 흐름
 
 > **CURRENT PRODUCTION**: 실제 Launch 판매 카탈로그는 `getLaunchProductIds()`
-> (`app/lib/paidAnalysisTopicConfig.ts`)를 source of truth로 하는 **총 54개
-> (TOPIC 47 + PERIOD 7)**다. 상세 내역과 가격 실험 계획은
+> (`app/lib/paidAnalysisTopicConfig.ts`)를 source of truth로 하는 **총 57개
+> (TOPIC 50 + PERIOD 7)**다. 상세 내역과 가격 실험 계획은
 > `docs/12_PRICING_REVENUE_ARCHITECTURE.md` 참조.
 
 추천 시스템은 상품 Catalog를 숨기거나 제한하지 않는다.

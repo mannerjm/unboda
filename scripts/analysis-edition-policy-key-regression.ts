@@ -1,6 +1,6 @@
 // STEP 57D-48F-B: analysis edition policy + edition key foundation regression.
 //
-// Proves: (A) exhaustive 54-product policy mapping, (B-J) deterministic
+// Proves: (A) exhaustive 57-product policy mapping, (B-J) deterministic
 // edition-key formats per policy including month/year rollover boundaries,
 // (K) host-timezone independence, (L) fail-closed on unknown/non-launch
 // productIds.
@@ -22,11 +22,11 @@ function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(`FAIL: ${message}`);
 }
 
-// --- A. exactly 54 launch products mapped, no duplicates, no gaps ---
+// --- A. exactly 57 launch products mapped, no duplicates, no gaps ---
 const launchIds = getLaunchProductIds();
 const configuredIds = getConfiguredEditionPolicyProductIds();
 
-assert(launchIds.length === 54, `expected exactly 54 launch products, found ${launchIds.length}`);
+assert(launchIds.length === 57, `expected exactly 57 launch products, found ${launchIds.length}`);
 assert(configuredIds.length === new Set(configuredIds).size, "policy config must not contain duplicate productIds");
 assert(configuredIds.length === launchIds.length, "policy config must map every launch product exactly once, no more, no fewer");
 
@@ -44,7 +44,7 @@ for (const productId of configuredIds) {
 // non-launch products must never be accidentally activated
 assert(getAnalysisEditionPolicy("monthly-12months") === null, "non-launch monthly-12months must not resolve to a policy");
 assert(getAnalysisEditionPolicy("not-a-real-product") === null, "unknown productId must not resolve to a policy");
-console.log("A. all 54 launch products mapped exactly once, non-launch products excluded ✓");
+console.log("A. all 57 launch products mapped exactly once, non-launch products excluded ✓");
 
 // --- B. MONTHLY (TOPIC), e.g. career-job-change ---
 assert(getAnalysisEditionPolicy("career-job-change") === "MONTHLY", "career-job-change must be MONTHLY");

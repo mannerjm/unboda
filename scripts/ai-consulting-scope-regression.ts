@@ -11,12 +11,12 @@ function assert(condition: unknown, message: string): asserts condition {
 const launchIds = getLaunchProductIds();
 const uniqueLaunchIds = new Set(launchIds);
 assert(uniqueLaunchIds.size === launchIds.length, "Launch product ids must be unique");
-assert(launchIds.length === 54, `expected 54 launch products, got ${launchIds.length}`);
+assert(launchIds.length === 57, `expected 57 launch products, got ${launchIds.length}`);
 
 const topicIds = launchIds.filter((productId) => getPaidAnalysisTopicConfig(productId) !== undefined);
 const periodIds = launchIds.filter((productId) => getPeriodAnalysisStrategy(productId) !== null && !getPaidAnalysisTopicConfig(productId));
 
-assert(topicIds.length === 47, `expected 47 topic consulting products, got ${topicIds.length}`);
+assert(topicIds.length === 50, `expected 50 topic consulting products, got ${topicIds.length}`);
 assert(periodIds.length === 7, `expected 7 period consulting products, got ${periodIds.length}`);
 assert(topicIds.length + periodIds.length === launchIds.length, "every launch product must resolve to exactly one consulting family");
 

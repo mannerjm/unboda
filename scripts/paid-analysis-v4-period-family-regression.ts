@@ -7,9 +7,9 @@ function assert(condition: boolean, message: string): void { if (!condition) thr
 
 const periodIds = ["monthly-current", "monthly-next", "yearly-current", "annual-next", "annual-3years", "daeun-current", "lifetime-overview"] as const;
 const launchIds = getLaunchProductIds();
-assert(launchIds.length === 54, "Launch catalog must contain 47 topic products and 7 period products");
+assert(launchIds.length === 57, "Launch catalog must contain 50 topic products and 7 period products");
 assert(new Set(launchIds).size === launchIds.length, "Launch IDs must be unique");
-assert(launchIds.filter((id) => resolvePaidAnalysisLaunchSpecialization(id).kind === "topic").length === 47, "Topic family must remain exactly 47 products");
+assert(launchIds.filter((id) => resolvePaidAnalysisLaunchSpecialization(id).kind === "topic").length === 50, "Topic family must remain exactly 50 products");
 assert(launchIds.filter((id) => resolvePaidAnalysisLaunchSpecialization(id).kind === "period").length === 7, "Period family must contain exactly 7 products");
 assert(!launchIds.includes("annual-current"), "annual-current must be an alias, not a second commercial launch product");
 

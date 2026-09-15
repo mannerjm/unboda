@@ -9,8 +9,8 @@ const topicIds = new Set(topicProducts.map((product) => product.id));
 const launchTopicIds = getLaunchProductIds().filter((productId) => topicIds.has(productId));
 const configs = launchTopicIds.map((productId) => getPaidAnalysisTopicConfig(productId));
 
-if (topicProducts.length !== 47 || launchTopicIds.length !== 47) {
-  throw new Error(`Expected 47 Launch Topic products, got ${topicProducts.length}/${launchTopicIds.length}`);
+if (topicProducts.length !== 50 || launchTopicIds.length !== 50) {
+  throw new Error(`Expected 50 Launch Topic products, got ${topicProducts.length}/${launchTopicIds.length}`);
 }
 if (new Set(topicProducts.map((product) => product.category)).size !== 7) {
   throw new Error("Expected seven Topic categories");

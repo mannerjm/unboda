@@ -6,9 +6,10 @@ import { buildFreeAnalysis } from "../buildFreeAnalysis";
 import { buildPremiumAnalysis } from "../buildPremiumAnalysis";
 import { buildAnalysisProductRecommendations } from "../analysisProductRecommendations";
 import { buildAnalysisRecommendation } from "../analysisRecommendationBuilder";
+import { buildDeterministicRecommendationExplanation } from "../generateAnalysisRecommendation";
 import { buildMainAnalysisPrompt } from "../mainAnalysisPrompt";
 import { buildMainAnalysisCompactFacts } from "../mainAnalysisCompactFacts";
-import { generateMainAnalysis, generateRecommendationExplanation, type MainAnalysisGenerationResult } from "../analysisAIService";
+import { generateMainAnalysis, type MainAnalysisGenerationResult } from "../analysisAIService";
 import type { AnalyzeProfileMetadata, AnalyzeSuccessResponse } from "../analyzeApiTypes";
 import { createEvaluationContext } from "../evaluationContext";
 
@@ -46,10 +47,8 @@ export async function buildFreeAnalysisResponse(input: {
   const recommendation = buildAnalysisRecommendation({
     engineResult: productRecommendations.engineResult,
   });
-  const [mainAnalysis, recommendationExplanation] = await Promise.all([
-    generateMainAnalysis(buildMainAnalysisPrompt({ compactFacts })),
-    generateRecommendationExplanation(recommendation),
-  ]);
+  const recommendationExplanation = buildDeterministicRecommendationExplanation(recommendation);
+  const mainAnalysis = await generateMainAnalysis(buildMainAnalysisPrompt({ compactFacts }));
 
   return {
     result: mainAnalysis.text,

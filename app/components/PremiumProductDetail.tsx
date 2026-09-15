@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
 import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import { getProductPricing } from "@/app/lib/productPricing";
 import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
+import { formatTopicExpectedUnderstanding } from "@/app/lib/purchaseDecisionCopy";
 
 type PremiumProductDetailProps = {
   product: PremiumProductDefinition;
@@ -28,10 +30,12 @@ function formatPrice(productId: string): string {
   return `${getProductPricing(productId).amount.toLocaleString("ko-KR")}원`;
 }
 
-function DetailList({ items }: { items: readonly string[] }) {
+function DetailList({ title, items }: { title: string; items: readonly string[] }) {
+  if (items.length === 0) return null;
+
   return (
     <div className="mt-5">
-      <p className="text-xs font-semibold text-stone-700">이 분석에서 보는 것</p>
+      <p className="text-xs font-semibold text-stone-700">{title}</p>
       <ul className="mt-2 space-y-1.5 text-sm leading-6 text-stone-600">
         {items.map((item) => <li key={item}>· {item}</li>)}
       </ul>
@@ -47,6 +51,24 @@ function getQuickOverviewItems(product: PremiumProductDefinition): readonly stri
   return product.purchaseDecision?.analysisScope.slice(0, 3) ?? [];
 }
 
+function getRecommendedFor(product: PremiumProductDefinition): readonly string[] {
+  if (product.kind === "PERIOD") {
+    return product.purchaseDecision?.recommendedFor.slice(0, 2) ?? [];
+  }
+
+  return getPaidAnalysisTopicConfig(product.id)?.purchaseDecision?.recommendedFor.slice(0, 2) ?? [];
+}
+
+function getExpectedUnderstanding(product: PremiumProductDefinition): readonly string[] {
+  if (product.kind === "PERIOD") {
+    return product.purchaseDecision?.expectedUnderstanding.slice(0, 2) ?? [];
+  }
+
+  return getPaidAnalysisTopicConfig(product.id)?.purchaseDecision?.expectedUnderstanding
+    .slice(0, 2)
+    .map(formatTopicExpectedUnderstanding) ?? [];
+}
+
 export default function PremiumProductDetail({
   product,
   state,
@@ -57,12 +79,10 @@ export default function PremiumProductDetail({
   const [savedState, setSavedState] = useState(isSaved);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Re-sync with authoritative persisted state whenever it changes (e.g. async fetch resolves after mount).
   useEffect(() => {
     setSavedState(isSaved);
   }, [isSaved]);
 
-  // Product detail only saves; removal is handled exclusively on /interests.
   const handleSave = async () => {
     if (savedState) return;
     try {
@@ -78,7 +98,9 @@ export default function PremiumProductDetail({
 
   const isPeriod = product.kind === "PERIOD";
   const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
+  const recommendedFor = getRecommendedFor(product);
   const quickOverviewItems = getQuickOverviewItems(product);
+  const expectedUnderstanding = getExpectedUnderstanding(product);
   const href = getPremiumAnalysisHref(product.id, state, profileId);
 
   return (
@@ -97,8 +119,10 @@ export default function PremiumProductDetail({
         ) : null}
       </div>
 
-      <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-700">{product.description}</p>
-      {quickOverviewItems.length > 0 ? <DetailList items={quickOverviewItems} /> : null}
+      <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-stone-800">{product.description}</p>
+      <DetailList title={isPeriod ? "이런 때 살펴보세요" : "이런 고민이 있다면"} items={recommendedFor} />
+      <DetailList title="이 분석에서 보는 것" items={quickOverviewItems} />
+      <DetailList title="분석 후 알 수 있는 것" items={expectedUnderstanding} />
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-4">
         <span className="text-sm font-medium text-stone-500">{formatPrice(product.id)}</span>

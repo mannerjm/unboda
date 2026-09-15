@@ -50,8 +50,20 @@ for (const id of ["health", "business", "social", "study", "yearly", "daeun", "h
 if (resolveCanonicalRecommendationProduct("스트레스와 회복 패턴")) {
   throw new Error("Non-canonical stress/recovery title became purchasable");
 }
-if (!cards.includes("getPaidAnalysisTopicConfig") || !cards.includes("decision.whatItAnalyzes") || !cards.includes("왜 지금 추천하나요?") || !cards.includes("분석을 받고 나면")) {
-  throw new Error("Recommendation cards must show canonical purchase-decision context");
+for (const required of [
+  "getPaidAnalysisTopicConfig",
+  "product.description",
+  "product.details?.slice(0, 3)",
+  "decision.expectedUnderstanding",
+  "formatTopicExpectedUnderstanding",
+  "왜 지금 추천됐나요",
+  "이 분석에서 보는 것",
+  "분석 후 알 수 있는 것",
+]) {
+  if (!cards.includes(required)) throw new Error(`Recommendation detail must keep concise conversion context: ${required}`);
+}
+if (cards.includes("decision.distinction") || cards.includes("비슷한 분석과의 차이")) {
+  throw new Error("Recommendation detail must not restore repetitive sibling-comparison copy");
 }
 if (cards.includes("{recommendation.reasons[0]")) {
   throw new Error("Raw recommendation reason must not be rendered directly");

@@ -4,8 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import {
+  COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID,
+  COMPATIBILITY_FAMILY_OTHER_SESSION_KEY,
   COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
   COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY,
+  COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID,
+  COMPATIBILITY_FAMILY_SIBLING_SESSION_KEY,
   COMPATIBILITY_ROMANTIC_PRODUCT_ID,
   COMPATIBILITY_ROMANTIC_SESSION_KEY,
 } from "@/app/lib/specialAnalysisProducts";
@@ -52,6 +56,12 @@ function CheckoutSuccessContent() {
         } else if (productId === COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID) {
           window.sessionStorage.removeItem(COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY);
           router.replace(`/special-analysis/compatibility/family/parent-child/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`);
+        } else if (productId === COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID) {
+          window.sessionStorage.removeItem(COMPATIBILITY_FAMILY_SIBLING_SESSION_KEY);
+          router.replace(`/special-analysis/compatibility/family/siblings/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`);
+        } else if (productId === COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID) {
+          window.sessionStorage.removeItem(COMPATIBILITY_FAMILY_OTHER_SESSION_KEY);
+          router.replace(`/special-analysis/compatibility/family/other/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`);
         } else {
           router.replace(`/paid-analysis/${encodeURIComponent(productId)}?profileId=${encodeURIComponent(profileId)}`);
         }

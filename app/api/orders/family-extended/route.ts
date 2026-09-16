@@ -28,8 +28,6 @@ import {
   AnalysisEditionUnavailableError,
 } from "@/app/lib/purchases/server";
 import {
-  COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID,
-  COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID,
   isCompatibilityFamilyOtherProductId,
   isCompatibilityFamilySiblingProductId,
 } from "@/app/lib/specialAnalysisProducts";
@@ -64,9 +62,7 @@ function isOtherRole(value: unknown): value is FamilyOtherRole {
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
-  }
+  if (!user) return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
 
   let body: unknown;
   try {
@@ -89,29 +85,28 @@ export async function POST(request: Request) {
     );
   }
 
-  const productId = requestBody?.productId;
+  const productId = typeof requestBody?.productId === "string" ? requestBody.productId : null;
   const isSibling = isCompatibilityFamilySiblingProductId(productId);
   const isOther = isCompatibilityFamilyOtherProductId(productId);
   if (!isSibling && !isOther) {
     return NextResponse.json({ error: "유효하지 않은 가족 궁합 상품입니다." }, { status: 400 });
   }
 
-  if (!isProfileId(requestBody?.profileId)) {
+  const profileId = requestBody?.profileId;
+  if (!isProfileId(profileId)) {
     return NextResponse.json({ error: "유효한 프로필을 선택해 주세요." }, { status: 400 });
   }
 
   let profile;
   try {
-    profile = await getUserProfile(requestBody.profileId, user.id);
+    profile = await getUserProfile(profileId, user.id);
   } catch (error) {
     console.error("[family-extended-orders] profile lookup failed", error);
     return NextResponse.json({ error: "프로필을 조회하지 못했습니다." }, { status: 500 });
   }
-  if (!profile) {
-    return NextResponse.json({ error: "프로필을 찾을 수 없습니다." }, { status: 404 });
-  }
+  if (!profile) return NextResponse.json({ error: "프로필을 찾을 수 없습니다." }, { status: 404 });
 
-  const rawPayload = requestBody.familyPayload;
+  const rawPayload = requestBody?.familyPayload;
   if (!rawPayload || typeof rawPayload !== "object" || Array.isArray(rawPayload)) {
     return NextResponse.json({ error: "가족 관계 정보를 다시 입력해 주세요.", code: "FAMILY_INPUT_REQUIRED" }, { status: 400 });
   }

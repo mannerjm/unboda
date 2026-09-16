@@ -2,6 +2,17 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  // This exact page exists only on the temporary review branch and is already
+  // guarded by VERCEL_ENV === "preview" inside the page itself. Skip Supabase
+  // session refresh here so the isolated review deployment does not require
+  // Preview Supabase credentials. Production never takes this branch.
+  if (
+    process.env.VERCEL_ENV === "preview"
+    && request.nextUrl.pathname === "/internal/review/family-extended-live"
+  ) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

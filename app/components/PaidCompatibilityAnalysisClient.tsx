@@ -253,7 +253,7 @@ export default function PaidCompatibilityAnalysisClient({
             </div>
             <div className="shrink-0 sm:text-right">
               <p className="text-xs font-medium text-stone-500">결제 금액</p>
-              <p className="mt-1 text-3xl font-bold tracking-[-0.03em] text-stone-950">{COMPATIBILITY_ROMANTIC_PRODUCT.amount.toLocaleString("ko-KR")}원</p>
+              <p className="mt-1 text-[22px] font-bold tracking-[-0.02em] text-stone-950">{COMPATIBILITY_ROMANTIC_PRODUCT.amount.toLocaleString("ko-KR")}원</p>
             </div>
           </div>
         </div>

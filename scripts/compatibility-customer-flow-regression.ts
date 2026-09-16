@@ -90,6 +90,7 @@ const hub = readFileSync("app/special-analysis/page.tsx", "utf8");
 const compatibilityPage = readFileSync("app/special-analysis/compatibility/page.tsx", "utf8");
 const romanticPage = readFileSync("app/special-analysis/compatibility/romantic/page.tsx", "utf8");
 const familyPage = readFileSync("app/special-analysis/compatibility/family/page.tsx", "utf8");
+const parentChildPage = readFileSync("app/special-analysis/compatibility/family/parent-child/page.tsx", "utf8");
 const paidClient = readFileSync("app/components/PaidCompatibilityAnalysisClient.tsx", "utf8");
 const oldApi = readFileSync("app/api/special-analysis/compatibility/route.ts", "utf8");
 const ordersApi = readFileSync("app/api/orders/route.ts", "utf8");
@@ -114,8 +115,9 @@ assert(romanticPage.includes("PaidCompatibilityAnalysisClient") && romanticPage.
 assert(romanticPage.includes("← 궁합 유형 선택"), "romantic route must return to the compatibility type selector");
 assert(!romanticPage.includes("CompatibilityAnalysisClient myProfileLabel"), "romantic customer route must not mount the old free-generation flow");
 assert(familyPage.includes("부모·자녀") && familyPage.includes("형제·자매") && familyPage.includes("기타 가족"), "family route must split family relationship types before analysis input");
-assert(familyPage.includes("아직 결제나 분석 생성은 연결하지 않았습니다"), "unfinished family compatibility must stay explicitly non-purchasable");
-assert(!familyPage.includes("/checkout/") && !familyPage.includes("PaidCompatibilityAnalysisClient"), "family structure must not reuse romantic payment or input before its own interpretation contract exists");
+assert(familyPage.includes('href="/special-analysis/compatibility/family/parent-child"'), "family route must expose the parent-child scope as the first family type");
+assert(parentChildPage.includes("입력·결제 연결 전") && parentChildPage.includes("상대 정보 입력과 결제는 이 기준을 검증한 다음 연결합니다"), "unfinished parent-child compatibility must stay explicitly non-purchasable");
+assert(!familyPage.includes("/checkout/") && !parentChildPage.includes("/checkout/") && !familyPage.includes("PaidCompatibilityAnalysisClient") && !parentChildPage.includes("PaidCompatibilityAnalysisClient"), "family structure must not reuse romantic payment or input before its own commercial flow exists");
 
 assert(paidClient.includes("COMPATIBILITY_ROMANTIC_SESSION_KEY"), "raw partner input must remain browser-session scoped until checkout");
 assert(paidClient.includes("sessionStorage.setItem") && paidClient.includes("/checkout/"), "partner input must move to the shared checkout rather than generate directly");

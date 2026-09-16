@@ -48,16 +48,16 @@ export default async function SpecialAnalysisPage() {
                   <div className="max-w-2xl">
                     <h2 className="text-2xl font-bold text-stone-950">궁합 분석</h2>
                     <p className="mt-3 text-sm leading-7 text-stone-600">
-                      연인·배우자 관계에서 잘 맞는 점, 부딪히기 쉬운 지점, 회복 방식과 현재 관계 흐름을 함께 살펴봅니다.
+                      두 사람의 관계 유형에 맞춰 잘 맞는 점, 부딪히기 쉬운 지점, 회복 방식과 현재 관계 흐름을 살펴봅니다.
                     </p>
                     <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
-                      <span className="rounded-full bg-stone-100 px-3 py-1.5">출생시간을 몰라도 분석 가능</span>
-                      <span className="rounded-full bg-stone-100 px-3 py-1.5">소통·갈등·회복까지 확인</span>
+                      <span className="rounded-full bg-stone-100 px-3 py-1.5">관계 유형별 분석</span>
+                      <span className="rounded-full bg-stone-100 px-3 py-1.5">소통·갈등·회복 확인</span>
                       <span className="rounded-full bg-stone-100 px-3 py-1.5">현재 관계 흐름 함께 확인</span>
                     </div>
                   </div>
                   <span className="inline-flex shrink-0 items-center rounded-2xl bg-stone-900 px-4 py-2.5 text-sm font-bold text-white transition group-hover:bg-stone-800">
-                    궁합 분석 시작하기 →
+                    궁합 유형 선택하기 →
                   </span>
                 </div>
               </Link>

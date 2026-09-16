@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import FamilyParentChildAnalysisClient from "@/app/components/FamilyParentChildAnalysisClient";
+import PaidFamilyParentChildAnalysisClient from "@/app/components/PaidFamilyParentChildAnalysisClient";
 
 type FamilyRelationshipType = "parent_child" | "siblings" | "other_family";
 
@@ -113,15 +113,9 @@ export default function FamilyCompatibilityAnalysisClient({
 
       {selectedRelationship === "parent_child" ? (
         <div data-family-relationship-content="parent_child" className="scroll-mt-6">
-          <FamilyParentChildAnalysisClient myProfileLabel={myProfileLabel} profileId={profileId} />
+          <PaidFamilyParentChildAnalysisClient myProfileLabel={myProfileLabel} profileId={profileId} />
         </div>
       ) : null}
-
-      <style jsx global>{`
-        .family-analysis-shell:has([data-section="family-parent-child-report"]) #family-relationship-selector {
-          display: none !important;
-        }
-      `}</style>
     </div>
   );
 }

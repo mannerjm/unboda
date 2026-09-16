@@ -64,8 +64,16 @@ assert(parentUser.directions.parentToChild.toRole === "child", "parent-to-child 
 assert(parentUser.directions.childToParent.fromRole === "child", "child-to-parent direction must stay semantic");
 assert(parentUser.directions.childToParent.toRole === "parent", "child-to-parent target must stay semantic");
 assert(
-  JSON.stringify(parentUser.directions.parentToChild) === JSON.stringify(childUser.directions.childToParent),
-  "changing which person is labeled as parent must remap directional influence rather than silently reuse the same direction",
+  parentUser.directions.parentToChild.supportPressure === childUser.directions.childToParent.supportPressure
+    && parentUser.directions.parentToChild.burdenPressure === childUser.directions.childToParent.burdenPressure
+    && JSON.stringify(parentUser.directions.parentToChild.leadingSupportElements) === JSON.stringify(childUser.directions.childToParent.leadingSupportElements)
+    && JSON.stringify(parentUser.directions.parentToChild.leadingBurdenElements) === JSON.stringify(childUser.directions.childToParent.leadingBurdenElements),
+  "changing which person is labeled as parent must remap the same underlying A-to-B influence to the opposite family direction",
+);
+assert(
+  parentUser.directions.childToParent.supportPressure === childUser.directions.parentToChild.supportPressure
+    && parentUser.directions.childToParent.burdenPressure === childUser.directions.parentToChild.burdenPressure,
+  "changing which person is labeled as parent must also remap the reverse influence",
 );
 assert(parentUser.currentTiming.parentLoad.person === "A", "parent timing load must follow semantic role mapping");
 assert(childUser.currentTiming.parentLoad.person === "B", "parent timing load must remap when user is child");

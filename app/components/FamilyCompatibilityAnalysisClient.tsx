@@ -117,9 +117,9 @@ export default function FamilyCompatibilityAnalysisClient({
         </div>
       ) : null}
 
-      <style jsx>{`
+      <style jsx global>{`
         .family-analysis-shell:has([data-section="family-parent-child-report"]) #family-relationship-selector {
-          display: none;
+          display: none !important;
         }
       `}</style>
     </div>

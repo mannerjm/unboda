@@ -43,7 +43,10 @@ export default async function CompatibilityAnalysisPage() {
               </p>
             </header>
           </div>
-          <PaidCompatibilityAnalysisClient myProfileLabel={activeProfile.label} profileId={activeProfile.id} />
+          <PaidCompatibilityAnalysisClient
+            myProfileLabel={activeProfile.label}
+            profileId={activeProfile.id}
+          />
         </div>
       </main>
     </AppShell>

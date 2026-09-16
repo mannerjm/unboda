@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
-import CompatibilityAnalysisClient from "@/app/components/CompatibilityAnalysisClient";
+import PaidCompatibilityAnalysisClient from "@/app/components/PaidCompatibilityAnalysisClient";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 
@@ -37,13 +37,13 @@ export default async function CompatibilityAnalysisPage() {
             <Link href="/special-analysis" className="text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4">← 전문 분석</Link>
             <header className="mt-7 border-b border-stone-200 pb-6">
               <p className="text-xs font-semibold tracking-[0.16em] text-stone-400">전문 분석 · 궁합</p>
-              <h1 className="mt-2 text-3xl font-bold text-stone-950 sm:text-4xl">궁합 분석</h1>
+              <h1 className="mt-2 text-3xl font-bold text-stone-950 sm:text-4xl">연인·배우자 궁합 분석</h1>
               <p className="mt-4 text-sm leading-7 text-stone-600">
-                연인·배우자 관계에서 잘 맞는 점, 부딪히기 쉬운 지점, 회복 방식과 현재 관계 흐름을 함께 살펴봅니다.
+                두 사람의 관계 강점, 부딪히는 방식, 회복 조건, 서로에게 미치는 영향과 현재 관계 흐름을 함께 살펴봅니다.
               </p>
             </header>
           </div>
-          <CompatibilityAnalysisClient myProfileLabel={activeProfile.label} />
+          <PaidCompatibilityAnalysisClient myProfileLabel={activeProfile.label} profileId={activeProfile.id} />
         </div>
       </main>
     </AppShell>

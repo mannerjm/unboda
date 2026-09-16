@@ -183,16 +183,16 @@ export default function PaidCompatibilityAnalysisClient({
 
   return (
     <form onSubmit={submit} className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-[30px] border border-[#e4dac9] bg-white shadow-[0_18px_50px_rgba(87,72,48,0.08)]">
-      <div className="bg-[linear-gradient(135deg,#f7f1e6_0%,#fffdf9_100%)] px-6 py-7 sm:px-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-bold tracking-[0.18em] text-stone-400">분석 기준</p>
-            <p className="mt-2 text-xl font-bold text-stone-950">{myProfileLabel}님의 사주 × 상대방 사주</p>
-            <p className="mt-2 text-sm leading-7 text-stone-600">현재 선택된 내 프로필을 기준으로 연인·배우자 관계를 살펴봅니다.</p>
-          </div>
-          <div className="rounded-2xl bg-stone-900 px-4 py-3 text-right text-white">
-            <p className="text-[10px] font-semibold tracking-[0.16em] text-stone-300">전문 궁합 리포트</p>
-            <p className="mt-1 text-lg font-bold">{COMPATIBILITY_ROMANTIC_PRODUCT.amount.toLocaleString("ko-KR")}원</p>
+      <div className="relative overflow-hidden bg-[linear-gradient(135deg,#f7f1e6_0%,#fffdf9_58%,#f8f3ea_100%)] px-6 py-8 sm:px-8 sm:py-9">
+        <div aria-hidden="true" className="absolute -right-12 -top-16 h-40 w-40 rounded-full border border-[#e8dece]/80 bg-white/40" />
+        <div aria-hidden="true" className="absolute -bottom-14 right-20 h-24 w-24 rounded-full bg-[#ede3d3]/45 blur-2xl" />
+        <div className="relative">
+          <p className="text-[11px] font-bold tracking-[0.18em] text-stone-400">분석 기준</p>
+          <p className="mt-2 text-2xl font-bold tracking-[-0.02em] text-stone-950">{myProfileLabel}님의 사주 <span className="font-medium text-stone-400">×</span> 상대방 사주</p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">현재 선택된 내 프로필을 기준으로 연인·배우자 관계를 살펴봅니다.</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <span className="rounded-full border border-[#e4dac9] bg-white/75 px-3 py-1.5 text-xs font-semibold text-stone-700">연인·배우자 관계</span>
+            <span className="rounded-full border border-[#e4dac9] bg-white/75 px-3 py-1.5 text-xs font-semibold text-stone-700">현재 관계 흐름 포함</span>
           </div>
         </div>
       </div>
@@ -243,8 +243,23 @@ export default function PaidCompatibilityAnalysisClient({
         <p className="mt-3 text-xs leading-6 text-stone-500">본인·성인 인증이 아직 완료되지 않았다면 결제 화면에서 NICE 본인확인을 먼저 진행합니다.</p>
 
         {error ? <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
-        <button type="submit" disabled={!canSubmit} className="mt-7 inline-flex w-full items-center justify-center rounded-2xl bg-stone-900 px-5 py-4 text-sm font-bold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300">
-          {COMPATIBILITY_ROMANTIC_PRODUCT.amount.toLocaleString("ko-KR")}원 결제 후 궁합 분석하기
+
+        <div className="mt-7 overflow-hidden rounded-3xl border border-[#e5dac8] bg-[linear-gradient(135deg,#fbf7ef_0%,#fffdf9_100%)] shadow-sm">
+          <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
+            <div>
+              <p className="text-[11px] font-bold tracking-[0.16em] text-stone-400">전문 궁합 리포트</p>
+              <p className="mt-2 text-sm font-semibold text-stone-800">두 사람의 관계 분석을 결제 후 바로 생성합니다.</p>
+              <p className="mt-1 text-xs leading-5 text-stone-500">결제 완료 후 생성된 결과는 구매한 분석에서 다시 볼 수 있습니다.</p>
+            </div>
+            <div className="shrink-0 sm:text-right">
+              <p className="text-xs font-medium text-stone-500">결제 금액</p>
+              <p className="mt-1 text-3xl font-bold tracking-[-0.03em] text-stone-950">{COMPATIBILITY_ROMANTIC_PRODUCT.amount.toLocaleString("ko-KR")}원</p>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" disabled={!canSubmit} className="mt-3 inline-flex w-full items-center justify-center rounded-2xl bg-stone-900 px-5 py-4 text-sm font-bold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300">
+          결제하고 궁합 분석하기
         </button>
         <p className="mt-3 text-center text-xs leading-5 text-stone-400">결제가 승인되면 분석 생성이 시작되고 구매한 분석에 보관됩니다.</p>
       </div>

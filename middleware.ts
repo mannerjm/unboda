@@ -2,6 +2,13 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  if (
+    process.env.VERCEL_ENV === "preview"
+    && request.nextUrl.pathname === "/internal/review/family-report-final-qa"
+  ) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

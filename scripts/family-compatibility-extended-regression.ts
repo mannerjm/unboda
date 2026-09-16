@@ -18,6 +18,12 @@ import {
   buildFamilySiblingPaidEditionKey,
   buildFamilySiblingPaidInputSnapshot,
 } from "../app/lib/familyCompatibilityExtendedPaidAnalysis";
+import {
+  buildFamilyOtherReportContext,
+  buildFamilyOtherReportPrompt,
+  buildFamilySiblingReportContext,
+  buildFamilySiblingReportPrompt,
+} from "../app/lib/familyCompatibilityExtendedReportContract";
 import { FAMILY_PARENT_CHILD_DOMAINS } from "../app/lib/familyCompatibilityParentChild";
 import {
   COMPATIBILITY_FAMILY_OTHER_PRODUCT,
@@ -72,6 +78,10 @@ assert(Object.keys(siblingA.domains).sort().join("|") === [...FAMILY_SIBLING_DOM
 assert(siblingA.directions.userToSibling.level === timing.base.directionalInfluence.BReceivesFromA.level, "A=user to B=sibling direction must remain semantic");
 assert(siblingA.directions.siblingToUser.level === timing.base.directionalInfluence.AReceivesFromB.level, "B=sibling to A=user direction must remain semantic");
 
+const siblingPrompt = buildFamilySiblingReportPrompt(buildFamilySiblingReportContext(siblingA));
+assert(siblingPrompt.system.includes("두 directional_structure 근거를 모두 사용"), "sibling report prompt must require both directional facts in the core");
+assert(siblingPrompt.user.includes("family-sibling:direction:user-to-sibling") && siblingPrompt.user.includes("family-sibling:direction:sibling-to-user"), "sibling report prompt must carry both directional facts");
+
 assert(resolveFamilyOtherRolePair("grandparent_grandchild", "grandparent")?.familyMember === "grandchild", "grandparent relation must map counterpart to grandchild");
 assert(resolveFamilyOtherRolePair("grandparent_grandchild", "grandchild")?.familyMember === "grandparent", "grandchild relation must map counterpart to grandparent");
 assert(resolveFamilyOtherRolePair("aunt_uncle_niece_nephew", "aunt_uncle")?.familyMember === "niece_nephew", "aunt/uncle relation must map to niece/nephew");
@@ -88,6 +98,19 @@ assert(otherResult.relationshipType === "other_family", "other-family model must
 assert(Object.keys(otherResult.domains).sort().join("|") === [...FAMILY_OTHER_DOMAINS].sort().join("|"), "other-family model must expose only its dedicated domains");
 assert(JSON.stringify([...FAMILY_SIBLING_DOMAINS].sort()) !== JSON.stringify([...FAMILY_PARENT_CHILD_DOMAINS].sort()), "sibling domains must not be a renamed parent-child contract");
 assert(JSON.stringify([...FAMILY_OTHER_DOMAINS].sort()) !== JSON.stringify([...FAMILY_PARENT_CHILD_DOMAINS].sort()), "other-family domains must not be a renamed parent-child contract");
+
+const grandparentPrompt = buildFamilyOtherReportPrompt(buildFamilyOtherReportContext(otherResult));
+assert(grandparentPrompt.user.includes("보호·지원과 자율성") && grandparentPrompt.user.includes("연락·방문"), "grandparent report prompt must use grandparent-specific relationship guidance");
+
+const cousinRoles = resolveFamilyOtherRolePair("cousins", "cousin");
+assert(cousinRoles !== null, "cousin role semantics must resolve");
+const cousinPrompt = buildFamilyOtherReportPrompt(buildFamilyOtherReportContext(buildFamilyOtherCompatibility(timing, "cousins", cousinRoles)));
+assert(cousinPrompt.user.includes("수평적인 친밀감") && cousinPrompt.user.includes("비교·평가"), "cousin report prompt must use cousin-specific relationship guidance");
+
+const inLawRoles = resolveFamilyOtherRolePair("in_laws", "in_law");
+assert(inLawRoles !== null, "in-law role semantics must resolve");
+const inLawPrompt = buildFamilyOtherReportPrompt(buildFamilyOtherReportContext(buildFamilyOtherCompatibility(timing, "in_laws", inLawRoles)));
+assert(inLawPrompt.user.includes("예의와 역할 기대") && inLawPrompt.user.includes("연락·도움·관여"), "in-law report prompt must use in-law-specific relationship guidance");
 
 const siblingSnapshot = buildFamilySiblingPaidInputSnapshot({
   evaluationDate,
@@ -137,6 +160,7 @@ const orderRoute = readFileSync("app/api/orders/family-extended/route.ts", "utf8
 const checkoutPanel = readFileSync("app/checkout/[productId]/FamilyExtendedCheckoutAccessPanel.tsx", "utf8");
 const generation = readFileSync("app/lib/paidReports/generation.ts", "utf8");
 const reportContract = readFileSync("app/lib/familyCompatibilityExtendedReportContract.ts", "utf8");
+const reportService = readFileSync("app/lib/familyCompatibilityExtendedReportService.ts", "utf8");
 const purchasedList = readFileSync("app/components/PurchasedAnalysesListMultiEdition.tsx", "utf8");
 
 const sharedStorageNotice = "상대방 정보는 결제 연결을 위해 현재 브라우저에만 잠시 보관됩니다.";
@@ -155,6 +179,9 @@ assert(checkoutPanel.includes('paidEligibilityStatus !== "VERIFIED_ADULT"') && c
 assert(generation.includes("isCompatibilityFamilySiblingProductId") && generation.includes("generateFamilySiblingReport"), "paid generation must dispatch sibling reports from the frozen snapshot");
 assert(generation.includes("isCompatibilityFamilyOtherProductId") && generation.includes("generateFamilyOtherReport"), "paid generation must dispatch other-family reports from the frozen snapshot");
 assert(reportContract.includes("comparisonAndCompetition") && reportContract.includes("roleAndExpectations") && reportContract.includes("boundariesAndContact"), "report contracts must preserve relationship-specific sections");
+assert(reportContract.includes("validateDirectionRefs") && reportContract.includes("OVERUSED_NARRATIVE_PATTERNS"), "report validation must enforce two-way grounding and guard repeated abstract language");
+assert(reportContract.includes("grandparent_grandchild") && reportContract.includes("aunt_uncle_niece_nephew") && reportContract.includes("cousins") && reportContract.includes("in_laws"), "other-family report writing must distinguish supported relationship kinds");
+assert(reportService.includes("relationshipCore는 두 directional_structure 근거를 모두 반영") && reportService.includes("작성자의 판단 과정을 설명하는 메타 문구를 쓰지 않습니다"), "report service must instruct premium directional and direct customer language");
 assert(purchasedList.includes("FAMILY_SIBLINGS_YEAR") && purchasedList.includes("FAMILY_OTHER_YEAR"), "purchased analysis must reopen both extended family yearly editions");
 
 console.log("family-compatibility-extended-regression: OK");

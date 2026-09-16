@@ -3,7 +3,10 @@ import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { COMPATIBILITY_ROMANTIC_PRODUCT } from "@/app/lib/specialAnalysisProducts";
+import {
+  COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT,
+  COMPATIBILITY_ROMANTIC_PRODUCT,
+} from "@/app/lib/specialAnalysisProducts";
 
 export default async function CompatibilityAnalysisPage() {
   const user = await getCurrentUser();
@@ -73,23 +76,24 @@ export default async function CompatibilityAnalysisPage() {
 
             <Link
               href="/special-analysis/compatibility/family/parent-child#family-relationship-selector"
-              className="group flex min-h-[290px] flex-col rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md sm:p-7"
+              className="group flex min-h-[290px] flex-col rounded-[28px] border border-[#dfd3c1] bg-[linear-gradient(145deg,#fbf6ed_0%,#fffdf9_65%,#ffffff_100%)] p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#cdbb9f] hover:shadow-md sm:p-7"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <span className="inline-flex rounded-full bg-[#f3eadb] px-3 py-1.5 text-[11px] font-bold text-stone-700">부모·자녀 이용 가능</span>
+                  <span className="inline-flex rounded-full bg-stone-900 px-3 py-1.5 text-[11px] font-bold text-white">부모·자녀 이용 가능</span>
                   <h2 className="mt-5 text-2xl font-bold tracking-[-0.02em] text-stone-950">가족 궁합</h2>
                 </div>
+                <span className="text-sm font-bold text-stone-900">{COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT.amount.toLocaleString("ko-KR")}원</span>
               </div>
               <p className="mt-4 text-sm leading-7 text-stone-600">
-                가족 관계를 한 화면에서 선택하고, 관계에 맞는 역할과 정보를 입력해 바로 분석을 시작할 수 있습니다.
+                가족 관계를 한 화면에서 선택하고, 부모·자녀 관계는 결제 시점의 연도 흐름까지 포함한 리포트로 생성해 보관합니다.
               </p>
               <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-stone-500">
-                <span className="rounded-full bg-stone-50 px-3 py-1.5">부모·자녀</span>
+                <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-stone-200">부모·자녀</span>
                 <span className="rounded-full bg-stone-50 px-3 py-1.5">형제·자매 준비 중</span>
                 <span className="rounded-full bg-stone-50 px-3 py-1.5">기타 가족 준비 중</span>
               </div>
-              <span className="mt-auto pt-7 text-sm font-bold text-stone-700">가족 궁합 시작하기 →</span>
+              <span className="mt-auto pt-7 text-sm font-bold text-stone-900">가족 궁합 시작하기 →</span>
             </Link>
           </section>
         </div>

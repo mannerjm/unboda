@@ -286,14 +286,50 @@ export default function PaidFamilyExtendedAnalysisClient({ mode, myProfileLabel,
           {form.calendarType === "음력" ? <label className="flex items-center gap-2 self-end pb-4 text-sm text-stone-600"><input type="checkbox" checked={form.isLeapMonth} onChange={(event) => setForm((current) => ({ ...current, isLeapMonth: event.target.checked }))} />윤달이에요</label> : null}
         </div>
 
-        <div className="mt-7 rounded-2xl bg-stone-50 px-4 py-4 text-xs leading-6 text-stone-500">입력한 가족의 원본 생년월일과 출생시간은 결제 전 브라우저 세션에서만 임시 사용합니다. 주문에는 계산된 분석 snapshot만 저장됩니다.</div>
-        {error ? <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
-
-        <div className="mt-6 rounded-[24px] border border-[#e3d8c6] bg-[#faf6ee] p-5">
-          <div className="flex items-center justify-between gap-4 text-sm"><span className="font-semibold text-stone-600">결제 금액</span><strong className="text-lg text-stone-950">{product.amount.toLocaleString("ko-KR")}원</strong></div>
-          <p className="mt-2 text-xs leading-6 text-stone-500">{evaluationYear}년판으로 생성되어 구매한 분석에 저장됩니다.</p>
+        <div className="mt-7 rounded-3xl border border-[#eadfc9] bg-[#faf6ee] p-5">
+          <p className="text-sm font-bold text-stone-900">결제 후 제공되는 내용</p>
+          <div className="mt-3 grid gap-2 text-sm leading-7 text-stone-600 sm:grid-cols-2">
+            {mode === "siblings" ? (
+              <>
+                <p>· 정서적 연결과 대화 방식</p>
+                <p>· 나 → 형제·자매 / 형제·자매 → 나의 영향</p>
+                <p>· 비교와 경쟁, 역할과 경계</p>
+                <p>· 갈등 뒤 회복과 {evaluationYear}년 관계 흐름</p>
+              </>
+            ) : (
+              <>
+                <p>· 정서적 거리와 대화 방식</p>
+                <p>· 역할과 기대, 서로에게 미치는 영향</p>
+                <p>· 연락·도움·관여의 경계</p>
+                <p>· 갈등 뒤 회복과 {evaluationYear}년 관계 흐름</p>
+              </>
+            )}
+          </div>
         </div>
-        <button type="submit" disabled={!canSubmit} className="mt-5 w-full rounded-2xl bg-stone-950 px-5 py-4 text-sm font-bold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300">결제하고 궁합 분석하기</button>
+
+        <div className="mt-5 rounded-2xl bg-stone-50 px-4 py-4 text-sm leading-7 text-stone-600">
+          상대방 정보는 결제 연결을 위해 현재 브라우저에만 잠시 보관됩니다. 주문에는 분석에 필요한 계산 정보만 보관하며, 결제가 완료되면 브라우저에 남아 있던 상대방 정보는 자동으로 삭제됩니다. 구매 리포트는 {evaluationYear}년판으로 고정 저장됩니다.
+        </div>
+        <p className="mt-3 text-xs leading-6 text-stone-500">본인·성인 인증이 아직 완료되지 않았다면 결제 화면에서 NICE 본인확인을 먼저 진행합니다.</p>
+
+        {error ? <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
+
+        <div className="mt-7 overflow-hidden rounded-3xl border border-[#e5dac8] bg-[linear-gradient(135deg,#fbf7ef_0%,#fffdf9_100%)] shadow-sm">
+          <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
+            <div>
+              <p className="text-[11px] font-bold tracking-[0.16em] text-stone-400">전문 궁합 리포트</p>
+              <p className="mt-2 text-sm font-semibold text-stone-800">{mode === "siblings" ? "형제·자매" : "기타 가족"} 관계 분석을 결제 후 바로 생성합니다.</p>
+              <p className="mt-1 text-xs leading-5 text-stone-500">결제 완료 후 생성된 {evaluationYear}년판 결과는 구매한 분석에서 다시 볼 수 있습니다.</p>
+            </div>
+            <div className="shrink-0 sm:text-right">
+              <p className="text-xs font-medium text-stone-500">결제 금액</p>
+              <p className="mt-1 text-[22px] font-bold tracking-[-0.02em] text-stone-950">{product.amount.toLocaleString("ko-KR")}원</p>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" disabled={!canSubmit} className="mt-3 inline-flex w-full items-center justify-center rounded-2xl bg-stone-900 px-5 py-4 text-sm font-bold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300">결제하고 궁합 분석하기</button>
+        <p className="mt-3 text-center text-xs leading-5 text-stone-400">결제가 승인되면 분석 생성이 시작되고 구매한 분석에 보관됩니다.</p>
       </div>
     </form>
   );

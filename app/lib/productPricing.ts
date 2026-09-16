@@ -13,7 +13,8 @@ export type PricingFamily =
 export type ProductPricingSource =
   | "launch-v1-explicit"
   | "launch-v1-core-fallback"
-  | "registry-core-fallback";
+  | "registry-core-fallback"
+  | "special-analysis-explicit";
 
 export type ProductPricing = {
   productId: string;

@@ -73,7 +73,7 @@ const timing = buildCompatibilityTiming(mine.person, knownSnapshot.person, {
 });
 const perspectives = buildCompatibilityPairPerspectives(timing);
 assert(perspectives.meToPartner.direction === "me_to_partner", "user-to-partner direction must remain distinct");
-assert(perspectives.partnerToMe.direction === "partner_to_user", "partner-to-user direction must remain distinct");
+assert(perspectives.partnerToMe.direction === "partner_to_me", "partner-to-user direction must remain distinct");
 assert(!/\d{1,3}\s*(?:점|%)/u.test(`${perspectives.meToPartner.summary}${perspectives.partnerToMe.summary}`), "directional copy must not expose numeric scores");
 
 const unknownSnapshot = buildPartnerCompatibilitySnapshot(unknownPartner.value, evaluationDate);

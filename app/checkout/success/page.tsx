@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import {
+  COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
+  COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY,
   COMPATIBILITY_ROMANTIC_PRODUCT_ID,
   COMPATIBILITY_ROMANTIC_SESSION_KEY,
 } from "@/app/lib/specialAnalysisProducts";
@@ -41,11 +43,15 @@ function CheckoutSuccessContent() {
           throw new Error(payload?.message ?? payload?.error ?? "결제 확인에 실패했습니다.");
         }
 
+        const edition = payload?.purchase?.analysisEditionKey;
+        const editionQuery = edition ? `&edition=${encodeURIComponent(edition)}` : "";
+
         if (productId === COMPATIBILITY_ROMANTIC_PRODUCT_ID) {
           window.sessionStorage.removeItem(COMPATIBILITY_ROMANTIC_SESSION_KEY);
-          const edition = payload?.purchase?.analysisEditionKey;
-          const editionQuery = edition ? `&edition=${encodeURIComponent(edition)}` : "";
           router.replace(`/special-analysis/compatibility/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`);
+        } else if (productId === COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID) {
+          window.sessionStorage.removeItem(COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY);
+          router.replace(`/special-analysis/compatibility/family/parent-child/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`);
         } else {
           router.replace(`/paid-analysis/${encodeURIComponent(productId)}?profileId=${encodeURIComponent(profileId)}`);
         }

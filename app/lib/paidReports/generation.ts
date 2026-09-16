@@ -14,7 +14,18 @@ import {
   type StoredCompatibilityReport,
 } from "../compatibilityPaidAnalysis";
 import { generateCompatibilityReport } from "../compatibilityReportService";
-import { isCompatibilityRomanticProductId } from "../specialAnalysisProducts";
+import { buildFamilyParentChildCompatibility } from "../familyCompatibilityParentChild";
+import {
+  buildFamilyParentChildDirectionCard,
+  FAMILY_PARENT_CHILD_PAID_REPORT_VERSION,
+  parseFamilyParentChildPaidInputSnapshot,
+  type StoredFamilyParentChildReport,
+} from "../familyCompatibilityPaidAnalysis";
+import { generateFamilyParentChildReport } from "../familyCompatibilityParentChildReportService";
+import {
+  isCompatibilityFamilyParentChildProductId,
+  isCompatibilityRomanticProductId,
+} from "../specialAnalysisProducts";
 import type { StoredPaidAnalysisDetail } from "../paidAnalysisDetailOutput";
 import {
   claimPaidReport,
@@ -95,8 +106,61 @@ async function runCompatibilityPaidReportGeneration(
     userId: input.userId,
     profileId: input.profileId,
     productId: input.productId,
-    // paid_reports.content is jsonb; this product has its own schema discriminator
-    // and dedicated reader while the legacy helper remains typed to V4 detail.
+    content: content as unknown as StoredPaidAnalysisDetail,
+  });
+  return { state: "completed" as const, report };
+}
+
+async function runFamilyParentChildPaidReportGeneration(
+  input: PaidReportGenerationInput,
+  claim: Extract<PaidReportClaim, { state: "claimed" }>,
+) {
+  const purchase = input.purchaseId ? await getPurchaseById(input.purchaseId) : null;
+  if (!purchase) {
+    throw new Error("부모·자녀 궁합 생성에 필요한 구매 정보를 확인하지 못했습니다.");
+  }
+
+  const snapshot = parseFamilyParentChildPaidInputSnapshot(purchase.analysisReferenceSnapshot);
+  const timingResult = buildCompatibilityTiming(
+    snapshot.mine.person,
+    snapshot.familyMember.person,
+    {
+      evaluationYear: snapshot.evaluationYear,
+      A: snapshot.mine.timing,
+      B: snapshot.familyMember.timing,
+    },
+  );
+  const familyResult = buildFamilyParentChildCompatibility(timingResult, snapshot.userRole);
+  const parentLabel = snapshot.userRole === "parent" ? snapshot.myProfileLabel : snapshot.familyMemberLabel;
+  const childLabel = snapshot.userRole === "child" ? snapshot.myProfileLabel : snapshot.familyMemberLabel;
+  const generated = await generateFamilyParentChildReport(familyResult, { parentLabel, childLabel });
+
+  if (!(await canPublish(input))) {
+    return { state: "skipped" as const };
+  }
+
+  const content: StoredFamilyParentChildReport = {
+    schemaVersion: FAMILY_PARENT_CHILD_PAID_REPORT_VERSION,
+    report: generated.report,
+    directions: {
+      parentToChild: buildFamilyParentChildDirectionCard(familyResult.directions.parentToChild, parentLabel, childLabel),
+      childToParent: buildFamilyParentChildDirectionCard(familyResult.directions.childToParent, childLabel, parentLabel),
+    },
+    meta: {
+      evaluationYear: snapshot.evaluationYear,
+      myProfileLabel: snapshot.myProfileLabel,
+      familyMemberLabel: snapshot.familyMemberLabel,
+      userRole: snapshot.userRole,
+      familyMemberRole: snapshot.familyMemberRole,
+      familyMemberBirthTimeKnown: snapshot.familyMemberBirthTimeKnown,
+    },
+  };
+
+  const report = await completePaidReport({
+    reportId: claim.report.id,
+    userId: input.userId,
+    profileId: input.profileId,
+    productId: input.productId,
     content: content as unknown as StoredPaidAnalysisDetail,
   });
   return { state: "completed" as const, report };
@@ -125,6 +189,21 @@ export async function runPaidReportGeneration(
         profileId: input.profileId,
         productId: input.productId,
         errorCode: "compatibility_generation_failed",
+      });
+      return { state: "failed" as const };
+    }
+  }
+
+  if (isCompatibilityFamilyParentChildProductId(input.productId)) {
+    try {
+      return await runFamilyParentChildPaidReportGeneration(input, claim);
+    } catch {
+      await failPaidReport({
+        reportId: claim.report.id,
+        userId: input.userId,
+        profileId: input.profileId,
+        productId: input.productId,
+        errorCode: "family_parent_child_generation_failed",
       });
       return { state: "failed" as const };
     }

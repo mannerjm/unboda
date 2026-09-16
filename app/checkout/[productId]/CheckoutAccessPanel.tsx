@@ -10,8 +10,10 @@ import { createClient } from "@/app/lib/supabase/client";
 import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 import NiceAdultVerificationButton from "@/app/account/NiceAdultVerificationButton";
 import {
+  COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY,
   COMPATIBILITY_ROMANTIC_SESSION_KEY,
   getSpecialAnalysisProduct,
+  isCompatibilityFamilyParentChildProductId,
   isCompatibilityRomanticProductId,
 } from "@/app/lib/specialAnalysisProducts";
 
@@ -65,7 +67,8 @@ export default function CheckoutAccessPanel({
   const [accountStatus, setAccountStatus] = useState<AccountStatusResponse | null>(null);
   const [accountStatusLoading, setAccountStatusLoading] = useState(true);
   const [compatibilityPartner, setCompatibilityPartner] = useState<unknown>(null);
-  const [compatibilityPayloadChecked, setCompatibilityPayloadChecked] = useState(false);
+  const [familyParentChild, setFamilyParentChild] = useState<unknown>(null);
+  const [specialPayloadChecked, setSpecialPayloadChecked] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
   const [immediateGenerationAcknowledged, setImmediateGenerationAcknowledged] = useState(false);
   const acknowledgementRef = useRef<HTMLInputElement>(null);
@@ -73,22 +76,25 @@ export default function CheckoutAccessPanel({
 
   const specialProduct = getSpecialAnalysisProduct(productId);
   const canonicalProductId = specialProduct?.id ?? getCanonicalPremiumProductId(productId);
-  const isCompatibility = isCompatibilityRomanticProductId(canonicalProductId);
+  const isRomanticCompatibility = isCompatibilityRomanticProductId(canonicalProductId);
+  const isFamilyParentChild = isCompatibilityFamilyParentChildProductId(canonicalProductId);
 
   useEffect(() => {
-    if (isCompatibility) {
-      try {
+    try {
+      if (isRomanticCompatibility) {
         const stored = window.sessionStorage.getItem(COMPATIBILITY_ROMANTIC_SESSION_KEY);
         setCompatibilityPartner(stored ? JSON.parse(stored) : null);
-      } catch {
-        setCompatibilityPartner(null);
-      } finally {
-        setCompatibilityPayloadChecked(true);
+      } else if (isFamilyParentChild) {
+        const stored = window.sessionStorage.getItem(COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY);
+        setFamilyParentChild(stored ? JSON.parse(stored) : null);
       }
-    } else {
-      setCompatibilityPayloadChecked(true);
+    } catch {
+      if (isRomanticCompatibility) setCompatibilityPartner(null);
+      if (isFamilyParentChild) setFamilyParentChild(null);
+    } finally {
+      setSpecialPayloadChecked(true);
     }
-  }, [isCompatibility]);
+  }, [isFamilyParentChild, isRomanticCompatibility]);
 
   useEffect(() => {
     let cancelled = false;
@@ -132,8 +138,12 @@ export default function CheckoutAccessPanel({
       setErrorMessage("결제 전에 계정 인증을 완료해 주세요.");
       return;
     }
-    if (isCompatibility && !compatibilityPartner) {
+    if (isRomanticCompatibility && !compatibilityPartner) {
       setErrorMessage("궁합 분석에 필요한 상대방 정보를 다시 입력해 주세요.");
+      return;
+    }
+    if (isFamilyParentChild && !familyParentChild) {
+      setErrorMessage("부모·자녀 궁합에 필요한 가족 정보를 다시 입력해 주세요.");
       return;
     }
     if (!immediateGenerationAcknowledged) {
@@ -159,7 +169,8 @@ export default function CheckoutAccessPanel({
           productId: canonicalProductId,
           profileId,
           immediateGenerationAcknowledged: true,
-          ...(isCompatibility ? { compatibilityPartner } : {}),
+          ...(isRomanticCompatibility ? { compatibilityPartner } : {}),
+          ...(isFamilyParentChild ? { familyParentChild } : {}),
         }),
       });
 
@@ -231,12 +242,19 @@ export default function CheckoutAccessPanel({
             eligibilityStatus={accountStatus.account.paidEligibilityStatus}
           />
         </>
-      ) : isCompatibility && compatibilityPayloadChecked && !compatibilityPartner ? (
+      ) : isRomanticCompatibility && specialPayloadChecked && !compatibilityPartner ? (
         <>
           <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">COMPATIBILITY INPUT</p>
           <h2 className="mt-3 text-2xl font-bold text-stone-900">상대방 정보를 다시 확인해 주세요</h2>
           <p className="mt-4 text-sm leading-7 text-stone-600">연인·배우자 궁합 입력 화면에서 상대방 정보를 확인한 뒤 결제로 이동해 주세요.</p>
           <Link href="/special-analysis/compatibility/romantic" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-stone-900 px-5 py-4 text-sm font-bold text-white">연인·배우자 궁합 입력으로 돌아가기</Link>
+        </>
+      ) : isFamilyParentChild && specialPayloadChecked && !familyParentChild ? (
+        <>
+          <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">FAMILY INPUT</p>
+          <h2 className="mt-3 text-2xl font-bold text-stone-900">가족 정보를 다시 확인해 주세요</h2>
+          <p className="mt-4 text-sm leading-7 text-stone-600">부모·자녀 궁합 입력 화면에서 역할과 가족 정보를 확인한 뒤 결제로 이동해 주세요.</p>
+          <Link href="/special-analysis/compatibility/family/parent-child#family-relationship-selector" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-stone-900 px-5 py-4 text-sm font-bold text-white">부모·자녀 궁합 입력으로 돌아가기</Link>
         </>
       ) : (
         <>

@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import {
+  COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  COMPATIBILITY_ROMANTIC_SESSION_KEY,
+} from "@/app/lib/specialAnalysisProducts";
 
 function CheckoutSuccessContent() {
   const router = useRouter();
@@ -27,13 +31,24 @@ function CheckoutSuccessContent() {
       body: JSON.stringify({ paymentKey, amount }),
     })
       .then(async (response) => {
-        const payload = await response.json().catch(() => null) as { error?: string; message?: string } | null;
+        const payload = await response.json().catch(() => null) as {
+          error?: string;
+          message?: string;
+          purchase?: { analysisEditionKey?: string | null };
+        } | null;
 
         if (!response.ok) {
           throw new Error(payload?.message ?? payload?.error ?? "결제 확인에 실패했습니다.");
         }
 
-        router.replace(`/paid-analysis/${encodeURIComponent(productId)}?profileId=${encodeURIComponent(profileId)}`);
+        if (productId === COMPATIBILITY_ROMANTIC_PRODUCT_ID) {
+          window.sessionStorage.removeItem(COMPATIBILITY_ROMANTIC_SESSION_KEY);
+          const edition = payload?.purchase?.analysisEditionKey;
+          const editionQuery = edition ? `&edition=${encodeURIComponent(edition)}` : "";
+          router.replace(`/special-analysis/compatibility/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`);
+        } else {
+          router.replace(`/paid-analysis/${encodeURIComponent(productId)}?profileId=${encodeURIComponent(profileId)}`);
+        }
         router.refresh();
       })
       .catch((error: unknown) => {

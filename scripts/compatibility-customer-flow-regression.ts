@@ -88,6 +88,8 @@ assert(COMPATIBILITY_ROMANTIC_PRODUCT.amount === 19_900, "romantic compatibility
 const shell = readFileSync("app/components/AppShell.tsx", "utf8");
 const hub = readFileSync("app/special-analysis/page.tsx", "utf8");
 const compatibilityPage = readFileSync("app/special-analysis/compatibility/page.tsx", "utf8");
+const romanticPage = readFileSync("app/special-analysis/compatibility/romantic/page.tsx", "utf8");
+const familyPage = readFileSync("app/special-analysis/compatibility/family/page.tsx", "utf8");
 const paidClient = readFileSync("app/components/PaidCompatibilityAnalysisClient.tsx", "utf8");
 const oldApi = readFileSync("app/api/special-analysis/compatibility/route.ts", "utf8");
 const ordersApi = readFileSync("app/api/orders/route.ts", "utf8");
@@ -104,8 +106,16 @@ const adapter = readFileSync("app/lib/compatibilityCustomerInput.ts", "utf8");
 
 assert(shell.includes('href: "/special-analysis"') && shell.includes('label: "전문 분석"'), "AppShell must expose professional analysis");
 assert(hub.includes("궁합 분석") && hub.includes('href="/special-analysis/compatibility"'), "professional hub must expose compatibility without requiring payment first");
-assert(compatibilityPage.includes("PaidCompatibilityAnalysisClient") && compatibilityPage.includes("연인·배우자 궁합 분석"), "compatibility page must show the paid product input flow");
-assert(!compatibilityPage.includes("CompatibilityAnalysisClient myProfileLabel"), "customer route must not mount the old free-generation flow");
+assert(hub.includes("관계 유형별 분석") && hub.includes("궁합 유형 선택하기"), "professional hub must present compatibility as a relationship-type family");
+assert(compatibilityPage.includes("어떤 관계를 살펴볼까요?") && compatibilityPage.includes('href="/special-analysis/compatibility/romantic"'), "compatibility route must be a relationship-type selector");
+assert(compatibilityPage.includes('href="/special-analysis/compatibility/family"') && compatibilityPage.includes("가족 궁합") && compatibilityPage.includes("설계 중"), "compatibility selector must expose the family structure without pretending it is purchasable");
+assert(!compatibilityPage.includes("PaidCompatibilityAnalysisClient"), "relationship-type selector must not mount a paid input form");
+assert(romanticPage.includes("PaidCompatibilityAnalysisClient") && romanticPage.includes("연인·배우자 궁합 분석"), "romantic route must own the paid product input flow");
+assert(romanticPage.includes("← 궁합 유형 선택"), "romantic route must return to the compatibility type selector");
+assert(!romanticPage.includes("CompatibilityAnalysisClient myProfileLabel"), "romantic customer route must not mount the old free-generation flow");
+assert(familyPage.includes("부모·자녀") && familyPage.includes("형제·자매") && familyPage.includes("기타 가족"), "family route must split family relationship types before analysis input");
+assert(familyPage.includes("아직 결제나 분석 생성은 연결하지 않았습니다"), "unfinished family compatibility must stay explicitly non-purchasable");
+assert(!familyPage.includes("/checkout/") && !familyPage.includes("PaidCompatibilityAnalysisClient"), "family structure must not reuse romantic payment or input before its own interpretation contract exists");
 
 assert(paidClient.includes("COMPATIBILITY_ROMANTIC_SESSION_KEY"), "raw partner input must remain browser-session scoped until checkout");
 assert(paidClient.includes("sessionStorage.setItem") && paidClient.includes("/checkout/"), "partner input must move to the shared checkout rather than generate directly");
@@ -121,7 +131,9 @@ assert(checkout.includes('fetch("/api/account/status"') && checkout.includes("Ni
 assert(checkout.includes('paidEligibilityStatus !== "VERIFIED_ADULT"'), "shared checkout must gate payment until adult eligibility is verified");
 assert(checkout.includes("상품은 자유롭게 둘러볼 수 있습니다"), "adult verification must remain a purchase boundary, not a catalog browsing boundary");
 assert(checkout.includes("COMPATIBILITY_ROMANTIC_SESSION_KEY") && checkout.includes("compatibilityPartner"), "shared checkout must pass temporary compatibility partner input only when creating the order");
+assert(checkout.includes('/special-analysis/compatibility/romantic'), "missing romantic partner input must return to the romantic route");
 assert(checkoutPage.includes("getSpecialAnalysisProduct") && checkoutPage.includes("resolveLaunchPurchasableProduct"), "shared checkout page must support both premium and special products");
+assert(checkoutPage.includes('/special-analysis/compatibility/romantic'), "special checkout back navigation must return to the romantic product input route");
 
 assert(ordersApi.includes("validateCompatibilityPartnerInput") && ordersApi.includes("buildCompatibilityPaidInputSnapshot"), "server order boundary must validate raw partner input then derive the stored pair snapshot");
 assert(ordersApi.includes("createCompatibilityPendingOrder") && ordersApi.includes("createPendingOrder"), "special and standard products must share the same order endpoint while keeping specialized snapshot creation");

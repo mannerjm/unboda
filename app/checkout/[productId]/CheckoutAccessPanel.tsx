@@ -235,8 +235,8 @@ export default function CheckoutAccessPanel({
         <>
           <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">COMPATIBILITY INPUT</p>
           <h2 className="mt-3 text-2xl font-bold text-stone-900">상대방 정보를 다시 확인해 주세요</h2>
-          <p className="mt-4 text-sm leading-7 text-stone-600">궁합 입력 화면에서 상대방 정보를 확인한 뒤 결제로 이동해 주세요.</p>
-          <Link href="/special-analysis/compatibility" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-stone-900 px-5 py-4 text-sm font-bold text-white">궁합 입력 화면으로 돌아가기</Link>
+          <p className="mt-4 text-sm leading-7 text-stone-600">연인·배우자 궁합 입력 화면에서 상대방 정보를 확인한 뒤 결제로 이동해 주세요.</p>
+          <Link href="/special-analysis/compatibility/romantic" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-stone-900 px-5 py-4 text-sm font-bold text-white">연인·배우자 궁합 입력으로 돌아가기</Link>
         </>
       ) : (
         <>

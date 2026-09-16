@@ -52,7 +52,7 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
     ? formatAnalysisEditionLabel(edition.editionKey, edition.referenceSnapshot).replace(/ 분석$/, "")
     : undefined;
   const backHref = specialProduct
-    ? "/special-analysis/compatibility"
+    ? "/special-analysis/compatibility/romantic"
     : `/paid-analysis/${canonicalProductId}${profileId ? `?profileId=${profileId}` : ""}`;
 
   return (

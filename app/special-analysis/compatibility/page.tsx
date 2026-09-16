@@ -71,23 +71,26 @@ export default async function CompatibilityAnalysisPage() {
               <span className="mt-auto pt-7 text-sm font-bold text-stone-900">연인·배우자 궁합 시작하기 →</span>
             </Link>
 
-            <div className="flex min-h-[290px] flex-col rounded-[28px] border border-stone-200 bg-white p-6 sm:p-7">
+            <Link
+              href="/special-analysis/compatibility/family"
+              className="group flex min-h-[290px] flex-col rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md sm:p-7"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <span className="inline-flex rounded-full bg-stone-100 px-3 py-1.5 text-[11px] font-bold text-stone-600">준비 중</span>
+                  <span className="inline-flex rounded-full bg-stone-100 px-3 py-1.5 text-[11px] font-bold text-stone-600">설계 중</span>
                   <h2 className="mt-5 text-2xl font-bold tracking-[-0.02em] text-stone-950">가족 궁합</h2>
                 </div>
               </div>
               <p className="mt-4 text-sm leading-7 text-stone-600">
-                부모·자녀와 형제·자매처럼 가족 관계에 따라 달라지는 기대, 거리감, 역할과 반복되는 갈등·회복 방식을 살펴보는 분석을 준비하고 있습니다.
+                부모·자녀와 형제·자매처럼 가족 관계에 따라 달라지는 기대, 거리감, 역할과 반복되는 갈등·회복 방식을 관계별로 나눠 설계하고 있습니다.
               </p>
               <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-stone-500">
                 <span className="rounded-full bg-stone-50 px-3 py-1.5">부모·자녀</span>
                 <span className="rounded-full bg-stone-50 px-3 py-1.5">형제·자매</span>
                 <span className="rounded-full bg-stone-50 px-3 py-1.5">역할·거리·회복</span>
               </div>
-              <p className="mt-auto pt-7 text-xs leading-6 text-stone-400">가족 관계별 해석 기준을 먼저 분리해 설계한 뒤 정식으로 연결합니다.</p>
-            </div>
+              <span className="mt-auto pt-7 text-sm font-bold text-stone-700">가족 관계 기준 보기 →</span>
+            </Link>
           </section>
         </div>
       </main>

@@ -72,7 +72,7 @@ export default async function CompatibilityAnalysisPage() {
             </Link>
 
             <Link
-              href="/special-analysis/compatibility/family/parent-child#family-parent-child-form"
+              href="/special-analysis/compatibility/family/parent-child#family-relationship-selector"
               className="group flex min-h-[290px] flex-col rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md sm:p-7"
             >
               <div className="flex items-start justify-between gap-4">
@@ -82,22 +82,16 @@ export default async function CompatibilityAnalysisPage() {
                 </div>
               </div>
               <p className="mt-4 text-sm leading-7 text-stone-600">
-                부모·자녀처럼 가족 안에서 달라지는 기대, 거리감, 보호와 독립, 반복되는 갈등과 회복 방식을 관계별로 나누어 살펴봅니다.
+                가족 관계를 한 화면에서 선택하고, 관계에 맞는 역할과 정보를 입력해 바로 분석을 시작할 수 있습니다.
               </p>
               <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-stone-500">
                 <span className="rounded-full bg-stone-50 px-3 py-1.5">부모·자녀</span>
-                <span className="rounded-full bg-stone-50 px-3 py-1.5">형제·자매 설계 중</span>
-                <span className="rounded-full bg-stone-50 px-3 py-1.5">역할·거리·회복</span>
+                <span className="rounded-full bg-stone-50 px-3 py-1.5">형제·자매 준비 중</span>
+                <span className="rounded-full bg-stone-50 px-3 py-1.5">기타 가족 준비 중</span>
               </div>
-              <span className="mt-auto pt-7 text-sm font-bold text-stone-700">부모·자녀 궁합 바로 시작하기 →</span>
+              <span className="mt-auto pt-7 text-sm font-bold text-stone-700">가족 궁합 시작하기 →</span>
             </Link>
           </section>
-
-          <div className="mt-5 text-right">
-            <Link href="/special-analysis/compatibility/family" className="text-xs font-semibold text-stone-500 underline decoration-stone-300 underline-offset-4">
-              다른 가족 관계 유형 보기
-            </Link>
-          </div>
         </div>
       </main>
     </AppShell>

@@ -239,6 +239,9 @@ const FORBIDDEN_VISIBLE_PATTERNS: readonly RegExp[] = [
   /(?:부모\s*탓|자녀\s*탓|불효|나쁜\s*부모)/u,
   /\b(?:A|B)\b/u,
   /\b(?:supportive|adjustment_needed|insufficient_evidence|burdensome)\b/u,
+  /\b(?:supportPressure|burdenPressure|tensionPressure|mixedPressure|neutralPressure|contextPressure)\b/u,
+  /(?:지지|부담|긴장|혼합)\s*압력/u,
+  /(?:기대[·ㆍ]?자율성|경계[·ㆍ]?압박)\s*영역/u,
 ];
 
 function allVisibleText(report: FamilyParentChildReportOutput): string {

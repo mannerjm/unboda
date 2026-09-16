@@ -161,7 +161,9 @@ export default async function FamilyExtendedLiveReviewPage({
 
   const { mode } = await searchParams;
   const selectedMode = mode === "other" ? "other" : "siblings";
-  const content = selectedMode === "other" ? await otherFamilyReport() : await siblingReport();
+  const reportView = selectedMode === "other"
+    ? <FamilyExtendedPaidReportView mode="other_family" content={await otherFamilyReport()} />
+    : <FamilyExtendedPaidReportView mode="siblings" content={await siblingReport()} />;
 
   return (
     <main className="min-h-screen bg-[#f6f3ed] px-4 py-8 sm:px-8">
@@ -174,7 +176,7 @@ export default async function FamilyExtendedLiveReviewPage({
             <Link href="?mode=other" className={`rounded-full px-4 py-2 text-xs font-bold ${selectedMode === "other" ? "bg-stone-950 text-white" : "bg-white text-stone-700 ring-1 ring-stone-200"}`}>기타 가족 실제 출력</Link>
           </div>
         </div>
-        <FamilyExtendedPaidReportView mode={selectedMode === "other" ? "other_family" : "siblings"} content={content} />
+        {reportView}
       </div>
     </main>
   );

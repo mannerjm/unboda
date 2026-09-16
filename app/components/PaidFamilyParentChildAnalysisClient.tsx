@@ -367,7 +367,7 @@ export default function PaidFamilyParentChildAnalysisClient({
         </div>
 
         <div className="mt-5 rounded-2xl bg-stone-50 px-4 py-4 text-sm leading-7 text-stone-600">
-          입력한 가족의 원본 정보는 결제 전에는 이 브라우저 세션에만 임시 보관합니다. 주문 생성 시 서버에서 계산용 스냅샷으로 변환하며, 구매 리포트는 {evaluationYear}년판으로 고정 저장됩니다.
+          상대방 정보는 결제 연결을 위해 현재 브라우저에만 잠시 보관됩니다. 주문에는 분석에 필요한 계산 정보만 보관하며, 결제가 완료되면 브라우저에 남아 있던 상대방 정보는 자동으로 삭제됩니다. 구매 리포트는 {evaluationYear}년판으로 고정 저장됩니다.
         </div>
         <p className="mt-3 text-xs leading-6 text-stone-500">본인·성인 인증이 아직 완료되지 않았다면 결제 화면에서 NICE 본인확인을 먼저 진행합니다.</p>
 

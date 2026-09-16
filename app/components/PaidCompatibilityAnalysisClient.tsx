@@ -218,7 +218,7 @@ export default function PaidCompatibilityAnalysisClient({
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             <span className="rounded-full border border-[#e4dac9] bg-white/75 px-3 py-1.5 text-xs font-semibold text-stone-700">연인·배우자 관계</span>
-            <span className="rounded-full border border-[#e4dac9] bg-white/75 px-3 py-1.5 text-xs font-semibold text-stone-700">{evaluationYear}년판 · 구매 후 고정 저장</span>
+            <span className="rounded-full border border-[#e4dac9] bg-white/75 px-3 py-1.5 text-xs font-semibold text-stone-700">{evaluationYear}년판 · 구매 후 저장</span>
           </div>
         </div>
       </div>

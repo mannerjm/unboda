@@ -132,15 +132,22 @@ assert(String(COMPATIBILITY_FAMILY_SIBLING_SESSION_KEY) !== String(COMPATIBILITY
 
 const selector = readFileSync("app/components/FamilyCompatibilityAnalysisClient.tsx", "utf8");
 const inputClient = readFileSync("app/components/PaidFamilyExtendedAnalysisClient.tsx", "utf8");
+const parentChildInputClient = readFileSync("app/components/PaidFamilyParentChildAnalysisClient.tsx", "utf8");
 const orderRoute = readFileSync("app/api/orders/family-extended/route.ts", "utf8");
 const checkoutPanel = readFileSync("app/checkout/[productId]/FamilyExtendedCheckoutAccessPanel.tsx", "utf8");
 const generation = readFileSync("app/lib/paidReports/generation.ts", "utf8");
 const reportContract = readFileSync("app/lib/familyCompatibilityExtendedReportContract.ts", "utf8");
 const purchasedList = readFileSync("app/components/PurchasedAnalysesListMultiEdition.tsx", "utf8");
 
+const sharedStorageNotice = "상대방 정보는 결제 연결을 위해 현재 브라우저에만 잠시 보관됩니다.";
 assert(selector.includes('mode="siblings"') && selector.includes('mode="other_family"') && !selector.includes("준비 중"), "family selector must activate sibling and other-family without reusing parent-child content");
 assert(inputClient.includes("조부모·손주") && inputClient.includes("삼촌·이모·고모·조카") && inputClient.includes("사촌") && inputClient.includes("인척"), "other-family input must collect relationship semantics");
 assert(inputClient.includes("sessionStorage.setItem") && !inputClient.includes('birthTime: "12:00"'), "raw family input must remain session-scoped and never synthesize noon");
+assert(inputClient.includes("결제 후 제공되는 내용") && inputClient.includes("정서적 연결과 대화 방식") && inputClient.includes("정서적 거리와 대화 방식"), "sibling and other-family forms must show relationship-specific included-report content");
+assert(inputClient.includes("전문 궁합 리포트") && inputClient.includes("결제 금액") && inputClient.includes("NICE 본인확인"), "extended family checkout summary must match the parent-child pre-purchase structure");
+assert(inputClient.includes(sharedStorageNotice) && parentChildInputClient.includes(sharedStorageNotice), "all family purchase forms must use the same browser-session privacy notice");
+assert(inputClient.includes("결제가 완료되면 브라우저에 남아 있던 상대방 정보는 자동으로 삭제됩니다."), "family privacy copy must explain post-payment browser cleanup");
+assert(inputClient.includes("구매 리포트는 {evaluationYear}년판으로 고정 저장됩니다."), "family privacy copy must explain fixed purchase-year storage");
 assert(orderRoute.includes("validateCompatibilityPartnerInput") && orderRoute.includes("buildFamilySiblingPaidInputSnapshot") && orderRoute.includes("buildFamilyOtherPaidInputSnapshot"), "extended family orders must validate raw input then derive frozen snapshots server-side");
 assert(checkoutPanel.includes('paidEligibilityStatus !== "VERIFIED_ADULT"') && checkoutPanel.includes("immediateGenerationAcknowledged: true"), "extended family checkout must keep adult and immediate-generation gates");
 assert(generation.includes("isCompatibilityFamilySiblingProductId") && generation.includes("generateFamilySiblingReport"), "paid generation must dispatch sibling reports from the frozen snapshot");

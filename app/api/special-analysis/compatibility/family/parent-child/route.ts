@@ -24,23 +24,38 @@ function directionCard(
   fromLabel: string,
   toLabel: string,
 ) {
-  const headline = direction.level === "supportive"
-    ? `${fromLabel}의 방식이 ${toLabel}에게 힘이 되기 쉬워요`
-    : direction.level === "burdensome"
-      ? `${toLabel}에게는 부담으로 느껴질 여지가 있어요`
-      : direction.level === "mixed"
+  const supportLeads = direction.supportPressure > direction.burdenPressure + 0.08;
+  const burdenLeads = direction.burdenPressure > direction.supportPressure + 0.08;
+  const hasSupport = direction.supportPressure > 0;
+  const hasBurden = direction.burdenPressure > 0;
+
+  const headline = supportLeads
+    ? `${fromLabel}의 방식은 ${toLabel}에게 지지로 전달되는 힘이 더 커요`
+    : burdenLeads
+      ? `${fromLabel}의 방식은 ${toLabel}에게 부담으로 먼저 느껴질 수 있어요`
+      : hasSupport && hasBurden
         ? "힘이 되는 부분과 부담이 되는 부분이 함께 보여요"
-        : "한쪽으로 강하게 치우치지 않는 흐름이에요";
+        : direction.level === "supportive"
+          ? `${fromLabel}의 방식이 ${toLabel}에게 힘이 되기 쉬워요`
+          : "한쪽으로 강하게 치우치지 않는 흐름이에요";
 
   const signals: string[] = [];
-  if (direction.supportPressure > 0) {
-    signals.push(`${fromLabel}의 반응과 방식이 ${toLabel}에게 보탬이 되는 작용이 확인됩니다.`);
+  if (supportLeads) {
+    signals.push(`${fromLabel}에서 ${toLabel}로 향하는 영향은 부담 신호보다 지지로 전달되는 흐름이 더 뚜렷합니다.`);
+  } else if (burdenLeads) {
+    signals.push(`${fromLabel}에서 ${toLabel}로 향하는 영향은 지지보다 부담 신호가 더 크게 잡힙니다.`);
+  } else if (hasSupport && hasBurden) {
+    signals.push(`${fromLabel}의 반응은 ${toLabel}에게 힘과 부담으로 모두 작용할 수 있어 상황에 따른 차이가 큽니다.`);
+  } else {
+    signals.push("강한 한 방향보다 상황과 대화 방식에 따라 달라질 여지가 큰 관계입니다.");
   }
-  if (direction.burdenPressure > 0) {
-    signals.push(`상황에 따라 같은 방식이 ${toLabel}에게는 압박이나 부담으로 느껴질 수 있습니다.`);
-  }
-  if (signals.length === 0) {
-    signals.push("강한 방향성보다 상황과 대화 방식에 따라 달라질 여지가 큰 관계입니다.");
+
+  if (hasSupport && hasBurden) {
+    signals.push(`같은 행동도 ${toLabel}의 상황에 따라 도움과 압박으로 다르게 받아들여질 수 있습니다.`);
+  } else if (hasSupport) {
+    signals.push(`${toLabel}가 필요로 하는 방식과 맞을 때 관계를 안정시키는 쪽으로 작용하기 쉽습니다.`);
+  } else if (hasBurden) {
+    signals.push(`${toLabel}의 선택 범위와 타이밍을 먼저 확인하면 부담으로 번지는 것을 줄일 수 있습니다.`);
   }
 
   return {
@@ -98,10 +113,12 @@ export async function POST(request: Request) {
       B: familyMember.timing,
     });
     const familyResult = buildFamilyParentChildCompatibility(timing, row.userRole);
-    const generated = await generateFamilyParentChildReport(familyResult);
-
     const parentLabel = row.userRole === "parent" ? profile.label : validatedFamilyMember.value.label;
     const childLabel = row.userRole === "child" ? profile.label : validatedFamilyMember.value.label;
+    const generated = await generateFamilyParentChildReport(familyResult, {
+      parentLabel,
+      childLabel,
+    });
 
     return NextResponse.json({
       report: generated.report,

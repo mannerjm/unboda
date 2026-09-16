@@ -54,7 +54,7 @@ export default function FamilyCompatibilityAnalysisClient({
   }
 
   return (
-    <div className="mt-8">
+    <div className="family-analysis-shell mt-8">
       <section
         id="family-relationship-selector"
         data-section="family-relationship-selector"
@@ -116,6 +116,12 @@ export default function FamilyCompatibilityAnalysisClient({
           <FamilyParentChildAnalysisClient myProfileLabel={myProfileLabel} profileId={profileId} />
         </div>
       ) : null}
+
+      <style jsx>{`
+        .family-analysis-shell:has([data-section="family-parent-child-report"]) #family-relationship-selector {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 }

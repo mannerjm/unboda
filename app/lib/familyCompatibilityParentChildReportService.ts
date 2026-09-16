@@ -16,6 +16,25 @@ export type GeneratedFamilyParentChildReport = Readonly<{
 
 const MAX_ATTEMPTS = 2;
 
+const REQUIRED_JSON_SHAPE = `[REQUIRED_JSON_SHAPE]
+반드시 아래 필드 구조를 빠짐없이 지켜 JSON 객체 하나만 반환하세요.
+{
+  "relationshipCore": { "headline": "문장", "summary": "문장", "evidenceRefs": ["근거 ID"] },
+  "emotionalConnection": { "summary": "문장", "keyPoints": ["문장"], "evidenceRefs": ["근거 ID"] },
+  "communication": { "summary": "문장", "keyPoints": ["문장"], "evidenceRefs": ["근거 ID"] },
+  "expectationAndAutonomy": { "summary": "문장", "keyPoints": ["문장"], "evidenceRefs": ["근거 ID"] },
+  "boundariesAndPressure": { "summary": "문장", "keyPoints": ["문장"], "evidenceRefs": ["근거 ID"] },
+  "recovery": { "summary": "문장", "keyPoints": ["문장"], "evidenceRefs": ["근거 ID"] },
+  "currentTiming": { "headline": "문장", "summary": "문장", "keyPoints": ["문장"], "evidenceRefs": ["근거 ID"] },
+  "actionGuide": {
+    "doNext": [{ "action": "문장", "reason": "문장", "evidenceRefs": ["근거 ID"] }],
+    "avoid": [{ "action": "문장", "reason": "문장", "evidenceRefs": ["근거 ID"] }]
+  }
+}
+- currentTiming은 현재 흐름 근거를 설명할 수 없을 때만 null로 반환할 수 있습니다. null이 아니라면 headline, summary, keyPoints, evidenceRefs 네 필드가 모두 필수입니다.
+- actionGuide.doNext와 actionGuide.avoid의 모든 항목은 action, reason, evidenceRefs 세 필드가 모두 필수입니다.
+- 키 이름을 바꾸거나 생략하지 마세요. Markdown 코드펜스나 JSON 밖의 설명문을 붙이지 마세요.`;
+
 const STRICT_CARDINALITY_LIMITS = `[STRICT_CARDINALITY_LIMITS]
 - relationshipCore.evidenceRefs: 1~5개
 - emotionalConnection/communication/expectationAndAutonomy/boundariesAndPressure/recovery.keyPoints: 각각 1~3개
@@ -53,21 +72,30 @@ function extractJsonObject(text: string): unknown {
   return JSON.parse(withoutFence.slice(firstBrace, lastBrace + 1)) as unknown;
 }
 
-function isRetryableCardinalityOverflow(error: unknown): boolean {
-  return error instanceof ZodError
-    && error.issues.length > 0
-    && error.issues.every((issue) => issue.code === "too_big");
+function buildRepairInstruction(error: unknown): string {
+  if (error instanceof ZodError) {
+    const issues = error.issues
+      .slice(0, 12)
+      .map((issue) => `${issue.path.length > 0 ? issue.path.join(".") : "root"}: ${issue.message}`)
+      .join("\n- ");
+    return `[REPAIR_INSTRUCTION]
+직전 응답은 리포트 스키마 검증에 실패했습니다. 아래 오류를 모두 고치고 JSON 전체를 처음부터 다시 작성하세요.
+- ${issues}
+특히 누락된 필드는 REQUIRED_JSON_SHAPE에 맞춰 반드시 채우고, 배열 개수 제한과 evidenceRefs 허용 범위도 함께 지키세요.`;
+  }
+
+  const message = error instanceof Error ? error.message : "알 수 없는 출력 형식 오류";
+  return `[REPAIR_INSTRUCTION]
+직전 응답은 올바른 가족 궁합 JSON으로 처리할 수 없었습니다: ${message}
+REQUIRED_JSON_SHAPE를 그대로 따라 JSON 객체 전체를 다시 작성하고 JSON 밖의 문장은 반환하지 마세요.`;
 }
 
 function buildGenerationRequest(
   prompt: ReturnType<typeof buildFamilyParentChildReportPrompt>,
-  attempt: number,
+  repairInstruction: string,
 ): string {
-  const retryInstruction = attempt === 0
-    ? ""
-    : "\n\n[REPAIR_INSTRUCTION]\n직전 응답은 배열 개수 제한을 초과했습니다. 내용과 근거 관계는 유지하되 가장 중요한 항목만 남겨 JSON 전체를 다시 작성하세요.";
-
-  return `[SYSTEM]\n${prompt.system}\n\n${STRICT_CARDINALITY_LIMITS}\n\n${CUSTOMER_COPY_GUIDE}${retryInstruction}\n\n[USER]\n${prompt.user}`;
+  const repairBlock = repairInstruction ? `\n\n${repairInstruction}` : "";
+  return `[SYSTEM]\n${prompt.system}\n\n${REQUIRED_JSON_SHAPE}\n\n${STRICT_CARDINALITY_LIMITS}\n\n${CUSTOMER_COPY_GUIDE}${repairBlock}\n\n[USER]\n${prompt.user}`;
 }
 
 export async function generateFamilyParentChildReport(
@@ -76,10 +104,11 @@ export async function generateFamilyParentChildReport(
   const context = buildFamilyParentChildReportContext(result);
   const prompt = buildFamilyParentChildReportPrompt(context);
   let lastError: unknown;
+  let repairInstruction = "";
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
     const outputText = await generateAnalysisText(
-      buildGenerationRequest(prompt, attempt),
+      buildGenerationRequest(prompt, repairInstruction),
       { callType: "recommendation-analysis" },
     );
 
@@ -89,8 +118,9 @@ export async function generateFamilyParentChildReport(
       return { report, context };
     } catch (error) {
       lastError = error;
-      const canRetry = attempt + 1 < MAX_ATTEMPTS && isRetryableCardinalityOverflow(error);
+      const canRetry = attempt + 1 < MAX_ATTEMPTS;
       if (!canRetry) throw error;
+      repairInstruction = buildRepairInstruction(error);
     }
   }
 

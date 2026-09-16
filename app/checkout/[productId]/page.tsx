@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CheckoutAccessPanel from "./CheckoutAccessPanel";
+import FamilyExtendedCheckoutAccessPanel from "./FamilyExtendedCheckoutAccessPanel";
 import ProfileSelector from "@/app/components/ProfileSelector";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
@@ -13,7 +14,9 @@ import { formatAnalysisEditionLabel } from "@/app/lib/analysisEditionLabel";
 import { getKoreaEvaluationDate } from "@/app/lib/evaluationContext";
 import {
   getSpecialAnalysisProduct,
+  isCompatibilityFamilyOtherProductId,
   isCompatibilityFamilyParentChildProductId,
+  isCompatibilityFamilySiblingProductId,
   isCompatibilityRomanticProductId,
 } from "@/app/lib/specialAnalysisProducts";
 import Script from "next/script";
@@ -58,14 +61,29 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
     ? formatAnalysisEditionLabel(edition.editionKey, edition.referenceSnapshot).replace(/ 분석$/, "")
     : isCompatibilityFamilyParentChildProductId(canonicalProductId)
       ? `${familyEvaluationYear}년 부모·자녀 궁합`
-      : undefined;
+      : isCompatibilityFamilySiblingProductId(canonicalProductId)
+        ? `${familyEvaluationYear}년 형제·자매 궁합`
+        : isCompatibilityFamilyOtherProductId(canonicalProductId)
+          ? `${familyEvaluationYear}년 기타 가족 궁합`
+          : undefined;
+  const isFamilyExtended = isCompatibilityFamilySiblingProductId(canonicalProductId)
+    || isCompatibilityFamilyOtherProductId(canonicalProductId);
   const backHref = isCompatibilityRomanticProductId(canonicalProductId)
     ? "/special-analysis/compatibility/romantic"
-    : isCompatibilityFamilyParentChildProductId(canonicalProductId)
+    : isCompatibilityFamilyParentChildProductId(canonicalProductId) || isFamilyExtended
       ? "/special-analysis/compatibility/family/parent-child#family-relationship-selector"
       : specialProduct
         ? "/special-analysis/compatibility"
         : `/paid-analysis/${canonicalProductId}${profileId ? `?profileId=${profileId}` : ""}`;
+
+  const accessPanelProps = {
+    productId: canonicalProductId,
+    profileId,
+    productTitle: displayTitle,
+    profileLabel: profile?.label,
+    priceLabel: `${resolved.amount.toLocaleString("ko-KR")}원`,
+    editionLabel: checkoutEditionLabel,
+  };
 
   return (
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
@@ -88,14 +106,9 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
           </div>
         ) : null}
 
-        <CheckoutAccessPanel
-          productId={canonicalProductId}
-          profileId={profileId}
-          productTitle={displayTitle}
-          profileLabel={profile?.label}
-          priceLabel={`${resolved.amount.toLocaleString("ko-KR")}원`}
-          editionLabel={checkoutEditionLabel}
-        />
+        {isFamilyExtended
+          ? <FamilyExtendedCheckoutAccessPanel {...accessPanelProps} />
+          : <CheckoutAccessPanel {...accessPanelProps} />}
 
         {user && !profileId && premiumProduct ? (
           <ProfileSelector productId={premiumProduct.id} destination="checkout" />

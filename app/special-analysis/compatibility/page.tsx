@@ -72,7 +72,7 @@ export default async function CompatibilityAnalysisPage() {
             </Link>
 
             <Link
-              href="/special-analysis/compatibility/family"
+              href="/special-analysis/compatibility/family/parent-child#family-parent-child-form"
               className="group flex min-h-[290px] flex-col rounded-[28px] border border-stone-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-md sm:p-7"
             >
               <div className="flex items-start justify-between gap-4">
@@ -89,9 +89,15 @@ export default async function CompatibilityAnalysisPage() {
                 <span className="rounded-full bg-stone-50 px-3 py-1.5">형제·자매 설계 중</span>
                 <span className="rounded-full bg-stone-50 px-3 py-1.5">역할·거리·회복</span>
               </div>
-              <span className="mt-auto pt-7 text-sm font-bold text-stone-700">가족 궁합 선택하기 →</span>
+              <span className="mt-auto pt-7 text-sm font-bold text-stone-700">부모·자녀 궁합 바로 시작하기 →</span>
             </Link>
           </section>
+
+          <div className="mt-5 text-right">
+            <Link href="/special-analysis/compatibility/family" className="text-xs font-semibold text-stone-500 underline decoration-stone-300 underline-offset-4">
+              다른 가족 관계 유형 보기
+            </Link>
+          </div>
         </div>
       </main>
     </AppShell>

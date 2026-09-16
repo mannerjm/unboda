@@ -1,5 +1,9 @@
 import type { PaymentStatus } from "./payment";
-import { COMPATIBILITY_ROMANTIC_PRODUCT, COMPATIBILITY_ROMANTIC_PRODUCT_ID } from "./specialAnalysisProducts";
+import {
+  COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
+  COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  getSpecialAnalysisProduct,
+} from "./specialAnalysisProducts";
 import { createAdminClient } from "./supabase/admin";
 
 export type SpecialAnalysisPurchaseHistoryItem = {
@@ -29,6 +33,11 @@ type OrderRow = {
   status: PaymentStatus;
 };
 
+const SPECIAL_PURCHASE_PRODUCT_IDS = [
+  COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
+] as const;
+
 export async function listUserSpecialAnalysisPurchaseHistory(
   userId: string,
 ): Promise<SpecialAnalysisPurchaseHistoryItem[]> {
@@ -37,7 +46,7 @@ export async function listUserSpecialAnalysisPurchaseHistory(
     .from("purchases")
     .select("id,profile_id,product_id,order_id,purchased_at")
     .eq("user_id", userId)
-    .eq("product_id", COMPATIBILITY_ROMANTIC_PRODUCT_ID)
+    .in("product_id", [...SPECIAL_PURCHASE_PRODUCT_IDS])
     .order("purchased_at", { ascending: false });
 
   if (purchaseError) {
@@ -63,14 +72,15 @@ export async function listUserSpecialAnalysisPurchaseHistory(
 
   return purchases.flatMap((purchase) => {
     const order = orderById.get(purchase.order_id);
-    if (!order) return [];
+    const product = getSpecialAnalysisProduct(purchase.product_id);
+    if (!order || !product) return [];
     return [{
       purchaseId: purchase.id,
       orderId: purchase.order_id,
       profileId: purchase.profile_id,
-      productId: COMPATIBILITY_ROMANTIC_PRODUCT.id,
-      productName: COMPATIBILITY_ROMANTIC_PRODUCT.title,
-      categoryLabel: COMPATIBILITY_ROMANTIC_PRODUCT.categoryLabel,
+      productId: product.id,
+      productName: product.title,
+      categoryLabel: product.categoryLabel,
       purchasedAt: purchase.purchased_at,
       amount: order.amount,
       currency: currencyByOrderId.get(order.id) ?? "KRW",

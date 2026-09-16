@@ -1,5 +1,7 @@
 export const COMPATIBILITY_ROMANTIC_PRODUCT_ID = "compatibility-romantic" as const;
 export const COMPATIBILITY_ROMANTIC_SESSION_KEY = "unboda:compatibility-romantic:partner:v1" as const;
+export const COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID = "compatibility-family-parent-child" as const;
+export const COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY = "unboda:compatibility-family-parent-child:v1" as const;
 
 export type SpecialAnalysisProductDefinition = Readonly<{
   id: string;
@@ -21,8 +23,19 @@ export const COMPATIBILITY_ROMANTIC_PRODUCT: SpecialAnalysisProductDefinition = 
   categoryLabel: "전문 분석 · 궁합",
 };
 
+export const COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT: SpecialAnalysisProductDefinition = {
+  id: COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
+  title: "부모·자녀 궁합 분석",
+  shortTitle: "부모·자녀 궁합",
+  description: "부모와 자녀가 서로에게 미치는 방향, 정서적 연결과 대화, 기대와 독립, 보호와 경계, 갈등 뒤 회복과 현재 연도 흐름을 함께 살펴봅니다.",
+  amount: 19_900,
+  currency: "KRW",
+  categoryLabel: "전문 분석 · 궁합 · 가족",
+};
+
 const SPECIAL_ANALYSIS_PRODUCT_LOOKUP: Readonly<Record<string, SpecialAnalysisProductDefinition>> = {
   [COMPATIBILITY_ROMANTIC_PRODUCT_ID]: COMPATIBILITY_ROMANTIC_PRODUCT,
+  [COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID]: COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT,
 };
 
 export function getSpecialAnalysisProduct(productId: string | null | undefined): SpecialAnalysisProductDefinition | undefined {
@@ -35,4 +48,8 @@ export function isSpecialAnalysisProductId(productId: string | null | undefined)
 
 export function isCompatibilityRomanticProductId(productId: string | null | undefined): boolean {
   return productId === COMPATIBILITY_ROMANTIC_PRODUCT_ID;
+}
+
+export function isCompatibilityFamilyParentChildProductId(productId: string | null | undefined): boolean {
+  return productId === COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID;
 }

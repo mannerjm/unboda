@@ -10,7 +10,12 @@ import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
 import { resolveAnalysisEditionForOrder } from "@/app/lib/analysisEditionForOrder";
 import { formatAnalysisEditionLabel } from "@/app/lib/analysisEditionLabel";
-import { getSpecialAnalysisProduct } from "@/app/lib/specialAnalysisProducts";
+import { getKoreaEvaluationDate } from "@/app/lib/evaluationContext";
+import {
+  getSpecialAnalysisProduct,
+  isCompatibilityFamilyParentChildProductId,
+  isCompatibilityRomanticProductId,
+} from "@/app/lib/specialAnalysisProducts";
 import Script from "next/script";
 
 type CheckoutPageProps = {
@@ -48,12 +53,19 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
         profile,
       })
     : null;
+  const familyEvaluationYear = Number(getKoreaEvaluationDate().slice(0, 4));
   const checkoutEditionLabel = edition
     ? formatAnalysisEditionLabel(edition.editionKey, edition.referenceSnapshot).replace(/ 분석$/, "")
-    : undefined;
-  const backHref = specialProduct
+    : isCompatibilityFamilyParentChildProductId(canonicalProductId)
+      ? `${familyEvaluationYear}년 부모·자녀 궁합`
+      : undefined;
+  const backHref = isCompatibilityRomanticProductId(canonicalProductId)
     ? "/special-analysis/compatibility/romantic"
-    : `/paid-analysis/${canonicalProductId}${profileId ? `?profileId=${profileId}` : ""}`;
+    : isCompatibilityFamilyParentChildProductId(canonicalProductId)
+      ? "/special-analysis/compatibility/family/parent-child#family-relationship-selector"
+      : specialProduct
+        ? "/special-analysis/compatibility"
+        : `/paid-analysis/${canonicalProductId}${profileId ? `?profileId=${profileId}` : ""}`;
 
   return (
     <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">

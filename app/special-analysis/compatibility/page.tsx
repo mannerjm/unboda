@@ -86,7 +86,7 @@ export default async function CompatibilityAnalysisPage() {
               </p>
               <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-stone-500">
                 <span className="rounded-full bg-stone-50 px-3 py-1.5">부모·자녀</span>
-                <span className="rounded-full bg-stone-50 px-3 py-1.5">형제·자매 준비 중</span>
+                <span className="rounded-full bg-stone-50 px-3 py-1.5">형제·자매 설계 중</span>
                 <span className="rounded-full bg-stone-50 px-3 py-1.5">역할·거리·회복</span>
               </div>
               <span className="mt-auto pt-7 text-sm font-bold text-stone-700">가족 궁합 선택하기 →</span>

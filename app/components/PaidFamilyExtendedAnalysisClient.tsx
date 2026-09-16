@@ -169,6 +169,7 @@ export default function PaidFamilyExtendedAnalysisClient({ mode, myProfileLabel,
   const productId = mode === "siblings" ? COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID : COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID;
   const sessionKey = mode === "siblings" ? COMPATIBILITY_FAMILY_SIBLING_SESSION_KEY : COMPATIBILITY_FAMILY_OTHER_SESSION_KEY;
   const roles = useMemo(() => roleOptions(form.relationshipKind), [form.relationshipKind]);
+  const selectedRelationship = OTHER_RELATIONSHIPS.find((option) => option.value === form.relationshipKind);
   const effectiveRole = mode === "other_family" && roles.length === 1 ? roles[0].value : form.userRole;
   const canSubmit = Boolean(
     form.label.trim()
@@ -220,39 +221,46 @@ export default function PaidFamilyExtendedAnalysisClient({ mode, myProfileLabel,
 
       <div className="p-6 sm:p-8">
         {mode === "other_family" ? (
-          <>
-            <fieldset>
-              <legend className="text-sm font-semibold text-stone-800">어떤 가족 관계인가요?</legend>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                {OTHER_RELATIONSHIPS.map((option) => {
-                  const selected = form.relationshipKind === option.value;
-                  return (
-                    <label key={option.value} className={`cursor-pointer rounded-2xl border p-4 transition ${selected ? "border-stone-900 bg-stone-950 text-white" : "border-stone-200 bg-white hover:border-stone-400"}`}>
-                      <input className="sr-only" type="radio" name="otherRelationship" checked={selected} onChange={() => setForm((current) => ({ ...current, relationshipKind: option.value, userRole: "" }))} />
-                      <span className="block text-sm font-bold">{option.title}</span>
-                      <span className={`mt-1.5 block text-xs leading-5 ${selected ? "text-stone-300" : "text-stone-500"}`}>{option.description}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </fieldset>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <label className="sm:col-span-2">
+              <span className="text-sm font-semibold text-stone-800">어떤 가족 관계인가요?</span>
+              <select
+                value={form.relationshipKind}
+                onChange={(event) => setForm((current) => ({
+                  ...current,
+                  relationshipKind: event.target.value as FormState["relationshipKind"],
+                  userRole: "",
+                }))}
+                required
+                className="mt-2 w-full rounded-2xl border border-stone-300 bg-white px-4 py-3.5 text-sm outline-none focus:border-stone-500"
+              >
+                <option value="" disabled>선택해 주세요</option>
+                {OTHER_RELATIONSHIPS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.title}</option>
+                ))}
+              </select>
+              <p className="mt-2 text-xs leading-5 text-stone-500">
+                {selectedRelationship?.description ?? "분석할 가족 관계를 선택해 주세요."}
+              </p>
+            </label>
+
             {roles.length > 0 ? (
-              <fieldset className="mt-7">
-                <legend className="text-sm font-semibold text-stone-800">나는 이 관계에서</legend>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  {roles.map((option) => {
-                    const selected = effectiveRole === option.value;
-                    return (
-                      <label key={option.value} className={`cursor-pointer rounded-2xl border p-4 transition ${selected ? "border-stone-900 bg-stone-950 text-white" : "border-stone-200 bg-white hover:border-stone-400"}`}>
-                        <input className="sr-only" type="radio" name="otherRole" checked={selected} onChange={() => setForm((current) => ({ ...current, userRole: option.value }))} />
-                        <span className="block text-sm font-bold">{option.title}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </fieldset>
+              <label className="sm:col-span-2">
+                <span className="text-sm font-semibold text-stone-800">나는 이 관계에서</span>
+                <select
+                  value={effectiveRole}
+                  onChange={(event) => setForm((current) => ({ ...current, userRole: event.target.value as FamilyOtherRole }))}
+                  required
+                  className="mt-2 w-full rounded-2xl border border-stone-300 bg-white px-4 py-3.5 text-sm outline-none focus:border-stone-500"
+                >
+                  <option value="" disabled>선택해 주세요</option>
+                  {roles.map((option) => (
+                    <option key={option.value} value={option.value}>{option.title}</option>
+                  ))}
+                </select>
+              </label>
             ) : null}
-          </>
+          </div>
         ) : null}
 
         <div className="mt-7 grid gap-5 sm:grid-cols-2">

@@ -103,16 +103,26 @@ export function parseCompatibilityPaidInputSnapshot(value: unknown): Compatibili
 }
 
 export function buildCompatibilityPaidEditionKey(snapshot: CompatibilityPaidInputSnapshot): string {
-  const partnerFingerprint = createHash("sha256")
+  // Both participants are part of the commercial identity. If the member later
+  // corrects their own profile, the corrected pair is a new deterministic
+  // analysis rather than being blocked by an entitlement for the old inputs.
+  const pairFingerprint = createHash("sha256")
     .update(JSON.stringify({
-      person: snapshot.partner.person,
-      timing: snapshot.partner.timing,
-      birthTimeKnown: snapshot.partnerBirthTimeKnown,
+      mine: {
+        person: snapshot.mine.person,
+        timing: snapshot.mine.timing,
+        birthTimeKnown: snapshot.mine.birthTimeKnown,
+      },
+      partner: {
+        person: snapshot.partner.person,
+        timing: snapshot.partner.timing,
+        birthTimeKnown: snapshot.partnerBirthTimeKnown,
+      },
     }))
     .digest("hex")
     .slice(0, 16);
 
-  return `PAIR_YEAR:${snapshot.evaluationYear}:${partnerFingerprint}`;
+  return `PAIR_YEAR:${snapshot.evaluationYear}:${pairFingerprint}`;
 }
 
 export function isStoredCompatibilityReport(value: unknown): value is StoredCompatibilityReport {

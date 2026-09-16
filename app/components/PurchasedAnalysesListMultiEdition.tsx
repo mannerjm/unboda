@@ -1,7 +1,11 @@
 import Link from "next/link";
 import type { PurchasedAnalysisProductGroup } from "@/app/lib/purchasedAnalysesGrouping";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
-import { getSpecialAnalysisProduct, isCompatibilityRomanticProductId } from "@/app/lib/specialAnalysisProducts";
+import {
+  getSpecialAnalysisProduct,
+  isCompatibilityFamilyParentChildProductId,
+  isCompatibilityRomanticProductId,
+} from "@/app/lib/specialAnalysisProducts";
 
 const statusLabels: Record<string, string> = {
   none: "분석 준비 중",
@@ -29,9 +33,12 @@ type PurchasedAnalysesListProps = {
   profileId: string;
 };
 
-function compatibilityEditionLabel(editionKey: string | null): string {
-  const match = editionKey?.match(/^PAIR_YEAR:(\d{4}):[a-f0-9]{16}$/);
-  return match ? `${match[1]}년 궁합 분석` : "궁합 분석";
+function compatibilityEditionLabel(productId: string, editionKey: string | null): string {
+  const romantic = editionKey?.match(/^PAIR_YEAR:(\d{4}):[a-f0-9]{16}$/);
+  if (romantic) return `${romantic[1]}년 궁합 분석`;
+  const family = editionKey?.match(/^FAMILY_PARENT_CHILD_YEAR:(\d{4}):[a-f0-9]{16}$/);
+  if (family) return `${family[1]}년 부모·자녀 궁합`;
+  return isCompatibilityFamilyParentChildProductId(productId) ? "부모·자녀 궁합" : "궁합 분석";
 }
 
 export default function PurchasedAnalysesList({ groups, profileId }: PurchasedAnalysesListProps) {
@@ -52,7 +59,9 @@ export default function PurchasedAnalysesList({ groups, profileId }: PurchasedAn
     <div className="mt-8 space-y-8 border-y border-stone-200">
       {groups.map((group) => {
         const specialProduct = getSpecialAnalysisProduct(group.productId);
-        const isCompatibility = isCompatibilityRomanticProductId(group.productId);
+        const isRomanticCompatibility = isCompatibilityRomanticProductId(group.productId);
+        const isFamilyParentChild = isCompatibilityFamilyParentChildProductId(group.productId);
+        const isCompatibility = isRomanticCompatibility || isFamilyParentChild;
         const displayTitle = specialProduct?.title ?? getPremiumProductDisplayTitle(group.productId, group.productName);
 
         return (
@@ -65,12 +74,14 @@ export default function PurchasedAnalysesList({ groups, profileId }: PurchasedAn
             <div className="space-y-3">
               {group.editions.map((edition) => {
                 const editionQuery = edition.analysisEditionKey ? `&edition=${encodeURIComponent(edition.analysisEditionKey)}` : "";
-                const href = isCompatibility
+                const href = isRomanticCompatibility
                   ? `/special-analysis/compatibility/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`
-                  : `/paid-analysis/${group.productId}/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
+                  : isFamilyParentChild
+                    ? `/special-analysis/compatibility/family/parent-child/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`
+                    : `/paid-analysis/${group.productId}/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
                 const isPreparing = edition.reportStatus === "none" || edition.reportStatus === "generating";
                 const displayEditionLabel = isCompatibility
-                  ? compatibilityEditionLabel(edition.analysisEditionKey)
+                  ? compatibilityEditionLabel(group.productId, edition.analysisEditionKey)
                   : edition.editionLabel;
 
                 return (

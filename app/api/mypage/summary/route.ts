@@ -8,6 +8,8 @@ import {
 import { listProfileDeleteBlockers, listUserProfiles } from "@/app/lib/profiles/server";
 import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
 import { listUserPurchaseHistory } from "@/app/lib/purchases/server";
+import { listUserSpecialAnalysisPurchaseHistory } from "@/app/lib/specialAnalysisPurchaseHistory";
+import { getSpecialAnalysisProduct } from "@/app/lib/specialAnalysisProducts";
 import { listUserRefundSummaries } from "@/app/lib/refunds/server";
 import { createEvaluationContext } from "@/app/lib/evaluationContext";
 
@@ -17,12 +19,13 @@ export async function GET() {
 
   try {
     const evaluationContext = createEvaluationContext();
-    const [profiles, summaries, deleteBlockers, paidAnalysis, purchaseHistory, refunds] = await Promise.all([
+    const [profiles, summaries, deleteBlockers, rawPaidAnalysis, standardPurchaseHistory, specialPurchaseHistory, refunds] = await Promise.all([
       listUserProfiles(user.id),
       listUserFreeAnalysisResults(user.id),
       listProfileDeleteBlockers(user.id),
       listUserPaidAnalysisSummaries(user.id),
       listUserPurchaseHistory(user.id),
+      listUserSpecialAnalysisPurchaseHistory(user.id),
       listUserRefundSummaries(user.id),
     ]);
     const freeAnalysisResults = profiles.map((profile) => {
@@ -40,16 +43,13 @@ export async function GET() {
 
       return {
         profileId: profile.id,
-        // A period change does not invalidate the saved result. My Page keeps the
-        // existing result marked completed while AppShell presents the monthly
-        // refresh invitation. Birth-input changes still remain true stale states.
         status: periodRefreshAvailable ? "completed" : status,
         periodRefreshAvailable,
         currentEvaluationYear: evaluationContext.evaluationYear,
         currentEvaluationMonth: evaluationContext.evaluationMonth,
       };
     });
-    // UX hint only: DELETE /api/profiles/[profileId] re-checks the same rules.
+
     const profileDeletability = profiles.map((profile) => {
       const reason = deleteBlockers.get(profile.id);
       return reason
@@ -57,6 +57,13 @@ export async function GET() {
         : { profileId: profile.id, deletable: true };
     });
 
+    const paidAnalysis = rawPaidAnalysis.map((item) => {
+      const specialProduct = getSpecialAnalysisProduct(item.productId);
+      return specialProduct ? { ...item, productName: specialProduct.title } : item;
+    });
+
+    const purchaseHistory = [...standardPurchaseHistory, ...specialPurchaseHistory]
+      .sort((left, right) => right.purchasedAt.localeCompare(left.purchasedAt));
     const refundByOrderId = new Map(refunds.map((refund) => [refund.orderId, refund]));
     const purchaseHistoryWithRefunds = purchaseHistory.map((purchase) => ({
       ...purchase,

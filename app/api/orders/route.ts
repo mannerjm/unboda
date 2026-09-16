@@ -19,8 +19,13 @@ import {
 } from "@/app/lib/compatibilityCustomerInput";
 import { buildCompatibilityPaidInputSnapshot } from "@/app/lib/compatibilityPaidAnalysis";
 import { createCompatibilityPendingOrder } from "@/app/lib/compatibilityPurchases";
+import { buildFamilyParentChildPaidInputSnapshot } from "@/app/lib/familyCompatibilityPaidAnalysis";
+import { createFamilyParentChildPendingOrder } from "@/app/lib/familyCompatibilityPurchases";
+import type { FamilyParentChildRole } from "@/app/lib/familyCompatibilityParentChild";
 import {
+  COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
   COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  isCompatibilityFamilyParentChildProductId,
   isCompatibilityRomanticProductId,
 } from "@/app/lib/specialAnalysisProducts";
 
@@ -33,6 +38,10 @@ function koreaDate(now = new Date()): string {
   }).formatToParts(now);
   const value = Object.fromEntries(parts.map((part) => [part.type, part.value]));
   return `${value.year}-${value.month}-${value.day}`;
+}
+
+function isFamilyRole(value: unknown): value is FamilyParentChildRole {
+  return value === "parent" || value === "child";
 }
 
 export async function POST(request: Request) {
@@ -61,6 +70,7 @@ export async function POST(request: Request) {
     profileId?: unknown;
     immediateGenerationAcknowledged?: unknown;
     compatibilityPartner?: unknown;
+    familyParentChild?: unknown;
   } | null;
   const rawProductId = requestBody?.productId;
   const rawProfileId = requestBody?.profileId;
@@ -133,6 +143,42 @@ export async function POST(request: Request) {
     }
   }
 
+  let familyParentChildSnapshot: ReturnType<typeof buildFamilyParentChildPaidInputSnapshot> | null = null;
+  if (isCompatibilityFamilyParentChildProductId(resolved.productId)) {
+    const rawFamily = requestBody?.familyParentChild;
+    if (!rawFamily || typeof rawFamily !== "object" || Array.isArray(rawFamily)) {
+      return NextResponse.json({ error: "부모·자녀 관계 정보를 다시 입력해 주세요.", code: "FAMILY_PARENT_CHILD_INPUT_REQUIRED" }, { status: 400 });
+    }
+    const row = rawFamily as { userRole?: unknown; familyMember?: unknown };
+    if (!isFamilyRole(row.userRole)) {
+      return NextResponse.json({ error: "이 관계에서 내가 부모인지 자녀인지 선택해 주세요.", code: "FAMILY_PARENT_CHILD_ROLE_REQUIRED" }, { status: 400 });
+    }
+    const validation = validateCompatibilityPartnerInput(row.familyMember);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error, code: "FAMILY_PARENT_CHILD_MEMBER_REQUIRED" }, { status: 400 });
+    }
+
+    const evaluationDate = koreaDate();
+    const evaluationYear = Number(evaluationDate.slice(0, 4));
+    try {
+      const mine = buildProfileCompatibilitySnapshot(profile, evaluationDate);
+      const familyMember = buildPartnerCompatibilitySnapshot(validation.value, evaluationDate);
+      familyParentChildSnapshot = buildFamilyParentChildPaidInputSnapshot({
+        evaluationDate,
+        evaluationYear,
+        myProfileLabel: profile.label,
+        familyMemberLabel: validation.value.label,
+        userRole: row.userRole,
+        familyMemberBirthTimeKnown: validation.value.birthTimeKnown,
+        mine,
+        familyMember,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "부모·자녀 궁합 계산 입력을 확인하지 못했습니다.";
+      return NextResponse.json({ error: message, code: "FAMILY_PARENT_CHILD_INPUT_UNAVAILABLE" }, { status: 422 });
+    }
+  }
+
   try {
     getTossConfig();
   } catch {
@@ -151,12 +197,19 @@ export async function POST(request: Request) {
           snapshot: compatibilitySnapshot,
           paymentProvider: "toss",
         })
-      : await createPendingOrder({
-          userId: user.id,
-          profileId: profile.id,
-          productId: resolved.productId,
-          paymentProvider: "toss",
-        });
+      : resolved.productId === COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID && familyParentChildSnapshot
+        ? await createFamilyParentChildPendingOrder({
+            userId: user.id,
+            profile,
+            snapshot: familyParentChildSnapshot,
+            paymentProvider: "toss",
+          })
+        : await createPendingOrder({
+            userId: user.id,
+            profileId: profile.id,
+            productId: resolved.productId,
+            paymentProvider: "toss",
+          });
     emitPaymentEvent("order_created", {
       operationalClass: "NORMAL",
       orderId: order.id,

@@ -80,18 +80,18 @@ export default async function CompatibilityAnalysisPage() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <span className="inline-flex rounded-full bg-stone-900 px-3 py-1.5 text-[11px] font-bold text-white">부모·자녀 이용 가능</span>
+                  <span className="inline-flex rounded-full bg-stone-900 px-3 py-1.5 text-[11px] font-bold text-white">가족 궁합 이용 가능</span>
                   <h2 className="mt-5 text-2xl font-bold tracking-[-0.02em] text-stone-950">가족 궁합</h2>
                 </div>
                 <span className="text-sm font-bold text-stone-900">{COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT.amount.toLocaleString("ko-KR")}원</span>
               </div>
               <p className="mt-4 text-sm leading-7 text-stone-600">
-                가족 관계를 한 화면에서 선택하고, 부모·자녀 관계는 결제 시점의 연도 흐름까지 포함한 리포트로 생성해 보관합니다.
+                부모·자녀, 형제·자매, 기타 가족을 한 화면에서 선택하고 관계마다 다른 기준과 구매 연도 흐름으로 분석해 보관합니다.
               </p>
-              <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-stone-500">
+              <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
                 <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-stone-200">부모·자녀</span>
-                <span className="rounded-full bg-stone-50 px-3 py-1.5">형제·자매 준비 중</span>
-                <span className="rounded-full bg-stone-50 px-3 py-1.5">기타 가족 준비 중</span>
+                <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-stone-200">형제·자매</span>
+                <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-stone-200">기타 가족</span>
               </div>
               <span className="mt-auto pt-7 text-sm font-bold text-stone-900">가족 궁합 시작하기 →</span>
             </Link>

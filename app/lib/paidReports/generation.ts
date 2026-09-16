@@ -14,6 +14,23 @@ import {
   type StoredCompatibilityReport,
 } from "../compatibilityPaidAnalysis";
 import { generateCompatibilityReport } from "../compatibilityReportService";
+import {
+  buildFamilyOtherCompatibility,
+  buildFamilySiblingCompatibility,
+} from "../familyCompatibilityExtended";
+import {
+  buildFamilyExtendedDirectionCard,
+  FAMILY_OTHER_PAID_REPORT_VERSION,
+  FAMILY_SIBLING_PAID_REPORT_VERSION,
+  parseFamilyOtherPaidInputSnapshot,
+  parseFamilySiblingPaidInputSnapshot,
+  type StoredFamilyOtherReport,
+  type StoredFamilySiblingReport,
+} from "../familyCompatibilityExtendedPaidAnalysis";
+import {
+  generateFamilyOtherReport,
+  generateFamilySiblingReport,
+} from "../familyCompatibilityExtendedReportService";
 import { buildFamilyParentChildCompatibility } from "../familyCompatibilityParentChild";
 import {
   buildFamilyParentChildDirectionCard,
@@ -23,7 +40,9 @@ import {
 } from "../familyCompatibilityPaidAnalysis";
 import { generateFamilyParentChildReport } from "../familyCompatibilityParentChildReportService";
 import {
+  isCompatibilityFamilyOtherProductId,
   isCompatibilityFamilyParentChildProductId,
+  isCompatibilityFamilySiblingProductId,
   isCompatibilityRomanticProductId,
 } from "../specialAnalysisProducts";
 import type { StoredPaidAnalysisDetail } from "../paidAnalysisDetailOutput";
@@ -66,9 +85,7 @@ async function runCompatibilityPaidReportGeneration(
   claim: Extract<PaidReportClaim, { state: "claimed" }>,
 ) {
   const purchase = input.purchaseId ? await getPurchaseById(input.purchaseId) : null;
-  if (!purchase) {
-    throw new Error("궁합 분석 생성에 필요한 구매 정보를 확인하지 못했습니다.");
-  }
+  if (!purchase) throw new Error("궁합 분석 생성에 필요한 구매 정보를 확인하지 못했습니다.");
 
   const snapshot = parseCompatibilityPaidInputSnapshot(purchase.analysisReferenceSnapshot);
   const timingResult = buildCompatibilityTiming(
@@ -83,9 +100,7 @@ async function runCompatibilityPaidReportGeneration(
   const generated = await generateCompatibilityReport(timingResult);
   const perspectives = buildCompatibilityPairPerspectives(timingResult);
 
-  if (!(await canPublish(input))) {
-    return { state: "skipped" as const };
-  }
+  if (!(await canPublish(input))) return { state: "skipped" as const };
 
   const content: StoredCompatibilityReport = {
     schemaVersion: COMPATIBILITY_PAID_REPORT_VERSION,
@@ -116,9 +131,7 @@ async function runFamilyParentChildPaidReportGeneration(
   claim: Extract<PaidReportClaim, { state: "claimed" }>,
 ) {
   const purchase = input.purchaseId ? await getPurchaseById(input.purchaseId) : null;
-  if (!purchase) {
-    throw new Error("부모·자녀 궁합 생성에 필요한 구매 정보를 확인하지 못했습니다.");
-  }
+  if (!purchase) throw new Error("부모·자녀 궁합 생성에 필요한 구매 정보를 확인하지 못했습니다.");
 
   const snapshot = parseFamilyParentChildPaidInputSnapshot(purchase.analysisReferenceSnapshot);
   const timingResult = buildCompatibilityTiming(
@@ -135,9 +148,7 @@ async function runFamilyParentChildPaidReportGeneration(
   const childLabel = snapshot.userRole === "child" ? snapshot.myProfileLabel : snapshot.familyMemberLabel;
   const generated = await generateFamilyParentChildReport(familyResult, { parentLabel, childLabel });
 
-  if (!(await canPublish(input))) {
-    return { state: "skipped" as const };
-  }
+  if (!(await canPublish(input))) return { state: "skipped" as const };
 
   const content: StoredFamilyParentChildReport = {
     schemaVersion: FAMILY_PARENT_CHILD_PAID_REPORT_VERSION,
@@ -166,6 +177,144 @@ async function runFamilyParentChildPaidReportGeneration(
   return { state: "completed" as const, report };
 }
 
+async function runFamilySiblingPaidReportGeneration(
+  input: PaidReportGenerationInput,
+  claim: Extract<PaidReportClaim, { state: "claimed" }>,
+) {
+  const purchase = input.purchaseId ? await getPurchaseById(input.purchaseId) : null;
+  if (!purchase) throw new Error("형제·자매 궁합 생성에 필요한 구매 정보를 확인하지 못했습니다.");
+
+  const snapshot = parseFamilySiblingPaidInputSnapshot(purchase.analysisReferenceSnapshot);
+  const timingResult = buildCompatibilityTiming(
+    snapshot.mine.person,
+    snapshot.familyMember.person,
+    {
+      evaluationYear: snapshot.evaluationYear,
+      A: snapshot.mine.timing,
+      B: snapshot.familyMember.timing,
+    },
+  );
+  const familyResult = buildFamilySiblingCompatibility(timingResult);
+  const generated = await generateFamilySiblingReport(familyResult, {
+    userLabel: snapshot.myProfileLabel,
+    siblingLabel: snapshot.familyMemberLabel,
+  });
+
+  if (!(await canPublish(input))) return { state: "skipped" as const };
+
+  const content: StoredFamilySiblingReport = {
+    schemaVersion: FAMILY_SIBLING_PAID_REPORT_VERSION,
+    report: generated.report,
+    directions: {
+      userToSibling: buildFamilyExtendedDirectionCard(
+        familyResult.directions.userToSibling,
+        snapshot.myProfileLabel,
+        snapshot.familyMemberLabel,
+      ),
+      siblingToUser: buildFamilyExtendedDirectionCard(
+        familyResult.directions.siblingToUser,
+        snapshot.familyMemberLabel,
+        snapshot.myProfileLabel,
+      ),
+    },
+    meta: {
+      evaluationYear: snapshot.evaluationYear,
+      myProfileLabel: snapshot.myProfileLabel,
+      familyMemberLabel: snapshot.familyMemberLabel,
+      familyMemberBirthTimeKnown: snapshot.familyMemberBirthTimeKnown,
+    },
+  };
+
+  const report = await completePaidReport({
+    reportId: claim.report.id,
+    userId: input.userId,
+    profileId: input.profileId,
+    productId: input.productId,
+    content: content as unknown as StoredPaidAnalysisDetail,
+  });
+  return { state: "completed" as const, report };
+}
+
+async function runFamilyOtherPaidReportGeneration(
+  input: PaidReportGenerationInput,
+  claim: Extract<PaidReportClaim, { state: "claimed" }>,
+) {
+  const purchase = input.purchaseId ? await getPurchaseById(input.purchaseId) : null;
+  if (!purchase) throw new Error("기타 가족 궁합 생성에 필요한 구매 정보를 확인하지 못했습니다.");
+
+  const snapshot = parseFamilyOtherPaidInputSnapshot(purchase.analysisReferenceSnapshot);
+  const timingResult = buildCompatibilityTiming(
+    snapshot.mine.person,
+    snapshot.familyMember.person,
+    {
+      evaluationYear: snapshot.evaluationYear,
+      A: snapshot.mine.timing,
+      B: snapshot.familyMember.timing,
+    },
+  );
+  const familyResult = buildFamilyOtherCompatibility(
+    timingResult,
+    snapshot.relationshipKind,
+    { user: snapshot.userRole, familyMember: snapshot.familyMemberRole },
+  );
+  const generated = await generateFamilyOtherReport(familyResult, {
+    userLabel: snapshot.myProfileLabel,
+    familyLabel: snapshot.familyMemberLabel,
+  });
+
+  if (!(await canPublish(input))) return { state: "skipped" as const };
+
+  const content: StoredFamilyOtherReport = {
+    schemaVersion: FAMILY_OTHER_PAID_REPORT_VERSION,
+    report: generated.report,
+    directions: {
+      userToFamily: buildFamilyExtendedDirectionCard(
+        familyResult.directions.userToFamily,
+        snapshot.myProfileLabel,
+        snapshot.familyMemberLabel,
+      ),
+      familyToUser: buildFamilyExtendedDirectionCard(
+        familyResult.directions.familyToUser,
+        snapshot.familyMemberLabel,
+        snapshot.myProfileLabel,
+      ),
+    },
+    meta: {
+      evaluationYear: snapshot.evaluationYear,
+      myProfileLabel: snapshot.myProfileLabel,
+      familyMemberLabel: snapshot.familyMemberLabel,
+      familyMemberBirthTimeKnown: snapshot.familyMemberBirthTimeKnown,
+      relationshipKind: snapshot.relationshipKind,
+      userRole: snapshot.userRole,
+      familyMemberRole: snapshot.familyMemberRole,
+    },
+  };
+
+  const report = await completePaidReport({
+    reportId: claim.report.id,
+    userId: input.userId,
+    profileId: input.profileId,
+    productId: input.productId,
+    content: content as unknown as StoredPaidAnalysisDetail,
+  });
+  return { state: "completed" as const, report };
+}
+
+async function failCompatibilityReport(
+  input: PaidReportGenerationInput,
+  claim: Extract<PaidReportClaim, { state: "claimed" }>,
+  errorCode: string,
+) {
+  await failPaidReport({
+    reportId: claim.report.id,
+    userId: input.userId,
+    profileId: input.profileId,
+    productId: input.productId,
+    errorCode,
+  });
+  return { state: "failed" as const };
+}
+
 /**
  * Runs only an already-claimed exact-edition report. Financial completion does
  * not await this work; exact entitlement and account state are rechecked so a
@@ -175,22 +324,13 @@ export async function runPaidReportGeneration(
   input: PaidReportGenerationInput,
   claim: Extract<PaidReportClaim, { state: "claimed" }>,
 ) {
-  if (!(await canPublish(input))) {
-    return { state: "skipped" as const };
-  }
+  if (!(await canPublish(input))) return { state: "skipped" as const };
 
   if (isCompatibilityRomanticProductId(input.productId)) {
     try {
       return await runCompatibilityPaidReportGeneration(input, claim);
     } catch {
-      await failPaidReport({
-        reportId: claim.report.id,
-        userId: input.userId,
-        profileId: input.profileId,
-        productId: input.productId,
-        errorCode: "compatibility_generation_failed",
-      });
-      return { state: "failed" as const };
+      return failCompatibilityReport(input, claim, "compatibility_generation_failed");
     }
   }
 
@@ -198,14 +338,23 @@ export async function runPaidReportGeneration(
     try {
       return await runFamilyParentChildPaidReportGeneration(input, claim);
     } catch {
-      await failPaidReport({
-        reportId: claim.report.id,
-        userId: input.userId,
-        profileId: input.profileId,
-        productId: input.productId,
-        errorCode: "family_parent_child_generation_failed",
-      });
-      return { state: "failed" as const };
+      return failCompatibilityReport(input, claim, "family_parent_child_generation_failed");
+    }
+  }
+
+  if (isCompatibilityFamilySiblingProductId(input.productId)) {
+    try {
+      return await runFamilySiblingPaidReportGeneration(input, claim);
+    } catch {
+      return failCompatibilityReport(input, claim, "family_sibling_generation_failed");
+    }
+  }
+
+  if (isCompatibilityFamilyOtherProductId(input.productId)) {
+    try {
+      return await runFamilyOtherPaidReportGeneration(input, claim);
+    } catch {
+      return failCompatibilityReport(input, claim, "family_other_generation_failed");
     }
   }
 
@@ -217,9 +366,7 @@ export async function runPaidReportGeneration(
       input.purchaseId ? getPurchaseById(input.purchaseId) : null,
     ]);
 
-    if (!profile || !purchase) {
-      throw new Error("유료 분석 생성에 필요한 구매 정보를 확인하지 못했습니다.");
-    }
+    if (!profile || !purchase) throw new Error("유료 분석 생성에 필요한 구매 정보를 확인하지 못했습니다.");
 
     const referenceSnapshot = purchase.analysisReferenceSnapshot as { anchorDate?: string } | null;
     let generationProfile: ProfileDto = profile;
@@ -242,9 +389,7 @@ export async function runPaidReportGeneration(
       generationId: claim.report.id,
     });
 
-    if (!(await canPublish(input))) {
-      return { state: "skipped" as const };
-    }
+    if (!(await canPublish(input))) return { state: "skipped" as const };
 
     const report = await completePaidReport({
       reportId: claim.report.id,

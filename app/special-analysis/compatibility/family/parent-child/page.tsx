@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
+import FamilyParentChildAnalysisClient from "@/app/components/FamilyParentChildAnalysisClient";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 
@@ -106,18 +107,7 @@ export default async function ParentChildCompatibilityPage() {
             </div>
           </section>
 
-          <section className="mt-6 rounded-[28px] border border-[#e5dac8] bg-[#faf6ee] p-6 sm:p-7">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-bold text-stone-500">현재 준비 상태</p>
-                <h2 className="mt-2 text-xl font-bold text-stone-950">부모·자녀 전용 분석 기준을 먼저 완성했습니다.</h2>
-                <p className="mt-2 max-w-2xl text-sm leading-7 text-stone-600">
-                  연인·배우자용 문구를 그대로 가져오지 않고 부모·자녀 관계에 맞게 정서적 연결, 기대와 독립, 보호와 경계, 회복 기준을 별도로 나눴습니다. 상대 정보 입력과 결제는 이 기준을 검증한 다음 연결합니다.
-                </p>
-              </div>
-              <span className="shrink-0 rounded-full bg-white px-4 py-2 text-xs font-bold text-stone-600 ring-1 ring-[#e5dac8]">입력·결제 연결 전</span>
-            </div>
-          </section>
+          <FamilyParentChildAnalysisClient myProfileLabel={activeProfile.label} profileId={activeProfile.id} />
         </div>
       </main>
     </AppShell>

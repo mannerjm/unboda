@@ -238,7 +238,7 @@ export default function PaidCompatibilityAnalysisClient({
         </div>
 
         <div className="mt-5 rounded-2xl bg-stone-50 px-4 py-4 text-sm leading-7 text-stone-600">
-          상대방 입력값은 결제 연결을 위해 현재 브라우저에 일시 보관됩니다. 주문에는 원본 생년월일 대신 분석에 필요한 계산 정보만 보관하고, 결제가 완료되면 임시 입력값을 지웁니다.
+          상대방 정보는 결제 연결을 위해 현재 브라우저에만 잠시 보관됩니다. 주문에는 분석에 필요한 계산 정보만 보관하며, 결제가 완료되면 브라우저에 남아 있던 상대방 정보는 자동으로 삭제됩니다.
         </div>
         <p className="mt-3 text-xs leading-6 text-stone-500">본인·성인 인증이 아직 완료되지 않았다면 결제 화면에서 NICE 본인확인을 먼저 진행합니다.</p>
 

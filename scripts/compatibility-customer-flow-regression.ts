@@ -91,6 +91,9 @@ const compatibilityPage = readFileSync("app/special-analysis/compatibility/page.
 const romanticPage = readFileSync("app/special-analysis/compatibility/romantic/page.tsx", "utf8");
 const familyPage = readFileSync("app/special-analysis/compatibility/family/page.tsx", "utf8");
 const parentChildPage = readFileSync("app/special-analysis/compatibility/family/parent-child/page.tsx", "utf8");
+const parentChildClient = readFileSync("app/components/FamilyParentChildAnalysisClient.tsx", "utf8");
+const parentChildApi = readFileSync("app/api/special-analysis/compatibility/family/parent-child/route.ts", "utf8");
+const parentChildReportService = readFileSync("app/lib/familyCompatibilityParentChildReportService.ts", "utf8");
 const paidClient = readFileSync("app/components/PaidCompatibilityAnalysisClient.tsx", "utf8");
 const oldApi = readFileSync("app/api/special-analysis/compatibility/route.ts", "utf8");
 const ordersApi = readFileSync("app/api/orders/route.ts", "utf8");
@@ -116,8 +119,17 @@ assert(romanticPage.includes("← 궁합 유형 선택"), "romantic route must r
 assert(!romanticPage.includes("CompatibilityAnalysisClient myProfileLabel"), "romantic customer route must not mount the old free-generation flow");
 assert(familyPage.includes("부모·자녀") && familyPage.includes("형제·자매") && familyPage.includes("기타 가족"), "family route must split family relationship types before analysis input");
 assert(familyPage.includes('href="/special-analysis/compatibility/family/parent-child"'), "family route must expose the parent-child scope as the first family type");
-assert(parentChildPage.includes("입력·결제 연결 전") && parentChildPage.includes("상대 정보 입력과 결제는 이 기준을 검증한 다음 연결합니다"), "unfinished parent-child compatibility must stay explicitly non-purchasable");
-assert(!familyPage.includes("/checkout/") && !parentChildPage.includes("/checkout/") && !familyPage.includes("PaidCompatibilityAnalysisClient") && !parentChildPage.includes("PaidCompatibilityAnalysisClient"), "family structure must not reuse romantic payment or input before its own commercial flow exists");
+assert(parentChildPage.includes("FamilyParentChildAnalysisClient") && parentChildPage.includes("부모 → 자녀, 자녀 → 부모를 따로 봅니다"), "parent-child route must mount its dedicated input/report flow");
+assert(parentChildClient.includes('value: "parent"') || parentChildClient.includes('"parent",\n              "부모예요"'), "parent-child input must let the user identify as parent");
+assert(parentChildClient.includes('"child",\n              "자녀예요"'), "parent-child input must let the user identify as child");
+assert(parentChildClient.includes("function BirthDateSelector") && !parentChildClient.includes('type="date"'), "family input must use deliberate year/month/day selection");
+assert(parentChildClient.includes("별도 프로필이나 가족 궁합 기록으로 저장하지 않습니다"), "family input must explain that raw counterpart data is not persisted");
+assert(parentChildClient.includes("data-section=\"family-direction\"") && parentChildClient.includes("부모에서 자녀로, 자녀에서 부모로 나누어 봅니다"), "family result must visibly preserve both directions");
+assert(!parentChildClient.includes("/checkout/") && !parentChildPage.includes("/checkout/"), "parent-child flow must not attach payment before pricing is decided");
+assert(parentChildApi.includes("validateCompatibilityPartnerInput") && parentChildApi.includes("buildFamilyParentChildCompatibility"), "family API must validate counterpart input and use the deterministic family model");
+assert(parentChildApi.includes("getUserProfile") && parentChildApi.includes("generateFamilyParentChildReport"), "family API must scope the profile to the user and generate from the family-specific contract");
+assert(!parentChildApi.includes('.from("') && !parentChildApi.includes("insert("), "family generation endpoint must not persist raw family input or reports");
+assert(parentChildReportService.includes("validateFamilyParentChildReportOutput") && parentChildReportService.includes("MAX_ATTEMPTS = 2"), "family report generation must stay schema-validated with bounded repair");
 
 assert(paidClient.includes("COMPATIBILITY_ROMANTIC_SESSION_KEY"), "raw partner input must remain browser-session scoped until checkout");
 assert(paidClient.includes("sessionStorage.setItem") && paidClient.includes("/checkout/"), "partner input must move to the shared checkout rather than generate directly");

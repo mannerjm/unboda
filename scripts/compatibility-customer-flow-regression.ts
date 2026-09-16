@@ -89,6 +89,7 @@ const shell = readFileSync("app/components/AppShell.tsx", "utf8");
 const hub = readFileSync("app/special-analysis/page.tsx", "utf8");
 const compatibilityPage = readFileSync("app/special-analysis/compatibility/page.tsx", "utf8");
 const romanticPage = readFileSync("app/special-analysis/compatibility/romantic/page.tsx", "utf8");
+const familyPage = readFileSync("app/special-analysis/compatibility/family/page.tsx", "utf8");
 const paidClient = readFileSync("app/components/PaidCompatibilityAnalysisClient.tsx", "utf8");
 const oldApi = readFileSync("app/api/special-analysis/compatibility/route.ts", "utf8");
 const ordersApi = readFileSync("app/api/orders/route.ts", "utf8");
@@ -107,11 +108,14 @@ assert(shell.includes('href: "/special-analysis"') && shell.includes('label: "�
 assert(hub.includes("궁합 분석") && hub.includes('href="/special-analysis/compatibility"'), "professional hub must expose compatibility without requiring payment first");
 assert(hub.includes("관계 유형별 분석") && hub.includes("궁합 유형 선택하기"), "professional hub must present compatibility as a relationship-type family");
 assert(compatibilityPage.includes("어떤 관계를 살펴볼까요?") && compatibilityPage.includes('href="/special-analysis/compatibility/romantic"'), "compatibility route must be a relationship-type selector");
-assert(compatibilityPage.includes("연인·배우자 궁합") && compatibilityPage.includes("가족 궁합") && compatibilityPage.includes("준비 중"), "compatibility selector must expose romantic now and family as the next explicitly unfinished type");
+assert(compatibilityPage.includes('href="/special-analysis/compatibility/family"') && compatibilityPage.includes("가족 궁합") && compatibilityPage.includes("설계 중"), "compatibility selector must expose the family structure without pretending it is purchasable");
 assert(!compatibilityPage.includes("PaidCompatibilityAnalysisClient"), "relationship-type selector must not mount a paid input form");
 assert(romanticPage.includes("PaidCompatibilityAnalysisClient") && romanticPage.includes("연인·배우자 궁합 분석"), "romantic route must own the paid product input flow");
 assert(romanticPage.includes("← 궁합 유형 선택"), "romantic route must return to the compatibility type selector");
 assert(!romanticPage.includes("CompatibilityAnalysisClient myProfileLabel"), "romantic customer route must not mount the old free-generation flow");
+assert(familyPage.includes("부모·자녀") && familyPage.includes("형제·자매") && familyPage.includes("기타 가족"), "family route must split family relationship types before analysis input");
+assert(familyPage.includes("아직 결제나 분석 생성은 연결하지 않았습니다"), "unfinished family compatibility must stay explicitly non-purchasable");
+assert(!familyPage.includes("/checkout/") && !familyPage.includes("PaidCompatibilityAnalysisClient"), "family structure must not reuse romantic payment or input before its own interpretation contract exists");
 
 assert(paidClient.includes("COMPATIBILITY_ROMANTIC_SESSION_KEY"), "raw partner input must remain browser-session scoped until checkout");
 assert(paidClient.includes("sessionStorage.setItem") && paidClient.includes("/checkout/"), "partner input must move to the shared checkout rather than generate directly");

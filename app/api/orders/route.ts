@@ -12,6 +12,28 @@ import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { emitPaymentEvent } from "@/app/lib/payments/observability";
 import { getTossConfig } from "@/app/lib/toss/config";
+import {
+  buildPartnerCompatibilitySnapshot,
+  buildProfileCompatibilitySnapshot,
+  validateCompatibilityPartnerInput,
+} from "@/app/lib/compatibilityCustomerInput";
+import { buildCompatibilityPaidInputSnapshot } from "@/app/lib/compatibilityPaidAnalysis";
+import { createCompatibilityPendingOrder } from "@/app/lib/compatibilityPurchases";
+import {
+  COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  isCompatibilityRomanticProductId,
+} from "@/app/lib/specialAnalysisProducts";
+
+function koreaDate(now = new Date()): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const value = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${value.year}-${value.month}-${value.day}`;
+}
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -38,6 +60,7 @@ export async function POST(request: Request) {
     productId?: unknown;
     profileId?: unknown;
     immediateGenerationAcknowledged?: unknown;
+    compatibilityPartner?: unknown;
   } | null;
   const rawProductId = requestBody?.productId;
   const rawProfileId = requestBody?.profileId;
@@ -83,6 +106,33 @@ export async function POST(request: Request) {
     );
   }
 
+  let compatibilitySnapshot: ReturnType<typeof buildCompatibilityPaidInputSnapshot> | null = null;
+  if (isCompatibilityRomanticProductId(resolved.productId)) {
+    const validation = validateCompatibilityPartnerInput(requestBody?.compatibilityPartner);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error, code: "COMPATIBILITY_PARTNER_REQUIRED" }, { status: 400 });
+    }
+
+    const evaluationDate = koreaDate();
+    const evaluationYear = Number(evaluationDate.slice(0, 4));
+    try {
+      const mine = buildProfileCompatibilitySnapshot(profile, evaluationDate);
+      const partner = buildPartnerCompatibilitySnapshot(validation.value, evaluationDate);
+      compatibilitySnapshot = buildCompatibilityPaidInputSnapshot({
+        evaluationDate,
+        evaluationYear,
+        myProfileLabel: profile.label,
+        partnerLabel: validation.value.label,
+        partnerBirthTimeKnown: validation.value.birthTimeKnown,
+        mine,
+        partner,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "궁합 계산 입력을 확인하지 못했습니다.";
+      return NextResponse.json({ error: message, code: "COMPATIBILITY_INPUT_UNAVAILABLE" }, { status: 422 });
+    }
+  }
+
   try {
     getTossConfig();
   } catch {
@@ -94,12 +144,19 @@ export async function POST(request: Request) {
 
   try {
     // amount comes from the server-side pricing source, never from the client
-    const order = await createPendingOrder({
-      userId: user.id,
-      profileId: profile.id,
-      productId: resolved.productId,
-      paymentProvider: "toss",
-    });
+    const order = resolved.productId === COMPATIBILITY_ROMANTIC_PRODUCT_ID && compatibilitySnapshot
+      ? await createCompatibilityPendingOrder({
+          userId: user.id,
+          profile,
+          snapshot: compatibilitySnapshot,
+          paymentProvider: "toss",
+        })
+      : await createPendingOrder({
+          userId: user.id,
+          profileId: profile.id,
+          productId: resolved.productId,
+          paymentProvider: "toss",
+        });
     emitPaymentEvent("order_created", {
       operationalClass: "NORMAL",
       orderId: order.id,

@@ -8,6 +8,7 @@ import {
   type ProductPricingSource,
 } from "../productPricing";
 import { getLaunchProductIds } from "../paidAnalysisTopicConfig";
+import { getSpecialAnalysisProduct } from "../specialAnalysisProducts";
 
 export type PurchasableProductResolution =
   | {
@@ -32,9 +33,8 @@ export type LaunchPurchasableProductResolution =
     };
 
 /**
- * Normalizes an untrusted productId to its canonical registry ID and resolves
- * the server-side price. The registry stays the single source of truth; this
- * helper never invents IDs or accepts a client-supplied amount.
+ * Normalizes an untrusted productId to a server-known product and resolves the
+ * server-side price. Client-supplied amounts are never accepted.
  */
 export function resolvePurchasableProduct(
   rawProductId: unknown,
@@ -43,7 +43,21 @@ export function resolvePurchasableProduct(
     return { ok: false, reason: "missing" };
   }
 
-  const canonicalProductId = getCanonicalPremiumProductId(rawProductId.trim());
+  const requestedProductId = rawProductId.trim();
+  const specialProduct = getSpecialAnalysisProduct(requestedProductId);
+  if (specialProduct) {
+    return {
+      ok: true,
+      productId: specialProduct.id,
+      family: "DEEP",
+      amount: specialProduct.amount,
+      currency: specialProduct.currency,
+      source: "special-analysis-explicit",
+      entryExperimentEligible: false,
+    };
+  }
+
+  const canonicalProductId = getCanonicalPremiumProductId(requestedProductId);
 
   if (!getPremiumProduct(canonicalProductId)) {
     return { ok: false, reason: "unknown_product" };
@@ -65,6 +79,10 @@ export function resolveLaunchPurchasableProduct(
   const resolved = resolvePurchasableProduct(rawProductId);
 
   if (!resolved.ok) {
+    return resolved;
+  }
+
+  if (getSpecialAnalysisProduct(resolved.productId)) {
     return resolved;
   }
 

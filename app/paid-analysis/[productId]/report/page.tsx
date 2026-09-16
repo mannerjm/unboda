@@ -1,8 +1,10 @@
 import PaidAnalysisDetailV2Client from "../PaidAnalysisDetailV2Client";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import ReportAccessGate from "./ReportAccessGate";
 import AiConsultingEntryCard from "./AiConsultingEntryCard";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
+import { isCompatibilityRomanticProductId } from "@/app/lib/specialAnalysisProducts";
 
 type PaidAnalysisReportPageProps = {
   params: Promise<{
@@ -17,6 +19,12 @@ export default async function PaidAnalysisReportPage({
 }: PaidAnalysisReportPageProps) {
   const { productId } = await params;
   const { profileId, edition } = await searchParams;
+
+  if (isCompatibilityRomanticProductId(productId) && profileId) {
+    const editionQuery = edition ? `&edition=${encodeURIComponent(edition)}` : "";
+    redirect(`/special-analysis/compatibility/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`);
+  }
+
   const product = getPremiumProduct(productId);
 
   if (!product) {

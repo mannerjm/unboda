@@ -6,6 +6,16 @@ import { parseAnalysisInputSnapshot, InvalidAnalysisInputSnapshotError } from ".
 import { getActiveEntitlementForProfileEdition, getPurchaseById } from "../purchases/server";
 import { getUserProfile } from "../profiles/server";
 import type { ProfileDto } from "../profiles/types";
+import { buildCompatibilityTiming } from "../compatibilityTiming";
+import { buildCompatibilityPairPerspectives } from "../compatibilityPairPerspective";
+import {
+  COMPATIBILITY_PAID_REPORT_VERSION,
+  parseCompatibilityPaidInputSnapshot,
+  type StoredCompatibilityReport,
+} from "../compatibilityPaidAnalysis";
+import { generateCompatibilityReport } from "../compatibilityReportService";
+import { isCompatibilityRomanticProductId } from "../specialAnalysisProducts";
+import type { StoredPaidAnalysisDetail } from "../paidAnalysisDetailOutput";
 import {
   claimPaidReport,
   completePaidReport,
@@ -27,15 +37,7 @@ export async function preparePaidReportGeneration(
   return claimPaidReport(input);
 }
 
-/**
- * Runs only an already-claimed exact-edition report. Financial completion does
- * not await this work; exact entitlement and account state are rechecked so a
- * refund or account closure cannot publish a report after revocation.
- */
-export async function runPaidReportGeneration(
-  input: PaidReportGenerationInput,
-  claim: Extract<PaidReportClaim, { state: "claimed" }>,
-) {
+async function canPublish(input: PaidReportGenerationInput): Promise<boolean> {
   const [account, entitlement] = await Promise.all([
     getAccountLifecycle(input.userId),
     getActiveEntitlementForProfileEdition(
@@ -45,9 +47,87 @@ export async function runPaidReportGeneration(
       input.analysisEditionKey,
     ),
   ]);
+  return account?.status === "ACTIVE" && Boolean(entitlement);
+}
 
-  if (account?.status !== "ACTIVE" || !entitlement) {
+async function runCompatibilityPaidReportGeneration(
+  input: PaidReportGenerationInput,
+  claim: Extract<PaidReportClaim, { state: "claimed" }>,
+) {
+  const purchase = input.purchaseId ? await getPurchaseById(input.purchaseId) : null;
+  if (!purchase) {
+    throw new Error("궁합 분석 생성에 필요한 구매 정보를 확인하지 못했습니다.");
+  }
+
+  const snapshot = parseCompatibilityPaidInputSnapshot(purchase.analysisReferenceSnapshot);
+  const timingResult = buildCompatibilityTiming(
+    snapshot.mine.person,
+    snapshot.partner.person,
+    {
+      evaluationYear: snapshot.evaluationYear,
+      A: snapshot.mine.timing,
+      B: snapshot.partner.timing,
+    },
+  );
+  const generated = await generateCompatibilityReport(timingResult);
+  const perspectives = buildCompatibilityPairPerspectives(timingResult);
+
+  if (!(await canPublish(input))) {
     return { state: "skipped" as const };
+  }
+
+  const content: StoredCompatibilityReport = {
+    schemaVersion: COMPATIBILITY_PAID_REPORT_VERSION,
+    report: generated.report,
+    perspectives,
+    meta: {
+      evaluationYear: snapshot.evaluationYear,
+      myProfileLabel: snapshot.myProfileLabel,
+      partnerLabel: snapshot.partnerLabel,
+      partnerBirthTimeKnown: snapshot.partnerBirthTimeKnown,
+      natalDataQuality: generated.context.natalDataQuality,
+      timingDataQuality: generated.context.timingDataQuality,
+    },
+  };
+
+  const report = await completePaidReport({
+    reportId: claim.report.id,
+    userId: input.userId,
+    profileId: input.profileId,
+    productId: input.productId,
+    // paid_reports.content is jsonb; this product has its own schema discriminator
+    // and dedicated reader while the legacy helper remains typed to V4 detail.
+    content: content as unknown as StoredPaidAnalysisDetail,
+  });
+  return { state: "completed" as const, report };
+}
+
+/**
+ * Runs only an already-claimed exact-edition report. Financial completion does
+ * not await this work; exact entitlement and account state are rechecked so a
+ * refund or account closure cannot publish a report after revocation.
+ */
+export async function runPaidReportGeneration(
+  input: PaidReportGenerationInput,
+  claim: Extract<PaidReportClaim, { state: "claimed" }>,
+) {
+  if (!(await canPublish(input))) {
+    return { state: "skipped" as const };
+  }
+
+  if (isCompatibilityRomanticProductId(input.productId)) {
+    try {
+      return await runCompatibilityPaidReportGeneration(input, claim);
+    } catch {
+      await failPaidReport({
+        reportId: claim.report.id,
+        userId: input.userId,
+        profileId: input.profileId,
+        productId: input.productId,
+        errorCode: "compatibility_generation_failed",
+      });
+      return { state: "failed" as const };
+    }
   }
 
   const telemetryAttemptId = randomUUID();
@@ -83,15 +163,7 @@ export async function runPaidReportGeneration(
       generationId: claim.report.id,
     });
 
-    // Recheck after the expensive operation before publication.
-    const entitlementBeforePublish = await getActiveEntitlementForProfileEdition(
-      input.userId,
-      input.profileId,
-      input.productId,
-      input.analysisEditionKey,
-    );
-    const accountBeforePublish = await getAccountLifecycle(input.userId);
-    if (!entitlementBeforePublish || accountBeforePublish?.status !== "ACTIVE") {
+    if (!(await canPublish(input))) {
       return { state: "skipped" as const };
     }
 

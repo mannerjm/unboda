@@ -119,7 +119,13 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "부모·자녀 궁합을 생성하지 못했습니다.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[family-parent-child] report generation failed", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message : "Unknown report generation error",
+    });
+    return NextResponse.json(
+      { error: "리포트 생성 중 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." },
+      { status: 500 },
+    );
   }
 }

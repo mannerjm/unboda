@@ -232,39 +232,26 @@ export default function PaidFamilyParentChildAnalysisClient({
       </div>
 
       <div className="p-6 sm:p-8">
-        <fieldset>
-          <legend className="text-sm font-semibold text-stone-800">나는 이 관계에서</legend>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            {([[
-              "parent",
-              "부모예요",
-              "내가 부모이고 상대가 자녀인 관계",
-            ], [
-              "child",
-              "자녀예요",
-              "내가 자녀이고 상대가 부모인 관계",
-            ]] as const).map(([value, title, description]) => {
-              const selected = form.userRole === value;
-              return (
-                <label
-                  key={value}
-                  className={`cursor-pointer rounded-2xl border p-4 transition ${selected ? "border-stone-900 bg-stone-950 text-white shadow-sm" : "border-stone-200 bg-white text-stone-900 hover:border-stone-400"}`}
-                >
-                  <input
-                    className="sr-only"
-                    type="radio"
-                    name="familyRole"
-                    value={value}
-                    checked={selected}
-                    onChange={() => setForm((current) => ({ ...current, userRole: value }))}
-                  />
-                  <span className="block text-sm font-bold">{title}</span>
-                  <span className={`mt-1.5 block text-xs leading-5 ${selected ? "text-stone-300" : "text-stone-500"}`}>{description}</span>
-                </label>
-              );
-            })}
-          </div>
-        </fieldset>
+        <label className="block">
+          <span className="text-sm font-semibold text-stone-800">나는 이 관계에서</span>
+          <select
+            value={form.userRole}
+            onChange={(event) => setForm((current) => ({ ...current, userRole: event.target.value as FamilyRole }))}
+            required
+            className="mt-2 w-full rounded-2xl border border-stone-300 bg-white px-4 py-3.5 text-sm outline-none focus:border-stone-500"
+          >
+            <option value="" disabled>선택해 주세요</option>
+            <option value="parent">부모예요</option>
+            <option value="child">자녀예요</option>
+          </select>
+          <p className="mt-2 text-xs leading-5 text-stone-500">
+            {form.userRole === "parent"
+              ? "내가 부모이고 상대가 자녀인 관계"
+              : form.userRole === "child"
+                ? "내가 자녀이고 상대가 부모인 관계"
+                : "분석할 관계에서 내 역할을 선택해 주세요."}
+          </p>
+        </label>
 
         <div className="mt-7 grid gap-5 sm:grid-cols-2">
           <label className="sm:col-span-2">

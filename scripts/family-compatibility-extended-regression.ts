@@ -82,7 +82,7 @@ assert(resolveFamilyOtherRolePair("other_relatives", "relative")?.familyMember =
 assert(resolveFamilyOtherRolePair("grandparent_grandchild", "cousin") === null, "invalid other-family role pair must fail closed");
 
 const otherRoles = resolveFamilyOtherRolePair("grandparent_grandchild", "grandparent");
-assert(otherRoles, "other-family role semantics must resolve");
+assert(otherRoles !== null, "other-family role semantics must resolve");
 const otherResult = buildFamilyOtherCompatibility(timing, "grandparent_grandchild", otherRoles);
 assert(otherResult.relationshipType === "other_family", "other-family model must preserve its relationship type");
 assert(Object.keys(otherResult.domains).sort().join("|") === [...FAMILY_OTHER_DOMAINS].sort().join("|"), "other-family model must expose only its dedicated domains");
@@ -128,7 +128,7 @@ assert(otherEdition !== changedRelationshipEdition, "changing other-family relat
 
 assert(COMPATIBILITY_FAMILY_SIBLING_PRODUCT.amount === 19_900, "sibling compatibility must use the family premium price");
 assert(COMPATIBILITY_FAMILY_OTHER_PRODUCT.amount === 19_900, "other-family compatibility must use the family premium price");
-assert(COMPATIBILITY_FAMILY_SIBLING_SESSION_KEY !== COMPATIBILITY_FAMILY_OTHER_SESSION_KEY, "extended family raw-input session keys must remain isolated");
+assert(String(COMPATIBILITY_FAMILY_SIBLING_SESSION_KEY) !== String(COMPATIBILITY_FAMILY_OTHER_SESSION_KEY), "extended family raw-input session keys must remain isolated");
 
 const selector = readFileSync("app/components/FamilyCompatibilityAnalysisClient.tsx", "utf8");
 const inputClient = readFileSync("app/components/PaidFamilyExtendedAnalysisClient.tsx", "utf8");

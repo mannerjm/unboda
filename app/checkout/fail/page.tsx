@@ -14,7 +14,7 @@ function CheckoutFailContent() {
     : "/deep-analysis";
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6 text-stone-900">
+    <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-6 text-stone-900">
       <section className="max-w-md text-center">
         <h1 className="text-2xl font-bold">결제를 완료하지 못했습니다.</h1>
         <p className="mt-4 text-sm leading-7 text-stone-600">
@@ -30,5 +30,5 @@ function CheckoutFailContent() {
 }
 
 export default function CheckoutFailPage() {
-  return <Suspense fallback={<main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6 text-stone-900"><p>결제 결과를 확인하고 있습니다.</p></main>}><CheckoutFailContent /></Suspense>;
+  return <Suspense fallback={<main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-6 text-stone-900"><p>결제 결과를 확인하고 있습니다.</p></main>}><CheckoutFailContent /></Suspense>;
 }

@@ -73,7 +73,7 @@ for (const cardCopy of [
 }
 
 for (const preserved of [
-  "summary.profileId === profileId",
+  "item.profileId === profileId",
   "getPremiumAnalysisHref",
   "toPremiumAnalysisProductState",
   "getProductPricing",

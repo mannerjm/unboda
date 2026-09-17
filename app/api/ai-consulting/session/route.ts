@@ -3,6 +3,7 @@ import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { getCanonicalPremiumProductId, getPremiumProduct } from "@/app/lib/premiumProductRegistry";
+import { isAiConsultingCompatibilityProductId } from "@/app/lib/aiConsultingCompatibilityScope";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import {
   ensureAiConsultingThreadForAnalysis,
@@ -25,7 +26,10 @@ async function resolveBoundary(input: SessionInput) {
     return { error: NextResponse.json({ error: "유효한 프로필이 필요합니다." }, { status: 400 }) } as const;
   }
 
-  if (typeof input.productId !== "string" || !getPremiumProduct(input.productId)) {
+  if (
+    typeof input.productId !== "string"
+    || (!getPremiumProduct(input.productId) && !isAiConsultingCompatibilityProductId(input.productId))
+  ) {
     return { error: NextResponse.json({ error: "유효한 분석 상품이 필요합니다." }, { status: 400 }) } as const;
   }
 

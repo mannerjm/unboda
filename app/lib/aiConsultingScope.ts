@@ -1,5 +1,9 @@
 import { getPeriodAnalysisStrategy } from "./analysisPeriodStrategy";
 import {
+  evaluateCompatibilityAiConsultingScope,
+  isAiConsultingCompatibilityProductId,
+} from "./aiConsultingCompatibilityScope";
+import {
   getLaunchProductIds,
   getPaidAnalysisTopicConfig,
   resolvePaidAnalysisLaunchSpecialization,
@@ -17,6 +21,7 @@ export type AiConsultingScopeDecision =
 export type AiConsultingScopeReason =
   | "within_topic_scope"
   | "within_period_scope"
+  | "within_compatibility_scope"
   | "question_too_short"
   | "question_too_long"
   | "unknown_or_unlaunched_product"
@@ -24,19 +29,18 @@ export type AiConsultingScopeReason =
   | "topic_outside_purchased_scope"
   | "period_scope_unclear"
   | "period_mismatch"
+  | "compatibility_scope_unclear"
+  | "compatibility_outside_purchased_scope"
   | "safety_sensitive_request";
 
 export type AiConsultingScopeResult = {
   decision: AiConsultingScopeDecision;
   reason: AiConsultingScopeReason;
   productId: string;
-  kind: "topic" | "period" | "none";
+  kind: "topic" | "period" | "compatibility" | "none";
   normalizedQuestion: string;
-  /** Never charge a consulting turn unless this is true. */
   chargeable: boolean;
-  /** Static boundaries that must be included in the eventual answer prompt. */
   answerGuardrails: readonly string[];
-  /** Safe user-facing explanation. No LLM call is needed for non-ALLOW results. */
   userMessage: string;
 };
 
@@ -92,10 +96,7 @@ const SAFETY_PATTERNS: readonly RegExp[] = [
 ];
 
 function normalize(value: string): string {
-  return value
-    .normalize("NFKC")
-    .replace(/\s+/g, " ")
-    .trim();
+  return value.normalize("NFKC").replace(/\s+/g, " ").trim();
 }
 
 function tokenize(value: string): Set<string> {
@@ -106,25 +107,20 @@ function tokenize(value: string): Set<string> {
 
 function overlapScore(question: string, sources: readonly string[]): number {
   const questionTokens = tokenize(question);
-  if (questionTokens.size === 0) {
-    return 0;
-  }
+  if (questionTokens.size === 0) return 0;
 
   let score = 0;
   for (const source of sources) {
     const normalizedSource = normalize(source).toLowerCase();
     const sourceTokens = tokenize(source);
     let local = 0;
-
     for (const token of questionTokens) {
       if (sourceTokens.has(token) || normalizedSource.includes(token)) {
         local += token.length >= 4 ? 2 : 1;
       }
     }
-
     score = Math.max(score, local);
   }
-
   return score;
 }
 
@@ -133,17 +129,16 @@ function includesOneOf(question: string, patterns: readonly RegExp[]): boolean {
 }
 
 function result(
-  partial: Omit<AiConsultingScopeResult, "normalizedQuestion" | "chargeable"> & {
-    normalizedQuestion: string;
-  },
+  partial: Omit<AiConsultingScopeResult, "chargeable">,
 ): AiConsultingScopeResult {
-  return {
-    ...partial,
-    chargeable: partial.decision === "ALLOW",
-  };
+  return { ...partial, chargeable: partial.decision === "ALLOW" };
 }
 
-function safetyRedirect(productId: string, kind: AiConsultingScopeResult["kind"], question: string): AiConsultingScopeResult {
+function safetyRedirect(
+  productId: string,
+  kind: AiConsultingScopeResult["kind"],
+  question: string,
+): AiConsultingScopeResult {
   return result({
     decision: "SAFETY_REDIRECT",
     reason: "safety_sensitive_request",
@@ -220,7 +215,6 @@ function evaluateTopic(productId: string, question: string): AiConsultingScopeRe
 function evaluatePeriod(productId: string, question: string): AiConsultingScopeResult {
   const strategy = getPeriodAnalysisStrategy(productId);
   const rule = PERIOD_ANCHOR_RULES[productId];
-
   if (!strategy || !rule) {
     return result({
       decision: "DENY",
@@ -286,22 +280,27 @@ function evaluatePeriod(productId: string, question: string): AiConsultingScopeR
   });
 }
 
-/**
- * Pure, deterministic preflight. This function must run before any LLM call or turn charge.
- * It does not read memory, payment state or user data; callers must first select a purchased
- * product entitlement and pass that productId here.
- */
 export function evaluateAiConsultingScope(input: {
   productId: string;
   question: string;
 }): AiConsultingScopeResult {
   const question = normalize(input.question);
-  const canonicalProductId = getCanonicalPremiumProductId(input.productId);
+  const compatibilityProduct = isAiConsultingCompatibilityProductId(input.productId);
+  const canonicalProductId = compatibilityProduct
+    ? input.productId
+    : getCanonicalPremiumProductId(input.productId);
   const launchIds = new Set(getLaunchProductIds());
   const specialization = resolvePaidAnalysisLaunchSpecialization(canonicalProductId);
-  const kind = specialization.kind === "none" ? "none" : specialization.kind;
+  const kind: AiConsultingScopeResult["kind"] = compatibilityProduct
+    ? "compatibility"
+    : specialization.kind === "none"
+      ? "none"
+      : specialization.kind;
 
-  if (!launchIds.has(canonicalProductId) || specialization.kind === "none") {
+  if (
+    !compatibilityProduct
+    && (!launchIds.has(canonicalProductId) || specialization.kind === "none")
+  ) {
     return result({
       decision: "DENY",
       reason: "unknown_or_unlaunched_product",
@@ -309,7 +308,7 @@ export function evaluateAiConsultingScope(input: {
       kind: "none",
       normalizedQuestion: question,
       answerGuardrails: [],
-      userMessage: "현재 판매·구매 가능한 심층 분석에 연결된 상담이 아닙니다.",
+      userMessage: "현재 판매·구매 가능한 분석에 연결된 상담이 아닙니다.",
     });
   }
 
@@ -339,6 +338,13 @@ export function evaluateAiConsultingScope(input: {
 
   if (includesOneOf(question, SAFETY_PATTERNS)) {
     return safetyRedirect(canonicalProductId, kind, question);
+  }
+
+  if (compatibilityProduct) {
+    return evaluateCompatibilityAiConsultingScope({
+      productId: canonicalProductId,
+      question,
+    });
   }
 
   return specialization.kind === "topic"

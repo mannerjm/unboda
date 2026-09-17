@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import CompatibilityPaidReportPreparing from "@/app/components/CompatibilityPaidReportPreparing";
 import FamilyExtendedPaidReportView from "@/app/components/FamilyExtendedPaidReportView";
+import AiConsultingEntryCard from "@/app/paid-analysis/[productId]/report/AiConsultingEntryCard";
 import {
   isStoredFamilyOtherReport,
   type StoredFamilyOtherReport,
@@ -50,6 +51,8 @@ export default async function FamilyOtherPurchasedReportPage({ searchParams }: P
     entitlement.analysisEditionKey,
   );
 
+  const completed = report?.status === "completed" && isStoredFamilyOtherReport(report.content as unknown);
+
   return (
     <AppShell activeProfileId={profileId}>
       <main className="min-h-screen bg-[#fbfbfa] px-5 py-8 text-stone-900 sm:px-8 sm:py-10">
@@ -58,9 +61,18 @@ export default async function FamilyOtherPurchasedReportPage({ searchParams }: P
             <Link href="/purchased-analyses" className="text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4">← 구매한 분석</Link>
             <span className="text-xs text-stone-500">{profile.label}님의 구매 리포트</span>
           </div>
-          {report?.status === "completed" && isStoredFamilyOtherReport(report.content as unknown)
-            ? <FamilyExtendedPaidReportView mode="other_family" content={report.content as unknown as StoredFamilyOtherReport} />
-            : <CompatibilityPaidReportPreparing failed={report?.status === "failed"} />}
+          {completed ? (
+            <>
+              <FamilyExtendedPaidReportView mode="other_family" content={report!.content as unknown as StoredFamilyOtherReport} />
+              <AiConsultingEntryCard
+                productId={COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID}
+                profileId={profileId}
+                edition={entitlement.analysisEditionKey}
+              />
+            </>
+          ) : (
+            <CompatibilityPaidReportPreparing failed={report?.status === "failed"} />
+          )}
         </div>
       </main>
     </AppShell>

@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import CompatibilityPaidReportPreparing from "@/app/components/CompatibilityPaidReportPreparing";
 import FamilyExtendedPaidReportView from "@/app/components/FamilyExtendedPaidReportView";
+import AiConsultingEntryCard from "@/app/paid-analysis/[productId]/report/AiConsultingEntryCard";
 import {
   isStoredFamilySiblingReport,
   type StoredFamilySiblingReport,
@@ -50,6 +51,8 @@ export default async function FamilySiblingPurchasedReportPage({ searchParams }:
     entitlement.analysisEditionKey,
   );
 
+  const completed = report?.status === "completed" && isStoredFamilySiblingReport(report.content as unknown);
+
   return (
     <AppShell activeProfileId={profileId}>
       <main className="min-h-screen bg-[#fbfbfa] px-5 py-8 text-stone-900 sm:px-8 sm:py-10">
@@ -58,9 +61,18 @@ export default async function FamilySiblingPurchasedReportPage({ searchParams }:
             <Link href="/purchased-analyses" className="text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4">← 구매한 분석</Link>
             <span className="text-xs text-stone-500">{profile.label}님의 구매 리포트</span>
           </div>
-          {report?.status === "completed" && isStoredFamilySiblingReport(report.content as unknown)
-            ? <FamilyExtendedPaidReportView mode="siblings" content={report.content as unknown as StoredFamilySiblingReport} />
-            : <CompatibilityPaidReportPreparing failed={report?.status === "failed"} />}
+          {completed ? (
+            <>
+              <FamilyExtendedPaidReportView mode="siblings" content={report!.content as unknown as StoredFamilySiblingReport} />
+              <AiConsultingEntryCard
+                productId={COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID}
+                profileId={profileId}
+                edition={entitlement.analysisEditionKey}
+              />
+            </>
+          ) : (
+            <CompatibilityPaidReportPreparing failed={report?.status === "failed"} />
+          )}
         </div>
       </main>
     </AppShell>

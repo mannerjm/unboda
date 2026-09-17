@@ -66,9 +66,9 @@ export default function AiConsultingEntryCard({
   const hasPreviousConversation =
     session && session.state !== "report_required" && session.messages.length > 0;
 
-  // Checkout is intentionally not exposed yet. Show the consultation entry only
-  // when this profile already has a positive shared credit balance, or when an
-  // actual prior conversation exists so the user can still read it after depletion.
+  // Keep the same commercial exposure policy as the existing deep-analysis flow:
+  // show the entry when this profile has shared credit, or when a previous thread
+  // exists so the user can still reopen it after the balance reaches zero.
   if (
     !profileId ||
     !edition ||
@@ -93,10 +93,10 @@ export default function AiConsultingEntryCard({
       <div className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
         <p className="text-xs font-semibold tracking-[0.18em] text-stone-500">AI CONSULTING</p>
         <h2 className="mt-3 text-xl font-bold text-stone-950">
-          {hasPreviousConversation ? "지난 AI 상담을 이어서 질문하기" : "이 분석을 바탕으로 AI에게 질문하기"}
+          {hasPreviousConversation ? "지난 AI 상담을 이어서 질문하기" : "이 리포트를 바탕으로 AI에게 질문하기"}
         </h2>
         <p className="mt-3 text-sm leading-7 text-stone-600">
-          이 프로필의 AI 질문권을 구매한 심층 분석들에서 공통으로 사용할 수 있고, 정상 답변이 완료된 질문만 1회 차감합니다.
+          이 프로필의 AI 질문권을 구매한 분석 리포트들에서 공통으로 사용할 수 있고, 정상 답변이 완료된 질문만 1회 차감합니다.
         </p>
         <div className="mt-4 rounded-2xl bg-stone-100 px-4 py-3 text-sm leading-6 text-stone-700">
           {historySummary ? <p className="font-semibold text-stone-900">{historySummary}</p> : null}

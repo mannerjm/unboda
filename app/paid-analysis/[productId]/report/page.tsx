@@ -4,7 +4,12 @@ import { redirect } from "next/navigation";
 import ReportAccessGate from "./ReportAccessGate";
 import AiConsultingEntryCard from "./AiConsultingEntryCard";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
-import { isCompatibilityRomanticProductId } from "@/app/lib/specialAnalysisProducts";
+import {
+  isCompatibilityFamilyOtherProductId,
+  isCompatibilityFamilyParentChildProductId,
+  isCompatibilityFamilySiblingProductId,
+  isCompatibilityRomanticProductId,
+} from "@/app/lib/specialAnalysisProducts";
 
 type PaidAnalysisReportPageProps = {
   params: Promise<{
@@ -13,6 +18,25 @@ type PaidAnalysisReportPageProps = {
   searchParams: Promise<{ profileId?: string; edition?: string }>;
 };
 
+function compatibilityReportHref(productId: string, profileId: string, edition?: string): string | null {
+  const editionQuery = edition ? `&edition=${encodeURIComponent(edition)}` : "";
+  const profileQuery = `?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
+
+  if (isCompatibilityRomanticProductId(productId)) {
+    return `/special-analysis/compatibility/report${profileQuery}`;
+  }
+  if (isCompatibilityFamilyParentChildProductId(productId)) {
+    return `/special-analysis/compatibility/family/parent-child/report${profileQuery}`;
+  }
+  if (isCompatibilityFamilySiblingProductId(productId)) {
+    return `/special-analysis/compatibility/family/siblings/report${profileQuery}`;
+  }
+  if (isCompatibilityFamilyOtherProductId(productId)) {
+    return `/special-analysis/compatibility/family/other/report${profileQuery}`;
+  }
+  return null;
+}
+
 export default async function PaidAnalysisReportPage({
   params,
   searchParams,
@@ -20,9 +44,9 @@ export default async function PaidAnalysisReportPage({
   const { productId } = await params;
   const { profileId, edition } = await searchParams;
 
-  if (isCompatibilityRomanticProductId(productId) && profileId) {
-    const editionQuery = edition ? `&edition=${encodeURIComponent(edition)}` : "";
-    redirect(`/special-analysis/compatibility/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`);
+  if (profileId) {
+    const compatibilityHref = compatibilityReportHref(productId, profileId, edition);
+    if (compatibilityHref) redirect(compatibilityHref);
   }
 
   const product = getPremiumProduct(productId);

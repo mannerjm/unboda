@@ -51,9 +51,9 @@ export default function CompatibilityReportValuePreview({
   return (
     <section
       data-compatibility-report-preview={mode}
-      className="mt-7 overflow-hidden rounded-[28px] border border-[#e4dac9] bg-[#fffdf9] shadow-[0_12px_36px_rgba(87,72,48,0.06)]"
+      className="mt-7 overflow-hidden rounded-[28px] border border-[#dfe3ef] bg-[#f9faff] shadow-[0_12px_36px_rgba(32,38,72,0.06)]"
     >
-      <div className="border-b border-[#ebe2d4] bg-[linear-gradient(135deg,#f8f2e8_0%,#fffdf9_72%)] px-5 py-5 sm:px-6">
+      <div className="border-b border-[#e4e7f1] bg-[linear-gradient(135deg,#f1f0ff_0%,#f9faff_72%)] px-5 py-5 sm:px-6">
         <p className="text-[11px] font-bold tracking-[0.16em] text-stone-400">리포트 구성 미리보기</p>
         <h3 className="mt-2 text-lg font-bold tracking-[-0.02em] text-stone-950">{config.headline}</h3>
         <p className="mt-2 max-w-2xl text-xs leading-6 text-stone-500">

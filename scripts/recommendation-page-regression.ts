@@ -20,11 +20,11 @@ if (deep.includes("RecommendationTop3") || deep.includes("productRecommendations
   throw new Error("Deep analysis should remain manual discovery, not duplicate the full recommendation view");
 }
 
-if (!page.includes("무료 분석에서 이어서 확인할 분석") || !page.includes("무료 분석에서 가장 크게 드러난 문제")) {
-  throw new Error("Recommendation page must explicitly continue the free-analysis problem diagnosis");
+if (!page.includes("이번 결과를 보고,") || !page.includes("무엇이 더 궁금해졌나요?")) {
+  throw new Error("Recommendation page must lead with the customer's next question");
 }
-if (!page.includes("실제 계산 근거가 있는 다른 분야를 우선") || !page.includes("같은 분야의 다른 문제도 추천될 수 있어요")) {
-  throw new Error("Recommendation copy must describe category diversity as evidence-based priority, not a guarantee");
+if (!page.includes("같은 계산 근거로 이어가되") || !page.includes("상품 이름보다 지금 궁금한 질문을 먼저")) {
+  throw new Error("Recommendation copy must explain that question-first discovery still follows free-analysis evidence");
 }
 if (!page.includes("buildCurrentRecommendations") || !page.includes("mergeRecommendationStoryline") || !page.includes("selectedCategories")) {
   throw new Error("Recommendation page must refresh deterministic recommendations and avoid repeated recommendation categories");
@@ -32,10 +32,10 @@ if (!page.includes("buildCurrentRecommendations") || !page.includes("mergeRecomm
 if (!page.includes("storedRecommendations[0]") || !page.includes("tryAdd(storedPrimary, false)")) {
   throw new Error("Recommendation refresh must preserve the stored primary problem that the free analysis already diagnosed");
 }
-if (!cards.includes("무료 분석에서 이어지는 추천 TOP 3") || !cards.includes("무료 분석과 같은 계산 근거로 선정")) {
-  throw new Error("Top 3 cards must explain that recommendation ranking continues the free-analysis evidence");
+if (!cards.includes("내 결과에서 이어지는 질문 3가지") || !cards.includes("무료 분석과 같은 계산 근거로 선정")) {
+  throw new Error("Recommendation cards must explain that next questions continue the free-analysis evidence");
 }
-if (!cards.includes("effectiveSelectedProductId") || !cards.includes("validRecommendations[0]?.product.id ?? null") || !cards.includes("가장 먼저 확인할 분석")) {
+if (!cards.includes("effectiveSelectedProductId") || !cards.includes("validRecommendations[0]?.product.id ?? null") || !cards.includes("가장 먼저 이어볼 질문")) {
   throw new Error("Primary recommendation detail must always be visible before the user selects another card");
 }
 

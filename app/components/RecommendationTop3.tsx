@@ -31,6 +31,10 @@ function getReadableRecommendationReason(
   return readableReason ?? "현재 무료 분석에서 확인된 흐름과 연결되는 주제라 우선 추천했어요.";
 }
 
+function getRecommendationQuestion(productId: string, fallback: string): string {
+  return getPaidAnalysisTopicConfig(productId)?.purchaseDecision.decisionQuestion ?? fallback;
+}
+
 export default function RecommendationTop3({
   recommendations,
   profileId,
@@ -58,20 +62,22 @@ export default function RecommendationTop3({
   return (
     <section className="mt-8" aria-labelledby="recommendation-top3-title">
       {explanation ? (
-        <div className="mb-6 max-w-3xl border-l-2 border-[#cdbb98] pl-4">
-          <p className="text-sm font-semibold leading-6 text-stone-900">{explanation.headline}</p>
-          <p className="mt-2 text-sm leading-6 text-stone-600">{explanation.summary}</p>
+        <div className="mb-7 rounded-[1.6rem] border border-[#ded8cc] bg-[#fffdf9] px-5 py-5 sm:px-6">
+          <p className="text-xs font-black tracking-[0.14em] text-[#7768c7]">내 무료 결과에서 이어지는 이유</p>
+          <p className="mt-3 text-base font-bold leading-7 text-stone-900">{explanation.headline}</p>
+          <p className="mt-2 max-w-3xl text-sm leading-7 text-stone-600">{explanation.summary}</p>
         </div>
       ) : null}
+
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[10px] font-semibold tracking-[0.18em] text-stone-500">PERSONAL RECOMMENDATION</p>
-          <h2 id="recommendation-top3-title" className="mt-2 text-xl font-bold text-stone-900">무료 분석에서 이어지는 추천 TOP 3</h2>
+          <p className="text-xs font-black tracking-[0.14em] text-[#7768c7]">이번 결과에서 이어지는 질문</p>
+          <h2 id="recommendation-top3-title" className="mt-2 text-2xl font-black tracking-[-0.035em] text-stone-950 sm:text-3xl">내 결과에서 이어지는 질문 3가지</h2>
         </div>
-        <span className="text-xs text-stone-500">무료 분석과 같은 계산 근거로 선정</span>
+        <span className="text-xs font-medium text-stone-500">무료 분석과 같은 계산 근거로 선정</span>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
+      <div className="mt-5 grid gap-4 md:grid-cols-3">
         {validRecommendations.map(({ recommendation, product }, index) => {
           const summary = paidSummaries.find(
             (item) => item.profileId === profileId && item.productId === product.id,
@@ -79,31 +85,39 @@ export default function RecommendationTop3({
           const state = toPremiumAnalysisProductState(summary?.reportStatus);
           const href = getPremiumAnalysisHref(product.id, state, profileId);
           const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
+          const question = getRecommendationQuestion(product.id, product.description);
+          const selected = effectiveSelectedProductId === product.id;
 
           if (!href) {
             return (
-              <div key={product.id} className="flex min-w-0 items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-4 text-stone-500">
-                <Rank index={index} />
-                <span className="min-w-0 flex-1 truncate text-sm font-semibold">{displayTitle}</span>
-                <span className="shrink-0 text-xs">생성 중</span>
+              <div key={product.id} className="rounded-[1.5rem] border border-stone-200 bg-stone-50 p-5 text-stone-500">
+                <p className="text-xs font-black tracking-[0.12em]">0{index + 1} · {displayTitle}</p>
+                <p className="mt-3 text-base font-bold leading-7">{question}</p>
+                <p className="mt-4 text-xs">분석 생성 중</p>
               </div>
             );
           }
 
-          const selected = effectiveSelectedProductId === product.id;
-
           return (
-            <button key={product.id} type="button" aria-pressed={selected} onClick={() => setSelectedProductId(product.id)} className={`flex min-w-0 items-center gap-3 rounded-xl border px-4 py-4 text-left transition hover:border-[#cdbb98] hover:bg-[#fbf7ef] ${selected ? "border-[#cdbb98] bg-[#fbf7ef]" : "border-stone-200 bg-white"}`}>
-              <Rank index={index} />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold text-stone-900">{displayTitle}</span>
-                <span className="mt-1 block truncate text-xs text-stone-500">{getReadableRecommendationReason(recommendation)}</span>
-              </span>
-              <span className="shrink-0 text-[11px] font-medium text-stone-500">{getProductPricing(product.id).amount.toLocaleString("ko-KR")}원</span>
+            <button
+              key={product.id}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => setSelectedProductId(product.id)}
+              className={`group min-h-56 rounded-[1.55rem] border p-5 text-left transition hover:-translate-y-0.5 hover:border-[#9282df] hover:shadow-[0_16px_34px_rgba(54,45,93,0.08)] ${selected ? "border-[#9282df] bg-[linear-gradient(145deg,#f8f5ff,#fffdfa)] shadow-[0_16px_36px_rgba(78,63,137,0.10)]" : "border-stone-200 bg-white"}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-[11px] font-black tracking-[0.12em] text-[#7667bc]">0{index + 1} · {displayTitle}</p>
+                <span className="shrink-0 text-[11px] font-semibold text-stone-500">{getProductPricing(product.id).amount.toLocaleString("ko-KR")}원</span>
+              </div>
+              <p className="mt-5 text-lg font-black leading-7 tracking-[-0.02em] text-stone-950">{question}</p>
+              <p className="mt-4 line-clamp-2 text-sm leading-6 text-stone-600">{getReadableRecommendationReason(recommendation)}</p>
+              <p className="mt-5 text-xs font-bold text-[#7667bc]">{selected ? "아래에서 이 질문을 자세히 보고 있어요" : "이 질문 살펴보기 →"}</p>
             </button>
           );
         })}
       </div>
+
       {effectiveSelectedProductId ? (
         <RecommendationDetail
           productId={effectiveSelectedProductId}
@@ -115,10 +129,6 @@ export default function RecommendationTop3({
       ) : null}
     </section>
   );
-}
-
-function Rank({ index }: { index: number }) {
-  return <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f3eee4] text-xs font-bold text-[#9a8050]">{index + 1}</span>;
 }
 
 function RecommendationDetail({
@@ -149,31 +159,48 @@ function RecommendationDetail({
     .map(formatTopicExpectedUnderstanding);
 
   return (
-    <section className="mt-5 rounded-xl border border-[#cdbb98] bg-[#fffdf8] p-5" aria-labelledby="recommendation-detail-title">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-semibold tracking-[0.16em] text-stone-500">{isPrimary ? "가장 먼저 확인할 분석" : "선택한 추천 분석"}</p>
-          <h3 id="recommendation-detail-title" className="mt-2 text-xl font-bold text-stone-900">{displayTitle}</h3>
+    <section className="mt-6 overflow-hidden rounded-[1.8rem] border border-[#d9d2c5] bg-white shadow-[0_18px_45px_rgba(41,35,27,0.05)]" aria-labelledby="recommendation-detail-title">
+      <div className="bg-[linear-gradient(135deg,#111936,#1c183d_55%,#262041)] px-6 py-6 text-white sm:px-7">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs font-black tracking-[0.14em] text-[#b7a9ff]">{isPrimary ? "가장 먼저 이어볼 질문" : "선택한 다음 질문"}</p>
+          <span className="rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-semibold text-[#d9d5ea]">{displayTitle}</span>
         </div>
-        <span className="text-xs text-stone-500">무료 분석에서 이어진 추천</span>
+        <h3 id="recommendation-detail-title" className="mt-3 max-w-3xl text-2xl font-black leading-9 tracking-[-0.03em]">{decision.decisionQuestion}</h3>
       </div>
 
-      <p className="mt-4 text-sm font-medium leading-6 text-stone-800">{product.description}</p>
-      <div className="mt-4 rounded-lg bg-[#fbf7ef] px-4 py-3">
-        <p className="text-xs font-semibold text-stone-700">왜 지금 추천됐나요</p>
-        <p className="mt-1.5 text-sm leading-6 text-stone-600">{reason}</p>
-      </div>
-      <DetailList title="이 분석에서 보는 것" items={overviewItems} />
-      <DetailList title="분석 후 알 수 있는 것" items={expectedUnderstanding} />
+      <div className="p-6 sm:p-7">
+        <p className="text-sm font-medium leading-7 text-stone-700">{product.description}</p>
+        <div className="mt-5 rounded-2xl bg-[#f7f4ef] px-5 py-4">
+          <p className="text-xs font-black text-stone-800">왜 지금 이 질문이 이어졌나요?</p>
+          <p className="mt-2 text-sm leading-7 text-stone-600">{reason}</p>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <DetailList title="이 분석에서 보는 것" items={overviewItems} />
+          <DetailList title="분석 후 알 수 있는 것" items={expectedUnderstanding} />
+        </div>
 
-      <div className="mt-5 flex items-center justify-between gap-3 border-t border-stone-200 pt-4">
-        <span className="text-sm font-medium text-stone-500">{getProductPricing(productId).amount.toLocaleString("ko-KR")}원</span>
-        {state === "generating" ? <span className="rounded-lg bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-500">생성 중</span> : href ? <Link href={href} className="rounded-lg bg-stone-900 px-4 py-2.5 text-xs font-semibold text-white hover:bg-stone-800">{state === "not_purchased" ? "이 분석 자세히 보기" : "리포트 보기"}</Link> : null}
+        <div className="mt-6 flex flex-col gap-3 border-t border-stone-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-base font-black text-stone-950">{getProductPricing(productId).amount.toLocaleString("ko-KR")}원</span>
+          {state === "generating" ? (
+            <span className="rounded-xl bg-stone-100 px-4 py-3 text-xs font-semibold text-stone-500">생성 중</span>
+          ) : href ? (
+            <Link href={href} className="rounded-xl bg-stone-950 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-[#25213d]">
+              {state === "not_purchased" ? "이 질문 더 깊게 보기" : "리포트 보기"}
+            </Link>
+          ) : null}
+        </div>
       </div>
     </section>
   );
 }
 
 function DetailList({ title, items }: { title: string; items: readonly string[] }) {
-  return <div className="mt-4"><p className="text-xs font-semibold text-stone-700">{title}</p><ul className="mt-2 space-y-1.5 text-sm leading-6 text-stone-600">{items.map((item) => <li key={item}>· {item}</li>)}</ul></div>;
+  return (
+    <div className="mt-5">
+      <p className="text-xs font-black text-stone-800">{title}</p>
+      <ul className="mt-2 space-y-2 text-sm leading-6 text-stone-600">
+        {items.map((item) => <li key={item}>· {item}</li>)}
+      </ul>
+    </div>
+  );
 }

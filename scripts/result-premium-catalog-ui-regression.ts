@@ -31,8 +31,8 @@ const navigationHelper = read("app/lib/premiumAnalysisNavigation.ts");
 // 1. The free result keeps only a concise conversion funnel; full recommendation
 // and catalog experiences live on their dedicated routes.
 assert(
-  resultPage.includes("나에게 추천된 심층 분석 보기")
-    && resultPage.includes("원하는 심층 분석 직접 찾기")
+  resultPage.includes("내 결과에서 이어지는 질문 보기")
+    && resultPage.includes("원하는 주제로 직접 찾기")
     && resultPage.includes("/recommendations?profileId=${currentProfileId}")
     && resultPage.includes("/deep-analysis?profileId=${currentProfileId}"),
   "result page must keep concise recommendation and discovery CTAs",

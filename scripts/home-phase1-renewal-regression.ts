@@ -46,10 +46,25 @@ for (const copy of [
   "혼자 보는 사주와",
   "분석을 읽고도",
   "쉽게 들어오고, 필요한 만큼 깊게.",
+  "지금 마음에 걸리는 것",
+  "두 사람의 흐름",
+  "리포트 다음 질문",
+  "운보다 이용 흐름",
+  "지금 · 관계 · 선택을 한 흐름으로",
 ]) {
   assert(home.includes(copy), `renewed home must include customer-facing phase 1 section: ${copy}`);
 }
 
+for (const legacyEnglishEyebrow of [
+  "FIND YOUR QUESTION",
+  "TWO PEOPLE, ONE RELATIONSHIP",
+  "AI CONSULTING",
+  "HOW UNBODA WORKS",
+]) {
+  assert(!home.includes(legacyEnglishEyebrow), `phase 1 polish must remove template-like English eyebrow: ${legacyEnglishEyebrow}`);
+}
+
+assert(home.includes("motion-safe:animate-[spin_28s_linear_infinite]"), "home brand flow graphic must include restrained motion with reduced-motion safety");
 assert(home.includes("무료 분석") && home.includes("심층 분석") && home.includes("두 사람 궁합"), "phase 1 must keep the free-first path while exposing direct exploration");
 assert(home.includes("운보다 · 참고용 명리 분석 서비스"), "legal footer identity must remain on the renewed home");
 assert(home.includes("사업자등록번호 201-28-96364"), "business registration footer must remain on the renewed home");

@@ -445,7 +445,7 @@ useEffect(() => {
 
 if (!isStorageChecked) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea]">
+    <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc]">
       <p className="text-sm text-stone-500">
         사주 데이터를 불러오는 중입니다...
       </p>
@@ -454,7 +454,7 @@ if (!isStorageChecked) {
 }
 if (!sajuData) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6">
+    <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-6">
       <div className="rounded-3xl border border-stone-200 bg-white p-8 text-center shadow-sm">
         <p className="font-semibold text-stone-900">
           {aiResult || "AI 분석 결과를 찾을 수 없습니다."}
@@ -476,7 +476,7 @@ if (
 ) {
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6">
+    <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-6">
       <div className="rounded-3xl border border-stone-200 bg-white p-8 text-center shadow-sm">
         <p className="font-semibold text-stone-900">
           새 분석 데이터가 없습니다.
@@ -1668,7 +1668,7 @@ export default function ResultPage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea]">
+        <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc]">
           <p className="text-sm text-stone-500">
             사주 결과를 불러오는 중입니다...
           </p>

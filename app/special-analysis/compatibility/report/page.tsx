@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import CompatibilityPaidReportPreparing from "@/app/components/CompatibilityPaidReportPreparing";
 import CompatibilityPaidReportView from "@/app/components/CompatibilityPaidReportView";
+import AiConsultingEntryCard from "@/app/paid-analysis/[productId]/report/AiConsultingEntryCard";
 import { isStoredCompatibilityReport } from "@/app/lib/compatibilityPaidAnalysis";
 import { getPaidReport } from "@/app/lib/paidReports/server";
 import { getUserProfile } from "@/app/lib/profiles/server";
@@ -47,6 +48,8 @@ export default async function CompatibilityPurchasedReportPage({ searchParams }:
     entitlement.analysisEditionKey,
   );
 
+  const completed = report?.status === "completed" && isStoredCompatibilityReport(report.content as unknown);
+
   return (
     <AppShell activeProfileId={profileId}>
       <main className="min-h-screen bg-[#fbfbfa] px-5 py-8 text-stone-900 sm:px-8 sm:py-10">
@@ -55,9 +58,18 @@ export default async function CompatibilityPurchasedReportPage({ searchParams }:
             <Link href="/purchased-analyses" className="text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4">← 구매한 분석</Link>
             <span className="text-xs text-stone-500">{profile.label}님의 구매 리포트</span>
           </div>
-          {report?.status === "completed" && isStoredCompatibilityReport(report.content as unknown)
-            ? <CompatibilityPaidReportView content={report.content as unknown as import("@/app/lib/compatibilityPaidAnalysis").StoredCompatibilityReport} />
-            : <CompatibilityPaidReportPreparing failed={report?.status === "failed"} />}
+          {completed ? (
+            <>
+              <CompatibilityPaidReportView content={report.content as unknown as import("@/app/lib/compatibilityPaidAnalysis").StoredCompatibilityReport} />
+              <AiConsultingEntryCard
+                productId={COMPATIBILITY_ROMANTIC_PRODUCT_ID}
+                profileId={profileId}
+                edition={entitlement.analysisEditionKey}
+              />
+            </>
+          ) : (
+            <CompatibilityPaidReportPreparing failed={report?.status === "failed"} />
+          )}
         </div>
       </main>
     </AppShell>

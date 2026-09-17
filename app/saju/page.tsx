@@ -137,7 +137,6 @@ export default function SajuPage() {
             ) : null}
           </div>
         </div>
-        </div>
       </main>
     </AppShell>
   );

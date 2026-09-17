@@ -3,7 +3,7 @@ import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { getCanonicalPremiumProductId, getPremiumProduct } from "@/app/lib/premiumProductRegistry";
-import { getSpecialAnalysisProduct } from "@/app/lib/specialAnalysisProducts";
+import { isAiConsultingCompatibilityProductId } from "@/app/lib/aiConsultingCompatibilityScope";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import {
   ensureAiConsultingThreadForAnalysis,
@@ -28,7 +28,7 @@ async function resolveBoundary(input: SessionInput) {
 
   if (
     typeof input.productId !== "string"
-    || (!getPremiumProduct(input.productId) && !getSpecialAnalysisProduct(input.productId))
+    || (!getPremiumProduct(input.productId) && !isAiConsultingCompatibilityProductId(input.productId))
   ) {
     return { error: NextResponse.json({ error: "유효한 분석 상품이 필요합니다." }, { status: 400 }) } as const;
   }
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
   try {
     input = (await request.json()) as SessionInput;
   } catch {
-    return NextResponse.json({ error: "잘못된 요청 형식입니다." }, { status: 400 });
+    return NextResponse.json({ error: "잘못된 요청 형식입니다." }, { status: 400 }) } as const;
   }
 
   const boundary = await resolveBoundary(input);

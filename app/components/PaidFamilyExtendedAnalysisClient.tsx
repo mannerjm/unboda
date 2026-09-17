@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
+import CompatibilityReportValuePreview from "@/app/components/CompatibilityReportValuePreview";
 import type { FamilyOtherRelationshipKind, FamilyOtherRole } from "@/app/lib/familyCompatibilityExtended";
 import {
   COMPATIBILITY_FAMILY_OTHER_PRODUCT,
@@ -294,26 +295,11 @@ export default function PaidFamilyExtendedAnalysisClient({ mode, myProfileLabel,
           {form.calendarType === "음력" ? <label className="flex items-center gap-2 self-end pb-4 text-sm text-stone-600"><input type="checkbox" checked={form.isLeapMonth} onChange={(event) => setForm((current) => ({ ...current, isLeapMonth: event.target.checked }))} />윤달이에요</label> : null}
         </div>
 
-        <div className="mt-7 rounded-3xl border border-[#eadfc9] bg-[#faf6ee] p-5">
-          <p className="text-sm font-bold text-stone-900">결제 후 제공되는 내용</p>
-          <div className="mt-3 grid gap-2 text-sm leading-7 text-stone-600 sm:grid-cols-2">
-            {mode === "siblings" ? (
-              <>
-                <p>· 정서적 연결과 대화 방식</p>
-                <p>· 나 → 형제·자매 / 형제·자매 → 나의 영향</p>
-                <p>· 비교와 경쟁, 역할과 경계</p>
-                <p>· 갈등 뒤 회복과 {evaluationYear}년 관계 흐름</p>
-              </>
-            ) : (
-              <>
-                <p>· 정서적 거리와 대화 방식</p>
-                <p>· 역할과 기대, 서로에게 미치는 영향</p>
-                <p>· 연락·도움·관여의 경계</p>
-                <p>· 갈등 뒤 회복과 {evaluationYear}년 관계 흐름</p>
-              </>
-            )}
-          </div>
-        </div>
+        <CompatibilityReportValuePreview
+          mode={mode === "siblings" ? "siblings" : "other_family"}
+          evaluationYear={evaluationYear}
+          relationshipLabel={mode === "other_family" ? selectedRelationship?.title : null}
+        />
 
         <div className="mt-5 rounded-2xl bg-stone-50 px-4 py-4 text-sm leading-7 text-stone-600">
           상대방 정보는 결제 연결을 위해 현재 브라우저에만 잠시 보관됩니다. 주문에는 분석에 필요한 계산 정보만 보관하며, 결제가 완료되면 브라우저에 남아 있던 상대방 정보는 자동으로 삭제됩니다. 구매 리포트는 {evaluationYear}년판으로 고정 저장됩니다.

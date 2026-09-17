@@ -20,6 +20,7 @@ import {
 } from "@/app/lib/premiumProductRegistry";
 import { resolveCanonicalRecommendationProduct } from "@/app/lib/analysisProductRecommendations";
 import { getProductPricing } from "@/app/lib/productPricing";
+import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
 import type {
   AnalysisRecommendationOutput,
 } from "@/app/lib/analysisRecommendationOutput";
@@ -94,7 +95,7 @@ function AISummarySectionCard({
   text: string;
 }) {
   return (
-    <section className="rounded-2xl border border-stone-200 bg-[#f7f3ea] p-5">
+    <section className="rounded-[1.4rem] border border-[#e4ded3] bg-[#fffdf9] p-5">
       <h3 className="text-sm font-semibold text-stone-900">{title}</h3>
       <div className="mt-3 text-sm leading-7 text-stone-700">
         <ReactMarkdown
@@ -553,6 +554,16 @@ const displayedPaidAnalysisProducts =
     ? recommendedPaidAnalysisProducts
     : fallbackPaidAnalysisProducts;
 
+const recommendationQuestionPreviews = displayedPaidAnalysisProducts
+  .slice(0, 3)
+  .map((product) => ({
+    id: product.id,
+    title: product.title,
+    question:
+      getPaidAnalysisTopicConfig(product.id)?.purchaseDecision.decisionQuestion
+      ?? product.description,
+  }));
+
 const selectedPaidAnalysis = displayedPaidAnalysisProducts.find(
   (product) => product.id === selectedPaidAnalysisId
 )!;
@@ -605,22 +616,27 @@ async function retryMainAnalysis() {
 
   return (
     <AppShell activeProfileId={currentProfileId}>
-      <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
+      <main className="min-h-screen bg-[#f6f4ef] px-5 py-10 text-stone-900 sm:py-12">
         <div className="mx-auto w-full max-w-6xl">
-        <header className="mb-10 text-center">
-          <p className="mb-4 text-xs tracking-[0.35em] text-stone-500">
-            UNBODA AI REPORT
-          </p>
-
-          <h1 className="text-4xl font-bold sm:text-5xl">
-            당신의 사주 리포트
-          </h1>
-
-          <p className="mt-4 text-sm leading-7 text-stone-600">
-            입력하신 출생 정보를 바탕으로 만든
-            <br className="sm:hidden" />
-            운보다 AI 참고용 분석입니다.
-          </p>
+        <header className="relative mb-8 overflow-hidden rounded-[2.2rem] border border-[#7166b8]/20 bg-[linear-gradient(135deg,#0a1128_0%,#111735_52%,#21183d_100%)] px-6 py-8 text-white shadow-[0_24px_70px_rgba(23,24,55,0.16)] sm:px-9 sm:py-10">
+          <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-[#7759db]/20 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-[-7rem] left-[18%] h-52 w-52 rounded-full bg-[#d36e9c]/10 blur-3xl" />
+          <div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-xs font-black tracking-[0.16em] text-[#aa9cff]">무료 분석 결과</p>
+              <h1 className="mt-3 text-3xl font-black leading-tight tracking-[-0.05em] sm:text-4xl lg:text-[2.8rem]">
+                지금 내 흐름을 읽는<br className="hidden sm:block" /> 첫 번째 리포트
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-[#b7bdd1] sm:text-base">
+                출생 정보와 명리 계산 결과를 바탕으로 핵심 구조부터 현재 흐름까지 차근차근 살펴봐요.
+                궁금한 부분이 생기면 결과 아래의 다음 질문으로 이어갈 수 있습니다.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 lg:max-w-xs lg:justify-end">
+              <span className="rounded-full border border-white/12 bg-white/[0.07] px-4 py-2 text-xs font-bold text-[#ddd9ee]">{profileLabel}</span>
+              <span className="rounded-full border border-white/12 bg-white/[0.05] px-4 py-2 text-xs font-bold text-[#b7bdd1]">무료 결과 · 참고용 분석</span>
+            </div>
+          </div>
         </header>
 
         <section className="mb-6 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm">
@@ -1559,31 +1575,52 @@ h3: ({ children }) => {
 </div>
 </section>
   )}
-        <section className="mt-8 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" aria-labelledby="next-analysis-title">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">NEXT ANALYSIS</p>
-            <h2 id="next-analysis-title" className="mt-3 text-2xl font-bold text-stone-900">{providedResult ? "더 깊이 보고 싶은 흐름을 살펴보세요" : "무료 분석에서 확인한 흐름을 더 깊게 살펴보세요"}</h2>
-            <p className="mt-3 text-sm leading-7 text-stone-600">{providedResult ? <>현재 분석을 바탕으로 추천된 심층 분석을 확인하거나,<br className="hidden sm:block" /> 원하는 주제를 직접 선택할 수 있어요.</> : "무료 분석에서 확인한 현재 흐름을 바탕으로, 지금 먼저 살펴보면 좋은 분석을 추천받거나 원하는 주제를 직접 선택해 더 깊게 볼 수 있어요."}</p>
+        <section className="mt-8 overflow-hidden rounded-[2rem] border border-[#d9d2c5] bg-white shadow-[0_20px_55px_rgba(44,38,31,0.06)]" aria-labelledby="next-analysis-title">
+          <div className="bg-[linear-gradient(135deg,#111936,#1c183d_55%,#262041)] px-6 py-7 text-white sm:px-8">
+            <p className="text-xs font-black tracking-[0.14em] text-[#b2a3ff]">무료 결과에서 이어보기</p>
+            <h2 id="next-analysis-title" className="mt-3 text-2xl font-black tracking-[-0.035em] sm:text-3xl">
+              이번 결과를 보고,<br className="sm:hidden" /> 무엇이 더 궁금해졌나요?
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-[#b7bdd1]">
+              같은 계산 결과에서 이어지는 질문을 먼저 보고, 마음에 걸리는 부분만 더 깊게 살펴보세요.
+              상품을 고르는 것보다 내 질문을 찾는 순서로 이어집니다.
+            </p>
           </div>
-          {providedResult ? (
-            <div className="mt-6 border-y border-stone-200 py-5">
-              <p className="text-sm font-semibold text-stone-900">무료 결과는 로그인 없이 계속 확인할 수 있어요.</p>
-              <p className="mt-2 text-sm leading-6 text-stone-600">로그인하면 분석을 저장하고 이어서 관리할 수 있습니다.</p>
+
+          <div className="p-6 sm:p-8">
+            {recommendationQuestionPreviews.length > 0 ? (
+              <div className="grid gap-3 md:grid-cols-3">
+                {recommendationQuestionPreviews.map((item, index) => (
+                  <div key={item.id} className="rounded-[1.35rem] border border-stone-200 bg-[#fffdfa] p-5">
+                    <p className="text-[11px] font-black tracking-[0.12em] text-[#7768c7]">0{index + 1} · {item.title}</p>
+                    <p className="mt-3 text-base font-black leading-7 tracking-[-0.02em] text-stone-950">{item.question}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {providedResult ? (
+              <div className="mt-5 rounded-2xl bg-[#f7f4ef] px-5 py-4">
+                <p className="text-sm font-semibold text-stone-900">무료 결과는 로그인 없이 계속 확인할 수 있어요.</p>
+                <p className="mt-1.5 text-sm leading-6 text-stone-600">개인 추천을 저장하고 이어서 관리하려면 로그인해 주세요.</p>
+              </div>
+            ) : null}
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <Link
+                href={providedResult ? "/auth/login?returnTo=/recommendations&origin=guest-result" : `/recommendations?profileId=${currentProfileId}`}
+                className="rounded-xl bg-stone-950 px-5 py-4 text-center text-sm font-bold text-white transition hover:bg-[#25213d]"
+              >
+                내 결과에서 이어지는 질문 보기
+              </Link>
+              <Link
+                href={`/deep-analysis?profileId=${currentProfileId}`}
+                className="rounded-xl border border-stone-300 bg-white px-5 py-4 text-center text-sm font-bold text-stone-700 transition hover:bg-stone-50"
+              >
+                원하는 주제로 직접 찾기
+              </Link>
             </div>
-          ) : null}
-          <div className="mt-7 grid gap-3 sm:grid-cols-2">
-            <Link href={providedResult ? "/auth/login?returnTo=/recommendations&origin=guest-result" : `/recommendations?profileId=${currentProfileId}`} className="rounded-xl bg-stone-900 px-5 py-4 text-center text-sm font-semibold text-white transition hover:bg-stone-800">
-              나에게 추천된 심층 분석 보기
-            </Link>
-            <Link href={`/deep-analysis?profileId=${currentProfileId}`} className="rounded-xl border border-stone-300 bg-white px-5 py-4 text-center text-sm font-semibold text-stone-700 transition hover:bg-stone-50">
-              원하는 심층 분석 직접 찾기
-            </Link>
           </div>
-          {providedResult ? (
-            <Link href="/auth/login?returnTo=/recommendations&origin=guest-result" className="mt-3 block text-center text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-900">
-              로그인 / 회원가입
-            </Link>
-          ) : null}
         </section>
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
           <button
@@ -1621,7 +1658,7 @@ function InfoCard({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl bg-[#f7f3ea] px-5 py-4">
+    <div className="rounded-2xl border border-[#e6e0d6] bg-[#fffdf9] px-5 py-4">
       <p className="mb-2 text-xs text-stone-500">{label}</p>
       <p className="font-semibold text-stone-900">{value}</p>
     </div>

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "tsx scripts/compatibility-engine-foundation-regression.ts && tsx scripts/compatibility-domain-aggregation-regression.ts && tsx scripts/compatibility-personal-structure-regression.ts && tsx scripts/compatibility-timing-regression.ts && tsx scripts/compatibility-report-contract-regression.ts && tsx scripts/compatibility-customer-flow-regression.ts && tsx scripts/family-compatibility-parent-child-regression.ts && tsx scripts/family-compatibility-extended-regression.ts && tsx scripts/ai-consulting-compatibility-regression.ts && tsx scripts/social-launch-expansion-regression.ts && tsx scripts/premium-presentation-regression.ts && tsx scripts/saju-supplemental-stars-regression.ts && tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-price-tier-audit-regression.ts && tsx scripts/paid-analysis-v4-actual-output-tier-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
+    "prebuild": "tsx scripts/compatibility-engine-foundation-regression.ts && tsx scripts/compatibility-domain-aggregation-regression.ts && tsx scripts/compatibility-personal-structure-regression.ts && tsx scripts/compatibility-timing-regression.ts && tsx scripts/compatibility-report-contract-regression.ts && tsx scripts/compatibility-customer-flow-regression.ts && tsx scripts/family-compatibility-parent-child-regression.ts && tsx scripts/family-compatibility-extended-regression.ts && tsx scripts/ai-consulting-compatibility-regression.ts && tsx scripts/home-phase1-renewal-regression.ts && tsx scripts/social-launch-expansion-regression.ts && tsx scripts/premium-presentation-regression.ts && tsx scripts/saju-supplemental-stars-regression.ts && tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-price-tier-audit-regression.ts && tsx scripts/paid-analysis-v4-actual-output-tier-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -22,6 +22,7 @@
     "test:ai-consulting-compatibility": "tsx scripts/ai-consulting-compatibility-regression.ts",
     "test:ai-consulting-e2e-contract": "tsx scripts/ai-consulting-e2e-contract-regression.ts",
     "test:ai-consulting-e2e": "npm run test:ai-consulting-credit-checkout && npm run test:ai-consulting-credit-history && npm run test:ai-consulting-memory && npm run test:ai-consulting-quality-cost && npm run test:ai-consulting-operations && npm run test:ai-consulting-compatibility && npm run test:ai-consulting-e2e-contract",
+    "test:home-phase1": "tsx scripts/home-phase1-renewal-regression.ts",
     "test:saju-stars": "tsx scripts/saju-supplemental-stars-regression.ts",
     "test:compatibility-foundation": "tsx scripts/compatibility-engine-foundation-regression.ts",
     "test:compatibility-domains": "tsx scripts/compatibility-domain-aggregation-regression.ts",

@@ -31,6 +31,8 @@ for (const required of [
   "분석 후 알 수 있는 것",
   "PremiumReportValuePreview",
   'state === "not_purchased"',
+  "결제 금액",
+  "text-lg font-bold text-stone-950",
   "getPremiumAnalysisHref(product.id, state, profileId)",
 ]) {
   assert(sharedDetail.includes(required), `shared product detail missing ${required}`);
@@ -46,6 +48,7 @@ for (const required of [
   "strategy.requiredInsights",
   "strategy.timelineSpec.labels",
   "strategy.reviewArtifact",
+  '.replace(/노력কে/g, "노력을")',
   "리포트 구성 미리보기",
   "이 상품의 실제 생성 주제",
   "이 기간 상품의 실제 생성 주제",

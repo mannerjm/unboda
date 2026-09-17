@@ -53,7 +53,7 @@ export default async function PaidAnalysisReportPage({
 
   if (!product) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6">
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-6">
         <div className="rounded-3xl border border-stone-200 bg-white p-8 text-center shadow-sm">
           <h1 className="text-2xl font-bold text-stone-900">
             존재하지 않는 심층 분석입니다.
@@ -71,7 +71,7 @@ export default async function PaidAnalysisReportPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] text-stone-900">
+    <main className="min-h-screen bg-[#f5f7fc] text-stone-900">
       <ReportAccessGate productId={productId} profileId={profileId} edition={edition}>
         <PaidAnalysisDetailV2Client productId={productId} profileId={profileId} edition={edition} />
         <AiConsultingEntryCard productId={productId} profileId={profileId} edition={edition} />

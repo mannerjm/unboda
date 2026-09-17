@@ -81,16 +81,16 @@ function LoginPageContent() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
+    <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-[#11162d]">
       <div className="mx-auto w-full max-w-xl">
         <Link
           href={backHref}
-          className="text-sm font-semibold text-stone-600 transition hover:text-stone-900"
+          className="text-sm font-semibold text-[#626b85] transition hover:text-[#11162d]"
         >
           ← 이전 화면으로 돌아가기
         </Link>
 
-        <p className="mt-10 text-xs font-semibold tracking-[0.25em] text-stone-500">
+        <p className="mt-10 text-xs font-semibold tracking-[0.25em] text-[#7b8299]">
           LOGIN
         </p>
 
@@ -98,18 +98,18 @@ function LoginPageContent() {
           운보다에 로그인
         </h1>
 
-        <p className="mt-5 text-sm leading-7 text-stone-600">
+        <p className="mt-5 text-sm leading-7 text-[#626b85]">
           {isGuestResultOrigin || isGuestResultNavigationOrigin || isGuestNavigationOrigin
             ? guestContextCopy
             : "구매한 심층 분석을 보관하고 다시 확인하려면 계정에 로그인해 주세요."}
         </p>
 
-        <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
+        <section className="mt-8 overflow-hidden rounded-[2rem] border border-[#dfe3ef] bg-white shadow-[0_20px_55px_rgba(32,38,72,0.08)]"><div className="bg-[linear-gradient(135deg,#0a1128,#15183a_58%,#241b43)] px-7 py-6 text-white"><p className="text-xs font-black tracking-[0.14em] text-[#aa9cff]">운보다 계정</p><p className="mt-2 text-sm leading-6 text-[#b7bdd1]">분석과 구매 기록을 안전하게 이어서 관리해요.</p></div><div className="p-7 sm:p-9">
           <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); void handleLogin(); }}>
             <div>
               <label
                 htmlFor="email"
-                className="text-sm font-semibold text-stone-900"
+                className="text-sm font-semibold text-[#11162d]"
               >
                 이메일
               </label>
@@ -121,7 +121,7 @@ function LoginPageContent() {
                 placeholder="example@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-3 w-full rounded-2xl border border-stone-300 bg-white px-4 py-4 text-sm outline-none transition focus:border-stone-900"
+                className="mt-3 w-full rounded-2xl border border-[#d7dcea] bg-white px-4 py-4 text-sm outline-none transition focus:border-[#745fe7] focus:ring-4 focus:ring-[#745fe7]/10"
                 required
               />
             </div>
@@ -129,7 +129,7 @@ function LoginPageContent() {
             <div>
               <label
                 htmlFor="password"
-                className="text-sm font-semibold text-stone-900"
+                className="text-sm font-semibold text-[#11162d]"
               >
                 비밀번호
               </label>
@@ -141,7 +141,7 @@ function LoginPageContent() {
                 placeholder="비밀번호를 입력해 주세요"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-3 w-full rounded-2xl border border-stone-300 bg-white px-4 py-4 text-sm outline-none transition focus:border-stone-900"
+                className="mt-3 w-full rounded-2xl border border-[#d7dcea] bg-white px-4 py-4 text-sm outline-none transition focus:border-[#745fe7] focus:ring-4 focus:ring-[#745fe7]/10"
                 required
               />
             </div>
@@ -157,7 +157,7 @@ function LoginPageContent() {
             <button
               type="submit"
               disabled={isLoading || (AUTH_CAPTCHA_ENABLED && !captchaToken)}
-              className="w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:opacity-60"
+              className="w-full rounded-2xl bg-[linear-gradient(135deg,#6f5ce7,#8d68ef)] px-5 py-4 font-black text-white shadow-[0_12px_28px_rgba(111,92,231,0.20)] transition hover:brightness-105 disabled:opacity-50"
             >
               {isLoading ? "로그인 중..." : "로그인"}
             </button>
@@ -165,24 +165,24 @@ function LoginPageContent() {
 
           <Link
             href={`/auth/forgot-password?returnTo=${encodeURIComponent(postLoginReturnTo)}`}
-            className="mt-4 block text-center text-sm font-semibold text-stone-600 underline"
+            className="mt-4 block text-center text-sm font-semibold text-[#626b85] underline"
           >
             비밀번호를 잊으셨나요?
           </Link>
 
-          <div className="mt-6 border-t border-stone-200 pt-6 text-center">
-            <p className="text-sm text-stone-600">
+          <div className="mt-6 border-t border-[#dfe3ef] pt-6 text-center">
+            <p className="text-sm text-[#626b85]">
               아직 계정이 없으신가요?
             </p>
 
             <Link
               href={`/auth/signup?returnTo=${encodeURIComponent(safeReturnTo)}${origin ? `&origin=${encodeURIComponent(origin)}` : ""}`}
-              className="mt-3 inline-block text-sm font-bold text-stone-900 underline"
+              className="mt-3 inline-block text-sm font-bold text-[#11162d] underline"
             >
               회원가입하기
             </Link>
           </div>
-        </section>
+        </div></section>
       </div>
     </main>
   );
@@ -191,9 +191,9 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-[#f7f3ea] p-5 py-14 text-stone-900">
+        <main className="min-h-screen bg-[#f5f7fc] p-5 py-14 text-[#11162d]">
           <div className="mx-auto w-full max-w-xl">
-            <p className="text-sm text-stone-600">
+            <p className="text-sm text-[#626b85]">
               로그인 페이지를 불러오는 중입니다...
             </p>
           </div>

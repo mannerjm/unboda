@@ -50,8 +50,9 @@ for (const copy of [
   "두 사람의 흐름",
   "리포트 다음 질문",
   "운보다 이용 흐름",
-  "지금 · 관계 · 선택을 한 흐름으로",
+  "흐름 · 관계 · 선택을 한 장면으로",
   "서로 다른 두 흐름이 만나는 지점",
+  "지금 내 흐름에서 시작해볼까요?",
 ]) {
   assert(home.includes(copy), `renewed home must include customer-facing Modern Mystic section: ${copy}`);
 }
@@ -66,15 +67,22 @@ for (const legacyEnglishEyebrow of [
 }
 
 assert(home.includes("motion-safe:animate-[spin_28s_linear_infinite]"), "home brand flow graphic must include restrained motion with reduced-motion safety");
+assert(home.includes("lg:max-w-[28.5rem] lg:opacity-[0.86]"), "hero artwork must stay visually subordinate to the primary copy on large screens");
+assert(!home.includes("['선택','bottom-[14%]"), "hero must avoid three competing floating labels after visual simplification");
 assert(home.includes("bg-[linear-gradient(180deg,#070d20_0%,#0b1330_40%,#090f24_100%)]"), "Modern Mystic home must keep the deep navy brand canvas");
 assert(home.includes("radial-gradient(circle_at_12%_18%"), "Modern Mystic home must keep the lightweight star field without heavy media assets");
+assert(home.includes("opacity-[0.68]"), "star field must remain restrained enough for long-page readability");
 assert(home.includes("bg-[linear-gradient(135deg,#795cff,#9d78ff)]"), "primary action must retain the Modern Mystic violet emphasis");
 assert(home.includes("backdrop-blur-xl"), "Modern Mystic cards must retain the glass surface language");
 assert(home.includes("function CardScene"), "curiosity cards must include category-specific atmospheric scenes");
+for (const sceneCue of ["peopleFlow", "F3C779", "7FE0C7", "9bb4ff66"]) {
+  assert(home.includes(sceneCue), `curiosity scenes must keep distinct semantic visual cue: ${sceneCue}`);
+}
 assert(home.includes("function CompatibilityVisual"), "compatibility section must use the dedicated two-flow visual rather than generic rings");
 assert(home.includes("bg-[linear-gradient(135deg,#1b1d3b_0%,#25172f_45%,#171d3b_100%)]"), "compatibility section must introduce a warmer violet-rose temperature shift");
 assert(home.includes("bg-[linear-gradient(135deg,#10182f_0%,#171631_48%,#10203a_100%)]"), "AI consulting section must retain a distinct cooler blue-violet temperature");
 assert(home.includes("bg-[linear-gradient(90deg,transparent,#8f7cff55,#ff9db555,#8f7cff55,transparent)]"), "journey section must render as a connected flow rather than a plain table");
+assert(home.includes("<TrustSection copy={copy}/>"), "closing journey CTA must preserve the current landing-state primary destination");
 assert(home.includes("무료 분석") && home.includes("심층 분석") && home.includes("두 사람 궁합"), "home must keep the free-first path while exposing direct exploration");
 assert(home.includes("운보다 · 참고용 명리 분석 서비스"), "legal footer identity must remain on the renewed home");
 assert(home.includes("사업자등록번호 201-28-96364"), "business registration footer must remain on the renewed home");
@@ -84,4 +92,4 @@ for (const forbidden of ["requestPayment", "markOrderPaid", "grantEntitlement", 
   assert(!home.includes(forbidden), `home visual renewal must not embed commercial runtime logic: ${forbidden}`);
 }
 
-console.log("Home Modern Mystic depth polish regression passed ✓");
+console.log("Home Modern Mystic final balance regression passed ✓");

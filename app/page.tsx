@@ -43,9 +43,9 @@ function getLandingCopy(state: LandingState) {
   switch (state.kind) {
     case "no_profiles":
       return {
-        eyebrow: "새로운 분석을 시작해 보세요",
+        eyebrow: "내 운보다 시작하기",
         title: "먼저, 분석할 사람을 정해 주세요",
-        description: "출생 정보를 등록하면 나와 가족의 사주 흐름을 차분히 살펴볼 수 있습니다.",
+        description: "출생 정보를 등록하면 무료 분석을 시작하고, 결과에서 궁금한 부분을 심층 분석으로 이어갈 수 있어요.",
         primary: "첫 분석 대상 만들기",
         primaryHref: "/mypage",
         secondary: "마이페이지",
@@ -53,9 +53,9 @@ function getLandingCopy(state: LandingState) {
       };
     case "needs_profile_selection":
       return {
-        eyebrow: "분석 준비",
-        title: "이어서 볼 분석 대상을 선택해 주세요",
-        description: "선택한 프로필을 기준으로 무료 분석과 심층 분석을 이어갑니다.",
+        eyebrow: "분석 대상 선택",
+        title: "누구의 흐름을 볼까요?",
+        description: "분석할 프로필을 선택하면 무료 분석과 개인 추천을 같은 대상 기준으로 이어갈 수 있어요.",
         primary: "분석 대상 선택하기",
         primaryHref: "/mypage",
         secondary: "마이페이지",
@@ -63,9 +63,9 @@ function getLandingCopy(state: LandingState) {
       };
     case "analysis_complete":
       return {
-        eyebrow: state.status === "needs_retry" ? "저장된 분석" : "최근 분석",
-        title: "내 분석을 이어서 살펴보세요",
-        description: state.status === "needs_retry" ? "사주 구조와 추천은 저장되어 있습니다. 결과 화면에서 AI 해석을 다시 생성할 수 있습니다." : "무료 분석 결과를 다시 보고, 지금의 흐름에 맞는 추천을 확인해 보세요.",
+        eyebrow: state.status === "needs_retry" ? "저장된 분석" : "내 운보다",
+        title: "내 분석을 이어서 볼까요?",
+        description: state.status === "needs_retry" ? "계산 결과와 추천은 안전하게 저장되어 있어요. 결과 화면에서 해석만 다시 생성할 수 있습니다." : "무료 분석 결과를 다시 보고, 그 결과에서 이어지는 개인 추천을 확인해 보세요.",
         primary: "내 분석 이어보기",
         primaryHref: `/result?profileId=${state.profileId}`,
         secondary: "현재 추천 보기",
@@ -74,8 +74,8 @@ function getLandingCopy(state: LandingState) {
     case "analysis_stale":
       return {
         eyebrow: "분석 갱신 필요",
-        title: "변경된 정보로 다시 분석해 주세요",
-        description: "출생 정보 또는 현재 평가 기간이 달라 최신 흐름을 다시 확인해야 합니다.",
+        title: "최신 흐름으로 다시 이어볼까요?",
+        description: "출생 정보 또는 현재 평가 기간이 달라졌어요. 최신 기준으로 무료 분석을 갱신하면 추천도 함께 새로 이어집니다.",
         primary: "분석 갱신하기",
         primaryHref: "/saju",
         secondary: "마이페이지",
@@ -84,8 +84,8 @@ function getLandingCopy(state: LandingState) {
     case "analysis_in_progress":
       return {
         eyebrow: "분석 진행 중",
-        title: "분석이 준비되고 있습니다",
-        description: "잠시 후 저장된 결과를 확인할 수 있습니다.",
+        title: "지금 내 흐름을 읽고 있어요",
+        description: "분석이 준비되면 결과와 개인 추천까지 바로 이어서 확인할 수 있습니다.",
         primary: "분석 결과 확인하기",
         primaryHref: `/loading?profileId=${state.profileId}`,
         secondary: "마이페이지",
@@ -93,20 +93,20 @@ function getLandingCopy(state: LandingState) {
       };
     case "analysis_ready":
       return {
-        eyebrow: "분석 준비",
-        title: "내 사주 흐름을 무료로 확인해 보세요",
-        description: "사주 원국과 현재 흐름을 함께 읽고, 지금의 방향을 살펴봅니다.",
-        primary: "무료 사주 분석 시작하기",
+        eyebrow: "무료 분석부터 시작",
+        title: "지금 내 운, 어디로 가고 있을까?",
+        description: "먼저 무료 분석으로 지금의 흐름을 보고, 궁금한 부분이 생기면 나에게 맞는 심층 분석으로 이어가세요.",
+        primary: "무료로 내 운 보기",
         primaryHref: "/saju",
         secondary: "마이페이지",
         secondaryHref: "/mypage",
       };
     case "guest":
       return {
-        eyebrow: "개인 명리 분석",
-        title: "내 사주의 흐름을 차분히 살펴보세요",
-        description: "출생 정보를 바탕으로 나와 가족의 사주 흐름을 확인하고, 필요한 분석을 이어서 살펴볼 수 있습니다.",
-        primary: "무료 사주 분석 시작하기",
+        eyebrow: "무료 분석부터 시작",
+        title: "지금 내 운, 어디로 가고 있을까?",
+        description: "먼저 무료 분석으로 지금의 흐름을 보고, 궁금한 부분이 생기면 나에게 맞는 심층 분석으로 이어가세요.",
+        primary: "무료로 내 운 보기",
         primaryHref: "/guest-saju",
         secondary: "로그인 / 기존 사용자",
         secondaryHref: "/auth/login?returnTo=/",

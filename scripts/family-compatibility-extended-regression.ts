@@ -154,8 +154,10 @@ assert(COMPATIBILITY_FAMILY_OTHER_PRODUCT.amount === 19_900, "other-family compa
 assert(String(COMPATIBILITY_FAMILY_SIBLING_SESSION_KEY) !== String(COMPATIBILITY_FAMILY_OTHER_SESSION_KEY), "extended family raw-input session keys must remain isolated");
 
 const selector = readFileSync("app/components/FamilyCompatibilityAnalysisClient.tsx", "utf8");
+const romanticInputClient = readFileSync("app/components/PaidCompatibilityAnalysisClient.tsx", "utf8");
 const inputClient = readFileSync("app/components/PaidFamilyExtendedAnalysisClient.tsx", "utf8");
 const parentChildInputClient = readFileSync("app/components/PaidFamilyParentChildAnalysisClient.tsx", "utf8");
+const reportValuePreview = readFileSync("app/components/CompatibilityReportValuePreview.tsx", "utf8");
 const orderRoute = readFileSync("app/api/orders/family-extended/route.ts", "utf8");
 const checkoutPanel = readFileSync("app/checkout/[productId]/FamilyExtendedCheckoutAccessPanel.tsx", "utf8");
 const generation = readFileSync("app/lib/paidReports/generation.ts", "utf8");
@@ -169,7 +171,22 @@ assert(inputClient.includes("조부모·손주") && inputClient.includes("삼촌
 assert(inputClient.includes("sessionStorage.setItem") && !inputClient.includes('birthTime: "12:00"'), "raw family input must remain session-scoped and never synthesize noon");
 assert(parentChildInputClient.includes('<option value="parent">부모예요</option>') && parentChildInputClient.includes('<option value="child">자녀예요</option>') && !parentChildInputClient.includes('name="familyRole"'), "parent-child role must use the same open-list select pattern as gender");
 assert(inputClient.includes("value={form.relationshipKind}") && inputClient.includes("value={effectiveRole}") && !inputClient.includes('name="otherRelationship"') && !inputClient.includes('name="otherRole"'), "other-family relationship and role must use select controls instead of card radios");
-assert(inputClient.includes("결제 후 제공되는 내용") && inputClient.includes("정서적 연결과 대화 방식") && inputClient.includes("정서적 거리와 대화 방식"), "sibling and other-family forms must show relationship-specific included-report content");
+assert(
+  romanticInputClient.includes('<CompatibilityReportValuePreview mode="romantic"')
+    && parentChildInputClient.includes('<CompatibilityReportValuePreview mode="parent_child"')
+    && inputClient.includes('mode={mode === "siblings" ? "siblings" : "other_family"}'),
+  "all four paid compatibility inputs must show the shared report value preview",
+);
+assert(
+  reportValuePreview.includes("리포트 구성 미리보기")
+    && reportValuePreview.includes("실제 분석 결과를 미리 보여주는 화면이 아니라")
+    && reportValuePreview.includes("정서적 연결")
+    && reportValuePreview.includes("비교·경쟁")
+    && reportValuePreview.includes("연락·도움·관여 경계")
+    && reportValuePreview.includes("실제 문장은 입력한 두 사람의 계산 결과에 따라 달라집니다."),
+  "report preview must explain structure, preserve relationship-specific domains, and avoid presenting sample copy as an actual result",
+);
+assert(!romanticInputClient.includes("결제 후 제공되는 내용") && !parentChildInputClient.includes("결제 후 제공되는 내용") && !inputClient.includes("결제 후 제공되는 내용"), "old flat included-content lists must be replaced by the richer shared preview");
 assert(inputClient.includes("전문 궁합 리포트") && inputClient.includes("결제 금액") && inputClient.includes("NICE 본인확인"), "extended family checkout summary must match the parent-child pre-purchase structure");
 assert(inputClient.includes(sharedStorageNotice) && parentChildInputClient.includes(sharedStorageNotice), "all family purchase forms must use the same browser-session privacy notice");
 assert(inputClient.includes("결제가 완료되면 브라우저에 남아 있던 상대방 정보는 자동으로 삭제됩니다."), "family privacy copy must explain post-payment browser cleanup");

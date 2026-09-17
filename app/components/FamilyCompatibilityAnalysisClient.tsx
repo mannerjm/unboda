@@ -54,7 +54,7 @@ export default function FamilyCompatibilityAnalysisClient({
       <section
         id="family-relationship-selector"
         data-section="family-relationship-selector"
-        className="mx-auto max-w-4xl rounded-[30px] border border-[#e4dac9] bg-white p-6 shadow-[0_18px_50px_rgba(87,72,48,0.07)] sm:p-8"
+        className="mx-auto max-w-4xl rounded-[30px] border border-[#dfe3ef] bg-white p-6 shadow-[0_18px_50px_rgba(32,38,72,0.07)] sm:p-8"
       >
         <p className="text-[11px] font-bold tracking-[0.18em] text-stone-400">가족 관계 선택</p>
         <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-stone-950">어떤 가족 관계인가요?</h2>

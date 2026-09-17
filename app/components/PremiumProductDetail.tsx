@@ -152,8 +152,11 @@ export default function PremiumProductDetail({
 
       {state === "not_purchased" ? <PremiumReportValuePreview product={product} /> : null}
 
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-4">
-        <span className="text-sm font-medium text-stone-500">{formatPrice(product.id)}</span>
+      <div className="mt-5 flex flex-wrap items-end justify-between gap-4 border-t border-stone-200 pt-4">
+        <div>
+          <p className="text-[10px] font-semibold tracking-[0.14em] text-stone-400">결제 금액</p>
+          <p className="mt-1 text-lg font-bold text-stone-950">{formatPrice(product.id)}</p>
+        </div>
         <div className="flex flex-wrap gap-2">
           {state === "none" || state === "generating" ? (
             <span className="rounded-lg bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-500">{ACTION_LABELS[state]}</span>

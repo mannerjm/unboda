@@ -41,7 +41,7 @@ export default async function CompatibilityAnalysisPage() {
           <section className="mt-8 grid gap-5 lg:grid-cols-2">
             <Link
               href="/special-analysis/compatibility/romantic"
-              className="group flex min-h-[290px] flex-col rounded-[28px] border border-[#dfd3c1] bg-[linear-gradient(145deg,#fbf6ed_0%,#fffdf9_65%,#ffffff_100%)] p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#cdbb9f] hover:shadow-md sm:p-7"
+              className="group flex min-h-[290px] flex-col rounded-[28px] border border-[#dfe3ef] bg-[linear-gradient(145deg,#f3f1ff_0%,#f9faff_65%,#ffffff_100%)] p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md sm:p-7"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -63,7 +63,7 @@ export default async function CompatibilityAnalysisPage() {
 
             <Link
               href="/special-analysis/compatibility/family/parent-child#family-relationship-selector"
-              className="group flex min-h-[290px] flex-col rounded-[28px] border border-[#dfd3c1] bg-[linear-gradient(145deg,#fbf6ed_0%,#fffdf9_65%,#ffffff_100%)] p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#cdbb9f] hover:shadow-md sm:p-7"
+              className="group flex min-h-[290px] flex-col rounded-[28px] border border-[#dfe3ef] bg-[linear-gradient(145deg,#f3f1ff_0%,#f9faff_65%,#ffffff_100%)] p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md sm:p-7"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>

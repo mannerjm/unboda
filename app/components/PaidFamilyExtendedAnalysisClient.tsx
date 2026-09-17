@@ -103,7 +103,7 @@ function BirthDateSelector({ birthYear, birthMonth, birthDay, calendarType, onCh
     onChange(next);
   }
 
-  const selectClass = "w-full appearance-none rounded-2xl border border-[#e3d9c8] bg-white px-4 py-3.5 pr-9 text-sm font-semibold text-stone-800 outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400";
+  const selectClass = "w-full appearance-none rounded-2xl border border-[#dfe3ef] bg-white px-4 py-3.5 pr-9 text-sm font-semibold text-stone-800 outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400";
 
   return (
     <div className="sm:col-span-2">
@@ -205,8 +205,8 @@ export default function PaidFamilyExtendedAnalysisClient({ mode, myProfileLabel,
   }
 
   return (
-    <form onSubmit={submit} className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-[30px] border border-[#e4dac9] bg-white shadow-[0_18px_50px_rgba(87,72,48,0.08)]">
-      <div className="bg-[linear-gradient(135deg,#f7f1e6_0%,#fffdf9_58%,#f8f3ea_100%)] px-6 py-8 sm:px-8 sm:py-9">
+    <form onSubmit={submit} className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-[30px] border border-[#dfe3ef] bg-white shadow-[0_18px_50px_rgba(32,38,72,0.08)]">
+      <div className="bg-[linear-gradient(135deg,#f1f0ff_0%,#f9faff_58%,#f7f8ff_100%)] px-6 py-8 sm:px-8 sm:py-9">
         <p className="text-[11px] font-bold tracking-[0.18em] text-stone-400">분석 기준</p>
         <p className="mt-2 text-2xl font-bold tracking-[-0.02em] text-stone-950">{myProfileLabel}님의 사주 <span className="font-medium text-stone-400">×</span> 가족 사주</p>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">
@@ -215,8 +215,8 @@ export default function PaidFamilyExtendedAnalysisClient({ mode, myProfileLabel,
             : "먼저 어떤 가족 관계인지와 내 역할을 선택한 뒤 상대 가족의 정보를 입력해 주세요. 관계 유형에 맞는 역할과 거리 기준으로 분석합니다."}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
-          <span className="rounded-full border border-[#e4dac9] bg-white/75 px-3 py-1.5 text-xs font-semibold text-stone-700">{mode === "siblings" ? "형제·자매 관계" : "기타 가족 관계"}</span>
-          <span className="rounded-full border border-[#e4dac9] bg-white/75 px-3 py-1.5 text-xs font-semibold text-stone-700">{evaluationYear}년판 · 구매 후 저장</span>
+          <span className="rounded-full border border-[#dfe3ef] bg-white/75 px-3 py-1.5 text-xs font-semibold text-stone-700">{mode === "siblings" ? "형제·자매 관계" : "기타 가족 관계"}</span>
+          <span className="rounded-full border border-[#dfe3ef] bg-white/75 px-3 py-1.5 text-xs font-semibold text-stone-700">{evaluationYear}년판 · 구매 후 저장</span>
         </div>
       </div>
 
@@ -308,7 +308,7 @@ export default function PaidFamilyExtendedAnalysisClient({ mode, myProfileLabel,
 
         {error ? <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
 
-        <div className="mt-7 overflow-hidden rounded-3xl border border-[#e5dac8] bg-[linear-gradient(135deg,#fbf7ef_0%,#fffdf9_100%)] shadow-sm">
+        <div className="mt-7 overflow-hidden rounded-3xl border border-[#dfe3ef] bg-[linear-gradient(135deg,#f5f6fc_0%,#f9faff_100%)] shadow-sm">
           <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
             <div>
               <p className="text-[11px] font-bold tracking-[0.16em] text-stone-400">전문 궁합 리포트</p>

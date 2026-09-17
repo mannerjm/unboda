@@ -118,7 +118,7 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
 
   return (
     <AppShell activeProfileId={profile.id}>
-      <main className="min-h-screen bg-[#f6f4ef] px-5 py-7 text-stone-900 sm:px-8 sm:py-9">
+      <main className="min-h-screen bg-[#f5f7fc] px-5 py-7 text-stone-900 sm:px-8 sm:py-9">
         <div className="mx-auto w-full max-w-6xl">
           <header className="relative overflow-hidden rounded-[2rem] border border-[#6f65ba]/20 bg-[linear-gradient(135deg,#0a1128_0%,#111735_52%,#21183d_100%)] px-6 py-8 text-white shadow-[0_24px_70px_rgba(23,24,55,0.16)] sm:px-9 sm:py-10">
             <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#7759db]/20 blur-3xl" />

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
@@ -10,30 +9,10 @@ import {
 
 export default async function CompatibilityAnalysisPage() {
   const user = await getCurrentUser();
-  if (!user) {
-    redirect("/auth/login?returnTo=/special-analysis/compatibility");
-  }
-
-  const activeProfile = await getActiveProfile(user.id);
-  if (!activeProfile) {
-    return (
-      <AppShell>
-        <main className="min-h-screen bg-[#fbfbfa] px-5 py-8 text-stone-900 sm:px-8 sm:py-10">
-          <div className="mx-auto w-full max-w-3xl">
-            <Link href="/special-analysis" className="text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4">← 전문 분석</Link>
-            <section className="mt-8 rounded-3xl border border-stone-200 bg-white p-8 text-center">
-              <h1 className="text-2xl font-bold text-stone-950">궁합 분석</h1>
-              <p className="mt-4 text-sm leading-7 text-stone-600">분석할 내 프로필을 먼저 선택해 주세요.</p>
-              <Link href="/mypage" className="mt-5 inline-flex rounded-2xl bg-stone-900 px-5 py-3 text-sm font-bold text-white">마이페이지에서 프로필 선택</Link>
-            </section>
-          </div>
-        </main>
-      </AppShell>
-    );
-  }
+  const activeProfile = user ? await getActiveProfile(user.id) : null;
 
   return (
-    <AppShell activeProfileId={activeProfile.id}>
+    <AppShell activeProfileId={activeProfile?.id}>
       <main className="min-h-screen bg-[#fbfbfa] px-5 py-8 text-stone-900 sm:px-8 sm:py-10">
         <div className="mx-auto w-full max-w-5xl">
           <Link href="/special-analysis" className="text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4">← 전문 분석</Link>
@@ -44,11 +23,19 @@ export default async function CompatibilityAnalysisPage() {
             <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-600">
               어떤 관계를 살펴볼까요? 관계의 성격에 따라 중요하게 보는 기준과 리포트 구성이 달라집니다.
             </p>
-            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-500">
-              <span>현재 분석 대상</span>
-              <strong className="font-semibold text-stone-900">{activeProfile.label}</strong>
-              <Link href="/mypage" className="text-xs underline decoration-stone-300 underline-offset-4">프로필 변경</Link>
-            </div>
+            {activeProfile ? (
+              <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-500">
+                <span>현재 분석 대상</span>
+                <strong className="font-semibold text-stone-900">{activeProfile.label}</strong>
+                <Link href="/mypage" className="text-xs underline decoration-stone-300 underline-offset-4">프로필 변경</Link>
+              </div>
+            ) : (
+              <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-stone-500">
+                <span className="rounded-full bg-stone-100 px-3 py-1.5 text-xs font-semibold text-stone-700">로그인 없이 둘러보기 가능</span>
+                <span>{user ? "실제 분석을 시작하려면 내 프로필을 먼저 선택해 주세요." : "실제 분석을 시작할 때 로그인과 내 프로필이 필요합니다."}</span>
+                {user ? <Link href="/mypage" className="text-xs underline decoration-stone-300 underline-offset-4">프로필 선택</Link> : null}
+              </div>
+            )}
           </header>
 
           <section className="mt-8 grid gap-5 lg:grid-cols-2">

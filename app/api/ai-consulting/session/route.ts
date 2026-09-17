@@ -80,7 +80,7 @@ export async function POST(request: Request) {
   try {
     input = (await request.json()) as SessionInput;
   } catch {
-    return NextResponse.json({ error: "잘못된 요청 형식입니다." }, { status: 400 }) } as const;
+    return NextResponse.json({ error: "잘못된 요청 형식입니다." }, { status: 400 });
   }
 
   const boundary = await resolveBoundary(input);

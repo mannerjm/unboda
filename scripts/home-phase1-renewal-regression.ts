@@ -61,17 +61,21 @@ for (const legacyEnglishEyebrow of [
   "AI CONSULTING",
   "HOW UNBODA WORKS",
 ]) {
-  assert(!home.includes(legacyEnglishEyebrow), `phase 1 polish must remove template-like English eyebrow: ${legacyEnglishEyebrow}`);
+  assert(!home.includes(legacyEnglishEyebrow), `home must avoid template-like English eyebrow: ${legacyEnglishEyebrow}`);
 }
 
 assert(home.includes("motion-safe:animate-[spin_28s_linear_infinite]"), "home brand flow graphic must include restrained motion with reduced-motion safety");
-assert(home.includes("무료 분석") && home.includes("심층 분석") && home.includes("두 사람 궁합"), "phase 1 must keep the free-first path while exposing direct exploration");
+assert(home.includes("bg-[linear-gradient(180deg,#070d20_0%,#0b1330_45%,#0a1026_100%)]"), "Modern Mystic home must keep the deep navy brand canvas");
+assert(home.includes("radial-gradient(circle_at_12%_18%"), "Modern Mystic home must keep the lightweight star field without heavy media assets");
+assert(home.includes("bg-[linear-gradient(135deg,#795cff,#9d78ff)]"), "primary action must retain the Modern Mystic violet emphasis");
+assert(home.includes("backdrop-blur-xl"), "Modern Mystic cards must retain the glass surface language");
+assert(home.includes("무료 분석") && home.includes("심층 분석") && home.includes("두 사람 궁합"), "home must keep the free-first path while exposing direct exploration");
 assert(home.includes("운보다 · 참고용 명리 분석 서비스"), "legal footer identity must remain on the renewed home");
 assert(home.includes("사업자등록번호 201-28-96364"), "business registration footer must remain on the renewed home");
 assert(home.includes("support@unboda.kr"), "support contact must remain on the renewed home");
 
 for (const forbidden of ["requestPayment", "markOrderPaid", "grantEntitlement", "generatePaidReport"] ) {
-  assert(!home.includes(forbidden), `phase 1 home renewal must not embed commercial runtime logic: ${forbidden}`);
+  assert(!home.includes(forbidden), `home visual renewal must not embed commercial runtime logic: ${forbidden}`);
 }
 
-console.log("Home phase 1 renewal regression passed ✓");
+console.log("Home Modern Mystic renewal regression passed ✓");

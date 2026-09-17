@@ -99,7 +99,7 @@ export default function SajuPage() {
   if (isLoading) {
     return (
       <AppShell activeProfileId={activeProfile?.id}>
-        <main className="min-h-screen bg-[#f7f3ea]">
+        <main className="min-h-screen bg-[#f5f7fc]">
           <p className="sr-only" aria-live="polite">저장된 분석 결과를 확인하는 중입니다.</p>
         </main>
       </AppShell>
@@ -108,24 +108,27 @@ export default function SajuPage() {
 
   return (
     <AppShell activeProfileId={activeProfile?.id}>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-[#f7f3ea] px-6 py-12">
-        <div className="w-full max-w-xl rounded-[2rem] border border-stone-200 bg-white p-7 shadow-sm sm:p-10">
-          <p className="mb-3 text-xs font-semibold tracking-[0.28em] text-stone-500">AI ANALYSIS</p>
-          <h1 className="text-4xl font-bold text-stone-900 sm:text-5xl">사주 조회</h1>
+      <main className="flex min-h-screen flex-col items-center justify-center bg-[#f5f7fc] px-6 py-12">
+        <div className="w-full max-w-2xl overflow-hidden rounded-[2rem] border border-[#dfe3ef] bg-white shadow-[0_22px_60px_rgba(32,38,72,0.08)]">
+          <div className="bg-[linear-gradient(135deg,#0a1128,#14183a_58%,#241b43)] px-7 py-8 text-white sm:px-10">
+            <p className="text-xs font-black tracking-[0.16em] text-[#aa9cff]">내 무료 분석</p>
+            <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] sm:text-4xl">내 흐름 이어보기</h1>
+            <p className="mt-3 text-sm leading-7 text-[#b7bdd1]">저장된 분석이 있으면 바로 이어보고, 없으면 현재 프로필로 새 무료 분석을 시작합니다.</p>
+          </div>
 
-          <div className="mt-8 space-y-5">
+          <div className="space-y-5 p-7 sm:p-10">
             {activeProfile ? (
-              <div className="rounded-2xl border border-stone-200 bg-stone-50 p-5 text-sm leading-7 text-stone-700">
-                <p className="font-semibold text-stone-900">활성 분석 대상: {activeProfile.label}</p>
+              <div className="rounded-2xl border border-[#e0e4ef] bg-[#f8f9fd] p-5 text-sm leading-7 text-[#5f6881]">
+                <p className="font-bold text-[#11162d]">활성 분석 대상: {activeProfile.label}</p>
                 <p>{activeProfile.birthDate} · {activeProfile.birthTime} · {activeProfile.gender} · {activeProfile.calendarType}</p>
-                <a href="/mypage" className="mt-3 inline-block font-semibold text-stone-900">마이페이지에서 대상 변경</a>
+                <a href="/mypage" className="mt-3 inline-block font-bold text-[#6555c6]">마이페이지에서 대상 변경</a>
               </div>
             ) : null}
 
             <button
               onClick={() => void startAnalysis()}
               disabled={!activeProfile || isStarting}
-              className="block w-full rounded-2xl bg-stone-900 p-4 text-center text-base font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400"
+              className="block w-full rounded-2xl bg-[linear-gradient(135deg,#6f5ce7,#8d68ef)] p-4 text-center text-base font-black text-white shadow-[0_12px_28px_rgba(111,92,231,0.22)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isStarting ? "분석 결과를 확인하는 중..." : "운보다 AI로 분석하기"}
             </button>
@@ -133,6 +136,7 @@ export default function SajuPage() {
               <p className="text-sm text-red-600">{validationMessage}</p>
             ) : null}
           </div>
+        </div>
         </div>
       </main>
     </AppShell>

@@ -45,7 +45,7 @@ export default async function PaidAnalysisPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
+    <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-stone-900">
       <div className="mx-auto max-w-3xl">
         <Link
           href={profileId ? `/deep-analysis?profileId=${encodeURIComponent(profileId)}` : "/deep-analysis"}

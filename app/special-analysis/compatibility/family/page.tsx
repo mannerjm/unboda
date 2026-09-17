@@ -47,7 +47,7 @@ export default async function FamilyCompatibilityPage() {
               ["형제·자매", "정서적 연결, 대화, 비교와 경쟁, 오래 굳어진 역할과 경계, 회복을 살펴봅니다."],
               ["기타 가족", "조부모·손주, 조카, 사촌, 인척 등 관계별 역할과 기대, 거리와 소통을 살펴봅니다."],
             ].map(([title, description]) => (
-              <Link key={title} href={FAMILY_ENTRY} className="group flex min-h-[250px] flex-col rounded-[26px] border border-[#dfd3c1] bg-[linear-gradient(145deg,#fbf6ed_0%,#fffdf9_65%,#ffffff_100%)] p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#cdbb9f] hover:shadow-md">
+              <Link key={title} href={FAMILY_ENTRY} className="group flex min-h-[250px] flex-col rounded-[26px] border border-[#dfe3ef] bg-[linear-gradient(145deg,#f3f1ff_0%,#f9faff_65%,#ffffff_100%)] p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md">
                 <span className="w-fit rounded-full bg-stone-900 px-3 py-1.5 text-[11px] font-bold text-white">이용 가능</span>
                 <h2 className="mt-5 text-xl font-bold text-stone-950">{title}</h2>
                 <p className="mt-3 text-sm leading-7 text-stone-600">{description}</p>

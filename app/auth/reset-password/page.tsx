@@ -43,26 +43,26 @@ function ResetPasswordContent() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
+    <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-[#11162d]">
       <div className="mx-auto w-full max-w-xl">
-        {!isComplete ? <Link href={`/auth/login?returnTo=${encodeURIComponent(returnTo)}`} className="text-sm font-semibold text-stone-600">← 로그인으로 돌아가기</Link> : null}
+        {!isComplete ? <Link href={`/auth/login?returnTo=${encodeURIComponent(returnTo)}`} className="text-sm font-semibold text-[#626b85]">← 로그인으로 돌아가기</Link> : null}
         <h1 className="mt-10 text-3xl font-bold">{isComplete ? "비밀번호 변경 완료" : "새 비밀번호 설정"}</h1>
-        <p className="mt-4 text-sm leading-7 text-stone-600">
+        <p className="mt-4 text-sm leading-7 text-[#626b85]">
           {isComplete ? "비밀번호가 안전하게 변경되었습니다. 새 비밀번호로 다시 로그인해 주세요." : "새 비밀번호를 입력하면 모든 기기에서 다시 로그인해야 합니다."}
         </p>
-        <section className="mt-8 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <section className="mt-8 rounded-3xl border border-[#dfe3ef] bg-white p-6 shadow-sm sm:p-8">
           {isComplete ? (
-            <button type="button" onClick={() => router.replace(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`)} className="w-full rounded-xl bg-stone-900 px-5 py-3 font-semibold text-white">새 비밀번호로 로그인하기</button>
-          ) : !ready ? <p className="text-sm leading-6 text-stone-600">재설정 링크를 확인하고 있습니다. 링크를 다시 요청해 주세요.</p> : (
+            <button type="button" onClick={() => router.replace(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`)} className="w-full rounded-xl bg-[#111735] px-5 py-3 font-semibold text-white">새 비밀번호로 로그인하기</button>
+          ) : !ready ? <p className="text-sm leading-6 text-[#626b85]">재설정 링크를 확인하고 있습니다. 링크를 다시 요청해 주세요.</p> : (
             <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void updatePassword(); }}>
               <label className="block text-sm font-semibold" htmlFor="password">새 비밀번호
-                <input id="password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 font-normal outline-none focus:border-stone-900" required />
+                <input id="password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded-xl border border-[#d7dcea] px-4 py-3 font-normal outline-none focus:border-[#745fe7] focus:ring-4 focus:ring-[#745fe7]/10" required />
               </label>
               <label className="block text-sm font-semibold" htmlFor="confirmation">새 비밀번호 확인
-                <input id="confirmation" type="password" autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className="mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 font-normal outline-none focus:border-stone-900" required />
+                <input id="confirmation" type="password" autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className="mt-2 w-full rounded-xl border border-[#d7dcea] px-4 py-3 font-normal outline-none focus:border-[#745fe7] focus:ring-4 focus:ring-[#745fe7]/10" required />
               </label>
               {message ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{message}</p> : null}
-              <button type="submit" disabled={isLoading} className="w-full rounded-xl bg-stone-900 px-5 py-3 font-semibold text-white disabled:bg-stone-400">{isLoading ? "저장 중..." : "비밀번호 저장"}</button>
+              <button type="submit" disabled={isLoading} className="w-full rounded-xl bg-[linear-gradient(135deg,#6f5ce7,#8d68ef)] px-5 py-3 font-black text-white shadow-[0_10px_24px_rgba(111,92,231,0.18)] disabled:opacity-50">{isLoading ? "저장 중..." : "비밀번호 저장"}</button>
             </form>
           )}
         </section>

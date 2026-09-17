@@ -28,7 +28,7 @@ export default function RootLayout({
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#f7f3ea] text-stone-900">
+      <body className="min-h-full flex flex-col bg-[#f5f7fc] text-[#11162d]">
         <AnalyticsVisitTracker />
         {children}
       </body>

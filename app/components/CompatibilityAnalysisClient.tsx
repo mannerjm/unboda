@@ -124,7 +124,7 @@ function BirthDateSelector({
     onChange(next);
   };
 
-  const selectClass = "w-full appearance-none rounded-2xl border border-[#e3d9c8] bg-white px-4 py-3.5 pr-9 text-sm font-semibold text-stone-800 outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400";
+  const selectClass = "w-full appearance-none rounded-2xl border border-[#dfe3ef] bg-white px-4 py-3.5 pr-9 text-sm font-semibold text-stone-800 outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400";
 
   return (
     <div className="sm:col-span-2">
@@ -554,7 +554,7 @@ export default function CompatibilityAnalysisClient({ myProfileLabel }: { myProf
         <p className="mt-2 text-sm leading-6 text-stone-500">현재 분석 대상으로 선택된 내 사주를 기준으로 비교합니다.</p>
       </div>
 
-      <div className="mt-6 rounded-2xl bg-[#f7f3ea] px-4 py-3 text-sm leading-6 text-stone-600">
+      <div className="mt-6 rounded-2xl bg-[#f5f7fc] px-4 py-3 text-sm leading-6 text-stone-600">
         현재 궁합 분석은 연인·배우자 관계를 기준으로 살펴봅니다.
       </div>
 

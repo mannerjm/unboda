@@ -62,7 +62,7 @@ export default function RecommendationTop3({
   return (
     <section className="mt-8" aria-labelledby="recommendation-top3-title">
       {explanation ? (
-        <div className="mb-7 rounded-[1.6rem] border border-[#ded8cc] bg-[#fffdf9] px-5 py-5 sm:px-6">
+        <div className="mb-7 rounded-[1.6rem] border border-[#dfe3ef] bg-[#f9faff] px-5 py-5 sm:px-6">
           <p className="text-xs font-black tracking-[0.14em] text-[#7768c7]">내 무료 결과에서 이어지는 이유</p>
           <p className="mt-3 text-base font-bold leading-7 text-stone-900">{explanation.headline}</p>
           <p className="mt-2 max-w-3xl text-sm leading-7 text-stone-600">{explanation.summary}</p>
@@ -104,7 +104,7 @@ export default function RecommendationTop3({
               type="button"
               aria-pressed={selected}
               onClick={() => setSelectedProductId(product.id)}
-              className={`group min-h-56 rounded-[1.55rem] border p-5 text-left transition hover:-translate-y-0.5 hover:border-[#9282df] hover:shadow-[0_16px_34px_rgba(54,45,93,0.08)] ${selected ? "border-[#9282df] bg-[linear-gradient(145deg,#f8f5ff,#fffdfa)] shadow-[0_16px_36px_rgba(78,63,137,0.10)]" : "border-stone-200 bg-white"}`}
+              className={`group min-h-56 rounded-[1.55rem] border p-5 text-left transition hover:-translate-y-0.5 hover:border-[#9282df] hover:shadow-[0_16px_34px_rgba(54,45,93,0.08)] ${selected ? "border-[#9282df] bg-[linear-gradient(145deg,#f8f5ff,#f9faff)] shadow-[0_16px_36px_rgba(78,63,137,0.10)]" : "border-stone-200 bg-white"}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <p className="text-[11px] font-black tracking-[0.12em] text-[#7667bc]">0{index + 1} · {displayTitle}</p>
@@ -159,7 +159,7 @@ function RecommendationDetail({
     .map(formatTopicExpectedUnderstanding);
 
   return (
-    <section className="mt-6 overflow-hidden rounded-[1.8rem] border border-[#d9d2c5] bg-white shadow-[0_18px_45px_rgba(41,35,27,0.05)]" aria-labelledby="recommendation-detail-title">
+    <section className="mt-6 overflow-hidden rounded-[1.8rem] border border-[#dfe3ef] bg-white shadow-[0_18px_45px_rgba(41,35,27,0.05)]" aria-labelledby="recommendation-detail-title">
       <div className="bg-[linear-gradient(135deg,#111936,#1c183d_55%,#262041)] px-6 py-6 text-white sm:px-7">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs font-black tracking-[0.14em] text-[#b7a9ff]">{isPrimary ? "가장 먼저 이어볼 질문" : "선택한 다음 질문"}</p>
@@ -170,7 +170,7 @@ function RecommendationDetail({
 
       <div className="p-6 sm:p-7">
         <p className="text-sm font-medium leading-7 text-stone-700">{product.description}</p>
-        <div className="mt-5 rounded-2xl bg-[#f7f4ef] px-5 py-4">
+        <div className="mt-5 rounded-2xl bg-[#f4f6fb] px-5 py-4">
           <p className="text-xs font-black text-stone-800">왜 지금 이 질문이 이어졌나요?</p>
           <p className="mt-2 text-sm leading-7 text-stone-600">{reason}</p>
         </div>

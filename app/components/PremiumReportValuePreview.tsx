@@ -130,7 +130,7 @@ export default function PremiumReportValuePreview({ product }: { product: Premiu
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {preview.cards.map((card) => (
-            <div key={card.step} className="rounded-2xl border border-stone-200 bg-[#fffdf9] p-4">
+            <div key={card.step} className="rounded-2xl border border-stone-200 bg-[#f9faff] p-4">
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-stone-900 text-[10px] font-bold text-white">{card.step}</span>
                 <p className="text-sm font-bold text-stone-900">{card.title}</p>

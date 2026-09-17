@@ -72,9 +72,9 @@ function CheckoutSuccessContent() {
       });
   }, [router, searchParams]);
 
-  return <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6 text-stone-900"><p>{message}</p></main>;
+  return <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-6 text-stone-900"><p>{message}</p></main>;
 }
 
 export default function CheckoutSuccessPage() {
-  return <Suspense fallback={<main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6 text-stone-900"><p>결제를 확인하고 있습니다.</p></main>}><CheckoutSuccessContent /></Suspense>;
+  return <Suspense fallback={<main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-6 text-stone-900"><p>결제를 확인하고 있습니다.</p></main>}><CheckoutSuccessContent /></Suspense>;
 }

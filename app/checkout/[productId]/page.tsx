@@ -86,7 +86,7 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
   };
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
+    <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-stone-900">
       <Script src="https://js.tosspayments.com/v2/standard" strategy="afterInteractive" />
       <div className="mx-auto max-w-2xl">
         <Link href={backHref} className="text-sm font-semibold text-stone-600 transition hover:text-stone-900">

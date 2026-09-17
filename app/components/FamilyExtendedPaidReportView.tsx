@@ -103,8 +103,8 @@ function ActionSection({
 function SiblingReport({ content }: { content: StoredFamilySiblingReport }) {
   const { report, directions, meta } = content;
   return (
-    <article className="mt-8 overflow-hidden rounded-[32px] border border-[#e3d9c8] bg-[#fffdf9] shadow-[0_22px_60px_rgba(72,59,41,0.10)]">
-      <header className="bg-[linear-gradient(135deg,#f8f1e5_0%,#fffdf8_58%,#f1ebe2_100%)] px-6 py-8 sm:px-9 sm:py-10">
+    <article className="mt-8 overflow-hidden rounded-[32px] border border-[#dfe3ef] bg-[#f9faff] shadow-[0_22px_60px_rgba(32,38,72,0.09)]">
+      <header className="bg-[linear-gradient(135deg,#f1f0ff_0%,#fbfcff_58%,#eef1fb_100%)] px-6 py-8 sm:px-9 sm:py-10">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full bg-white/80 px-3 py-1.5 text-[11px] font-bold text-stone-700 ring-1 ring-stone-200">가족 궁합 리포트</span>
@@ -155,8 +155,8 @@ function OtherFamilyReport({ content }: { content: StoredFamilyOtherReport }) {
   const { report, directions, meta } = content;
   const relationshipLabel = getFamilyOtherRelationshipLabel(meta.relationshipKind);
   return (
-    <article className="mt-8 overflow-hidden rounded-[32px] border border-[#e3d9c8] bg-[#fffdf9] shadow-[0_22px_60px_rgba(72,59,41,0.10)]">
-      <header className="bg-[linear-gradient(135deg,#f8f1e5_0%,#fffdf8_58%,#f1ebe2_100%)] px-6 py-8 sm:px-9 sm:py-10">
+    <article className="mt-8 overflow-hidden rounded-[32px] border border-[#dfe3ef] bg-[#f9faff] shadow-[0_22px_60px_rgba(32,38,72,0.09)]">
+      <header className="bg-[linear-gradient(135deg,#f1f0ff_0%,#fbfcff_58%,#eef1fb_100%)] px-6 py-8 sm:px-9 sm:py-10">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full bg-white/80 px-3 py-1.5 text-[11px] font-bold text-stone-700 ring-1 ring-stone-200">가족 궁합 리포트</span>

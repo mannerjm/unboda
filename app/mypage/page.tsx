@@ -174,7 +174,7 @@ const statusToneClasses: Record<StatusTone, string> = {
 
 const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
 const activeFocusRing = `${focusRing} focus-visible:ring-white focus-visible:ring-offset-stone-900`;
-const restingFocusRing = `${focusRing} focus-visible:ring-stone-900 focus-visible:ring-offset-[#f7f3ea]`;
+const restingFocusRing = `${focusRing} focus-visible:ring-stone-900 focus-visible:ring-offset-[#f5f7fc]`;
 
 // The active card is charcoal, so tone colors would drop below contrast on it.
 function statusBadgeClass(isActive: boolean, tone: StatusTone): string {
@@ -197,7 +197,7 @@ function deleteActionClass(isActive: boolean): string {
 
 function subCardClass(isActive: boolean): string {
   return isActive
-    ? "mt-5 rounded-2xl border border-[#dfd3bd] bg-[#fbf7ef] p-4"
+    ? "mt-5 rounded-2xl border border-[#d9dded] bg-[#f5f6fc] p-4"
     : "mt-5 rounded-2xl border border-stone-200 bg-stone-50/60 p-4";
 }
 
@@ -659,7 +659,7 @@ export default function MyPage() {
 
   return (
     <AppShell activeProfileId={activeProfileId}>
-      <main className="min-h-screen bg-[#f7f3ea] px-5 py-12 text-stone-900 sm:py-16">
+      <main className="min-h-screen bg-[#f5f7fc] px-5 py-12 text-stone-900 sm:py-16">
         <div className="mx-auto w-full max-w-3xl">
           <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -809,7 +809,7 @@ export default function MyPage() {
               key={profile.id}
               onClick={(event) => selectFromCardClick(event, profile.id)}
               className={profile.id === activeProfileId
-                ? "rounded-2xl border border-[#cdbb98] bg-[#fffdf8] p-4 text-left text-stone-900 shadow-sm sm:p-5"
+                ? "rounded-2xl border border-[#cdbb98] bg-[#fbfcff] p-4 text-left text-stone-900 shadow-sm sm:p-5"
                 : "cursor-pointer rounded-2xl border border-stone-200 bg-white p-4 text-left shadow-sm transition hover:border-stone-300 hover:shadow-md sm:p-5"}
             >
               <button
@@ -839,7 +839,7 @@ export default function MyPage() {
                 </span>
               </button>
               <div className={profile.id === activeProfileId
-                ? "mt-3 rounded-xl border border-[#dfd3bd] bg-[#fbf7ef] px-3 py-2.5"
+                ? "mt-3 rounded-xl border border-[#d9dded] bg-[#f5f6fc] px-3 py-2.5"
                 : "mt-3 rounded-xl border border-stone-200 bg-stone-50/60 px-3 py-2.5"}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -867,7 +867,7 @@ export default function MyPage() {
                 ) : null}
               </div>
               <div className={profile.id === activeProfileId
-                ? "mt-2 rounded-xl border border-[#dfd3bd] bg-[#fbf7ef] px-3 py-2.5"
+                ? "mt-2 rounded-xl border border-[#d9dded] bg-[#f5f6fc] px-3 py-2.5"
                 : "mt-2 rounded-xl border border-stone-200 bg-stone-50/60 px-3 py-2.5"}
               >
                   <p className={profile.id === activeProfileId
@@ -953,7 +953,7 @@ export default function MyPage() {
               ) : null}
               {pendingDeleteProfileId === profile.id ? (
                 <div className={profile.id === activeProfileId
-                  ? "mt-3 rounded-2xl border border-[#dfd3bd] bg-[#fbf7ef] p-4"
+                  ? "mt-3 rounded-2xl border border-[#d9dded] bg-[#f5f6fc] p-4"
                   : "mt-3 rounded-2xl border border-red-200 bg-red-50 p-4"}
                 >
                   <p className={profile.id === activeProfileId

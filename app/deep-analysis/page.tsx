@@ -19,7 +19,7 @@ export default async function DeepAnalysisPage({ searchParams }: { searchParams?
 
   return (
     <AppShell activeProfileId={activeProfile?.id}>
-      <main className="min-h-screen bg-[#f7f6f3] px-5 py-7 text-stone-900 sm:px-8 sm:py-9">
+      <main className="min-h-screen bg-[#f5f7fc] px-5 py-7 text-stone-900 sm:px-8 sm:py-9">
         <div className="mx-auto w-full max-w-6xl">
           <section className="relative overflow-hidden rounded-[2rem] border border-[#6f65ba]/20 bg-[linear-gradient(135deg,#0a1128_0%,#111735_48%,#1b1738_100%)] px-6 py-8 text-white shadow-[0_24px_70px_rgba(23,24,55,0.18)] sm:px-9 sm:py-10 lg:px-11">
             <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#7759db]/20 blur-3xl" />

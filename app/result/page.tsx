@@ -95,7 +95,7 @@ function AISummarySectionCard({
   text: string;
 }) {
   return (
-    <section className="rounded-[1.4rem] border border-[#e4ded3] bg-[#fffdf9] p-5">
+    <section className="rounded-[1.4rem] border border-[#dfe3ef] bg-[#f9faff] p-5">
       <h3 className="text-sm font-semibold text-stone-900">{title}</h3>
       <div className="mt-3 text-sm leading-7 text-stone-700">
         <ReactMarkdown
@@ -445,7 +445,7 @@ useEffect(() => {
 
 if (!isStorageChecked) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea]">
+    <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc]">
       <p className="text-sm text-stone-500">
         사주 데이터를 불러오는 중입니다...
       </p>
@@ -454,7 +454,7 @@ if (!isStorageChecked) {
 }
 if (!sajuData) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6">
+    <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-6">
       <div className="rounded-3xl border border-stone-200 bg-white p-8 text-center shadow-sm">
         <p className="font-semibold text-stone-900">
           {aiResult || "AI 분석 결과를 찾을 수 없습니다."}
@@ -476,7 +476,7 @@ if (
 ) {
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea] px-6">
+    <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-6">
       <div className="rounded-3xl border border-stone-200 bg-white p-8 text-center shadow-sm">
         <p className="font-semibold text-stone-900">
           새 분석 데이터가 없습니다.
@@ -616,7 +616,7 @@ async function retryMainAnalysis() {
 
   return (
     <AppShell activeProfileId={currentProfileId}>
-      <main className="min-h-screen bg-[#f6f4ef] px-5 py-10 text-stone-900 sm:py-12">
+      <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-stone-900 sm:py-12">
         <div className="mx-auto w-full max-w-6xl">
         <header className="relative mb-8 overflow-hidden rounded-[2.2rem] border border-[#7166b8]/20 bg-[linear-gradient(135deg,#0a1128_0%,#111735_52%,#21183d_100%)] px-6 py-8 text-white shadow-[0_24px_70px_rgba(23,24,55,0.16)] sm:px-9 sm:py-10">
           <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-[#7759db]/20 blur-3xl" />
@@ -1600,7 +1600,7 @@ h3: ({ children }) => {
             ) : null}
 
             {providedResult ? (
-              <div className="mt-5 rounded-2xl bg-[#f7f4ef] px-5 py-4">
+              <div className="mt-5 rounded-2xl bg-[#f4f6fb] px-5 py-4">
                 <p className="text-sm font-semibold text-stone-900">무료 결과는 로그인 없이 계속 확인할 수 있어요.</p>
                 <p className="mt-1.5 text-sm leading-6 text-stone-600">개인 추천을 저장하고 이어서 관리하려면 로그인해 주세요.</p>
               </div>
@@ -1658,7 +1658,7 @@ function InfoCard({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[#e6e0d6] bg-[#fffdf9] px-5 py-4">
+    <div className="rounded-2xl border border-[#dfe3ef] bg-[#f9faff] px-5 py-4">
       <p className="mb-2 text-xs text-stone-500">{label}</p>
       <p className="font-semibold text-stone-900">{value}</p>
     </div>
@@ -1668,7 +1668,7 @@ export default function ResultPage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center bg-[#f7f3ea]">
+        <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc]">
           <p className="text-sm text-stone-500">
             사주 결과를 불러오는 중입니다...
           </p>

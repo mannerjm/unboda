@@ -151,7 +151,7 @@ export default function MonthlyFreeAnalysisRefreshNotice({ profileId, surface }:
   }
 
   return (
-    <section className="bg-[#f7f3ea] px-5 pt-6" aria-labelledby="monthly-refresh-heading">
+    <section className="bg-[#f5f7fc] px-5 pt-6" aria-labelledby="monthly-refresh-heading">
       <div className="mx-auto w-full max-w-6xl rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6 sm:px-6">
         <div>
           <p className="text-xs font-semibold tracking-[0.16em] text-amber-700">MONTHLY UPDATE</p>

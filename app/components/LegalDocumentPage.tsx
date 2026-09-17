@@ -10,7 +10,7 @@ type LegalDocumentPageProps = {
 
 export default function LegalDocumentPage({ eyebrow, title, summary, children }: LegalDocumentPageProps) {
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-5 py-12 text-stone-900 sm:px-8 sm:py-16">
+    <main className="min-h-screen bg-[#f5f7fc] px-5 py-12 text-stone-900 sm:px-8 sm:py-16">
       <article className="mx-auto w-full max-w-3xl">
         <Link href="/" className="inline-flex text-sm font-semibold text-stone-600 underline-offset-4 hover:text-stone-900 hover:underline focus:outline-none focus:ring-2 focus:ring-stone-900 focus:ring-offset-2">
           운보다 홈

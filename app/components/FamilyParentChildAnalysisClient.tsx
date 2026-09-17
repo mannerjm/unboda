@@ -122,7 +122,7 @@ function BirthDateSelector({
     onChange(next);
   };
 
-  const selectClass = "w-full appearance-none rounded-2xl border border-[#e3d9c8] bg-white px-4 py-3.5 pr-9 text-sm font-semibold text-stone-800 outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400";
+  const selectClass = "w-full appearance-none rounded-2xl border border-[#dfe3ef] bg-white px-4 py-3.5 pr-9 text-sm font-semibold text-stone-800 outline-none transition focus:border-stone-500 focus:ring-2 focus:ring-stone-200 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400";
 
   return (
     <div className="sm:col-span-2">
@@ -199,8 +199,8 @@ function FamilyReport({ response, onReset }: { response: FamilyResponse; onReset
   const childLabel = meta.userRole === "child" ? meta.myProfileLabel : meta.familyMemberLabel;
 
   return (
-    <article data-section="family-parent-child-report" className="mt-8 overflow-hidden rounded-[32px] border border-[#e3d9c8] bg-[#fffdf9] shadow-[0_22px_60px_rgba(72,59,41,0.10)]">
-      <header className="bg-[linear-gradient(135deg,#f8f1e5_0%,#fffdf8_58%,#f1ebe2_100%)] px-6 py-8 sm:px-9 sm:py-10">
+    <article data-section="family-parent-child-report" className="mt-8 overflow-hidden rounded-[32px] border border-[#dfe3ef] bg-[#f9faff] shadow-[0_22px_60px_rgba(32,38,72,0.09)]">
+      <header className="bg-[linear-gradient(135deg,#f1f0ff_0%,#fbfcff_58%,#eef1fb_100%)] px-6 py-8 sm:px-9 sm:py-10">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full bg-white/80 px-3 py-1.5 text-[11px] font-bold text-stone-700 ring-1 ring-stone-200">가족 궁합 리포트</span>
@@ -342,8 +342,8 @@ export default function FamilyParentChildAnalysisClient({ myProfileLabel, profil
   }
 
   return (
-    <form onSubmit={submit} className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-[30px] border border-[#e4dac9] bg-white shadow-[0_18px_50px_rgba(87,72,48,0.08)]">
-      <div className="bg-[linear-gradient(135deg,#f7f1e6_0%,#fffdf9_60%,#f8f3ea_100%)] px-6 py-8 sm:px-8">
+    <form onSubmit={submit} className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-[30px] border border-[#dfe3ef] bg-white shadow-[0_18px_50px_rgba(32,38,72,0.08)]">
+      <div className="bg-[linear-gradient(135deg,#f1f0ff_0%,#f9faff_60%,#f7f8ff_100%)] px-6 py-8 sm:px-8">
         <p className="text-[11px] font-bold tracking-[0.18em] text-stone-400">분석 기준</p>
         <p className="mt-2 text-2xl font-bold tracking-[-0.02em] text-stone-950">{myProfileLabel}님의 사주 <span className="font-medium text-stone-400">×</span> 가족 사주</p>
         <p className="mt-3 text-sm leading-7 text-stone-600">먼저 이 관계에서 내가 부모인지 자녀인지 선택한 뒤 상대 가족의 정보를 입력해 주세요.</p>

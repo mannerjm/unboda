@@ -115,16 +115,16 @@ function SignupPageContent() {
 
   if (isConfirmationSent) {
     return (
-      <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
+      <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-[#11162d]">
         <div className="mx-auto w-full max-w-xl">
-          <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9 text-center">
-            <h2 className="text-2xl font-bold text-stone-900">이메일을 확인해 주세요</h2>
-            <p className="mt-4 text-sm leading-7 text-stone-600">
+          <section className="mt-10 rounded-3xl border border-[#dfe3ef] bg-white p-7 shadow-sm sm:p-9 text-center">
+            <h2 className="text-2xl font-bold text-[#11162d]">이메일을 확인해 주세요</h2>
+            <p className="mt-4 text-sm leading-7 text-[#626b85]">
               <strong>{email}</strong> 주소로 확인 이메일을 보냈습니다.
               <br />
               이메일의 링크를 클릭하면 로그인이 완료됩니다.
             </p>
-            <p className="mt-4 text-xs text-stone-500">
+            <p className="mt-4 text-xs text-[#7b8299]">
               이메일이 오지 않으면 스팸함을 확인해 주세요.
             </p>
           </section>
@@ -134,16 +134,16 @@ function SignupPageContent() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
+    <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-[#11162d]">
       <div className="mx-auto w-full max-w-xl">
         <Link
           href={backHref}
-          className="text-sm font-semibold text-stone-600 transition hover:text-stone-900"
+          className="text-sm font-semibold text-[#626b85] transition hover:text-[#11162d]"
         >
           ← 이전 화면으로 돌아가기
         </Link>
 
-        <p className="mt-10 text-xs font-semibold tracking-[0.25em] text-stone-500">
+        <p className="mt-10 text-xs font-semibold tracking-[0.25em] text-[#7b8299]">
           SIGN UP
         </p>
 
@@ -151,15 +151,15 @@ function SignupPageContent() {
           운보다 계정 만들기
         </h1>
 
-        <p className="mt-5 text-sm leading-7 text-stone-600">
+        <p className="mt-5 text-sm leading-7 text-[#626b85]">
           구매한 심층 분석과 저장한 사주 프로필을 안전하게 보관하려면
           계정을 만들어 주세요.
         </p>
 
-        <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
+        <section className="mt-8 overflow-hidden rounded-[2rem] border border-[#dfe3ef] bg-white shadow-[0_20px_55px_rgba(32,38,72,0.08)]"><div className="bg-[linear-gradient(135deg,#0a1128,#15183a_58%,#241b43)] px-7 py-6 text-white"><p className="text-xs font-black tracking-[0.14em] text-[#aa9cff]">운보다 계정</p><p className="mt-2 text-sm leading-6 text-[#b7bdd1]">분석과 구매 기록을 안전하게 이어서 관리해요.</p></div><div className="p-7 sm:p-9">
           <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); void handleSignup(); }}>
             <div>
-              <label htmlFor="email" className="text-sm font-semibold text-stone-900">
+              <label htmlFor="email" className="text-sm font-semibold text-[#11162d]">
                 이메일
               </label>
               <input
@@ -169,13 +169,13 @@ function SignupPageContent() {
                 placeholder="example@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-3 w-full rounded-2xl border border-stone-300 bg-white px-4 py-4 text-sm outline-none transition focus:border-stone-900"
+                className="mt-3 w-full rounded-2xl border border-[#d7dcea] bg-white px-4 py-4 text-sm outline-none transition focus:border-[#745fe7] focus:ring-4 focus:ring-[#745fe7]/10"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="text-sm font-semibold text-stone-900">
+              <label htmlFor="password" className="text-sm font-semibold text-[#11162d]">
                 비밀번호
               </label>
               <input
@@ -185,13 +185,13 @@ function SignupPageContent() {
                 placeholder="8자 이상 입력해 주세요"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-3 w-full rounded-2xl border border-stone-300 bg-white px-4 py-4 text-sm outline-none transition focus:border-stone-900"
+                className="mt-3 w-full rounded-2xl border border-[#d7dcea] bg-white px-4 py-4 text-sm outline-none transition focus:border-[#745fe7] focus:ring-4 focus:ring-[#745fe7]/10"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="passwordConfirm" className="text-sm font-semibold text-stone-900">
+              <label htmlFor="passwordConfirm" className="text-sm font-semibold text-[#11162d]">
                 비밀번호 확인
               </label>
               <input
@@ -201,20 +201,20 @@ function SignupPageContent() {
                 placeholder="비밀번호를 다시 입력해 주세요"
                 value={passwordConfirm}
                 onChange={(e) => setPasswordConfirm(e.target.value)}
-                className="mt-3 w-full rounded-2xl border border-stone-300 bg-white px-4 py-4 text-sm outline-none transition focus:border-stone-900"
+                className="mt-3 w-full rounded-2xl border border-[#d7dcea] bg-white px-4 py-4 text-sm outline-none transition focus:border-[#745fe7] focus:ring-4 focus:ring-[#745fe7]/10"
                 required
               />
             </div>
 
-            <fieldset className="space-y-4 border-t border-stone-200 pt-6">
-              <legend className="text-sm font-semibold text-stone-900">가입 확인</legend>
+            <fieldset className="space-y-4 border-t border-[#dfe3ef] pt-6">
+              <legend className="text-sm font-semibold text-[#11162d]">가입 확인</legend>
               <label className="flex items-start gap-3 text-sm leading-6 text-stone-700">
                 <input
                   ref={ageRef}
                   type="checkbox"
                   checked={age14OrOlderConfirmed}
                   onChange={(e) => setAge14OrOlderConfirmed(e.target.checked)}
-                  className="mt-1 h-5 w-5 shrink-0 accent-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+                  className="mt-1 h-5 w-5 shrink-0 accent-[#6f5ce7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]"
                 />
                 <span>저는 만 14세 이상입니다.</span>
               </label>
@@ -224,9 +224,9 @@ function SignupPageContent() {
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-1 h-5 w-5 shrink-0 accent-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+                  className="mt-1 h-5 w-5 shrink-0 accent-[#6f5ce7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]"
                 />
-                <span><Link href="/terms" className="font-semibold text-stone-900 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900">이용약관</Link>에 동의합니다.</span>
+                <span><Link href="/terms" className="font-semibold text-[#11162d] underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]">이용약관</Link>에 동의합니다.</span>
               </label>
             </fieldset>
 
@@ -241,25 +241,25 @@ function SignupPageContent() {
             <button
               type="submit"
               disabled={isLoading || (AUTH_CAPTCHA_ENABLED && !captchaToken)}
-              className="w-full rounded-2xl bg-stone-900 px-5 py-4 font-semibold text-white transition hover:bg-stone-800 disabled:opacity-60"
+              className="w-full rounded-2xl bg-[linear-gradient(135deg,#6f5ce7,#8d68ef)] px-5 py-4 font-black text-white shadow-[0_12px_28px_rgba(111,92,231,0.20)] transition hover:brightness-105 disabled:opacity-50"
             >
               {isLoading ? "가입 중..." : "회원가입"}
             </button>
           </form>
 
-          <div className="mt-6 border-t border-stone-200 pt-6 text-center">
-            <p className="text-sm text-stone-600">
+          <div className="mt-6 border-t border-[#dfe3ef] pt-6 text-center">
+            <p className="text-sm text-[#626b85]">
               이미 계정이 있으신가요?
             </p>
 
             <Link
               href={`/auth/login?returnTo=${encodeURIComponent(safeReturnTo)}${isGuestOrigin ? `&origin=${encodeURIComponent(origin)}` : ""}`}
-              className="mt-3 inline-block text-sm font-bold text-stone-900 underline"
+              className="mt-3 inline-block text-sm font-bold text-[#11162d] underline"
             >
               로그인하기
             </Link>
           </div>
-        </section>
+        </div></section>
       </div>
     </main>
   );
@@ -269,9 +269,9 @@ export default function SignupPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
+        <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-[#11162d]">
           <div className="mx-auto w-full max-w-xl">
-            <p className="text-sm text-stone-600">불러오는 중입니다...</p>
+            <p className="text-sm text-[#626b85]">불러오는 중입니다...</p>
           </div>
         </main>
       }

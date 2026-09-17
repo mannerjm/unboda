@@ -74,7 +74,8 @@ assert.equal(safety.decision, "SAFETY_REDIRECT", "compatibility consulting must 
 assert.equal(safety.chargeable, false);
 
 const sessionRoute = readFileSync("app/api/ai-consulting/session/route.ts", "utf8");
-assert(sessionRoute.includes("getSpecialAnalysisProduct"), "AI consulting session boundary must accept special compatibility products");
+assert(sessionRoute.includes("isAiConsultingCompatibilityProductId"), "AI consulting session boundary must explicitly allow supported compatibility products");
+assert(!sessionRoute.includes("getSpecialAnalysisProduct"), "unsupported future special products must not gain consulting access implicitly");
 
 const reportRoutes = [
   ["app/special-analysis/compatibility/report/page.tsx", "COMPATIBILITY_ROMANTIC_PRODUCT_ID"],

@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { getPeriodAnalysisStrategy } from "../app/lib/analysisPeriodStrategy";
 import { getLaunchProductIds, getPaidAnalysisTopicConfig } from "../app/lib/paidAnalysisTopicConfig";
 import { getPremiumProduct } from "../app/lib/premiumProductRegistry";
 import { resolveLaunchPurchasableProduct } from "../app/lib/purchases/products";
@@ -8,6 +9,7 @@ function assert(condition: boolean, message: string): void {
 }
 
 const sharedDetail = readFileSync("app/components/PremiumProductDetail.tsx", "utf8");
+const reportPreview = readFileSync("app/components/PremiumReportValuePreview.tsx", "utf8");
 const catalog = readFileSync("app/components/PremiumCatalogSection.tsx", "utf8");
 const standalonePage = readFileSync("app/paid-analysis/[productId]/page.tsx", "utf8");
 const accessPanel = readFileSync("app/paid-analysis/[productId]/PaidAnalysisAccessPanel.tsx", "utf8");
@@ -27,9 +29,30 @@ for (const required of [
   "이런 때 살펴보세요",
   "이 분석에서 보는 것",
   "분석 후 알 수 있는 것",
+  "PremiumReportValuePreview",
+  'state === "not_purchased"',
   "getPremiumAnalysisHref(product.id, state, profileId)",
 ]) {
   assert(sharedDetail.includes(required), `shared product detail missing ${required}`);
+}
+
+for (const required of [
+  "getPaidAnalysisTopicConfig",
+  "getPeriodAnalysisStrategy",
+  "config.userQuestion",
+  "config.analysisFocus",
+  "config.actionFocus",
+  "config.decisionType",
+  "strategy.requiredInsights",
+  "strategy.timelineSpec.labels",
+  "strategy.reviewArtifact",
+  "리포트 구성 미리보기",
+  "이 상품의 실제 생성 주제",
+  "이 기간 상품의 실제 생성 주제",
+  "실제 분석 결과를 미리 보여주는 화면이 아니라",
+  "실제 문장과 판단 기준은 선택한 프로필의 계산 결과와 분석 시점에 따라 달라집니다.",
+]) {
+  assert(reportPreview.includes(required), `report value preview missing ${required}`);
 }
 
 for (const removedCustomerCopy of [
@@ -56,8 +79,24 @@ for (const productId of getLaunchProductIds()) {
   if (product.kind === "PERIOD") {
     const recommendedFor = product.purchaseDecision?.recommendedFor.slice(0, 2) ?? [];
     assert(recommendedFor.length > 0 && recommendedFor.length <= 2, `${productId} must support a maximum-two-item period relevance section`);
+
+    const strategy = getPeriodAnalysisStrategy(productId);
+    assert(Boolean(strategy), `${productId} must have an actual period generation strategy for the preview`);
+    if (strategy) {
+      assert(strategy.requiredInsights.length >= 4, `${productId} preview must have period-specific generated responsibilities`);
+      assert(strategy.timelineSpec.labels.length >= 4, `${productId} preview must expose the real period timeline structure`);
+      assert(strategy.reviewArtifact.trim().length > 0, `${productId} preview must expose the real review artifact`);
+    }
   } else {
     assert(product.title.trim().length > 0, `${productId} must support title-based plain-language relevance copy`);
+
+    const config = getPaidAnalysisTopicConfig(productId);
+    assert(Boolean(config), `${productId} must have an actual topic generation config for the preview`);
+    if (config) {
+      assert(config.analysisFocus.length > 0, `${productId} preview must have topic-specific analysis focus`);
+      assert(config.requiredInsights.length > 0, `${productId} preview must remain grounded in required generated insights`);
+      assert(config.actionFocus.length > 0, `${productId} preview must have topic-specific action focus`);
+    }
   }
 
   const quickOverviewItems = product.details?.slice(0, 3)

@@ -9,6 +9,7 @@ import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import { getProductPricing } from "@/app/lib/productPricing";
 import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
 import { formatTopicExpectedUnderstanding } from "@/app/lib/purchaseDecisionCopy";
+import PremiumReportValuePreview from "@/app/components/PremiumReportValuePreview";
 
 type PremiumProductDetailProps = {
   product: PremiumProductDefinition;
@@ -148,6 +149,8 @@ export default function PremiumProductDetail({
       <DetailList title={isPeriod ? "이런 때 살펴보세요" : "이런 고민이 있다면"} items={recommendedFor} />
       <DetailList title="이 분석에서 보는 것" items={quickOverviewItems} />
       <DetailList title="분석 후 알 수 있는 것" items={expectedUnderstanding} />
+
+      {state === "not_purchased" ? <PremiumReportValuePreview product={product} /> : null}
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-4">
         <span className="text-sm font-medium text-stone-500">{formatPrice(product.id)}</span>

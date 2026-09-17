@@ -18,7 +18,10 @@ type PreviewModel = {
 };
 
 function normalizeSentence(value: string): string {
-  return value.trim().replace(/[?？.。]+$/, "");
+  return value
+    .trim()
+    .replace(/노력কে/g, "노력을")
+    .replace(/[?？.。]+$/, "");
 }
 
 function buildTopicPreview(product: PremiumProductDefinition): PreviewModel | null {

@@ -16,7 +16,7 @@ function ReportSectionHeader({
   void tone;
   return (
     <div className="max-w-3xl">
-      <p className={`text-[11px] font-bold tracking-[0.18em] ${dark ? "text-slate-400" : "text-slate-400"}`}>{eyebrow}</p>
+      <p className={`text-xs font-bold tracking-[0.15em] ${dark ? "text-slate-400" : "text-slate-400"}`}>{eyebrow}</p>
       <h3 className={`mt-2 text-xl font-bold tracking-tight sm:text-2xl ${dark ? "text-white" : "text-[#11162d]"}`}>{title}</h3>
       {description ? <p className={`mt-2 text-sm leading-7 ${dark ? "text-slate-300" : "text-slate-500"}`}>{description}</p> : null}
     </div>
@@ -25,10 +25,10 @@ function ReportSectionHeader({
 
 function PointList({ points }: { points: readonly string[] }) {
   return (
-    <ul className="mt-5 grid gap-3">
+    <ul className="mt-4 grid gap-3">
       {points.map((point) => (
-        <li key={point} className="flex gap-3 rounded-2xl bg-white/80 px-4 py-3 text-sm leading-7 text-slate-700 ring-1 ring-[#dce1ef]/80">
-          <span aria-hidden="true" className="mt-[9px] flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6f5ce7] text-[10px] font-bold text-white">✓</span>
+        <li key={point} className="flex gap-3 rounded-2xl bg-white/80 px-4 py-3 text-[15px] leading-7 text-slate-700 ring-1 ring-[#dce1ef]/80">
+          <span aria-hidden="true" className="mt-[9px] flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6f5ce7] text-xs font-bold text-white">✓</span>
           <span>{point}</span>
         </li>
       ))}
@@ -39,9 +39,9 @@ function PointList({ points }: { points: readonly string[] }) {
 function SummaryTile({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
   return (
     <article className="rounded-3xl border border-[#dce1ef]/80 bg-white p-5 shadow-sm sm:p-6">
-      <p className="text-[11px] font-bold tracking-[0.16em] text-slate-400">{eyebrow}</p>
+      <p className="text-xs font-bold tracking-[0.13em] text-slate-400">{eyebrow}</p>
       <h4 className="mt-3 text-base font-bold leading-7 text-[#11162d]">{title}</h4>
-      <p className="mt-2 text-sm leading-7 text-slate-600">{body}</p>
+      <p className="mt-2 text-[15px] leading-7 text-slate-700">{body}</p>
     </article>
   );
 }
@@ -51,10 +51,10 @@ function PerspectiveCard({ label, headline, summary, signals }: { label: string;
     <article className="rounded-3xl border border-[#d8d3ff] bg-white p-5 shadow-sm sm:p-6">
       <p className="text-xs font-semibold text-[#5e4bd1]">{label}</p>
       <h4 className="mt-3 text-lg font-bold leading-8 text-[#11162d]">{headline}</h4>
-      <p className="mt-3 text-sm leading-7 text-slate-600">{summary}</p>
+      <p className="mt-3 text-[15px] leading-7 text-slate-700">{summary}</p>
       <div className="mt-5 space-y-2">
         {signals.map((signal) => (
-          <p key={signal} className="flex gap-2 text-xs leading-6 text-slate-600">
+          <p key={signal} className="flex gap-2 text-sm leading-6 text-slate-600">
             <span aria-hidden="true" className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#dccaa7]" />
             <span>{signal}</span>
           </p>
@@ -116,14 +116,14 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
         </header>
 
         {!meta.partnerBirthTimeKnown ? (
-          <div className="border-t border-[#d8d3ff] bg-[#f3f1ff] px-6 py-4 text-sm leading-7 text-slate-600 sm:px-10">
+          <div className="border-t border-[#d8d3ff] bg-[#f3f1ff] px-6 py-4 text-[15px] leading-7 text-slate-700 sm:px-10">
             상대방 출생시간이 없어 시간대에 따라 달라지는 세부 요소와 일부 장기 흐름은 제외하고, 확인 가능한 생년월일 기준과 올해 흐름을 반영했습니다.
           </div>
         ) : null}
 
         <section className="bg-[#f7f8fc] px-6 py-9 sm:px-10 sm:py-10">
           <ReportSectionHeader eyebrow="KEY POINTS" title="관계 핵심 포인트" description="길게 읽기 전에 두 사람 관계에서 먼저 확인할 세 가지 포인트입니다." />
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <div className="mt-5 grid gap-3 lg:grid-cols-3">
             <SummaryTile eyebrow="강점" title={firstStrength?.title ?? "함께 살릴 수 있는 강점"} body={firstStrength?.body ?? "두 사람이 함께 있을 때 살아나는 장점을 아래 리포트에서 구체적으로 확인할 수 있습니다."} />
             <SummaryTile eyebrow="조율" title="부딪히기 쉬운 지점" body={conflictPoint} />
             <SummaryTile eyebrow={`${meta.evaluationYear}년`} title={report.currentTiming?.headline ?? "현재 관계 흐름"} body={timingPoint} />
@@ -138,7 +138,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
                 <article key={item.title} className="rounded-3xl bg-[#f7f8fc] p-5 ring-1 ring-[#dce1ef]/70 sm:p-6">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#6f5ce7] text-xs font-bold text-white">{String(index + 1).padStart(2, "0")}</span>
                   <h4 className="mt-5 text-base font-bold leading-7 text-[#11162d]">{item.title}</h4>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{item.body}</p>
+                  <p className="mt-3 text-[15px] leading-7 text-slate-700">{item.body}</p>
                 </article>
               ))}
             </div>
@@ -175,7 +175,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
               <p className="text-xl font-bold leading-8 text-[#11162d] sm:text-2xl">{report.currentTiming.headline}</p>
               <p className="mt-4 max-w-3xl text-[15px] leading-8 text-slate-700">{report.currentTiming.summary}</p>
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                {report.currentTiming.keyPoints.map((point) => <div key={point} className="rounded-2xl bg-white px-4 py-4 text-sm leading-7 text-slate-700 ring-1 ring-[#e5e1ff]">{point}</div>)}
+                {report.currentTiming.keyPoints.map((point) => <div key={point} className="rounded-2xl bg-white px-4 py-4 text-[15px] leading-7 text-slate-700 ring-1 ring-[#e5e1ff]">{point}</div>)}
               </div>
             </div>
           </section>
@@ -183,12 +183,12 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
 
         <section className="border-t border-[#dce1ef]/80 px-6 py-10 sm:px-10 sm:py-12">
           <ReportSectionHeader eyebrow="07 · 지금 해볼 것" title="지금 해볼 것" description="관계를 바꾸는 건 큰 결심보다 반복 가능한 작은 행동에 가깝습니다." />
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <div className="mt-5 grid gap-3 lg:grid-cols-3">
             {report.actionGuide.doNext.map((item, index) => (
               <article key={`${item.action}-${item.reason}`} className="rounded-3xl bg-[#f7f6ff] p-5 ring-1 ring-[#d8d3ff] sm:p-6">
-                <p className="text-[11px] font-bold tracking-[0.16em] text-slate-400">실천 {String(index + 1).padStart(2, "0")}</p>
+                <p className="text-xs font-bold tracking-[0.13em] text-slate-400">실천 {String(index + 1).padStart(2, "0")}</p>
                 <p className="mt-3 font-bold leading-7 text-[#11162d]">{item.action}</p>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{item.reason}</p>
+                <p className="mt-3 text-[15px] leading-7 text-slate-700">{item.reason}</p>
               </article>
             ))}
           </div>
@@ -198,14 +198,14 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
               {report.actionGuide.avoid.map((item) => (
                 <div key={`${item.action}-${item.reason}`} className="rounded-2xl bg-white p-4 ring-1 ring-[#dce1ef]/80">
                   <p className="text-sm font-semibold leading-7 text-[#11162d]">{item.action}</p>
-                  <p className="mt-1 text-sm leading-7 text-slate-600">{item.reason}</p>
+                  <p className="mt-1 text-[15px] leading-7 text-slate-700">{item.reason}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
       </article>
-      <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-6 text-slate-500">궁합은 두 사람의 명리 구조와 현재 흐름을 해석한 참고 콘텐츠입니다. 관계의 결과를 확정하거나 대신 결정하지 않습니다.</p>
+      <p className="mx-auto mt-5 max-w-3xl text-center text-sm leading-6 text-slate-600">궁합은 두 사람의 명리 구조와 현재 흐름을 해석한 참고 콘텐츠입니다. 관계의 결과를 확정하거나 대신 결정하지 않습니다.</p>
     </div>
   );
 }

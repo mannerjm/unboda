@@ -74,6 +74,7 @@ type PaidAnalysisSummary = {
   productId: string;
   productName: string;
   reportStatus: PaidReportStatus;
+  analysisEditionKey: string | null;
 };
 
 type RefundSummary = {
@@ -982,7 +983,7 @@ export default function MyPage() {
                   {(paidAnalysisByProfileId[profile.id] ?? []).length > 0 ? (
                     <ul className="mt-2 divide-y divide-stone-200">
                       {(paidAnalysisByProfileId[profile.id] ?? []).map((item) => (
-                      <li key={item.productId} className="flex flex-wrap items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">
+                      <li key={`${item.productId}|${item.analysisEditionKey ?? "legacy"}`} className="flex flex-wrap items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">
                         <span className="min-w-0">
                           <span className="block text-sm font-semibold">{item.productName}</span>
                           <span className={`mt-1.5 ${statusBadgeClass(profile.id === activeProfileId, paidReportStatusTones[item.reportStatus])}`}>
@@ -1001,7 +1002,7 @@ export default function MyPage() {
                           </button>
                         ) : (
                           <Link
-                            href={`/paid-analysis/${item.productId}/report?profileId=${profile.id}`}
+                            href={`/paid-analysis/${item.productId}/report?profileId=${profile.id}${item.analysisEditionKey ? `&edition=${encodeURIComponent(item.analysisEditionKey)}` : ""}`}
                             className={profile.id === activeProfileId
                               ? `shrink-0 ${cardActionClass(true)}`
                               : `shrink-0 ${cardActionClass(false)}`}

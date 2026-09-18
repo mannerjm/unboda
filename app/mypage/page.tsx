@@ -13,6 +13,7 @@ import { profileDeleteBlockMessages } from "@/app/lib/profiles/types";
 import { createClient } from "@/app/lib/supabase/client";
 import { GUEST_BIRTH_DATE_MIN, getGuestBirthDateMax } from "@/app/lib/guestFreeAnalyses/date";
 import AppShell from "@/app/components/AppShell";
+import { hasCanonicalAnalysisInputChanged } from "@/app/lib/analysisInputIdentity";
 
 function formatProfileBirthDate(birthDate: string): string {
   return birthDate.replace(/-/g, ".");
@@ -258,6 +259,9 @@ export default function MyPage() {
   const [formInput, setFormInput] = useState<ProfileInput>(emptyProfileInput);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [pendingBirthChangeConfirmation, setPendingBirthChangeConfirmation] = useState<{
+    hasPaidHistory: boolean;
+  } | null>(null);
   const confirmedActiveProfileIdRef = useRef<string | null>(null);
   const pendingActiveProfileIdRef = useRef<string | null>(null);
   const isPersistingActiveProfileRef = useRef(false);
@@ -623,9 +627,28 @@ export default function MyPage() {
     setEditingProfileId(null);
     setFormInput(emptyProfileInput);
     setFormError(null);
+    setPendingBirthChangeConfirmation(null);
   }
 
-  async function submitForm() {
+  async function submitForm(birthDataChangeAcknowledged = false) {
+    const editingProfile = editingProfileId
+      ? profiles.find((profile) => profile.id === editingProfileId) ?? null
+      : null;
+    const canonicalBirthChanged = Boolean(
+      editingProfile && hasCanonicalAnalysisInputChanged(editingProfile, formInput),
+    );
+    const hasPaidHistory = Boolean(
+      editingProfileId
+      && purchaseHistory.some(
+        (item) => item.profileId === editingProfileId && item.paymentStatus === "paid",
+      ),
+    );
+
+    if (canonicalBirthChanged && !birthDataChangeAcknowledged) {
+      setPendingBirthChangeConfirmation({ hasPaidHistory });
+      return;
+    }
+
     setIsSubmittingForm(true);
     setFormError(null);
     const fallback = editingProfileId
@@ -638,13 +661,30 @@ export default function MyPage() {
         {
           method: editingProfileId ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formInput),
+          body: JSON.stringify(
+            canonicalBirthChanged
+              ? { ...formInput, birthDataChangeAcknowledged: true }
+              : formInput,
+          ),
         },
       );
-      const body = await response.json() as { error?: string };
-      if (!response.ok) throw new Error(body.error ?? fallback);
+      const body = await response.json() as { error?: string; code?: string };
+      if (!response.ok) {
+        if (body.code === "BIRTH_DATA_CHANGE_ACKNOWLEDGEMENT_REQUIRED") {
+          setPendingBirthChangeConfirmation({ hasPaidHistory: true });
+          return;
+        }
+        throw new Error(body.error ?? fallback);
+      }
 
       closeForm();
+      setMessage(
+        canonicalBirthChanged
+          ? hasPaidHistory
+            ? "출생 정보가 변경되었습니다. 기존 구매 리포트와 AI 상담은 이전 정보 기준으로 보관됩니다. 새 기준으로 이용하려면 무료 사주를 다시 확인해 주세요."
+            : "출생 정보가 변경되었습니다. 현재 정보 기준으로 무료 사주를 다시 확인해 주세요."
+          : null,
+      );
       await reloadMypageData();
     } catch (submitError) {
       setFormError(submitError instanceof Error ? submitError.message : fallback);
@@ -778,8 +818,8 @@ export default function MyPage() {
             ) : null}
             {editingProfileId ? (
               <p className="rounded-xl bg-slate-50 px-4 py-3 text-xs leading-6 text-slate-500">
-                출생 정보가 변경되면 기존 무료 분석은 다시 분석이 필요할 수 있습니다.
-                이미 구매한 심층 분석이 있다면 기존 리포트 내용과 새 출생 정보가 달라질 수 있습니다.
+                생년월일·태어난 시간·성별·달력·윤달처럼 사주 계산에 쓰이는 정보가 바뀌면 무료 사주를 다시 확인해야 합니다.
+                이미 구매한 리포트는 구매 당시 출생 정보 기준으로 바뀌지 않고 그대로 보관됩니다.
               </p>
             ) : null}
             {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
@@ -792,6 +832,58 @@ export default function MyPage() {
               </button>
             </div>
           </form>
+        ) : null}
+        {pendingBirthChangeConfirmation ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b1025]/55 px-5 py-8 backdrop-blur-sm"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && !isSubmittingForm) {
+                setPendingBirthChangeConfirmation(null);
+              }
+            }}
+          >
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="birth-change-confirmation-title"
+              className="w-full max-w-lg rounded-[1.75rem] border border-[#d8d3ff] bg-white p-6 shadow-[0_28px_80px_rgba(15,20,50,0.28)] sm:p-7"
+            >
+              <p className="text-xs font-black tracking-[0.14em] text-[#6f5ce7]">출생 정보 변경 안내</p>
+              <h2 id="birth-change-confirmation-title" className="mt-2 text-xl font-black text-[#11162d]">
+                출생 정보를 변경하시겠어요?
+              </h2>
+              {pendingBirthChangeConfirmation.hasPaidHistory ? (
+                <div className="mt-4 space-y-3 text-sm leading-7 text-slate-700">
+                  <p>기존 리포트와 AI 상담 기록은 구매 당시 출생 정보 기준으로 그대로 보관됩니다.</p>
+                  <p>변경 후 기존 상담은 새 출생 정보와 자동으로 합쳐지지 않습니다. 새 출생 정보 기준으로 이용하려면 무료 사주를 다시 확인한 뒤, 이후 새로 구매하는 분석부터 변경된 정보가 적용됩니다.</p>
+                  <p className="font-semibold text-[#40359a]">남아 있는 AI 질문권은 그대로 유지됩니다.</p>
+                </div>
+              ) : (
+                <p className="mt-4 text-sm leading-7 text-slate-700">
+                  출생 정보를 변경하면 기존 무료 사주는 재분석이 필요합니다. 변경된 정보는 무료 사주를 다시 확인한 뒤 이후 새 분석부터 적용됩니다.
+                </p>
+              )}
+              <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  disabled={isSubmittingForm}
+                  onClick={() => setPendingBirthChangeConfirmation(null)}
+                  className={`rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 ${restingFocusRing}`}
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  disabled={isSubmittingForm}
+                  onClick={() => void submitForm(true)}
+                  className={`rounded-xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:opacity-50 ${restingFocusRing}`}
+                >
+                  {isSubmittingForm ? "변경 중..." : "출생 정보 변경"}
+                </button>
+              </div>
+            </section>
+          </div>
         ) : null}
         {isProfilesLoaded && profiles.length === 0 && !isFormOpen ? (
           <section className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white/70 p-8 text-center">

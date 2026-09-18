@@ -105,38 +105,38 @@ export default function CreditCheckoutClient({
   }
 
   return (
-    <section className="mt-8">
-      <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+    <section className="mt-6">
+      <div className="rounded-[1.75rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-6">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold tracking-[0.18em] text-stone-500">PROFILE CREDIT</p>
-            <h2 className="mt-2 text-xl font-bold text-stone-950">AI 질문권</h2>
+            <p className="text-xs font-semibold tracking-[0.18em] text-slate-500">PROFILE CREDIT</p>
+            <h2 className="mt-2 text-xl font-bold text-[#11162d]">AI 질문권</h2>
           </div>
-          <div className="rounded-2xl bg-stone-100 px-4 py-3 text-right">
-            <p className="text-xs text-stone-500">현재 잔액</p>
-            <p className="mt-1 text-lg font-bold text-stone-950">{currentBalance}회</p>
+          <div className="rounded-2xl bg-[#eef0f6] px-4 py-3 text-right">
+            <p className="text-xs text-slate-500">현재 잔액</p>
+            <p className="mt-1 text-lg font-bold text-[#11162d]">{currentBalance}회</p>
           </div>
         </div>
 
-        <p className="mt-4 text-sm leading-7 text-stone-600">
+        <p className="mt-4 text-sm leading-7 text-slate-700">
           질문권은 이 프로필에서 공통으로 사용합니다. 구매한 심층 분석의 상담 범위 안에서 정상 답변이 완료된 경우에만 1회 차감됩니다.
         </p>
       </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-3">
         {bundles.map((bundle) => (
-          <article key={bundle.id} className="relative rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+          <article key={bundle.id} className="relative rounded-[1.5rem] border border-[#dce1ef] bg-white p-5 shadow-sm">
             {bundle.recommended ? (
-              <span className="absolute right-4 top-4 rounded-full bg-stone-950 px-3 py-1 text-xs font-semibold text-white">추천</span>
+              <span className="absolute right-4 top-4 rounded-full bg-[#6f5ce7] px-3 py-1 text-xs font-semibold text-white">추천</span>
             ) : null}
-            <p className="text-sm font-semibold text-stone-500">AI 질문권</p>
-            <h3 className="mt-2 text-2xl font-bold text-stone-950">{bundle.questions}회</h3>
-            <p className="mt-4 text-lg font-semibold text-stone-900">{bundle.priceKrw.toLocaleString("ko-KR")}원</p>
+            <p className="text-sm font-semibold text-slate-500">AI 질문권</p>
+            <h3 className="mt-2 text-2xl font-bold text-[#11162d]">{bundle.questions}회</h3>
+            <p className="mt-4 text-lg font-semibold text-[#11162d]">{bundle.priceKrw.toLocaleString("ko-KR")}원</p>
             <button
               type="button"
               onClick={() => void startCheckout(bundle)}
               disabled={!checkoutEnabled || activeBundleId !== null}
-              className="mt-6 w-full rounded-2xl bg-stone-950 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-stone-300"
+              className="mt-5 w-full rounded-2xl bg-[#6f5ce7] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:bg-slate-300"
             >
               {activeBundleId === bundle.id ? "결제 준비 중..." : checkoutEnabled ? "구매하기" : "결제 준비 중"}
             </button>

@@ -1,10 +1,20 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import PurchasedAnalysesListMultiEdition from "@/app/components/PurchasedAnalysesListMultiEdition";
+import { computeAnalysisEditionKey } from "@/app/lib/analysisEditionKey";
+import { formatAnalysisEditionLabel } from "@/app/lib/analysisEditionLabel";
 import type { PurchasedAnalysisProductGroup } from "@/app/lib/purchasedAnalysesGrouping";
 import { OperatorAuthorizationError, requireOperator } from "@/app/lib/operators/server";
 
 export const dynamic = "force-dynamic";
+
+function previewEdition(productId: string, anchorDate: string) {
+  const analysisEditionKey = computeAnalysisEditionKey({ productId, anchorDate });
+  return {
+    analysisEditionKey,
+    editionLabel: formatAnalysisEditionLabel(analysisEditionKey),
+  };
+}
 
 const PREVIEW_GROUPS: PurchasedAnalysisProductGroup[] = [
   {
@@ -14,17 +24,15 @@ const PREVIEW_GROUPS: PurchasedAnalysisProductGroup[] = [
     latestAcquiredAt: "2026-09-17T05:20:00.000Z",
     editions: [
       {
-        analysisEditionKey: "YEAR:2026",
+        ...previewEdition("wealth", "2026-09-17"),
         reportStatus: "completed",
-        editionLabel: "2026년 분석",
         isLatest: true,
         acquiredAt: "2026-09-17T05:20:00.000Z",
         acquisitionSource: "purchase",
       },
       {
-        analysisEditionKey: "YEAR:2025",
+        ...previewEdition("wealth", "2025-11-28"),
         reportStatus: "completed",
-        editionLabel: "2025년 분석",
         isLatest: false,
         acquiredAt: "2025-11-28T03:10:00.000Z",
         acquisitionSource: "purchase",
@@ -38,9 +46,8 @@ const PREVIEW_GROUPS: PurchasedAnalysisProductGroup[] = [
     latestAcquiredAt: "2026-09-13T08:45:00.000Z",
     editions: [
       {
-        analysisEditionKey: "YEAR:2026",
+        ...previewEdition("career-workplace-relationships", "2026-09-13"),
         reportStatus: "generating",
-        editionLabel: "2026년 분석",
         isLatest: true,
         acquiredAt: "2026-09-13T08:45:00.000Z",
         acquisitionSource: "purchase",
@@ -65,14 +72,28 @@ const PREVIEW_GROUPS: PurchasedAnalysisProductGroup[] = [
   },
   {
     profileId: "00000000-0000-4000-8000-000000000001",
+    productId: "monthly-next",
+    productName: "다음달 운",
+    latestAcquiredAt: "2026-07-20T04:20:00.000Z",
+    editions: [
+      {
+        ...previewEdition("monthly-next", "2026-09-18"),
+        reportStatus: "completed",
+        isLatest: true,
+        acquiredAt: "2026-07-20T04:20:00.000Z",
+        acquisitionSource: "purchase",
+      },
+    ],
+  },
+  {
+    profileId: "00000000-0000-4000-8000-000000000001",
     productId: "relationship-current",
     productName: "현재 연애 관계의 지속성과 조정",
     latestAcquiredAt: "2026-08-03T02:00:00.000Z",
     editions: [
       {
-        analysisEditionKey: "YEAR:2026",
+        ...previewEdition("relationship-current", "2026-08-03"),
         reportStatus: "failed",
-        editionLabel: "2026년 분석",
         isLatest: true,
         acquiredAt: "2026-08-03T02:00:00.000Z",
         acquisitionSource: "purchase",

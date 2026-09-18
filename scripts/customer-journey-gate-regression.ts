@@ -26,7 +26,7 @@ assert(familyCheckout.includes("FREE ANALYSIS REQUIRED") && familyCheckout.inclu
 
 for (const source of [orders, familyOrders]) {
   const freeGate = source.indexOf("getProfileFreeAnalysisFoundationStatus");
-  const orderMutation = Math.max(source.indexOf("createPendingOrder"), source.indexOf("createFamilySiblingPendingOrder"));
+  const orderMutation = Math.max(source.indexOf("await createPendingOrder"), source.indexOf("await createFamilySiblingPendingOrder"));
   assert(freeGate !== -1 && source.includes("FREE_ANALYSIS_REQUIRED"), "order API must enforce free-analysis readiness server-side");
   assert(orderMutation === -1 || freeGate < orderMutation, "free-analysis gate must run before commercial order mutation");
 }

@@ -165,7 +165,7 @@ for (const field of ["overview", "strength", "fiveElements", "yongshin", "gyeokg
 const traitsCardIndex = resultPage.indexOf('{ title: "사주의 특성", text: aiInterpretation.strength }');
 const overviewCardIndex = resultPage.indexOf('{ title: "한눈에 보는 핵심", text: aiInterpretation.overview }');
 assert(traitsCardIndex >= 0 && overviewCardIndex >= 0 && traitsCardIndex < overviewCardIndex, "new free analysis must render 사주의 특성 before 한눈에 보는 핵심");
-assert(resultPage.includes("지금 가장 먼저 보이는 흐름") && resultPage.includes("나를 설명하는 핵심") && resultPage.includes("지금 가장 걸리는 흐름"), "free AI result must expose a large lead and two scannable insight blocks");
+assert(resultPage.includes("지금 결과의 핵심") && resultPage.includes("나를 설명하는 핵심") && resultPage.includes("왜 이렇게 보이는지"), "free AI result must expose a conclusion-first lead and a distinct reason block");
 assert(resultPage.includes("현재 결과를 바탕으로 추천 분석으로 이어집니다."), "free AI result must bridge curiosity into the existing recommendation flow without changing recommendation cards");
 assert(resultPage.includes("운보다 AI 종합 해석"), "bottom panel must use summary title");
 assert(resultPage.includes("formatUnbodaMessage(aiSummary)"), "bottom panel must remain compatible with legacy summary output");
@@ -225,7 +225,9 @@ assert(prompt.includes("일시적인 흔들림인지 앞으로 방향을 바꿀 
 assert(prompt.includes("기회보다 주의가 더 크다"), "prompt must prohibit fear-based opportunity-versus-caution comparisons");
 assert(prompt.includes("해결책을 절대 제시하지 마세요"), "free prompt must explicitly prohibit solutions");
 assert(prompt.includes("약 260~360자 내외") && prompt.includes("400자를 넘기지 마세요"), "free prompt must cap the AI diagnosis to a fast, compact character target");
+assert(prompt.includes("첫 문장은 55자 안팎의 '현재 결론'") && prompt.includes("아래 설명과 같은 말을 반복하지 않습니다"), "overview lead must be a concise conclusion rather than a duplicate of the reason card");
 assert(prompt.includes("정확히 2문장") && prompt.includes("정확히 3문장"), "free prompt must enforce predictable short section lengths");
+assert(prompt.length < 3600, `free main-analysis prompt fixture must stay compact; got ${prompt.length} chars`);
 assert(prompt.includes("영어 단어를 사용자에게 절대 노출하지 마세요"), "free prompt must prohibit accidental English leakage");
 assert(prompt.includes("화면 위쪽에 이미 표시된") && prompt.includes("그대로 반복"), "free prompt must prohibit repeating deterministic engine output");
 console.log("10. prompt separates stable traits from prioritized current problems in plain language ✓");

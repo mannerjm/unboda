@@ -1283,7 +1283,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
                     <div className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full bg-[#8f7cff]/20 blur-3xl" />
                     <div className="pointer-events-none absolute -bottom-20 left-[20%] h-40 w-40 rounded-full bg-[#ff8fb8]/10 blur-3xl" />
                     <div className="relative">
-                      <p className="text-xs font-black tracking-[0.16em] text-[#b9adff]">지금 가장 먼저 보이는 흐름</p>
+                      <p className="text-xs font-black tracking-[0.16em] text-[#b9adff]">지금 결과의 핵심</p>
                       <p className="mt-3 max-w-4xl text-[22px] font-black leading-[1.5] tracking-[-0.035em] text-white sm:text-[28px]">
                         {aiOverviewHighlight.lead || normalizeAIHighlightText(aiInterpretation.overview ?? "")}
                       </p>
@@ -1307,7 +1307,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
                     <section className="rounded-[1.5rem] border border-[#e1e4ef] bg-white p-5 sm:p-6">
                       <div className="flex items-center gap-2">
                         <span className="grid h-8 w-8 place-items-center rounded-full bg-[#fff0f5] text-sm font-black text-[#b85f86]">2</span>
-                        <h3 className="text-base font-black text-[#11162d] sm:text-lg">지금 가장 걸리는 흐름</h3>
+                        <h3 className="text-base font-black text-[#11162d] sm:text-lg">왜 이렇게 보이는지</h3>
                       </div>
                       <p className="mt-4 text-[16px] font-medium leading-8 text-slate-700 sm:text-[17px]">
                         {aiOverviewHighlight.detail || normalizeAIHighlightText(aiInterpretation.overview ?? "")}
@@ -1318,7 +1318,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
                   <div className="mt-4 flex items-start gap-4 rounded-[1.45rem] border border-[#d8d3ff] bg-[#f5f3ff] px-5 py-4 sm:px-6 sm:py-5">
                     <span aria-hidden="true" className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-lg font-black text-[#6f5ce7] shadow-sm">↓</span>
                     <div>
-                      <p className="text-base font-black text-[#262047]">여기까지는 ‘무슨 흐름인지’까지예요.</p>
+                      <p className="text-base font-black text-[#262047]">여기서부터 질문이 갈립니다.</p>
                       <p className="mt-1 text-sm leading-6 text-[#665f83] sm:text-[15px]">
                         왜 반복되는지 · 언제 달라지는지 · 어떤 부분을 더 깊게 볼지는 바로 아래에서 가장 궁금한 질문을 골라보세요. 현재 결과를 바탕으로 추천 분석으로 이어집니다.
                       </p>

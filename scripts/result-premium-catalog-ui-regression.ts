@@ -113,7 +113,7 @@ assert(
     && resultPage.includes("relation.target"),
   "all relation data must render once in the unified Five Element region",
 );
-assert(resultPage.includes("운보다 AI 종합 해석") && resultPage.includes("핵심만 빠르게") && resultPage.includes("지금 가장 먼저 보이는 흐름"), "AI interpretation must stay prominent while presenting a fast, scannable highlight");
+assert(resultPage.includes("운보다 AI 종합 해석") && resultPage.includes("핵심만 빠르게") && resultPage.includes("지금 결과의 핵심"), "AI interpretation must stay prominent while presenting a fast, scannable highlight");
 
 // 2 & 3. recommendations stay exactly three and TOPIC-only
 const periodProducts = listPeriodCatalogProducts();

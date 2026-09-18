@@ -39,12 +39,13 @@ assert(
   "AI consulting must use gpt-5.6-terra",
 );
 assert(!generateAnalysisText.includes('const model = "gpt-5"'), "model must not be hardcoded to gpt-5 for every callType");
-assert(generateAnalysisText.includes("return 900;"), "main-analysis max output tokens must stay tightly capped for the fast free-result contract");
+assert(generateAnalysisText.includes("return 700;"), "main-analysis max output tokens must stay tightly capped for the fast free-result contract");
 assert(generateAnalysisText.includes("return 4800;"), "paid-analysis-detail max output tokens must remain 4800");
 assert(generateAnalysisText.includes("return 3200;"), "default max output tokens must remain 3200");
 assert(!generateAnalysisText.includes('callType === "main-analysis" || callType === "paid-analysis-detail"'), "main-analysis and paid-analysis-detail token budgets must be resolved separately");
 assert(generateAnalysisText.includes("? 120000"), "main-analysis timeout must remain 120000ms");
-assert(generateAnalysisText.includes('effort: "low"'), "reasoning.effort must remain low for this step");
+assert(generateAnalysisText.includes('return callType === "main-analysis" ? "none" : "low";'), "main-analysis must disable reasoning while other analysis calls keep low reasoning");
+assert(generateAnalysisText.includes("effort: reasoningEffort"), "Responses API request must use the per-call reasoning effort");
 assert(
   (generateAnalysisText.match(/store:\s*false/g) ?? []).length === 2,
   "all core analysis Responses API calls disable stored response application state",

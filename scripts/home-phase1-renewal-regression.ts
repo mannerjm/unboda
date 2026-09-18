@@ -33,9 +33,9 @@ assert(page.includes('primaryHref: `/result?profileId=${state.profileId}`'), "co
 assert(page.includes('secondaryHref: `/recommendations?profileId=${state.profileId}`'), "completed analysis must still expose profile-scoped recommendations");
 
 for (const route of [
-  'href="/deep-analysis"',
-  'href="/special-analysis/compatibility"',
-  'href="/purchased-analyses"',
+  "/deep-analysis",
+  "/special-analysis/compatibility",
+  "/purchased-analyses",
 ]) {
   assert(home.includes(route), `renewed home must expose direct route ${route}`);
 }

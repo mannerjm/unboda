@@ -85,7 +85,7 @@ assert(!chat.includes('남은 질문 {session.questionsRemaining}회'), "mid-pag
 assert(entry.includes("이 리포트를 바탕으로 AI에게 질문하기"), "report entry must preserve the established AI consulting CTA language");
 assert(entry.includes("presentation.productTitle"), "report entry must name the report that grounds consultation");
 assert(entry.includes("presentation.suggestedQuestions.slice(0, 3)"), "report entry must preview suggested follow-up questions");
-assert(entry.includes("통합 상담 기록 보기") && entry.includes("통합 AI 상담 이어가기"), "report entry must expose unified continuation/history actions");
+assert(entry.includes("이전 상담 기록 보기") && entry.includes("이전 상담 이어보기"), "report entry must preserve familiar continuation/history actions inside the unified hub");
 assert(entry.includes("이전 상담 기록은 계속 볼 수 있습니다"), "zero-credit prior conversations must remain readable");
 
 assert(page.includes("AiConsultingPortfolioClient") && page.includes("getActiveProfile"), "AI consultation page must resolve the active profile and render the unified portfolio hub");

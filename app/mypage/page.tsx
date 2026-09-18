@@ -626,7 +626,7 @@ export default function MyPage() {
     setEditingProfileId(null);
     setFormInput(emptyProfileInput);
     setFormError(null);
-    setPendingBirthChangeConfirmation(null);
+    setPendingBirthChangeConfirmation(false);
   }
 
   async function submitForm(birthDataChangeAcknowledged = false) {
@@ -838,7 +838,7 @@ export default function MyPage() {
             role="presentation"
             onMouseDown={(event) => {
               if (event.target === event.currentTarget && !isSubmittingForm) {
-                setPendingBirthChangeConfirmation(null);
+                setPendingBirthChangeConfirmation(false);
               }
             }}
           >
@@ -862,7 +862,7 @@ export default function MyPage() {
                 <button
                   type="button"
                   disabled={isSubmittingForm}
-                  onClick={() => setPendingBirthChangeConfirmation(null)}
+                  onClick={() => setPendingBirthChangeConfirmation(false)}
                   className={`rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 ${restingFocusRing}`}
                 >
                   취소

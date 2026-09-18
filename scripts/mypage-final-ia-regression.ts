@@ -23,6 +23,8 @@ console.log("2. profile ownership remains on My Page and separate from account i
 
 assert(mypage.includes('href="/interests"') && mypage.includes("관심 분석"), "My Page must link to the interested-analysis library");
 assert(mypage.includes('href="/purchased-analyses"') && mypage.includes("구매한 분석"), "My Page must link to the purchased-analysis library");
+assert(mypage.includes('href="/ai-consulting"') && mypage.includes("통합 AI 상담 이어가기"), "My Page must expose direct unified AI consultation access");
+assert(mypage.includes("이전 상담 기록") && mypage.includes("직접 저장한 기억"), "My Page AI shortcut must explain the consultation continuity differentiator");
 assert(mypage.includes("내 보관함") && mypage.includes("결제 내역"), "My Page must distinguish content library from financial history");
 assert(mypage.includes("아직 결제 또는 환불 내역이 없습니다."), "payment history must have a calm empty state");
 assert(interests.includes("listUserInterestedAnalysesWithCurrentState") && purchased.includes("PurchasedAnalysesAutoRefresh"), "dedicated library pages must remain authoritative for interest and purchased content state");

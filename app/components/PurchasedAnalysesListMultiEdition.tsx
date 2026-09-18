@@ -178,20 +178,26 @@ export default function PurchasedAnalysesList({
         </div>
       </section>
 
-      <section className="mt-4 rounded-[1.75rem] border border-[#d8d3ff] bg-[#f3f1ff] p-5 sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-bold tracking-[0.15em] text-[#6f5ce7]">AI CONSULTING HUB</p>
-            <h2 className="mt-2 text-xl font-black text-[#11162d]">보유한 분석을 한 상담에서 이어가기</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">
-              질문권은 상품별로 나뉘지 않습니다. 완료된 구매 분석이 늘어날수록 AI 상담 범위가 자동으로 넓어지고, 질문마다 관련 리포트를 선택해 답변합니다.
+      <section className="relative mt-4 overflow-hidden rounded-[1.9rem] border border-[#4d4f87] bg-[radial-gradient(circle_at_86%_12%,rgba(128,105,255,.28),transparent_30%),linear-gradient(135deg,#111734_0%,#1a1942_55%,#282052_100%)] p-5 text-white shadow-[0_18px_50px_rgba(28,31,76,0.16)] sm:p-7">
+        <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full bg-[#7b61ff]/15 blur-3xl" />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-xs font-black tracking-[0.15em] text-[#b5aaff]">UNBODA AI CONSULTING · 핵심 기능</p>
+            <h2 className="mt-2 text-2xl font-black tracking-[-0.025em]">리포트가 끝나도, 상담은 계속 이어집니다</h2>
+            <p className="mt-3 text-sm leading-7 text-slate-200">
+              질문권은 상품별로 나뉘지 않습니다. 완료된 구매 분석이 늘어날수록 AI 상담 범위가 자동으로 넓어지고, 질문마다 관련 리포트를 자동으로 연결합니다. 이전 상담 기록과 내가 직접 저장한 기억도 같은 상담에서 이어서 참고합니다.
             </p>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-[#ddd8ff]">
+              <span className="rounded-full border border-white/12 bg-white/[0.07] px-3 py-2">보유 리포트 통합</span>
+              <span className="rounded-full border border-white/12 bg-white/[0.07] px-3 py-2">상담 기록 이어보기</span>
+              <span className="rounded-full border border-white/12 bg-white/[0.07] px-3 py-2">직접 저장한 기억 참고</span>
+            </div>
           </div>
           <Link
             href={consultingHubHref}
-            className="shrink-0 rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]"
+            className="shrink-0 rounded-2xl bg-white px-5 py-3.5 text-sm font-black text-[#191833] shadow-[0_12px_28px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 hover:bg-[#eeeaff]"
           >
-            통합 AI 상담 이어가기
+            통합 AI 상담 바로가기
           </Link>
         </div>
       </section>

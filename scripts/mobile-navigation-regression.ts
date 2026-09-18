@@ -18,7 +18,7 @@ for (const [label, href] of [
   ["추천", 'href: "/recommendations"'],
   ["심층", 'href: "/deep-analysis"'],
   ["전문", 'href: "/special-analysis"'],
-  ["관심", 'href: "/interests"'],
+  ["AI 상담", 'href: "/ai-consulting"'],
   ["구매", 'href: "/purchased-analyses"'],
   ["내 정보", 'href: "/mypage"'],
 ] as const) {
@@ -26,6 +26,7 @@ for (const [label, href] of [
 }
 
 assert((mobileNavItems.match(/shortLabel:/g) ?? []).length === 7, "mobile navigation must contain exactly seven direct destinations");
+assert(!mobileNavItems.includes('shortLabel: "관심"'), "mobile primary navigation should prioritize unified AI consulting while Interest remains available in desktop navigation and My Page");
 assert(mobileNavigation.includes("grid-cols-7") && !mobileNavigation.includes("grid-cols-6"), "mobile navigation must use one seven-column row for all direct destinations");
 assert(!mobileNavigation.includes("더보기") && !mobileNavigation.includes("More"), "mobile navigation must not hide destinations behind a More menu");
 assert(shell.includes("min-h-[56px]"), "each mobile navigation item must retain a usable minimum touch height");

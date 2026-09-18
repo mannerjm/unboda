@@ -722,6 +722,17 @@ export default function MyPage() {
                 <p className="text-base font-semibold text-slate-900">구매한 분석</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">보유한 분석과 이전 회차 리포트를 확인합니다.</p>
               </Link>
+              <Link href="/ai-consulting" className={`relative overflow-hidden rounded-2xl border border-[#d8d3ff] bg-[linear-gradient(135deg,#f7f5ff_0%,#eeebff_100%)] p-5 transition hover:-translate-y-0.5 hover:border-[#aaa0f4] sm:col-span-2 ${restingFocusRing}`}>
+                <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#7b61ff]/10 blur-2xl" />
+                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-black tracking-[0.12em] text-[#6f5ce7]">UNBODA AI CONSULTING</p>
+                    <p className="mt-2 text-lg font-bold text-[#11162d]">통합 AI 상담 이어가기</p>
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">구매한 리포트와 이전 상담 기록, 직접 저장한 기억을 연결해 같은 프로필의 상담을 이어갑니다.</p>
+                  </div>
+                  <span className="shrink-0 rounded-xl bg-[#6f5ce7] px-4 py-2.5 text-sm font-bold text-white">바로가기 →</span>
+                </div>
+              </Link>
             </div>
           </section>
         {isFormOpen ? (

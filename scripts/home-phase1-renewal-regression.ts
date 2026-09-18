@@ -39,12 +39,15 @@ for (const route of [
 ]) {
   assert(home.includes(route), `renewed home must expose direct route ${route}`);
 }
+assert(home.includes('"/ai-consulting"') && home.includes("AI 상담 바로 이어가기"), "member home must expose a direct unified AI consulting entry instead of routing through the purchased library");
+assert(home.includes("이전 상담 기록") && home.includes("직접 저장한 기억"), "home must explain continuity through prior consultation and explicit saved memory");
+assert(home.indexOf("<AiConsultingSection state={state}/>") < home.indexOf("<CuriositySection/>"), "AI consulting differentiation must appear before lower discovery sections");
 
 for (const copy of [
   "원하는 분석 바로 찾기",
   "요즘, 어떤 게 가장 궁금하세요?",
   "혼자 보는 사주와",
-  "분석을 읽고도",
+  "리포트가 끝이 아니라",
   "쉽게 들어오고, 필요한 만큼 깊게.",
   "지금 마음에 걸리는 것",
   "두 사람의 흐름",
@@ -80,7 +83,7 @@ for (const sceneCue of ["peopleFlow", "F3C779", "7FE0C7", "9bb4ff66"]) {
 }
 assert(home.includes("function CompatibilityVisual"), "compatibility section must use the dedicated two-flow visual rather than generic rings");
 assert(home.includes("bg-[linear-gradient(135deg,#1b1d3b_0%,#25172f_45%,#171d3b_100%)]"), "compatibility section must introduce a warmer violet-rose temperature shift");
-assert(home.includes("bg-[linear-gradient(135deg,#10182f_0%,#171631_48%,#10203a_100%)]"), "AI consulting section must retain a distinct cooler blue-violet temperature");
+assert(home.includes("linear-gradient(135deg,#0c1330_0%,#17163b_48%,#21184a_100%)"), "AI consulting section must retain a distinct cooler blue-violet temperature with stronger violet emphasis");
 assert(home.includes("bg-[linear-gradient(90deg,transparent,#8f7cff55,#ff9db555,#8f7cff55,transparent)]"), "journey section must render as a connected flow rather than a plain table");
 assert(home.includes("<TrustSection copy={copy}/>"), "closing journey CTA must preserve the current landing-state primary destination");
 assert(home.includes("무료 분석") && home.includes("심층 분석") && home.includes("두 사람 궁합"), "home must keep the free-first path while exposing direct exploration");

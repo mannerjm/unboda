@@ -49,7 +49,7 @@ type AccountStatusResponse = {
 function AccountPageFrame({ children }: { children: ReactNode }) {
   return (
     <AppShell>
-      <main className="min-h-screen bg-[#f7f3ea] px-5 py-12 text-stone-900 sm:py-16">
+      <main className="min-h-screen bg-[#f5f7fc] px-5 py-12 text-slate-900 sm:py-16">
         <div className="mx-auto w-full max-w-xl">{children}</div>
       </main>
     </AppShell>
@@ -217,7 +217,7 @@ export default function AccountPage() {
     return (
       <AccountPageFrame>
         <div className="text-center">
-          <p className="text-sm font-semibold text-stone-600">계정 정보를 불러오는 중입니다...</p>
+          <p className="text-sm font-semibold text-slate-600">계정 정보를 불러오는 중입니다...</p>
         </div>
       </AccountPageFrame>
     );
@@ -227,7 +227,7 @@ export default function AccountPage() {
     return (
       <AccountPageFrame>
         <p className="text-sm text-red-600">{fetchError || "계정 정보를 불러올 수 없습니다."}</p>
-        <Link href="/mypage" className="mt-4 inline-block text-sm font-semibold text-stone-600">마이페이지로 돌아가기</Link>
+        <Link href="/mypage" className="mt-4 inline-block text-sm font-semibold text-slate-600">마이페이지로 돌아가기</Link>
       </AccountPageFrame>
     );
   }
@@ -236,21 +236,21 @@ export default function AccountPage() {
 
   return (
     <AccountPageFrame>
-        <Link href="/mypage" className="text-sm font-semibold text-stone-600">마이페이지로 돌아가기</Link>
-        <p className="mt-10 text-xs font-semibold tracking-[0.25em] text-stone-500">ACCOUNT</p>
+        <Link href="/mypage" className="text-sm font-semibold text-slate-600">마이페이지로 돌아가기</Link>
+        <p className="mt-10 text-xs font-semibold tracking-[0.25em] text-slate-500">ACCOUNT</p>
         <h1 className="mt-3 text-3xl font-bold">계정 정보</h1>
 
-        <section className="mt-8 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" aria-labelledby="account-status-heading">
-          <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">ACCOUNT STATUS</p>
-          <h2 id="account-status-heading" className="mt-2 text-xl font-bold text-stone-900">계정 상태</h2>
+        <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8" aria-labelledby="account-status-heading">
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">ACCOUNT STATUS</p>
+          <h2 id="account-status-heading" className="mt-2 text-xl font-bold text-slate-900">계정 상태</h2>
           {/* 로그인 이메일 & 이메일 변경 */}
           <div className="mt-6">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold text-stone-500">로그인 이메일</p>
+              <p className="text-xs font-semibold text-slate-500">로그인 이메일</p>
               <button
                 type="button"
                 onClick={() => { setShowEmailChange(!showEmailChange); setEmailMessage(null); }}
-                className="text-xs font-semibold text-stone-600 hover:text-stone-900 underline"
+                className="text-xs font-semibold text-slate-600 hover:text-slate-900 underline"
               >
                 {showEmailChange ? "취소" : "이메일 변경"}
               </button>
@@ -258,8 +258,8 @@ export default function AccountPage() {
             <p className="mt-2 break-all text-sm font-semibold">{email}</p>
 
             {showEmailChange && (
-              <form onSubmit={(e) => void handleChangeEmail(e)} className="mt-4 space-y-3 rounded-2xl bg-stone-50 p-4 border border-stone-200">
-                <label htmlFor="newEmailInput" className="block text-xs font-semibold text-stone-700">
+              <form onSubmit={(e) => void handleChangeEmail(e)} className="mt-4 space-y-3 rounded-2xl bg-[#f7f8fc] p-4 border border-[#dce1ef]">
+                <label htmlFor="newEmailInput" className="block text-xs font-semibold text-slate-700">
                   새 이메일 주소
                 </label>
                 <input
@@ -268,13 +268,13 @@ export default function AccountPage() {
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="new-email@example.com"
-                  className="w-full rounded-xl border border-stone-300 px-3 py-2 text-sm font-normal outline-none focus:border-stone-900"
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-normal outline-none focus:border-[#6f5ce7]"
                   required
                 />
                 <button
                   type="submit"
                   disabled={emailSubmitting}
-                  className="w-full rounded-xl bg-stone-900 py-2.5 text-xs font-semibold text-white disabled:bg-stone-400"
+                  className="w-full rounded-xl bg-[#6f5ce7] py-2.5 text-xs font-semibold text-white transition hover:bg-[#5f4fd2] disabled:bg-slate-400"
                 >
                   {emailSubmitting ? "요청 중..." : "이메일 변경 확인 메일 발송"}
                 </button>
@@ -288,9 +288,9 @@ export default function AccountPage() {
           </div>
 
           {/* 이메일 인증 */}
-          <div className="border-t border-stone-100 pt-5">
+          <div className="border-t border-slate-100 pt-5">
             <div className="flex items-center justify-between gap-4">
-              <span className="text-sm text-stone-600">이메일 인증</span>
+              <span className="text-sm text-slate-600">이메일 인증</span>
               <span className="text-sm font-semibold">{emailVerified ? "인증됨" : "인증 필요"}</span>
             </div>
             {!emailVerified && (
@@ -299,7 +299,7 @@ export default function AccountPage() {
                   type="button"
                   onClick={() => void handleResendVerification()}
                   disabled={resendSubmitting}
-                  className="rounded-xl border border-stone-300 px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 disabled:bg-stone-100"
+                  className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:bg-slate-100"
                 >
                   {resendSubmitting ? "발송 중..." : "인증메일 재전송"}
                 </button>
@@ -313,13 +313,13 @@ export default function AccountPage() {
           </div>
 
           {/* 본인/성인 인증 */}
-          <div className="border-t border-stone-100 pt-5">
+          <div className="border-t border-slate-100 pt-5">
             <div className="flex items-center justify-between gap-4">
-              <span className="text-sm text-stone-600">본인/성인 인증</span>
+              <span className="text-sm text-slate-600">본인/성인 인증</span>
               <span className="text-sm font-semibold">{eligibilityLabels[account.paidEligibilityStatus]}</span>
             </div>
-            <p className="mt-3 text-sm leading-6 text-stone-600">{eligibilityGuidance[account.paidEligibilityStatus]}</p>
-            <p className="mt-2 text-xs leading-5 text-stone-500">분석 프로필의 생년월일과 계정 본인 인증은 별개입니다.</p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">{eligibilityGuidance[account.paidEligibilityStatus]}</p>
+            <p className="mt-2 text-xs leading-5 text-slate-500">분석 프로필의 생년월일과 계정 본인 인증은 별개입니다.</p>
             <NiceAdultVerificationButton
               accountStatus={account.status}
               emailVerified={emailVerified}
@@ -328,28 +328,28 @@ export default function AccountPage() {
           </div>
 
           {/* 계정 상태 */}
-          <div className="flex items-center justify-between gap-4 border-t border-stone-100 pt-5">
-            <span className="text-sm text-stone-600">계정 상태</span>
+          <div className="flex items-center justify-between gap-4 border-t border-slate-100 pt-5">
+            <span className="text-sm text-slate-600">계정 상태</span>
             <span className="text-sm font-semibold">{statusLabels[account.status]}</span>
           </div>
 
           {/* 비밀번호 변경 */}
-          <div className="border-t border-stone-100 pt-5">
+          <div className="border-t border-slate-100 pt-5">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-stone-600">비밀번호 변경</span>
+              <span className="text-sm text-slate-600">비밀번호 변경</span>
               <button
                 type="button"
                 onClick={() => { setShowPasswordChange(!showPasswordChange); setPasswordMessage(null); }}
-                className="text-xs font-semibold text-stone-600 hover:text-stone-900 underline"
+                className="text-xs font-semibold text-slate-600 hover:text-slate-900 underline"
               >
                 {showPasswordChange ? "닫기" : "비밀번호 변경하기"}
               </button>
             </div>
 
             {showPasswordChange ? (
-              <form onSubmit={(e) => void handleChangePassword(e)} className="mt-4 space-y-3 rounded-2xl bg-stone-50 p-4 border border-stone-200">
+              <form onSubmit={(e) => void handleChangePassword(e)} className="mt-4 space-y-3 rounded-2xl bg-[#f7f8fc] p-4 border border-[#dce1ef]">
                 <div>
-                  <label htmlFor="newPasswordInput" className="block text-xs font-semibold text-stone-700">
+                  <label htmlFor="newPasswordInput" className="block text-xs font-semibold text-slate-700">
                     새 비밀번호 (8자 이상)
                   </label>
                   <input
@@ -357,12 +357,12 @@ export default function AccountPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-stone-300 px-3 py-2 text-sm outline-none focus:border-stone-900"
+                    className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#6f5ce7]"
                     required
                   />
                 </div>
                 <div>
-                  <label htmlFor="confirmPasswordInput" className="block text-xs font-semibold text-stone-700">
+                  <label htmlFor="confirmPasswordInput" className="block text-xs font-semibold text-slate-700">
                     비밀번호 확인
                   </label>
                   <input
@@ -370,14 +370,14 @@ export default function AccountPage() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-stone-300 px-3 py-2 text-sm outline-none focus:border-stone-900"
+                    className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#6f5ce7]"
                     required
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={passwordSubmitting}
-                  className="w-full rounded-xl bg-stone-900 py-2.5 text-xs font-semibold text-white disabled:bg-stone-400"
+                  className="w-full rounded-xl bg-[#6f5ce7] py-2.5 text-xs font-semibold text-white transition hover:bg-[#5f4fd2] disabled:bg-slate-400"
                 >
                   {passwordSubmitting ? "변경 중..." : "비밀번호 변경"}
                 </button>
@@ -389,7 +389,7 @@ export default function AccountPage() {
               </form>
             ) : (
               <div className="mt-2 text-right">
-                <Link href="/auth/forgot-password?returnTo=/account" className="text-xs text-stone-500 hover:underline">
+                <Link href="/auth/forgot-password?returnTo=/account" className="text-xs text-slate-500 hover:underline">
                   비밀번호가 기억나지 않으신가요? (재설정 이메일 보내기)
                 </Link>
               </div>
@@ -397,7 +397,7 @@ export default function AccountPage() {
           </div>
 
           {/* 회원탈퇴 요청 / 취소 */}
-          <div className="border-t border-stone-100 pt-5">
+          <div className="border-t border-slate-100 pt-5">
             {account.status === "ACTIVE" ? (
               <div>
                 {!showClosureConfirm ? (
@@ -427,7 +427,7 @@ export default function AccountPage() {
                       <button
                         type="button"
                         onClick={() => setShowClosureConfirm(false)}
-                        className="rounded-xl border border-stone-300 px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-100"
+                        className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
                       >
                         취소
                       </button>

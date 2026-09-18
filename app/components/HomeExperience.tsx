@@ -49,14 +49,10 @@ function BrandMark() {
 
 function Header({ state }: { state: LandingState }) {
   const isGuest = state.kind === "guest";
-  const freeHref = isGuest ? "/guest-saju" : "/saju";
   const accountHref = isGuest ? "/auth/login?returnTo=/" : "/mypage";
   const aiHref = isGuest ? "/auth/login?returnTo=/ai-consulting" : "/ai-consulting";
   return <header className="relative z-20 flex items-center justify-between gap-3 py-1 text-white">
     <Link href="/" className="flex shrink-0 items-center gap-3 text-xl font-black tracking-[-0.045em]"><BrandMark />운보다</Link>
-    <nav className="hidden items-center gap-6 text-sm font-semibold text-[#c9c8db] md:flex" aria-label="주요 메뉴">
-      <Link href={freeHref} className="transition hover:text-white">무료 분석</Link><Link href="/deep-analysis" className="transition hover:text-white">심층 분석</Link><Link href="/special-analysis/compatibility" className="transition hover:text-white">궁합</Link><Link href="/purchased-analyses" className="transition hover:text-white">구매한 분석</Link>
-    </nav>
     <div className="flex shrink-0 items-center gap-2">
       <Link href={aiHref} className="inline-flex items-center gap-1.5 rounded-full border border-[#927fff]/35 bg-[linear-gradient(135deg,rgba(111,92,231,.9),rgba(141,113,255,.9))] px-3.5 py-2.5 text-xs font-black text-white shadow-[0_0_24px_rgba(111,92,231,.24)] transition hover:-translate-y-0.5 hover:brightness-110 sm:px-4 sm:text-sm"><Icon name="chat" className="h-4 w-4"/>AI 상담</Link>
       <Link href={accountHref} className="rounded-full border border-white/20 bg-white/10 px-3.5 py-2.5 text-xs font-bold text-white backdrop-blur-xl transition hover:bg-white/15 sm:px-4 sm:text-sm">{isGuest ? "로그인" : "마이페이지"}</Link>

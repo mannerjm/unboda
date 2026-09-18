@@ -33,13 +33,15 @@ assert(page.includes('primaryHref: `/result?profileId=${state.profileId}`'), "co
 assert(page.includes('secondaryHref: `/recommendations?profileId=${state.profileId}`'), "completed analysis must still expose profile-scoped recommendations");
 
 for (const route of [
-  'href="/deep-analysis"',
-  'href="/special-analysis/compatibility"',
-  'href="/purchased-analyses"',
+  "/deep-analysis",
+  "/special-analysis/compatibility",
+  "/purchased-analyses",
 ]) {
   assert(home.includes(route), `renewed home must expose direct route ${route}`);
 }
 assert(home.includes('"/ai-consulting"') && home.includes("AI 상담 바로 이어가기"), "member home must expose a direct unified AI consulting entry instead of routing through the purchased library");
+assert(!home.includes('aria-label="주요 메뉴"'), "home header must not duplicate discovery categories already available in the main content");
+assert(home.includes("AI 상담") && home.includes("마이페이지") && home.includes("로그인"), "simplified home header must preserve AI consulting and account actions");
 assert(home.includes("이전 상담 기록") && home.includes("직접 저장한 기억"), "home must explain continuity through prior consultation and explicit saved memory");
 assert(home.indexOf("<AiConsultingSection state={state}/>") < home.indexOf("<CuriositySection/>"), "AI consulting differentiation must appear before lower discovery sections");
 

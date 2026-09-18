@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 const home = readFileSync("app/components/HomeExperience.tsx", "utf8");
 const compatibility = readFileSync("app/special-analysis/compatibility/page.tsx", "utf8");
 const romantic = readFileSync("app/special-analysis/compatibility/romantic/page.tsx", "utf8");
+const pairPage = readFileSync("app/special-analysis/compatibility/PairCompatibilityPage.tsx", "utf8");
 const family = readFileSync("app/special-analysis/compatibility/family/parent-child/page.tsx", "utf8");
 
 const expectedHomeRoutes = [
@@ -30,7 +31,8 @@ assert(compatibility.includes("activeProfile?.id"), "compatibility catalog must 
 assert(compatibility.includes("/special-analysis/compatibility/romantic"), "compatibility catalog must keep romantic product entry");
 assert(compatibility.includes("/special-analysis/compatibility/family/parent-child#family-relationship-selector"), "compatibility catalog must keep family product entry");
 
-assert(romantic.includes('redirect("/auth/login?returnTo=/special-analysis/compatibility/romantic")'), "romantic analysis start must still require login");
+assert(romantic.includes("PairCompatibilityPage") && romantic.includes("COMPATIBILITY_ROMANTIC_PRODUCT_ID"), "romantic analysis must enter through the shared authenticated pair page");
+assert(pairPage.includes("getCurrentUser()") && pairPage.includes('redirect(`/auth/login?returnTo=${entryPath}`)'), "all pair compatibility analysis starts must require login");
 assert(family.includes('redirect("/auth/login?returnTo=/special-analysis/compatibility/family/parent-child")'), "family analysis start must still require login");
 
 console.log("Public discovery entry routing regression passed ✓");

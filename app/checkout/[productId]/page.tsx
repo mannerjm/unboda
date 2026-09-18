@@ -12,6 +12,7 @@ import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
 import { resolveAnalysisEditionForOrder } from "@/app/lib/analysisEditionForOrder";
 import { formatAnalysisEditionLabel } from "@/app/lib/analysisEditionLabel";
 import { getKoreaEvaluationDate } from "@/app/lib/evaluationContext";
+import { getProfileFreeAnalysisFoundationStatus } from "@/app/lib/freeAnalysisEligibility";
 import {
   getSpecialAnalysisProduct,
   isCompatibilityFamilyOtherProductId,
@@ -35,6 +36,9 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
 
   const profile = user && profileId ? await getUserProfile(profileId, user.id) : null;
   if (user && profileId && !profile) notFound();
+  const freeAnalysisStatus = user && profile
+    ? await getProfileFreeAnalysisFoundationStatus(user.id, profile)
+    : null;
 
   const resolved = resolveLaunchPurchasableProduct(productId);
   if (!resolved.ok) notFound();
@@ -83,6 +87,7 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
     profileLabel: profile?.label,
     priceLabel: `${resolved.amount.toLocaleString("ko-KR")}원`,
     editionLabel: checkoutEditionLabel,
+    freeAnalysisStatus,
   };
 
   return (

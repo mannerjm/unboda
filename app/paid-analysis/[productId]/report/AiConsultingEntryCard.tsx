@@ -90,16 +90,16 @@ export default function AiConsultingEntryCard({
 
   return (
     <section className="mx-auto mb-10 mt-6 max-w-3xl px-5 sm:px-8">
-      <div className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-xs font-semibold tracking-[0.18em] text-stone-500">AI CONSULTING</p>
-        <h2 className="mt-3 text-xl font-bold text-stone-950">
+      <div className="rounded-[2rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#ffffff_0%,#f7f6ff_100%)] p-6 shadow-[0_16px_45px_rgba(54,45,112,0.07)] sm:p-8">
+        <p className="text-xs font-bold tracking-[0.18em] text-[#6f5ce7]">AI CONSULTING</p>
+        <h2 className="mt-3 text-xl font-bold text-[#11162d]">
           {hasPreviousConversation ? "지난 AI 상담을 이어서 질문하기" : "이 리포트를 바탕으로 AI에게 질문하기"}
         </h2>
-        <p className="mt-3 text-sm leading-7 text-stone-600">
+        <p className="mt-3 text-sm leading-7 text-slate-600">
           이 프로필의 AI 질문권을 구매한 분석 리포트들에서 공통으로 사용할 수 있고, 정상 답변이 완료된 질문만 1회 차감합니다.
         </p>
-        <div className="mt-4 rounded-2xl bg-stone-100 px-4 py-3 text-sm leading-6 text-stone-700">
-          {historySummary ? <p className="font-semibold text-stone-900">{historySummary}</p> : null}
+        <div className="mt-4 rounded-2xl bg-[#f3f1ff] px-4 py-3 text-sm leading-6 text-slate-700">
+          {historySummary ? <p className="font-semibold text-[#11162d]">{historySummary}</p> : null}
           <p className={historySummary ? "mt-1" : undefined}>
             {depleted
               ? "남은 질문 0회 · 이전 상담 기록은 계속 볼 수 있습니다."
@@ -108,7 +108,7 @@ export default function AiConsultingEntryCard({
         </div>
         <Link
           href={href}
-          className="mt-5 inline-flex rounded-2xl bg-stone-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-800"
+          className="mt-5 inline-flex rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#5f4fd2]"
         >
           {depleted
             ? "이전 상담 기록 보기"

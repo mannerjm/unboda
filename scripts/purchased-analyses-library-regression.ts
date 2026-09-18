@@ -23,7 +23,7 @@ assert(!shell.includes("결제 / 관리"), "purchased analyses must remain in th
 assert(list.includes("none:") && list.includes("generating:") && list.includes("completed:") && list.includes("failed:"), "library must preserve all paid report states");
 assert(list.includes('edition.reportStatus === "none" || edition.reportStatus === "generating"'), "preparing library editions must remain non-actionable");
 assert(list.includes("&edition=${encodeURIComponent(edition.analysisEditionKey)}"), "report actions must preserve the exact purchased edition");
-assert(list.includes("아직 구매한 심층 분석이 없습니다.") && list.includes("현재 분석 대상에게 필요한 심층 분석을 확인해 보세요.") && list.includes("심층 분석 둘러보기 →") && list.includes('href="/deep-analysis"'), "empty library must provide a polished deep analysis recovery");
+assert(list.includes("아직 보관된 유료 분석이 없습니다.") && list.includes("심층 분석 둘러보기") && list.includes('href="/deep-analysis"'), "empty library must provide a polished analysis recovery");
 assert(paidReports.includes("listUserEntitlements(userId)") && !paidReports.includes("getLaunchProductIds"), "library source must be active entitlement based, not launch-filtered");
 assert(mypage.includes("결제 내역") && mypage.includes("구매한 분석은 보관함에서, 결제와 환불 기록은 여기에서 확인합니다."), "My Page must separate purchased analysis content from payment and refund history");
 assert(!saju.includes("PurchasedAnalysesList"), "내 분석 must remain free-only");

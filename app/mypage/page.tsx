@@ -166,7 +166,7 @@ const paidReportStatusTones: Record<PaidReportStatus, StatusTone> = {
 };
 
 const statusToneClasses: Record<StatusTone, string> = {
-  neutral: "border-stone-200 bg-stone-50 text-stone-600",
+  neutral: "border-slate-200 bg-slate-50 text-slate-600",
   positive: "border-emerald-200 bg-emerald-50 text-emerald-800",
   warning: "border-amber-200 bg-amber-50 text-amber-800",
   critical: "border-red-200 bg-red-50 text-red-700",
@@ -174,31 +174,31 @@ const statusToneClasses: Record<StatusTone, string> = {
 
 const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
 const activeFocusRing = `${focusRing} focus-visible:ring-white focus-visible:ring-offset-stone-900`;
-const restingFocusRing = `${focusRing} focus-visible:ring-stone-900 focus-visible:ring-offset-[#f5f7fc]`;
+const restingFocusRing = `${focusRing} focus-visible:ring-[#6f5ce7] focus-visible:ring-offset-[#f5f7fc]`;
 
 // The active card is charcoal, so tone colors would drop below contrast on it.
 function statusBadgeClass(isActive: boolean, tone: StatusTone): string {
   return `inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
-    isActive ? "border-[#cdbb98] bg-[#f3eee4] text-stone-800" : statusToneClasses[tone]
+    isActive ? "border-[#b9b2f6] bg-[#eeecff] text-[#5144ad]" : statusToneClasses[tone]
   }`;
 }
 
 function cardActionClass(isActive: boolean): string {
   return isActive
-    ? `rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50 ${restingFocusRing}`
-    : `rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400 ${restingFocusRing}`;
+    ? `rounded-full border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 ${restingFocusRing}`
+    : `rounded-full border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400 ${restingFocusRing}`;
 }
 
 function deleteActionClass(isActive: boolean): string {
   return isActive
     ? `rounded-full border border-red-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 ${restingFocusRing}`
-    : `rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-stone-200 disabled:text-stone-400 ${restingFocusRing}`;
+    : `rounded-full border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400 ${restingFocusRing}`;
 }
 
 function subCardClass(isActive: boolean): string {
   return isActive
     ? "mt-5 rounded-2xl border border-[#d9dded] bg-[#f5f6fc] p-4"
-    : "mt-5 rounded-2xl border border-stone-200 bg-stone-50/60 p-4";
+    : "mt-5 rounded-2xl border border-slate-200 bg-slate-50/60 p-4";
 }
 
 type SummaryBody = {
@@ -654,107 +654,107 @@ export default function MyPage() {
   }
 
   if (!isAuthChecked) {
-    return <main className="flex min-h-screen items-center justify-center bg-[#fbfbfa] px-6 text-center text-sm text-stone-600">로그인 상태를 확인하고 있습니다.</main>;
+    return <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-6 text-center text-sm text-slate-600">로그인 상태를 확인하고 있습니다.</main>;
   }
 
   return (
     <AppShell activeProfileId={activeProfileId}>
-      <main className="min-h-screen bg-[#f5f7fc] px-5 py-12 text-stone-900 sm:py-16">
+      <main className="min-h-screen bg-[#f5f7fc] px-5 py-12 text-slate-900 sm:py-16">
         <div className="mx-auto w-full max-w-3xl">
           <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-semibold tracking-[0.25em] text-stone-500">MY PAGE</p>
+              <p className="text-xs font-semibold tracking-[0.25em] text-slate-500">MY PAGE</p>
               <h1 className="mt-3 text-3xl font-bold sm:text-4xl">마이페이지</h1>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-stone-600">계정 상태와 분석 대상을 관리하고, 저장하거나 구매한 분석을 확인하세요.</p>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600">계정 상태와 분석 대상을 관리하고, 저장하거나 구매한 분석을 확인하세요.</p>
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <button
                 type="button"
                 onClick={openCreateForm}
-                className={`rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 ${restingFocusRing}`}
+                className={`rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 ${restingFocusRing}`}
               >
                 인원 추가
               </button>
               {profiles.length > 0 ? (
-                <span className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-500">
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500">
                   {profiles.length}명 등록
                 </span>
               ) : null}
             </div>
           </header>
-          <section className="mt-8 border-y border-stone-200 py-6" aria-labelledby="account-status-heading">
+          <section className="mt-8 border-y border-slate-200 py-6" aria-labelledby="account-status-heading">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">ACCOUNT STATUS</p>
-                <h2 id="account-status-heading" className="mt-2 text-xl font-bold text-stone-900">계정 상태</h2>
-                <p className="mt-2 text-sm leading-6 text-stone-600">계정 인증 상태는 분석 대상 프로필의 출생 정보와 별개로 관리됩니다.</p>
+                <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">ACCOUNT STATUS</p>
+                <h2 id="account-status-heading" className="mt-2 text-xl font-bold text-slate-900">계정 상태</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">계정 인증 상태는 분석 대상 프로필의 출생 정보와 별개로 관리됩니다.</p>
               </div>
-              <Link href="/account" className={`shrink-0 rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-center text-sm font-semibold text-stone-700 transition hover:bg-stone-50 ${restingFocusRing}`}>
+              <Link href="/account" className={`shrink-0 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50 ${restingFocusRing}`}>
                 계정 설정에서 확인하기
               </Link>
             </div>
             {accountStatus ? (
               <dl className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="min-w-0 border-t border-stone-100 pt-3 sm:border-t-0 sm:border-r sm:pr-4 sm:pt-0">
-                  <dt className="text-xs font-semibold text-stone-500">로그인 이메일</dt>
-                  <dd className="mt-1 break-all text-sm font-semibold text-stone-800">{accountStatus.email}</dd>
+                <div className="min-w-0 border-t border-slate-100 pt-3 sm:border-t-0 sm:border-r sm:pr-4 sm:pt-0">
+                  <dt className="text-xs font-semibold text-slate-500">로그인 이메일</dt>
+                  <dd className="mt-1 break-all text-sm font-semibold text-slate-800">{accountStatus.email}</dd>
                 </div>
-                <div className="border-t border-stone-100 pt-3 sm:border-t-0 sm:border-r sm:px-4 sm:pt-0">
-                  <dt className="text-xs font-semibold text-stone-500">이메일 인증</dt>
-                  <dd className="mt-1 text-sm font-semibold text-stone-800">{accountStatus.emailVerified ? "인증됨" : "인증 필요"}</dd>
+                <div className="border-t border-slate-100 pt-3 sm:border-t-0 sm:border-r sm:px-4 sm:pt-0">
+                  <dt className="text-xs font-semibold text-slate-500">이메일 인증</dt>
+                  <dd className="mt-1 text-sm font-semibold text-slate-800">{accountStatus.emailVerified ? "인증됨" : "인증 필요"}</dd>
                 </div>
-                <div className="border-t border-stone-100 pt-3 sm:border-t-0 sm:pl-4 sm:pt-0">
-                  <dt className="text-xs font-semibold text-stone-500">본인/성인 인증</dt>
-                  <dd className="mt-1 text-sm font-semibold text-stone-800">{paidEligibilityLabels[accountStatus.account.paidEligibilityStatus]}</dd>
+                <div className="border-t border-slate-100 pt-3 sm:border-t-0 sm:pl-4 sm:pt-0">
+                  <dt className="text-xs font-semibold text-slate-500">본인/성인 인증</dt>
+                  <dd className="mt-1 text-sm font-semibold text-slate-800">{paidEligibilityLabels[accountStatus.account.paidEligibilityStatus]}</dd>
                 </div>
               </dl>
             ) : null}
           </section>
           <section className="mt-8" aria-labelledby="library-heading">
-            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">MY LIBRARY</p>
-            <h2 id="library-heading" className="mt-2 text-xl font-bold text-stone-900">내 보관함</h2>
+            <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">MY LIBRARY</p>
+            <h2 id="library-heading" className="mt-2 text-xl font-bold text-slate-900">내 보관함</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <Link href="/interests" className={`rounded-xl border border-stone-200 bg-white p-5 transition hover:border-stone-300 hover:bg-stone-50 ${restingFocusRing}`}>
-                <p className="text-base font-semibold text-stone-900">관심 분석</p>
-                <p className="mt-2 text-sm leading-6 text-stone-600">저장한 분석 주제와 현재 회차 상태를 확인합니다.</p>
+              <Link href="/interests" className={`rounded-xl border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 ${restingFocusRing}`}>
+                <p className="text-base font-semibold text-slate-900">관심 분석</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">저장한 분석 주제와 현재 회차 상태를 확인합니다.</p>
               </Link>
-              <Link href="/purchased-analyses" className={`rounded-xl border border-stone-200 bg-white p-5 transition hover:border-stone-300 hover:bg-stone-50 ${restingFocusRing}`}>
-                <p className="text-base font-semibold text-stone-900">구매한 분석</p>
-                <p className="mt-2 text-sm leading-6 text-stone-600">보유한 분석과 이전 회차 리포트를 확인합니다.</p>
+              <Link href="/purchased-analyses" className={`rounded-xl border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 ${restingFocusRing}`}>
+                <p className="text-base font-semibold text-slate-900">구매한 분석</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">보유한 분석과 이전 회차 리포트를 확인합니다.</p>
               </Link>
             </div>
           </section>
         {isFormOpen ? (
           <form
-            className="mt-8 space-y-5 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
+            className="mt-8 space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
             onSubmit={(event) => { event.preventDefault(); void submitForm(); }}
           >
             <p className="text-base font-bold">{editingProfileId ? "프로필 수정" : "인원 추가"}</p>
             <label className="block text-sm font-semibold">이름 또는 구분
-              <input value={formInput.label} onChange={(event) => setFormInput({ ...formInput, label: event.target.value })} placeholder="이름 또는 구분" className={`mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 font-normal ${restingFocusRing}`} required />
+              <input value={formInput.label} onChange={(event) => setFormInput({ ...formInput, label: event.target.value })} placeholder="이름 또는 구분" className={`mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal ${restingFocusRing}`} required />
             </label>
             <label className="block text-sm font-semibold">관계
-              <select value={formInput.relationshipType} onChange={(event) => setFormInput({ ...formInput, relationshipType: event.target.value as ProfileRelationshipType })} className={`mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 font-normal ${restingFocusRing}`} required>
+              <select value={formInput.relationshipType} onChange={(event) => setFormInput({ ...formInput, relationshipType: event.target.value as ProfileRelationshipType })} className={`mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-normal ${restingFocusRing}`} required>
                 {relationshipOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
               </select>
             </label>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-semibold">생년월일
-                <input type="date" min={GUEST_BIRTH_DATE_MIN} max={getGuestBirthDateMax()} value={formInput.birthDate} onChange={(event) => setFormInput({ ...formInput, birthDate: event.target.value })} className={`mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 font-normal ${restingFocusRing}`} required />
+                <input type="date" min={GUEST_BIRTH_DATE_MIN} max={getGuestBirthDateMax()} value={formInput.birthDate} onChange={(event) => setFormInput({ ...formInput, birthDate: event.target.value })} className={`mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal ${restingFocusRing}`} required />
               </label>
               <label className="block text-sm font-semibold">태어난 시간
-                <input type="time" value={formInput.birthTime} onChange={(event) => setFormInput({ ...formInput, birthTime: event.target.value })} className={`mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 font-normal ${restingFocusRing}`} required />
+                <input type="time" value={formInput.birthTime} onChange={(event) => setFormInput({ ...formInput, birthTime: event.target.value })} className={`mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal ${restingFocusRing}`} required />
               </label>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-semibold">성별
-                <select value={formInput.gender} onChange={(event) => setFormInput({ ...formInput, gender: event.target.value as ProfileInput["gender"] })} className={`mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 font-normal ${restingFocusRing}`} required>
+                <select value={formInput.gender} onChange={(event) => setFormInput({ ...formInput, gender: event.target.value as ProfileInput["gender"] })} className={`mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-normal ${restingFocusRing}`} required>
                   <option value="남성">남성</option>
                   <option value="여성">여성</option>
                 </select>
               </label>
               <label className="block text-sm font-semibold">달력
-                <select value={formInput.calendarType} onChange={(event) => setFormInput({ ...formInput, calendarType: event.target.value as ProfileInput["calendarType"], isLeapMonth: event.target.value === "양력" ? false : formInput.isLeapMonth })} className={`mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 font-normal ${restingFocusRing}`} required>
+                <select value={formInput.calendarType} onChange={(event) => setFormInput({ ...formInput, calendarType: event.target.value as ProfileInput["calendarType"], isLeapMonth: event.target.value === "양력" ? false : formInput.isLeapMonth })} className={`mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-normal ${restingFocusRing}`} required>
                   <option value="양력">양력</option>
                   <option value="음력">음력</option>
                 </select>
@@ -766,51 +766,51 @@ export default function MyPage() {
               </label>
             ) : null}
             {editingProfileId ? (
-              <p className="rounded-xl bg-stone-50 px-4 py-3 text-xs leading-6 text-stone-500">
+              <p className="rounded-xl bg-slate-50 px-4 py-3 text-xs leading-6 text-slate-500">
                 출생 정보가 변경되면 기존 무료 분석은 다시 분석이 필요할 수 있습니다.
                 이미 구매한 심층 분석이 있다면 기존 리포트 내용과 새 출생 정보가 달라질 수 있습니다.
               </p>
             ) : null}
             {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
             <div className="flex flex-col gap-2 sm:flex-row">
-              <button type="submit" disabled={isSubmittingForm} className={`flex-1 rounded-xl bg-stone-900 px-5 py-3 font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400 ${restingFocusRing}`}>
+              <button type="submit" disabled={isSubmittingForm} className={`flex-1 rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400 ${restingFocusRing}`}>
                 {isSubmittingForm ? "저장 중..." : editingProfileId ? "수정 저장" : "등록하기"}
               </button>
-              <button type="button" onClick={closeForm} disabled={isSubmittingForm} className={`rounded-xl border border-stone-300 bg-white px-5 py-3 font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed ${restingFocusRing}`}>
+              <button type="button" onClick={closeForm} disabled={isSubmittingForm} className={`rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed ${restingFocusRing}`}>
                 취소
               </button>
             </div>
           </form>
         ) : null}
         {isProfilesLoaded && profiles.length === 0 && !isFormOpen ? (
-          <section className="mt-8 rounded-3xl border border-dashed border-stone-300 bg-white/70 p-8 text-center">
+          <section className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white/70 p-8 text-center">
             <p className="text-base font-bold">아직 등록된 분석 대상이 없습니다</p>
-            <p className="mt-3 text-sm leading-7 text-stone-600">
+            <p className="mt-3 text-sm leading-7 text-slate-600">
               본인이나 가족의 출생 정보를 등록하면 무료 사주와 심층 분석을 이어서 볼 수 있습니다.
             </p>
             <button
               type="button"
               onClick={openCreateForm}
-              className={`mt-6 rounded-xl bg-stone-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 ${restingFocusRing}`}
+              className={`mt-6 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 ${restingFocusRing}`}
             >
               첫 분석 대상 추가
             </button>
           </section>
         ) : null}
         <section className="mt-10" aria-labelledby="profile-management-heading">
-          <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">PROFILE MANAGEMENT</p>
-          <h2 id="profile-management-heading" className="mt-2 text-xl font-bold text-stone-900">프로필 관리</h2>
-          <p className="mt-2 text-sm leading-6 text-stone-600">프로필은 분석 대상이며 계정 본인 인증과 별개입니다.</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">PROFILE MANAGEMENT</p>
+          <h2 id="profile-management-heading" className="mt-2 text-xl font-bold text-slate-900">프로필 관리</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">프로필은 분석 대상이며 계정 본인 인증과 별개입니다.</p>
         <div className="mt-5">
-          {profiles.length > 0 ? <p className="mb-3 text-xs font-semibold tracking-[0.2em] text-stone-500">내 프로필 및 이용 가능한 분석</p> : null}
+          {profiles.length > 0 ? <p className="mb-3 text-xs font-semibold tracking-[0.2em] text-slate-500">내 프로필 및 이용 가능한 분석</p> : null}
           <div className="space-y-3">
           {profiles.map((profile) => (
             <div
               key={profile.id}
               onClick={(event) => selectFromCardClick(event, profile.id)}
               className={profile.id === activeProfileId
-                ? "rounded-2xl border border-[#cdbb98] bg-[#fbfcff] p-4 text-left text-stone-900 shadow-sm sm:p-5"
-                : "cursor-pointer rounded-2xl border border-stone-200 bg-white p-4 text-left shadow-sm transition hover:border-stone-300 hover:shadow-md sm:p-5"}
+                ? "rounded-2xl border border-[#b9b2f6] bg-[#f9f9ff] p-4 text-left text-slate-900 shadow-sm sm:p-5"
+                : "cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-slate-300 hover:shadow-md sm:p-5"}
             >
               <button
                 type="button"
@@ -822,30 +822,30 @@ export default function MyPage() {
                 <span className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-lg font-bold">{profile.label}</span>
                   {profile.id === activeProfileId ? (
-                    <span className="rounded-full border border-[#cdbb98] bg-[#f3eee4] px-3 py-1 text-xs font-semibold text-stone-800">현재 분석 대상</span>
+                    <span className="rounded-full border border-[#b9b2f6] bg-[#eeecff] px-3 py-1 text-xs font-semibold text-slate-800">현재 분석 대상</span>
                   ) : null}
                 </span>
                 <span className={profile.id === activeProfileId
-                  ? "mt-1.5 block text-sm text-stone-600"
-                  : "mt-1.5 block text-sm text-stone-500"}
+                  ? "mt-1.5 block text-sm text-slate-600"
+                  : "mt-1.5 block text-sm text-slate-500"}
                 >
                   {relationshipLabels[profile.relationshipType]}
                 </span>
                 <span className={profile.id === activeProfileId
-                  ? "mt-0.5 block text-sm text-stone-600"
-                  : "mt-0.5 block text-sm text-stone-500"}
+                  ? "mt-0.5 block text-sm text-slate-600"
+                  : "mt-0.5 block text-sm text-slate-500"}
                 >
                   {formatProfileDetails(profile)}
                 </span>
               </button>
               <div className={profile.id === activeProfileId
                 ? "mt-3 rounded-xl border border-[#d9dded] bg-[#f5f6fc] px-3 py-2.5"
-                : "mt-3 rounded-xl border border-stone-200 bg-stone-50/60 px-3 py-2.5"}
+                : "mt-3 rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5"}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className={profile.id === activeProfileId
-                    ? "text-xs font-semibold tracking-[0.14em] text-stone-500"
-                    : "text-xs font-semibold tracking-[0.14em] text-stone-500"}
+                    ? "text-xs font-semibold tracking-[0.14em] text-slate-500"
+                    : "text-xs font-semibold tracking-[0.14em] text-slate-500"}
                   >
                     무료 사주
                   </p>
@@ -859,8 +859,8 @@ export default function MyPage() {
                 </div>
                 {freeAnalysisStatusHints[freeAnalysisStatusById[profile.id] ?? "none"] ? (
                   <p className={profile.id === activeProfileId
-                    ? "mt-1.5 text-xs leading-5 text-stone-500"
-                    : "mt-1.5 text-xs leading-5 text-stone-500"}
+                    ? "mt-1.5 text-xs leading-5 text-slate-500"
+                    : "mt-1.5 text-xs leading-5 text-slate-500"}
                   >
                     {freeAnalysisStatusHints[freeAnalysisStatusById[profile.id] ?? "none"]}
                   </p>
@@ -868,11 +868,11 @@ export default function MyPage() {
               </div>
               <div className={profile.id === activeProfileId
                 ? "mt-2 rounded-xl border border-[#d9dded] bg-[#f5f6fc] px-3 py-2.5"
-                : "mt-2 rounded-xl border border-stone-200 bg-stone-50/60 px-3 py-2.5"}
+                : "mt-2 rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5"}
               >
                   <p className={profile.id === activeProfileId
-                    ? "text-xs font-semibold tracking-[0.14em] text-stone-500"
-                    : "text-xs font-semibold tracking-[0.14em] text-stone-500"}
+                    ? "text-xs font-semibold tracking-[0.14em] text-slate-500"
+                    : "text-xs font-semibold tracking-[0.14em] text-slate-500"}
                   >
                     구매한 심층 분석
                   </p>
@@ -892,7 +892,7 @@ export default function MyPage() {
                             disabled
                             className={profile.id === activeProfileId
                               ? "shrink-0 rounded-full border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-white/50"
-                              : "shrink-0 rounded-full border border-stone-200 px-3.5 py-1.5 text-xs font-semibold text-stone-400"}
+                              : "shrink-0 rounded-full border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-400"}
                           >
                             {paidReportActionLabels[item.reportStatus]}
                           </button>
@@ -910,12 +910,12 @@ export default function MyPage() {
                       ))}
                     </ul>
                   ) : (
-                    <p className="mt-2 text-sm text-stone-500">아직 구매한 심층 분석이 없습니다.</p>
+                    <p className="mt-2 text-sm text-slate-500">아직 구매한 심층 분석이 없습니다.</p>
                   )}
                 </div>
               <div className={profile.id === activeProfileId
-                ? "mt-3 flex flex-wrap gap-2 border-t border-stone-200 pt-3"
-                : "mt-3 flex flex-wrap gap-2 border-t border-stone-200 pt-3"}
+                ? "mt-3 flex flex-wrap gap-2 border-t border-slate-200 pt-3"
+                : "mt-3 flex flex-wrap gap-2 border-t border-slate-200 pt-3"}
               >
                 {profile.id === activeProfileId ? (
                   <button
@@ -945,8 +945,8 @@ export default function MyPage() {
               </div>
               {getDeleteBlockMessage(profile.id) ? (
                 <p className={profile.id === activeProfileId
-                  ? "mt-3 rounded-xl bg-stone-50 px-3 py-2 text-xs leading-5 text-stone-500"
-                  : "mt-3 rounded-xl bg-stone-50 px-3 py-2 text-xs leading-5 text-stone-500"}
+                  ? "mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-500"
+                  : "mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-500"}
                 >
                   {getDeleteBlockMessage(profile.id)}
                 </p>
@@ -957,7 +957,7 @@ export default function MyPage() {
                   : "mt-3 rounded-2xl border border-red-200 bg-red-50 p-4"}
                 >
                   <p className={profile.id === activeProfileId
-                    ? "text-xs leading-6 text-stone-700"
+                    ? "text-xs leading-6 text-slate-700"
                     : "text-xs leading-6 text-red-800"}
                   >
                     프로필을 삭제하면 저장된 무료 분석 결과도 함께 삭제되며 복구할 수 없습니다.
@@ -967,7 +967,7 @@ export default function MyPage() {
                       type="button"
                       onClick={() => void deleteProfile(profile.id)}
                       disabled={isDeletingProfile}
-                      className={`rounded-full bg-red-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-stone-400 ${restingFocusRing}`}
+                      className={`rounded-full bg-red-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-slate-400 ${restingFocusRing}`}
                     >
                       {isDeletingProfile ? "삭제 중..." : "삭제 확인"}
                     </button>
@@ -986,10 +986,10 @@ export default function MyPage() {
           ))}
           </div>
           {profiles.length > 0 ? (
-            <section className="mt-5 flex flex-col gap-3 border-t border-stone-200 pt-5 sm:flex-row sm:items-center sm:justify-between" aria-labelledby="selected-profile-action-heading">
+            <section className="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between" aria-labelledby="selected-profile-action-heading">
               <div>
-                <p id="selected-profile-action-heading" className="text-sm font-semibold text-stone-900">선택한 프로필로 분석 이어가기</p>
-                <p className="mt-1 text-sm leading-6 text-stone-600">
+                <p id="selected-profile-action-heading" className="text-sm font-semibold text-slate-900">선택한 프로필로 분석 이어가기</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
                   {activeProfileId
                     ? "현재 분석 대상의 무료 사주 결과를 확인하거나 새로 분석할 수 있습니다."
                     : "먼저 위에서 분석 대상을 선택해 주세요."}
@@ -1007,7 +1007,7 @@ export default function MyPage() {
                   router.push("/saju");
                 }}
                 disabled={!activeProfileId}
-                className={`w-full shrink-0 rounded-xl bg-stone-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-400 sm:w-auto ${restingFocusRing}`}
+                className={`w-full shrink-0 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400 sm:w-auto ${restingFocusRing}`}
               >
                 {activeProfileId && freeAnalysisStatusById[activeProfileId] === "completed"
                   ? "선택한 프로필의 무료 분석 결과 보기"
@@ -1021,10 +1021,10 @@ export default function MyPage() {
           ) : null}
         </div>
         </section>
-        <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-7" aria-labelledby="payment-history-heading">
-            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">PAYMENT HISTORY</p>
-            <h2 id="payment-history-heading" className="mt-2 text-2xl font-bold text-stone-900">결제 내역</h2>
-            <p className="mt-2 text-sm leading-6 text-stone-600">구매한 분석은 보관함에서, 결제와 환불 기록은 여기에서 확인합니다.</p>
+        <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7" aria-labelledby="payment-history-heading">
+            <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">PAYMENT HISTORY</p>
+            <h2 id="payment-history-heading" className="mt-2 text-2xl font-bold text-slate-900">결제 내역</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">구매한 분석은 보관함에서, 결제와 환불 기록은 여기에서 확인합니다.</p>
             {purchaseHistory.length > 0 ? (
             <ul className="mt-5 divide-y divide-stone-200">
               {purchaseHistory.map((item) => {
@@ -1035,47 +1035,47 @@ export default function MyPage() {
                   <li key={item.purchaseId} className="py-4 first:pt-0 last:pb-0">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
-                        <p className="font-semibold text-stone-900">{item.productName}</p>
-                        <p className="mt-1 text-xs text-stone-500">{item.categoryLabel} · 분석 대상: {profile?.label ?? "등록된 프로필"}</p>
-                        <p className="mt-2 text-sm text-stone-600">{formatPurchaseDate(item.purchasedAt)} · {formatPurchaseAmount(item.amount, item.currency)}</p>
+                        <p className="font-semibold text-slate-900">{item.productName}</p>
+                        <p className="mt-1 text-xs text-slate-500">{item.categoryLabel} · 분석 대상: {profile?.label ?? "등록된 프로필"}</p>
+                        <p className="mt-2 text-sm text-slate-600">{formatPurchaseDate(item.purchasedAt)} · {formatPurchaseAmount(item.amount, item.currency)}</p>
                       </div>
                       <div className="flex shrink-0 flex-wrap gap-2">
-                        <span className="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-xs font-semibold text-stone-600">{paymentStatusLabels[item.paymentStatus]}</span>
-                        {item.refund ? <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${item.refund.status === "REFUND_COMPLETED" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : item.refund.status === "OWNER_REVIEW_REQUIRED" ? "border-amber-200 bg-amber-50 text-amber-800" : "border-stone-200 bg-stone-50 text-stone-600"}`}>{refundStatusLabels[item.refund.status]}</span> : null}
+                        <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600">{paymentStatusLabels[item.paymentStatus]}</span>
+                        {item.refund ? <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${item.refund.status === "REFUND_COMPLETED" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : item.refund.status === "OWNER_REVIEW_REQUIRED" ? "border-amber-200 bg-amber-50 text-amber-800" : "border-slate-200 bg-slate-50 text-slate-600"}`}>{refundStatusLabels[item.refund.status]}</span> : null}
                       </div>
                     </div>
-                    {item.refund ? <p className="mt-2 text-xs leading-5 text-stone-500">{item.refund.customerMessage}</p> : null}
+                    {item.refund ? <p className="mt-2 text-xs leading-5 text-slate-500">{item.refund.customerMessage}</p> : null}
                     {feedback ? <p className={`mt-2 text-xs leading-5 ${feedback.kind === "success" ? "text-emerald-700" : "text-amber-700"}`}>{feedback.status ? refundStatusLabels[feedback.status] : null}{feedback.status ? " · " : ""}{feedback.message}</p> : null}
                     {canRequestRefund && refundFormOrderId !== item.orderId ? (
                       <button
                         type="button"
                         onClick={() => openRefundForm(item.orderId)}
-                        className={`mt-3 rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-xs font-semibold text-stone-700 transition hover:bg-stone-50 ${restingFocusRing}`}
+                        className={`mt-3 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 ${restingFocusRing}`}
                       >
                         환불·취소 요청
                       </button>
                     ) : null}
                     {refundFormOrderId === item.orderId ? (
-                      <div className="mt-4 rounded-2xl border border-stone-200 bg-stone-50 p-4">
-                        <p className="text-sm font-semibold text-stone-900">환불·취소 요청</p>
-                        <dl className="mt-3 space-y-1 text-xs leading-5 text-stone-600">
-                          <div className="flex justify-between gap-3"><dt>상품</dt><dd className="text-right font-semibold text-stone-900">{item.productName}</dd></div>
-                          <div className="flex justify-between gap-3"><dt>결제 금액</dt><dd className="text-right font-semibold text-stone-900">{formatPurchaseAmount(item.amount, item.currency)}</dd></div>
-                          <div className="flex justify-between gap-3"><dt>결제일</dt><dd className="text-right font-semibold text-stone-900">{formatPurchaseDate(item.purchasedAt)}</dd></div>
-                          <div className="flex justify-between gap-3"><dt>분석 대상</dt><dd className="text-right font-semibold text-stone-900">{profile?.label ?? "등록된 프로필"}</dd></div>
+                      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <p className="text-sm font-semibold text-slate-900">환불·취소 요청</p>
+                        <dl className="mt-3 space-y-1 text-xs leading-5 text-slate-600">
+                          <div className="flex justify-between gap-3"><dt>상품</dt><dd className="text-right font-semibold text-slate-900">{item.productName}</dd></div>
+                          <div className="flex justify-between gap-3"><dt>결제 금액</dt><dd className="text-right font-semibold text-slate-900">{formatPurchaseAmount(item.amount, item.currency)}</dd></div>
+                          <div className="flex justify-between gap-3"><dt>결제일</dt><dd className="text-right font-semibold text-slate-900">{formatPurchaseDate(item.purchasedAt)}</dd></div>
+                          <div className="flex justify-between gap-3"><dt>분석 대상</dt><dd className="text-right font-semibold text-slate-900">{profile?.label ?? "등록된 프로필"}</dd></div>
                         </dl>
-                        <label htmlFor={`refund-reason-${item.orderId}`} className="mt-4 block text-xs font-semibold text-stone-700">환불·취소 사유</label>
+                        <label htmlFor={`refund-reason-${item.orderId}`} className="mt-4 block text-xs font-semibold text-slate-700">환불·취소 사유</label>
                         <select
                           id={`refund-reason-${item.orderId}`}
                           value={refundReasonCategory}
                           onChange={(event) => setRefundReasonCategory(event.target.value as RefundReasonCategory | "")}
                           disabled={isSubmittingRefund}
-                          className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none focus:border-stone-900"
+                          className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-900"
                         >
                           <option value="">사유를 선택해 주세요</option>
                           {refundReasonOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                         </select>
-                        <label htmlFor={`refund-text-${item.orderId}`} className="mt-3 block text-xs font-semibold text-stone-700">추가 설명 (선택)</label>
+                        <label htmlFor={`refund-text-${item.orderId}`} className="mt-3 block text-xs font-semibold text-slate-700">추가 설명 (선택)</label>
                         <textarea
                           id={`refund-text-${item.orderId}`}
                           value={refundReasonText}
@@ -1083,10 +1083,10 @@ export default function MyPage() {
                           maxLength={200}
                           disabled={isSubmittingRefund}
                           rows={3}
-                          className="mt-2 w-full resize-y rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none focus:border-stone-900"
+                          className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-900"
                         />
-                        <p className="mt-1 text-right text-[11px] text-stone-500">{refundReasonText.length}/200</p>
-                        <label className="mt-3 flex items-start gap-2 text-xs leading-5 text-stone-700">
+                        <p className="mt-1 text-right text-[11px] text-slate-500">{refundReasonText.length}/200</p>
+                        <label className="mt-3 flex items-start gap-2 text-xs leading-5 text-slate-700">
                           <input
                             type="checkbox"
                             checked={refundConfirmation}
@@ -1101,11 +1101,11 @@ export default function MyPage() {
                             type="button"
                             onClick={() => void submitRefundRequest(item)}
                             disabled={isSubmittingRefund || !refundReasonCategory || !refundConfirmation}
-                            className={`rounded-xl bg-stone-900 px-4 py-2.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:bg-stone-400 ${restingFocusRing}`}
+                            className={`rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-400 ${restingFocusRing}`}
                           >
                             {isSubmittingRefund ? "요청 처리 중..." : "환불·취소 요청 제출"}
                           </button>
-                          <button type="button" onClick={closeRefundForm} disabled={isSubmittingRefund} className={`rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-xs font-semibold text-stone-700 disabled:cursor-not-allowed disabled:text-stone-400 ${restingFocusRing}`}>취소</button>
+                          <button type="button" onClick={closeRefundForm} disabled={isSubmittingRefund} className={`rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:text-slate-400 ${restingFocusRing}`}>취소</button>
                         </div>
                         {feedback && !feedback.status ? <p className="mt-3 text-xs leading-5 text-red-600">{feedback.message}</p> : null}
                       </div>
@@ -1114,19 +1114,19 @@ export default function MyPage() {
                 );
               })}
             </ul>
-            ) : <p className="mt-5 border-t border-stone-100 pt-5 text-sm leading-6 text-stone-500">아직 결제 또는 환불 내역이 없습니다.</p>}
+            ) : <p className="mt-5 border-t border-slate-100 pt-5 text-sm leading-6 text-slate-500">아직 결제 또는 환불 내역이 없습니다.</p>}
         </section>
         {message ? <p className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{message}</p> : null}
-        <section className="mt-10 border-t border-stone-200 pt-6" aria-labelledby="account-management-heading">
+        <section className="mt-10 border-t border-slate-200 pt-6" aria-labelledby="account-management-heading">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">ACCOUNT MANAGEMENT</p>
-              <h2 id="account-management-heading" className="mt-2 text-xl font-bold text-stone-900">계정 관리</h2>
-              <p className="mt-2 text-sm leading-6 text-stone-600">이메일, 비밀번호, 회원탈퇴 같은 민감한 설정은 계정 관리에서 변경합니다.</p>
+              <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">ACCOUNT MANAGEMENT</p>
+              <h2 id="account-management-heading" className="mt-2 text-xl font-bold text-slate-900">계정 관리</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">이메일, 비밀번호, 회원탈퇴 같은 민감한 설정은 계정 관리에서 변경합니다.</p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
-              <Link href="/account" className={`rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 ${restingFocusRing}`}>계정 관리</Link>
-              <button type="button" onClick={() => void signOut()} disabled={isSigningOut} className={`rounded-lg px-4 py-2.5 text-sm font-semibold text-stone-500 underline-offset-4 transition hover:text-stone-700 hover:underline disabled:cursor-not-allowed disabled:text-stone-300 ${restingFocusRing}`}>
+              <Link href="/account" className={`rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 ${restingFocusRing}`}>계정 관리</Link>
+              <button type="button" onClick={() => void signOut()} disabled={isSigningOut} className={`rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-500 underline-offset-4 transition hover:text-slate-700 hover:underline disabled:cursor-not-allowed disabled:text-slate-300 ${restingFocusRing}`}>
                 {isSigningOut ? "로그아웃 중..." : "로그아웃"}
               </button>
             </div>

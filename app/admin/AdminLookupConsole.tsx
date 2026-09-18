@@ -142,11 +142,11 @@ function time(value: string | null | undefined): string {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div className="min-w-0 border-t border-stone-100 py-3 first:border-t-0"><dt className="text-xs font-semibold text-stone-500">{label}</dt><dd className="mt-1 break-all text-sm font-medium text-stone-900">{children}</dd></div>;
+  return <div className="min-w-0 border-t border-slate-100 py-3 first:border-t-0"><dt className="text-xs font-semibold text-slate-500">{label}</dt><dd className="mt-1 break-all text-sm font-medium text-slate-900">{children}</dd></div>;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="border-y border-stone-200 py-5"><h2 className="text-base font-bold text-stone-900">{title}</h2><dl className="mt-3">{children}</dl></section>;
+  return <section className="border-y border-slate-200 py-5"><h2 className="text-base font-bold text-slate-900">{title}</h2><dl className="mt-3">{children}</dl></section>;
 }
 
 function errorMessage(status: number): string {
@@ -258,44 +258,44 @@ export default function AdminLookupConsole({
 
   return (
     <section className="mt-8" aria-labelledby="cs-console-heading">
-      <header className="border-b border-stone-200 pb-6">
-        <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">CS CONSOLE</p>
+      <header className="border-b border-slate-200 pb-6">
+        <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">CS CONSOLE</p>
         <h2 id="cs-console-heading" className="mt-3 text-2xl font-bold">고객 지원 조회</h2>
-        <p className="mt-3 text-sm leading-6 text-stone-600">고객 지원 목적의 조회 전용 화면입니다. 조회 결과를 임의로 변경하지 마세요.</p>
+        <p className="mt-3 text-sm leading-6 text-slate-600">고객 지원 목적의 조회 전용 화면입니다. 조회 결과를 임의로 변경하지 마세요.</p>
       </header>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <form onSubmit={lookupCustomer} className="border border-stone-200 bg-white p-5 shadow-sm">
+        <form onSubmit={lookupCustomer} className="rounded-2xl border border-[#dce1ef] bg-white p-5 shadow-sm">
           <label htmlFor="customer-email" className="text-sm font-bold">정확한 계정 이메일</label>
-          <p className="mt-1 text-xs leading-5 text-stone-500">전체 이메일 주소를 입력해 주세요.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">전체 이메일 주소를 입력해 주세요.</p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <input id="customer-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="min-w-0 flex-1 border border-stone-300 px-3 py-2.5 text-sm outline-none focus:border-stone-900" required />
-            <button type="submit" disabled={loading !== null} className="min-h-11 shrink-0 bg-stone-900 px-4 text-sm font-semibold text-white disabled:bg-stone-400">{loading === "customer" ? "조회 중" : "고객 조회"}</button>
+            <input id="customer-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="min-w-0 flex-1 border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-900" required />
+            <button type="submit" disabled={loading !== null} className="min-h-11 shrink-0 bg-[#171a3d] px-4 text-sm font-semibold text-white transition hover:bg-[#242957] disabled:bg-slate-400">{loading === "customer" ? "조회 중" : "고객 조회"}</button>
           </div>
         </form>
-        <form onSubmit={lookupOrder} className="border border-stone-200 bg-white p-5 shadow-sm">
+        <form onSubmit={lookupOrder} className="rounded-2xl border border-[#dce1ef] bg-white p-5 shadow-sm">
           <label htmlFor="order-id" className="text-sm font-bold">내부 주문 ID</label>
-          <p className="mt-1 text-xs leading-5 text-stone-500">정확한 주문 UUID만 조회할 수 있습니다.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">정확한 주문 UUID만 조회할 수 있습니다.</p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <input id="order-id" value={orderId} onChange={(event) => setOrderId(event.target.value)} className="min-w-0 flex-1 border border-stone-300 px-3 py-2.5 font-mono text-sm outline-none focus:border-stone-900" required />
-            <button type="submit" disabled={loading !== null} className="min-h-11 shrink-0 bg-stone-900 px-4 text-sm font-semibold text-white disabled:bg-stone-400">{loading === "order" ? "조회 중" : "주문 조회"}</button>
+            <input id="order-id" value={orderId} onChange={(event) => setOrderId(event.target.value)} className="min-w-0 flex-1 border border-slate-300 px-3 py-2.5 font-mono text-sm outline-none focus:border-slate-900" required />
+            <button type="submit" disabled={loading !== null} className="min-h-11 shrink-0 bg-[#171a3d] px-4 text-sm font-semibold text-white transition hover:bg-[#242957] disabled:bg-slate-400">{loading === "order" ? "조회 중" : "주문 조회"}</button>
           </div>
         </form>
       </div>
 
-      <section className="mt-8 border-y border-stone-200 py-6" aria-labelledby="failure-summary-heading">
+      <section className="mt-8 border-y border-slate-200 py-6" aria-labelledby="failure-summary-heading">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">OPERATIONAL STATUS</p>
+            <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">OPERATIONAL STATUS</p>
             <h3 id="failure-summary-heading" className="mt-2 text-xl font-bold">운영 확인 필요</h3>
           </div>
-          <button type="button" onClick={() => void loadFailures()} className="min-h-11 border border-stone-300 bg-white px-4 text-sm font-semibold text-stone-700">현황 새로고침</button>
+          <button type="button" onClick={() => void loadFailures()} className="min-h-11 border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700">현황 새로고침</button>
         </div>
 
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {(Object.keys(failureLabels) as FailureCategory[]).map((category) => (
-            <button key={category} type="button" onClick={() => void loadFailures(category)} className="min-h-16 border border-stone-200 bg-white p-3 text-left">
-              <span className="block text-xs font-semibold text-stone-500">{failureLabels[category]}</span>
+            <button key={category} type="button" onClick={() => void loadFailures(category)} className="min-h-16 border border-slate-200 bg-white p-3 text-left">
+              <span className="block text-xs font-semibold text-slate-500">{failureLabels[category]}</span>
               <span className="mt-1 block text-lg font-bold">{failureSummary ? failureSummary[category] ?? 0 : "-"}</span>
             </button>
           ))}
@@ -303,42 +303,42 @@ export default function AdminLookupConsole({
 
         {selectedFailure && failureQueue ? (
           <div className="mt-6">
-            <div className="border border-stone-200 bg-stone-50 p-4">
+            <div className="border border-slate-200 bg-slate-50 p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <h4 className="text-base font-bold">{failureLabels[selectedFailure]}</h4>
-                <span className={`px-2 py-1 text-xs font-bold ${failureGuides[selectedFailure].priority === "대표 확인" ? "bg-red-100 text-red-800" : failureGuides[selectedFailure].priority === "자동 대기" ? "bg-amber-100 text-amber-800" : "bg-stone-200 text-stone-800"}`}>{failureGuides[selectedFailure].priority}</span>
+                <span className={`px-2 py-1 text-xs font-bold ${failureGuides[selectedFailure].priority === "대표 확인" ? "bg-red-100 text-red-800" : failureGuides[selectedFailure].priority === "자동 대기" ? "bg-amber-100 text-amber-800" : "bg-slate-200 text-slate-800"}`}>{failureGuides[selectedFailure].priority}</span>
               </div>
               <dl className="mt-4 grid gap-3 text-sm leading-6 md:grid-cols-2">
-                <div><dt className="text-xs font-semibold text-stone-500">먼저 확인</dt><dd className="mt-1 text-stone-800">{failureGuides[selectedFailure].check}</dd></div>
-                <div><dt className="text-xs font-semibold text-stone-500">그다음 행동</dt><dd className="mt-1 text-stone-800">{failureGuides[selectedFailure].action}</dd></div>
-                <div><dt className="text-xs font-semibold text-stone-500">왜</dt><dd className="mt-1 text-stone-800">{failureGuides[selectedFailure].why}</dd></div>
+                <div><dt className="text-xs font-semibold text-slate-500">먼저 확인</dt><dd className="mt-1 text-slate-800">{failureGuides[selectedFailure].check}</dd></div>
+                <div><dt className="text-xs font-semibold text-slate-500">그다음 행동</dt><dd className="mt-1 text-slate-800">{failureGuides[selectedFailure].action}</dd></div>
+                <div><dt className="text-xs font-semibold text-slate-500">왜</dt><dd className="mt-1 text-slate-800">{failureGuides[selectedFailure].why}</dd></div>
                 <div><dt className="text-xs font-semibold text-red-600">절대 하지 않기</dt><dd className="mt-1 text-red-800">{failureGuides[selectedFailure].never}</dd></div>
               </dl>
             </div>
 
             {failureQueue.length === 0 ? (
-              <p className="mt-3 text-sm text-stone-500">확인할 항목이 없습니다.</p>
+              <p className="mt-3 text-sm text-slate-500">확인할 항목이 없습니다.</p>
             ) : (
-              <ul className="mt-4 divide-y divide-stone-200 border-y border-stone-200">
+              <ul className="mt-4 divide-y divide-stone-200 border-y border-slate-200">
                 {failureQueue.map((item) => (
                   <li key={`${selectedFailure}-${item.referenceId}`} className="py-4 text-sm">
-                    <p className="text-xs font-semibold text-stone-500">{referenceLabels[item.referenceType]}</p>
-                    <p className="mt-1 break-all font-mono text-xs text-stone-700">{item.referenceId}</p>
+                    <p className="text-xs font-semibold text-slate-500">{referenceLabels[item.referenceType]}</p>
+                    <p className="mt-1 break-all font-mono text-xs text-slate-700">{item.referenceId}</p>
                     <p className="mt-2 font-semibold">{item.productLabel ?? "계정 종료"}{item.editionLabel ? ` · ${item.editionLabel}` : ""}</p>
-                    <div className="mt-2 grid gap-1 text-xs leading-5 text-stone-600 sm:grid-cols-2">
+                    <div className="mt-2 grid gap-1 text-xs leading-5 text-slate-600 sm:grid-cols-2">
                       <p>상태: {value(item.status)}</p>
                       <p>재시도: {item.retryCount ?? 0}회</p>
                       <p>다음 재시도: {time(item.nextRetryAt)}</p>
                       <p>마지막 갱신: {time(item.updatedAt)}</p>
                       <p className="sm:col-span-2">실패 코드: {item.failureCode ?? "안전한 실패 코드 없음"}</p>
                     </div>
-                    <p className="mt-3 border-l-2 border-stone-400 pl-3 text-xs leading-6 text-stone-700">{decisionForFailure(selectedFailure, item)}</p>
+                    <p className="mt-3 border-l-2 border-slate-400 pl-3 text-xs leading-6 text-slate-700">{decisionForFailure(selectedFailure, item)}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {item.orderId ? (
-                        <button type="button" disabled={loading !== null} onClick={() => void fetchOrder(item.orderId ?? "", `failure-queue:${selectedFailure}`)} className="min-h-10 border border-stone-900 bg-stone-900 px-3 text-xs font-semibold text-white disabled:bg-stone-400">연결 주문 상세 확인</button>
+                        <button type="button" disabled={loading !== null} onClick={() => void fetchOrder(item.orderId ?? "", `failure-queue:${selectedFailure}`)} className="min-h-10 border border-slate-900 bg-[#171a3d] px-3 text-xs font-semibold text-white transition hover:bg-[#242957] disabled:bg-slate-400">연결 주문 상세 확인</button>
                       ) : null}
                       {item.accountEmail ? (
-                        <button type="button" disabled={loading !== null} onClick={() => void fetchCustomer(item.accountEmail ?? "", `failure-queue:${selectedFailure}`)} className="min-h-10 border border-stone-300 bg-white px-3 text-xs font-semibold text-stone-800 disabled:text-stone-400">연결 계정 상세 확인</button>
+                        <button type="button" disabled={loading !== null} onClick={() => void fetchCustomer(item.accountEmail ?? "", `failure-queue:${selectedFailure}`)} className="min-h-10 border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-800 disabled:text-slate-400">연결 계정 상세 확인</button>
                       ) : null}
                     </div>
                   </li>

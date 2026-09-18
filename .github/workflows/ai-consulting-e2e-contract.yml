@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "app/ai-consulting/**"
+      - "app/admin/ai-consulting/**"
       - "app/api/ai-consulting/**"
       - "app/lib/aiConsulting/**"
       - "scripts/ai-consulting-*.ts"

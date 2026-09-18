@@ -107,21 +107,21 @@ export default function SupportCenterClient({
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-5 py-10 text-stone-900 sm:px-8 sm:py-14">
+    <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
       <div className="mx-auto w-full max-w-4xl">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className="text-sm font-semibold text-stone-600 underline underline-offset-4">← 운보다 홈</Link>
+          <Link href="/" className="text-sm font-semibold text-slate-600 underline underline-offset-4">← 운보다 홈</Link>
           <div className="flex gap-3 text-sm">
-            <Link href="/terms" className="text-stone-500 underline underline-offset-4">이용약관</Link>
-            <Link href="/privacy" className="text-stone-500 underline underline-offset-4">개인정보처리방침</Link>
-            <Link href="/refund" className="text-stone-500 underline underline-offset-4">환불정책</Link>
+            <Link href="/terms" className="text-slate-500 underline underline-offset-4">이용약관</Link>
+            <Link href="/privacy" className="text-slate-500 underline underline-offset-4">개인정보처리방침</Link>
+            <Link href="/refund" className="text-slate-500 underline underline-offset-4">환불정책</Link>
           </div>
         </div>
 
-        <header className="mt-8 border-b border-stone-200 pb-7">
-          <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">SUPPORT CENTER</p>
+        <header className="mt-8 border-b border-slate-200 pb-7">
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">SUPPORT CENTER</p>
           <h1 className="mt-3 text-3xl font-bold sm:text-4xl">고객지원 센터</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-600">반복되는 문제는 먼저 자동 해결 경로로 안내합니다. 그래도 해결되지 않는 경우에만 문의를 접수해 필요한 지원을 받을 수 있도록 운영합니다.</p>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">반복되는 문제는 먼저 자동 해결 경로로 안내합니다. 그래도 해결되지 않는 경우에만 문의를 접수해 필요한 지원을 받을 수 있도록 운영합니다.</p>
         </header>
 
         <section className="mt-7">
@@ -132,85 +132,85 @@ export default function SupportCenterClient({
                 key={item}
                 type="button"
                 onClick={() => { setCategory(item); setShowForm(item === "OTHER"); setFeedback(null); }}
-                className={`min-h-24 rounded-xl border p-4 text-left transition ${category === item ? "border-stone-900 bg-stone-900 text-white" : "border-stone-200 bg-white hover:border-stone-400"}`}
+                className={`min-h-24 rounded-2xl border p-4 text-left shadow-sm transition ${category === item ? "border-[#6f5ce7] bg-[#171a3d] text-white shadow-[0_10px_28px_rgba(66,56,150,0.18)]" : "border-[#dce1ef] bg-white hover:border-[#aaa0f4] hover:shadow-md"}`}
               >
                 <span className="text-sm font-bold">{SUPPORT_CATEGORY_LABELS[item]}</span>
-                <span className={`mt-2 block text-xs leading-5 ${category === item ? "text-stone-200" : "text-stone-500"}`}>{guides[item].description}</span>
+                <span className={`mt-2 block text-xs leading-5 ${category === item ? "text-[#d8d7f2]" : "text-slate-500"}`}>{guides[item].description}</span>
               </button>
             ))}
           </div>
         </section>
 
         {selectedGuide ? (
-          <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-            <p className="text-xs font-semibold text-amber-700">먼저 자동 해결을 확인해 주세요</p>
+          <section className="mt-6 rounded-2xl border border-[#d8d3ff] bg-[#f1efff] p-5">
+            <p className="text-xs font-semibold text-[#5e4bd1]">먼저 자동 해결을 확인해 주세요</p>
             <h2 className="mt-2 text-lg font-bold">{selectedGuide.title}</h2>
-            <p className="mt-2 text-sm leading-7 text-stone-700">{selectedGuide.description}</p>
+            <p className="mt-2 text-sm leading-7 text-slate-700">{selectedGuide.description}</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link href={selectedGuide.href} className="rounded-lg bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white">{selectedGuide.actionLabel}</Link>
+              <Link href={selectedGuide.href} className="rounded-xl bg-[#6f5ce7] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5f4fd2]">{selectedGuide.actionLabel}</Link>
               {category !== "OTHER" ? (
-                <button type="button" onClick={() => setShowForm(true)} className="rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-700">안내대로 했지만 해결되지 않았어요</button>
+                <button type="button" onClick={() => setShowForm(true)} className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700">안내대로 했지만 해결되지 않았어요</button>
               ) : null}
             </div>
           </section>
         ) : null}
 
         {showForm && category ? (
-          <section className="mt-6 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+          <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             {!isAuthenticated ? (
               <div>
                 <h2 className="text-lg font-bold">문의 접수는 로그인 후 가능합니다</h2>
-                <p className="mt-2 text-sm leading-7 text-stone-600">계정과 주문을 안전하게 확인하기 위해 회원 문의는 로그인된 계정 기준으로 접수합니다. 로그인 문제가 있다면 먼저 비밀번호 재설정을 이용해 주세요.</p>
+                <p className="mt-2 text-sm leading-7 text-slate-600">계정과 주문을 안전하게 확인하기 위해 회원 문의는 로그인된 계정 기준으로 접수합니다. 로그인 문제가 있다면 먼저 비밀번호 재설정을 이용해 주세요.</p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Link href="/auth/login?returnTo=/support" className="rounded-lg bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white">로그인</Link>
-                  <Link href="/auth/forgot-password?returnTo=/support" className="rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-700">비밀번호 재설정</Link>
+                  <Link href="/auth/login?returnTo=/support" className="rounded-xl bg-[#6f5ce7] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5f4fd2]">로그인</Link>
+                  <Link href="/auth/forgot-password?returnTo=/support" className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700">비밀번호 재설정</Link>
                 </div>
               </div>
             ) : (
               <form onSubmit={submit} className="space-y-4">
                 <div>
                   <h2 className="text-lg font-bold">해결되지 않은 문제 접수</h2>
-                  <p className="mt-2 text-xs leading-6 text-stone-500">비밀번호, 카드번호, 결제키, 주민등록번호, 사주 원문이나 상담 전체 내용 같은 불필요한 민감정보는 적지 마세요. 운영자는 필요한 주문·계정 상태만 별도로 확인합니다.</p>
+                  <p className="mt-2 text-xs leading-6 text-slate-500">비밀번호, 카드번호, 결제키, 주민등록번호, 사주 원문이나 상담 전체 내용 같은 불필요한 민감정보는 적지 마세요. 운영자는 필요한 주문·계정 상태만 별도로 확인합니다.</p>
                 </div>
                 {selectedGuide?.needsOrderId ? (
-                  <label className="block text-sm font-semibold">주문 ID <span className="font-normal text-stone-400">(알고 있는 경우)</span>
-                    <input value={orderId} onChange={(event) => setOrderId(event.target.value)} placeholder="마이페이지에 표시된 주문 UUID" className="mt-2 w-full rounded-lg border border-stone-300 px-3 py-2.5 font-mono text-sm" />
+                  <label className="block text-sm font-semibold">주문 ID <span className="font-normal text-slate-400">(알고 있는 경우)</span>
+                    <input value={orderId} onChange={(event) => setOrderId(event.target.value)} placeholder="마이페이지에 표시된 주문 UUID" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-mono text-sm" />
                   </label>
                 ) : null}
                 <label className="block text-sm font-semibold">문제 상황
-                  <textarea value={message} onChange={(event) => setMessage(event.target.value)} minLength={20} maxLength={1200} required rows={6} className="mt-2 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm leading-6" placeholder="자동 안내를 따라 해본 뒤에도 남아 있는 문제와 화면에 표시된 안전한 상태 문구를 적어 주세요." />
+                  <textarea value={message} onChange={(event) => setMessage(event.target.value)} minLength={20} maxLength={1200} required rows={6} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm leading-6" placeholder="자동 안내를 따라 해본 뒤에도 남아 있는 문제와 화면에 표시된 안전한 상태 문구를 적어 주세요." />
                 </label>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs text-stone-400">{message.length}/1200 · 진행 중 문의는 최대 3건</span>
-                  <button type="submit" disabled={submitting} className="rounded-lg bg-stone-900 px-5 py-2.5 text-sm font-semibold text-white disabled:bg-stone-400">{submitting ? "접수 중..." : "문의 접수"}</button>
+                  <span className="text-xs text-slate-400">{message.length}/1200 · 진행 중 문의는 최대 3건</span>
+                  <button type="submit" disabled={submitting} className="rounded-xl bg-[#6f5ce7] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5f4fd2] disabled:bg-slate-400">{submitting ? "접수 중..." : "문의 접수"}</button>
                 </div>
               </form>
             )}
           </section>
         ) : null}
 
-        {feedback ? <p role="status" className="mt-5 rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700">{feedback}</p> : null}
+        {feedback ? <p role="status" className="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">{feedback}</p> : null}
 
         {isAuthenticated ? (
-          <section className="mt-10 border-t border-stone-200 pt-7">
+          <section className="mt-10 border-t border-slate-200 pt-7">
             <div className="flex items-end justify-between gap-3">
-              <div><p className="text-xs font-semibold tracking-[0.2em] text-stone-500">MY REQUESTS</p><h2 className="mt-2 text-xl font-bold">내 문의</h2></div>
-              <button type="button" onClick={() => window.location.reload()} className="text-sm font-semibold text-stone-600 underline underline-offset-4">새로고침</button>
+              <div><p className="text-xs font-semibold tracking-[0.2em] text-slate-500">MY REQUESTS</p><h2 className="mt-2 text-xl font-bold">내 문의</h2></div>
+              <button type="button" onClick={() => window.location.reload()} className="text-sm font-semibold text-slate-600 underline underline-offset-4">새로고침</button>
             </div>
-            {requests.length === 0 ? <p className="mt-4 text-sm text-stone-500">접수된 문의가 없습니다.</p> : (
+            {requests.length === 0 ? <p className="mt-4 text-sm text-slate-500">접수된 문의가 없습니다.</p> : (
               <div className="mt-4 space-y-3">
                 {requests.map((request) => (
-                  <article key={request.id} className="rounded-xl border border-stone-200 bg-white p-5">
+                  <article key={request.id} className="rounded-xl border border-slate-200 bg-white p-5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="font-bold">{SUPPORT_CATEGORY_LABELS[request.category]}</p>
-                      <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-600">{SUPPORT_STATUS_LABELS[request.status]}</span>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">{SUPPORT_STATUS_LABELS[request.status]}</span>
                     </div>
-                    <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-stone-700">{request.message}</p>
-                    <p className="mt-3 text-xs text-stone-400">접수 {time(request.createdAt)}</p>
+                    <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">{request.message}</p>
+                    <p className="mt-3 text-xs text-slate-400">접수 {time(request.createdAt)}</p>
                     {request.operatorResponse ? (
                       <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                         <p className="text-xs font-semibold text-emerald-700">운보다 답변</p>
-                        <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-stone-800">{request.operatorResponse}</p>
+                        <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-800">{request.operatorResponse}</p>
                       </div>
                     ) : null}
                   </article>

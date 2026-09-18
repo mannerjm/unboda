@@ -42,16 +42,16 @@ export default function InterestedAnalysesList({
 
   if (displayAnalyses.length === 0) {
     return (
-      <section className="mt-10 border-y border-stone-200 py-12 text-center">
-        <p className="text-base font-semibold text-stone-800">
+      <section className="mt-8 rounded-3xl border border-[#dce1ef] bg-white/90 px-6 py-12 text-center shadow-sm">
+        <p className="text-base font-semibold text-slate-800">
           아직 관심 분석에 저장한 항목이 없습니다.
         </p>
-        <p className="mt-2 text-sm leading-6 text-stone-500">
+        <p className="mt-2 text-sm leading-6 text-slate-500">
           궁금한 심층 분석을 저장해 두고 나중에 다시 확인해 보세요.
         </p>
         <Link
           href="/deep-analysis"
-          className="mt-5 inline-flex text-sm font-semibold text-stone-700 underline decoration-stone-300 underline-offset-4"
+          className="mt-5 inline-flex text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4"
         >
           심층 분석 둘러보기 →
         </Link>
@@ -60,24 +60,24 @@ export default function InterestedAnalysesList({
   }
 
   return (
-    <ul className="mt-8 divide-y divide-stone-200 border-y border-stone-200">
+    <ul className="mt-8 divide-y divide-stone-200 border-y border-slate-200">
       {displayAnalyses.map(({ record, product, currentState }) => {
         const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
         return (
         <li
           key={record.id}
-          className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-4 rounded-2xl border border-[#dce1ef] bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between"
         >
           <div className="min-w-0 flex-1">
-            <p className="text-base font-semibold text-stone-900">
+            <p className="text-base font-semibold text-slate-900">
               {displayTitle}
             </p>
             {product.description && (
-              <p className="mt-2 text-sm text-stone-600">
+              <p className="mt-2 text-sm text-slate-600">
                 {product.description}
               </p>
             )}
-            <p className="mt-2 text-xs font-semibold text-stone-500">
+            <p className="mt-2 text-xs font-semibold text-slate-500">
               {currentState.ownsCurrentEdition
                 ? "현재 분석 보유 중"
                 : "현재 회차 미보유"}
@@ -87,7 +87,7 @@ export default function InterestedAnalysesList({
             {currentState.ownsCurrentEdition ? (
               <Link
                 href="/purchased-analyses"
-                className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs font-semibold text-stone-700 transition hover:bg-stone-50"
+                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
               >
                 구매한 분석에서 보기
               </Link>
@@ -95,7 +95,7 @@ export default function InterestedAnalysesList({
             <button
               onClick={() => handleRemove(record.productId, record.id)}
               disabled={loading === record.productId}
-              className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs font-semibold text-stone-700 transition hover:bg-stone-50 disabled:cursor-wait disabled:bg-stone-50 disabled:text-stone-500"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-wait disabled:bg-slate-50 disabled:text-slate-500"
             >
               {loading === record.productId
                 ? "제거 중..."

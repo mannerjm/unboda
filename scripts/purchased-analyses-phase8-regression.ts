@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { computeAnalysisEditionKey } from "../app/lib/analysisEditionKey";
+import { formatAnalysisEditionLabel } from "../app/lib/analysisEditionLabel";
 import { groupPurchasedAnalysesByProduct } from "../app/lib/purchasedAnalysesGrouping";
 
 function read(path: string): string {
@@ -107,6 +109,25 @@ assert(!refresh.includes("claimPaidReport") && !refresh.includes("generatePaidAn
 assert(preview.includes("await requireOperator()"), "Phase 8 preview must be operator gated");
 assert(preview.includes("PREVIEW_GROUPS"), "Phase 8 preview must use local sample library data");
 assert(preview.includes("previewMode"), "Phase 8 preview must render the real shared library component in preview mode");
+assert(preview.includes("computeAnalysisEditionKey") && preview.includes("formatAnalysisEditionLabel"), "Phase 8 preview must derive sample editions from the real edition policy helpers");
+assert(preview.includes('previewEdition("career-workplace-relationships", "2026-09-13")'), "monthly career preview must derive its month edition from the actual policy");
+assert(preview.includes('previewEdition("relationship-current", "2026-08-03")'), "monthly relationship preview must derive its month edition from the actual policy");
+assert(preview.includes('previewEdition("monthly-next", "2026-09-18")'), "target-month preview must derive the next-month edition from the actual policy");
+assert(!preview.includes('productId: "career-workplace-relationships"') || !preview.includes('analysisEditionKey: "YEAR:2026"'), "monthly preview products must not be hardcoded as yearly editions");
+
+const yearlyEdition = computeAnalysisEditionKey({ productId: "wealth", anchorDate: "2026-09-17" });
+const monthlyEdition = computeAnalysisEditionKey({ productId: "career-workplace-relationships", anchorDate: "2026-09-13" });
+const relationshipMonthlyEdition = computeAnalysisEditionKey({ productId: "relationship-current", anchorDate: "2026-08-03" });
+const targetMonthEdition = computeAnalysisEditionKey({ productId: "monthly-next", anchorDate: "2026-09-18" });
+
+assert(yearlyEdition === "YEAR:2026", "wealth preview must remain a yearly edition");
+assert(monthlyEdition === "MONTH:2026-09", "workplace relationship preview must be a September monthly edition");
+assert(relationshipMonthlyEdition === "MONTH:2026-08", "current relationship preview must be an August monthly edition");
+assert(targetMonthEdition === "TARGET_MONTH:2026-10", "next-month preview must point to October when purchased in September");
+assert(formatAnalysisEditionLabel(yearlyEdition) === "2026년 분석", "yearly preview label must stay customer-readable");
+assert(formatAnalysisEditionLabel(monthlyEdition) === "2026년 9월 분석", "monthly preview label must show the purchase/reference month");
+assert(formatAnalysisEditionLabel(relationshipMonthlyEdition) === "2026년 8월 분석", "monthly relationship label must show the month");
+assert(formatAnalysisEditionLabel(targetMonthEdition) === "2026년 10월 대상 분석", "target-month label must show the analyzed target month");
 for (const forbidden of ["/api/orders", "requestPayment", "grantEntitlement", "createPurchaseFromPaidOrder"]) {
   assert(!preview.includes(forbidden), `Phase 8 preview must not invoke commercial mutation: ${forbidden}`);
 }

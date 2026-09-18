@@ -12,6 +12,7 @@ const accessPanel = read("app/paid-analysis/[productId]/PaidAnalysisAccessPanel.
 const checkoutPage = read("app/checkout/[productId]/page.tsx");
 const checkoutPanel = read("app/checkout/[productId]/CheckoutAccessPanel.tsx");
 const catalog = read("app/components/PremiumCatalogSection.tsx");
+const recommendations = read("app/components/RecommendationTop3.tsx");
 
 for (const [name, source] of [
   ["premium detail", detail],
@@ -55,6 +56,8 @@ assert(accessPanel.includes("getPaidReport"), "detail access must keep authorita
 assert(accessPanel.includes('<PremiumProductDetail product={product} state={state} profileId={profileId} isSaved={isSaved} />'), "detail access must keep the existing shared-detail contract");
 
 assert(catalog.includes("PremiumProductDetail"), "deep-analysis discovery must keep using the shared premium detail");
+assert(recommendations.includes('import PremiumReportValuePreview from "@/app/components/PremiumReportValuePreview"'), "recommendation detail must reuse the shared report preview");
+assert(recommendations.includes('state === "not_purchased" ? <PremiumReportValuePreview product={product} /> : null'), "recommendation detail must show the report preview before purchase");
 assert(catalog.includes('bg-[#f7f8fc]'), "selected catalog detail must sit on the cool Phase 4 surface");
 
 assert(checkoutPage.includes('bg-[#f5f7fc]'), "checkout must keep the cool canvas");

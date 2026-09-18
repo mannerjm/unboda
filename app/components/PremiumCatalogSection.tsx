@@ -355,7 +355,7 @@ function TopicDiscovery({
       </div>
 
       {selectedProduct && purchaseDecision ? (
-        <div className="mt-6 rounded-[1.5rem] border border-stone-200 bg-[#fcfbf9] p-1 sm:p-2">
+        <div className="mt-6 rounded-[1.6rem] border border-[#dce1ef] bg-[#f7f8fc] p-1 sm:p-2">
           <PremiumProductDetail
             key={selectedProduct.id}
             product={selectedProduct}
@@ -366,7 +366,7 @@ function TopicDiscovery({
           />
         </div>
       ) : (
-        <div className="mt-5 rounded-[1.35rem] border border-dashed border-stone-300 bg-stone-50 px-5 py-6 text-center">
+        <div className="mt-5 rounded-[1.35rem] border border-dashed border-[#cfd5e6] bg-[#f7f8fc] px-5 py-6 text-center">
           <p className="text-xs text-stone-500">질문을 선택하면 분석 내용, 가격, 리포트 구조와 구매 전 안내가 열려요.</p>
         </div>
       )}
@@ -435,7 +435,7 @@ function PeriodDiscovery({
       </div>
 
       {selectedProduct?.purchaseDecision ? (
-        <div className="mt-6 rounded-[1.5rem] border border-stone-200 bg-[#fcfbf9] p-1 sm:p-2">
+        <div className="mt-6 rounded-[1.6rem] border border-[#dce1ef] bg-[#f7f8fc] p-1 sm:p-2">
           <PremiumProductDetail
             key={selectedProduct.id}
             product={selectedProduct}
@@ -446,7 +446,7 @@ function PeriodDiscovery({
           />
         </div>
       ) : (
-        <div className="mt-5 rounded-[1.35rem] border border-dashed border-stone-300 bg-stone-50 px-5 py-6 text-center">
+        <div className="mt-5 rounded-[1.35rem] border border-dashed border-[#cfd5e6] bg-[#f7f8fc] px-5 py-6 text-center">
           <p className="text-xs text-stone-500">시간 범위를 선택하면 분석 내용, 가격, 리포트 구조와 구매 전 안내가 열려요.</p>
         </div>
       )}

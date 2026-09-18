@@ -16,6 +16,7 @@ const parentChild = read("app/components/FamilyParentChildPaidReportView.tsx");
 const extended = read("app/components/FamilyExtendedPaidReportView.tsx");
 const preparing = read("app/components/CompatibilityPaidReportPreparing.tsx");
 const romanticRoute = read("app/special-analysis/compatibility/report/page.tsx");
+const pairReportRoute = read("app/special-analysis/compatibility/PairCompatibilityReportPage.tsx");
 const parentChildRoute = read("app/special-analysis/compatibility/family/parent-child/report/page.tsx");
 const siblingRoute = read("app/special-analysis/compatibility/family/siblings/report/page.tsx");
 const otherRoute = read("app/special-analysis/compatibility/family/other/report/page.tsx");
@@ -32,6 +33,7 @@ const reportSurfaces = [
   ["extended-family report", extended],
   ["compatibility preparing", preparing],
   ["romantic route", romanticRoute],
+  ["pair compatibility route", pairReportRoute],
   ["parent-child route", parentChildRoute],
   ["sibling route", siblingRoute],
   ["other-family route", otherRoute],
@@ -98,11 +100,11 @@ assert(v4.includes("<PeriodTimelineSection periodAnalysis={detail.periodAnalysis
 assert(legacy.includes("isPaidAnalysisDetailV4") && legacy.includes("<PaidAnalysisV4Report"), "legacy client must keep V4 dispatch");
 assert(legacy.includes("detail.heroSummary") && legacy.includes("detail.confidence"), "legacy stored report rendering must remain available");
 
-assert(romantic.includes("관계 핵심 포인트"), "romantic report must present a quick relationship summary");
-assert(romantic.includes('data-section="pair-perspective"'), "romantic report must preserve two-way perspective");
-assert(romantic.includes("report.strengths") && romantic.includes("report.conflict") && romantic.includes("report.recovery") && romantic.includes("report.longTerm"), "romantic report sections must remain intact");
-assert(romantic.includes("report.currentTiming") && romantic.includes("report.actionGuide.doNext") && romantic.includes("report.actionGuide.avoid"), "romantic timing and action guide must remain intact");
-assert(!romantic.includes('bg-[#171a3d] px-6 py-10 text-white'), "romantic report must not use a large dark reading section");
+assert(romantic.includes("getPairCompatibilityConfigByRelationshipType") && romantic.includes("config.reportKeyPointsDescription"), "pair report must present a relation-specific quick summary");
+assert(romantic.includes('data-section="pair-perspective"'), "pair compatibility report must preserve two-way perspective");
+assert(romantic.includes("report.strengths") && romantic.includes("report.conflict") && romantic.includes("report.recovery") && romantic.includes("report.longTerm"), "pair compatibility report sections must remain intact");
+assert(romantic.includes("report.currentTiming") && romantic.includes("report.actionGuide.doNext") && romantic.includes("report.actionGuide.avoid"), "pair compatibility timing and action guide must remain intact");
+assert(!romantic.includes('bg-[#171a3d] px-6 py-10 text-white'), "pair compatibility report must not use a large dark reading section");
 
 assert(parentChild.includes("directions.parentToChild") && parentChild.includes("directions.childToParent"), "parent-child report must preserve both directions");
 assert(parentChild.includes("report.emotionalConnection") && parentChild.includes("report.expectationAndAutonomy") && parentChild.includes("report.boundariesAndPressure"), "parent-child domains must remain intact");
@@ -123,8 +125,11 @@ assert(paidRoute.includes("ReportAccessGate") && paidRoute.includes("PaidAnalysi
 assert(gate.includes("hasActiveEntitlementForProfileEdition") && gate.includes("hasActiveEntitlementForProfile"), "report access must remain entitlement scoped");
 assert(gate.includes("getUserProfile(profileId, user.id)") && gate.includes("activeProfile?.id !== profile.id"), "report access must remain profile scoped");
 
+assert(romanticRoute.includes("PairCompatibilityReportPage"), "romantic report wrapper must use the shared pair report route");
+assert(pairReportRoute.includes("getPaidReport") && pairReportRoute.includes("CompatibilityPaidReportView"), "shared pair compatibility route must keep its paid report renderer");
+assert(pairReportRoute.includes("AiConsultingEntryCard"), "shared pair compatibility route must keep AI consulting entry");
+
 for (const [name, source, marker] of [
-  ["romantic route", romanticRoute, "CompatibilityPaidReportView"],
   ["parent-child route", parentChildRoute, "FamilyParentChildPaidReportView"],
   ["sibling route", siblingRoute, 'FamilyExtendedPaidReportView mode="siblings"'],
   ["other-family route", otherRoute, 'FamilyExtendedPaidReportView mode="other_family"'],

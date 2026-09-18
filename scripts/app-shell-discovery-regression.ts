@@ -27,6 +27,7 @@ for (const requiredText of [
   "추천 분석",
   "심층 분석",
   "전문 분석",
+  "AI 상담",
   "마이페이지",
   "고객지원 센터",
 ]) {
@@ -57,6 +58,10 @@ if (!appShellSource.includes('href: "/deep-analysis"')) {
 
 if (!appShellSource.includes('href: "/special-analysis"')) {
   throw new Error("Professional analysis navigation must target the dedicated hub");
+}
+
+if (!appShellSource.includes('href: "/ai-consulting"') || !appShellSource.includes("이어가기")) {
+  throw new Error("Unified AI consulting must be a prominent real navigation destination");
 }
 
 if (!appShellSource.includes('href: "/support"')) {

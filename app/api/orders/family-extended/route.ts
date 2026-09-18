@@ -21,6 +21,10 @@ import {
 } from "@/app/lib/familyCompatibilityExtendedPurchases";
 import { emitPaymentEvent } from "@/app/lib/payments/observability";
 import { getUserProfile } from "@/app/lib/profiles/server";
+import {
+  getProfileFreeAnalysisFoundationStatus,
+  isFreeAnalysisFoundationReady,
+} from "@/app/lib/freeAnalysisEligibility";
 import { isProfileId } from "@/app/lib/profiles/types";
 import {
   ActiveEditionOrderAlreadyPaidError,
@@ -105,6 +109,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "프로필을 조회하지 못했습니다." }, { status: 500 });
   }
   if (!profile) return NextResponse.json({ error: "프로필을 찾을 수 없습니다." }, { status: 404 });
+
+  const freeAnalysisStatus = await getProfileFreeAnalysisFoundationStatus(user.id, profile);
+  if (!isFreeAnalysisFoundationReady(freeAnalysisStatus)) {
+    return NextResponse.json(
+      {
+        error: "유료 분석을 결제하기 전에 현재 프로필의 무료 사주를 먼저 확인해 주세요.",
+        code: "FREE_ANALYSIS_REQUIRED",
+        freeAnalysisStatus,
+      },
+      { status: 409 },
+    );
+  }
 
   const rawPayload = requestBody?.familyPayload;
   if (!rawPayload || typeof rawPayload !== "object" || Array.isArray(rawPayload)) {

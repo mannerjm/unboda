@@ -259,9 +259,8 @@ export default function MyPage() {
   const [formInput, setFormInput] = useState<ProfileInput>(emptyProfileInput);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [pendingBirthChangeConfirmation, setPendingBirthChangeConfirmation] = useState<{
-    hasPaidHistory: boolean;
-  } | null>(null);
+  const [pendingBirthChangeConfirmation, setPendingBirthChangeConfirmation] = useState(false);
+  const [birthChangeNotice, setBirthChangeNotice] = useState<string | null>(null);
   const confirmedActiveProfileIdRef = useRef<string | null>(null);
   const pendingActiveProfileIdRef = useRef<string | null>(null);
   const isPersistingActiveProfileRef = useRef(false);
@@ -645,7 +644,7 @@ export default function MyPage() {
     );
 
     if (canonicalBirthChanged && !birthDataChangeAcknowledged) {
-      setPendingBirthChangeConfirmation({ hasPaidHistory });
+      setPendingBirthChangeConfirmation(true);
       return;
     }
 
@@ -671,20 +670,20 @@ export default function MyPage() {
       const body = await response.json() as { error?: string; code?: string };
       if (!response.ok) {
         if (body.code === "BIRTH_DATA_CHANGE_ACKNOWLEDGEMENT_REQUIRED") {
-          setPendingBirthChangeConfirmation({ hasPaidHistory: true });
+          setPendingBirthChangeConfirmation(true);
           return;
         }
         throw new Error(body.error ?? fallback);
       }
 
       closeForm();
-      setMessage(
-        canonicalBirthChanged
-          ? hasPaidHistory
+      if (canonicalBirthChanged) {
+        setBirthChangeNotice(
+          hasPaidHistory
             ? "출생 정보가 변경되었습니다. 기존 구매 리포트와 AI 상담은 이전 정보 기준으로 보관됩니다. 새 기준으로 이용하려면 무료 사주를 다시 확인해 주세요."
-            : "출생 정보가 변경되었습니다. 현재 정보 기준으로 무료 사주를 다시 확인해 주세요."
-          : null,
-      );
+            : "출생 정보가 변경되었습니다. 현재 정보 기준으로 무료 사주를 다시 확인해 주세요.",
+        );
+      }
       await reloadMypageData();
     } catch (submitError) {
       setFormError(submitError instanceof Error ? submitError.message : fallback);
@@ -853,17 +852,12 @@ export default function MyPage() {
               <h2 id="birth-change-confirmation-title" className="mt-2 text-xl font-black text-[#11162d]">
                 출생 정보를 변경하시겠어요?
               </h2>
-              {pendingBirthChangeConfirmation.hasPaidHistory ? (
-                <div className="mt-4 space-y-3 text-sm leading-7 text-slate-700">
-                  <p>기존 리포트와 AI 상담 기록은 구매 당시 출생 정보 기준으로 그대로 보관됩니다.</p>
-                  <p>변경 후 기존 상담은 새 출생 정보와 자동으로 합쳐지지 않습니다. 새 출생 정보 기준으로 이용하려면 무료 사주를 다시 확인한 뒤, 이후 새로 구매하는 분석부터 변경된 정보가 적용됩니다.</p>
-                  <p className="font-semibold text-[#40359a]">남아 있는 AI 질문권은 그대로 유지됩니다.</p>
-                </div>
-              ) : (
-                <p className="mt-4 text-sm leading-7 text-slate-700">
-                  출생 정보를 변경하면 기존 무료 사주는 재분석이 필요합니다. 변경된 정보는 무료 사주를 다시 확인한 뒤 이후 새 분석부터 적용됩니다.
-                </p>
-              )}
+              <div className="mt-4 space-y-3 text-sm leading-7 text-slate-700">
+                <p>출생 정보를 변경하면 현재 무료 사주는 재분석이 필요합니다.</p>
+                <p>이미 구매한 리포트와 AI 상담 기록이 있다면 기존 리포트와 상담은 구매 당시 출생 정보 기준으로 그대로 보관됩니다.</p>
+                <p>변경 후 기존 상담은 새 출생 정보와 자동으로 합쳐지지 않습니다. 새 출생 정보 기준으로 이용하려면 무료 사주를 다시 확인한 뒤, 이후 새로 구매하는 분석부터 변경된 정보가 적용됩니다.</p>
+                <p className="font-semibold text-[#40359a]">남아 있는 AI 질문권이 있다면 그대로 유지됩니다.</p>
+              </div>
               <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <button
                   type="button"
@@ -883,6 +877,12 @@ export default function MyPage() {
                 </button>
               </div>
             </section>
+          </div>
+        ) : null}
+        {birthChangeNotice ? (
+          <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-[#d8d3ff] bg-[#f7f5ff] px-5 py-4 text-sm leading-6 text-[#40359a] sm:flex-row sm:items-center sm:justify-between">
+            <p>{birthChangeNotice}</p>
+            <Link href="/saju" className="shrink-0 font-bold underline underline-offset-4">무료 사주 다시 보기</Link>
           </div>
         ) : null}
         {isProfilesLoaded && profiles.length === 0 && !isFormOpen ? (

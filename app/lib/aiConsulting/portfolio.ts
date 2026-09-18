@@ -1,6 +1,12 @@
 import { evaluateAiConsultingScope, type AiConsultingScopeResult } from "../aiConsultingScope";
 import { getAiConsultingPresentation } from "../aiConsultingPresentation";
 import { listUserPaidAnalysisSummaries } from "../paidReports/server";
+import {
+  resolveAnalysisInputProfileVersion,
+  type AnalysisInputProfileVersion,
+} from "../analysisInputSnapshot";
+import { getCanonicalPremiumProductId } from "../premiumProductRegistry";
+import type { ProfileDto } from "../profiles/types";
 import { createAdminClient } from "../supabase/admin";
 import { answerAiConsultingQuestion } from "./answerPipeline";
 import {
@@ -18,6 +24,7 @@ export type AiConsultingPortfolioAnalysis = {
   acquiredAt: string;
   suggestedQuestions: readonly string[];
   scopeLabel: string;
+  profileInputVersion: AnalysisInputProfileVersion;
 };
 
 export type AiConsultingPortfolioMessage = {
@@ -39,6 +46,7 @@ export type AiConsultingPortfolioState = {
   questionsRemaining: number;
   analyses: AiConsultingPortfolioAnalysis[];
   messages: AiConsultingPortfolioMessage[];
+  previousAnalysesExcluded: number;
 };
 
 export type AiConsultingPortfolioSource = Pick<
@@ -134,37 +142,94 @@ function routingScore(
   return score;
 }
 
+type PurchaseInputRow = {
+  product_id: string;
+  analysis_edition_key: string | null;
+  analysis_input_snapshot: unknown;
+  purchased_at: string;
+};
+
 async function listPortfolioAnalyses(input: {
   userId: string;
   profileId: string;
-}): Promise<AiConsultingPortfolioAnalysis[]> {
+  profile: ProfileDto;
+  includePreviousSource?: {
+    productId: string;
+    analysisEditionKey: string;
+  } | null;
+}): Promise<{
+  analyses: AiConsultingPortfolioAnalysis[];
+  previousAnalysesExcluded: number;
+}> {
   const summaries = await listUserPaidAnalysisSummaries(input.userId);
+  const { data: purchaseData, error: purchaseError } = await createAdminClient()
+    .from("purchases")
+    .select("product_id,analysis_edition_key,analysis_input_snapshot,purchased_at")
+    .eq("user_id", input.userId)
+    .eq("profile_id", input.profileId)
+    .order("purchased_at", { ascending: false });
+
+  if (purchaseError) {
+    throw new Error(`AI_CONSULTING_PURCHASE_INPUT_LOOKUP_FAILED: ${purchaseError.message}`);
+  }
+
+  // The newest purchase for an exact product/edition is the relevant source if
+  // a refunded historical purchase and a later re-purchase both exist.
+  const purchaseInputByKey = new Map<string, unknown>();
+  for (const row of (purchaseData ?? []) as PurchaseInputRow[]) {
+    if (!row.analysis_edition_key) continue;
+    const canonicalProductId = getCanonicalPremiumProductId(row.product_id);
+    const key = analysisKey(canonicalProductId, row.analysis_edition_key);
+    if (!purchaseInputByKey.has(key)) {
+      purchaseInputByKey.set(key, row.analysis_input_snapshot);
+    }
+  }
+
   const seen = new Set<string>();
+  const analyses: AiConsultingPortfolioAnalysis[] = [];
+  let previousAnalysesExcluded = 0;
 
-  return summaries
-    .filter((summary) =>
-      summary.profileId === input.profileId
-      && summary.reportStatus === "completed"
-      && Boolean(summary.analysisEditionKey),
+  for (const summary of summaries
+    .filter((item) =>
+      item.profileId === input.profileId
+      && item.reportStatus === "completed"
+      && Boolean(item.analysisEditionKey),
     )
-    .sort((a, b) => b.acquiredAt.localeCompare(a.acquiredAt))
-    .flatMap((summary) => {
-      const editionKey = summary.analysisEditionKey!;
-      const key = analysisKey(summary.productId, editionKey);
-      if (seen.has(key)) return [];
-      seen.add(key);
+    .sort((a, b) => b.acquiredAt.localeCompare(a.acquiredAt))) {
+    const editionKey = summary.analysisEditionKey!;
+    const key = analysisKey(summary.productId, editionKey);
+    if (seen.has(key)) continue;
+    seen.add(key);
 
-      const presentation = getAiConsultingPresentation(summary.productId, editionKey);
-      return [{
-        productId: summary.productId,
-        analysisEditionKey: editionKey,
-        productTitle: presentation.productTitle,
-        editionLabel: presentation.editionLabel,
-        acquiredAt: summary.acquiredAt,
-        suggestedQuestions: presentation.suggestedQuestions,
-        scopeLabel: presentation.scopeLabel,
-      }];
+    const profileInputVersion = resolveAnalysisInputProfileVersion(
+      purchaseInputByKey.get(key),
+      input.profile,
+    );
+    const explicitPreviousSource = Boolean(
+      input.includePreviousSource
+      && input.includePreviousSource.productId === summary.productId
+      && input.includePreviousSource.analysisEditionKey === editionKey,
+    );
+
+    if (profileInputVersion !== "current" && !explicitPreviousSource) {
+      previousAnalysesExcluded += 1;
+      continue;
+    }
+
+    const presentation = getAiConsultingPresentation(summary.productId, editionKey);
+    analyses.push({
+      productId: summary.productId,
+      analysisEditionKey: editionKey,
+      productTitle: presentation.productTitle,
+      editionLabel: presentation.editionLabel,
+      acquiredAt: summary.acquiredAt,
+      suggestedQuestions: presentation.suggestedQuestions,
+      scopeLabel: presentation.scopeLabel,
+      profileInputVersion,
     });
+  }
+
+  return { analyses, previousAnalysesExcluded };
 }
 
 async function listPortfolioMessages(input: {
@@ -237,8 +302,13 @@ async function listPortfolioMessages(input: {
 export async function getAiConsultingPortfolioState(input: {
   userId: string;
   profileId: string;
+  profile: ProfileDto;
+  includePreviousSource?: {
+    productId: string;
+    analysisEditionKey: string;
+  } | null;
 }): Promise<AiConsultingPortfolioState> {
-  const analyses = await listPortfolioAnalyses(input);
+  const { analyses, previousAnalysesExcluded } = await listPortfolioAnalyses(input);
   const [questionsRemaining, messages] = await Promise.all([
     getAiConsultingCreditBalance(input),
     listPortfolioMessages({ ...input, analyses }),
@@ -249,6 +319,7 @@ export async function getAiConsultingPortfolioState(input: {
     questionsRemaining,
     analyses,
     messages,
+    previousAnalysesExcluded,
   };
 }
 
@@ -268,16 +339,27 @@ export async function answerAiConsultingPortfolioQuestion(input: {
   question: string;
   preferredProductId?: string | null;
   preferredEditionKey?: string | null;
+  profile: ProfileDto;
 }): Promise<AiConsultingPortfolioQuestionResult> {
+  const includePreviousSource = input.preferredProductId && input.preferredEditionKey
+    ? {
+        productId: input.preferredProductId,
+        analysisEditionKey: input.preferredEditionKey,
+      }
+    : null;
   const state = await getAiConsultingPortfolioState({
     userId: input.userId,
     profileId: input.profileId,
+    profile: input.profile,
+    includePreviousSource,
   });
 
   if (state.analyses.length === 0) {
     return {
       state: "outside_portfolio",
-      message: "완료된 구매 리포트가 아직 없습니다. 유료 리포트가 완성되면 보유 분석이 AI 상담 범위에 자동으로 추가됩니다.",
+      message: state.previousAnalysesExcluded > 0
+        ? "현재 출생 정보와 일치하는 완료 리포트가 없습니다. 이전 출생정보 기준 리포트는 자동 상담 범위에서 제외되며, 해당 리포트에서 직접 들어오면 기존 상담을 이어갈 수 있습니다."
+        : "완료된 구매 리포트가 아직 없습니다. 유료 리포트가 완성되면 보유 분석이 AI 상담 범위에 자동으로 추가됩니다.",
       questionsRemaining: state.questionsRemaining,
     };
   }

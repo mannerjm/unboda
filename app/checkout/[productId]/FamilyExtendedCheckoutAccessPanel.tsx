@@ -162,58 +162,63 @@ export default function FamilyExtendedCheckoutAccessPanel({
   const familyBackHref = "/special-analysis/compatibility/family/parent-child#family-relationship-selector";
 
   return (
-    <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
+    <section className="mt-6 rounded-[2rem] border border-[#d9deed] bg-white p-6 shadow-[0_16px_45px_rgba(33,40,83,0.07)] sm:p-8">
       {authState.status === "guest" ? (
         <>
-          <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">ACCOUNT REQUIRED</p>
-          <h2 className="mt-3 text-2xl font-bold text-stone-900">구매한 분석을 보관하려면 계정 연결이 필요합니다</h2>
-          <p className="mt-4 text-sm leading-7 text-stone-600">상품 설명과 가격은 누구나 볼 수 있습니다. 결제와 구매 결과 보관을 위해서만 계정 연결이 필요합니다.</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">ACCOUNT REQUIRED</p>
+          <h2 className="mt-3 text-2xl font-bold text-[#11162d]">구매한 분석을 보관하려면 계정 연결이 필요합니다</h2>
+          <p className="mt-4 text-sm leading-7 text-slate-600">상품 설명과 가격은 누구나 볼 수 있습니다. 결제와 구매 결과 보관을 위해서만 계정 연결이 필요합니다.</p>
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
-            <Link href={`/auth/login?returnTo=${encodeURIComponent(returnTo)}`} className="rounded-2xl bg-stone-900 px-5 py-4 text-center font-semibold text-white">로그인</Link>
-            <Link href={`/auth/signup?returnTo=${encodeURIComponent(returnTo)}`} className="rounded-2xl border border-stone-300 bg-white px-5 py-4 text-center font-semibold text-stone-900">회원가입</Link>
+            <Link href={`/auth/login?returnTo=${encodeURIComponent(returnTo)}`} className="rounded-2xl bg-[#6f5ce7] px-5 py-4 text-center font-semibold text-white transition hover:bg-[#5f4fd2]">로그인</Link>
+            <Link href={`/auth/signup?returnTo=${encodeURIComponent(returnTo)}`} className="rounded-2xl border border-[#cfd5e6] bg-white px-5 py-4 text-center font-semibold text-[#11162d]">회원가입</Link>
           </div>
         </>
       ) : accountStatusLoading ? (
-        <><p className="text-xs font-semibold tracking-[0.2em] text-stone-500">PURCHASE CHECK</p><h2 className="mt-3 text-2xl font-bold">결제 가능 상태를 확인하고 있습니다</h2></>
+        <><p className="text-xs font-semibold tracking-[0.2em] text-slate-500">PURCHASE CHECK</p><h2 className="mt-3 text-2xl font-bold">결제 가능 상태를 확인하고 있습니다</h2></>
       ) : !accountStatus ? (
-        <><h2 className="text-2xl font-bold">계정 상태를 확인하지 못했습니다</h2><Link href="/account" className="mt-6 inline-flex rounded-2xl border border-stone-300 px-5 py-3 text-sm font-semibold">계정 정보 확인</Link></>
+        <><h2 className="text-2xl font-bold">계정 상태를 확인하지 못했습니다</h2><Link href="/account" className="mt-6 inline-flex rounded-2xl border border-[#cfd5e6] px-5 py-3 text-sm font-semibold">계정 정보 확인</Link></>
       ) : !accountStatus.emailVerified ? (
-        <><p className="text-xs font-semibold tracking-[0.2em] text-stone-500">EMAIL VERIFICATION</p><h2 className="mt-3 text-2xl font-bold">결제 전에 이메일 인증을 완료해 주세요</h2><Link href="/account" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-stone-900 px-5 py-4 text-sm font-bold text-white">이메일 인증 확인하기</Link></>
+        <><p className="text-xs font-semibold tracking-[0.2em] text-slate-500">EMAIL VERIFICATION</p><h2 className="mt-3 text-2xl font-bold">결제 전에 이메일 인증을 완료해 주세요</h2><Link href="/account" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-[#6f5ce7] px-5 py-4 text-sm font-bold text-white transition hover:bg-[#5f4fd2]">이메일 인증 확인하기</Link></>
       ) : accountStatus.account.paidEligibilityStatus !== "VERIFIED_ADULT" ? (
         <>
-          <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">PAYMENT VERIFICATION</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">PAYMENT VERIFICATION</p>
           <h2 className="mt-3 text-2xl font-bold">결제 전에 본인·성인 인증이 필요합니다</h2>
-          <p className="mt-4 text-sm leading-7 text-stone-600">실제 유료 결제를 진행하는 회원만 한 번 본인·성인 인증을 완료하면 됩니다.</p>
+          <p className="mt-4 text-sm leading-7 text-slate-600">실제 유료 결제를 진행하는 회원만 한 번 본인·성인 인증을 완료하면 됩니다.</p>
           <NiceAdultVerificationButton accountStatus={accountStatus.account.status} emailVerified={accountStatus.emailVerified} eligibilityStatus={accountStatus.account.paidEligibilityStatus} />
         </>
       ) : payloadChecked && !familyPayload ? (
         <>
-          <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">FAMILY INPUT</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">FAMILY INPUT</p>
           <h2 className="mt-3 text-2xl font-bold">가족 정보를 다시 확인해 주세요</h2>
-          <p className="mt-4 text-sm leading-7 text-stone-600">가족 궁합 입력 화면에서 관계와 상대 가족 정보를 확인한 뒤 결제로 이동해 주세요.</p>
-          <Link href={familyBackHref} className="mt-6 inline-flex w-full justify-center rounded-2xl bg-stone-900 px-5 py-4 text-sm font-bold text-white">가족 궁합 입력으로 돌아가기</Link>
+          <p className="mt-4 text-sm leading-7 text-slate-600">가족 궁합 입력 화면에서 관계와 상대 가족 정보를 확인한 뒤 결제로 이동해 주세요.</p>
+          <Link href={familyBackHref} className="mt-6 inline-flex w-full justify-center rounded-2xl bg-[#6f5ce7] px-5 py-4 text-sm font-bold text-white transition hover:bg-[#5f4fd2]">가족 궁합 입력으로 돌아가기</Link>
         </>
       ) : (
         <>
-          <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">PURCHASE READY</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">PURCHASE READY</p>
           <h2 className="mt-3 text-2xl font-bold">결제를 진행할 수 있습니다</h2>
-          <p className="mt-4 text-sm leading-7 text-stone-600">인증과 분석 대상을 확인했습니다. 아래 내용을 확인한 뒤 결제를 계속해 주세요.</p>
+          <p className="mt-4 text-sm leading-7 text-slate-600">인증과 분석 대상을 확인했습니다. 아래 내용을 확인한 뒤 결제를 계속해 주세요.</p>
+          <div className="mt-5 grid gap-2 text-xs sm:grid-cols-3" aria-label="가족 궁합 결제 준비 상태">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 font-semibold text-emerald-700">계정 인증 확인</div>
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 font-semibold text-emerald-700">분석 대상 확인</div>
+            <div className="rounded-xl border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-2.5 font-semibold text-[#5e4bd1]">결제 후 즉시 생성</div>
+          </div>
           {profileId ? (
-            <div className="mt-7 border-t border-stone-200 pt-6">
+            <div className="mt-7 border-t border-[#dce1ef] pt-6">
               <h3 className="text-base font-bold">결제 및 분석 생성 안내</h3>
-              <dl className="mt-4 space-y-2 text-sm leading-6 text-stone-700">
-                <div className="flex justify-between gap-4"><dt className="text-stone-500">상품</dt><dd className="text-right font-semibold">{productTitle}</dd></div>
-                <div className="flex justify-between gap-4"><dt className="text-stone-500">분석 대상</dt><dd className="text-right font-semibold">{profileLabel ?? "-"}</dd></div>
-                <div className="flex justify-between gap-4"><dt className="text-stone-500">결제 금액</dt><dd className="text-right font-semibold">{priceLabel}</dd></div>
-                {editionLabel ? <div className="flex justify-between gap-4"><dt className="text-stone-500">분석 기준</dt><dd className="text-right font-semibold">{editionLabel}</dd></div> : null}
+              <dl className="mt-4 space-y-2 text-sm leading-6 text-slate-700">
+                <div className="flex justify-between gap-4"><dt className="text-slate-500">상품</dt><dd className="text-right font-semibold">{productTitle}</dd></div>
+                <div className="flex justify-between gap-4"><dt className="text-slate-500">분석 대상</dt><dd className="text-right font-semibold">{profileLabel ?? "-"}</dd></div>
+                <div className="flex justify-between gap-4"><dt className="text-slate-500">결제 금액</dt><dd className="text-right font-semibold">{priceLabel}</dd></div>
+                {editionLabel ? <div className="flex justify-between gap-4"><dt className="text-slate-500">분석 기준</dt><dd className="text-right font-semibold">{editionLabel}</dd></div> : null}
               </dl>
               <p className="mt-5 text-sm font-semibold leading-6">결제가 승인되면 개인화 분석 생성이 즉시 시작되고 구매한 분석에 보관됩니다.</p>
-              <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-700">
+              <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-[#d8d3ff] bg-[#f7f6ff] p-4 text-sm leading-6 text-slate-700">
                 <input ref={acknowledgementRef} type="checkbox" checked={acknowledged} onChange={(event) => { setAcknowledged(event.target.checked); setErrorMessage(null); }} className="mt-1" />
                 <span>결제 승인 직후 선택한 가족 정보를 기준으로 개인화 분석 생성이 시작되는 점을 확인했습니다.</span>
               </label>
               {errorMessage ? <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{errorMessage}</p> : null}
-              <button type="button" onClick={handlePayment} disabled={isPaying || !acknowledged} className="mt-6 w-full rounded-2xl bg-stone-900 px-5 py-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-stone-300">{isPaying ? "결제창을 준비하고 있습니다..." : `${priceLabel} 결제하기`}</button>
+              <button type="button" onClick={handlePayment} disabled={isPaying || !acknowledged} className="mt-6 w-full rounded-2xl bg-[#6f5ce7] px-5 py-4 text-sm font-bold text-white shadow-[0_12px_28px_rgba(93,76,209,0.22)] transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none">{isPaying ? "결제창을 준비하고 있습니다..." : `${priceLabel} 결제하기`}</button>
             </div>
           ) : null}
         </>

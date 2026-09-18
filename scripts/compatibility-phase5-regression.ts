@@ -77,11 +77,11 @@ assert(parentChildInput.includes("두 흐름을 연결합니다"), "parent-child
 assert(extendedInput.includes("두 흐름을 연결합니다"), "extended-family input must express the two-flow relationship language");
 
 assert(romanticInput.includes("sessionStorage.setItem(COMPATIBILITY_ROMANTIC_SESSION_KEY"), "romantic raw partner input must remain browser-session scoped");
-assert(romanticInput.includes(`router.push(\`/checkout/${COMPATIBILITY_ROMANTIC_PRODUCT_ID}?profileId=${encodeURIComponent(profileId)}\`)`), "romantic checkout must remain profile scoped");
+assert(romanticInput.includes('router.push(`/checkout/${COMPATIBILITY_ROMANTIC_PRODUCT_ID}?profileId=${encodeURIComponent(profileId)}`)'), "romantic checkout must remain profile scoped");
 assert(parentChildInput.includes("COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY") && parentChildInput.includes("sessionStorage.setItem"), "parent-child raw family input must remain browser-session scoped");
-assert(parentChildInput.includes(`/checkout/${COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID}?profileId=`), "parent-child checkout must remain profile scoped");
+assert(parentChildInput.includes('router.push(`/checkout/${COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID}?profileId=${encodeURIComponent(profileId)}`)'), "parent-child checkout must remain profile scoped");
 assert(extendedInput.includes("COMPATIBILITY_FAMILY_SIBLING_SESSION_KEY") && extendedInput.includes("COMPATIBILITY_FAMILY_OTHER_SESSION_KEY"), "extended family must preserve separate session contracts");
-assert(extendedInput.includes(`router.push(\`/checkout/${productId}?profileId=${encodeURIComponent(profileId)}\`)`), "extended-family checkout must remain profile scoped");
+assert(extendedInput.includes('router.push(`/checkout/${productId}?profileId=${encodeURIComponent(profileId)}`)'), "extended-family checkout must remain profile scoped");
 
 assert(familySelector.includes('mode="siblings"') && familySelector.includes('mode="other_family"'), "family selector must keep sibling and other-family modes");
 assert(parentChildInput.includes('<option value="parent">부모예요</option>') && parentChildInput.includes('<option value="child">자녀예요</option>'), "parent-child semantic role selection must remain intact");

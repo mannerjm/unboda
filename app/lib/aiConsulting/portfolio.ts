@@ -3,6 +3,10 @@ import { getAiConsultingPresentation } from "../aiConsultingPresentation";
 import { listUserPaidAnalysisSummaries } from "../paidReports/server";
 import { createAdminClient } from "../supabase/admin";
 import { answerAiConsultingQuestion } from "./answerPipeline";
+import {
+  recordAiConsultingFailureOutcome,
+  recordAiConsultingSuccessOutcome,
+} from "./operations";
 import { ensureAiConsultingThreadForAnalysis } from "./session";
 import { getAiConsultingCreditBalance } from "./server";
 
@@ -365,26 +369,57 @@ export async function answerAiConsultingPortfolioQuestion(input: {
     title: `${top.analysis.productTitle} AI 상담`,
   });
 
-  const result = await answerAiConsultingQuestion({
-    userId: input.userId,
-    profileId: input.profileId,
-    threadId,
-    requestId: input.requestId,
-    question: input.question,
-  });
+  try {
+    const result = await answerAiConsultingQuestion({
+      userId: input.userId,
+      profileId: input.profileId,
+      threadId,
+      requestId: input.requestId,
+      question: input.question,
+    });
 
-  if (result.state !== "answered") {
+    if (result.state !== "answered") {
+      return {
+        state: "non_chargeable",
+        message: result.userMessage,
+        reason: result.scopeReason,
+        questionsRemaining: result.questionsRemaining,
+      };
+    }
+
+    try {
+      await recordAiConsultingSuccessOutcome({
+        userId: input.userId,
+        profileId: input.profileId,
+        threadId,
+        requestId: input.requestId,
+        assistantMessageId: result.assistantMessageId,
+      });
+    } catch (telemetryError) {
+      console.error("[ai-consulting-portfolio] success telemetry failed", {
+        message: telemetryError instanceof Error ? telemetryError.message : "unknown-telemetry-error",
+      });
+    }
+
     return {
-      state: "non_chargeable",
-      message: result.userMessage,
-      reason: result.scopeReason,
+      state: "answered",
       questionsRemaining: result.questionsRemaining,
+      source: toSource(top.analysis),
     };
+  } catch (error) {
+    try {
+      await recordAiConsultingFailureOutcome({
+        userId: input.userId,
+        profileId: input.profileId,
+        threadId,
+        requestId: input.requestId,
+        error,
+      });
+    } catch (telemetryError) {
+      console.error("[ai-consulting-portfolio] failure telemetry failed", {
+        message: telemetryError instanceof Error ? telemetryError.message : "unknown-telemetry-error",
+      });
+    }
+    throw error;
   }
-
-  return {
-    state: "answered",
-    questionsRemaining: result.questionsRemaining,
-    source: toSource(top.analysis),
-  };
 }

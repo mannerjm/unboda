@@ -91,7 +91,7 @@ export default function RecommendationTop3({
 
           if (!href) {
             return (
-              <div key={product.id} className="rounded-[1.5rem] border border-[#dce1ef] bg-stone-50 p-5 text-slate-500">
+              <div key={product.id} className="rounded-[1.5rem] border border-[#dce1ef] bg-[#f7f8fc] p-5 text-slate-500">
                 <p className="text-xs font-black tracking-[0.12em]">0{index + 1} · {displayTitle}</p>
                 <p className="mt-3 text-base font-bold leading-7">{question}</p>
                 <p className="mt-4 text-xs">분석 생성 중</p>
@@ -187,7 +187,7 @@ function RecommendationDetail({
           {state === "generating" ? (
             <span className="rounded-xl bg-[#eef0f6] px-4 py-3 text-xs font-semibold text-slate-500">생성 중</span>
           ) : href ? (
-            <Link href={href} className="rounded-xl bg-stone-950 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-[#25213d]">
+            <Link href={href} className="rounded-xl bg-[#171a3d] px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-[#25213d]">
               {state === "not_purchased" ? "이 질문 더 깊게 보기" : "리포트 보기"}
             </Link>
           ) : null}

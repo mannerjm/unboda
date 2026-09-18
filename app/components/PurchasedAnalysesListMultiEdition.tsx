@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { PurchasedAnalysisProductGroup } from "@/app/lib/purchasedAnalysesGrouping";
+import { Phase9NextAnalysisCards } from "@/app/components/Phase9NextAnalysisSection";
+import type { Phase9NextAnalysisRecommendation } from "@/app/lib/phase9NextAnalysis";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import {
   getSpecialAnalysisProduct,
@@ -27,6 +29,7 @@ type PurchasedAnalysesListProps = {
   groups: readonly PurchasedAnalysisProductGroup[];
   profileId: string;
   previewMode?: boolean;
+  phase9Recommendations?: readonly Phase9NextAnalysisRecommendation[];
 };
 
 function compatibilityEditionLabel(productId: string, editionKey: string | null): string {
@@ -112,6 +115,7 @@ export default function PurchasedAnalysesList({
   groups,
   profileId,
   previewMode = false,
+  phase9Recommendations = [],
 }: PurchasedAnalysesListProps) {
   if (groups.length === 0) {
     return (
@@ -282,19 +286,28 @@ export default function PurchasedAnalysesList({
       </section>
 
       <section data-next-question-slot="phase9" className="mt-6 rounded-[1.75rem] border border-[#dce1ef] bg-[#f9faff] p-5 sm:p-6">
-        <p className="text-xs font-bold tracking-[0.15em] text-[#6f5ce7]">NEXT QUESTION</p>
+        <p className="text-xs font-bold tracking-[0.15em] text-[#6f5ce7]">NEXT QUESTION · PHASE 9</p>
         <h2 className="mt-2 text-xl font-black text-[#11162d]">다음 질문이 생겼다면</h2>
         <p className="mt-2 max-w-2xl text-[15px] leading-7 text-slate-700">
-          보관한 리포트를 다시 읽은 뒤 새로운 궁금증이 생기면 다른 심층 분석이나 전문 분석을 둘러볼 수 있습니다.
+          보관한 리포트와 현재 보유한 exact edition을 기준으로, 겹치지 않는 다음 분석을 최대 2개만 제안합니다.
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Link href="/deep-analysis" className="rounded-2xl bg-[#171a3d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#242957]">
-            심층 분석 둘러보기
-          </Link>
-          <Link href="/special-analysis" className="rounded-2xl border border-[#dce1ef] bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-[#f7f8fc]">
-            전문 분석 보기
-          </Link>
-        </div>
+        {phase9Recommendations.length > 0 ? (
+          <Phase9NextAnalysisCards recommendations={phase9Recommendations} compact />
+        ) : (
+          <>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              지금 바로 이어지는 추천이 없으면 다른 심층 분석이나 전문 분석을 둘러볼 수 있습니다.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href="/deep-analysis" className="rounded-2xl bg-[#171a3d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#242957]">
+                심층 분석 둘러보기
+              </Link>
+              <Link href="/special-analysis" className="rounded-2xl border border-[#dce1ef] bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-[#f7f8fc]">
+                전문 분석 보기
+              </Link>
+            </div>
+          </>
+        )}
       </section>
     </div>
   );

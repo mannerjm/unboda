@@ -54,9 +54,9 @@ export default function CompatibilityReportValuePreview({
       className="mt-7 overflow-hidden rounded-[28px] border border-[#dfe3ef] bg-[#f9faff] shadow-[0_12px_36px_rgba(32,38,72,0.06)]"
     >
       <div className="border-b border-[#e4e7f1] bg-[linear-gradient(135deg,#f3f1ff_0%,#fbfcff_72%)] px-5 py-5 sm:px-6">
-        <p className="text-[11px] font-bold tracking-[0.16em] text-slate-400">리포트 구성 미리보기</p>
+        <p className="text-xs font-bold tracking-[0.14em] text-slate-500">리포트 구성 미리보기</p>
         <h3 className="mt-2 text-lg font-bold tracking-[-0.02em] text-[#11162d]">{config.headline}</h3>
-        <p className="mt-2 max-w-2xl text-xs leading-6 text-slate-500">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
           실제 분석 결과를 미리 보여주는 화면이 아니라, 결제 후 어떤 순서와 깊이로 읽게 되는지 안내하는 구성 예시입니다.
         </p>
       </div>
@@ -65,39 +65,39 @@ export default function CompatibilityReportValuePreview({
         <ol className="grid gap-3 sm:grid-cols-3">
           <li className="rounded-2xl border border-[#dce1ef] bg-white p-4">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#6f5ce7] text-[11px] font-bold text-white">1</span>
-              <p className="text-xs font-bold text-slate-500">관계 핵심</p>
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#6f5ce7] text-xs font-bold text-white">1</span>
+              <p className="text-xs font-bold text-slate-600">관계 핵심</p>
             </div>
             <p className="mt-3 text-sm font-bold leading-6 text-[#11162d]">두 사람의 기본 관계부터 정리</p>
-            <p className="mt-1 text-xs leading-6 text-slate-500">힘이 되는 지점과 주의할 패턴을 먼저 짚어 전체 리포트의 기준을 잡습니다.</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">힘이 되는 지점과 주의할 패턴을 먼저 짚어 전체 리포트의 기준을 잡습니다.</p>
           </li>
 
           <li className="rounded-2xl border border-[#dce1ef] bg-white p-4">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#6f5ce7] text-[11px] font-bold text-white">2</span>
-              <p className="text-xs font-bold text-slate-500">양방향 영향</p>
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#6f5ce7] text-xs font-bold text-white">2</span>
+              <p className="text-xs font-bold text-slate-600">양방향 영향</p>
             </div>
             <p className="mt-3 text-sm font-bold leading-6 text-[#11162d]">{config.directionTitle}</p>
-            <p className="mt-1 text-xs leading-6 text-slate-500">{config.directionDescription}</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">{config.directionDescription}</p>
           </li>
 
           <li className="rounded-2xl border border-[#dce1ef] bg-white p-4">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#6f5ce7] text-[11px] font-bold text-white">3</span>
-              <p className="text-xs font-bold text-slate-500">{evaluationYear}년 흐름</p>
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#6f5ce7] text-xs font-bold text-white">3</span>
+              <p className="text-xs font-bold text-slate-600">{evaluationYear}년 흐름</p>
             </div>
             <p className="mt-3 text-sm font-bold leading-6 text-[#11162d]">올해 달라지는 흐름과 행동 가이드</p>
-            <p className="mt-1 text-xs leading-6 text-slate-500">기본 관계와 올해 흐름을 구분하고, 지금 해볼 행동과 줄이면 좋은 행동까지 연결합니다.</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">기본 관계와 올해 흐름을 구분하고, 지금 해볼 행동과 줄이면 좋은 행동까지 연결합니다.</p>
           </li>
         </ol>
 
-        <div className="mt-5 border-t border-[#dce1ef] pt-5">
+        <div className="mt-4 border-t border-[#dce1ef] pt-4">
           <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
               <p className="text-xs font-bold text-slate-800">관계별로 더 깊게 보는 영역</p>
-              {relationshipContext ? <p className="mt-1 text-xs leading-5 text-slate-500">{relationshipContext}</p> : null}
+              {relationshipContext ? <p className="mt-1 text-sm leading-6 text-slate-600">{relationshipContext}</p> : null}
             </div>
-            <p className="text-[11px] font-semibold text-slate-400">단순 점수 대신 관계의 맥락을 나눠 설명</p>
+            <p className="text-xs font-semibold text-slate-500">단순 점수 대신 관계의 맥락을 나눠 설명</p>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             {config.domains.map((domain) => (
@@ -108,7 +108,7 @@ export default function CompatibilityReportValuePreview({
           </div>
         </div>
 
-        <p className="mt-5 rounded-2xl bg-[#f7f8fc] px-4 py-3 text-xs leading-6 text-slate-500">
+        <p className="mt-5 rounded-2xl bg-[#f7f8fc] px-4 py-3 text-sm leading-6 text-slate-600">
           실제 문장은 입력한 두 사람의 계산 결과에 따라 달라집니다. 완성된 {evaluationYear}년판 리포트는 결제 후 구매한 분석에서 다시 볼 수 있습니다.
         </p>
       </div>

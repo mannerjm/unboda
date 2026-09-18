@@ -79,8 +79,8 @@ for (const relationBadge of ["연인 관계", "가족 관계", "업무 관계", 
   assert(overview.includes(relationBadge), `compatibility overview must expose relation badge: ${relationBadge}`);
 }
 assert(
-  overview.includes('section className="mt-8 grid gap-5 lg:grid-cols-3"'),
-  "all compatibility cards must share one three-column desktop grid",
+  overview.includes('section className="mt-8 grid gap-5 lg:auto-rows-fr lg:grid-cols-3"'),
+  "all compatibility cards must share equal-height desktop grid rows",
 );
 const unifiedCardClass = 'group flex min-h-[270px] flex-col rounded-[28px] border border-[#dfe3ef] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md';
 assert(

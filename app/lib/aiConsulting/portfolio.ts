@@ -190,10 +190,10 @@ async function listPortfolioAnalyses(input: {
   let previousAnalysesExcluded = 0;
 
   for (const summary of summaries
-    .filter((item) =>
-      item.profileId === input.profileId
-      && item.reportStatus === "completed"
-      && Boolean(item.analysisEditionKey),
+    .filter((summary) =>
+      summary.profileId === input.profileId
+      && summary.reportStatus === "completed"
+      && Boolean(summary.analysisEditionKey),
     )
     .sort((a, b) => b.acquiredAt.localeCompare(a.acquiredAt))) {
     const editionKey = summary.analysisEditionKey!;

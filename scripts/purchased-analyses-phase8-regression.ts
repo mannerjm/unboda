@@ -18,7 +18,7 @@ assert(page.includes('redirect("/auth/login?returnTo=/purchased-analyses")'), "P
 assert(page.includes("getActiveProfile(user.id)"), "Phase 8 library must resolve the active profile");
 assert(page.includes("analysis.profileId === activeProfile.id"), "Phase 8 library must remain active-profile scoped");
 assert(page.includes("groupPurchasedAnalysesByProduct(analyses)"), "Phase 8 page must group only the filtered profile summaries");
-assert(page.includes("구매한 분석 보관함") && page.includes("MY ANALYSIS LIBRARY"), "Phase 8 must present the library as a revisit hub");
+assert(page.includes("구매한 분석 보관함") && page.includes("MY LIBRARY"), "Phase 8 must present the library as a revisit hub while keeping the shared library hierarchy");
 assert(page.includes("현재 분석 대상") && page.includes("activeProfile.label"), "Phase 8 must keep profile orientation visible");
 assert(!page.includes("ProfileSelector"), "Phase 8 must not introduce an inline profile switcher");
 

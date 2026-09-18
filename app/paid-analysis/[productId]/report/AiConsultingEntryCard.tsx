@@ -98,7 +98,7 @@ export default function AiConsultingEntryCard({
           <div>
             <p className="text-xs font-bold tracking-[0.16em] text-[#6f5ce7]">AI CONSULTING</p>
             <h2 className="mt-3 text-xl font-black text-[#11162d]">
-              {hasPreviousConversation ? "지난 AI 상담을 이어서 질문하기" : "이 리포트에서 남은 질문 이어가기"}
+              {hasPreviousConversation ? "지난 AI 상담을 이어서 질문하기" : "이 리포트를 바탕으로 AI에게 질문하기"}
             </h2>
             <p className="mt-3 text-[15px] leading-7 text-slate-700">
               일반 챗봇이 아니라 <strong className="font-bold text-[#11162d]">{presentation.productTitle}</strong> 리포트의 계산 결과와 해석 범위 안에서 이어서 답변합니다.

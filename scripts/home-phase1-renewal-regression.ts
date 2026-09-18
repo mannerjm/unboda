@@ -83,7 +83,7 @@ for (const sceneCue of ["peopleFlow", "F3C779", "7FE0C7", "9bb4ff66"]) {
 }
 assert(home.includes("function CompatibilityVisual"), "compatibility section must use the dedicated two-flow visual rather than generic rings");
 assert(home.includes("bg-[linear-gradient(135deg,#1b1d3b_0%,#25172f_45%,#171d3b_100%)]"), "compatibility section must introduce a warmer violet-rose temperature shift");
-assert(home.includes("bg-[linear-gradient(135deg,#10182f_0%,#171631_48%,#10203a_100%)]"), "AI consulting section must retain a distinct cooler blue-violet temperature");
+assert(home.includes("linear-gradient(135deg,#0c1330_0%,#17163b_48%,#21184a_100%)"), "AI consulting section must retain a distinct cooler blue-violet temperature with stronger violet emphasis");
 assert(home.includes("bg-[linear-gradient(90deg,transparent,#8f7cff55,#ff9db555,#8f7cff55,transparent)]"), "journey section must render as a connected flow rather than a plain table");
 assert(home.includes("<TrustSection copy={copy}/>"), "closing journey CTA must preserve the current landing-state primary destination");
 assert(home.includes("무료 분석") && home.includes("심층 분석") && home.includes("두 사람 궁합"), "home must keep the free-first path while exposing direct exploration");

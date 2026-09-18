@@ -50,7 +50,7 @@ export default function FamilyParentChildPaidReportView({ content }: { content: 
           <Link href="/special-analysis/compatibility/family/parent-child#family-relationship-selector" className="rounded-full border border-[#cfd5e6] bg-white/70 px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-white">다른 가족 분석</Link>
         </div>
         <p className="mt-6 text-sm font-semibold text-slate-500">{parentLabel} <span className="mx-1 text-slate-300">×</span> {childLabel}</p>
-        <p className="mt-5 text-xs font-bold tracking-[0.14em] text-slate-400">관계 핵심</p>
+        <p className="mt-5 text-xs font-bold tracking-[0.14em] text-slate-500">관계 핵심</p>
         <h1 className="mt-3 max-w-4xl text-3xl font-bold leading-[1.24] tracking-[-0.035em] text-[#11162d] sm:text-4xl">{report.relationshipCore.headline}</h1>
         <p className="mt-5 max-w-4xl text-sm leading-8 text-slate-700">{report.relationshipCore.summary}</p>
         <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">

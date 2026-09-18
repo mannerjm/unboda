@@ -2,14 +2,20 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { evaluateAiConsultingScope } from "../app/lib/aiConsultingScope";
 import {
+  COMPATIBILITY_BUSINESS_PRODUCT_ID,
   COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID,
   COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
   COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID,
+  COMPATIBILITY_FRIEND_PRODUCT_ID,
   COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  COMPATIBILITY_WORKPLACE_PRODUCT_ID,
 } from "../app/lib/specialAnalysisProducts";
 
 const representativeCases: Array<[string, string]> = [
   [COMPATIBILITY_ROMANTIC_PRODUCT_ID, "상대와 대화할 때 자꾸 오해가 생기는데 우리 관계에서는 어떻게 풀어가는 게 좋아?"],
+  [COMPATIBILITY_WORKPLACE_PRODUCT_ID, "동료와 업무 역할을 나눌 때 갈등이 생기는데 협업 방식을 어떻게 맞추면 좋아?"],
+  [COMPATIBILITY_FRIEND_PRODUCT_ID, "친구와 연락 거리감을 어떻게 맞추면 서로 부담이 덜할까?"],
+  [COMPATIBILITY_BUSINESS_PRODUCT_ID, "동업자와 역할과 책임을 나누고 의사결정을 맞추려면 무엇을 먼저 확인해야 해?"],
   [COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID, "부모와 자녀 사이 기대와 독립의 경계를 어떻게 잡는 게 좋아?"],
   [COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID, "형제 사이 비교와 경쟁이 심해질 때 갈등을 어떻게 회복하면 좋아?"],
   [COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID, "사촌과 연락 빈도나 도움의 경계를 어떻게 정하는 게 좋아?"],
@@ -27,6 +33,9 @@ for (const [productId, question] of representativeCases) {
 
 const crossRelationshipCases: Array<[string, string]> = [
   [COMPATIBILITY_ROMANTIC_PRODUCT_ID, "부모와 자녀 관계도 같이 봐줘"],
+  [COMPATIBILITY_WORKPLACE_PRODUCT_ID, "배우자와의 애정 관계도 같이 봐줘"],
+  [COMPATIBILITY_FRIEND_PRODUCT_ID, "동업자와 사업 파트너 관계도 같이 봐줘"],
+  [COMPATIBILITY_BUSINESS_PRODUCT_ID, "친구와 우정 관계도 같이 봐줘"],
   [COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID, "내 연인과의 애정 관계는 어때?"],
   [COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID, "사촌과의 관계도 같이 봐줘"],
   [COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID, "내 동생과 형제 경쟁도 봐줘"],
@@ -77,14 +86,27 @@ const sessionRoute = readFileSync("app/api/ai-consulting/session/route.ts", "utf
 assert(sessionRoute.includes("isAiConsultingCompatibilityProductId"), "AI consulting session boundary must explicitly allow supported compatibility products");
 assert(!sessionRoute.includes("getSpecialAnalysisProduct"), "unsupported future special products must not gain consulting access implicitly");
 
-const reportRoutes = [
+const pairReport = readFileSync("app/special-analysis/compatibility/PairCompatibilityReportPage.tsx", "utf8");
+assert(pairReport.includes("AiConsultingEntryCard"), "shared pair compatibility report must expose AI consulting after a completed paid report");
+assert(pairReport.includes("productId={productId}"), "shared pair report must bind consulting to the exact purchased pair product");
+assert(pairReport.includes("edition={entitlement.analysisEditionKey}"), "shared pair report must pin consulting to the purchased pair/year edition");
+
+for (const [path, productIdConstant] of [
   ["app/special-analysis/compatibility/report/page.tsx", "COMPATIBILITY_ROMANTIC_PRODUCT_ID"],
+  ["app/special-analysis/compatibility/workplace/report/page.tsx", "COMPATIBILITY_WORKPLACE_PRODUCT_ID"],
+  ["app/special-analysis/compatibility/friend/report/page.tsx", "COMPATIBILITY_FRIEND_PRODUCT_ID"],
+  ["app/special-analysis/compatibility/business/report/page.tsx", "COMPATIBILITY_BUSINESS_PRODUCT_ID"],
+] as const) {
+  const source = readFileSync(path, "utf8");
+  assert(source.includes("PairCompatibilityReportPage"), `${path} must use the shared pair report surface`);
+  assert(source.includes(`productId={${productIdConstant}}`), `${path} must bind the exact pair compatibility product`);
+}
+
+for (const [path, productIdConstant] of [
   ["app/special-analysis/compatibility/family/parent-child/report/page.tsx", "COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID"],
   ["app/special-analysis/compatibility/family/siblings/report/page.tsx", "COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID"],
   ["app/special-analysis/compatibility/family/other/report/page.tsx", "COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID"],
-] as const;
-
-for (const [path, productIdConstant] of reportRoutes) {
+] as const) {
   const source = readFileSync(path, "utf8");
   assert(source.includes("AiConsultingEntryCard"), `${path} must expose AI consulting after a completed paid report`);
   assert(source.includes(`productId={${productIdConstant}}`), `${path} must bind consulting to the exact purchased compatibility product`);
@@ -93,7 +115,8 @@ for (const [path, productIdConstant] of reportRoutes) {
 
 const genericReportRoute = readFileSync("app/paid-analysis/[productId]/report/page.tsx", "utf8");
 for (const helper of [
-  "isCompatibilityRomanticProductId",
+  "isCompatibilityPairProductId",
+  "getCompatibilityPairReportPath",
   "isCompatibilityFamilyParentChildProductId",
   "isCompatibilityFamilySiblingProductId",
   "isCompatibilityFamilyOtherProductId",

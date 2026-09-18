@@ -271,7 +271,8 @@ export function evaluateCompatibilityAiConsultingScope(input: {
     });
   }
 
-  if (includesOneOf(question, config.conflictingRelationshipPatterns)) {
+  const hasOwnRelationship = includesOneOf(question, config.ownRelationshipPatterns);
+  if (!hasOwnRelationship && includesOneOf(question, config.conflictingRelationshipPatterns)) {
     return compatibilityResult({
       decision: "DENY",
       reason: "compatibility_outside_purchased_scope",
@@ -296,7 +297,6 @@ export function evaluateCompatibilityAiConsultingScope(input: {
   }
 
   const hasRelationshipDomain = includesOneOf(question, RELATIONSHIP_DOMAIN_PATTERNS);
-  const hasOwnRelationship = includesOneOf(question, config.ownRelationshipPatterns);
   if (includesOneOf(question, OUTSIDE_TOPIC_PATTERNS) && !hasRelationshipDomain && !hasOwnRelationship) {
     return compatibilityResult({
       decision: "DENY",

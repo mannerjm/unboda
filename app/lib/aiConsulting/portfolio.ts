@@ -229,6 +229,24 @@ async function listPortfolioAnalyses(input: {
     });
   }
 
+  const explicitPrevious = input.includePreviousSource
+    ? analyses.find((analysis) =>
+        analysis.productId === input.includePreviousSource!.productId
+        && analysis.analysisEditionKey === input.includePreviousSource!.analysisEditionKey
+        && analysis.profileInputVersion !== "current",
+      )
+    : null;
+
+  // A historical report continuation is intentionally isolated: once the user
+  // enters from a report purchased with previous/unknown birth inputs, that
+  // consultation cannot silently jump to a current-input report.
+  if (explicitPrevious) {
+    return {
+      analyses: [explicitPrevious],
+      previousAnalysesExcluded,
+    };
+  }
+
   return { analyses, previousAnalysesExcluded };
 }
 

@@ -41,7 +41,7 @@ export default async function CompatibilityAnalysisPage() {
             )}
           </header>
 
-          <section className="mt-8 grid gap-5 lg:grid-cols-3">
+          <section className="mt-8 grid gap-5 lg:auto-rows-fr lg:grid-cols-3">
             <Link
               href="/special-analysis/compatibility/romantic"
               className="group flex min-h-[270px] flex-col rounded-[28px] border border-[#dfe3ef] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md"

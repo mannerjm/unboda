@@ -53,7 +53,7 @@ function DetailList({ title, items }: { title: string; items: readonly string[] 
   return (
     <article className="rounded-2xl border border-[#dce1ef] bg-white p-5 shadow-sm">
       <p className="text-xs font-bold tracking-[0.08em] text-[#6f5ce7]">{title}</p>
-      <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-700">
+      <ul className="mt-4 space-y-3 text-[15px] leading-7 text-slate-700">
         {items.map((item) => (
           <li key={item} className="flex gap-3">
             <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#8b7cf0]" />
@@ -152,13 +152,13 @@ export default function PremiumProductDetail({
 
   return (
     <section
-      className="mt-6 overflow-hidden rounded-[2rem] border border-[#d9deed] bg-white shadow-[0_18px_55px_rgba(33,40,83,0.08)]"
+      className="mt-5 overflow-hidden rounded-[1.8rem] border border-[#d9deed] bg-white shadow-[0_18px_55px_rgba(33,40,83,0.08)]"
       aria-labelledby="selected-product-title"
     >
-      <div className="bg-[radial-gradient(circle_at_top_right,rgba(132,111,241,0.16),transparent_34%),linear-gradient(145deg,#11162d_0%,#171a3d_60%,#242957_100%)] px-6 py-7 text-white sm:px-8 sm:py-9">
+      <div className="bg-[radial-gradient(circle_at_top_right,rgba(132,111,241,0.16),transparent_34%),linear-gradient(145deg,#11162d_0%,#171a3d_60%,#242957_100%)] px-5 py-6 text-white sm:px-8 sm:py-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[10px] font-bold tracking-[0.22em] text-[#b9b2f6]">PREMIUM ANALYSIS</p>
+            <p className="text-xs font-bold tracking-[0.18em] text-[#c9c3ff]">PREMIUM ANALYSIS</p>
             <p className="mt-2 text-xs font-semibold text-slate-300">
               {isPeriod ? "선택한 기간 분석" : "선택한 분석"}
             </p>
@@ -186,7 +186,7 @@ export default function PremiumProductDetail({
           {product.description}
         </p>
 
-        <div className="mt-6 grid gap-2 text-xs text-slate-200 sm:grid-cols-3">
+        <div className="mt-5 grid gap-2 text-xs text-slate-200 sm:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3">
             <p className="font-bold text-white">1. 분석 대상 확인</p>
             <p className="mt-1 leading-5">{profileId ? "선택한 프로필 기준" : "결제 전에 프로필 선택"}</p>
@@ -202,7 +202,7 @@ export default function PremiumProductDetail({
         </div>
       </div>
 
-      <div className="bg-[#f7f8fc] px-5 py-6 sm:px-7 sm:py-8">
+      <div className="bg-[#f7f8fc] px-4 py-5 sm:px-7 sm:py-7">
         <div className="grid gap-4 lg:grid-cols-3">
           <DetailList title={isPeriod ? "이런 때 살펴보세요" : "이런 고민이 있다면"} items={recommendedFor} />
           <DetailList title="이 분석에서 보는 것" items={quickOverviewItems} />
@@ -211,14 +211,14 @@ export default function PremiumProductDetail({
 
         {state === "not_purchased" ? <PremiumReportValuePreview product={product} /> : null}
 
-        <div className="mt-6 rounded-[1.6rem] border border-[#d8d3ff] bg-[linear-gradient(135deg,#ffffff_0%,#f3f1ff_100%)] p-5 shadow-sm sm:p-6">
+        <div className="mt-5 rounded-[1.5rem] border border-[#d8d3ff] bg-[linear-gradient(135deg,#ffffff_0%,#f3f1ff_100%)] p-5 shadow-sm sm:p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-[10px] font-bold tracking-[0.16em] text-slate-500">구매 전 확인</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="text-xs font-bold tracking-[0.13em] text-slate-600">구매 전 확인</p>
+              <p className="mt-2 text-[15px] leading-7 text-slate-700">
                 결제 금액과 분석 대상을 확인한 뒤 진행하세요. 결제가 승인되면 개인화 분석 생성이 바로 시작됩니다.
               </p>
-              <p className="mt-4 text-[10px] font-semibold tracking-[0.14em] text-slate-400">결제 금액</p>
+              <p className="mt-4 text-xs font-semibold tracking-[0.12em] text-slate-500">결제 금액</p>
               <p className="mt-1 text-lg font-bold text-stone-950">{formatPrice(product.id)}</p>
             </div>
 

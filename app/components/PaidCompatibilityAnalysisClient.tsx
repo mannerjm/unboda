@@ -207,7 +207,6 @@ export default function PaidCompatibilityAnalysisClient({
   return (
     <form onSubmit={submit} className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-[30px] border border-[#dfe3ef] bg-white shadow-[0_18px_50px_rgba(32,38,72,0.08)]">
       <div className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_35%,rgba(112,88,229,0.28),transparent_24%),radial-gradient(circle_at_82%_65%,rgba(219,105,161,0.2),transparent_25%),linear-gradient(145deg,#0b1025_0%,#171a3d_58%,#24204d_100%)] px-6 py-8 text-white sm:px-8 sm:py-9">
-        <div aria-hidden="true" className="absolute -right-12 -top-16 h-40 w-40 rounded-full border border-[#e4e7f1]/80 bg-white/40" />
         <div aria-hidden="true" className="absolute -bottom-14 right-20 h-24 w-24 rounded-full bg-[#ddd8ff]/45 blur-2xl" />
         <div className="relative">
           <p className="text-[11px] font-bold tracking-[0.18em] text-[#b9b2f6]">두 흐름을 연결합니다</p>

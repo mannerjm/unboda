@@ -10,29 +10,23 @@ import {
 } from "@/app/lib/specialAnalysisProducts";
 
 const statusLabels: Record<string, string> = {
-  none: "분석 준비 중",
-  generating: "분석 준비 중",
-  completed: "분석 완료",
-  failed: "분석 준비에 문제가 있어요",
+  none: "리포트 준비 중",
+  generating: "리포트 준비 중",
+  completed: "바로 열 수 있어요",
+  failed: "다시 준비가 필요해요",
 };
 
 const statusClasses: Record<string, string> = {
   none: "border-slate-200 bg-slate-50 text-slate-600",
   generating: "border-slate-200 bg-slate-50 text-slate-600",
   completed: "border-emerald-200 bg-emerald-50 text-emerald-800",
-  failed: "border-red-200 bg-red-50 text-red-700",
-};
-
-const actionLabels: Record<string, string> = {
-  none: "분석을 준비하고 있어요",
-  generating: "분석을 준비하고 있어요",
-  completed: "분석 결과 보기",
-  failed: "다시 준비하기",
+  failed: "border-rose-200 bg-rose-50 text-rose-700",
 };
 
 type PurchasedAnalysesListProps = {
   groups: readonly PurchasedAnalysisProductGroup[];
   profileId: string;
+  previewMode?: boolean;
 };
 
 function compatibilityEditionLabel(productId: string, editionKey: string | null): string {
@@ -50,80 +44,264 @@ function compatibilityEditionLabel(productId: string, editionKey: string | null)
   return "궁합 분석";
 }
 
-export default function PurchasedAnalysesList({ groups, profileId }: PurchasedAnalysesListProps) {
+function formatAcquiredDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "보관 중";
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(date);
+}
+
+function acquisitionLabel(source: PurchasedAnalysisProductGroup["editions"][number]["acquisitionSource"]): string {
+  return source === "purchase" ? "구매" : "보관 시작";
+}
+
+function getDisplayTitle(group: PurchasedAnalysisProductGroup): string {
+  const specialProduct = getSpecialAnalysisProduct(group.productId);
+  return specialProduct?.title ?? getPremiumProductDisplayTitle(group.productId, group.productName);
+}
+
+function getCategoryLabel(group: PurchasedAnalysisProductGroup): string {
+  return getSpecialAnalysisProduct(group.productId)?.categoryLabel ?? "심층 분석";
+}
+
+function getEditionLabel(
+  group: PurchasedAnalysisProductGroup,
+  edition: PurchasedAnalysisProductGroup["editions"][number],
+): string {
+  const isCompatibility =
+    isCompatibilityRomanticProductId(group.productId)
+    || isCompatibilityFamilyParentChildProductId(group.productId)
+    || isCompatibilityFamilySiblingProductId(group.productId)
+    || isCompatibilityFamilyOtherProductId(group.productId);
+
+  return isCompatibility
+    ? compatibilityEditionLabel(group.productId, edition.analysisEditionKey)
+    : edition.editionLabel;
+}
+
+function reportHref(
+  group: PurchasedAnalysisProductGroup,
+  profileId: string,
+  editionKey: string | null,
+  previewMode: boolean,
+): string {
+  if (previewMode) return "/admin/report-preview";
+
+  const editionQuery = editionKey ? `&edition=${encodeURIComponent(editionKey)}` : "";
+
+  if (isCompatibilityRomanticProductId(group.productId)) {
+    return `/special-analysis/compatibility/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
+  }
+  if (isCompatibilityFamilyParentChildProductId(group.productId)) {
+    return `/special-analysis/compatibility/family/parent-child/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
+  }
+  if (isCompatibilityFamilySiblingProductId(group.productId)) {
+    return `/special-analysis/compatibility/family/siblings/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
+  }
+  if (isCompatibilityFamilyOtherProductId(group.productId)) {
+    return `/special-analysis/compatibility/family/other/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
+  }
+
+  return `/paid-analysis/${encodeURIComponent(group.productId)}/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
+}
+
+function consultingHref(
+  group: PurchasedAnalysisProductGroup,
+  profileId: string,
+  editionKey: string,
+  previewMode: boolean,
+): string {
+  if (previewMode) return "/admin/ai-consulting-preview";
+  const query = new URLSearchParams({
+    profileId,
+    productId: group.productId,
+    edition: editionKey,
+  });
+  return `/ai-consulting?${query.toString()}`;
+}
+
+export default function PurchasedAnalysesList({
+  groups,
+  profileId,
+  previewMode = false,
+}: PurchasedAnalysesListProps) {
   if (groups.length === 0) {
     return (
-      <section className="mt-8 rounded-3xl border border-[#dce1ef] bg-white/90 px-6 py-12 text-center shadow-sm">
-        <p className="text-base font-semibold text-slate-800">아직 구매한 분석이 없습니다.</p>
-        <p className="mt-2 text-sm leading-6 text-slate-500">심층 분석과 전문 분석에서 필요한 분석을 확인해 보세요.</p>
-        <div className="mt-5 flex flex-wrap justify-center gap-4">
-          <Link href="/deep-analysis" className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4">심층 분석 둘러보기 →</Link>
-          <Link href="/special-analysis" className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4">전문 분석 둘러보기 →</Link>
+      <section className="mt-6 rounded-[1.75rem] border border-[#dce1ef] bg-white px-6 py-12 text-center shadow-sm">
+        <p className="text-lg font-bold text-[#11162d]">아직 보관된 유료 분석이 없습니다.</p>
+        <p className="mx-auto mt-3 max-w-xl text-[15px] leading-7 text-slate-600">
+          필요한 질문이 생기면 심층 분석이나 전문 분석을 둘러보세요. 구매한 리포트는 이곳에 프로필별로 모입니다.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link href="/deep-analysis" className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]">
+            심층 분석 둘러보기
+          </Link>
+          <Link href="/special-analysis" className="rounded-2xl border border-[#dce1ef] bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-[#f7f8fc]">
+            전문 분석 둘러보기
+          </Link>
         </div>
       </section>
     );
   }
 
+  const allEditions = groups
+    .flatMap((group) => group.editions.map((edition) => ({ group, edition })))
+    .sort((a, b) => b.edition.acquiredAt.localeCompare(a.edition.acquiredAt));
+  const recent = allEditions[0]!;
+  const completedCount = allEditions.filter(({ edition }) => edition.reportStatus === "completed").length;
+  const preparingCount = allEditions.filter(({ edition }) =>
+    edition.reportStatus === "none" || edition.reportStatus === "generating",
+  ).length;
+  const recentReportHref = reportHref(recent.group, profileId, recent.edition.analysisEditionKey, previewMode);
+  const recentEditionLabel = getEditionLabel(recent.group, recent.edition);
+  const recentCanConsult = recent.edition.reportStatus === "completed" && Boolean(recent.edition.analysisEditionKey);
+
   return (
-    <div className="mt-8 space-y-6">
-      {groups.map((group) => {
-        const specialProduct = getSpecialAnalysisProduct(group.productId);
-        const isRomanticCompatibility = isCompatibilityRomanticProductId(group.productId);
-        const isFamilyParentChild = isCompatibilityFamilyParentChildProductId(group.productId);
-        const isFamilySibling = isCompatibilityFamilySiblingProductId(group.productId);
-        const isFamilyOther = isCompatibilityFamilyOtherProductId(group.productId);
-        const isCompatibility = isRomanticCompatibility || isFamilyParentChild || isFamilySibling || isFamilyOther;
-        const displayTitle = specialProduct?.title ?? getPremiumProductDisplayTitle(group.productId, group.productName);
-
-        return (
-          <div key={group.productId} className="py-6 first:pt-0 last:pb-0">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-slate-900">{displayTitle}</h2>
-              {specialProduct ? <p className="mt-1 text-xs text-slate-500">{specialProduct.categoryLabel}</p> : null}
+    <div className="mt-6">
+      <section className="overflow-hidden rounded-[2rem] border border-[#d8d3ff] bg-[radial-gradient(circle_at_82%_14%,rgba(112,88,229,0.13),transparent_26%),linear-gradient(145deg,#ffffff_0%,#f7f6ff_100%)] p-5 shadow-[0_18px_48px_rgba(43,45,94,0.08)] sm:p-7">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-xs font-bold tracking-[0.15em] text-[#6f5ce7]">RECENT</p>
+            <h2 className="mt-2 text-xl font-black text-[#11162d]">최근 이어보기</h2>
+            <p className="mt-4 text-xs font-bold tracking-[0.12em] text-slate-500">{getCategoryLabel(recent.group)}</p>
+            <h3 className="mt-2 text-2xl font-black tracking-[-0.025em] text-[#11162d]">{getDisplayTitle(recent.group)}</h3>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+              <span className="rounded-full border border-[#d8d3ff] bg-white px-3 py-1.5 font-semibold text-[#5e4bd1]">{recentEditionLabel}</span>
+              <span>
+                {acquisitionLabel(recent.edition.acquisitionSource)} · {formatAcquiredDate(recent.edition.acquiredAt)}
+              </span>
             </div>
-
-            <div className="space-y-3">
-              {group.editions.map((edition) => {
-                const editionQuery = edition.analysisEditionKey ? `&edition=${encodeURIComponent(edition.analysisEditionKey)}` : "";
-                const href = isRomanticCompatibility
-                  ? `/special-analysis/compatibility/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`
-                  : isFamilyParentChild
-                    ? `/special-analysis/compatibility/family/parent-child/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`
-                    : isFamilySibling
-                      ? `/special-analysis/compatibility/family/siblings/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`
-                      : isFamilyOther
-                        ? `/special-analysis/compatibility/family/other/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`
-                        : `/paid-analysis/${group.productId}/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
-                const isPreparing = edition.reportStatus === "none" || edition.reportStatus === "generating";
-                const displayEditionLabel = isCompatibility
-                  ? compatibilityEditionLabel(group.productId, edition.analysisEditionKey)
-                  : edition.editionLabel;
-
-                return (
-                  <div key={edition.analysisEditionKey ?? "legacy"} className="flex flex-col gap-3 rounded-2xl border border-[#dce1ef] bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-slate-900">{displayEditionLabel}</p>
-                        {!isCompatibility && edition.isLatest && group.editions.length > 1 ? (
-                          <span className="rounded bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700">최신</span>
-                        ) : null}
-                      </div>
-                      <span className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClasses[edition.reportStatus]}`}>
-                        {statusLabels[edition.reportStatus]}
-                      </span>
-                    </div>
-                    {isPreparing ? (
-                      <span className="shrink-0 rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-500">{actionLabels[edition.reportStatus]}</span>
-                    ) : (
-                      <Link href={href} className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-2 text-center text-xs font-semibold text-slate-700 transition hover:bg-slate-50">{actionLabels[edition.reportStatus]}</Link>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            <span className={`mt-3 inline-flex rounded-full border px-3 py-1.5 text-xs font-bold ${statusClasses[recent.edition.reportStatus]}`}>
+              {statusLabels[recent.edition.reportStatus]}
+            </span>
           </div>
-        );
-      })}
+
+          <div className="flex shrink-0 flex-wrap gap-2">
+            {recent.edition.reportStatus === "none" || recent.edition.reportStatus === "generating" ? (
+              <span className="rounded-2xl bg-[#eef0f6] px-4 py-3 text-sm font-bold text-slate-500">리포트 준비 중</span>
+            ) : (
+              <Link href={recentReportHref} className="rounded-2xl bg-[#171a3d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#242957]">
+                {recent.edition.reportStatus === "failed" ? "다시 준비하기" : "리포트 보기"}
+              </Link>
+            )}
+            {recentCanConsult ? (
+              <Link
+                href={consultingHref(recent.group, profileId, recent.edition.analysisEditionKey!, previewMode)}
+                className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]"
+              >
+                AI 상담
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-6" aria-labelledby="purchased-library-heading">
+        <div className="flex flex-col gap-3 border-b border-[#dce1ef] pb-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-bold tracking-[0.15em] text-[#6f5ce7]">MY LIBRARY</p>
+            <h2 id="purchased-library-heading" className="mt-2 text-2xl font-black text-[#11162d]">전체 보관함</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">연도판과 분석 상태를 확인하고, 완료된 리포트는 언제든 다시 열 수 있습니다.</p>
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs font-semibold">
+            <span className="rounded-full bg-[#eef0f6] px-3 py-2 text-slate-600">보관 {allEditions.length}개</span>
+            <span className="rounded-full bg-emerald-50 px-3 py-2 text-emerald-800">완료 {completedCount}개</span>
+            {preparingCount > 0 ? (
+              <span className="rounded-full bg-slate-100 px-3 py-2 text-slate-600">준비 중 {preparingCount}개</span>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {groups.map((group) => {
+            const specialProduct = getSpecialAnalysisProduct(group.productId);
+            const isCompatibility =
+              isCompatibilityRomanticProductId(group.productId)
+              || isCompatibilityFamilyParentChildProductId(group.productId)
+              || isCompatibilityFamilySiblingProductId(group.productId)
+              || isCompatibilityFamilyOtherProductId(group.productId);
+
+            return (
+              <article key={group.productId} className="rounded-[1.75rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-6">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xs font-bold tracking-[0.12em] text-slate-500">{specialProduct?.categoryLabel ?? "심층 분석"}</p>
+                    <h3 className="mt-2 text-lg font-black text-[#11162d]">{getDisplayTitle(group)}</h3>
+                  </div>
+                  <span className="self-start rounded-full bg-[#f3f1ff] px-3 py-1.5 text-xs font-bold text-[#5e4bd1]">
+                    {group.editions.length > 1 ? `${group.editions.length}개 연도판·에디션` : "1개 보관"}
+                  </span>
+                </div>
+
+                <div className="mt-4 divide-y divide-[#e7eaf2]">
+                  {group.editions.map((edition) => {
+                    const href = reportHref(group, profileId, edition.analysisEditionKey, previewMode);
+                    const displayEditionLabel = getEditionLabel(group, edition);
+                    const isPreparing = edition.reportStatus === "none" || edition.reportStatus === "generating";
+                    const canConsult = edition.reportStatus === "completed" && Boolean(edition.analysisEditionKey);
+
+                    return (
+                      <div key={edition.analysisEditionKey ?? "legacy"} className="grid gap-4 py-4 first:pt-0 last:pb-0 sm:grid-cols-[1fr_auto] sm:items-center">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-[15px] font-bold text-[#11162d]">{displayEditionLabel}</p>
+                            {!isCompatibility && edition.isLatest && group.editions.length > 1 ? (
+                              <span className="rounded-full bg-[#f3f1ff] px-2.5 py-1 text-xs font-bold text-[#5e4bd1]">최신 연도판</span>
+                            ) : null}
+                          </div>
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+                            <span>{acquisitionLabel(edition.acquisitionSource)} · {formatAcquiredDate(edition.acquiredAt)}</span>
+                            <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-bold ${statusClasses[edition.reportStatus]}`}>
+                              {statusLabels[edition.reportStatus]}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 sm:justify-end">
+                          {isPreparing ? (
+                            <span className="rounded-xl bg-[#eef0f6] px-4 py-2.5 text-xs font-bold text-slate-500">준비 중</span>
+                          ) : (
+                            <Link href={href} className="rounded-xl border border-[#cfd5e6] bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition hover:bg-[#f7f8fc]">
+                              {edition.reportStatus === "failed" ? "다시 준비하기" : "리포트 보기"}
+                            </Link>
+                          )}
+                          {canConsult ? (
+                            <Link
+                              href={consultingHref(group, profileId, edition.analysisEditionKey!, previewMode)}
+                              className="rounded-xl bg-[#f3f1ff] px-4 py-2.5 text-xs font-bold text-[#5e4bd1] transition hover:bg-[#eae7ff]"
+                            >
+                              AI 상담
+                            </Link>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section data-next-question-slot="phase9" className="mt-6 rounded-[1.75rem] border border-[#dce1ef] bg-[#f9faff] p-5 sm:p-6">
+        <p className="text-xs font-bold tracking-[0.15em] text-[#6f5ce7]">NEXT QUESTION</p>
+        <h2 className="mt-2 text-xl font-black text-[#11162d]">다음 질문이 생겼다면</h2>
+        <p className="mt-2 max-w-2xl text-[15px] leading-7 text-slate-700">
+          보관한 리포트를 다시 읽은 뒤 새로운 궁금증이 생기면 다른 심층 분석이나 관계 분석을 둘러볼 수 있습니다.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link href="/deep-analysis" className="rounded-2xl bg-[#171a3d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#242957]">
+            심층 분석 둘러보기
+          </Link>
+          <Link href="/special-analysis" className="rounded-2xl border border-[#dce1ef] bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-[#f7f8fc]">
+            관계·전문 분석 보기
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

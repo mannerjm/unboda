@@ -93,7 +93,7 @@ export function resolveMaxOutputTokens(
   callType?: AnalysisTextCallType,
 ): number {
   if (callType === "main-analysis") {
-    return 1800;
+    return 900;
   }
 
   if (callType === "paid-analysis-detail") {

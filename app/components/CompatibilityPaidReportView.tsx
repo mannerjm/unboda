@@ -16,7 +16,7 @@ function ReportSectionHeader({
   void tone;
   return (
     <div className="max-w-3xl">
-      <p className={`text-xs font-bold tracking-[0.15em] ${dark ? "text-slate-400" : "text-slate-400"}`}>{eyebrow}</p>
+      <p className={`text-xs font-bold tracking-[0.15em] ${dark ? "text-slate-500" : "text-slate-500"}`}>{eyebrow}</p>
       <h3 className={`mt-2 text-xl font-bold tracking-tight sm:text-2xl ${dark ? "text-white" : "text-[#11162d]"}`}>{title}</h3>
       {description ? <p className={`mt-2 text-sm leading-7 ${dark ? "text-slate-300" : "text-slate-500"}`}>{description}</p> : null}
     </div>
@@ -39,7 +39,7 @@ function PointList({ points }: { points: readonly string[] }) {
 function SummaryTile({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
   return (
     <article className="rounded-3xl border border-[#dce1ef]/80 bg-white p-5 shadow-sm sm:p-6">
-      <p className="text-xs font-bold tracking-[0.13em] text-slate-400">{eyebrow}</p>
+      <p className="text-xs font-bold tracking-[0.13em] text-slate-500">{eyebrow}</p>
       <h4 className="mt-3 text-base font-bold leading-7 text-[#11162d]">{title}</h4>
       <p className="mt-2 text-[15px] leading-7 text-slate-700">{body}</p>
     </article>
@@ -186,7 +186,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
           <div className="mt-5 grid gap-3 lg:grid-cols-3">
             {report.actionGuide.doNext.map((item, index) => (
               <article key={`${item.action}-${item.reason}`} className="rounded-3xl bg-[#f7f6ff] p-5 ring-1 ring-[#d8d3ff] sm:p-6">
-                <p className="text-xs font-bold tracking-[0.13em] text-slate-400">실천 {String(index + 1).padStart(2, "0")}</p>
+                <p className="text-xs font-bold tracking-[0.13em] text-slate-500">실천 {String(index + 1).padStart(2, "0")}</p>
                 <p className="mt-3 font-bold leading-7 text-[#11162d]">{item.action}</p>
                 <p className="mt-3 text-[15px] leading-7 text-slate-700">{item.reason}</p>
               </article>

@@ -65,7 +65,16 @@ for (const runtimeContract of [
 }
 assert(chat.includes("if (isPreview) return;"), "operator preview must block question submission");
 assert(chat.includes("if (previewData)"), "operator preview must render without live session/memory fetches");
-assert(chat.includes("previewData?.backHref"), "preview must return to the design-review flow");
+assert(chat.includes("previewData?.backHref"), "preview must retain its design-review return target");
+assert(chat.includes('data-section="conversation"'), "chat must mark the conversation boundary");
+assert(chat.includes('data-ai-composer="conversation-sticky"'), "composer must be scoped to the conversation section");
+assert(
+  chat.indexOf('data-ai-composer="conversation-sticky"') > chat.indexOf('data-section="conversation"'),
+  "sticky composer must render inside the conversation flow, not above scope/memory sections",
+);
+assert(chat.includes('space-y-4 pb-44 sm:pb-40'), "conversation must reserve space so the sticky composer does not cover the latest answer");
+assert(!chat.includes('← {isPreview ? "미리보기 목록으로" : "리포트로 돌아가기"}'), "operator preview must not duplicate the admin preview navigation");
+assert(!chat.includes('남은 질문 {session.questionsRemaining}회'), "mid-page continuation card must not duplicate the primary remaining-question counter");
 
 assert(entry.includes("이 리포트를 바탕으로 AI에게 질문하기"), "report entry must preserve the established AI consulting CTA language");
 assert(entry.includes("presentation.productTitle"), "report entry must name the report that grounds consultation");

@@ -219,7 +219,7 @@ export default function PaidFamilyParentChildAnalysisClient({
         <div aria-hidden="true" className="absolute -bottom-14 right-20 h-24 w-24 rounded-full bg-[#ddd8ff]/45 blur-2xl" />
         <div className="relative">
           <p className="text-[11px] font-bold tracking-[0.18em] text-[#b9b2f6]">두 흐름을 연결합니다</p>
-          <p className="mt-2 text-2xl font-bold tracking-[-0.02em] text-[#11162d]">
+          <p className="mt-2 text-2xl font-bold tracking-[-0.02em] text-white">
             {myProfileLabel}님의 사주 <span className="font-medium text-[#c9c3ff]">×</span> 가족 사주
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-200">

@@ -1704,7 +1704,7 @@ h3: ({ children }) => {
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <Link
-                href={providedResult ? "/auth/login?returnTo=/recommendations&origin=guest-result" : `/recommendations?profileId=${currentProfileId}`}
+                href={providedResult ? "/recommendations" : `/recommendations?profileId=${currentProfileId}`}
                 className="rounded-xl bg-stone-950 px-5 py-4 text-center text-sm font-bold text-white transition hover:bg-[#25213d]"
               >
                 내 결과에서 이어지는 질문 보기

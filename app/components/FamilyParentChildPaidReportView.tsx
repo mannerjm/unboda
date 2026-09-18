@@ -45,7 +45,7 @@ export default function FamilyParentChildPaidReportView({ content }: { content: 
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full bg-white/80 px-3 py-1.5 text-xs font-bold text-slate-700 ring-1 ring-[#dce1ef]">가족 궁합 리포트</span>
-            <span className="rounded-full bg-[#6f5ce7] px-3 py-1.5 text-[11px] font-bold text-white">부모·자녀 · {meta.evaluationYear}년판</span>
+            <span className="rounded-full bg-[#6f5ce7] px-3 py-1.5 text-xs font-bold text-white">부모·자녀 · {meta.evaluationYear}년판</span>
           </div>
           <Link href="/special-analysis/compatibility/family/parent-child#family-relationship-selector" className="rounded-full border border-[#cfd5e6] bg-white/70 px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-white">다른 가족 분석</Link>
         </div>
@@ -108,7 +108,7 @@ export default function FamilyParentChildPaidReportView({ content }: { content: 
           <div className="mt-6 grid gap-4 lg:grid-cols-3">
             {report.actionGuide.doNext.map((item, index) => (
               <article key={`${item.action}-${index}`} className="rounded-[24px] border border-[#d8d3ff] bg-[#f7f6ff] p-5">
-                <p className="text-[11px] font-bold tracking-[0.13em] text-slate-400">실천 {String(index + 1).padStart(2, "0")}</p>
+                <p className="text-xs font-bold tracking-[0.11em] text-[#6f5ce7]">실천 {String(index + 1).padStart(2, "0")}</p>
                 <h3 className="mt-3 text-base font-bold leading-7 text-[#11162d]">{item.action}</h3>
                 <p className="mt-3 text-[15px] leading-7 text-slate-700">{item.reason}</p>
               </article>

@@ -164,7 +164,7 @@ export default function PaidAnalysisV4Report({
               {detail.cause.reasons.map((reason, index) => (
                 <article key={reason.title} className="rounded-[1.5rem] border border-[#dce1ef] bg-[#fafbff] p-5">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6f5ce7] text-[11px] font-bold text-white">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6f5ce7] text-xs font-bold text-white">{String(index + 1).padStart(2, "0")}</span>
                     <p className="text-sm font-bold text-[#11162d]">{reason.title}</p>
                   </div>
                   <p className="mt-4 text-[15px] leading-7 text-slate-700">{reason.observedStructure}</p>

@@ -65,13 +65,13 @@ export default async function AiConsultingCreditsPage({
 
   if (!user) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f7f2e8] px-5 text-stone-900">
-        <section className="w-full max-w-xl rounded-[2rem] bg-white p-8 text-center shadow-sm">
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-5 text-[#11162d]">
+        <section className="w-full max-w-xl rounded-[1.75rem] border border-[#dce1ef] bg-white p-8 text-center shadow-sm">
           <h1 className="text-xl font-bold">로그인이 필요합니다</h1>
-          <p className="mt-3 text-sm leading-7 text-stone-600">AI 질문권은 구매한 심층 분석과 같은 계정·프로필에 연결됩니다.</p>
+          <p className="mt-3 text-sm leading-7 text-slate-700">AI 질문권은 구매한 심층 분석과 같은 계정·프로필에 연결됩니다.</p>
           <Link
             href={`/auth/login?returnTo=${encodeURIComponent(currentHref)}`}
-            className="mt-6 inline-flex rounded-2xl bg-stone-950 px-5 py-3 text-sm font-semibold text-white"
+            className="mt-6 inline-flex rounded-2xl bg-[#171a3d] px-5 py-3 text-sm font-semibold text-white"
           >
             로그인
           </Link>
@@ -82,10 +82,10 @@ export default async function AiConsultingCreditsPage({
 
   if (!profileId || !isProfileId(profileId) || !productId || !edition) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f7f2e8] px-5 text-stone-900">
-        <section className="w-full max-w-xl rounded-[2rem] bg-white p-8 text-center shadow-sm">
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-5 text-[#11162d]">
+        <section className="w-full max-w-xl rounded-[1.75rem] border border-[#dce1ef] bg-white p-8 text-center shadow-sm">
           <h1 className="text-xl font-bold">AI 질문권 정보를 확인하지 못했습니다</h1>
-          <p className="mt-3 text-sm leading-7 text-stone-600">구매한 심층 분석의 AI 상담 화면에서 다시 진입해 주세요.</p>
+          <p className="mt-3 text-sm leading-7 text-slate-700">구매한 심층 분석의 AI 상담 화면에서 다시 진입해 주세요.</p>
         </section>
       </main>
     );
@@ -94,8 +94,8 @@ export default async function AiConsultingCreditsPage({
   const profile = await getUserProfile(profileId, user.id).catch(() => null);
   if (!profile) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f7f2e8] px-5 text-stone-900">
-        <section className="w-full max-w-xl rounded-[2rem] bg-white p-8 text-center shadow-sm">
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-5 text-[#11162d]">
+        <section className="w-full max-w-xl rounded-[1.75rem] border border-[#dce1ef] bg-white p-8 text-center shadow-sm">
           <h1 className="text-xl font-bold">프로필을 확인하지 못했습니다</h1>
           <Link href={consultationHref} className="mt-5 inline-flex text-sm font-semibold underline underline-offset-4">AI 상담으로 돌아가기</Link>
         </section>
@@ -117,10 +117,10 @@ export default async function AiConsultingCreditsPage({
 
   if (!session || session.state === "report_required") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f7f2e8] px-5 text-stone-900">
-        <section className="w-full max-w-xl rounded-[2rem] bg-white p-8 text-center shadow-sm">
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-5 text-[#11162d]">
+        <section className="w-full max-w-xl rounded-[1.75rem] border border-[#dce1ef] bg-white p-8 text-center shadow-sm">
           <h1 className="text-xl font-bold">AI 질문권을 사용할 수 있는 분석이 아닙니다</h1>
-          <p className="mt-3 text-sm leading-7 text-stone-600">완료된 구매 심층 분석의 AI 상담 화면에서 질문권을 확인해 주세요.</p>
+          <p className="mt-3 text-sm leading-7 text-slate-700">완료된 구매 심층 분석의 AI 상담 화면에서 질문권을 확인해 주세요.</p>
           <Link href={consultationHref} className="mt-5 inline-flex text-sm font-semibold underline underline-offset-4">AI 상담으로 돌아가기</Link>
         </section>
       </main>
@@ -149,17 +149,17 @@ export default async function AiConsultingCreditsPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f2e8] px-5 py-10 text-stone-900">
+    <main className="min-h-screen bg-[#f5f7fc] px-4 py-7 text-[#11162d] sm:px-8 sm:py-10">
       <Script src="https://js.tosspayments.com/v2/standard" strategy="afterInteractive" />
       <div className="mx-auto max-w-4xl">
-        <Link href={consultationHref} className="text-sm font-semibold text-stone-600 hover:text-stone-900">
+        <Link href={consultationHref} className="text-sm font-semibold text-slate-700 hover:text-[#11162d]">
           ← AI 상담으로 돌아가기
         </Link>
 
-        <header className="mt-7 rounded-[2rem] bg-stone-950 p-7 text-white shadow-xl sm:p-9">
-          <p className="text-xs font-semibold tracking-[0.2em] text-amber-300">UNBODA AI CREDIT</p>
+        <header className="mt-5 rounded-[2rem] border border-[#35375f] bg-[radial-gradient(circle_at_top_right,rgba(113,89,233,0.24),transparent_28%),linear-gradient(145deg,#0b1025_0%,#171a3d_62%,#24204d_100%)] p-6 text-white shadow-[0_22px_60px_rgba(24,29,67,0.14)] sm:p-8">
+          <p className="text-xs font-semibold tracking-[0.2em] text-[#b9b2f6]">UNBODA AI CREDIT</p>
           <h1 className="mt-3 text-3xl font-bold">AI 질문권 관리</h1>
-          <p className="mt-4 text-sm leading-7 text-stone-300">
+          <p className="mt-4 text-sm leading-7 text-slate-200">
             {profile.label} 프로필의 공통 질문권입니다. 남은 질문권은 다른 시기·다른 주제의 구매 심층 분석에서도 같은 프로필이라면 이어서 사용할 수 있습니다.
           </p>
         </header>
@@ -174,16 +174,16 @@ export default async function AiConsultingCreditsPage({
           checkoutEnabled={providerReady}
         />
 
-        <section className="mt-8 rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+        <section className="mt-6 rounded-[1.75rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-7">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-semibold tracking-[0.18em] text-stone-500">CREDIT HISTORY</p>
-              <h2 className="mt-2 text-xl font-bold text-stone-950">질문권 구매·사용 내역</h2>
+              <p className="text-xs font-semibold tracking-[0.18em] text-slate-500">CREDIT HISTORY</p>
+              <h2 className="mt-2 text-xl font-bold text-[#11162d]">질문권 구매·사용 내역</h2>
             </div>
-            <p className="text-sm text-stone-600">현재 잔액 <strong className="text-stone-950">{session.questionsRemaining}회</strong></p>
+            <p className="text-sm text-slate-700">현재 잔액 <strong className="text-[#11162d]">{session.questionsRemaining}회</strong></p>
           </div>
 
-          <p className="mt-4 text-sm leading-7 text-stone-600">
+          <p className="mt-4 text-sm leading-7 text-slate-700">
             정상 AI 답변이 저장되어 실제 차감된 경우에만 사용 내역이 기록됩니다. 최근 50건을 표시합니다.
           </p>
 
@@ -192,23 +192,23 @@ export default async function AiConsultingCreditsPage({
               질문권 내역을 불러오지 못했습니다. 현재 잔액은 그대로 유지되며, 잠시 후 다시 확인해 주세요.
             </div>
           ) : history.length === 0 ? (
-            <div className="mt-6 rounded-2xl border border-dashed border-stone-300 px-5 py-8 text-center text-sm leading-7 text-stone-500">
+            <div className="mt-6 rounded-2xl border border-dashed border-[#cfd5e6] px-5 py-8 text-center text-sm leading-7 text-slate-500">
               아직 질문권 구매 또는 사용 내역이 없습니다.
             </div>
           ) : (
-            <ul className="mt-6 divide-y divide-stone-200 border-y border-stone-200">
+            <ul className="mt-6 divide-y divide-[#dce1ef] border-y border-[#dce1ef]">
               {history.map((entry) => (
                 <li key={entry.id} className="flex items-center justify-between gap-4 py-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-700">
+                      <span className="rounded-full bg-[#eef0f6] px-2.5 py-1 text-xs font-semibold text-slate-700">
                         {getHistoryTypeLabel(entry)}
                       </span>
-                      <p className="font-semibold text-stone-950">{getHistoryLabel(entry)}</p>
+                      <p className="font-semibold text-[#11162d]">{getHistoryLabel(entry)}</p>
                     </div>
-                    <p className="mt-2 text-xs text-stone-500">{formatHistoryDate(entry.createdAt)}</p>
+                    <p className="mt-2 text-sm text-slate-500">{formatHistoryDate(entry.createdAt)}</p>
                   </div>
-                  <span className={`shrink-0 text-base font-bold ${entry.quantity > 0 ? "text-emerald-700" : "text-stone-800"}`}>
+                  <span className={`shrink-0 text-base font-bold ${entry.quantity > 0 ? "text-emerald-700" : "text-slate-800"}`}>
                     {formatCreditDelta(entry.quantity)}
                   </span>
                 </li>
@@ -217,8 +217,8 @@ export default async function AiConsultingCreditsPage({
           )}
         </section>
 
-        <p className="mt-6 text-xs leading-6 text-stone-500">
-          질문권만으로 구매하지 않은 심층 분석 내용이 열리지는 않습니다. 범위를 벗어난 질문, 확인 요청, 안전 안내, 생성 실패에는 질문권이 차감되지 않습니다.
+        <p className="mt-6 text-xs leading-6 text-slate-500">
+          질문권만으로 구매하지 않은 유료 분석 내용이 열리지는 않습니다. 범위를 벗어난 질문, 확인 요청, 안전 안내, 생성 실패에는 질문권이 차감되지 않습니다.
         </p>
       </div>
     </main>

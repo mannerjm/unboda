@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getAiConsultingPresentation } from "@/app/lib/aiConsultingPresentation";
 
 type SessionPreviewMessage = {
   createdAt: string;
@@ -43,6 +44,10 @@ export default function AiConsultingEntryCard({
   edition?: string;
 }) {
   const [session, setSession] = useState<SessionPreview | null>(null);
+  const presentation = useMemo(
+    () => edition ? getAiConsultingPresentation(productId, edition) : null,
+    [edition, productId],
+  );
 
   useEffect(() => {
     if (!profileId || !edition) return;
@@ -66,12 +71,10 @@ export default function AiConsultingEntryCard({
   const hasPreviousConversation =
     session && session.state !== "report_required" && session.messages.length > 0;
 
-  // Keep the same commercial exposure policy as the existing deep-analysis flow:
-  // show the entry when this profile has shared credit, or when a previous thread
-  // exists so the user can still reopen it after the balance reaches zero.
   if (
     !profileId ||
     !edition ||
+    !presentation ||
     !session ||
     session.state === "report_required" ||
     (session.state === "credit_required" && !hasPreviousConversation)
@@ -89,33 +92,58 @@ export default function AiConsultingEntryCard({
     : null;
 
   return (
-    <section className="mx-auto mb-8 mt-5 max-w-3xl px-4 sm:px-8">
-      <div className="rounded-[1.75rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#ffffff_0%,#f7f6ff_100%)] p-5 shadow-[0_16px_45px_rgba(54,45,112,0.07)] sm:p-7">
-        <p className="text-xs font-bold tracking-[0.18em] text-[#6f5ce7]">AI CONSULTING</p>
-        <h2 className="mt-3 text-xl font-bold text-[#11162d]">
-          {hasPreviousConversation ? "지난 AI 상담을 이어서 질문하기" : "이 리포트를 바탕으로 AI에게 질문하기"}
-        </h2>
-        <p className="mt-3 text-[15px] leading-7 text-slate-700">
-          이 프로필의 AI 질문권을 구매한 분석 리포트들에서 공통으로 사용할 수 있고, 정상 답변이 완료된 질문만 1회 차감합니다.
-        </p>
-        <div className="mt-4 rounded-2xl bg-[#f3f1ff] px-4 py-3 text-[15px] leading-7 text-slate-700">
-          {historySummary ? <p className="font-semibold text-[#11162d]">{historySummary}</p> : null}
-          <p className={historySummary ? "mt-1" : undefined}>
-            {depleted
-              ? "남은 질문 0회 · 이전 상담 기록은 계속 볼 수 있습니다."
-              : `남은 질문 ${session.questionsRemaining}회`}
-          </p>
+    <section className="mx-auto mb-8 mt-5 max-w-4xl px-4 sm:px-8">
+      <div className="overflow-hidden rounded-[1.8rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#ffffff_0%,#f7f6ff_100%)] shadow-[0_16px_45px_rgba(54,45,112,0.07)]">
+        <div className="grid gap-5 p-5 sm:p-7 lg:grid-cols-[1.05fr_0.95fr]">
+          <div>
+            <p className="text-xs font-bold tracking-[0.16em] text-[#6f5ce7]">AI CONSULTING</p>
+            <h2 className="mt-3 text-xl font-black text-[#11162d]">
+              {hasPreviousConversation ? "지난 AI 상담을 이어서 질문하기" : "이 리포트를 바탕으로 AI에게 질문하기"}
+            </h2>
+            <p className="mt-3 text-[15px] leading-7 text-slate-700">
+              일반 챗봇이 아니라 <strong className="font-bold text-[#11162d]">{presentation.productTitle}</strong> 리포트의 계산 결과와 해석 범위 안에서 이어서 답변합니다.
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+              <span className="rounded-full border border-[#d8d3ff] bg-white px-3 py-2 text-[#5e4bd1]">{presentation.editionLabel}</span>
+              <span className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-slate-600">
+                {depleted ? "남은 질문 0회" : `남은 질문 ${session.questionsRemaining}회`}
+              </span>
+            </div>
+
+            {historySummary ? (
+              <p className="mt-4 text-sm font-semibold leading-6 text-slate-600">{historySummary}</p>
+            ) : null}
+            {depleted ? (
+              <p className="mt-2 text-sm leading-6 text-slate-600">남은 질문 0회 · 이전 상담 기록은 계속 볼 수 있습니다.</p>
+            ) : null}
+
+            <Link
+              href={href}
+              className="mt-5 inline-flex rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]"
+            >
+              {depleted
+                ? "이전 상담 기록 보기"
+                : hasPreviousConversation
+                  ? "이전 상담 이어보기"
+                  : "AI 상담 시작하기"}
+            </Link>
+          </div>
+
+          <div className="rounded-[1.5rem] border border-[#dce1ef] bg-white p-4">
+            <p className="text-xs font-bold tracking-[0.13em] text-slate-500">이어서 물어볼 수 있는 질문</p>
+            <div className="mt-3 space-y-2">
+              {presentation.suggestedQuestions.slice(0, 3).map((question) => (
+                <div key={question} className="rounded-2xl bg-[#f7f8fc] px-4 py-3 text-sm font-semibold leading-6 text-slate-700">
+                  {question}
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs leading-5 text-slate-500">
+              범위를 벗어난 질문·확인 요청·안전 안내에는 질문권이 차감되지 않습니다.
+            </p>
+          </div>
         </div>
-        <Link
-          href={href}
-          className="mt-5 inline-flex rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#5f4fd2]"
-        >
-          {depleted
-            ? "이전 상담 기록 보기"
-            : hasPreviousConversation
-              ? "이전 상담 이어보기"
-              : "AI 상담 시작하기"}
-        </Link>
       </div>
     </section>
   );

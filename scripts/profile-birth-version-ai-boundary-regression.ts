@@ -23,8 +23,8 @@ assert(!identity.includes("label") && !identity.includes("relationshipType"), "p
 assert(snapshot.includes("resolveAnalysisInputProfileVersion") && snapshot.includes('"current"') && snapshot.includes('"previous"') && snapshot.includes('"unknown"'), "commercial snapshots must classify current vs previous profile input");
 
 assert(mypage.includes("hasCanonicalAnalysisInputChanged") && mypage.includes("출생 정보를 변경하시겠어요?"), "mypage must warn before changing canonical birth inputs");
-assert(mypage.includes("기존 리포트와 AI 상담 기록은 구매 당시 출생 정보 기준으로 그대로 보관됩니다"), "warning must explain historical report/chat preservation");
-assert(mypage.includes("남아 있는 AI 질문권은 그대로 유지됩니다"), "warning must explain that paid AI credits survive the profile edit");
+assert(mypage.includes("구매 당시 출생 정보 기준으로 그대로 보관됩니다"), "warning must explain historical report/chat preservation");
+assert(mypage.includes("남아 있는 AI 질문권이 있다면 그대로 유지됩니다"), "warning must explain that paid AI credits survive the profile edit");
 assert(mypage.includes("birthDataChangeAcknowledged: true"), "confirmed birth changes must send explicit acknowledgement");
 
 assert(profileRoute.includes("BIRTH_DATA_CHANGE_ACKNOWLEDGEMENT_REQUIRED"), "server must require acknowledgement for purchase-backed birth changes");
@@ -33,6 +33,7 @@ assert(!profileRoute.includes('from("entitlements").delete') && !profileRoute.in
 
 assert(portfolio.includes('from("purchases")') && portfolio.includes("analysis_input_snapshot"), "AI portfolio must compare purchase-time frozen birth inputs");
 assert(portfolio.includes("includePreviousSource") && portfolio.includes("profileInputVersion"), "AI portfolio must keep previous-input analyses out of automatic routing while supporting explicit continuation");
+assert(portfolio.includes("analyses: [explicitPrevious]"), "explicit previous-input continuation must isolate the historical report instead of mixing current-input reports");
 assert(portfolioRoute.includes("includeProductId") && portfolioRoute.includes("includeEdition"), "portfolio API must accept only an explicit report source for previous-input continuation");
 assert(questionRoute.includes("preferredProductId") && questionRoute.includes("preferredEditionKey"), "question API must bind previous-input continuation to an exact preferred source");
 

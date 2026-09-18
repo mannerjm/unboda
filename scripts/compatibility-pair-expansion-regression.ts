@@ -72,9 +72,23 @@ assert(evaluateCompatibilityAiConsultingScope({
 }).decision === "DENY", "business consulting must reject future revenue prediction questions");
 
 const overview = read("app/special-analysis/compatibility/page.tsx");
-for (const label of ["직장·동료 궁합", "친구·지인 궁합", "사업·동업 궁합"]) {
+for (const label of ["연인·배우자 궁합", "가족 궁합", "직장·동료 궁합", "친구·지인 궁합", "사업·동업 궁합"]) {
   assert(overview.includes(label), `compatibility overview must expose ${label}`);
 }
+for (const relationBadge of ["연인 관계", "가족 관계", "업무 관계", "사적 관계", "사업 관계"]) {
+  assert(overview.includes(relationBadge), `compatibility overview must expose relation badge: ${relationBadge}`);
+}
+assert(
+  overview.includes('section className="mt-8 grid gap-5 lg:grid-cols-3"'),
+  "all compatibility cards must share one three-column desktop grid",
+);
+const unifiedCardClass = 'group flex min-h-[270px] flex-col rounded-[28px] border border-[#dfe3ef] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md';
+assert(
+  overview.split(unifiedCardClass).length - 1 === 5,
+  "all five compatibility cards must share the same card sizing and surface treatment",
+);
+assert(!overview.includes("min-h-[290px]"), "legacy oversized compatibility cards must be removed");
+assert(!overview.includes(">이용 가능<") && !overview.includes(">가족 궁합 이용 가능<"), "availability badges must be replaced by relation badges");
 for (const route of [
   "/special-analysis/compatibility/workplace",
   "/special-analysis/compatibility/friend",

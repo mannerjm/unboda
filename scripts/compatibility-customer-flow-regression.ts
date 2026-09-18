@@ -144,7 +144,7 @@ const successPage = readFileSync("app/checkout/success/page.tsx", "utf8");
 const purchasedList = readFileSync("app/components/PurchasedAnalysesListMultiEdition.tsx", "utf8");
 const adapter = readFileSync("app/lib/compatibilityCustomerInput.ts", "utf8");
 
-assert(compatibilityPage.includes("가족 궁합 이용 가능") && !compatibilityPage.includes("준비 중"), "family catalog card must show launched family types");
+assert(compatibilityPage.includes("가족 관계") && compatibilityPage.includes("부모·자녀") && compatibilityPage.includes("형제·자매") && compatibilityPage.includes("기타 가족") && !compatibilityPage.includes("준비 중"), "family catalog card must show launched family types with the relation badge");
 assert(familySelector.includes('mode="siblings"') && familySelector.includes('mode="other_family"'), "same-page family selector must mount distinct extended flows");
 assert(!familySelector.includes("disabled={!option.available}"), "sibling and other-family selections must no longer be disabled");
 assert(extendedInput.includes("조부모·손주") && extendedInput.includes("사촌") && extendedInput.includes("인척"), "other-family input must preserve relationship semantics");

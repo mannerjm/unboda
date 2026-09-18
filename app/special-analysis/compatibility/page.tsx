@@ -41,53 +41,47 @@ export default async function CompatibilityAnalysisPage() {
             )}
           </header>
 
-          <section className="mt-8 grid gap-5 lg:grid-cols-2">
+          <section className="mt-8 grid gap-5 lg:grid-cols-3">
             <Link
               href="/special-analysis/compatibility/romantic"
-              className="group flex min-h-[290px] flex-col rounded-[28px] border border-[#dfe3ef] bg-[linear-gradient(145deg,#f3f1ff_0%,#f9faff_65%,#ffffff_100%)] p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md sm:p-7"
+              className="group flex min-h-[270px] flex-col rounded-[28px] border border-[#dfe3ef] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <span className="inline-flex rounded-full bg-[#6f5ce7] px-3 py-1.5 text-[11px] font-bold text-white">이용 가능</span>
-                  <h2 className="mt-5 text-2xl font-bold tracking-[-0.02em] text-[#11162d]">연인·배우자 궁합</h2>
-                </div>
+              <div className="flex items-start justify-between gap-3">
+                <span className="inline-flex rounded-full bg-[#f3f1ff] px-3 py-1.5 text-[11px] font-bold text-[#5e4bd1]">연인 관계</span>
                 <span className="text-sm font-bold text-[#11162d]">{COMPATIBILITY_ROMANTIC_PRODUCT.amount.toLocaleString("ko-KR")}원</span>
               </div>
+              <h2 className="mt-5 text-2xl font-bold tracking-[-0.02em] text-[#11162d]">연인·배우자 궁합</h2>
               <p className="mt-4 text-sm leading-7 text-slate-600">
                 친밀감과 대화 방식, 갈등과 회복, 오래 함께하기 위한 기준과 현재 관계 흐름을 살펴봅니다.
               </p>
               <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
-                <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-[#dce1ef]">서로에게 미치는 영향</span>
-                <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-[#dce1ef]">갈등·회복 방식</span>
-                <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-[#dce1ef]">현재 관계 흐름</span>
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">서로에게 미치는 영향</span>
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">갈등·회복 방식</span>
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">현재 관계 흐름</span>
               </div>
               <span className="mt-auto pt-7 text-sm font-bold text-[#11162d]">연인·배우자 궁합 시작하기 →</span>
             </Link>
 
             <Link
               href="/special-analysis/compatibility/family/parent-child#family-relationship-selector"
-              className="group flex min-h-[290px] flex-col rounded-[28px] border border-[#dfe3ef] bg-[linear-gradient(145deg,#f3f1ff_0%,#f9faff_65%,#ffffff_100%)] p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md sm:p-7"
+              className="group flex min-h-[270px] flex-col rounded-[28px] border border-[#dfe3ef] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <span className="inline-flex rounded-full bg-[#6f5ce7] px-3 py-1.5 text-[11px] font-bold text-white">가족 궁합 이용 가능</span>
-                  <h2 className="mt-5 text-2xl font-bold tracking-[-0.02em] text-[#11162d]">가족 궁합</h2>
-                </div>
+              <div className="flex items-start justify-between gap-3">
+                <span className="inline-flex rounded-full bg-[#f3f1ff] px-3 py-1.5 text-[11px] font-bold text-[#5e4bd1]">가족 관계</span>
                 <span className="text-sm font-bold text-[#11162d]">{COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT.amount.toLocaleString("ko-KR")}원</span>
               </div>
+              <h2 className="mt-5 text-2xl font-bold tracking-[-0.02em] text-[#11162d]">가족 궁합</h2>
               <p className="mt-4 text-sm leading-7 text-slate-600">
                 부모·자녀, 형제·자매, 기타 가족을 한 화면에서 선택하고 관계마다 다른 기준과 구매 연도 흐름으로 분석해 보관합니다.
               </p>
               <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
-                <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-[#dce1ef]">부모·자녀</span>
-                <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-[#dce1ef]">형제·자매</span>
-                <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-[#dce1ef]">기타 가족</span>
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">부모·자녀</span>
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">형제·자매</span>
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">기타 가족</span>
               </div>
               <span className="mt-auto pt-7 text-sm font-bold text-[#11162d]">가족 궁합 시작하기 →</span>
             </Link>
-          </section>
 
-          <section className="mt-5 grid gap-5 lg:grid-cols-3">
             <Link
               href="/special-analysis/compatibility/workplace"
               className="group flex min-h-[270px] flex-col rounded-[28px] border border-[#dfe3ef] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md"

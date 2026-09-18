@@ -32,10 +32,18 @@ export async function GET(request: Request) {
   const boundary = await resolvePortfolioBoundary(url.searchParams.get("profileId"));
   if ("error" in boundary) return boundary.error;
 
+  const includeProductId = url.searchParams.get("includeProductId");
+  const includeEdition = url.searchParams.get("includeEdition");
+  const includePreviousSource = includeProductId && includeEdition
+    ? { productId: includeProductId, analysisEditionKey: includeEdition }
+    : null;
+
   try {
     const state = await getAiConsultingPortfolioState({
       userId: boundary.user.id,
       profileId: boundary.profile.id,
+      profile: boundary.profile,
+      includePreviousSource,
     });
     return NextResponse.json(state);
   } catch (error) {

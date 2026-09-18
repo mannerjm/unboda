@@ -101,7 +101,7 @@ export default function AiConsultingEntryCard({
               {hasPreviousConversation ? "지난 AI 상담을 이어서 질문하기" : "이 리포트를 바탕으로 AI에게 질문하기"}
             </h2>
             <p className="mt-3 text-[15px] leading-7 text-slate-700">
-              이 리포트에서 상담을 시작하지만 질문권은 프로필 공용입니다. 다른 유료 분석을 추가로 보유하면 통합 AI 상담에서 그 분석 범위도 함께 사용할 수 있습니다.
+              <strong className="font-bold text-[#11162d]">{presentation.productTitle}</strong> 리포트에서 상담을 시작하지만 질문권은 프로필 공용입니다. 다른 유료 분석을 추가로 보유하면 통합 AI 상담에서 그 분석 범위도 함께 사용할 수 있습니다.
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">

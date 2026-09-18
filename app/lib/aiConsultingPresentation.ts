@@ -75,9 +75,12 @@ export function getAiConsultingPresentation(
 ): AiConsultingPresentation {
   const special = getSpecialAnalysisProduct(productId);
   if (special) {
+    const pairEdition = edition.match(/^PAIR_YEAR:(\d{4}):[a-f0-9]{16}$/);
     return {
       productTitle: special.title,
-      editionLabel: formatAnalysisEditionLabel(edition),
+      editionLabel: pairEdition
+        ? `${pairEdition[1]}년 ${special.shortTitle ?? "궁합"}`
+        : formatAnalysisEditionLabel(edition),
       scopeLabel: "이 궁합 리포트에 저장된 관계 해석과 구매 연도 범위 안에서 답변합니다.",
       suggestedQuestions: COMPATIBILITY_QUESTIONS[productId] ?? DEFAULT_SUGGESTED_QUESTIONS,
     };

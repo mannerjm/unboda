@@ -6,6 +6,7 @@ import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
 import { groupPurchasedAnalysesByProduct } from "@/app/lib/purchasedAnalysesGrouping";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { getPhase9NextAnalysisRecommendations } from "@/app/lib/phase9NextAnalysis";
 
 export default async function PurchasedAnalysesPage() {
   const user = await getCurrentUser();
@@ -37,6 +38,21 @@ export default async function PurchasedAnalysesPage() {
   const analyses = (await listUserPaidAnalysisSummaries(user.id))
     .filter((analysis) => analysis.profileId === activeProfile.id);
   const groups = groupPurchasedAnalysesByProduct(analyses);
+  const recentSource = [...analyses]
+    .sort((left, right) =>
+      (right.reportStatus === "completed" ? 1 : 0) - (left.reportStatus === "completed" ? 1 : 0)
+      || right.acquiredAt.localeCompare(left.acquiredAt),
+    )[0] ?? null;
+  const phase9Recommendations = recentSource
+    ? await getPhase9NextAnalysisRecommendations({
+        userId: user.id,
+        profile: activeProfile,
+        source: {
+          productId: recentSource.productId,
+          analysisEditionKey: recentSource.analysisEditionKey,
+        },
+      })
+    : [];
 
   return (
     <AppShell activeProfileId={activeProfile.id}>
@@ -57,7 +73,7 @@ export default async function PurchasedAnalysesPage() {
               </Link>
             </div>
           </header>
-          <PurchasedAnalysesAutoRefresh groups={groups} profileId={activeProfile.id} />
+          <PurchasedAnalysesAutoRefresh groups={groups} profileId={activeProfile.id} phase9Recommendations={phase9Recommendations} />
         </div>
       </main>
     </AppShell>

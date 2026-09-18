@@ -4,6 +4,7 @@ import AppShell from "@/app/components/AppShell";
 import CompatibilityPaidReportPreparing from "@/app/components/CompatibilityPaidReportPreparing";
 import FamilyParentChildPaidReportView from "@/app/components/FamilyParentChildPaidReportView";
 import AiConsultingEntryCard from "@/app/paid-analysis/[productId]/report/AiConsultingEntryCard";
+import Phase9NextAnalysisSection from "@/app/components/Phase9NextAnalysisSection";
 import { isStoredFamilyParentChildReport } from "@/app/lib/familyCompatibilityPaidAnalysis";
 import { getPaidReport } from "@/app/lib/paidReports/server";
 import { getUserProfile } from "@/app/lib/profiles/server";
@@ -65,6 +66,11 @@ export default async function FamilyParentChildPurchasedReportPage({ searchParam
                 productId={COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID}
                 profileId={profileId}
                 edition={entitlement.analysisEditionKey}
+              />
+              <Phase9NextAnalysisSection
+                profileId={profileId}
+                sourceProductId={COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID}
+                sourceEditionKey={entitlement.analysisEditionKey}
               />
             </>
           ) : (

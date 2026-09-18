@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import ReportAccessGate from "./ReportAccessGate";
 import AiConsultingEntryCard from "./AiConsultingEntryCard";
+import Phase9NextAnalysisSection from "@/app/components/Phase9NextAnalysisSection";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import {
   isCompatibilityFamilyOtherProductId,
@@ -75,6 +76,11 @@ export default async function PaidAnalysisReportPage({
       <ReportAccessGate productId={productId} profileId={profileId} edition={edition}>
         <PaidAnalysisDetailV2Client productId={productId} profileId={profileId} edition={edition} />
         <AiConsultingEntryCard productId={productId} profileId={profileId} edition={edition} />
+        <Phase9NextAnalysisSection
+          profileId={profileId}
+          sourceProductId={productId}
+          sourceEditionKey={edition}
+        />
       </ReportAccessGate>
     </main>
   );

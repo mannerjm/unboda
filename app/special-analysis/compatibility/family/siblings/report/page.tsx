@@ -4,6 +4,7 @@ import AppShell from "@/app/components/AppShell";
 import CompatibilityPaidReportPreparing from "@/app/components/CompatibilityPaidReportPreparing";
 import FamilyExtendedPaidReportView from "@/app/components/FamilyExtendedPaidReportView";
 import AiConsultingEntryCard from "@/app/paid-analysis/[productId]/report/AiConsultingEntryCard";
+import Phase9NextAnalysisSection from "@/app/components/Phase9NextAnalysisSection";
 import {
   isStoredFamilySiblingReport,
   type StoredFamilySiblingReport,
@@ -68,6 +69,11 @@ export default async function FamilySiblingPurchasedReportPage({ searchParams }:
                 productId={COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID}
                 profileId={profileId}
                 edition={entitlement.analysisEditionKey}
+              />
+              <Phase9NextAnalysisSection
+                profileId={profileId}
+                sourceProductId={COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID}
+                sourceEditionKey={entitlement.analysisEditionKey}
               />
             </>
           ) : (

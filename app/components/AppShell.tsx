@@ -11,7 +11,7 @@ type NavItem = {
   href: string;
   label: string;
   shortLabel?: string;
-  icon: "home" | "chart" | "spark" | "compass" | "book" | "user";
+  icon: "home" | "chart" | "spark" | "compass" | "book" | "user" | "chat";
 };
 
 function NavIcon({ icon }: { icon: NavItem["icon"] }) {
@@ -22,6 +22,7 @@ function NavIcon({ icon }: { icon: NavItem["icon"] }) {
     compass: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Zm3.5-13.5-2.2 4.8-4.8 2.2 2.2-4.8 4.8-2.2Z",
     book: "M5 4.5A2.5 2.5 0 0 1 7.5 2H19v17H7.5A2.5 2.5 0 0 0 5 21.5Zm0 0V19m0-14.5A2.5 2.5 0 0 1 7.5 7H19",
     user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9a7 7 0 0 1 14 0",
+    chat: "M4 5h16v11H9l-5 4V5Z",
   } as const;
 
   return (
@@ -36,6 +37,7 @@ const analysisNavItems: NavItem[] = [
   { href: "/recommendations", label: "추천 분석", icon: "chart" },
   { href: "/deep-analysis", label: "심층 분석", icon: "spark" },
   { href: "/special-analysis", label: "전문 분석", icon: "compass" },
+  { href: "/ai-consulting", label: "AI 상담", icon: "chat" },
   { href: "/interests", label: "관심 분석", icon: "book" },
   { href: "/purchased-analyses", label: "구매한 분석", icon: "book" },
 ];
@@ -50,7 +52,7 @@ const mobileNavItems: NavItem[] = [
   { href: "/recommendations", label: "추천", shortLabel: "추천", icon: "chart" },
   { href: "/deep-analysis", label: "심층", shortLabel: "심층", icon: "spark" },
   { href: "/special-analysis", label: "전문 분석", shortLabel: "전문", icon: "compass" },
-  { href: "/interests", label: "관심 분석", shortLabel: "관심", icon: "book" },
+  { href: "/ai-consulting", label: "AI 상담", shortLabel: "AI 상담", icon: "chat" },
   { href: "/purchased-analyses", label: "구매한 분석", shortLabel: "구매", icon: "book" },
   { href: "/mypage", label: "마이페이지", shortLabel: "내 정보", icon: "user" },
 ];
@@ -236,10 +238,13 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                     className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
                     active
                       ? "bg-white/[0.10] text-white ring-1 ring-inset ring-[#8171ea]/35"
-                      : "text-[#aeb6cf] hover:bg-white/[0.06] hover:text-white"
+                      : item.activeHref === "/ai-consulting"
+                        ? "bg-[linear-gradient(135deg,rgba(111,92,231,.18),rgba(255,255,255,.05))] text-[#ddd7ff] ring-1 ring-inset ring-[#8171ea]/25 hover:bg-[linear-gradient(135deg,rgba(111,92,231,.28),rgba(255,255,255,.08))] hover:text-white"
+                        : "text-[#aeb6cf] hover:bg-white/[0.06] hover:text-white"
                   }`}
                 >
                   <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/deep-analysis" ? <LockIcon /> : null}<span>{item.label}</span>
+                  {item.activeHref === "/ai-consulting" ? <span className="ml-auto rounded-full border border-[#8f7cff]/30 bg-[#6f5ce7]/15 px-2 py-0.5 text-[9px] font-black tracking-[0.08em] text-[#c8beff]">이어가기</span> : null}
                 </Link>
               );
             })}
@@ -314,7 +319,9 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                 className={`flex min-h-[56px] flex-col items-center justify-center rounded-xl px-1 py-2 text-[11px] font-semibold transition ${
                   active
                     ? "bg-[#6f5ce7] text-white shadow-[0_8px_24px_rgba(111,92,231,0.28)]"
-                    : "text-[#929bb8] hover:bg-white/[0.07] hover:text-white"
+                    : item.activeHref === "/ai-consulting"
+                      ? "bg-white/[0.06] text-[#c9c1ff] hover:bg-white/[0.10] hover:text-white"
+                      : "text-[#929bb8] hover:bg-white/[0.07] hover:text-white"
                 }`}
               >
                     <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/deep-analysis" ? <LockIcon /> : null}<span>{item.shortLabel ?? item.label}</span>

@@ -45,7 +45,8 @@
     "test:paid-all": "npm run test:paid-money && npm run test:paid-career && npm run test:paid-relationship && npm run test:paid-health",
     "test:public-discovery-routing": "tsx scripts/public-discovery-entry-routing-regression.ts",
     "test:free-result-phase3": "tsx scripts/free-result-phase3-renewal-regression.ts",
-    "test:visual-system-phase35": "tsx scripts/visual-system-phase35-regression.ts",\n    "test:paid-analysis-phase4": "tsx scripts/paid-analysis-phase4-regression.ts"
+    "test:visual-system-phase35": "tsx scripts/visual-system-phase35-regression.ts",
+    "test:paid-analysis-phase4": "tsx scripts/paid-analysis-phase4-regression.ts"
   },
   "dependencies": {
     "@fullstackfamily/manseryeok": "^1.0.8",

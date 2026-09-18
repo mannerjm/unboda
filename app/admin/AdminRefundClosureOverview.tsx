@@ -40,10 +40,10 @@ function closureStatus(item: AdminRefundClosureDashboard["recentClosures"][numbe
 
 function MetricCard({ label, value, note }: { label: string; value: string; note: string }) {
   return (
-    <div className="border border-stone-200 bg-white p-4 shadow-sm">
-      <p className="text-xs font-semibold text-stone-500">{label}</p>
-      <p className="mt-2 text-xl font-bold text-stone-950">{value}</p>
-      <p className="mt-2 text-xs leading-5 text-stone-500">{note}</p>
+    <div className="rounded-2xl border border-[#dce1ef] bg-white p-4 shadow-sm">
+      <p className="text-xs font-semibold text-slate-500">{label}</p>
+      <p className="mt-2 text-xl font-bold text-slate-950">{value}</p>
+      <p className="mt-2 text-xs leading-5 text-slate-500">{note}</p>
     </div>
   );
 }
@@ -62,11 +62,11 @@ export default function AdminRefundClosureOverview({
   const totals = report.totals;
 
   return (
-    <section className="border-b border-stone-200 py-10" aria-labelledby="refund-closure-heading">
+    <section className="border-b border-slate-200 py-10" aria-labelledby="refund-closure-heading">
       <div>
-        <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">REFUNDS & ACCOUNT CLOSURES</p>
+        <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">REFUNDS & ACCOUNT CLOSURES</p>
         <h2 id="refund-closure-heading" className="mt-3 text-2xl font-bold">환불·회원 탈퇴 현황</h2>
-        <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-600">
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
           환불 금액은 실제 환불 완료 건만 집계합니다. 탈퇴 요청과 취소는 실제 계정 상태 전환 시점부터 기록하고,
           탈퇴 완료는 계정 최종 종료 시각을 기준으로 집계합니다. 모든 날짜는 한국시간(KST) 기준입니다.
         </p>
@@ -84,23 +84,23 @@ export default function AdminRefundClosureOverview({
       </div>
 
       <div className="mt-7 grid gap-5 xl:grid-cols-2">
-        <div className="border border-stone-200 bg-white p-5">
+        <div className="rounded-2xl border border-[#dce1ef] bg-white p-5">
           <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
               <h3 className="text-lg font-bold">최근 환불 내역</h3>
-              <p className="mt-1 text-xs text-stone-500">최근 요청 순 · 진행 중/완료/대표 확인 상태 모두 표시</p>
+              <p className="mt-1 text-xs text-slate-500">최근 요청 순 · 진행 중/완료/대표 확인 상태 모두 표시</p>
             </div>
           </div>
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-[720px] w-full text-sm">
               <thead>
-                <tr className="border-b border-stone-200 text-left text-xs text-stone-500">
+                <tr className="border-b border-slate-200 text-left text-xs text-slate-500">
                   <th className="py-2 pr-3">주문</th><th className="py-2 pr-3">상품</th><th className="py-2 pr-3 text-right">환불액</th><th className="py-2 pr-3">상태</th><th className="py-2 pr-3">요청일</th><th className="py-2">완료일</th>
                 </tr>
               </thead>
               <tbody>
                 {report.recentRefunds.length > 0 ? report.recentRefunds.map((item) => (
-                  <tr key={`${item.orderId}-${item.requestedAt}`} className="border-b border-stone-100 last:border-0">
+                  <tr key={`${item.orderId}-${item.requestedAt}`} className="border-b border-slate-100 last:border-0">
                     <td className="py-2.5 pr-3 font-mono text-xs" title={item.orderId}>…{item.orderId.slice(-8)}</td>
                     <td className="py-2.5 pr-3 font-medium">{labels.get(item.productId) ?? item.productId}</td>
                     <td className="py-2.5 pr-3 text-right font-semibold">{won(item.requestedAmountKrw)}</td>
@@ -109,28 +109,28 @@ export default function AdminRefundClosureOverview({
                     <td className="py-2.5 text-xs">{time(item.completedAt)}</td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={6} className="py-8 text-center text-sm text-stone-500">환불 내역이 없습니다.</td></tr>
+                  <tr><td colSpan={6} className="py-8 text-center text-sm text-slate-500">환불 내역이 없습니다.</td></tr>
                 )}
               </tbody>
             </table>
           </div>
         </div>
 
-        <div className="border border-stone-200 bg-white p-5">
+        <div className="rounded-2xl border border-[#dce1ef] bg-white p-5">
           <div>
             <h3 className="text-lg font-bold">최근 회원 탈퇴 내역</h3>
-            <p className="mt-1 text-xs text-stone-500">요청·처리 중·취소·완료 상태를 구분합니다.</p>
+            <p className="mt-1 text-xs text-slate-500">요청·처리 중·취소·완료 상태를 구분합니다.</p>
           </div>
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-[720px] w-full text-sm">
               <thead>
-                <tr className="border-b border-stone-200 text-left text-xs text-stone-500">
+                <tr className="border-b border-slate-200 text-left text-xs text-slate-500">
                   <th className="py-2 pr-3">계정 참조</th><th className="py-2 pr-3">상태</th><th className="py-2 pr-3">요청일</th><th className="py-2 pr-3">취소일</th><th className="py-2">완료일</th>
                 </tr>
               </thead>
               <tbody>
                 {report.recentClosures.length > 0 ? report.recentClosures.map((item) => (
-                  <tr key={`${item.accountUserId}-${item.generation}`} className="border-b border-stone-100 last:border-0">
+                  <tr key={`${item.accountUserId}-${item.generation}`} className="border-b border-slate-100 last:border-0">
                     <td className="py-2.5 pr-3 font-mono text-xs" title={item.accountUserId}>…{item.accountUserId.slice(-8)}</td>
                     <td className="py-2.5 pr-3 font-medium">{closureStatus(item)}</td>
                     <td className="py-2.5 pr-3 text-xs">{item.requestedAt ? time(item.requestedAt) : item.finalizedAt ? "기록 도입 전" : "-"}</td>
@@ -138,12 +138,12 @@ export default function AdminRefundClosureOverview({
                     <td className="py-2.5 text-xs">{time(item.finalizedAt)}</td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={5} className="py-8 text-center text-sm text-stone-500">회원 탈퇴 내역이 없습니다.</td></tr>
+                  <tr><td colSpan={5} className="py-8 text-center text-sm text-slate-500">회원 탈퇴 내역이 없습니다.</td></tr>
                 )}
               </tbody>
             </table>
           </div>
-          <p className="mt-4 text-xs leading-5 text-stone-500">
+          <p className="mt-4 text-xs leading-5 text-slate-500">
             누적 탈퇴 요청은 이 기능 적용 이후의 상태 전환부터 정확히 기록합니다. 기존 완료 계정은 완료 건수에는 포함되지만 과거 요청일을 임의 생성하지 않습니다.
           </p>
         </div>

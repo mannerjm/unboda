@@ -14,7 +14,7 @@ assert(
   "parent-child compatibility hero title must remain white on the navy hero surface",
 );
 assert(
-  !parentChild.includes('tracking-[-0.02em] text-[#11162d]'),
+  !parentChild.includes('tracking-[-0.02em] text-[#11162d]">\n            {myProfileLabel}'),
   "parent-child compatibility hero must not restore dark title text on the dark hero",
 );
 

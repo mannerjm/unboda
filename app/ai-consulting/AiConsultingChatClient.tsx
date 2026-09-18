@@ -54,7 +54,7 @@ export type AiConsultingPreviewData = {
 
 function policyMessage(decision: AiConsultingMessage["scopeDecision"]): string | null {
   if (decision === "CLARIFY") return "구매한 분석과 연결되는 부분을 조금 더 구체적으로 질문해 주세요. 이 질문은 횟수에서 차감되지 않았습니다.";
-  if (decision === "DENY") return "현재 구매한 분석의 상담 범위를 벗어난 질문입니다. 이 질문은 횟수에서 차감되지 않았습니다.";
+  if (decision === "DENY") return "현재 구매한 분석의 상담 범위를 벗어나 AI 답변을 생성하지 않았습니다. 질문권도 차감되지 않았습니다.";
   if (decision === "SAFETY_REDIRECT") return "이 질문은 실제 전문가의 확인이 필요한 안전 민감 영역입니다. 운보다 AI는 진단·처방·법률 판단·구체 투자 실행을 대신하지 않으며, 질문 횟수도 차감하지 않았습니다.";
   return null;
 }
@@ -365,7 +365,7 @@ export default function AiConsultingChatClient({
                   <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
                     <span className="rounded-full border border-[#d8d3ff] bg-white px-3 py-2 text-[#5e4bd1]">리포트 근거 기반</span>
                     <span className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-slate-600">정상 답변 완료 시 1회 차감</span>
-                    <span className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-slate-600">범위 밖 질문은 미차감</span>
+                    <span className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-slate-600">범위 밖 질문은 답변하지 않아요</span>
                   </div>
                 </div>
 
@@ -524,7 +524,7 @@ export default function AiConsultingChatClient({
                   />
                   <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-xs leading-5 text-slate-500">
-                      {isPreview ? "미리보기에서는 질문이 전송되지 않습니다." : `${question.length}/300 · 범위를 벗어난 질문은 차감되지 않습니다.`}
+                      {isPreview ? "미리보기에서는 질문이 전송되지 않습니다." : `${question.length}/300 · 범위를 벗어난 질문은 AI 답변을 생성하지 않으며 질문권도 차감되지 않습니다.`}
                     </span>
                     <button
                       type="submit"

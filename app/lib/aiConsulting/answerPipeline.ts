@@ -317,6 +317,16 @@ export async function answerAiConsultingQuestion(input: {
     ]);
 
     const partitioned = partitionAiConsultingMemoriesForPrompt(memories);
+    // Explicit USER_STATED memory is intentionally profile-wide. Derived
+    // interpretation and summaries are never allowed to cross a report/thread
+    // boundary, which also prevents a previous birth-input consultation from
+    // leaking into a consultation based on the profile's current inputs.
+    const analysisDerivedForThread = partitioned.analysisDerived.filter(
+      (memory) => memory.source_thread_id === thread.id,
+    );
+    const systemSummariesForThread = partitioned.systemSummaries.filter(
+      (memory) => memory.source_thread_id === thread.id,
+    );
     const reportContext = clipText(
       safeJson(paidReport.content),
       AI_CONSULTING_REPORT_CONTEXT_CHAR_CAP,
@@ -329,8 +339,8 @@ export async function answerAiConsultingQuestion(input: {
       answerGuardrails: scope.answerGuardrails,
       paidReportContext: reportContext,
       userStatedMemories: partitioned.userStated,
-      analysisDerivedMemories: partitioned.analysisDerived,
-      systemSummaries: partitioned.systemSummaries,
+      analysisDerivedMemories: analysisDerivedForThread,
+      systemSummaries: systemSummariesForThread,
       recentMessages,
     });
 

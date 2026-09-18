@@ -19,6 +19,7 @@ type RecommendationTop3Props = {
   profileId: string;
   paidSummaries: readonly PaidAnalysisSummary[];
   explanation?: AnalysisRecommendationOutput | null;
+  guestMode?: boolean;
 };
 
 function getReadableRecommendationReason(
@@ -41,6 +42,7 @@ export default function RecommendationTop3({
   profileId,
   paidSummaries,
   explanation,
+  guestMode = false,
 }: RecommendationTop3Props) {
   const validRecommendations = recommendations
     .slice(0, 3)
@@ -126,6 +128,7 @@ export default function RecommendationTop3({
           paidSummaries={paidSummaries}
           recommendation={selectedRecommendation?.recommendation}
           isPrimary={isPrimarySelection}
+          guestMode={guestMode}
         />
       ) : null}
     </section>
@@ -138,16 +141,41 @@ function RecommendationDetail({
   paidSummaries,
   recommendation,
   isPrimary,
+  guestMode,
 }: {
   productId: string;
   profileId: string;
   paidSummaries: readonly PaidAnalysisSummary[];
   recommendation?: AnalysisProductRecommendation;
   isPrimary: boolean;
+  guestMode: boolean;
 }) {
+  const [guestIntentPending, setGuestIntentPending] = useState(false);
+  const [guestIntentError, setGuestIntentError] = useState<string | null>(null);
   const product = getPremiumProduct(productId);
   const decision = getPaidAnalysisTopicConfig(productId)?.purchaseDecision;
   if (!product || !decision) return null;
+
+  async function continueGuestPurchase() {
+    if (!guestMode || guestIntentPending) return;
+    setGuestIntentPending(true);
+    setGuestIntentError(null);
+    try {
+      const response = await fetch("/api/guest-free-analysis/intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId }),
+      });
+      const body = await response.json() as { productId?: string; error?: string };
+      if (!response.ok || !body.productId) {
+        throw new Error(body.error ?? "선택한 분석을 저장하지 못했습니다.");
+      }
+      window.location.assign("/auth/login?returnTo=/auth/complete-guest-analysis&origin=guest-result");
+    } catch (error) {
+      setGuestIntentError(error instanceof Error ? error.message : "선택한 분석을 저장하지 못했습니다.");
+      setGuestIntentPending(false);
+    }
+  }
 
   const summary = paidSummaries.find((item) => item.profileId === profileId && item.productId === productId);
   const state = toPremiumAnalysisProductState(summary?.reportStatus);
@@ -184,7 +212,16 @@ function RecommendationDetail({
 
         <div className="mt-5 flex flex-col gap-3 border-t border-[#dce1ef] pt-4 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-base font-black text-[#11162d]">{getProductPricing(productId).amount.toLocaleString("ko-KR")}원</span>
-          {state === "generating" ? (
+          {guestMode ? (
+            <button
+              type="button"
+              onClick={() => void continueGuestPurchase()}
+              disabled={guestIntentPending}
+              className="rounded-xl bg-[#171a3d] px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-[#25213d] disabled:cursor-wait disabled:opacity-60"
+            >
+              {guestIntentPending ? "계속 준비 중..." : "이 질문 더 깊게 보기"}
+            </button>
+          ) : state === "generating" ? (
             <span className="rounded-xl bg-[#eef0f6] px-4 py-3 text-xs font-semibold text-slate-500">생성 중</span>
           ) : href ? (
             <Link href={href} className="rounded-xl bg-[#171a3d] px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-[#25213d]">
@@ -192,6 +229,9 @@ function RecommendationDetail({
             </Link>
           ) : null}
         </div>
+        {guestIntentError ? (
+          <p className="mt-3 text-sm font-medium text-red-600">{guestIntentError}</p>
+        ) : null}
       </div>
     </section>
   );

@@ -101,7 +101,7 @@ export default function AiConsultingEntryCard({
               {hasPreviousConversation ? "지난 AI 상담을 이어서 질문하기" : "이 리포트를 바탕으로 AI에게 질문하기"}
             </h2>
             <p className="mt-3 text-[15px] leading-7 text-slate-700">
-              일반 챗봇이 아니라 <strong className="font-bold text-[#11162d]">{presentation.productTitle}</strong> 리포트의 계산 결과와 해석 범위 안에서 이어서 답변합니다.
+              이 리포트에서 상담을 시작하지만 질문권은 프로필 공용입니다. 다른 유료 분석을 추가로 보유하면 통합 AI 상담에서 그 분석 범위도 함께 사용할 수 있습니다.
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
@@ -123,15 +123,15 @@ export default function AiConsultingEntryCard({
               className="mt-5 inline-flex rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]"
             >
               {depleted
-                ? "이전 상담 기록 보기"
+                ? "통합 상담 기록 보기"
                 : hasPreviousConversation
-                  ? "이전 상담 이어보기"
-                  : "AI 상담 시작하기"}
+                  ? "통합 AI 상담 이어가기"
+                  : "이 리포트로 통합 상담 시작"}
             </Link>
           </div>
 
           <div className="rounded-[1.5rem] border border-[#dce1ef] bg-white p-4">
-            <p className="text-xs font-bold tracking-[0.13em] text-slate-500">이어서 물어볼 수 있는 질문</p>
+            <p className="text-xs font-bold tracking-[0.13em] text-slate-500">이 리포트에서 시작하기 좋은 질문</p>
             <div className="mt-3 space-y-2">
               {presentation.suggestedQuestions.slice(0, 3).map((question) => (
                 <div key={question} className="rounded-2xl bg-[#f7f8fc] px-4 py-3 text-sm font-semibold leading-6 text-slate-700">
@@ -140,7 +140,7 @@ export default function AiConsultingEntryCard({
               ))}
             </div>
             <p className="mt-3 text-xs leading-5 text-slate-500">
-              범위를 벗어난 질문은 AI 답변을 생성하지 않으며 질문권도 차감되지 않습니다. 확인 요청·안전 안내도 미차감입니다.
+              이 리포트 범위를 벗어나더라도 다른 보유 분석과 연결되는 질문이면 통합 상담이 해당 리포트를 자동 선택합니다. 보유 분석 전체 범위 밖 질문은 답변하지 않고 미차감합니다.
             </p>
           </div>
         </div>

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "tsx scripts/compatibility-engine-foundation-regression.ts && tsx scripts/compatibility-domain-aggregation-regression.ts && tsx scripts/compatibility-personal-structure-regression.ts && tsx scripts/compatibility-timing-regression.ts && tsx scripts/compatibility-report-contract-regression.ts && tsx scripts/compatibility-customer-flow-regression.ts && tsx scripts/family-compatibility-parent-child-regression.ts && tsx scripts/family-compatibility-extended-regression.ts && tsx scripts/ai-consulting-compatibility-regression.ts && tsx scripts/home-phase1-renewal-regression.ts && tsx scripts/deep-analysis-phase2-renewal-regression.ts && tsx scripts/free-result-phase3-renewal-regression.ts && tsx scripts/visual-system-phase35-regression.ts && tsx scripts/public-discovery-entry-routing-regression.ts && tsx scripts/social-launch-expansion-regression.ts && tsx scripts/premium-presentation-regression.ts && tsx scripts/saju-supplemental-stars-regression.ts && tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-price-tier-audit-regression.ts && tsx scripts/paid-analysis-v4-actual-output-tier-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
+    "prebuild": "tsx scripts/compatibility-engine-foundation-regression.ts && tsx scripts/compatibility-domain-aggregation-regression.ts && tsx scripts/compatibility-personal-structure-regression.ts && tsx scripts/compatibility-timing-regression.ts && tsx scripts/compatibility-report-contract-regression.ts && tsx scripts/compatibility-customer-flow-regression.ts && tsx scripts/family-compatibility-parent-child-regression.ts && tsx scripts/family-compatibility-extended-regression.ts && tsx scripts/ai-consulting-compatibility-regression.ts && tsx scripts/home-phase1-renewal-regression.ts && tsx scripts/deep-analysis-phase2-renewal-regression.ts && tsx scripts/free-result-phase3-renewal-regression.ts && tsx scripts/visual-system-phase35-regression.ts && tsx scripts/paid-analysis-phase4-regression.ts && tsx scripts/public-discovery-entry-routing-regression.ts && tsx scripts/social-launch-expansion-regression.ts && tsx scripts/premium-presentation-regression.ts && tsx scripts/saju-supplemental-stars-regression.ts && tsx scripts/paid-analysis-v4-launch-audit-regression.ts && tsx scripts/paid-analysis-v4-price-tier-audit-regression.ts && tsx scripts/paid-analysis-v4-actual-output-tier-regression.ts && tsx scripts/openai-transient-retry-regression.ts && tsx scripts/paid-analysis-v4-consistency-retry-regression.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -45,7 +45,8 @@
     "test:paid-all": "npm run test:paid-money && npm run test:paid-career && npm run test:paid-relationship && npm run test:paid-health",
     "test:public-discovery-routing": "tsx scripts/public-discovery-entry-routing-regression.ts",
     "test:free-result-phase3": "tsx scripts/free-result-phase3-renewal-regression.ts",
-    "test:visual-system-phase35": "tsx scripts/visual-system-phase35-regression.ts"
+    "test:visual-system-phase35": "tsx scripts/visual-system-phase35-regression.ts",
+    "test:paid-analysis-phase4": "tsx scripts/paid-analysis-phase4-regression.ts"
   },
   "dependencies": {
     "@fullstackfamily/manseryeok": "^1.0.8",

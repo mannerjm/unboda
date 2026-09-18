@@ -52,11 +52,11 @@ export default async function FamilyParentChildPurchasedReportPage({ searchParam
 
   return (
     <AppShell activeProfileId={profileId}>
-      <main className="min-h-screen bg-[#fbfbfa] px-5 py-8 text-stone-900 sm:px-8 sm:py-10">
+      <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
         <div className="mx-auto w-full max-w-5xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <Link href="/purchased-analyses" className="text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4">← 구매한 분석</Link>
-            <span className="text-xs text-stone-500">{profile.label}님의 구매 리포트</span>
+            <Link href="/purchased-analyses" className="text-sm font-semibold text-slate-600 underline decoration-[#c4c9d9] underline-offset-4">← 구매한 분석</Link>
+            <span className="text-xs text-slate-500">{profile.label}님의 구매 리포트</span>
           </div>
           {completed ? (
             <>

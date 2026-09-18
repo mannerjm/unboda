@@ -264,6 +264,12 @@ export default function CheckoutAccessPanel({
             {profileId ? "인증과 분석 대상을 확인했습니다. 아래 내용을 확인한 뒤 결제를 계속해 주세요." : "분석 대상을 선택한 뒤 결제를 계속 진행할 수 있습니다."}
           </p>
 
+          <div className="mt-5 grid gap-2 text-xs sm:grid-cols-3" aria-label="결제 준비 상태">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 font-semibold text-emerald-700">계정 인증 확인</div>
+            <div className={`rounded-xl border px-3 py-2.5 font-semibold ${profileId ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-[#dce1ef] bg-[#f7f8fc] text-slate-500"}`}>분석 대상 {profileId ? "확인" : "선택 필요"}</div>
+            <div className="rounded-xl border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-2.5 font-semibold text-[#5e4bd1]">결제 후 즉시 생성</div>
+          </div>
+
           {profileId ? (
             <>
               <div className="mt-7 border-t border-[#dce1ef] pt-6" aria-labelledby="checkout-notice-title">

@@ -10,8 +10,9 @@ import {
   COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY,
   COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID,
   COMPATIBILITY_FAMILY_SIBLING_SESSION_KEY,
-  COMPATIBILITY_ROMANTIC_PRODUCT_ID,
-  COMPATIBILITY_ROMANTIC_SESSION_KEY,
+  getCompatibilityPairReportPath,
+  getCompatibilityPairSessionKey,
+  isCompatibilityPairProductId,
 } from "@/app/lib/specialAnalysisProducts";
 
 function CheckoutSuccessContent() {
@@ -50,9 +51,9 @@ function CheckoutSuccessContent() {
         const edition = payload?.purchase?.analysisEditionKey;
         const editionQuery = edition ? `&edition=${encodeURIComponent(edition)}` : "";
 
-        if (productId === COMPATIBILITY_ROMANTIC_PRODUCT_ID) {
-          window.sessionStorage.removeItem(COMPATIBILITY_ROMANTIC_SESSION_KEY);
-          router.replace(`/special-analysis/compatibility/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`);
+        if (isCompatibilityPairProductId(productId)) {
+          window.sessionStorage.removeItem(getCompatibilityPairSessionKey(productId));
+          router.replace(`${getCompatibilityPairReportPath(productId)}?profileId=${encodeURIComponent(profileId)}${editionQuery}`);
         } else if (productId === COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID) {
           window.sessionStorage.removeItem(COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY);
           router.replace(`/special-analysis/compatibility/family/parent-child/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`);

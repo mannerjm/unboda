@@ -9,6 +9,7 @@ import type {
   AiConsultingPortfolioSource,
   AiConsultingPortfolioState,
 } from "@/app/lib/aiConsulting/portfolio";
+import type { ProfileFreeAnalysisStatus } from "@/app/lib/freeAnalysisResults/server";
 
 type AiConsultingUserMemory = {
   id: string;
@@ -53,11 +54,13 @@ export default function AiConsultingPortfolioClient({
   focusProductId,
   focusEdition,
   previewData,
+  freeAnalysisStatus,
 }: {
   profileId: string;
   focusProductId?: string | null;
   focusEdition?: string | null;
   previewData?: AiConsultingPortfolioPreviewData;
+  freeAnalysisStatus?: ProfileFreeAnalysisStatus | null;
 }) {
   const [portfolio, setPortfolio] = useState<AiConsultingPortfolioState | null>(previewData?.state ?? null);
   const [memories, setMemories] = useState<AiConsultingUserMemory[]>(previewData?.memories ?? []);
@@ -72,6 +75,7 @@ export default function AiConsultingPortfolioClient({
   const [showAllAnalyses, setShowAllAnalyses] = useState(false);
   const isPreview = Boolean(previewData);
   const creditCheckoutEnabled = process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true";
+  const freeAnalysisReady = freeAnalysisStatus === "completed" || freeAnalysisStatus === "needs_retry";
 
   const loadPortfolio = useCallback(async () => {
     if (previewData) {
@@ -300,7 +304,7 @@ export default function AiConsultingPortfolioClient({
           </Link>
           {creditCheckoutHref ? (
             <Link href={creditCheckoutHref} className="text-sm font-semibold text-slate-600 underline decoration-slate-300 underline-offset-4">
-              질문권 내역
+              {creditCheckoutEnabled ? "질문권 충전·내역" : "질문권 내역"}
             </Link>
           ) : null}
         </div>
@@ -349,13 +353,31 @@ export default function AiConsultingPortfolioClient({
 
         {!isLoading && portfolio && portfolio.analyses.length === 0 ? (
           <section className="mt-5 rounded-[1.75rem] border border-[#dce1ef] bg-white p-7 text-center shadow-sm">
-            <h2 className="text-lg font-bold">상담에 연결할 완료 리포트가 아직 없습니다</h2>
-            <p className="mx-auto mt-3 max-w-xl text-[15px] leading-7 text-slate-700">
-              유료 리포트가 완료되면 별도 설정 없이 이 AI 상담의 보유 분석 범위에 자동으로 추가됩니다.
-            </p>
-            <Link href="/deep-analysis" className="mt-5 inline-flex rounded-2xl bg-[#171a3d] px-5 py-3 text-sm font-bold text-white">
-              심층 분석 둘러보기
-            </Link>
+            {!freeAnalysisReady ? (
+              <>
+                <p className="text-xs font-black tracking-[0.14em] text-[#6f5ce7]">AI CONSULTING · STEP 2</p>
+                <h2 className="mt-2 text-lg font-bold">무료 사주부터 확인해 주세요</h2>
+                <p className="mx-auto mt-3 max-w-xl text-[15px] leading-7 text-slate-700">
+                  AI 상담은 바로 시작하는 독립 분석이 아닙니다. 현재 프로필의 무료 사주를 먼저 확인하고, 그 기준으로 필요한 심층·전문 분석을 구매한 뒤 이용할 수 있습니다.
+                </p>
+                <Link href="/saju" className="mt-5 inline-flex rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white">
+                  무료 사주 먼저 보기
+                </Link>
+              </>
+            ) : (
+              <>
+                <p className="text-xs font-black tracking-[0.14em] text-[#6f5ce7]">AI CONSULTING · STEP 3</p>
+                <h2 className="mt-2 text-lg font-bold">유료 분석 리포트가 먼저 필요합니다</h2>
+                <p className="mx-auto mt-3 max-w-xl text-[15px] leading-7 text-slate-700">
+                  무료 사주는 준비되었습니다. 궁금한 주제의 심층·전문 분석을 구매해 리포트를 확인한 뒤, 추가 질문이 있을 때 AI 상담 이용권을 별도로 구매해 이어갈 수 있습니다.
+                </p>
+                <div className="mt-5 flex flex-wrap justify-center gap-2">
+                  <Link href="/recommendations" className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white">내 사주 기반 추천 보기</Link>
+                  <Link href="/deep-analysis" className="rounded-2xl border border-[#dce1ef] bg-white px-5 py-3 text-sm font-bold text-slate-700">심층 분석 둘러보기</Link>
+                  <Link href="/special-analysis" className="rounded-2xl border border-[#dce1ef] bg-white px-5 py-3 text-sm font-bold text-slate-700">전문 분석 둘러보기</Link>
+                </div>
+              </>
+            )}
           </section>
         ) : null}
 
@@ -610,7 +632,7 @@ export default function AiConsultingPortfolioClient({
                   <p className="text-sm leading-6 text-slate-700">공용 질문권을 모두 사용했습니다. 기존 상담 기록은 계속 볼 수 있습니다.</p>
                   {creditCheckoutHref ? (
                     <Link href={creditCheckoutHref} className="mt-3 inline-flex text-sm font-bold text-[#5e4bd1] underline underline-offset-4">
-                      {creditCheckoutEnabled ? "AI 질문권 추가 구매·내역" : "질문권 내역 보기"}
+                      {creditCheckoutEnabled ? "AI 상담 질문권 구매·충전" : "질문권 내역 보기"}
                     </Link>
                   ) : null}
                 </div>

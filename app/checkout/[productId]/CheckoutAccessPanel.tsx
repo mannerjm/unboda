@@ -9,6 +9,8 @@ import type { AccountLifecycleStatus, PaidEligibilityStatus } from "@/app/lib/ac
 import { createClient } from "@/app/lib/supabase/client";
 import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 import NiceAdultVerificationButton from "@/app/account/NiceAdultVerificationButton";
+import { isFreeAnalysisFoundationReady } from "@/app/lib/freeAnalysisEligibility";
+import type { ProfileFreeAnalysisStatus } from "@/app/lib/freeAnalysisResults/server";
 import {
   COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY,
   COMPATIBILITY_ROMANTIC_SESSION_KEY,
@@ -41,6 +43,7 @@ type CheckoutAccessPanelProps = {
   profileLabel?: string;
   priceLabel: string;
   editionLabel?: string;
+  freeAnalysisStatus?: ProfileFreeAnalysisStatus | null;
 };
 
 type AccountStatusResponse = {
@@ -62,6 +65,7 @@ export default function CheckoutAccessPanel({
   profileLabel,
   priceLabel,
   editionLabel,
+  freeAnalysisStatus,
 }: CheckoutAccessPanelProps) {
   const [authState, setAuthState] = useState<AuthState>(guestAuthState);
   const [accountStatus, setAccountStatus] = useState<AccountStatusResponse | null>(null);
@@ -134,6 +138,10 @@ export default function CheckoutAccessPanel({
 
   async function handlePayment() {
     if (authState.status !== "authenticated" || !profileId || isPaying) return;
+    if (!isFreeAnalysisFoundationReady(freeAnalysisStatus)) {
+      setErrorMessage("현재 분석 대상의 무료 사주를 먼저 확인해 주세요.");
+      return;
+    }
     if (!accountStatus || !accountStatus.emailVerified || accountStatus.account.paidEligibilityStatus !== "VERIFIED_ADULT") {
       setErrorMessage("결제 전에 계정 인증을 완료해 주세요.");
       return;
@@ -221,6 +229,31 @@ export default function CheckoutAccessPanel({
           <h2 className="text-2xl font-bold text-[#11162d]">계정 상태를 확인하지 못했습니다</h2>
           <p className="mt-4 text-sm leading-7 text-slate-600">잠시 후 새로고침하거나 계정 정보에서 인증 상태를 확인해 주세요.</p>
           <Link href="/account" className="mt-6 inline-flex rounded-2xl border border-[#cfd5e6] px-5 py-3 text-sm font-semibold text-slate-800">계정 정보 확인</Link>
+        </>
+      ) : !profileId ? (
+        <>
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">ANALYSIS SUBJECT REQUIRED</p>
+          <h2 className="mt-3 text-2xl font-bold text-[#11162d]">먼저 분석할 프로필을 선택해 주세요</h2>
+          <p className="mt-4 text-sm leading-7 text-slate-600">상품 정보는 자유롭게 볼 수 있습니다. 실제 결제는 마이페이지에 저장된 분석 대상을 선택한 뒤 진행합니다.</p>
+          <Link href="/mypage" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-[#6f5ce7] px-5 py-4 text-sm font-bold text-white">마이페이지에서 분석 대상 선택</Link>
+        </>
+      ) : !isFreeAnalysisFoundationReady(freeAnalysisStatus) ? (
+        <>
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">FREE ANALYSIS REQUIRED</p>
+          <h2 className="mt-3 text-2xl font-bold text-[#11162d]">유료 분석 전에 무료 사주를 먼저 확인해 주세요</h2>
+          <p className="mt-4 text-sm leading-7 text-slate-600">
+            {freeAnalysisStatus === "stale"
+              ? "저장된 출생 정보가 바뀌어 기존 무료 사주와 기준이 달라졌습니다. 현재 프로필 기준으로 무료 사주를 다시 확인하면 유료 분석을 이어갈 수 있습니다."
+              : freeAnalysisStatus === "generating"
+                ? "현재 프로필의 무료 사주를 만들고 있습니다. 결과가 준비된 뒤 이 분석의 결제를 이어갈 수 있습니다."
+                : "현재 프로필의 기본 사주 흐름을 먼저 확인한 뒤, 같은 생년월일시 정보를 기준으로 심층·전문 분석을 이어갑니다."}
+          </p>
+          <Link
+            href={freeAnalysisStatus === "generating" ? `/loading?profileId=${encodeURIComponent(profileId)}` : "/saju"}
+            className="mt-6 inline-flex w-full justify-center rounded-2xl bg-[#6f5ce7] px-5 py-4 text-sm font-bold text-white transition hover:bg-[#5f4fd2]"
+          >
+            {freeAnalysisStatus === "generating" ? "무료 사주 결과 확인" : "무료 사주 먼저 보기"}
+          </Link>
         </>
       ) : !accountStatus.emailVerified ? (
         <>

@@ -45,11 +45,11 @@ export default async function PaidAnalysisPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-stone-900">
-      <div className="mx-auto max-w-3xl">
+    <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-[#11162d] sm:px-8 sm:py-14">
+      <div className="mx-auto max-w-5xl">
         <Link
           href={profileId ? `/deep-analysis?profileId=${encodeURIComponent(profileId)}` : "/deep-analysis"}
-          className="inline-flex text-sm font-semibold text-stone-600 transition hover:text-stone-900"
+          className="inline-flex items-center rounded-full border border-[#dce1ef] bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-[#b9b2f6] hover:text-[#5e4bd1]"
         >
           ← 심층 분석으로 돌아가기
         </Link>

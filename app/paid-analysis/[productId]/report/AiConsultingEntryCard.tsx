@@ -114,6 +114,9 @@ export default function AiConsultingEntryCard({
             {historySummary ? (
               <p className="mt-4 text-sm font-semibold leading-6 text-slate-600">{historySummary}</p>
             ) : null}
+            {depleted ? (
+              <p className="mt-2 text-sm leading-6 text-slate-600">남은 질문 0회 · 이전 상담 기록은 계속 볼 수 있습니다.</p>
+            ) : null}
 
             <Link
               href={href}

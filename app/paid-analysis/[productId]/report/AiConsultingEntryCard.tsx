@@ -140,7 +140,7 @@ export default function AiConsultingEntryCard({
               ))}
             </div>
             <p className="mt-3 text-xs leading-5 text-slate-500">
-              범위를 벗어난 질문·확인 요청·안전 안내에는 질문권이 차감되지 않습니다.
+              범위를 벗어난 질문은 AI 답변을 생성하지 않으며 질문권도 차감되지 않습니다. 확인 요청·안전 안내도 미차감입니다.
             </p>
           </div>
         </div>

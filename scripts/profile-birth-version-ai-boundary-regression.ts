@@ -39,6 +39,6 @@ assert(questionRoute.includes("preferredProductId") && questionRoute.includes("p
 
 assert(client.includes("이전 출생정보 기준 상담") && client.includes("자동 상담 범위에서 제외"), "AI UI must disclose previous-input consultation boundaries");
 assert(answerPipeline.includes("source_thread_id === thread.id"), "analysis-derived and summary memories must be scoped to the selected thread");
-assert(answerPipeline.includes("userStated: partitioned.userStated"), "explicit user-stated memories remain profile-wide and separate from analysis-derived memory");
+assert(answerPipeline.includes("userStatedMemories: partitioned.userStated"), "explicit user-stated memories remain profile-wide and separate from analysis-derived memory");
 
 console.log("profile birth-version AI boundary regression passed");

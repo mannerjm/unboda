@@ -60,7 +60,7 @@ assert(!client.includes("dangerouslySetInnerHTML"), "unified consultation must r
 
 assert(entry.includes("질문권은 프로필 공용입니다."), "paid-report entry must explain that AI credits are shared");
 assert(entry.includes("다른 유료 분석을 추가로 보유하면 통합 AI 상담에서 그 분석 범위도 함께 사용할 수 있습니다."), "report entry must explain scope expansion after later purchases");
-assert(entry.includes("통합 AI 상담 이어가기"), "report entry must lead into the shared hub");
+assert(entry.includes("const href = `/ai-consulting?") && entry.includes("이전 상담 이어보기"), "report entry must preserve familiar continuation copy while routing into the shared hub");
 assert(entry.includes("이 리포트로 통합 상담 시작"), "first-time report entry must frame the report as a starting context, not an isolated wallet");
 
 assert(library.includes("AI CONSULTING HUB"), "purchased library must expose a unified AI consultation hub");

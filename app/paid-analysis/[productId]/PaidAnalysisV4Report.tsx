@@ -112,10 +112,10 @@ export default function PaidAnalysisV4Report({
           <h2 className="mt-5 max-w-4xl text-3xl font-black leading-[1.28] tracking-[-0.04em] text-[#11162d] sm:text-4xl">
             {detail.conclusion.headline}
           </h2>
-          <p className="mt-5 max-w-3xl text-sm leading-8 text-slate-600 sm:text-[15px]">
+          <p className="mt-5 max-w-3xl text-[15px] leading-8 text-slate-700">
             <span className="font-bold text-[#11162d]">대상 · </span>{detail.conclusion.focus}
           </p>
-          <p className="mt-2 max-w-3xl text-sm leading-8 text-slate-600 sm:text-[15px]">{detail.conclusion.rationale}</p>
+          <p className="mt-2 max-w-3xl text-[15px] leading-8 text-slate-700">{detail.conclusion.rationale}</p>
 
           <div className="mt-7 rounded-[1.5rem] border border-[#d8d3ff] bg-white/85 p-5">
             <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">지금 바로 할 것</p>

@@ -23,11 +23,11 @@ export default async function AdminPage() {
     }
 
     return (
-      <main className="min-h-screen bg-[#f7f3ea] px-5 py-14 text-stone-900">
+      <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-slate-900">
         <div className="mx-auto w-full max-w-xl">
-          <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">CS CONSOLE</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">CS CONSOLE</p>
           <h1 className="mt-3 text-3xl font-bold">접근 권한 없음</h1>
-          <p className="mt-4 text-sm leading-7 text-stone-600">이 화면은 승인된 운영자만 사용할 수 있습니다.</p>
+          <p className="mt-4 text-sm leading-7 text-slate-600">이 화면은 승인된 운영자만 사용할 수 있습니다.</p>
         </div>
       </main>
     );
@@ -88,13 +88,13 @@ export default async function AdminPage() {
   });
 
   return (
-    <main className="min-h-screen bg-[#f7f3ea] px-5 py-10 text-stone-900 sm:px-8 sm:py-14">
+    <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
       <div className="mx-auto w-full max-w-6xl">
         {growth ? (
           <AdminGrowthOverview report={growth} productLabels={productLabels} />
         ) : (
-          <section className="border-b border-stone-200 pb-8">
-            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">GROWTH & REVENUE</p>
+          <section className="border-b border-slate-200 pb-8">
+            <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">GROWTH & REVENUE</p>
             <h1 className="mt-3 text-3xl font-bold">서비스 성장·매출 현황</h1>
             <div className="mt-5 border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
               성장·매출 지표를 불러오지 못했습니다. 아래 운영 상태는 계속 확인할 수 있습니다.
@@ -105,8 +105,8 @@ export default async function AdminPage() {
         {refundClosure ? (
           <AdminRefundClosureOverview report={refundClosure} productLabels={productLabels} />
         ) : (
-          <section className="border-b border-stone-200 py-10">
-            <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">REFUNDS & ACCOUNT CLOSURES</p>
+          <section className="border-b border-slate-200 py-10">
+            <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">REFUNDS & ACCOUNT CLOSURES</p>
             <h2 className="mt-3 text-2xl font-bold">환불·회원 탈퇴 현황</h2>
             <div className="mt-5 border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
               환불·회원 탈퇴 현황을 불러오지 못했습니다. 아래 운영 예외 조회는 계속 사용할 수 있습니다.

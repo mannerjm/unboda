@@ -67,10 +67,11 @@ assert(entry.includes("다른 유료 분석을 추가로 보유하면 통합 AI 
 assert(entry.includes("const href = `/ai-consulting?") && entry.includes("이전 상담 이어보기"), "report entry must preserve familiar continuation copy while routing into the shared hub");
 assert(entry.includes("이 리포트로 통합 상담 시작"), "first-time report entry must frame the report as a starting context, not an isolated wallet");
 
-assert(library.includes("AI CONSULTING HUB"), "purchased library must expose a unified AI consultation hub");
+assert(library.includes("UNBODA AI CONSULTING · 핵심 기능"), "purchased library must visually foreground the unified AI consultation hub");
 assert(library.includes("질문권은 상품별로 나뉘지 않습니다."), "library must explicitly explain shared credits");
 assert(library.includes("완료된 구매 분석이 늘어날수록 AI 상담 범위가 자동으로 넓어지고"), "library must explain expanding owned scope");
-assert(library.includes("통합 AI 상담 이어가기"), "library must expose a global AI consultation entry");
+assert(library.includes("이전 상담 기록") && library.includes("직접 저장한 기억"), "library must explain conversation and explicit memory continuity");
+assert(library.includes("통합 AI 상담 바로가기"), "library must expose a single prominent global AI consultation entry");
 assert(library.includes("다른 심층 분석이나 전문 분석을 둘러볼 수 있습니다."), "library next-question copy must remain future-category neutral");
 assert(library.includes("전문 분석 보기"), "library specialist CTA must use the generic label");
 assert(!library.includes("이 리포트로 질문하기"), "purchased library must avoid per-report AI consultation buttons now that the unified hub is the single entry point");

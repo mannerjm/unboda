@@ -227,6 +227,7 @@ assert(prompt.includes("해결책을 절대 제시하지 마세요"), "free prom
 assert(prompt.includes("약 260~360자 내외") && prompt.includes("400자를 넘기지 마세요"), "free prompt must cap the AI diagnosis to a fast, compact character target");
 assert(prompt.includes("첫 문장은 55자 안팎의 '현재 결론'") && prompt.includes("아래 설명과 같은 말을 반복하지 않습니다"), "overview lead must be a concise conclusion rather than a duplicate of the reason card");
 assert(prompt.includes("정확히 2문장") && prompt.includes("정확히 3문장"), "free prompt must enforce predictable short section lengths");
+assert(prompt.length < 3600, `free main-analysis prompt fixture must stay compact; got ${prompt.length} chars`);
 assert(prompt.includes("영어 단어를 사용자에게 절대 노출하지 마세요"), "free prompt must prohibit accidental English leakage");
 assert(prompt.includes("화면 위쪽에 이미 표시된") && prompt.includes("그대로 반복"), "free prompt must prohibit repeating deterministic engine output");
 console.log("10. prompt separates stable traits from prioritized current problems in plain language ✓");

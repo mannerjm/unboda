@@ -93,7 +93,7 @@ export function resolveMaxOutputTokens(
   callType?: AnalysisTextCallType,
 ): number {
   if (callType === "main-analysis") {
-    return 900;
+    return 700;
   }
 
   if (callType === "paid-analysis-detail") {
@@ -105,6 +105,12 @@ export function resolveMaxOutputTokens(
   }
 
   return 3200;
+}
+
+export function resolveReasoningEffort(
+  callType?: AnalysisTextCallType,
+): "none" | "low" {
+  return callType === "main-analysis" ? "none" : "low";
 }
 
 export function resolveModel(callType?: AnalysisTextCallType): string {
@@ -164,6 +170,7 @@ export async function generateAnalysisText(
       : 45000;
 
   const model = resolveModel(callType);
+  const reasoningEffort = resolveReasoningEffort(callType);
   const promptLength = prompt.length;
   const startedAt = Date.now();
   const controller = new AbortController();
@@ -186,7 +193,7 @@ export async function generateAnalysisText(
             store: false,
             max_output_tokens: maxOutputTokens,
             reasoning: {
-              effort: "low",
+              effort: reasoningEffort,
             },
           },
           {
@@ -248,6 +255,7 @@ export async function generateAnalysisText(
     console.info("[generateAnalysisText] success", {
       callType,
       model,
+      reasoningEffort,
       promptLength,
       maxOutputTokens,
       timeoutMs,
@@ -266,6 +274,7 @@ export async function generateAnalysisText(
     console.error("[generateAnalysisText] failed", {
       callType,
       model,
+      reasoningEffort,
       promptLength,
       maxOutputTokens,
       timeoutMs,

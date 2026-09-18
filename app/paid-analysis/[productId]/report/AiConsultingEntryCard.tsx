@@ -123,9 +123,9 @@ export default function AiConsultingEntryCard({
               className="mt-5 inline-flex rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]"
             >
               {depleted
-                ? "통합 상담 기록 보기"
+                ? "이전 상담 기록 보기"
                 : hasPreviousConversation
-                  ? "통합 AI 상담 이어가기"
+                  ? "이전 상담 이어보기"
                   : "이 리포트로 통합 상담 시작"}
             </Link>
           </div>

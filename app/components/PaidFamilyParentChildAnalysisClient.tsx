@@ -214,7 +214,7 @@ export default function PaidFamilyParentChildAnalysisClient({
 
   return (
     <form onSubmit={submit} className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-[30px] border border-[#dfe3ef] bg-white shadow-[0_18px_50px_rgba(32,38,72,0.08)]">
-      <div className="relative overflow-hidden bg-[linear-gradient(135deg,#f1f0ff_0%,#f9faff_58%,#f7f8ff_100%)] px-6 py-8 sm:px-8 sm:py-9">
+      <div className="relative overflow-hidden bg-[radial-gradient(circle_at_18%_35%,rgba(112,88,229,0.28),transparent_24%),radial-gradient(circle_at_82%_65%,rgba(83,180,215,0.18),transparent_25%),linear-gradient(145deg,#0b1025_0%,#171a3d_58%,#24204d_100%)] px-6 py-8 text-white sm:px-8 sm:py-9">
         <div aria-hidden="true" className="absolute -right-12 -top-16 h-40 w-40 rounded-full border border-[#e4e7f1]/80 bg-white/40" />
         <div aria-hidden="true" className="absolute -bottom-14 right-20 h-24 w-24 rounded-full bg-[#ddd8ff]/45 blur-2xl" />
         <div className="relative">
@@ -287,7 +287,7 @@ export default function PaidFamilyParentChildAnalysisClient({
                 className="mt-2 w-full rounded-2xl border border-[#cfd5e6] bg-white px-4 py-3.5 text-sm outline-none transition disabled:bg-[#eef0f6] disabled:text-slate-400 focus:border-[#6f5ce7]"
               />
             </label>
-            <label className="mt-3 flex items-center gap-2 text-sm text-slate-200">
+            <label className="mt-3 flex items-center gap-2 text-sm text-slate-600">
               <input
                 type="checkbox"
                 checked={!form.birthTimeKnown}
@@ -332,7 +332,7 @@ export default function PaidFamilyParentChildAnalysisClient({
               </select>
             </label>
             {form.calendarType === "음력" ? (
-              <label className="mt-3 flex items-center gap-2 text-sm text-slate-200">
+              <label className="mt-3 flex items-center gap-2 text-sm text-slate-600">
                 <input
                   type="checkbox"
                   checked={form.isLeapMonth}

@@ -16,7 +16,7 @@ import {
   recordTossConfirmationStarted,
 } from "./purchases/server";
 import type { OrderRecord } from "./purchases/types";
-import { COMPATIBILITY_ROMANTIC_PRODUCT_ID } from "./specialAnalysisProducts";
+import { isCompatibilityPairProductId } from "./specialAnalysisProducts";
 import { createAdminClient } from "./supabase/admin";
 
 type OrderRow = {
@@ -56,6 +56,7 @@ function toOrderRecord(row: OrderRow): OrderRecord {
 async function getActiveCompatibilityOrder(input: {
   userId: string;
   profileId: string;
+  productId: string;
   analysisEditionKey: string;
 }): Promise<OrderRecord | null> {
   const { data, error } = await createAdminClient()
@@ -63,7 +64,7 @@ async function getActiveCompatibilityOrder(input: {
     .select("*")
     .eq("user_id", input.userId)
     .eq("profile_id", input.profileId)
-    .eq("product_id", COMPATIBILITY_ROMANTIC_PRODUCT_ID)
+    .eq("product_id", input.productId)
     .eq("analysis_edition_key", input.analysisEditionKey)
     .in("status", ["pending", "paid"])
     .order("created_at", { ascending: false })
@@ -88,25 +89,29 @@ export async function createCompatibilityPendingOrder(input: {
 }): Promise<OrderRecord> {
   await assertPaidPurchaseEligibility(input.userId);
 
-  const resolved = resolveLaunchPurchasableProduct(COMPATIBILITY_ROMANTIC_PRODUCT_ID);
-  if (!resolved.ok || resolved.productId !== COMPATIBILITY_ROMANTIC_PRODUCT_ID) {
-    throw new InvalidProductError(COMPATIBILITY_ROMANTIC_PRODUCT_ID);
+  const productId = input.snapshot.productId;
+  if (!isCompatibilityPairProductId(productId)) {
+    throw new InvalidProductError(productId);
+  }
+  const resolved = resolveLaunchPurchasableProduct(productId);
+  if (!resolved.ok || resolved.productId !== productId) {
+    throw new InvalidProductError(productId);
   }
 
   let analysisEditionKey: string;
   try {
     analysisEditionKey = buildCompatibilityPaidEditionKey(input.snapshot);
   } catch {
-    throw new AnalysisEditionUnavailableError(COMPATIBILITY_ROMANTIC_PRODUCT_ID);
+    throw new AnalysisEditionUnavailableError(productId);
   }
 
   if (await getActiveEntitlementForProfileEdition(
     input.userId,
     input.profile.id,
-    COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+    productId,
     analysisEditionKey,
   )) {
-    throw new AlreadyOwnedError(COMPATIBILITY_ROMANTIC_PRODUCT_ID);
+    throw new AlreadyOwnedError(productId);
   }
 
   const analysisInputSnapshot = buildAnalysisInputSnapshot(input.profile);
@@ -116,7 +121,7 @@ export async function createCompatibilityPendingOrder(input: {
     .insert({
       user_id: input.userId,
       profile_id: input.profile.id,
-      product_id: COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+      product_id: productId,
       amount: resolved.amount,
       status: "pending" satisfies PaymentStatus,
       payment_provider: input.paymentProvider ?? "mock",
@@ -131,6 +136,7 @@ export async function createCompatibilityPendingOrder(input: {
     const existing = await getActiveCompatibilityOrder({
       userId: input.userId,
       profileId: input.profile.id,
+      productId,
       analysisEditionKey,
     });
     if (existing?.status === "pending") return existing;

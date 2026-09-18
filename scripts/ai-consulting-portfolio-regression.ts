@@ -56,6 +56,10 @@ assert(client.includes("preferredProductId") && client.includes("preferredEditio
 assert(client.includes('data-section="portfolio-conversation"') && client.includes('data-ai-composer="portfolio-sticky"'), "unified composer must stay inside the conversation section");
 assert(client.includes("sourceTitle") && client.includes("sourceEditionLabel"), "each aggregated message must show which report/edition grounded it");
 assert(client.includes("threadId: message.threadId"), "memory writes must preserve the originating internal thread");
+assert(client.includes("showAllAnalyses") && client.includes("portfolio.analyses.slice(0, 3)"), "owned analysis display must default to the three most recent analyses");
+assert(client.includes("전체 보기 · +") && client.includes("접기"), "owned analysis display must support expand/collapse for the full portfolio");
+assert(client.includes("최근 보유 분석 3개") && client.includes("전체 보유 분석"), "owned analysis list must clearly explain collapsed and expanded states");
+assert(client.includes("상담 이용 안내") && client.includes('border-t border-[#e4e7f0]'), "consulting guidance must be visually separated from the owned-analysis list");
 assert(!client.includes("dangerouslySetInnerHTML"), "unified consultation must render model output as plain text");
 
 assert(entry.includes("질문권은 프로필 공용입니다."), "paid-report entry must explain that AI credits are shared");

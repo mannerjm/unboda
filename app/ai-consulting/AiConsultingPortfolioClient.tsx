@@ -69,6 +69,7 @@ export default function AiConsultingPortfolioClient({
   const [memoryError, setMemoryError] = useState<string | null>(null);
   const [savingMemoryMessageId, setSavingMemoryMessageId] = useState<string | null>(null);
   const [deletingMemoryId, setDeletingMemoryId] = useState<string | null>(null);
+  const [showAllAnalyses, setShowAllAnalyses] = useState(false);
   const isPreview = Boolean(previewData);
   const creditCheckoutEnabled = process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true";
 
@@ -144,6 +145,13 @@ export default function AiConsultingPortfolioClient({
     }
     return suggestions;
   }, [focusAnalysis, portfolio]);
+
+  const visibleAnalyses = useMemo(() => {
+    if (!portfolio) return [];
+    return showAllAnalyses ? portfolio.analyses : portfolio.analyses.slice(0, 3);
+  }, [portfolio, showAllAnalyses]);
+
+  const hiddenAnalysisCount = Math.max((portfolio?.analyses.length ?? 0) - 3, 0);
 
   const latestActivity = useMemo(
     () => formatRecentActivity(portfolio?.messages[portfolio.messages.length - 1]?.createdAt),
@@ -361,26 +369,47 @@ export default function AiConsultingPortfolioClient({
                   <p className="mt-3 text-[15px] leading-7 text-slate-700">
                     질문권은 상품별로 나뉘지 않습니다. 남은 횟수를 공용으로 사용하고, 질문 내용에 맞는 보유 리포트를 서버에서 자동 선택합니다.
                   </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {portfolio.analyses.map((analysis) => {
-                      const focused = focusAnalysis?.productId === analysis.productId
-                        && focusAnalysis.analysisEditionKey === analysis.analysisEditionKey;
-                      return (
-                        <span
-                          key={`${analysis.productId}|${analysis.analysisEditionKey}`}
-                          className={focused
-                            ? "rounded-full border border-[#aaa0f4] bg-[#f3f1ff] px-3 py-2 text-xs font-bold text-[#5e4bd1]"
-                            : "rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-xs font-semibold text-slate-600"}
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-xs font-bold tracking-[0.1em] text-slate-500">
+                        {showAllAnalyses ? "전체 보유 분석" : "최근 보유 분석 3개"}
+                      </p>
+                      {hiddenAnalysisCount > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowAllAnalyses((value) => !value)}
+                          className="shrink-0 text-xs font-bold text-[#5e4bd1] underline decoration-[#c8c0ff] underline-offset-4"
+                          aria-expanded={showAllAnalyses}
                         >
-                          {analysis.productTitle} · {analysis.editionLabel}{focused ? " · 시작 기준" : ""}
-                        </span>
-                      );
-                    })}
+                          {showAllAnalyses ? "접기" : `전체 보기 · +${hiddenAnalysisCount}개`}
+                        </button>
+                      ) : null}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {visibleAnalyses.map((analysis) => {
+                        const focused = focusAnalysis?.productId === analysis.productId
+                          && focusAnalysis.analysisEditionKey === analysis.analysisEditionKey;
+                        return (
+                          <span
+                            key={`${analysis.productId}|${analysis.analysisEditionKey}`}
+                            className={focused
+                              ? "rounded-full border border-[#aaa0f4] bg-[#f3f1ff] px-3 py-2 text-xs font-bold text-[#5e4bd1]"
+                              : "rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-xs font-semibold text-slate-600"}
+                          >
+                            {analysis.productTitle} · {analysis.editionLabel}{focused ? " · 시작 기준" : ""}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
-                    <span className="rounded-full border border-[#d8d3ff] bg-white px-3 py-2 text-[#5e4bd1]">질문마다 관련 리포트 자동 선택</span>
-                    <span className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-slate-600">정상 답변 완료 시 공용 질문권 1회 차감</span>
-                    <span className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-slate-600">보유 범위 밖 질문은 답변하지 않아요</span>
+
+                  <div className="mt-5 border-t border-[#e4e7f0] pt-4">
+                    <p className="text-xs font-bold tracking-[0.1em] text-slate-500">상담 이용 안내</p>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+                      <span className="rounded-full border border-[#d8d3ff] bg-white px-3 py-2 text-[#5e4bd1]">질문마다 관련 리포트 자동 선택</span>
+                      <span className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-slate-600">정상 답변 완료 시 공용 질문권 1회 차감</span>
+                      <span className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-slate-600">보유 범위 밖 질문은 답변하지 않아요</span>
+                    </div>
                   </div>
                 </div>
 

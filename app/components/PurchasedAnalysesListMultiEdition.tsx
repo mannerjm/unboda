@@ -185,7 +185,7 @@ export default function PurchasedAnalysesList({
             <p className="text-xs font-black tracking-[0.15em] text-[#b5aaff]">UNBODA AI CONSULTING · 핵심 기능</p>
             <h2 className="mt-2 text-2xl font-black tracking-[-0.025em]">리포트가 끝나도, 상담은 계속 이어집니다</h2>
             <p className="mt-3 text-sm leading-7 text-slate-200">
-              완료된 구매 리포트를 질문마다 자동으로 연결하고, 이전 상담 기록과 내가 직접 저장한 기억을 같은 상담에서 이어서 참고합니다. 새 분석을 구매하면 상담 범위도 자동으로 넓어집니다.
+              질문권은 상품별로 나뉘지 않습니다. 완료된 구매 분석이 늘어날수록 AI 상담 범위가 자동으로 넓어지고, 질문마다 관련 리포트를 자동으로 연결합니다. 이전 상담 기록과 내가 직접 저장한 기억도 같은 상담에서 이어서 참고합니다.
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-[#ddd8ff]">
               <span className="rounded-full border border-white/12 bg-white/[0.07] px-3 py-2">보유 리포트 통합</span>

@@ -201,9 +201,14 @@ export default async function AdminReportPreviewPage() {
                 실제 구매·주문·entitlement를 만들지 않는 샘플 화면입니다. 아래 내용은 디자인 확인용 예시입니다.
               </p>
             </div>
-            <Link href="/admin" className="rounded-full border border-[#dce1ef] bg-[#f7f8fc] px-4 py-2 text-sm font-semibold text-slate-700">
-              ← 관리자 페이지
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/admin/ai-consulting-preview" className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-4 py-2 text-sm font-semibold text-[#5e4bd1]">
+                AI 상담 화면 보기 →
+              </Link>
+              <Link href="/admin" className="rounded-full border border-[#dce1ef] bg-[#f7f8fc] px-4 py-2 text-sm font-semibold text-slate-700">
+                ← 관리자 페이지
+              </Link>
+            </div>
           </div>
         </div>
       </div>

@@ -26,6 +26,6 @@ assert(preview.includes("실제 구매·주문·entitlement를 만들지 않는 
 assert(!preview.includes("hasActiveEntitlementForProfile"), "preview must not fake or mutate entitlement checks");
 assert(!preview.includes("/api/orders"), "preview must not create orders");
 assert(!preview.includes("requestPayment"), "preview must not invoke payment");
-assert(admin.includes('href="/admin/report-preview"'), "admin dashboard must expose the operator report preview link");
+assert(!admin.includes('href="/admin/report-preview"'), "admin dashboard must not expose the completed Phase 6 preview link");
 
 console.log("Post Phase 6 report preview regression passed ✓");

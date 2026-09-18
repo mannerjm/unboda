@@ -94,8 +94,8 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
             <div className="flex flex-wrap items-start justify-between gap-5">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-[#cfd5e6]/80 bg-white/70 px-3 py-1.5 text-[11px] font-bold tracking-[0.14em] text-slate-600">궁합 리포트</span>
-                  <span className="rounded-full bg-[#6f5ce7] px-3 py-1.5 text-[11px] font-bold text-white">연인·배우자</span>
+                  <span className="rounded-full border border-[#cfd5e6]/80 bg-white/70 px-3 py-1.5 text-xs font-bold tracking-[0.12em] text-slate-600">궁합 리포트</span>
+                  <span className="rounded-full bg-[#6f5ce7] px-3 py-1.5 text-xs font-bold text-white">연인·배우자</span>
                 </div>
                 <p className="mt-5 text-sm font-semibold text-slate-500">{meta.myProfileLabel} <span className="mx-2 text-slate-300">×</span> {meta.partnerLabel}</p>
               </div>
@@ -103,7 +103,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
             </div>
 
             <div className="mt-8 max-w-4xl">
-              <p className="text-[11px] font-bold tracking-[0.2em] text-slate-400">관계 핵심</p>
+              <p className="text-xs font-bold tracking-[0.16em] text-[#6f5ce7]">관계 핵심</p>
               <h2 className="mt-3 text-3xl font-bold leading-[1.3] tracking-tight text-[#11162d] sm:text-4xl lg:text-[42px]">{report.relationshipCore.headline}</h2>
               <p className="mt-5 max-w-3xl text-[15px] leading-8 text-slate-700 sm:text-base">{report.relationshipCore.summary}</p>
             </div>

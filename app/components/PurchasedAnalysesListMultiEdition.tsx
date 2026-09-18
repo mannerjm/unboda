@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { PurchasedAnalysisProductGroup } from "@/app/lib/purchasedAnalysesGrouping";
-import { Phase9NextAnalysisCards } from "@/app/components/Phase9NextAnalysisSection";
+import Phase9NextAnalysisCards from "@/app/components/Phase9NextAnalysisCards";
 import type { Phase9NextAnalysisRecommendation } from "@/app/lib/phase9NextAnalysis";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import {

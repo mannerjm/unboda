@@ -9,7 +9,7 @@ import type { ProfileDto } from "../profiles/types";
 import { buildCompatibilityTiming } from "../compatibilityTiming";
 import { buildCompatibilityPairPerspectives } from "../compatibilityPairPerspective";
 import {
-  COMPATIBILITY_PAID_REPORT_VERSION,
+  COMPATIBILITY_PAIR_PAID_REPORT_VERSION,
   parseCompatibilityPaidInputSnapshot,
   type StoredCompatibilityReport,
 } from "../compatibilityPaidAnalysis";
@@ -43,7 +43,7 @@ import {
   isCompatibilityFamilyOtherProductId,
   isCompatibilityFamilyParentChildProductId,
   isCompatibilityFamilySiblingProductId,
-  isCompatibilityRomanticProductId,
+  isCompatibilityPairProductId,
 } from "../specialAnalysisProducts";
 import type { StoredPaidAnalysisDetail } from "../paidAnalysisDetailOutput";
 import {
@@ -88,6 +88,9 @@ async function runCompatibilityPaidReportGeneration(
   if (!purchase) throw new Error("궁합 분석 생성에 필요한 구매 정보를 확인하지 못했습니다.");
 
   const snapshot = parseCompatibilityPaidInputSnapshot(purchase.analysisReferenceSnapshot);
+  if (snapshot.productId !== input.productId) {
+    throw new Error("궁합 구매 상품과 생성 상품이 일치하지 않습니다.");
+  }
   const timingResult = buildCompatibilityTiming(
     snapshot.mine.person,
     snapshot.partner.person,
@@ -97,13 +100,13 @@ async function runCompatibilityPaidReportGeneration(
       B: snapshot.partner.timing,
     },
   );
-  const generated = await generateCompatibilityReport(timingResult);
+  const generated = await generateCompatibilityReport(timingResult, snapshot.relationshipType);
   const perspectives = buildCompatibilityPairPerspectives(timingResult);
 
   if (!(await canPublish(input))) return { state: "skipped" as const };
 
   const content: StoredCompatibilityReport = {
-    schemaVersion: COMPATIBILITY_PAID_REPORT_VERSION,
+    schemaVersion: COMPATIBILITY_PAIR_PAID_REPORT_VERSION,
     report: generated.report,
     perspectives,
     meta: {
@@ -111,6 +114,8 @@ async function runCompatibilityPaidReportGeneration(
       myProfileLabel: snapshot.myProfileLabel,
       partnerLabel: snapshot.partnerLabel,
       partnerBirthTimeKnown: snapshot.partnerBirthTimeKnown,
+      productId: snapshot.productId,
+      relationshipType: snapshot.relationshipType,
       natalDataQuality: generated.context.natalDataQuality,
       timingDataQuality: generated.context.timingDataQuality,
     },
@@ -326,7 +331,7 @@ export async function runPaidReportGeneration(
 ) {
   if (!(await canPublish(input))) return { state: "skipped" as const };
 
-  if (isCompatibilityRomanticProductId(input.productId)) {
+  if (isCompatibilityPairProductId(input.productId)) {
     try {
       return await runCompatibilityPaidReportGeneration(input, claim);
     } catch {

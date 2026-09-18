@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { hasCanonicalAnalysisInputChanged } from "@/app/lib/analysisInputIdentity";
+import { createAdminClient } from "@/app/lib/supabase/admin";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { AccountAccessError, requireVerifiedEmailAccount } from "@/app/lib/accounts/server";
 import {
@@ -55,10 +57,47 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "프로필을 찾을 수 없습니다." }, { status: 404 });
   }
 
-  const validation = mergeProfileInput(currentProfile, body);
+  const rawPatch = body && typeof body === "object" && !Array.isArray(body)
+    ? { ...(body as Record<string, unknown>) }
+    : body;
+  const birthDataChangeAcknowledged = Boolean(
+    rawPatch
+    && typeof rawPatch === "object"
+    && !Array.isArray(rawPatch)
+    && (rawPatch as Record<string, unknown>).birthDataChangeAcknowledged === true
+  );
+  if (rawPatch && typeof rawPatch === "object" && !Array.isArray(rawPatch)) {
+    delete (rawPatch as Record<string, unknown>).birthDataChangeAcknowledged;
+  }
+
+  const validation = mergeProfileInput(currentProfile, rawPatch);
 
   if (!validation.valid) {
     return NextResponse.json({ error: validation.error }, { status: 400 });
+  }
+
+  const canonicalBirthChanged = hasCanonicalAnalysisInputChanged(currentProfile, validation.value);
+  if (canonicalBirthChanged) {
+    const { count, error: purchaseLookupError } = await createAdminClient()
+      .from("purchases")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("profile_id", profileId);
+
+    if (purchaseLookupError) {
+      console.error("[profiles] purchase history lookup failed", purchaseLookupError);
+      return NextResponse.json({ error: "구매 이력을 확인하지 못했습니다." }, { status: 500 });
+    }
+
+    if ((count ?? 0) > 0 && !birthDataChangeAcknowledged) {
+      return NextResponse.json(
+        {
+          error: "기존 구매 리포트와 AI 상담이 구매 당시 출생 정보 기준으로 보관된다는 안내 확인이 필요합니다.",
+          code: "BIRTH_DATA_CHANGE_ACKNOWLEDGEMENT_REQUIRED",
+        },
+        { status: 409 },
+      );
+    }
   }
 
   try {

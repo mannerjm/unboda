@@ -11,6 +11,7 @@ const PREVIEW_DATA: AiConsultingPortfolioPreviewData = {
   state: {
     profileId: "00000000-0000-4000-8000-000000000001",
     questionsRemaining: 4,
+    previousAnalysesExcluded: 0,
     analyses: [
       {
         productId: "wealth",
@@ -19,6 +20,7 @@ const PREVIEW_DATA: AiConsultingPortfolioPreviewData = {
         editionLabel: "2026년 분석",
         acquiredAt: "2026-09-17T05:20:00.000Z",
         scopeLabel: "이 구매 리포트의 계산 결과와 해석 범위 안에서 다음 질문을 이어갑니다.",
+        profileInputVersion: "current",
         suggestedQuestions: [
           "이 리포트에서 지금 가장 먼저 행동으로 옮길 부분은 뭐야?",
           "주의 신호가 실제 생활에서는 어떤 모습으로 나타날 수 있어?",
@@ -32,6 +34,7 @@ const PREVIEW_DATA: AiConsultingPortfolioPreviewData = {
         editionLabel: "2026년 9월 분석",
         acquiredAt: "2026-09-12T03:20:00.000Z",
         scopeLabel: "이 구매 리포트의 계산 결과와 해석 범위 안에서 다음 질문을 이어갑니다.",
+        profileInputVersion: "current",
         suggestedQuestions: [
           "지금 이직을 서두르기보다 먼저 확인해야 할 조건은 뭐야?",
           "현재 자리에 남을 때 확인할 신호를 정리해줘.",
@@ -45,6 +48,7 @@ const PREVIEW_DATA: AiConsultingPortfolioPreviewData = {
         editionLabel: "2026년 9월 분석",
         acquiredAt: "2026-09-03T08:10:00.000Z",
         scopeLabel: "이 구매 리포트의 계산 결과와 해석 범위 안에서 다음 질문을 이어갑니다.",
+        profileInputVersion: "current",
         suggestedQuestions: [
           "지금 관계에서 내가 먼저 조정해볼 수 있는 부분은 뭐야?",
           "반복되는 갈등이 생길 때 확인할 신호는 뭐야?",
@@ -58,6 +62,7 @@ const PREVIEW_DATA: AiConsultingPortfolioPreviewData = {
         editionLabel: "2026년 분석",
         acquiredAt: "2026-08-24T06:40:00.000Z",
         scopeLabel: "이 구매 리포트의 계산 결과와 해석 범위 안에서 다음 질문을 이어갑니다.",
+        profileInputVersion: "current",
         suggestedQuestions: [
           "지금 공부 방식에서 가장 먼저 바꿔볼 부분은 뭐야?",
           "집중이 끊기는 패턴을 줄이려면 무엇부터 점검해야 해?",
@@ -71,6 +76,7 @@ const PREVIEW_DATA: AiConsultingPortfolioPreviewData = {
         editionLabel: "2026년 분석",
         acquiredAt: "2026-08-11T04:15:00.000Z",
         scopeLabel: "이 구매 리포트의 계산 결과와 해석 범위 안에서 다음 질문을 이어갑니다.",
+        profileInputVersion: "current",
         suggestedQuestions: [
           "지금 창업을 시작하기 전에 가장 먼저 점검해야 할 조건은 뭐야?",
           "준비가 부족하다고 볼 수 있는 신호는 뭐야?",

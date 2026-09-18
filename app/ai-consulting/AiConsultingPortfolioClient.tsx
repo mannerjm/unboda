@@ -82,14 +82,19 @@ export default function AiConsultingPortfolioClient({
       setPortfolio(previewData.state);
       return;
     }
+    const portfolioParams = new URLSearchParams({ profileId });
+    if (focusProductId && focusEdition) {
+      portfolioParams.set("includeProductId", focusProductId);
+      portfolioParams.set("includeEdition", focusEdition);
+    }
     const response = await fetch(
-      `/api/ai-consulting/portfolio?profileId=${encodeURIComponent(profileId)}`,
+      `/api/ai-consulting/portfolio?${portfolioParams.toString()}`,
       { cache: "no-store" },
     );
     const body = (await response.json()) as AiConsultingPortfolioState & { error?: string };
     if (!response.ok) throw new Error(body.error ?? "통합 AI 상담을 불러오지 못했습니다.");
     setPortfolio(body);
-  }, [previewData, profileId]);
+  }, [focusEdition, focusProductId, previewData, profileId]);
 
   const loadMemories = useCallback(async () => {
     if (previewData) {
@@ -315,6 +320,23 @@ export default function AiConsultingPortfolioClient({
           </div>
         ) : null}
 
+        {!isLoading && focusAnalysis && focusAnalysis.profileInputVersion !== "current" ? (
+          <section className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-950">
+            <p className="font-black">이전 출생정보 기준 상담</p>
+            <p className="mt-1">
+              이 리포트와 기존 상담 기록은 구매 당시 출생 정보 기준으로 보관됩니다. 현재 프로필의 새 출생정보와 자동으로 합치지 않으며, 이 화면에서는 이 리포트 기준으로만 상담을 이어갑니다.
+            </p>
+            <p className="mt-2 font-semibold">남아 있는 공용 AI 질문권은 그대로 사용할 수 있습니다.</p>
+          </section>
+        ) : null}
+
+        {!isLoading && portfolio && (portfolio.previousAnalysesExcluded ?? 0) > 0 && !focusAnalysis ? (
+          <section className="mt-4 rounded-2xl border border-[#dce1ef] bg-white px-5 py-4 text-sm leading-6 text-slate-700 shadow-sm">
+            <p className="font-bold text-[#11162d]">출생정보 변경 전 리포트 {(portfolio.previousAnalysesExcluded ?? 0)}개는 자동 상담 범위에서 제외되어 있습니다.</p>
+            <p className="mt-1">기존 리포트와 상담 기록은 삭제되지 않습니다. 해당 리포트에서 직접 AI 상담으로 들어오면 구매 당시 정보 기준으로 이어갈 수 있습니다.</p>
+          </section>
+        ) : null}
+
         <header className="relative mt-5 overflow-hidden rounded-[2rem] border border-[#35375f] bg-[radial-gradient(circle_at_82%_20%,rgba(113,89,233,0.26),transparent_28%),radial-gradient(circle_at_18%_85%,rgba(79,146,224,0.14),transparent_30%),linear-gradient(145deg,#0b1025_0%,#171a3d_58%,#24204d_100%)] p-6 text-white shadow-[0_22px_60px_rgba(24,29,67,0.14)] sm:p-8">
           <p className="text-xs font-black tracking-[0.16em] text-[#b9b2f6]">UNBODA AI CONSULTING</p>
           <h1 className="mt-3 text-2xl font-black tracking-[-0.035em] sm:text-3xl">내 구매 분석을 연결하는 AI 상담</h1>
@@ -330,8 +352,10 @@ export default function AiConsultingPortfolioClient({
               </p>
               <p className="mt-1 text-sm leading-6 text-slate-300">
                 {focusAnalysis
-                  ? `이 화면은 ${focusAnalysis.productTitle}에서 시작했지만, 다른 보유 분석도 질문에 따라 자동 연결됩니다.`
-                  : "완료된 구매 리포트가 상담 범위에 자동으로 포함됩니다."}
+                  ? focusAnalysis.profileInputVersion === "current"
+                    ? `이 화면은 ${focusAnalysis.productTitle}에서 시작했지만, 현재 출생정보 기준의 다른 보유 분석도 질문에 따라 자동 연결됩니다.`
+                    : `이 화면은 ${focusAnalysis.productTitle}의 구매 당시 출생정보 기준 상담입니다. 현재 출생정보 기준 분석과 자동으로 섞지 않습니다.`
+                  : "현재 출생정보와 일치하는 완료 리포트만 자동 상담 범위에 포함됩니다."}
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.07] px-5 py-4 sm:min-w-36">
@@ -353,7 +377,19 @@ export default function AiConsultingPortfolioClient({
 
         {!isLoading && portfolio && portfolio.analyses.length === 0 ? (
           <section className="mt-5 rounded-[1.75rem] border border-[#dce1ef] bg-white p-7 text-center shadow-sm">
-            {!freeAnalysisReady ? (
+            {(portfolio.previousAnalysesExcluded ?? 0) > 0 && freeAnalysisReady ? (
+              <>
+                <p className="text-xs font-black tracking-[0.14em] text-[#6f5ce7]">AI CONSULTING · NEW PROFILE INPUT</p>
+                <h2 className="mt-2 text-lg font-bold">이전 리포트는 보관 중이고, 새 기준 상담은 아직 준비되지 않았습니다</h2>
+                <p className="mx-auto mt-3 max-w-xl text-[15px] leading-7 text-slate-700">
+                  출생정보 변경 전 리포트와 상담 기록은 그대로 남아 있습니다. 새 출생정보 기준 AI 상담은 현재 기준으로 새로 구매한 유료 리포트가 생긴 뒤 시작할 수 있습니다.
+                </p>
+                <div className="mt-5 flex flex-wrap justify-center gap-2">
+                  <Link href="/purchased-analyses" className="rounded-2xl border border-[#dce1ef] bg-white px-5 py-3 text-sm font-bold text-slate-700">이전 구매 리포트 보기</Link>
+                  <Link href="/recommendations" className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white">현재 사주 기반 추천 보기</Link>
+                </div>
+              </>
+            ) : !freeAnalysisReady ? (
               <>
                 <p className="text-xs font-black tracking-[0.14em] text-[#6f5ce7]">AI CONSULTING · STEP 2</p>
                 <h2 className="mt-2 text-lg font-bold">무료 사주부터 확인해 주세요</h2>
@@ -418,7 +454,8 @@ export default function AiConsultingPortfolioClient({
                               ? "rounded-full border border-[#aaa0f4] bg-[#f3f1ff] px-3 py-2 text-xs font-bold text-[#5e4bd1]"
                               : "rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-xs font-semibold text-slate-600"}
                           >
-                            {analysis.productTitle} · {analysis.editionLabel}{focused ? " · 시작 기준" : ""}
+                            {analysis.productTitle} · {analysis.editionLabel}
+                            {analysis.profileInputVersion !== "current" ? " · 이전 정보 기준" : focused ? " · 시작 기준" : ""}
                           </span>
                         );
                       })}
@@ -470,7 +507,7 @@ export default function AiConsultingPortfolioClient({
                   <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">LONG-TERM MEMORY</p>
                   <h2 className="mt-2 text-base font-bold">AI가 기억하는 내 상황</h2>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">
-                    직접 저장한 내용은 상품이 달라져도 같은 프로필의 상담 연속성을 위해 참고합니다.
+                    내가 직접 저장한 사실·목표는 같은 프로필의 상담에서 공용으로 참고합니다. 리포트에서 파생된 해석·요약은 선택된 상담 스레드 밖으로 자동 혼합하지 않습니다.
                   </p>
                 </div>
                 <span className="shrink-0 rounded-full bg-[#eef0f6] px-3 py-1.5 text-xs font-semibold text-slate-700">

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { ProfileDto } from "./profiles/types";
+import { canonicalAnalysisInputMatches } from "./analysisInputIdentity";
 
 /**
  * Immutable commercial input snapshot (STEP 57D-48F-D2). Captures ONLY the
@@ -22,6 +23,7 @@ export const AnalysisInputSnapshotSchema = z.object({
 });
 
 export type AnalysisInputSnapshot = z.infer<typeof AnalysisInputSnapshotSchema>;
+export type AnalysisInputProfileVersion = "current" | "previous" | "unknown";
 
 export class InvalidAnalysisInputSnapshotError extends Error {
   constructor() {
@@ -53,4 +55,21 @@ export function parseAnalysisInputSnapshot(raw: unknown): AnalysisInputSnapshot 
   }
 
   return parsed.data;
+}
+
+
+/**
+ * Compares a purchase-time immutable input snapshot to the profile's current
+ * canonical saju inputs. Missing/legacy/corrupt snapshots are "unknown" and
+ * must never be treated as current automatically.
+ */
+export function resolveAnalysisInputProfileVersion(
+  raw: unknown,
+  profile: ProfileDto,
+): AnalysisInputProfileVersion {
+  const parsed = AnalysisInputSnapshotSchema.safeParse(raw);
+  if (!parsed.success) return "unknown";
+  return canonicalAnalysisInputMatches(parsed.data.birthData, profile)
+    ? "current"
+    : "previous";
 }

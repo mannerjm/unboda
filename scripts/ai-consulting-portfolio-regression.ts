@@ -74,7 +74,7 @@ assert(library.includes("통합 AI 상담 이어가기"), "library must expose a
 assert(library.includes("이 리포트로 질문하기"), "per-report buttons must be framed as context starters, not product-specific credit wallets");
 
 assert(preview.includes("AiConsultingPortfolioClient"), "operator preview must render the unified portfolio client");
-assert(preview.includes("재물·이직·관계 리포트를 한 상담에서 자동 연결"), "operator preview must demonstrate multi-product scope");
+assert(preview.includes("재물·이직·관계·학업·창업 리포트를 한 상담에서 자동 연결"), "operator preview must demonstrate multi-product scope with enough samples for expansion");
 assert(preview.includes("previewData={PREVIEW_DATA}"), "operator preview must remain static and non-mutating");
 assert(preview.includes('productId: "study-learning-strategy"') && preview.includes('productId: "business-startup-readiness"'), "operator preview must include more than three analyses so expand/collapse is visible");
 assert(!client.includes('공용 질문권 {portfolio.questionsRemaining}회'), "shared credit count must not be duplicated in the continuation card");

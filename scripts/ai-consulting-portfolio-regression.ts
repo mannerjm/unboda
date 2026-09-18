@@ -71,7 +71,9 @@ assert(library.includes("AI CONSULTING HUB"), "purchased library must expose a u
 assert(library.includes("질문권은 상품별로 나뉘지 않습니다."), "library must explicitly explain shared credits");
 assert(library.includes("완료된 구매 분석이 늘어날수록 AI 상담 범위가 자동으로 넓어지고"), "library must explain expanding owned scope");
 assert(library.includes("통합 AI 상담 이어가기"), "library must expose a global AI consultation entry");
-assert(library.includes("이 리포트로 질문하기"), "per-report buttons must be framed as context starters, not product-specific credit wallets");
+assert(library.includes("다른 심층 분석이나 전문 분석을 둘러볼 수 있습니다."), "library next-question copy must remain future-category neutral");
+assert(library.includes("전문 분석 보기"), "library specialist CTA must use the generic label");
+assert(!library.includes("이 리포트로 질문하기"), "purchased library must avoid per-report AI consultation buttons now that the unified hub is the single entry point");
 
 assert(preview.includes("AiConsultingPortfolioClient"), "operator preview must render the unified portfolio client");
 assert(preview.includes("재물·이직·관계·학업·창업 리포트를 한 상담에서 자동 연결"), "operator preview must demonstrate multi-product scope with enough samples for expansion");

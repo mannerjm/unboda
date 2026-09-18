@@ -108,7 +108,7 @@ function SiblingReport({ content }: { content: StoredFamilySiblingReport }) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full bg-white/80 px-3 py-1.5 text-xs font-bold text-slate-700 ring-1 ring-[#dce1ef]">가족 궁합 리포트</span>
-            <span className="rounded-full bg-[#6f5ce7] px-3 py-1.5 text-[11px] font-bold text-white">형제·자매 · {meta.evaluationYear}년판</span>
+            <span className="rounded-full bg-[#6f5ce7] px-3 py-1.5 text-xs font-bold text-white">형제·자매 · {meta.evaluationYear}년판</span>
           </div>
           <Link href="/special-analysis/compatibility/family/parent-child#family-relationship-selector" className="rounded-full border border-[#cfd5e6] bg-white/70 px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-white">다른 가족 분석</Link>
         </div>
@@ -160,7 +160,7 @@ function OtherFamilyReport({ content }: { content: StoredFamilyOtherReport }) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full bg-white/80 px-3 py-1.5 text-xs font-bold text-slate-700 ring-1 ring-[#dce1ef]">가족 궁합 리포트</span>
-            <span className="rounded-full bg-[#6f5ce7] px-3 py-1.5 text-[11px] font-bold text-white">{relationshipLabel} · {meta.evaluationYear}년판</span>
+            <span className="rounded-full bg-[#6f5ce7] px-3 py-1.5 text-xs font-bold text-white">{relationshipLabel} · {meta.evaluationYear}년판</span>
           </div>
           <Link href="/special-analysis/compatibility/family/parent-child#family-relationship-selector" className="rounded-full border border-[#cfd5e6] bg-white/70 px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-white">다른 가족 분석</Link>
         </div>

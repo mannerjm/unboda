@@ -43,7 +43,7 @@ export default async function PurchasedAnalysesPage() {
       <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-slate-900 sm:px-8 sm:py-10">
         <div className="mx-auto w-full max-w-5xl">
           <header className="rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-xs font-bold tracking-[0.18em] text-[#6f5ce7]">MY ANALYSIS LIBRARY</p>
+            <p className="text-xs font-bold tracking-[0.18em] text-[#6f5ce7]">MY LIBRARY</p>
             <h1 className="mt-2 text-3xl font-black tracking-[-0.03em] text-[#11162d] sm:text-4xl">구매한 분석 보관함</h1>
             <p className="mt-3 max-w-2xl text-[15px] leading-7 text-slate-700">
               구매한 리포트와 연도판, 준비 상태를 한곳에서 확인하고 완료된 분석은 언제든 다시 이어볼 수 있습니다.

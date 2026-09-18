@@ -84,7 +84,6 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
   // Seed that known state so a fast first click cannot be misrouted through a Guest login link.
   const [isGuest, setIsGuest] = useState<boolean | null>(pathname === "/mypage" ? false : null);
   const [hasGuestResult, setHasGuestResult] = useState(false);
-  const [memberSajuHref, setMemberSajuHref] = useState("/saju");
   const [aiCreditBalance, setAiCreditBalance] = useState<number | null>(null);
   const [aiCreditBalanceError, setAiCreditBalanceError] = useState(false);
 
@@ -120,30 +119,6 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
   }, []);
 
   const profileId = searchParams.get("profileId") || activeProfileId || null;
-
-  useEffect(() => {
-    let cancelled = false;
-
-    if (isGuest !== false || !profileId) {
-      setMemberSajuHref("/saju");
-      return () => { cancelled = true; };
-    }
-
-    void fetch(`/api/free-analysis/${encodeURIComponent(profileId)}`)
-      .then((response) => {
-        if (cancelled) return;
-        setMemberSajuHref(
-          response.ok
-            ? `/result?profileId=${encodeURIComponent(profileId)}`
-            : "/saju",
-        );
-      })
-      .catch(() => {
-        if (!cancelled) setMemberSajuHref("/saju");
-      });
-
-    return () => { cancelled = true; };
-  }, [isGuest, profileId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -193,7 +168,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
 
     // While auth is unresolved, use canonical destinations instead of manufacturing a login URL.
     // Their server boundaries remain authoritative and redirect real Guests when necessary.
-    if (item.href === "/saju") return isGuest === false ? memberSajuHref : "/saju";
+    if (item.href === "/saju") return "/saju";
     if (item.href === "/recommendations") return recommendationHref;
     if (item.href === "/deep-analysis") return deepAnalysisHref;
     return item.href;

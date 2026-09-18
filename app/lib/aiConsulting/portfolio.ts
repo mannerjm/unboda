@@ -205,9 +205,12 @@ async function listPortfolioAnalyses(input: {
       purchaseInputByKey.get(key),
       input.profile,
     );
+    const explicitPreviousProductId = input.includePreviousSource
+      ? getCanonicalPremiumProductId(input.includePreviousSource.productId)
+      : null;
     const explicitPreviousSource = Boolean(
       input.includePreviousSource
-      && input.includePreviousSource.productId === summary.productId
+      && explicitPreviousProductId === summary.productId
       && input.includePreviousSource.analysisEditionKey === editionKey,
     );
 
@@ -231,7 +234,7 @@ async function listPortfolioAnalyses(input: {
 
   const explicitPrevious = input.includePreviousSource
     ? analyses.find((analysis) =>
-        analysis.productId === input.includePreviousSource!.productId
+        analysis.productId === getCanonicalPremiumProductId(input.includePreviousSource!.productId)
         && analysis.analysisEditionKey === input.includePreviousSource!.analysisEditionKey
         && analysis.profileInputVersion !== "current",
       )
@@ -329,7 +332,11 @@ export async function getAiConsultingPortfolioState(input: {
   const { analyses, previousAnalysesExcluded } = await listPortfolioAnalyses(input);
   const [questionsRemaining, messages] = await Promise.all([
     getAiConsultingCreditBalance(input),
-    listPortfolioMessages({ ...input, analyses }),
+    listPortfolioMessages({
+      userId: input.userId,
+      profileId: input.profileId,
+      analyses,
+    }),
   ]);
 
   return {

@@ -93,8 +93,8 @@ for (const marker of [
   assert(list.includes(marker), `Phase 8 library must expose ${marker}`);
 }
 assert(list.includes('data-next-question-slot="phase9"'), "Phase 8 must reserve a stable next-question slot for Phase 9");
-assert(list.includes("다른 심층 분석이나 전문 분석을 둘러볼 수 있습니다."), "next-question copy must stay category-neutral for future specialist analysis expansion");
-assert(list.includes(">전문 분석 보기</Link>"), "next-question CTA must use the generic specialist-analysis label");
+assert(list.includes("다른 심층 분석이나 전문 분석을 둘러볼 수 있습니다.") && !list.includes("다른 심층 분석이나 관계 분석을 둘러볼 수 있습니다."), "next-question copy must stay category-neutral for future specialist analysis expansion");
+assert(list.includes("전문 분석 보기") && !list.includes("관계·전문 분석 보기"), "next-question CTA must use the generic specialist-analysis label");
 assert(list.includes("allEditions") && list.includes("acquiredAt.localeCompare"), "recent item must derive from acquisition time");
 assert(list.includes("completedCount") && list.includes("preparingCount"), "library must summarize completed/preparing states");
 assert(list.includes("const consultingHubHref") && list.includes("/ai-consulting?profileId="), "library must expose exactly one profile-wide AI consultation hub entry");

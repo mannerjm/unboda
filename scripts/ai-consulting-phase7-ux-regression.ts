@@ -1,0 +1,91 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+function read(path: string): string {
+  return readFileSync(path, "utf8");
+}
+
+const presentation = read("app/lib/aiConsultingPresentation.ts");
+const entry = read("app/paid-analysis/[productId]/report/AiConsultingEntryCard.tsx");
+const chat = read("app/ai-consulting/AiConsultingChatClient.tsx");
+const page = read("app/ai-consulting/page.tsx");
+const credits = read("app/ai-consulting/credits/page.tsx");
+const creditClient = read("app/ai-consulting/credits/CreditCheckoutClient.tsx");
+const preview = read("app/admin/ai-consulting-preview/page.tsx");
+const reportPreview = read("app/admin/report-preview/page.tsx");
+const admin = read("app/admin/page.tsx");
+
+for (const [name, source] of [
+  ["AI consulting chat", chat],
+  ["AI consulting entry", entry],
+  ["AI consulting fallback page", page],
+  ["AI credit page", credits],
+  ["AI credit checkout cards", creditClient],
+] as const) {
+  for (const warmToken of ["#f7f2e8", "text-stone-", "bg-stone-", "border-stone-", "ring-stone-"]) {
+    assert(!source.includes(warmToken), `${name} must not restore legacy warm/stone token ${warmToken}`);
+  }
+}
+
+assert(presentation.includes("getPremiumProductDisplayTitle"), "AI consulting presentation must resolve customer-facing premium titles");
+assert(presentation.includes("formatAnalysisEditionLabel"), "AI consulting presentation must show semantic edition labels");
+assert(presentation.includes("COMPATIBILITY_ROMANTIC_PRODUCT_ID"), "AI consulting presentation must include romantic compatibility questions");
+assert(presentation.includes("COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID"), "AI consulting presentation must include parent-child compatibility questions");
+assert(presentation.includes("COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID"), "AI consulting presentation must include sibling compatibility questions");
+assert(presentation.includes("COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID"), "AI consulting presentation must include other-family compatibility questions");
+assert(presentation.includes("PERIOD_SUGGESTED_QUESTIONS"), "period reports must get period-aware suggested questions");
+
+for (const label of [
+  "상담 기준 리포트",
+  "남은 질문",
+  "CONSULTING SCOPE",
+  "추천 질문",
+  "CONVERSATION",
+  "리포트에서 이어지는 대화",
+  "AI가 기억하는 내 상황",
+]) {
+  assert(chat.includes(label), `Phase 7 chat must expose ${label}`);
+}
+assert(chat.includes("presentation.productTitle") && chat.includes("presentation.editionLabel"), "chat must orient the user to the exact report context");
+assert(chat.includes("presentation.suggestedQuestions.map"), "chat must render deterministic suggested questions");
+assert(chat.includes("setQuestion(suggestion)"), "suggested questions must fill the composer without bypassing submission");
+assert(chat.includes("지난 상담에서 이어서 궁금한 점을 질문해 주세요."), "resumed chat composer contract must remain intact");
+assert(chat.includes("이전 상담 이어보기") && chat.includes("최근 상담") && chat.includes("이전 대화"), "prior-conversation orientation must remain intact");
+assert(chat.includes("whitespace-pre-wrap") && !chat.includes("dangerouslySetInnerHTML"), "assistant output must remain plain text rendering");
+
+for (const runtimeContract of [
+  'fetch("/api/ai-consulting/session"',
+  'fetch("/api/ai-consulting/question"',
+  'fetch("/api/ai-consulting/memories"',
+  "crypto.randomUUID()",
+  "scopeDecision",
+  "차감되지 않았습니다",
+]) {
+  assert(chat.includes(runtimeContract), `AI consulting runtime contract missing: ${runtimeContract}`);
+}
+assert(chat.includes("if (isPreview) return;"), "operator preview must block question submission");
+assert(chat.includes("if (previewData)"), "operator preview must render without live session/memory fetches");
+assert(chat.includes("previewData?.backHref"), "preview must return to the design-review flow");
+
+assert(entry.includes("이 리포트를 바탕으로 AI에게 질문하기"), "report entry must preserve the established AI consulting CTA language");
+assert(entry.includes("presentation.productTitle"), "report entry must name the report that grounds consultation");
+assert(entry.includes("presentation.suggestedQuestions.slice(0, 3)"), "report entry must preview suggested follow-up questions");
+assert(entry.includes("이전 상담 기록 보기") && entry.includes("이전 상담 이어보기"), "report entry must preserve continuation/history actions");
+assert(entry.includes("이전 상담 기록은 계속 볼 수 있습니다"), "zero-credit prior conversations must remain readable");
+
+assert(page.includes('bg-[#f5f7fc]'), "AI consultation fallback page must use the cool canvas");
+assert(credits.includes('bg-[#f5f7fc]'), "AI credit management must use the Phase 7 cool canvas");
+assert(creditClient.includes('bg-[#6f5ce7]'), "AI credit checkout primary actions must use the shared violet CTA");
+assert(creditClient.includes('fetch("/api/ai-consulting/credits/orders"'), "credit purchase must preserve the server order endpoint");
+assert(creditClient.includes("window.TossPayments") && creditClient.includes("requestPayment"), "credit purchase must preserve Toss payment invocation");
+
+assert(preview.includes("await requireOperator()"), "AI consulting preview must be operator-gated");
+assert(preview.includes("previewData={PREVIEW_DATA}"), "AI consulting preview must render the actual Phase 7 chat component");
+assert(preview.includes("실제 질문권·상담 기록·AI 호출을 만들지 않는 샘플 화면입니다."), "preview must clearly disclose that it creates no live consulting state");
+for (const forbidden of ["/api/ai-consulting/question", "/api/orders", "requestPayment", "grantEntitlement"]) {
+  assert(!preview.includes(forbidden), `operator preview must not invoke commercial/runtime action: ${forbidden}`);
+}
+assert(reportPreview.includes('href="/admin/ai-consulting-preview"'), "Phase 6 report preview must link directly to the Phase 7 follow-up screen");
+assert(admin.includes('href="/admin/ai-consulting-preview"'), "admin dashboard must expose the Phase 7 design preview");
+
+console.log("AI consulting Phase 7 UX regression passed ✓");

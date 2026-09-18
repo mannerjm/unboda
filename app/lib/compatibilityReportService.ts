@@ -8,6 +8,7 @@ import {
   type CompatibilityReportOutput,
 } from "./compatibilityReportContract";
 import type { CompatibilityTimingResult } from "./compatibilityTiming";
+import type { CompatibilityPairRelationshipType } from "./specialAnalysisProducts";
 
 export type GeneratedCompatibilityReport = {
   report: CompatibilityReportOutput;
@@ -29,8 +30,8 @@ const STRICT_CARDINALITY_LIMITS = `[STRICT_CARDINALITY_LIMITS]
 
 const CUSTOMER_COPY_GUIDE = `[CUSTOMER_COPY_GUIDE]
 - relationshipCore.headline은 한 문장, 가능하면 55자 안팎으로 압축합니다.
-- strengths는 이 두 사람의 근거에서 실제로 확인되는 차별점만 쓰고, 일반 연애 조언처럼 들리는 문장을 피합니다.
-- conflict는 갈등이 시작되는 패턴만, recovery는 갈등 뒤 다시 연결되는 조건만, longTerm은 반복해서 합의할 생활 기준만 다룹니다.
+- strengths는 이 두 사람의 근거에서 실제로 확인되는 차별점만 쓰고, 현재 관계 유형과 무관한 일반 조언을 피합니다.
+- conflict는 갈등이 시작되는 패턴만, recovery는 갈등 뒤 다시 연결되는 조건만, longTerm은 현재 관계 유형에서 반복해서 합의해야 할 기준만 다룹니다.
 - currentTiming은 기본 궁합을 반복하지 말고 해당 연도에 무엇을 늘리고 무엇을 줄일지 중심으로 설명합니다.
 - currentTiming의 제목과 본문에서는 '운영', '관리'처럼 관계를 시스템처럼 들리게 하는 표현을 피하고 '조율', '균형', '속도', '흐름' 같은 생활 언어를 사용합니다.
 - 각 summary는 같은 뜻을 반복하지 말고 핵심 2~3문장 안에서 끝냅니다.
@@ -73,9 +74,10 @@ function buildGenerationRequest(
 
 export async function generateCompatibilityReport(
   timingResult: CompatibilityTimingResult,
+  relationshipType: CompatibilityPairRelationshipType = "romantic_partner",
 ): Promise<GeneratedCompatibilityReport> {
   const context = buildCompatibilityReportContext(timingResult);
-  const prompt = buildCompatibilityReportPrompt(context);
+  const prompt = buildCompatibilityReportPrompt(context, relationshipType);
   let lastError: unknown;
 
   for (let attempt = 0; attempt < COMPATIBILITY_REPORT_GENERATION_MAX_ATTEMPTS; attempt += 1) {

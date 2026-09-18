@@ -2,10 +2,13 @@ import { formatAnalysisEditionLabel } from "./analysisEditionLabel";
 import { getPremiumProduct } from "./premiumProductRegistry";
 import { getPremiumProductDisplayTitle } from "./premiumPresentation";
 import {
+  COMPATIBILITY_BUSINESS_PRODUCT_ID,
   COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID,
   COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
   COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID,
+  COMPATIBILITY_FRIEND_PRODUCT_ID,
   COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  COMPATIBILITY_WORKPLACE_PRODUCT_ID,
   getSpecialAnalysisProduct,
 } from "./specialAnalysisProducts";
 
@@ -34,6 +37,21 @@ const COMPATIBILITY_QUESTIONS: Readonly<Record<string, readonly string[]>> = {
     "서로 대화할 때 오해를 줄이려면 어떤 순서가 좋아?",
     "지금 관계에서 내가 먼저 조정해볼 수 있는 행동은 뭐야?",
   ],
+  [COMPATIBILITY_WORKPLACE_PRODUCT_ID]: [
+    "업무 방식이 부딪히기 쉬운 지점은 어디야?",
+    "역할과 책임을 어떻게 나누면 갈등을 줄일 수 있어?",
+    "피드백이나 의사결정을 맞출 때 무엇을 먼저 조정하면 좋아?",
+  ],
+  [COMPATIBILITY_FRIEND_PRODUCT_ID]: [
+    "우리 사이에서 오해가 반복되기 쉬운 지점은 뭐야?",
+    "연락과 거리감을 서로 부담 없이 맞추려면 어떻게 하면 좋아?",
+    "서운함이 생겼을 때 관계를 회복하는 방법은 뭐야?",
+  ],
+  [COMPATIBILITY_BUSINESS_PRODUCT_ID]: [
+    "동업에서 역할과 책임이 충돌하기 쉬운 지점은 뭐야?",
+    "의사결정 속도와 권한을 어떻게 나누는 게 좋아?",
+    "돈과 성과 기준이 다를 때 어떤 합의를 먼저 확인해야 해?",
+  ],
   [COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID]: [
     "부모와 자녀 사이 기대와 독립의 균형을 어떻게 잡는 게 좋아?",
     "대화가 막힐 때 어떤 방식으로 먼저 풀어가면 좋아?",
@@ -57,9 +75,12 @@ export function getAiConsultingPresentation(
 ): AiConsultingPresentation {
   const special = getSpecialAnalysisProduct(productId);
   if (special) {
+    const pairEdition = edition.match(/^PAIR_YEAR:(\d{4}):[a-f0-9]{16}$/);
     return {
       productTitle: special.title,
-      editionLabel: formatAnalysisEditionLabel(edition),
+      editionLabel: pairEdition
+        ? `${pairEdition[1]}년 ${special.shortTitle ?? "궁합"}`
+        : formatAnalysisEditionLabel(edition),
       scopeLabel: "이 궁합 리포트에 저장된 관계 해석과 구매 연도 범위 안에서 답변합니다.",
       suggestedQuestions: COMPATIBILITY_QUESTIONS[productId] ?? DEFAULT_SUGGESTED_QUESTIONS,
     };

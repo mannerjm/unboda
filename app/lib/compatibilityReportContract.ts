@@ -7,6 +7,8 @@ import type {
   CompatibilityTimingEvidence,
   CompatibilityTimingResult,
 } from "./compatibilityTiming";
+import { getPairCompatibilityConfigByRelationshipType } from "./pairCompatibilityConfig";
+import type { CompatibilityPairRelationshipType } from "./specialAnalysisProducts";
 
 export const COMPATIBILITY_REPORT_CONTRACT_VERSION = "compatibility-report-v1" as const;
 
@@ -550,7 +552,9 @@ export function buildCompatibilityReportJsonContract(): string {
 
 export function buildCompatibilityReportPrompt(
   context: CompatibilityReportContext,
+  relationshipType: CompatibilityPairRelationshipType = "romantic_partner",
 ): { system: string; user: string } {
+  const relationshipConfig = getPairCompatibilityConfigByRelationshipType(relationshipType);
   const system = `당신은 운보다 궁합 엔진의 설명 레이어입니다.
 
 계산하거나 추측하지 말고 제공된 structured evidence만 설명하세요.
@@ -571,6 +575,28 @@ export function buildCompatibilityReportPrompt(
 13. 결과는 JSON 하나만 출력하고, 아래 계약에 없는 필드를 추가하지 않습니다.`;
 
   const user = `다음 궁합 엔진 컨텍스트만 사용해 한국어 리포트를 작성하세요.
+
+[RELATIONSHIP_TYPE]
+${relationshipConfig.label} 궁합
+
+[RELATIONSHIP_FOCUS]
+${relationshipConfig.promptFocus.map((item, index) => `${index + 1}. ${item}`).join("\n")}
+
+[DO_NOT_EXPAND_INTO]
+${relationshipConfig.promptAvoid.map((item) => `- ${item}`).join("\n")}
+
+관계 유형에 맞춰 같은 JSON 필드를 다음 의미로 해석하세요.
+- relationshipCore: ${relationshipConfig.label} 관계의 핵심 작동 방식
+- strengths: 이 관계에서 실제로 살릴 수 있는 보완 지점
+- conflict: ${relationshipConfig.reportConflictTitle}
+- recovery: ${relationshipConfig.reportRecoveryTitle}
+- longTerm: ${relationshipConfig.reportLongTermTitle}
+- currentTiming: ${relationshipConfig.reportTimingTitle}
+- actionGuide: ${relationshipConfig.reportActionTitle}
+연애·가족·직장·친구·사업의 언어를 서로 섞지 말고 현재 관계 유형의 장면과 의사결정만 설명하세요.
+사업·동업 분석에서도 사업 성공·수익·투자 결과를 예언하거나 금융·법률 실행 지시를 하지 마세요.
+
+다음 궁합 엔진 컨텍스트만 사용하세요.
 
 [ENGINE_CONTEXT]
 ${JSON.stringify(context, null, 2)}

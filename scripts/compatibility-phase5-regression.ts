@@ -22,6 +22,7 @@ function read(path: string): string {
 const specialEntry = read("app/special-analysis/page.tsx");
 const compatibilityEntry = read("app/special-analysis/compatibility/page.tsx");
 const romanticPage = read("app/special-analysis/compatibility/romantic/page.tsx");
+const pairPage = read("app/special-analysis/compatibility/PairCompatibilityPage.tsx");
 const familyPage = read("app/special-analysis/compatibility/family/page.tsx");
 const familyInputPage = read("app/special-analysis/compatibility/family/parent-child/page.tsx");
 const romanticInput = read("app/components/PaidCompatibilityAnalysisClient.tsx");
@@ -37,6 +38,7 @@ const phase5Surfaces = [
   ["special entry", specialEntry],
   ["compatibility entry", compatibilityEntry],
   ["romantic page", romanticPage],
+  ["pair page", pairPage],
   ["family page", familyPage],
   ["family input page", familyInputPage],
   ["romantic input", romanticInput],
@@ -60,7 +62,7 @@ for (const [name, source] of phase5Surfaces) {
 for (const [name, source] of [
   ["special entry", specialEntry],
   ["compatibility entry", compatibilityEntry],
-  ["romantic page", romanticPage],
+  ["pair page", pairPage],
   ["family page", familyPage],
   ["family input page", familyInputPage],
 ] as const) {
@@ -69,15 +71,16 @@ for (const [name, source] of [
 
 assert(compatibilityEntry.includes("연인·배우자 궁합") && compatibilityEntry.includes("가족 궁합"), "compatibility entry must keep both relationship worlds");
 assert(compatibilityEntry.includes("COMPATIBILITY_ROMANTIC_PRODUCT.amount") && compatibilityEntry.includes("COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT.amount"), "compatibility entry must keep registry pricing");
-assert(romanticPage.includes("PaidCompatibilityAnalysisClient"), "romantic route must keep the existing paid input client");
+assert(romanticPage.includes("PairCompatibilityPage") && romanticPage.includes("COMPATIBILITY_ROMANTIC_PRODUCT_ID"), "romantic route must bind the romantic product to the shared pair page");
+assert(pairPage.includes("PaidCompatibilityAnalysisClient") && pairPage.includes('bg-[#f5f7fc]'), "shared pair page must keep the paid input client and cool service canvas");
 assert(familyInputPage.includes("FamilyCompatibilityAnalysisClient"), "family route must keep the existing family selector client");
 
 assert(romanticInput.includes("두 흐름을 연결합니다"), "romantic input must express the two-flow relationship language");
 assert(parentChildInput.includes("두 흐름을 연결합니다"), "parent-child input must express the two-flow relationship language");
 assert(extendedInput.includes("두 흐름을 연결합니다"), "extended-family input must express the two-flow relationship language");
 
-assert(romanticInput.includes("sessionStorage.setItem(COMPATIBILITY_ROMANTIC_SESSION_KEY"), "romantic raw partner input must remain browser-session scoped");
-assert(romanticInput.includes('router.push(`/checkout/${COMPATIBILITY_ROMANTIC_PRODUCT_ID}?profileId=${encodeURIComponent(profileId)}`)'), "romantic checkout must remain profile scoped");
+assert(romanticInput.includes("getCompatibilityPairSessionKey") && romanticInput.includes("sessionStorage.setItem(sessionKey"), "pair raw partner input must remain isolated and browser-session scoped");
+assert(romanticInput.includes('router.push(`/checkout/${productId}?profileId=${encodeURIComponent(profileId)}`)'), "pair checkout must remain product- and profile-scoped");
 assert(parentChildInput.includes("COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY") && parentChildInput.includes("sessionStorage.setItem"), "parent-child raw family input must remain browser-session scoped");
 assert(parentChildInput.includes('router.push(`/checkout/${COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID}?profileId=${encodeURIComponent(profileId)}`)'), "parent-child checkout must remain profile scoped");
 assert(extendedInput.includes("COMPATIBILITY_FAMILY_SIBLING_SESSION_KEY") && extendedInput.includes("COMPATIBILITY_FAMILY_OTHER_SESSION_KEY"), "extended family must preserve separate session contracts");
@@ -88,7 +91,7 @@ assert(parentChildInput.includes('<option value="parent">부모예요</option>')
 assert(extendedInput.includes("grandparent_grandchild") && extendedInput.includes("aunt_uncle_niece_nephew") && extendedInput.includes("cousins") && extendedInput.includes("in_laws"), "other-family semantic relationships must remain intact");
 
 for (const marker of [
-  'mode="romantic"',
+  'previewMode = "romantic"',
   'mode="parent_child"',
   'mode={mode === "siblings" ? "siblings" : "other_family"}',
 ]) {
@@ -123,7 +126,7 @@ assert(new Set([
 assert(!romanticInput.includes("2026년판") && !parentChildInput.includes("2026년판") && !extendedInput.includes("2026년판"), "compatibility purchase-year copy must remain dynamic");
 assert(romanticInput.includes("evaluationYear") && parentChildInput.includes("evaluationYear") && extendedInput.includes("evaluationYear"), "all compatibility inputs must expose the dynamic purchase year");
 
-assert(checkout.includes("COMPATIBILITY_ROMANTIC_SESSION_KEY") && checkout.includes("COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY"), "standard checkout must keep romantic and parent-child session handoff");
+assert(checkout.includes("getCompatibilityPairSessionKey") && checkout.includes("COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY"), "standard checkout must keep pair and parent-child session handoff");
 assert(checkout.includes('fetch("/api/orders"'), "standard compatibility checkout must preserve the existing order endpoint");
 assert(checkout.includes("immediateGenerationAcknowledged: true"), "standard compatibility checkout must preserve immediate-generation acknowledgement");
 assert(checkout.includes("window.TossPayments") && checkout.includes("requestPayment"), "standard compatibility checkout must preserve Toss invocation");

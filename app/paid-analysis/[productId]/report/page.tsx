@@ -6,10 +6,11 @@ import AiConsultingEntryCard from "./AiConsultingEntryCard";
 import Phase9NextAnalysisSection from "@/app/components/Phase9NextAnalysisSection";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import {
+  getCompatibilityPairReportPath,
   isCompatibilityFamilyOtherProductId,
   isCompatibilityFamilyParentChildProductId,
   isCompatibilityFamilySiblingProductId,
-  isCompatibilityRomanticProductId,
+  isCompatibilityPairProductId,
 } from "@/app/lib/specialAnalysisProducts";
 
 type PaidAnalysisReportPageProps = {
@@ -23,8 +24,8 @@ function compatibilityReportHref(productId: string, profileId: string, edition?:
   const editionQuery = edition ? `&edition=${encodeURIComponent(edition)}` : "";
   const profileQuery = `?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
 
-  if (isCompatibilityRomanticProductId(productId)) {
-    return `/special-analysis/compatibility/report${profileQuery}`;
+  if (isCompatibilityPairProductId(productId)) {
+    return `${getCompatibilityPairReportPath(productId)}${profileQuery}`;
   }
   if (isCompatibilityFamilyParentChildProductId(productId)) {
     return `/special-analysis/compatibility/family/parent-child/report${profileQuery}`;

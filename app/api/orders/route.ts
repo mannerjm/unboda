@@ -28,9 +28,8 @@ import { createFamilyParentChildPendingOrder } from "@/app/lib/familyCompatibili
 import type { FamilyParentChildRole } from "@/app/lib/familyCompatibilityParentChild";
 import {
   COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
-  COMPATIBILITY_ROMANTIC_PRODUCT_ID,
   isCompatibilityFamilyParentChildProductId,
-  isCompatibilityRomanticProductId,
+  isCompatibilityPairProductId,
 } from "@/app/lib/specialAnalysisProducts";
 
 function koreaDate(now = new Date()): string {
@@ -133,7 +132,7 @@ export async function POST(request: Request) {
   }
 
   let compatibilitySnapshot: ReturnType<typeof buildCompatibilityPaidInputSnapshot> | null = null;
-  if (isCompatibilityRomanticProductId(resolved.productId)) {
+  if (isCompatibilityPairProductId(resolved.productId)) {
     const validation = validateCompatibilityPartnerInput(requestBody?.compatibilityPartner);
     if (!validation.valid) {
       return NextResponse.json({ error: validation.error, code: "COMPATIBILITY_PARTNER_REQUIRED" }, { status: 400 });
@@ -145,6 +144,7 @@ export async function POST(request: Request) {
       const mine = buildProfileCompatibilitySnapshot(profile, evaluationDate);
       const partner = buildPartnerCompatibilitySnapshot(validation.value, evaluationDate);
       compatibilitySnapshot = buildCompatibilityPaidInputSnapshot({
+        productId: resolved.productId,
         evaluationDate,
         evaluationYear,
         myProfileLabel: profile.label,
@@ -206,7 +206,7 @@ export async function POST(request: Request) {
 
   try {
     // amount comes from the server-side pricing source, never from the client
-    const order = resolved.productId === COMPATIBILITY_ROMANTIC_PRODUCT_ID && compatibilitySnapshot
+    const order = isCompatibilityPairProductId(resolved.productId) && compatibilitySnapshot
       ? await createCompatibilityPendingOrder({
           userId: user.id,
           profile,

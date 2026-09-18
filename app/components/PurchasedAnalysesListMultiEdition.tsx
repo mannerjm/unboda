@@ -4,11 +4,12 @@ import Phase9NextAnalysisCards from "@/app/components/Phase9NextAnalysisCards";
 import type { Phase9NextAnalysisRecommendation } from "@/app/lib/phase9NextAnalysis";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import {
+  getCompatibilityPairReportPath,
   getSpecialAnalysisProduct,
   isCompatibilityFamilyOtherProductId,
   isCompatibilityFamilyParentChildProductId,
   isCompatibilityFamilySiblingProductId,
-  isCompatibilityRomanticProductId,
+  isCompatibilityPairProductId,
 } from "@/app/lib/specialAnalysisProducts";
 
 const statusLabels: Record<string, string> = {
@@ -33,8 +34,10 @@ type PurchasedAnalysesListProps = {
 };
 
 function compatibilityEditionLabel(productId: string, editionKey: string | null): string {
-  const romantic = editionKey?.match(/^PAIR_YEAR:(\d{4}):[a-f0-9]{16}$/);
-  if (romantic) return `${romantic[1]}년 궁합 분석`;
+  const pair = editionKey?.match(/^PAIR_YEAR:(\d{4}):[a-f0-9]{16}$/);
+  if (pair && isCompatibilityPairProductId(productId)) {
+    return `${pair[1]}년 ${getSpecialAnalysisProduct(productId)?.shortTitle ?? "궁합"}`;
+  }
   const parentChild = editionKey?.match(/^FAMILY_PARENT_CHILD_YEAR:(\d{4}):[a-f0-9]{16}$/);
   if (parentChild) return `${parentChild[1]}년 부모·자녀 궁합`;
   const siblings = editionKey?.match(/^FAMILY_SIBLINGS_YEAR:(\d{4}):[a-f0-9]{16}$/);
@@ -75,7 +78,7 @@ function getEditionLabel(
   edition: PurchasedAnalysisProductGroup["editions"][number],
 ): string {
   const isCompatibility =
-    isCompatibilityRomanticProductId(group.productId)
+    isCompatibilityPairProductId(group.productId)
     || isCompatibilityFamilyParentChildProductId(group.productId)
     || isCompatibilityFamilySiblingProductId(group.productId)
     || isCompatibilityFamilyOtherProductId(group.productId);
@@ -95,8 +98,8 @@ function reportHref(
 
   const editionQuery = editionKey ? `&edition=${encodeURIComponent(editionKey)}` : "";
 
-  if (isCompatibilityRomanticProductId(group.productId)) {
-    return `/special-analysis/compatibility/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
+  if (isCompatibilityPairProductId(group.productId)) {
+    return `${getCompatibilityPairReportPath(group.productId)}?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
   }
   if (isCompatibilityFamilyParentChildProductId(group.productId)) {
     return `/special-analysis/compatibility/family/parent-child/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
@@ -226,7 +229,7 @@ export default function PurchasedAnalysesList({
           {groups.map((group) => {
             const specialProduct = getSpecialAnalysisProduct(group.productId);
             const isCompatibility =
-              isCompatibilityRomanticProductId(group.productId)
+              isCompatibilityPairProductId(group.productId)
               || isCompatibilityFamilyParentChildProductId(group.productId)
               || isCompatibilityFamilySiblingProductId(group.productId)
               || isCompatibilityFamilyOtherProductId(group.productId);

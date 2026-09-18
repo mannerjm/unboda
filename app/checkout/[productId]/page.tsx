@@ -14,11 +14,12 @@ import { formatAnalysisEditionLabel } from "@/app/lib/analysisEditionLabel";
 import { getKoreaEvaluationDate } from "@/app/lib/evaluationContext";
 import { getProfileFreeAnalysisFoundationStatus } from "@/app/lib/freeAnalysisEligibility";
 import {
+  getCompatibilityPairEntryPath,
   getSpecialAnalysisProduct,
   isCompatibilityFamilyOtherProductId,
   isCompatibilityFamilyParentChildProductId,
   isCompatibilityFamilySiblingProductId,
-  isCompatibilityRomanticProductId,
+  isCompatibilityPairProductId,
 } from "@/app/lib/specialAnalysisProducts";
 import Script from "next/script";
 
@@ -63,7 +64,9 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
   const familyEvaluationYear = Number(getKoreaEvaluationDate().slice(0, 4));
   const checkoutEditionLabel = edition
     ? formatAnalysisEditionLabel(edition.editionKey, edition.referenceSnapshot).replace(/ 분석$/, "")
-    : isCompatibilityFamilyParentChildProductId(canonicalProductId)
+    : isCompatibilityPairProductId(canonicalProductId)
+      ? `${familyEvaluationYear}년 ${specialProduct?.shortTitle ?? "궁합"}`
+      : isCompatibilityFamilyParentChildProductId(canonicalProductId)
       ? `${familyEvaluationYear}년 부모·자녀 궁합`
       : isCompatibilityFamilySiblingProductId(canonicalProductId)
         ? `${familyEvaluationYear}년 형제·자매 궁합`
@@ -72,8 +75,8 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
           : undefined;
   const isFamilyExtended = isCompatibilityFamilySiblingProductId(canonicalProductId)
     || isCompatibilityFamilyOtherProductId(canonicalProductId);
-  const backHref = isCompatibilityRomanticProductId(canonicalProductId)
-    ? "/special-analysis/compatibility/romantic"
+  const backHref = isCompatibilityPairProductId(canonicalProductId)
+    ? getCompatibilityPairEntryPath(canonicalProductId)
     : isCompatibilityFamilyParentChildProductId(canonicalProductId) || isFamilyExtended
       ? "/special-analysis/compatibility/family/parent-child#family-relationship-selector"
       : specialProduct

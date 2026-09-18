@@ -1,5 +1,9 @@
 import Link from "next/link";
-import type { StoredCompatibilityReport } from "@/app/lib/compatibilityPaidAnalysis";
+import {
+  resolveStoredCompatibilityRelationshipType,
+  type StoredCompatibilityReport,
+} from "@/app/lib/compatibilityPaidAnalysis";
+import { getPairCompatibilityConfigByRelationshipType } from "@/app/lib/pairCompatibilityConfig";
 
 function ReportSectionHeader({
   eyebrow,
@@ -76,6 +80,9 @@ function EditorialSection({ eyebrow, title, summary, points }: { eyebrow: string
 
 export default function CompatibilityPaidReportView({ content }: { content: StoredCompatibilityReport }) {
   const { report, perspectives, meta } = content;
+  const config = getPairCompatibilityConfigByRelationshipType(
+    resolveStoredCompatibilityRelationshipType(content),
+  );
   const firstStrength = report.strengths[0];
   const conflictPoint = report.conflict.keyPoints[0] ?? report.conflict.summary;
   const timingPoint = report.currentTiming?.keyPoints[0] ?? report.currentTiming?.summary ?? "현재 관계 흐름은 두 사람의 기본 관계 구조와 함께 살펴봅니다.";
@@ -95,7 +102,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full border border-[#cfd5e6]/80 bg-white/70 px-3 py-1.5 text-xs font-bold tracking-[0.12em] text-slate-600">궁합 리포트</span>
-                  <span className="rounded-full bg-[#6f5ce7] px-3 py-1.5 text-xs font-bold text-white">연인·배우자</span>
+                  <span className="rounded-full bg-[#6f5ce7] px-3 py-1.5 text-xs font-bold text-white">{config.reportBadge}</span>
                 </div>
                 <p className="mt-5 text-sm font-semibold text-slate-500">{meta.myProfileLabel} <span className="mx-2 text-slate-300">×</span> {meta.partnerLabel}</p>
               </div>
@@ -103,13 +110,13 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
             </div>
 
             <div className="mt-8 max-w-4xl">
-              <p className="text-xs font-bold tracking-[0.16em] text-[#6f5ce7]">관계 핵심</p>
+              <p className="text-xs font-bold tracking-[0.16em] text-[#6f5ce7]">{config.reportCoreEyebrow}</p>
               <h2 className="mt-3 text-3xl font-bold leading-[1.3] tracking-tight text-[#11162d] sm:text-4xl lg:text-[42px]">{report.relationshipCore.headline}</h2>
               <p className="mt-5 max-w-3xl text-[15px] leading-8 text-slate-700 sm:text-base">{report.relationshipCore.summary}</p>
             </div>
 
             <div className="mt-7 flex flex-wrap gap-2">
-              <span className="rounded-full bg-white/75 px-3 py-2 text-xs font-semibold text-slate-600 ring-1 ring-[#dce1ef]">두 사람의 관계 패턴</span>
+              <span className="rounded-full bg-white/75 px-3 py-2 text-xs font-semibold text-slate-600 ring-1 ring-[#dce1ef]">{config.label} 관계 패턴</span>
               <span className="rounded-full bg-white/75 px-3 py-2 text-xs font-semibold text-slate-600 ring-1 ring-[#dce1ef]">{meta.evaluationYear}년 흐름 함께 보기</span>
             </div>
           </div>
@@ -122,17 +129,17 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
         ) : null}
 
         <section className="bg-[#f7f8fc] px-6 py-9 sm:px-10 sm:py-10">
-          <ReportSectionHeader eyebrow="KEY POINTS" title="관계 핵심 포인트" description="길게 읽기 전에 두 사람 관계에서 먼저 확인할 세 가지 포인트입니다." />
+          <ReportSectionHeader eyebrow="KEY POINTS" title={`${config.label} 핵심 포인트`} description={config.reportKeyPointsDescription} />
           <div className="mt-5 grid gap-3 lg:grid-cols-3">
             <SummaryTile eyebrow="강점" title={firstStrength?.title ?? "함께 살릴 수 있는 강점"} body={firstStrength?.body ?? "두 사람이 함께 있을 때 살아나는 장점을 아래 리포트에서 구체적으로 확인할 수 있습니다."} />
-            <SummaryTile eyebrow="조율" title="부딪히기 쉬운 지점" body={conflictPoint} />
-            <SummaryTile eyebrow={`${meta.evaluationYear}년`} title={report.currentTiming?.headline ?? "현재 관계 흐름"} body={timingPoint} />
+            <SummaryTile eyebrow="조율" title={config.reportConflictTitle} body={conflictPoint} />
+            <SummaryTile eyebrow={`${meta.evaluationYear}년`} title={report.currentTiming?.headline ?? config.reportTimingTitle} body={timingPoint} />
           </div>
         </section>
 
         {report.strengths.length ? (
           <section className="border-t border-[#dce1ef]/80 px-6 py-10 sm:px-10 sm:py-12">
-            <ReportSectionHeader eyebrow="01 · 잘 맞는 부분" title="잘 맞는 부분" description="두 사람 사이에서 자연스럽게 연결되거나 함께 살릴 수 있는 강점입니다." />
+            <ReportSectionHeader eyebrow={config.reportStrengthEyebrow} title={config.reportStrengthTitle} description={config.reportStrengthDescription} />
             <div className={`mt-6 grid gap-4 ${strengthGridClass}`}>
               {report.strengths.map((item, index) => (
                 <article key={item.title} className="rounded-3xl bg-[#f7f8fc] p-5 ring-1 ring-[#dce1ef]/70 sm:p-6">
@@ -146,23 +153,23 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
         ) : null}
 
         <section data-section="pair-perspective" className="border-t border-[#dce1ef] bg-[#f3f1ff] px-6 py-10 sm:px-10 sm:py-12">
-          <ReportSectionHeader eyebrow="02 · 서로에게 미치는 방식" title="서로에게 미치는 방식" description="같은 관계라도 내가 상대에게 주는 영향과 상대가 나에게 주는 영향은 다르게 나타날 수 있습니다."  />
+          <ReportSectionHeader eyebrow="02 · 양방향 영향" title={config.reportDirectionTitle} description={config.reportDirectionDescription} />
           <div className="mt-7 grid gap-4 lg:grid-cols-2">
             <PerspectiveCard label={`${meta.myProfileLabel} → ${meta.partnerLabel}`} headline={perspectives.meToPartner.headline} summary={perspectives.meToPartner.summary} signals={perspectives.meToPartner.signals} />
             <PerspectiveCard label={`${meta.partnerLabel} → ${meta.myProfileLabel}`} headline={perspectives.partnerToMe.headline} summary={perspectives.partnerToMe.summary} signals={perspectives.partnerToMe.signals} />
           </div>
         </section>
 
-        <EditorialSection eyebrow="03 · 부딪히기 쉬운 부분" title="부딪히기 쉬운 부분" summary={report.conflict.summary} points={report.conflict.keyPoints} />
+        <EditorialSection eyebrow={config.reportConflictEyebrow} title={config.reportConflictTitle} summary={report.conflict.summary} points={report.conflict.keyPoints} />
 
         <section className="border-t border-[#dce1ef]/80 bg-[#f7f8fc] px-6 py-10 sm:px-10 sm:py-12">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-6">
             <div className="rounded-3xl border border-[#dce1ef]/80 bg-white p-6 sm:p-7">
-              <ReportSectionHeader eyebrow="04 · 갈등 뒤 회복" title="갈등 뒤 회복 방식" />
+              <ReportSectionHeader eyebrow={config.reportRecoveryEyebrow} title={config.reportRecoveryTitle} />
               <p className="mt-5 text-[15px] leading-8 text-slate-700">{report.recovery.summary}</p><PointList points={report.recovery.keyPoints} />
             </div>
             <div className="rounded-3xl border border-[#dce1ef]/80 bg-white p-6 sm:p-7">
-              <ReportSectionHeader eyebrow="05 · 오래 가는 기준" title="오래 가려면 맞춰야 할 기준" />
+              <ReportSectionHeader eyebrow={config.reportLongTermEyebrow} title={config.reportLongTermTitle} />
               <p className="mt-5 text-[15px] leading-8 text-slate-700">{report.longTerm.summary}</p><PointList points={report.longTerm.keyPoints} />
             </div>
           </div>
@@ -170,7 +177,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
 
         {report.currentTiming ? (
           <section className="border-t border-[#d8d3ff] bg-[#f3f1ff] px-6 py-10 sm:px-10 sm:py-12">
-            <ReportSectionHeader eyebrow="06 · 현재 흐름" title={`${meta.evaluationYear}년 현재 관계 흐름`} />
+            <ReportSectionHeader eyebrow="06 · 현재 흐름" title={`${meta.evaluationYear}년 ${config.reportTimingTitle}`} />
             <div className="mt-6 rounded-3xl border border-[#d8d3ff] bg-white/70 p-6 sm:p-8">
               <p className="text-xl font-bold leading-8 text-[#11162d] sm:text-2xl">{report.currentTiming.headline}</p>
               <p className="mt-4 max-w-3xl text-[15px] leading-8 text-slate-700">{report.currentTiming.summary}</p>
@@ -182,7 +189,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
         ) : null}
 
         <section className="border-t border-[#dce1ef]/80 px-6 py-10 sm:px-10 sm:py-12">
-          <ReportSectionHeader eyebrow="07 · 지금 해볼 것" title="지금 해볼 것" description="관계를 바꾸는 건 큰 결심보다 반복 가능한 작은 행동에 가깝습니다." />
+          <ReportSectionHeader eyebrow="07 · 행동 가이드" title={config.reportActionTitle} description="큰 결론보다 실제 관계에서 반복 가능한 작은 조정 기준으로 정리합니다." />
           <div className="mt-5 grid gap-3 lg:grid-cols-3">
             {report.actionGuide.doNext.map((item, index) => (
               <article key={`${item.action}-${item.reason}`} className="rounded-3xl bg-[#f7f6ff] p-5 ring-1 ring-[#d8d3ff] sm:p-6">
@@ -205,7 +212,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
           </div>
         </section>
       </article>
-      <p className="mx-auto mt-5 max-w-3xl text-center text-sm leading-6 text-slate-600">궁합은 두 사람의 명리 구조와 현재 흐름을 해석한 참고 콘텐츠입니다. 관계의 결과를 확정하거나 대신 결정하지 않습니다.</p>
+      <p className="mx-auto mt-5 max-w-3xl text-center text-sm leading-6 text-slate-600">{config.label} 궁합은 두 사람의 명리 구조와 현재 흐름을 해석한 참고 콘텐츠입니다. 상대의 의도나 관계·사업의 결과를 확정하거나 대신 결정하지 않습니다.</p>
     </div>
   );
 }

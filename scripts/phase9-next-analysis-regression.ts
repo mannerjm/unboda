@@ -12,6 +12,7 @@ const libraryPage = read("app/purchased-analyses/page.tsx");
 const libraryList = read("app/components/PurchasedAnalysesListMultiEdition.tsx");
 const standardReport = read("app/paid-analysis/[productId]/report/page.tsx");
 const romanticReport = read("app/special-analysis/compatibility/report/page.tsx");
+const pairCompatibilityReport = read("app/special-analysis/compatibility/PairCompatibilityReportPage.tsx");
 const parentReport = read("app/special-analysis/compatibility/family/parent-child/report/page.tsx");
 const siblingReport = read("app/special-analysis/compatibility/family/siblings/report/page.tsx");
 const otherReport = read("app/special-analysis/compatibility/family/other/report/page.tsx");
@@ -30,7 +31,8 @@ assert(section.includes("이미 보유한 동일 exact edition은 제외") && se
 assert(libraryPage.includes("getPhase9NextAnalysisRecommendations") && libraryPage.includes("recentSource"), "purchased library must resolve Phase 9 from a deterministic recent source");
 assert(libraryList.includes('data-next-question-slot="phase9"') && libraryList.includes("Phase9NextAnalysisCards"), "reserved Phase 9 library slot must now render recommendations");
 
-for (const report of [standardReport, romanticReport, parentReport, siblingReport, otherReport]) {
+assert(romanticReport.includes("PairCompatibilityReportPage"), "romantic report wrapper must use the shared pair compatibility report surface");
+for (const report of [standardReport, pairCompatibilityReport, parentReport, siblingReport, otherReport]) {
   assert(report.includes("Phase9NextAnalysisSection"), "every paid report family must expose the Phase 9 continuation surface");
 }
 

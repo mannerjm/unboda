@@ -172,7 +172,8 @@ assert(inputClient.includes("sessionStorage.setItem") && !inputClient.includes('
 assert(parentChildInputClient.includes('<option value="parent">부모예요</option>') && parentChildInputClient.includes('<option value="child">자녀예요</option>') && !parentChildInputClient.includes('name="familyRole"'), "parent-child role must use the same open-list select pattern as gender");
 assert(inputClient.includes("value={form.relationshipKind}") && inputClient.includes("value={effectiveRole}") && !inputClient.includes('name="otherRelationship"') && !inputClient.includes('name="otherRole"'), "other-family relationship and role must use select controls instead of card radios");
 assert(
-  romanticInputClient.includes('<CompatibilityReportValuePreview mode="romantic"')
+  romanticInputClient.includes('previewMode = "romantic"')
+    && romanticInputClient.includes("<CompatibilityReportValuePreview mode={previewMode}")
     && parentChildInputClient.includes('<CompatibilityReportValuePreview mode="parent_child"')
     && inputClient.includes('mode={mode === "siblings" ? "siblings" : "other_family"}'),
   "all four paid compatibility inputs must show the shared report value preview",

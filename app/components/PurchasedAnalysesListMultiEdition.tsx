@@ -158,6 +158,9 @@ export default function PurchasedAnalysesList({
   const recentReportHref = reportHref(recent.group, profileId, recent.edition.analysisEditionKey, previewMode);
   const recentEditionLabel = getEditionLabel(recent.group, recent.edition);
   const recentCanConsult = recent.edition.reportStatus === "completed" && Boolean(recent.edition.analysisEditionKey);
+  const consultingHubHref = previewMode
+    ? "/admin/ai-consulting-preview"
+    : `/ai-consulting?profileId=${encodeURIComponent(profileId)}`;
 
   return (
     <div className="mt-6">
@@ -192,10 +195,28 @@ export default function PurchasedAnalysesList({
                 href={consultingHref(recent.group, profileId, recent.edition.analysisEditionKey!, previewMode)}
                 className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]"
               >
-                AI 상담
+                이 리포트로 질문하기
               </Link>
             ) : null}
           </div>
+        </div>
+      </section>
+
+      <section className="mt-4 rounded-[1.75rem] border border-[#d8d3ff] bg-[#f3f1ff] p-5 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-bold tracking-[0.15em] text-[#6f5ce7]">AI CONSULTING HUB</p>
+            <h2 className="mt-2 text-xl font-black text-[#11162d]">보유한 분석을 한 상담에서 이어가기</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">
+              질문권은 상품별로 나뉘지 않습니다. 완료된 구매 분석이 늘어날수록 AI 상담 범위가 자동으로 넓어지고, 질문마다 관련 리포트를 선택해 답변합니다.
+            </p>
+          </div>
+          <Link
+            href={consultingHubHref}
+            className="shrink-0 rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]"
+          >
+            통합 AI 상담 이어가기
+          </Link>
         </div>
       </section>
 
@@ -273,7 +294,7 @@ export default function PurchasedAnalysesList({
                               href={consultingHref(group, profileId, edition.analysisEditionKey!, previewMode)}
                               className="rounded-xl bg-[#f3f1ff] px-4 py-2.5 text-xs font-bold text-[#5e4bd1] transition hover:bg-[#eae7ff]"
                             >
-                              AI 상담
+                              이 리포트로 질문하기
                             </Link>
                           ) : null}
                         </div>

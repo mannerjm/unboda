@@ -31,8 +31,8 @@ for (const presentation of [
 }
 
 assert(
-  result.includes('providedResult ? "/auth/login?returnTo=/recommendations&origin=guest-result"'),
-  "guest personalized recommendation must keep the existing login/save boundary",
+  result.includes('providedResult ? "/recommendations"'),
+  "guest personalized recommendation must open before the login/payment boundary",
 );
 assert(
   result.includes('/deep-analysis?profileId=${currentProfileId}'),

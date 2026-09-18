@@ -54,12 +54,6 @@ export default function GuestResultPage() {
         </ResultViewerContext.Provider>
       </div>
 
-      <style jsx global>{`
-        .guest-result-view a[href="/auth/login?returnTo=/recommendations&origin=guest-result"].underline {
-          display: none;
-        }
-      `}</style>
-
       {!intentSaved ? <main className="bg-[#f5f7fc] px-5 pb-14 text-[#11162d]"><div className="mx-auto w-full max-w-3xl"><section className="overflow-hidden rounded-[1.8rem] border border-[#dfe3ef] bg-white p-6 shadow-[0_18px_50px_rgba(32,38,72,0.08)]">
         <p className="text-xs font-black tracking-[0.14em] text-[#7768c7]">무료 결과 저장</p>
         <h2 className="mt-2 text-xl font-bold">방금 조회한 사주 정보를 내 프로필로 저장하시겠어요?</h2>

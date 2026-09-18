@@ -87,6 +87,32 @@ function formatUnbodaMessage(text: string) {
   return `${beforeMessage}\n\n${quotedMessage}`;
 }
 
+function normalizeAIHighlightText(text: string): string {
+  return text
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/[*_>`]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function splitAIOverviewHighlight(text: string): { lead: string; detail: string } {
+  const plain = normalizeAIHighlightText(text);
+  if (!plain) return { lead: "", detail: "" };
+
+  const sentence = plain.match(/^(.+?[.!?])(?:\s|$)/u);
+  if (!sentence) {
+    return {
+      lead: plain.length > 92 ? `${plain.slice(0, 92).trim()}…` : plain,
+      detail: "",
+    };
+  }
+
+  return {
+    lead: sentence[1].trim(),
+    detail: plain.slice(sentence[0].length).trim(),
+  };
+}
+
 function AISummarySectionCard({
   title,
   text,
@@ -339,6 +365,11 @@ const aiSummarySections = [
   { title: "관계 흐름", text: aiInterpretation.relationship },
   { title: "건강·생활 리듬", text: aiInterpretation.health },
 ].filter((section): section is { title: string; text: string } => Boolean(section.text));
+const hasPrimaryAISummary = Boolean(aiInterpretation.strength && aiInterpretation.overview);
+const aiOverviewHighlight = splitAIOverviewHighlight(aiInterpretation.overview ?? "");
+const legacyAISummarySections = aiSummarySections.filter(
+  (section) => section.title !== "사주의 특성" && section.title !== "한눈에 보는 핵심",
+);
 
 const [selectedDaeunOrder, setSelectedDaeunOrder] = useState<number | null>(null);
 const defaultDaeunOrder = sajuData?.daeunAnalysis
@@ -1181,20 +1212,25 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
   </div>
 </section>
 
-        <section className="mt-6 rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-7 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-900 text-lg text-white">
-              運
-            </div>
+        <section className="mt-6 overflow-hidden rounded-[2rem] border border-[#d8d3ff] bg-[linear-gradient(180deg,#ffffff_0%,#fbfaff_100%)] p-5 shadow-[0_18px_45px_rgba(58,48,120,0.08)] sm:p-7">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#171a3d] text-lg text-white shadow-sm">
+                運
+              </div>
 
-            <div>
-              <p className="text-xs tracking-[0.25em] text-stone-500">
-                AI ANALYSIS
-              </p>
-              <h2 className="mt-1 text-2xl font-bold">
-                운보다 AI 종합 해석
-              </h2>
+              <div>
+                <p className="text-xs font-bold tracking-[0.25em] text-[#7768c7]">
+                  AI ANALYSIS
+                </p>
+                <h2 className="mt-1 text-2xl font-black tracking-[-0.03em] text-[#11162d] sm:text-3xl">
+                  운보다 AI 종합 해석
+                </h2>
+              </div>
             </div>
+            <span className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-1.5 text-xs font-bold text-[#6657bd]">
+              핵심만 빠르게
+            </span>
           </div>
 
           {generationMeta?.mainAnalysisStatus === "failed" ? (
@@ -1241,8 +1277,68 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
             </div>
           ) : (
             <>
-              {aiSummarySections.length > 0 ? (
-                  <div className="grid items-start gap-3 sm:grid-cols-2">
+              {hasPrimaryAISummary ? (
+                <>
+                  <div className="relative overflow-hidden rounded-[1.7rem] border border-[#8f7cff]/20 bg-[linear-gradient(135deg,#171a3d_0%,#252053_58%,#3a285d_100%)] px-5 py-6 text-white shadow-[0_20px_46px_rgba(29,25,72,0.18)] sm:px-7 sm:py-7">
+                    <div className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full bg-[#8f7cff]/20 blur-3xl" />
+                    <div className="pointer-events-none absolute -bottom-20 left-[20%] h-40 w-40 rounded-full bg-[#ff8fb8]/10 blur-3xl" />
+                    <div className="relative">
+                      <p className="text-xs font-black tracking-[0.16em] text-[#b9adff]">지금 가장 먼저 보이는 흐름</p>
+                      <p className="mt-3 max-w-4xl text-[22px] font-black leading-[1.5] tracking-[-0.035em] text-white sm:text-[28px]">
+                        {aiOverviewHighlight.lead || normalizeAIHighlightText(aiInterpretation.overview ?? "")}
+                      </p>
+                      <p className="mt-3 text-sm leading-6 text-[#c5c9dc]">
+                        긴 설명 대신, 계산 엔진에서 지금 가장 중요한 내용만 압축했어요.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                    <section className="rounded-[1.5rem] border border-[#e1e4ef] bg-white p-5 sm:p-6">
+                      <div className="flex items-center gap-2">
+                        <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f3f1ff] text-sm font-black text-[#6657bd]">1</span>
+                        <h3 className="text-base font-black text-[#11162d] sm:text-lg">나를 설명하는 핵심</h3>
+                      </div>
+                      <div className="mt-4 text-[16px] font-medium leading-8 text-slate-700 sm:text-[17px]">
+                        <ReactMarkdown>{aiInterpretation.strength ?? ""}</ReactMarkdown>
+                      </div>
+                    </section>
+
+                    <section className="rounded-[1.5rem] border border-[#e1e4ef] bg-white p-5 sm:p-6">
+                      <div className="flex items-center gap-2">
+                        <span className="grid h-8 w-8 place-items-center rounded-full bg-[#fff0f5] text-sm font-black text-[#b85f86]">2</span>
+                        <h3 className="text-base font-black text-[#11162d] sm:text-lg">지금 가장 걸리는 흐름</h3>
+                      </div>
+                      <p className="mt-4 text-[16px] font-medium leading-8 text-slate-700 sm:text-[17px]">
+                        {aiOverviewHighlight.detail || normalizeAIHighlightText(aiInterpretation.overview ?? "")}
+                      </p>
+                    </section>
+                  </div>
+
+                  <div className="mt-4 flex items-start gap-4 rounded-[1.45rem] border border-[#d8d3ff] bg-[#f5f3ff] px-5 py-4 sm:px-6 sm:py-5">
+                    <span aria-hidden="true" className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-lg font-black text-[#6f5ce7] shadow-sm">↓</span>
+                    <div>
+                      <p className="text-base font-black text-[#262047]">여기까지는 ‘무슨 흐름인지’까지예요.</p>
+                      <p className="mt-1 text-sm leading-6 text-[#665f83] sm:text-[15px]">
+                        왜 반복되는지 · 언제 달라지는지 · 어떤 부분을 더 깊게 볼지는 바로 아래에서 가장 궁금한 질문을 골라보세요. 현재 결과를 바탕으로 추천 분석으로 이어집니다.
+                      </p>
+                    </div>
+                  </div>
+
+                  {legacyAISummarySections.length > 0 ? (
+                    <div className="mt-4 grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {legacyAISummarySections.map((section) => (
+                        <AISummarySectionCard
+                          key={section.title}
+                          title={section.title}
+                          text={section.text}
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                </>
+              ) : aiSummarySections.length > 0 ? (
+                <div className="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {aiSummarySections.map((section) => (
                     <AISummarySectionCard
                       key={section.title}

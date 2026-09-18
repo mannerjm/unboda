@@ -219,7 +219,7 @@ export default function PremiumProductDetail({
                 결제 금액과 분석 대상을 확인한 뒤 진행하세요. 결제가 승인되면 개인화 분석 생성이 바로 시작됩니다.
               </p>
               <p className="mt-4 text-xs font-semibold tracking-[0.12em] text-slate-500">결제 금액</p>
-              <p className="mt-1 text-lg font-bold text-stone-950">{formatPrice(product.id)}</p>
+              <p className="mt-1 text-lg font-bold text-[#11162d]">{formatPrice(product.id)}</p>
             </div>
 
             <div className="flex flex-col gap-2 sm:min-w-56">

@@ -4,9 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import CompatibilityReportValuePreview from "@/app/components/CompatibilityReportValuePreview";
 import {
-  COMPATIBILITY_ROMANTIC_PRODUCT,
   COMPATIBILITY_ROMANTIC_PRODUCT_ID,
-  COMPATIBILITY_ROMANTIC_SESSION_KEY,
+  getCompatibilityPairSessionKey,
+  getSpecialAnalysisProduct,
+  type CompatibilityPairProductId,
 } from "@/app/lib/specialAnalysisProducts";
 
 type FormState = {
@@ -165,9 +166,21 @@ function BirthDateSelector({
 export default function PaidCompatibilityAnalysisClient({
   myProfileLabel,
   profileId,
+  productId = COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  relationshipLabel = "연인·배우자",
+  partnerNoun = "상대방",
+  partnerPlaceholder = "예: 지민, 배우자",
+  relationshipDescription = "현재 선택된 내 프로필을 기준으로 연인·배우자 관계를 살펴봅니다.",
+  previewMode = "romantic",
 }: {
   myProfileLabel: string;
   profileId: string;
+  productId?: CompatibilityPairProductId;
+  relationshipLabel?: string;
+  partnerNoun?: string;
+  partnerPlaceholder?: string;
+  relationshipDescription?: string;
+  previewMode?: "romantic" | "workplace" | "friend" | "business";
 }) {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
@@ -181,6 +194,8 @@ export default function PaidCompatibilityAnalysisClient({
       && (!form.birthTimeKnown || form.birthTime),
   );
   const evaluationYear = getKoreaTodayParts().year;
+  const product = getSpecialAnalysisProduct(productId);
+  const sessionKey = getCompatibilityPairSessionKey(productId);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -197,8 +212,8 @@ export default function PaidCompatibilityAnalysisClient({
         calendarType: form.calendarType,
         isLeapMonth: form.calendarType === "음력" ? form.isLeapMonth : false,
       };
-      window.sessionStorage.setItem(COMPATIBILITY_ROMANTIC_SESSION_KEY, JSON.stringify(partner));
-      router.push(`/checkout/${COMPATIBILITY_ROMANTIC_PRODUCT_ID}?profileId=${encodeURIComponent(profileId)}`);
+      window.sessionStorage.setItem(sessionKey, JSON.stringify(partner));
+      router.push(`/checkout/${productId}?profileId=${encodeURIComponent(profileId)}`);
     } catch {
       setError("결제 화면으로 이동할 정보를 준비하지 못했습니다. 다시 시도해 주세요.");
     }
@@ -214,10 +229,10 @@ export default function PaidCompatibilityAnalysisClient({
             {myProfileLabel}님의 사주 <span className="font-medium text-[#c9c3ff]">×</span> 상대방 사주
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-200">
-            현재 선택된 내 프로필을 기준으로 연인·배우자 관계를 살펴봅니다. 결제 시점의 연도판으로 생성되어 구매한 분석에 그대로 보관됩니다.
+            {relationshipDescription} 결제 시점의 연도판으로 생성되어 구매한 분석에 그대로 보관됩니다.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
-            <span className="rounded-full border border-white/12 bg-white/[0.07] px-3 py-1.5 text-xs font-semibold text-slate-100">연인·배우자 관계</span>
+            <span className="rounded-full border border-white/12 bg-white/[0.07] px-3 py-1.5 text-xs font-semibold text-slate-100">{relationshipLabel} 관계</span>
             <span className="rounded-full border border-white/12 bg-white/[0.07] px-3 py-1.5 text-xs font-semibold text-slate-100">{evaluationYear}년판 · 구매 후 저장</span>
           </div>
         </div>
@@ -226,14 +241,14 @@ export default function PaidCompatibilityAnalysisClient({
       <div className="p-6 sm:p-8">
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="sm:col-span-2">
-            <span className="text-sm font-semibold text-slate-800">상대방 이름 또는 별칭</span>
+            <span className="text-sm font-semibold text-slate-800">{partnerNoun} 이름 또는 별칭</span>
             <input
               value={form.label}
               onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))}
               maxLength={40}
               required
               className="mt-2 w-full rounded-2xl border border-[#cfd5e6] bg-white px-4 py-3.5 text-sm outline-none transition focus:border-[#6f5ce7] focus:ring-2 focus:ring-[#e5e1ff]"
-              placeholder="예: 지민, 배우자"
+              placeholder={partnerPlaceholder}
             />
           </label>
 
@@ -314,10 +329,10 @@ export default function PaidCompatibilityAnalysisClient({
           </div>
         </div>
 
-        <CompatibilityReportValuePreview mode="romantic" evaluationYear={evaluationYear} />
+        <CompatibilityReportValuePreview mode={previewMode} evaluationYear={evaluationYear} />
 
         <div className="mt-5 rounded-2xl bg-[#f7f8fc] px-4 py-4 text-sm leading-7 text-slate-600">
-          상대방 정보는 결제 연결을 위해 현재 브라우저에만 잠시 보관됩니다. 주문에는 분석에 필요한 계산 정보만 보관하며, 결제가 완료되면 브라우저에 남아 있던 상대방 정보는 자동으로 삭제됩니다. 구매 리포트는 {evaluationYear}년판으로 고정 저장됩니다.
+          {partnerNoun} 정보는 결제 연결을 위해 현재 브라우저에만 잠시 보관됩니다. 주문에는 분석에 필요한 계산 정보만 보관하며, 결제가 완료되면 브라우저에 남아 있던 상대방 정보는 자동으로 삭제됩니다. 구매 리포트는 {evaluationYear}년판으로 고정 저장됩니다.
         </div>
         <p className="mt-3 text-xs leading-6 text-slate-500">본인·성인 인증이 아직 완료되지 않았다면 결제 화면에서 NICE 본인확인을 먼저 진행합니다.</p>
 
@@ -327,12 +342,12 @@ export default function PaidCompatibilityAnalysisClient({
           <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
             <div>
               <p className="text-[11px] font-bold tracking-[0.16em] text-slate-400">전문 궁합 리포트</p>
-              <p className="mt-2 text-sm font-semibold text-slate-800">두 사람의 관계 분석을 결제 후 바로 생성합니다.</p>
+              <p className="mt-2 text-sm font-semibold text-slate-800">{relationshipLabel} 관계 분석을 결제 후 바로 생성합니다.</p>
               <p className="mt-1 text-xs leading-5 text-slate-500">결제 완료 후 생성된 {evaluationYear}년판 결과는 구매한 분석에서 다시 볼 수 있습니다.</p>
             </div>
             <div className="shrink-0 sm:text-right">
               <p className="text-xs font-medium text-slate-500">결제 금액</p>
-              <p className="mt-1 text-[22px] font-bold tracking-[-0.02em] text-[#11162d]">{COMPATIBILITY_ROMANTIC_PRODUCT.amount.toLocaleString("ko-KR")}원</p>
+              <p className="mt-1 text-[22px] font-bold tracking-[-0.02em] text-[#11162d]">{product?.amount.toLocaleString("ko-KR") ?? "19,900"}원</p>
             </div>
           </div>
         </div>
@@ -342,7 +357,7 @@ export default function PaidCompatibilityAnalysisClient({
           disabled={!canSubmit}
           className="mt-3 inline-flex w-full items-center justify-center rounded-2xl bg-[#6f5ce7] px-5 py-4 text-sm font-bold text-white shadow-[0_12px_28px_rgba(93,76,209,0.2)] transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
         >
-          결제하고 궁합 분석하기
+          결제하고 {relationshipLabel} 궁합 분석하기
         </button>
         <p className="mt-3 text-center text-xs leading-5 text-slate-400">결제가 승인되면 분석 생성이 시작되고 구매한 분석에 보관됩니다.</p>
       </div>

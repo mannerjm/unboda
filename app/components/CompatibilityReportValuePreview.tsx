@@ -1,4 +1,4 @@
-type CompatibilityPreviewMode = "romantic" | "parent_child" | "siblings" | "other_family";
+type CompatibilityPreviewMode = "romantic" | "workplace" | "friend" | "business" | "parent_child" | "siblings" | "other_family";
 
 type PreviewConfig = Readonly<{
   headline: string;
@@ -13,6 +13,24 @@ const PREVIEW_CONFIG: Record<CompatibilityPreviewMode, PreviewConfig> = {
     directionTitle: "나 → 상대 / 상대 → 나를 따로 해석",
     directionDescription: "같은 관계라도 서로 다르게 체감할 수 있는 부분을 방향별로 나눠 설명합니다.",
     domains: ["정서적 연결", "대화", "갈등 패턴", "장기 기준", "갈등 뒤 회복"],
+  },
+  workplace: {
+    headline: "직장·동료 리포트는 이렇게 읽습니다",
+    directionTitle: "나 → 동료 / 동료 → 나의 업무 영향을 따로 해석",
+    directionDescription: "같은 업무 관계라도 서로에게 주는 추진력과 부담이 다를 수 있어 방향별로 나눠 설명합니다.",
+    domains: ["업무 스타일", "역할 분담", "의사결정", "소통·갈등", "협업 지속 기준"],
+  },
+  friend: {
+    headline: "친구·지인 리포트는 이렇게 읽습니다",
+    directionTitle: "나 → 친구 / 친구 → 나의 관계 영향을 따로 해석",
+    directionDescription: "친밀감과 거리감이 서로에게 어떻게 다르게 느껴지는지 양방향으로 나눠 설명합니다.",
+    domains: ["친밀감", "신뢰", "대화", "거리·경계", "관계 지속 흐름"],
+  },
+  business: {
+    headline: "사업·동업 리포트는 이렇게 읽습니다",
+    directionTitle: "나 → 파트너 / 파트너 → 나의 사업 관계 영향을 따로 해석",
+    directionDescription: "역할·책임·의사결정에서 서로에게 주는 보완과 부담을 방향별로 나눠 설명합니다.",
+    domains: ["역할·책임", "의사결정", "돈을 보는 방식", "권한·갈등", "장기 동업 기준"],
   },
   parent_child: {
     headline: "부모·자녀 리포트는 이렇게 읽습니다",

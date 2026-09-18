@@ -51,6 +51,32 @@ const PREVIEW_DATA: AiConsultingPortfolioPreviewData = {
           "관계를 유지할지 판단할 때 어떤 기준을 보면 돼?",
         ],
       },
+      {
+        productId: "study-learning-strategy",
+        analysisEditionKey: "YEAR:2026",
+        productTitle: "학습 전략 분석",
+        editionLabel: "2026년 분석",
+        acquiredAt: "2026-08-24T06:40:00.000Z",
+        scopeLabel: "이 구매 리포트의 계산 결과와 해석 범위 안에서 다음 질문을 이어갑니다.",
+        suggestedQuestions: [
+          "지금 공부 방식에서 가장 먼저 바꿔볼 부분은 뭐야?",
+          "집중이 끊기는 패턴을 줄이려면 무엇부터 점검해야 해?",
+          "다시 확인할 학습 기준을 정리해줘.",
+        ],
+      },
+      {
+        productId: "business-startup-readiness",
+        analysisEditionKey: "YEAR:2026",
+        productTitle: "창업 준비도 분석",
+        editionLabel: "2026년 분석",
+        acquiredAt: "2026-08-11T04:15:00.000Z",
+        scopeLabel: "이 구매 리포트의 계산 결과와 해석 범위 안에서 다음 질문을 이어갑니다.",
+        suggestedQuestions: [
+          "지금 창업을 시작하기 전에 가장 먼저 점검해야 할 조건은 뭐야?",
+          "준비가 부족하다고 볼 수 있는 신호는 뭐야?",
+          "다음 판단 시점을 정할 기준을 알려줘.",
+        ],
+      },
     ],
     messages: [
       {
@@ -144,7 +170,7 @@ export default async function AdminAiConsultingPreviewPage() {
           <div>
             <p className="text-xs font-bold tracking-[0.16em] text-[#6f5ce7]">ADMIN DESIGN PREVIEW</p>
             <h1 className="mt-2 text-xl font-black text-[#11162d]">통합 AI 상담 UX 미리보기</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-600">재물·이직·관계 리포트를 한 상담에서 자동 연결하는 샘플입니다. 실제 질문권·AI 호출·기억 저장은 동작하지 않습니다.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">재물·이직·관계·학업·창업 리포트를 한 상담에서 자동 연결하는 샘플입니다. 실제 질문권·AI 호출·기억 저장은 동작하지 않습니다.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/admin/purchased-analyses-preview" className="rounded-full border border-[#dce1ef] bg-[#f7f8fc] px-4 py-2 text-sm font-semibold text-slate-700">

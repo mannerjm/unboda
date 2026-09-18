@@ -431,7 +431,7 @@ export default function AiConsultingPortfolioClient({
               </div>
             </section>
 
-            <section className="mt-4 flex flex-col gap-2 rounded-2xl border border-[#dce1ef] bg-white px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <section className="mt-4 rounded-2xl border border-[#dce1ef] bg-white px-5 py-4 shadow-sm">
               <div>
                 <p className="text-sm font-bold">{portfolio.messages.length > 0 ? "통합 상담 이어보기" : "새 통합 상담"}</p>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
@@ -440,9 +440,6 @@ export default function AiConsultingPortfolioClient({
                     : "질문하면 관련 보유 분석을 자동으로 연결해 첫 상담을 시작합니다."}
                 </p>
               </div>
-              <span className="self-start rounded-full bg-[#f3f1ff] px-3 py-2 text-xs font-bold text-[#5e4bd1] sm:self-auto">
-                공용 질문권 {portfolio.questionsRemaining}회
-              </span>
             </section>
 
             <section className="mt-4 rounded-[1.75rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-6">

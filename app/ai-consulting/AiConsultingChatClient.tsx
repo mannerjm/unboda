@@ -289,12 +289,14 @@ export default function AiConsultingChatClient({
   return (
     <main className="min-h-screen bg-[#f5f7fc] px-4 py-7 text-[#11162d] sm:px-8 sm:py-10">
       <div className="mx-auto max-w-4xl">
-        <Link
-          href={reportHref}
-          className="inline-flex items-center rounded-full border border-[#dce1ef] bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-[#b9b2f6] hover:text-[#5e4bd1]"
-        >
-          ← {isPreview ? "미리보기 목록으로" : "리포트로 돌아가기"}
-        </Link>
+        {!isPreview ? (
+          <Link
+            href={reportHref}
+            className="inline-flex items-center rounded-full border border-[#dce1ef] bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-[#b9b2f6] hover:text-[#5e4bd1]"
+          >
+            ← 리포트로 돌아가기
+          </Link>
+        ) : null}
 
         {isPreview ? (
           <div className="mt-4 rounded-2xl border border-[#d8d3ff] bg-[#f3f1ff] px-4 py-3 text-sm leading-6 text-[#5e4bd1]">
@@ -398,14 +400,11 @@ export default function AiConsultingChatClient({
                   <p className="mt-1 text-sm leading-6 text-slate-600">추천 질문을 눌러 시작하거나 직접 질문해 주세요.</p>
                 )}
               </div>
-              <div className="flex items-center gap-4">
-                <span className="rounded-full bg-[#f3f1ff] px-3 py-2 text-sm font-bold text-[#5e4bd1]">남은 질문 {session.questionsRemaining}회</span>
-                {!isPreview ? (
-                  <Link href={creditCheckoutHref} className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4">
-                    질문권 내역
-                  </Link>
-                ) : null}
-              </div>
+              {!isPreview ? (
+                <Link href={creditCheckoutHref} className="self-start text-xs font-semibold text-slate-500 underline decoration-slate-300 underline-offset-4 sm:self-auto">
+                  질문권 내역
+                </Link>
+              ) : null}
             </section>
 
             <section className="mt-4 rounded-[1.75rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-6">
@@ -455,7 +454,7 @@ export default function AiConsultingChatClient({
               </p>
             </section>
 
-            <section className="mt-4 rounded-[1.75rem] border border-[#dce1ef] bg-[#f9faff] p-4 sm:p-5">
+            <section data-section="conversation" className="relative mt-4 rounded-[1.75rem] border border-[#dce1ef] bg-[#f9faff] p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">CONVERSATION</p>
@@ -464,7 +463,7 @@ export default function AiConsultingChatClient({
                 {hasPreviousConversation ? <span className="text-xs font-semibold text-slate-500">{messages.length}개 메시지</span> : null}
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 pb-44 sm:pb-40">
                 {messages.length === 0 ? (
                   <div className="rounded-[1.5rem] border border-dashed border-[#cfd5e6] bg-white p-7 text-center text-sm leading-7 text-slate-600">
                     구매한 분석에서 더 확인하고 싶은 점을 질문해 주세요.
@@ -511,43 +510,44 @@ export default function AiConsultingChatClient({
                   );
                 })}
               </div>
+              {session.state === "ready" ? (
+                <form onSubmit={submitQuestion} data-ai-composer="conversation-sticky" className="sticky bottom-4 z-10 -mt-36 rounded-[1.75rem] border border-[#d8d3ff] bg-white/95 p-4 shadow-[0_18px_50px_rgba(33,40,83,0.14)] backdrop-blur">
+                  <textarea
+                    value={question}
+                    onChange={(event) => setQuestion(event.target.value.slice(0, 300))}
+                    placeholder={hasPreviousConversation
+                      ? "지난 상담에서 이어서 궁금한 점을 질문해 주세요."
+                      : "이 분석에서 더 궁금한 점을 질문해 주세요."}
+                    rows={3}
+                    disabled={isSending}
+                    className="w-full resize-none rounded-2xl bg-[#f3f4f9] px-4 py-3 text-[15px] leading-7 text-slate-800 outline-none ring-[#6f5ce7] focus:ring-1 disabled:opacity-60"
+                  />
+                  <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-xs leading-5 text-slate-500">
+                      {isPreview ? "미리보기에서는 질문이 전송되지 않습니다." : `${question.length}/300 · 범위를 벗어난 질문은 차감되지 않습니다.`}
+                    </span>
+                    <button
+                      type="submit"
+                      disabled={isPreview || isSending || question.trim().length < 2}
+                      className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {isPreview ? "미리보기" : isSending ? "답변 확인 중..." : "질문하기"}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <section className="mt-5 rounded-2xl bg-[#eef0f6] px-5 py-4 text-sm leading-7 text-slate-700">
+                  <p>질문권을 모두 사용했습니다. 기존 상담 기록과 직접 저장한 AI 기억은 계속 확인하고 관리할 수 있습니다.</p>
+                  {!isPreview ? (
+                    <Link href={creditCheckoutHref} className="mt-3 inline-flex font-semibold text-[#5e4bd1] underline underline-offset-4">
+                      {creditCheckoutEnabled ? "AI 질문권 추가 구매·내역" : "질문권 내역 보기"}
+                    </Link>
+                  ) : null}
+                </section>
+              )}
+  
             </section>
 
-            {session.state === "ready" ? (
-              <form onSubmit={submitQuestion} className="sticky bottom-4 z-10 mt-5 rounded-[1.75rem] border border-[#d8d3ff] bg-white/95 p-4 shadow-[0_18px_50px_rgba(33,40,83,0.14)] backdrop-blur">
-                <textarea
-                  value={question}
-                  onChange={(event) => setQuestion(event.target.value.slice(0, 300))}
-                  placeholder={hasPreviousConversation
-                    ? "지난 상담에서 이어서 궁금한 점을 질문해 주세요."
-                    : "이 분석에서 더 궁금한 점을 질문해 주세요."}
-                  rows={3}
-                  disabled={isSending}
-                  className="w-full resize-none rounded-2xl bg-[#f3f4f9] px-4 py-3 text-[15px] leading-7 text-slate-800 outline-none ring-[#6f5ce7] focus:ring-1 disabled:opacity-60"
-                />
-                <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <span className="text-xs leading-5 text-slate-500">
-                    {isPreview ? "미리보기에서는 질문이 전송되지 않습니다." : `${question.length}/300 · 범위를 벗어난 질문은 차감되지 않습니다.`}
-                  </span>
-                  <button
-                    type="submit"
-                    disabled={isPreview || isSending || question.trim().length < 2}
-                    className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    {isPreview ? "미리보기" : isSending ? "답변 확인 중..." : "질문하기"}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <section className="mt-5 rounded-2xl bg-[#eef0f6] px-5 py-4 text-sm leading-7 text-slate-700">
-                <p>질문권을 모두 사용했습니다. 기존 상담 기록과 직접 저장한 AI 기억은 계속 확인하고 관리할 수 있습니다.</p>
-                {!isPreview ? (
-                  <Link href={creditCheckoutHref} className="mt-3 inline-flex font-semibold text-[#5e4bd1] underline underline-offset-4">
-                    {creditCheckoutEnabled ? "AI 질문권 추가 구매·내역" : "질문권 내역 보기"}
-                  </Link>
-                ) : null}
-              </section>
-            )}
           </>
         ) : null}
 

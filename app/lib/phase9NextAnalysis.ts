@@ -47,6 +47,9 @@ const SPECIAL_FOLLOW_UP: Readonly<Record<string, readonly string[]>> = {
   "compatibility-family-parent-child": ["social-family", "relationship-boundary", "yearly-current"],
   "compatibility-family-siblings": ["social-family", "relationship-conflict", "yearly-current"],
   "compatibility-family-other": ["social-family", "relationship-boundary", "yearly-current"],
+  "compatibility-workplace": ["career-workplace-relationships", "career-organization-fit", "yearly-current"],
+  "compatibility-friend": ["relationship-friendship", "relationship-boundary", "yearly-current"],
+  "compatibility-business": ["business-team-management", "business-startup-readiness", "yearly-current"],
 };
 
 function unique(values: readonly string[]): string[] {
@@ -58,7 +61,7 @@ function genericCompatibilityRecommendation(profileId: string): Phase9NextAnalys
     productId: "compatibility",
     title: "궁합 분석",
     categoryLabel: "전문 분석 · 궁합",
-    description: "연인·배우자 또는 가족 관계를 선택해 두 사람의 관계 구조와 현재 흐름을 함께 살펴봅니다.",
+    description: "연인·배우자, 가족, 직장·동료, 친구·지인, 사업·동업 관계를 선택해 두 사람의 관계 구조와 현재 흐름을 함께 살펴봅니다.",
     reason: "개인의 관계 흐름을 실제 두 사람의 관계 구조로 확장해 확인할 수 있습니다.",
     href: `/special-analysis/compatibility?profileId=${encodeURIComponent(profileId)}`,
     analysisEditionKey: null,

@@ -39,12 +39,15 @@ for (const route of [
 ]) {
   assert(home.includes(route), `renewed home must expose direct route ${route}`);
 }
+assert(home.includes('"/ai-consulting"') && home.includes("AI 상담 바로 이어가기"), "member home must expose a direct unified AI consulting entry instead of routing through the purchased library");
+assert(home.includes("이전 상담 기록") && home.includes("직접 저장한 기억"), "home must explain continuity through prior consultation and explicit saved memory");
+assert(home.indexOf("<AiConsultingSection state={state}/>") < home.indexOf("<CuriositySection/>"), "AI consulting differentiation must appear before lower discovery sections");
 
 for (const copy of [
   "원하는 분석 바로 찾기",
   "요즘, 어떤 게 가장 궁금하세요?",
   "혼자 보는 사주와",
-  "분석을 읽고도",
+  "리포트가 끝이 아니라",
   "쉽게 들어오고, 필요한 만큼 깊게.",
   "지금 마음에 걸리는 것",
   "두 사람의 흐름",

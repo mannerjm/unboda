@@ -8,6 +8,7 @@ function read(path: string): string {
 const presentation = read("app/lib/aiConsultingPresentation.ts");
 const entry = read("app/paid-analysis/[productId]/report/AiConsultingEntryCard.tsx");
 const chat = read("app/ai-consulting/AiConsultingChatClient.tsx");
+const portfolioChat = read("app/ai-consulting/AiConsultingPortfolioClient.tsx");
 const page = read("app/ai-consulting/page.tsx");
 const credits = read("app/ai-consulting/credits/page.tsx");
 const creditClient = read("app/ai-consulting/credits/CreditCheckoutClient.tsx");
@@ -17,6 +18,7 @@ const admin = read("app/admin/page.tsx");
 
 for (const [name, source] of [
   ["AI consulting chat", chat],
+  ["AI consulting portfolio chat", portfolioChat],
   ["AI consulting entry", entry],
   ["AI consulting fallback page", page],
   ["AI credit page", credits],
@@ -51,7 +53,7 @@ assert(chat.includes("presentation.suggestedQuestions.map"), "chat must render d
 assert(chat.includes("범위 밖 질문은 답변하지 않아요"), "consulting scope chip must clearly say out-of-scope questions are not answered");
 assert(chat.includes("범위를 벗어나 AI 답변을 생성하지 않았습니다. 질문권도 차감되지 않았습니다."), "DENY policy copy must state that no AI answer is generated and no credit is charged");
 assert(chat.includes("범위를 벗어난 질문은 AI 답변을 생성하지 않으며 질문권도 차감되지 않습니다."), "composer helper must explain blocked out-of-scope behavior");
-assert(entry.includes("범위를 벗어난 질문은 AI 답변을 생성하지 않으며 질문권도 차감되지 않습니다."), "report entry must explain blocked out-of-scope behavior");
+assert(entry.includes("보유 분석 전체 범위 밖 질문은 답변하지 않고 미차감합니다."), "report entry must explain unified owned-scope behavior");
 assert(chat.includes("setQuestion(suggestion)"), "suggested questions must fill the composer without bypassing submission");
 assert(chat.includes("지난 상담에서 이어서 궁금한 점을 질문해 주세요."), "resumed chat composer contract must remain intact");
 assert(chat.includes("이전 상담 이어보기") && chat.includes("최근 상담") && chat.includes("이전 대화"), "prior-conversation orientation must remain intact");
@@ -83,22 +85,27 @@ assert(!chat.includes('남은 질문 {session.questionsRemaining}회'), "mid-pag
 assert(entry.includes("이 리포트를 바탕으로 AI에게 질문하기"), "report entry must preserve the established AI consulting CTA language");
 assert(entry.includes("presentation.productTitle"), "report entry must name the report that grounds consultation");
 assert(entry.includes("presentation.suggestedQuestions.slice(0, 3)"), "report entry must preview suggested follow-up questions");
-assert(entry.includes("이전 상담 기록 보기") && entry.includes("이전 상담 이어보기"), "report entry must preserve continuation/history actions");
+assert(entry.includes("통합 상담 기록 보기") && entry.includes("통합 AI 상담 이어가기"), "report entry must expose unified continuation/history actions");
 assert(entry.includes("이전 상담 기록은 계속 볼 수 있습니다"), "zero-credit prior conversations must remain readable");
 
-assert(page.includes('bg-[#f5f7fc]'), "AI consultation fallback page must use the cool canvas");
+assert(page.includes("AiConsultingPortfolioClient") && page.includes("getActiveProfile"), "AI consultation page must resolve the active profile and render the unified portfolio hub");
 assert(credits.includes('bg-[#f5f7fc]'), "AI credit management must use the Phase 7 cool canvas");
 assert(creditClient.includes('bg-[#6f5ce7]'), "AI credit checkout primary actions must use the shared violet CTA");
 assert(creditClient.includes('fetch("/api/ai-consulting/credits/orders"'), "credit purchase must preserve the server order endpoint");
 assert(creditClient.includes("window.TossPayments") && creditClient.includes("requestPayment"), "credit purchase must preserve Toss payment invocation");
 
 assert(preview.includes("await requireOperator()"), "AI consulting preview must be operator-gated");
-assert(preview.includes("previewData={PREVIEW_DATA}"), "AI consulting preview must render the actual Phase 7 chat component");
-assert(preview.includes("실제 질문권·상담 기록·AI 호출을 만들지 않는 샘플 화면입니다."), "preview must clearly disclose that it creates no live consulting state");
+assert(preview.includes("AiConsultingPortfolioClient") && preview.includes("previewData={PREVIEW_DATA}"), "AI consulting preview must render the actual unified portfolio component");
+assert(preview.includes("실제 질문권·AI 호출·기억 저장은 동작하지 않습니다."), "preview must clearly disclose that it creates no live consulting state");
 for (const forbidden of ["/api/ai-consulting/question", "/api/orders", "requestPayment", "grantEntitlement"]) {
   assert(!preview.includes(forbidden), `operator preview must not invoke commercial/runtime action: ${forbidden}`);
 }
 assert(reportPreview.includes('href="/admin/ai-consulting-preview"'), "Phase 6 report preview must link directly to the Phase 7 follow-up screen");
+assert(portfolioChat.includes("내 구매 분석을 연결하는 AI 상담"), "unified consultation must explain the portfolio model");
+assert(portfolioChat.includes("공용 질문권") && portfolioChat.includes("모든 보유 분석에서 함께 사용"), "unified consultation must make the shared balance explicit");
+assert(portfolioChat.includes("질문마다 관련 리포트 자동 선택"), "unified consultation must explain automatic report routing");
+assert(portfolioChat.includes('fetch("/api/ai-consulting/portfolio/question"'), "unified consultation must submit through the portfolio router");
+assert(portfolioChat.includes('data-ai-composer="portfolio-sticky"'), "unified consultation composer must stay scoped to the conversation");
 assert(admin.includes('href="/admin/ai-consulting-preview"'), "admin dashboard must expose the Phase 7 design preview");
 
 console.log("AI consulting Phase 7 UX regression passed ✓");

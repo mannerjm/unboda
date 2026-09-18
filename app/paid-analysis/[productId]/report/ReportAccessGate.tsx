@@ -46,23 +46,23 @@ export default async function ReportAccessGate({
 
   if (!hasAccess) {
     return (
-      <section className="mt-10 rounded-3xl border border-stone-200 bg-white p-7 shadow-sm sm:p-9">
-        <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">
+      <section className="mx-auto mt-10 max-w-3xl rounded-[2rem] border border-[#dce1ef] bg-white p-7 shadow-[0_16px_45px_rgba(33,40,83,0.07)] sm:p-9">
+        <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">
           ACCESS DENIED
         </p>
 
-        <h2 className="mt-3 text-2xl font-bold text-stone-900">
+        <h2 className="mt-3 text-2xl font-bold text-[#11162d]">
           이 심층 분석을 열람할 권한이 없습니다
         </h2>
 
-        <p className="mt-4 text-sm leading-7 text-stone-600">
+        <p className="mt-4 text-sm leading-7 text-slate-600">
           로그인 상태와 해당 상품의 구매 권한을 확인해 주세요.
           구매가 완료된 계정에만 심층 분석 열람 권한이 연결됩니다.
         </p>
 
         <Link
           href={`/paid-analysis/${canonicalProductId}?profileId=${profileId}`}
-          className="mt-7 block w-full rounded-2xl bg-stone-900 px-5 py-4 text-center font-semibold text-white transition hover:bg-stone-800"
+          className="mt-7 block w-full rounded-2xl bg-[#6f5ce7] px-5 py-4 text-center font-semibold text-white transition hover:bg-[#5f4fd2]"
         >
           상품 설명으로 돌아가기
         </Link>

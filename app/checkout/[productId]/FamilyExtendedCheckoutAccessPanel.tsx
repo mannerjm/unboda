@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import NiceAdultVerificationButton from "@/app/account/NiceAdultVerificationButton";
+import { isFreeAnalysisFoundationReady } from "@/app/lib/freeAnalysisEligibility";
+import type { ProfileFreeAnalysisStatus } from "@/app/lib/freeAnalysisResults/server";
 import type { AccountLifecycleStatus, PaidEligibilityStatus } from "@/app/lib/accounts/server";
 import { guestAuthState, type AuthState } from "@/app/lib/auth";
 import {
@@ -49,6 +51,7 @@ export default function FamilyExtendedCheckoutAccessPanel({
   profileLabel,
   priceLabel,
   editionLabel,
+  freeAnalysisStatus,
 }: {
   productId: string;
   profileId?: string;
@@ -56,6 +59,7 @@ export default function FamilyExtendedCheckoutAccessPanel({
   profileLabel?: string;
   priceLabel: string;
   editionLabel?: string;
+  freeAnalysisStatus?: ProfileFreeAnalysisStatus | null;
 }) {
   const [authState, setAuthState] = useState<AuthState>(guestAuthState);
   const [accountStatus, setAccountStatus] = useState<AccountStatusResponse | null>(null);
@@ -107,6 +111,10 @@ export default function FamilyExtendedCheckoutAccessPanel({
 
   async function handlePayment() {
     if (authState.status !== "authenticated" || !profileId || isPaying) return;
+    if (!isFreeAnalysisFoundationReady(freeAnalysisStatus)) {
+      setErrorMessage("현재 분석 대상의 무료 사주를 먼저 확인해 주세요.");
+      return;
+    }
     if (!accountStatus || !accountStatus.emailVerified || accountStatus.account.paidEligibilityStatus !== "VERIFIED_ADULT") {
       setErrorMessage("결제 전에 계정 인증을 완료해 주세요.");
       return;
@@ -177,6 +185,26 @@ export default function FamilyExtendedCheckoutAccessPanel({
         <><p className="text-xs font-semibold tracking-[0.2em] text-slate-500">PURCHASE CHECK</p><h2 className="mt-3 text-2xl font-bold">결제 가능 상태를 확인하고 있습니다</h2></>
       ) : !accountStatus ? (
         <><h2 className="text-2xl font-bold">계정 상태를 확인하지 못했습니다</h2><Link href="/account" className="mt-6 inline-flex rounded-2xl border border-[#cfd5e6] px-5 py-3 text-sm font-semibold">계정 정보 확인</Link></>
+      ) : !profileId ? (
+        <>
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">ANALYSIS SUBJECT REQUIRED</p>
+          <h2 className="mt-3 text-2xl font-bold">먼저 분석할 프로필을 선택해 주세요</h2>
+          <p className="mt-4 text-sm leading-7 text-slate-600">가족 궁합 정보는 둘러볼 수 있지만 실제 결제는 내 분석 대상이 정해진 뒤 진행합니다.</p>
+          <Link href="/mypage" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-[#6f5ce7] px-5 py-4 text-sm font-bold text-white">마이페이지에서 분석 대상 선택</Link>
+        </>
+      ) : !isFreeAnalysisFoundationReady(freeAnalysisStatus) ? (
+        <>
+          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">FREE ANALYSIS REQUIRED</p>
+          <h2 className="mt-3 text-2xl font-bold">유료 분석 전에 무료 사주를 먼저 확인해 주세요</h2>
+          <p className="mt-4 text-sm leading-7 text-slate-600">
+            {freeAnalysisStatus === "stale"
+              ? "내 프로필의 출생 정보가 변경되어 기존 무료 사주 기준과 다릅니다. 현재 정보로 무료 사주를 다시 확인해 주세요."
+              : "내 프로필의 기본 사주를 먼저 확인하면 같은 출생정보를 기준으로 가족 궁합 분석을 이어갈 수 있습니다."}
+          </p>
+          <Link href={freeAnalysisStatus === "generating" ? `/loading?profileId=${encodeURIComponent(profileId)}` : "/saju"} className="mt-6 inline-flex w-full justify-center rounded-2xl bg-[#6f5ce7] px-5 py-4 text-sm font-bold text-white">
+            {freeAnalysisStatus === "generating" ? "무료 사주 결과 확인" : "무료 사주 먼저 보기"}
+          </Link>
+        </>
       ) : !accountStatus.emailVerified ? (
         <><p className="text-xs font-semibold tracking-[0.2em] text-slate-500">EMAIL VERIFICATION</p><h2 className="mt-3 text-2xl font-bold">결제 전에 이메일 인증을 완료해 주세요</h2><Link href="/account" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-[#6f5ce7] px-5 py-4 text-sm font-bold text-white transition hover:bg-[#5f4fd2]">이메일 인증 확인하기</Link></>
       ) : accountStatus.account.paidEligibilityStatus !== "VERIFIED_ADULT" ? (

@@ -61,7 +61,7 @@ export default function SajuPage() {
 
   const startAnalysis = async () => {
     if (!activeProfile) {
-      setValidationMessage("마이페이지에서 활성 분석 대상을 선택해 주세요.");
+      setValidationMessage("마이페이지에서 분석 대상을 선택해 주세요.");
       return;
     }
 
@@ -119,7 +119,7 @@ export default function SajuPage() {
           <div className="space-y-5 p-7 sm:p-10">
             {activeProfile ? (
               <div className="rounded-2xl border border-[#e0e4ef] bg-[#f8f9fd] p-5 text-sm leading-7 text-[#5f6881]">
-                <p className="font-bold text-[#11162d]">활성 분석 대상: {activeProfile.label}</p>
+                <p className="font-bold text-[#11162d]">분석 대상: {activeProfile.label}</p>
                 <p>{activeProfile.birthDate} · {activeProfile.birthTime} · {activeProfile.gender} · {activeProfile.calendarType}</p>
                 <a href="/mypage" className="mt-3 inline-block font-bold text-[#6555c6]">마이페이지에서 대상 변경</a>
               </div>

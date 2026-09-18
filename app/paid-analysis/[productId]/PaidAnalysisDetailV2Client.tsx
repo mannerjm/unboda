@@ -261,7 +261,7 @@ void detail;
     </p>
   ) : null}
 
-  <p className="mt-5 text-sm leading-7 text-slate-600">
+  <p className="mt-5 text-[15px] leading-7 text-slate-700">
     구매 권한이 확인된 사용자에게 제공되는 심층 분석 결과 페이지입니다.
   </p>
 </div>
@@ -282,7 +282,7 @@ void detail;
         </p>
       </header>
 
-      <div className="mt-8 space-y-5">
+      <div className="mt-6 space-y-4">
         {detail ? (
   <section className="rounded-[2rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-8">
     <div className="border-b border-[#dce1ef] pb-6">
@@ -300,7 +300,7 @@ void detail;
         {detail.heroSummary.headline}
       </h2>
 
-      <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
+      <p className="mt-3 text-[15px] leading-7 text-slate-700 sm:text-base">
         {detail.heroSummary.subheadline}
       </p>
 
@@ -333,7 +333,7 @@ void detail;
                 {index + 1}
               </span>
 
-              <span className="text-sm leading-6 text-slate-700">
+              <span className="text-[15px] leading-7 text-slate-700">
                 {reason}
               </span>
             </li>
@@ -342,7 +342,7 @@ void detail;
       </div>
     </div>
 
-    <div className="mt-6 rounded-2xl border border-[#dce1ef] bg-white p-5 sm:p-6">
+    <div className="mt-5 rounded-2xl border border-[#dce1ef] bg-white p-5 sm:p-6">
       <p className="text-xs font-semibold tracking-[0.18em] text-slate-500">
         운의 구조 분석
       </p>
@@ -351,7 +351,7 @@ void detail;
         현재 흐름을 만드는 핵심 구조
       </h3>
 
-      <p className="mt-3 text-sm leading-7 text-slate-600">
+      <p className="mt-3 text-[15px] leading-7 text-slate-700">
         {detail.fortuneStructure.summary}
       </p>
 
@@ -369,7 +369,7 @@ void detail;
               {item.value}
             </p>
 
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-[15px] leading-7 text-slate-700">
               {item.interpretation}
             </p>
           </article>
@@ -377,7 +377,7 @@ void detail;
       </div>
     </div>
 
-    <div className="mt-6 rounded-2xl border border-[#dce1ef] bg-white p-5 sm:p-6">
+    <div className="mt-5 rounded-2xl border border-[#dce1ef] bg-white p-5 sm:p-6">
       <p className="text-xs font-semibold tracking-[0.18em] text-slate-500">
         현재 상황 분석
       </p>
@@ -386,7 +386,7 @@ void detail;
         지금의 기회와 주의할 점
       </h3>
 
-      <p className="mt-3 text-sm leading-7 text-slate-600">
+      <p className="mt-3 text-[15px] leading-7 text-slate-700">
         {detail.currentSituation.summary}
       </p>
 
@@ -401,7 +401,7 @@ void detail;
               (opportunity, index) => (
                 <li
                   key={`${opportunity}-${index}`}
-                  className="flex gap-2 text-sm leading-6 text-slate-700"
+                  className="flex gap-2 text-[15px] leading-7 text-slate-700"
                 >
                   <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
                   <span>{opportunity}</span>
@@ -420,7 +420,7 @@ void detail;
             {detail.currentSituation.cautions.map((caution, index) => (
               <li
                 key={`${caution}-${index}`}
-                className="flex gap-2 text-sm leading-6 text-slate-700"
+                className="flex gap-2 text-[15px] leading-7 text-slate-700"
               >
                 <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500" />
                 <span>{caution}</span>
@@ -431,7 +431,7 @@ void detail;
       </div>
     </div>
 
-    <div className="mt-6 rounded-2xl border border-[#dce1ef] bg-white p-5 sm:p-6">
+    <div className="mt-5 rounded-2xl border border-[#dce1ef] bg-white p-5 sm:p-6">
       <p className="text-xs font-semibold tracking-[0.18em] text-slate-500">
         앞으로의 흐름
       </p>
@@ -459,7 +459,7 @@ void detail;
                 {item.title}
               </h4>
 
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-[15px] leading-7 text-slate-700">
                 {item.description}
               </p>
             </div>
@@ -472,7 +472,7 @@ void detail;
       <PeriodTimelineSection periodAnalysis={detail.periodAnalysis} />
     ) : null}
 
-    <div className="mt-6 grid gap-4 sm:grid-cols-2">
+    <div className="mt-5 grid gap-3 sm:grid-cols-2">
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5">
         <p className="text-xs font-semibold tracking-[0.18em] text-emerald-700">
           행동 가이드
@@ -486,7 +486,7 @@ void detail;
           {detail.actionGuide.map((action, index) => (
             <li
               key={`${action}-${index}`}
-              className="rounded-xl bg-white px-4 py-3 text-sm leading-6 text-slate-700"
+              className="rounded-xl bg-white px-4 py-3 text-[15px] leading-7 text-slate-700"
             >
               {action}
             </li>
@@ -507,7 +507,7 @@ void detail;
           {detail.avoidGuide.map((avoid, index) => (
             <li
               key={`${avoid}-${index}`}
-              className="rounded-xl bg-white px-4 py-3 text-sm leading-6 text-slate-700"
+              className="rounded-xl bg-white px-4 py-3 text-[15px] leading-7 text-slate-700"
             >
               {avoid}
             </li>
@@ -534,7 +534,7 @@ void detail;
       </div>
     </div>
 
-    <div className="mt-6 rounded-2xl border border-[#dce1ef] bg-white p-5 sm:p-6">
+    <div className="mt-5 rounded-2xl border border-[#dce1ef] bg-white p-5 sm:p-6">
       <p className="text-xs font-semibold tracking-[0.18em] text-slate-500">
         최종 점검
       </p>
@@ -553,7 +553,7 @@ void detail;
               ✓
             </span>
 
-            <span className="text-sm leading-6 text-slate-700">
+            <span className="text-[15px] leading-7 text-slate-700">
               {item}
             </span>
           </li>
@@ -561,7 +561,7 @@ void detail;
       </ul>
     </div>
     {detail.confidence ? (
-    <div className="mt-6 rounded-2xl border border-[#dce1ef] bg-white p-5 sm:p-6">
+    <div className="mt-5 rounded-2xl border border-[#dce1ef] bg-white p-5 sm:p-6">
   <div className="flex flex-wrap items-center justify-between gap-3">
     <div>
       <p className="text-xs font-semibold tracking-[0.18em] text-slate-500">
@@ -588,7 +588,7 @@ void detail;
         {detail.confidence.strongestEvidence.map((item, index) => (
           <li
             key={`${item}-${index}`}
-            className="flex gap-3 text-sm leading-7 text-slate-700"
+            className="flex gap-3 text-[15px] leading-7 text-slate-700"
           >
             <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
             <span>{item}</span>
@@ -606,7 +606,7 @@ void detail;
         {detail.confidence.uncertaintyFactors.map((item, index) => (
           <li
             key={`${item}-${index}`}
-            className="flex gap-3 text-sm leading-7 text-slate-700"
+            className="flex gap-3 text-[15px] leading-7 text-slate-700"
           >
             <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
             <span>{item}</span>
@@ -621,7 +621,7 @@ void detail;
       해석의 한계
     </p>
 
-    <p className="mt-2 text-sm leading-7 text-slate-600">
+    <p className="mt-2 text-[15px] leading-7 text-slate-700">
       {detail.confidence.limitations}
     </p>
   </div>

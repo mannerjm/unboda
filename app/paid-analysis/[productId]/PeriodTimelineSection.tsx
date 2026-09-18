@@ -17,7 +17,7 @@ export default function PeriodTimelineSection({
         {periodAnalysis.headline}
       </h3>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-4 space-y-3">
         {periodAnalysis.timelineItems.map((item) => (
           <article
             key={item.periodKey}
@@ -29,7 +29,7 @@ export default function PeriodTimelineSection({
               </p>
 
               {item.intensity ? (
-                <span className="rounded-full bg-[#6f5ce7] px-2 py-0.5 text-[10px] font-semibold text-white">
+                <span className="rounded-full bg-[#6f5ce7] px-2 py-0.5 text-xs font-semibold text-white">
                   {item.intensity}
                 </span>
               ) : null}
@@ -37,14 +37,14 @@ export default function PeriodTimelineSection({
 
             <h4 className="mt-1 font-bold text-[#11162d]">{item.title}</h4>
 
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-[15px] leading-7 text-slate-700">
               {item.summary}
             </p>
 
             {item.actions && item.actions.length > 0 ? (
               <div className="mt-3">
                 <p className="text-xs font-semibold text-emerald-700">이 구간의 행동</p>
-                <ul className="mt-1 space-y-1 text-sm leading-6 text-slate-600">
+                <ul className="mt-1 space-y-1 text-[15px] leading-7 text-slate-700">
                   {item.actions.map((action) => (
                     <li key={action}>• {action}</li>
                   ))}
@@ -55,7 +55,7 @@ export default function PeriodTimelineSection({
             {item.cautions && item.cautions.length > 0 ? (
               <div className="mt-3">
                 <p className="text-xs font-semibold text-rose-700">이 구간의 주의</p>
-                <ul className="mt-1 space-y-1 text-sm leading-6 text-slate-600">
+                <ul className="mt-1 space-y-1 text-[15px] leading-7 text-slate-700">
                   {item.cautions.map((caution) => (
                     <li key={caution}>• {caution}</li>
                   ))}
@@ -67,9 +67,9 @@ export default function PeriodTimelineSection({
       </div>
 
       {periodAnalysis.keyPoints && periodAnalysis.keyPoints.length > 0 ? (
-        <div className="mt-5 rounded-2xl bg-[#eef0f6] p-4">
+        <div className="mt-4 rounded-2xl bg-[#eef0f6] p-4">
           <p className="text-xs font-semibold text-slate-500">이 기간의 핵심</p>
-          <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+          <ul className="mt-2 space-y-1 text-[15px] leading-7 text-slate-700">
             {periodAnalysis.keyPoints.map((point) => (
               <li key={point}>• {point}</li>
             ))}

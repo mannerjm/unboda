@@ -61,6 +61,7 @@ export async function POST(request: Request) {
       question: input.question.trim(),
       preferredProductId,
       preferredEditionKey,
+      profile,
     });
 
     if (result.state === "credit_required") {

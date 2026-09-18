@@ -87,20 +87,23 @@ for (const marker of [
   "전체 보관함",
   "연도판과 분석 상태",
   "리포트 보기",
-  "AI 상담",
+  "통합 AI 상담 이어가기",
   "다음 질문이 생겼다면",
 ]) {
   assert(list.includes(marker), `Phase 8 library must expose ${marker}`);
 }
 assert(list.includes('data-next-question-slot="phase9"'), "Phase 8 must reserve a stable next-question slot for Phase 9");
+assert(list.includes("다른 심층 분석이나 전문 분석을 둘러볼 수 있습니다."), "next-question copy must stay category-neutral for future specialist analysis expansion");
+assert(list.includes(">전문 분석 보기</Link>"), "next-question CTA must use the generic specialist-analysis label");
 assert(list.includes("allEditions") && list.includes("acquiredAt.localeCompare"), "recent item must derive from acquisition time");
 assert(list.includes("completedCount") && list.includes("preparingCount"), "library must summarize completed/preparing states");
-assert(list.includes("consultingHref(") && list.includes("/ai-consulting?"), "completed reports must support AI consultation re-entry");
-assert(list.includes("edition.reportStatus === \"completed\" && Boolean(edition.analysisEditionKey)"), "AI consultation must only be offered for completed edition-scoped reports");
+assert(list.includes("const consultingHubHref") && list.includes("/ai-consulting?profileId="), "library must expose exactly one profile-wide AI consultation hub entry");
+assert(!list.includes("이 리포트로 질문하기"), "library must not expose per-report AI consultation buttons");
+assert(!list.includes("consultingHref("), "library must not retain per-report AI consultation routing helpers");
 assert(list.includes("reportHref(") && list.includes("encodeURIComponent(editionKey)"), "report reopening must preserve the exact edition");
 assert(list.includes('previewMode = false'), "shared library renderer must support a non-mutating operator preview");
 assert(list.includes('if (previewMode) return "/admin/report-preview"'), "preview report actions must stay in admin preview flow");
-assert(list.includes('if (previewMode) return "/admin/ai-consulting-preview"'), "preview AI actions must stay in admin preview flow");
+assert(list.includes('? "/admin/ai-consulting-preview"'), "preview unified AI hub action must stay in admin preview flow");
 
 assert(refresh.includes("router.refresh()"), "preparing reports must keep server refresh");
 assert(refresh.includes("window.setInterval") && refresh.includes("window.clearInterval"), "preparing auto-refresh lifecycle must remain intact");

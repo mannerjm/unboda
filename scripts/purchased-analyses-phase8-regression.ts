@@ -135,6 +135,6 @@ assert(formatAnalysisEditionLabel(targetMonthEdition) === "2026년 10월 대상 
 for (const forbidden of ["/api/orders", "requestPayment", "grantEntitlement", "createPurchaseFromPaidOrder"]) {
   assert(!preview.includes(forbidden), `Phase 8 preview must not invoke commercial mutation: ${forbidden}`);
 }
-assert(admin.includes('href="/admin/purchased-analyses-preview"'), "admin dashboard must expose Phase 8 preview");
+assert(!admin.includes('href="/admin/purchased-analyses-preview"'), "admin dashboard must not expose the completed Phase 8 preview");
 
 console.log("Purchased analyses Phase 8 library regression passed ✓");

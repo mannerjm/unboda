@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminGrowthDashboard, getAdminRefundClosureDashboard } from "@/app/lib/analytics/server";
 import { getAiConsultingCreditBundle } from "@/app/lib/aiConsulting/commercialPolicy";
@@ -91,26 +90,6 @@ export default async function AdminPage() {
   return (
     <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
       <div className="mx-auto w-full max-w-6xl">
-        <div className="mb-6 flex flex-wrap justify-end gap-2">
-          <Link
-            href="/admin/report-preview"
-            className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-4 py-2 text-sm font-semibold text-[#5e4bd1] transition hover:bg-[#eae7ff]"
-          >
-            Phase 6 리포트 디자인 미리보기
-          </Link>
-          <Link
-            href="/admin/ai-consulting-preview"
-            className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-4 py-2 text-sm font-semibold text-[#5e4bd1] transition hover:bg-[#eae7ff]"
-          >
-            Phase 7 AI 상담 UX 미리보기
-          </Link>
-          <Link
-            href="/admin/purchased-analyses-preview"
-            className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-4 py-2 text-sm font-semibold text-[#5e4bd1] transition hover:bg-[#eae7ff]"
-          >
-            Phase 8 구매한 분석 보관함 미리보기
-          </Link>
-        </div>
         {growth ? (
           <AdminGrowthOverview report={growth} productLabels={productLabels} />
         ) : (

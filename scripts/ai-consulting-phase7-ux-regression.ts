@@ -106,6 +106,6 @@ assert(portfolioChat.includes("공용 질문권") && portfolioChat.includes("모
 assert(portfolioChat.includes("질문마다 관련 리포트 자동 선택"), "unified consultation must explain automatic report routing");
 assert(portfolioChat.includes('fetch("/api/ai-consulting/portfolio/question"'), "unified consultation must submit through the portfolio router");
 assert(portfolioChat.includes('data-ai-composer="portfolio-sticky"'), "unified consultation composer must stay scoped to the conversation");
-assert(admin.includes('href="/admin/ai-consulting-preview"'), "admin dashboard must expose the Phase 7 design preview");
+assert(!admin.includes('href="/admin/ai-consulting-preview"'), "admin dashboard must not expose the completed Phase 7 design preview");
 
 console.log("AI consulting Phase 7 UX regression passed ✓");

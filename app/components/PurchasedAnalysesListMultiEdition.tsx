@@ -108,21 +108,6 @@ function reportHref(
   return `/paid-analysis/${encodeURIComponent(group.productId)}/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`;
 }
 
-function consultingHref(
-  group: PurchasedAnalysisProductGroup,
-  profileId: string,
-  editionKey: string,
-  previewMode: boolean,
-): string {
-  if (previewMode) return "/admin/ai-consulting-preview";
-  const query = new URLSearchParams({
-    profileId,
-    productId: group.productId,
-    edition: editionKey,
-  });
-  return `/ai-consulting?${query.toString()}`;
-}
-
 export default function PurchasedAnalysesList({
   groups,
   profileId,
@@ -157,7 +142,6 @@ export default function PurchasedAnalysesList({
   ).length;
   const recentReportHref = reportHref(recent.group, profileId, recent.edition.analysisEditionKey, previewMode);
   const recentEditionLabel = getEditionLabel(recent.group, recent.edition);
-  const recentCanConsult = recent.edition.reportStatus === "completed" && Boolean(recent.edition.analysisEditionKey);
   const consultingHubHref = previewMode
     ? "/admin/ai-consulting-preview"
     : `/ai-consulting?profileId=${encodeURIComponent(profileId)}`;
@@ -190,14 +174,6 @@ export default function PurchasedAnalysesList({
                 {recent.edition.reportStatus === "failed" ? "다시 준비하기" : "리포트 보기"}
               </Link>
             )}
-            {recentCanConsult ? (
-              <Link
-                href={consultingHref(recent.group, profileId, recent.edition.analysisEditionKey!, previewMode)}
-                className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]"
-              >
-                이 리포트로 질문하기
-              </Link>
-            ) : null}
           </div>
         </div>
       </section>
@@ -262,7 +238,6 @@ export default function PurchasedAnalysesList({
                     const href = reportHref(group, profileId, edition.analysisEditionKey, previewMode);
                     const displayEditionLabel = getEditionLabel(group, edition);
                     const isPreparing = edition.reportStatus === "none" || edition.reportStatus === "generating";
-                    const canConsult = edition.reportStatus === "completed" && Boolean(edition.analysisEditionKey);
 
                     return (
                       <div key={edition.analysisEditionKey ?? "legacy"} className="grid gap-4 py-4 first:pt-0 last:pb-0 sm:grid-cols-[1fr_auto] sm:items-center">
@@ -289,14 +264,6 @@ export default function PurchasedAnalysesList({
                               {edition.reportStatus === "failed" ? "다시 준비하기" : "리포트 보기"}
                             </Link>
                           )}
-                          {canConsult ? (
-                            <Link
-                              href={consultingHref(group, profileId, edition.analysisEditionKey!, previewMode)}
-                              className="rounded-xl bg-[#f3f1ff] px-4 py-2.5 text-xs font-bold text-[#5e4bd1] transition hover:bg-[#eae7ff]"
-                            >
-                              이 리포트로 질문하기
-                            </Link>
-                          ) : null}
                         </div>
                       </div>
                     );
@@ -312,14 +279,14 @@ export default function PurchasedAnalysesList({
         <p className="text-xs font-bold tracking-[0.15em] text-[#6f5ce7]">NEXT QUESTION</p>
         <h2 className="mt-2 text-xl font-black text-[#11162d]">다음 질문이 생겼다면</h2>
         <p className="mt-2 max-w-2xl text-[15px] leading-7 text-slate-700">
-          보관한 리포트를 다시 읽은 뒤 새로운 궁금증이 생기면 다른 심층 분석이나 관계 분석을 둘러볼 수 있습니다.
+          보관한 리포트를 다시 읽은 뒤 새로운 궁금증이 생기면 다른 심층 분석이나 전문 분석을 둘러볼 수 있습니다.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Link href="/deep-analysis" className="rounded-2xl bg-[#171a3d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#242957]">
             심층 분석 둘러보기
           </Link>
           <Link href="/special-analysis" className="rounded-2xl border border-[#dce1ef] bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-[#f7f8fc]">
-            관계·전문 분석 보기
+            전문 분석 보기
           </Link>
         </div>
       </section>

@@ -13,11 +13,14 @@ export type PurchasedAnalysisProductGroup = {
   profileId: string;
   productId: string;
   productName: string;
+  latestAcquiredAt: string;
   editions: Array<{
     analysisEditionKey: string | null;
     reportStatus: "none" | "generating" | "completed" | "failed";
     editionLabel: string;
     isLatest: boolean;
+    acquiredAt: string;
+    acquisitionSource: "purchase" | "subscription" | "credit" | "grant";
   }>;
 };
 
@@ -67,16 +70,28 @@ export function groupPurchasedAnalysesByProduct(
       },
     );
 
+    const editions = sortedEditions.map(([editionKey, summary], index) => ({
+      analysisEditionKey: editionKey,
+      reportStatus: summary.reportStatus,
+      editionLabel: formatAnalysisEditionLabel(editionKey ?? "LEGACY"),
+      isLatest: index === 0, // First (most recent) edition
+      acquiredAt: summary.acquiredAt,
+      acquisitionSource: summary.acquisitionSource,
+    }));
+    const latestAcquiredAt = editions.reduce(
+      (latest, edition) => edition.acquiredAt > latest ? edition.acquiredAt : latest,
+      "",
+    );
+
     return {
       profileId: group.profileId,
       productId: group.productId,
       productName: group.productName,
-      editions: sortedEditions.map(([editionKey, summary], index) => ({
-        analysisEditionKey: editionKey,
-        reportStatus: summary.reportStatus,
-        editionLabel: formatAnalysisEditionLabel(editionKey ?? "LEGACY"),
-        isLatest: index === 0, // First (most recent) edition
-      })),
+      latestAcquiredAt,
+      editions,
     };
-  });
+  }).sort((a, b) =>
+    b.latestAcquiredAt.localeCompare(a.latestAcquiredAt)
+      || a.productName.localeCompare(b.productName, "ko-KR"),
+  );
 }

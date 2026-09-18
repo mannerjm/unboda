@@ -119,6 +119,8 @@ export type PaidAnalysisSummary = {
   productName: string;
   reportStatus: PaidReportStatus | "none";
   analysisEditionKey: string | null;
+  acquiredAt: string;
+  acquisitionSource: "purchase" | "subscription" | "credit" | "grant";
 };
 
 function paidReportKey(profileId: string, productId: string, editionKey: string | null): string {
@@ -167,6 +169,8 @@ export async function listUserPaidAnalysisSummaries(
             paidReportKey(entitlement.profileId, productId, editionKey),
           ) ?? "none",
         analysisEditionKey: editionKey,
+        acquiredAt: entitlement.createdAt,
+        acquisitionSource: entitlement.source,
       };
     });
 }

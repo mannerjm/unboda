@@ -86,6 +86,8 @@ const completedSeptember = {
   productName: "재물운 심층 분석",
   reportStatus: "completed" as const,
   analysisEditionKey: "MONTH:2026-09",
+  acquiredAt: "2026-09-01T00:00:00.000Z",
+  acquisitionSource: "purchase" as const,
 };
 const generatingOctober = {
   ...completedSeptember,

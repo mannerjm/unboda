@@ -104,6 +104,12 @@ export default async function AdminPage() {
           >
             Phase 7 AI 상담 UX 미리보기
           </Link>
+          <Link
+            href="/admin/purchased-analyses-preview"
+            className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-4 py-2 text-sm font-semibold text-[#5e4bd1] transition hover:bg-[#eae7ff]"
+          >
+            Phase 8 구매한 분석 보관함 미리보기
+          </Link>
         </div>
         {growth ? (
           <AdminGrowthOverview report={growth} productLabels={productLabels} />

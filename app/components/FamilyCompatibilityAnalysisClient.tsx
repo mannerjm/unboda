@@ -71,7 +71,7 @@ export default function FamilyCompatibilityAnalysisClient({
                 type="button"
                 aria-pressed={selected}
                 onClick={() => selectRelationship(option)}
-                className={`min-w-[240px] snap-start rounded-[22px] border p-5 text-left transition sm:min-w-0 ${selected ? "border-stone-900 bg-[#171a3d] text-white shadow-sm" : "border-[#dce1ef] bg-white text-[#11162d] hover:border-[#aaa0f4]"}`}
+                className={`min-w-[240px] snap-start rounded-[22px] border p-5 text-left transition sm:min-w-0 ${selected ? "border-[#7f70e5] bg-[linear-gradient(145deg,#171a3d,#24204d)] text-white shadow-[0_12px_28px_rgba(54,45,112,0.16)]" : "border-[#dce1ef] bg-white text-[#11162d] hover:border-[#aaa0f4] hover:bg-[#faf9ff]"}`}
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-base font-bold">{option.title}</span>

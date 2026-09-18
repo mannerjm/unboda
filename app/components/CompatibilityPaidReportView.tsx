@@ -28,7 +28,7 @@ function PointList({ points }: { points: readonly string[] }) {
     <ul className="mt-5 grid gap-3">
       {points.map((point) => (
         <li key={point} className="flex gap-3 rounded-2xl bg-white/80 px-4 py-3 text-sm leading-7 text-slate-700 ring-1 ring-[#dce1ef]/80">
-          <span aria-hidden="true" className="mt-[9px] flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#171a3d] text-[10px] font-bold text-white">✓</span>
+          <span aria-hidden="true" className="mt-[9px] flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6f5ce7] text-[10px] font-bold text-white">✓</span>
           <span>{point}</span>
         </li>
       ))}
@@ -49,12 +49,12 @@ function SummaryTile({ eyebrow, title, body }: { eyebrow: string; title: string;
 function PerspectiveCard({ label, headline, summary, signals }: { label: string; headline: string; summary: string; signals: readonly string[] }) {
   return (
     <article className="rounded-3xl border border-[#d8d3ff] bg-white p-5 shadow-sm sm:p-6">
-      <p className="text-xs font-semibold text-slate-300">{label}</p>
+      <p className="text-xs font-semibold text-[#5e4bd1]">{label}</p>
       <h4 className="mt-3 text-lg font-bold leading-8 text-[#11162d]">{headline}</h4>
       <p className="mt-3 text-sm leading-7 text-slate-600">{summary}</p>
       <div className="mt-5 space-y-2">
         {signals.map((signal) => (
-          <p key={signal} className="flex gap-2 text-xs leading-6 text-slate-300">
+          <p key={signal} className="flex gap-2 text-xs leading-6 text-slate-600">
             <span aria-hidden="true" className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#dccaa7]" />
             <span>{signal}</span>
           </p>

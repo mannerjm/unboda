@@ -3,8 +3,11 @@ import AppShell from "@/app/components/AppShell";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import {
+  COMPATIBILITY_BUSINESS_PRODUCT,
   COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT,
+  COMPATIBILITY_FRIEND_PRODUCT,
   COMPATIBILITY_ROMANTIC_PRODUCT,
+  COMPATIBILITY_WORKPLACE_PRODUCT,
 } from "@/app/lib/specialAnalysisProducts";
 
 export default async function CompatibilityAnalysisPage() {
@@ -81,6 +84,68 @@ export default async function CompatibilityAnalysisPage() {
                 <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-[#dce1ef]">기타 가족</span>
               </div>
               <span className="mt-auto pt-7 text-sm font-bold text-[#11162d]">가족 궁합 시작하기 →</span>
+            </Link>
+          </section>
+
+          <section className="mt-5 grid gap-5 lg:grid-cols-3">
+            <Link
+              href="/special-analysis/compatibility/workplace"
+              className="group flex min-h-[270px] flex-col rounded-[28px] border border-[#dfe3ef] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <span className="inline-flex rounded-full bg-[#f3f1ff] px-3 py-1.5 text-[11px] font-bold text-[#5e4bd1]">업무 관계</span>
+                <span className="text-sm font-bold text-[#11162d]">{COMPATIBILITY_WORKPLACE_PRODUCT.amount.toLocaleString("ko-KR")}원</span>
+              </div>
+              <h2 className="mt-5 text-2xl font-bold tracking-[-0.02em] text-[#11162d]">직장·동료 궁합</h2>
+              <p className="mt-4 text-sm leading-7 text-slate-600">
+                상사·동료·팀원·업무 협업자 사이의 일하는 방식, 역할 분담, 소통과 갈등 흐름을 살펴봅니다.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">업무 스타일</span>
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">역할·소통</span>
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">협업 갈등</span>
+              </div>
+              <span className="mt-auto pt-7 text-sm font-bold text-[#11162d]">직장·동료 궁합 시작하기 →</span>
+            </Link>
+
+            <Link
+              href="/special-analysis/compatibility/friend"
+              className="group flex min-h-[270px] flex-col rounded-[28px] border border-[#dfe3ef] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <span className="inline-flex rounded-full bg-[#f3f1ff] px-3 py-1.5 text-[11px] font-bold text-[#5e4bd1]">사적 관계</span>
+                <span className="text-sm font-bold text-[#11162d]">{COMPATIBILITY_FRIEND_PRODUCT.amount.toLocaleString("ko-KR")}원</span>
+              </div>
+              <h2 className="mt-5 text-2xl font-bold tracking-[-0.02em] text-[#11162d]">친구·지인 궁합</h2>
+              <p className="mt-4 text-sm leading-7 text-slate-600">
+                친구와 가까운 지인 사이의 신뢰, 친밀감, 거리 조절, 오해와 관계 지속 흐름을 살펴봅니다.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">친밀감·신뢰</span>
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">거리·경계</span>
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">오해·회복</span>
+              </div>
+              <span className="mt-auto pt-7 text-sm font-bold text-[#11162d]">친구·지인 궁합 시작하기 →</span>
+            </Link>
+
+            <Link
+              href="/special-analysis/compatibility/business"
+              className="group flex min-h-[270px] flex-col rounded-[28px] border border-[#dfe3ef] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <span className="inline-flex rounded-full bg-[#f3f1ff] px-3 py-1.5 text-[11px] font-bold text-[#5e4bd1]">사업 관계</span>
+                <span className="text-sm font-bold text-[#11162d]">{COMPATIBILITY_BUSINESS_PRODUCT.amount.toLocaleString("ko-KR")}원</span>
+              </div>
+              <h2 className="mt-5 text-2xl font-bold tracking-[-0.02em] text-[#11162d]">사업·동업 궁합</h2>
+              <p className="mt-4 text-sm leading-7 text-slate-600">
+                동업자·공동창업자·사업 파트너 사이의 역할, 의사결정, 책임, 돈과 갈등 구조를 살펴봅니다.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">역할·책임</span>
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">의사결정</span>
+                <span className="rounded-full bg-[#f7f8fc] px-3 py-1.5">돈·권한 갈등</span>
+              </div>
+              <span className="mt-auto pt-7 text-sm font-bold text-[#11162d]">사업·동업 궁합 시작하기 →</span>
             </Link>
           </section>
         </div>

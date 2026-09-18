@@ -12,6 +12,7 @@ import type { PaidAnalysisSummary } from "@/app/lib/paidReports/server";
 import type { AnalysisRecommendationOutput } from "@/app/lib/analysisRecommendationOutput";
 import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
 import { formatTopicExpectedUnderstanding } from "@/app/lib/purchaseDecisionCopy";
+import PremiumReportValuePreview from "@/app/components/PremiumReportValuePreview";
 
 type RecommendationTop3Props = {
   recommendations: readonly AnalysisProductRecommendation[];
@@ -178,6 +179,8 @@ function RecommendationDetail({
           <DetailList title="이 분석에서 보는 것" items={overviewItems} />
           <DetailList title="분석 후 알 수 있는 것" items={expectedUnderstanding} />
         </div>
+
+        {state === "not_purchased" ? <PremiumReportValuePreview product={product} /> : null}
 
         <div className="mt-6 flex flex-col gap-3 border-t border-stone-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-base font-black text-stone-950">{getProductPricing(productId).amount.toLocaleString("ko-KR")}원</span>

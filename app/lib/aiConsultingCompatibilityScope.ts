@@ -65,6 +65,9 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
     ],
     ownRelationshipPatterns: [/연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친|파트너|상대/u],
     conflictingRelationshipPatterns: [
+      /직장|회사|상사|동료|팀원|팀장|부하|협업|업무/u,
+      /친구\s*관계|친구와|친구랑|지인|우정/u,
+      /동업|공동창업|공동대표|사업\s*파트너|동업자/u,
       /부모|아버지|어머니|엄마|아빠|자녀|아들|딸/u,
       /형제|자매|오빠|언니|누나|형|동생/u,
       /조부모|할머니|할아버지|손주|사촌|조카|삼촌|이모|고모|인척|시댁|처가/u,
@@ -87,6 +90,7 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
     conflictingRelationshipPatterns: [
       /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친/u,
       /부모|아버지|어머니|엄마|아빠|자녀|아들|딸|형제|자매/u,
+      /친구\s*관계|친구와|친구랑|지인|우정/u,
       /동업|공동창업|공동대표|사업\s*파트너/u,
     ],
     answerGuardrails: [
@@ -108,6 +112,7 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
     conflictingRelationshipPatterns: [
       /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친/u,
       /부모|아버지|어머니|엄마|아빠|자녀|아들|딸|형제|자매/u,
+      /직장|회사|상사|동료|팀원|팀장|부하|협업|업무/u,
       /동업|공동창업|공동대표|사업\s*파트너/u,
     ],
     answerGuardrails: [
@@ -129,6 +134,8 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
     conflictingRelationshipPatterns: [
       /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친/u,
       /부모|아버지|어머니|엄마|아빠|자녀|아들|딸|형제|자매/u,
+      /직장|회사|상사|동료|팀원|팀장|부하|협업|업무/u,
+      /친구\s*관계|친구와|친구랑|지인|우정/u,
     ],
     answerGuardrails: [
       ...COMMON_GUARDRAILS,
@@ -149,6 +156,9 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
     ownRelationshipPatterns: [/부모|아버지|어머니|엄마|아빠|자녀|아들|딸/u],
     conflictingRelationshipPatterns: [
       /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친/u,
+      /직장|회사|상사|동료|팀원|팀장|부하|협업|업무/u,
+      /친구\s*관계|친구와|친구랑|지인|우정/u,
+      /동업|공동창업|공동대표|사업\s*파트너|동업자/u,
       /형제|자매|오빠|언니|누나|형|동생/u,
       /조부모|할머니|할아버지|손주|사촌|조카|삼촌|이모|고모|인척|시댁|처가/u,
     ],
@@ -170,6 +180,9 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
     ownRelationshipPatterns: [/형제|자매|오빠|언니|누나|형|동생/u],
     conflictingRelationshipPatterns: [
       /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친/u,
+      /직장|회사|상사|동료|팀원|팀장|부하|협업|업무/u,
+      /친구\s*관계|친구와|친구랑|지인|우정/u,
+      /동업|공동창업|공동대표|사업\s*파트너|동업자/u,
       /부모|아버지|어머니|엄마|아빠|자녀|아들|딸/u,
       /조부모|할머니|할아버지|손주|사촌|조카|삼촌|이모|고모|인척|시댁|처가/u,
     ],
@@ -191,6 +204,9 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
     ownRelationshipPatterns: [/조부모|할머니|할아버지|손주|사촌|조카|삼촌|이모|고모|인척|시댁|처가|장인|장모|며느리|사위|친척|친족/u],
     conflictingRelationshipPatterns: [
       /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친/u,
+      /직장|회사|상사|동료|팀원|팀장|부하|협업|업무/u,
+      /친구\s*관계|친구와|친구랑|지인|우정/u,
+      /동업|공동창업|공동대표|사업\s*파트너|동업자/u,
       /부모|아버지|어머니|엄마|아빠|자녀|아들|딸/u,
       /형제|자매|오빠|언니|누나|형|동생/u,
     ],

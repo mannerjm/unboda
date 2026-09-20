@@ -72,7 +72,7 @@ for (const copy of [
 ]) {
   assert(commonWaiting.includes(copy), `shared waiting UI must explain: ${copy}`);
 }
-for (const state of ["none", "generating"]) {
+for (const state of ["none", "generating"] as const) {
   const href = getPremiumAnalysisHref("career", state, "00000000-0000-4000-8000-000000000001");
   assert(href?.startsWith("/paid-analysis/career/report?profileId=") === true, `${state} premium report must remain reopenable without new payment`);
 }

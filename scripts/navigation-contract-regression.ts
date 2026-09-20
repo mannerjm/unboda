@@ -20,7 +20,7 @@ assertEqual(
 );
 assertEqual(
   getPremiumAnalysisHref("money-leak-risk", "none", profileId),
-  null,
+  "/paid-analysis/money-leak-risk/report?profileId=profile-a",
   "preparing product route",
 );
 assertEqual(
@@ -30,7 +30,7 @@ assertEqual(
 );
 assertEqual(
   getPremiumAnalysisHref("money-leak-risk", "generating", profileId),
-  null,
+  "/paid-analysis/money-leak-risk/report?profileId=profile-a",
   "generating product route",
 );
 

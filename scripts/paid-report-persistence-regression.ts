@@ -36,7 +36,7 @@ console.log("2. report input is built from verified Profile deterministic data �
 
 assert(!detailClient.includes("sessionStorage") && !detailClient.includes("restoreStoredResult"), "paid detail client must not source report data from free sessionStorage");
 assert(detailClient.includes("JSON.stringify({ productId, profileId, edition })"), "paid detail client must send product, profile, and optional edition identifiers only");
-assert(detailClient.includes("response.status === 202") && detailClient.includes("결과 다시 확인하기"), "client must understand generating status without polling");
+assert(detailClient.includes("response.status === 202") && detailClient.includes("setIsGeneratingElsewhere(true)") && detailClient.includes("/api/paid-analysis-detail-v2/status"), "client must poll generation status automatically without creating duplicate report requests");
 console.log("3. client sends identifiers only and handles generating state ✓");
 
 const entitlementIndex = detailRoute.indexOf("getActiveEntitlementForProfile");

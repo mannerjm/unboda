@@ -1,10 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import PaidReportPreparing from "./PaidReportPreparing";
 
-export default function CompatibilityPaidReportPreparing({ failed = false }: { failed?: boolean }) {
+type Props = {
+  failed?: boolean;
+  productId?: string;
+  profileId?: string;
+  edition?: string;
+};
+
+export default function CompatibilityPaidReportPreparing({ failed = false, productId, profileId, edition }: Props) {
   const router = useRouter();
+  const [retrying, setRetrying] = useState(false);
+  const [retryError, setRetryError] = useState<string | null>(null);
 
   useEffect(() => {
     if (failed) return;
@@ -12,15 +22,37 @@ export default function CompatibilityPaidReportPreparing({ failed = false }: { f
     return () => window.clearInterval(timer);
   }, [failed, router]);
 
+  const retry = async () => {
+    if (!failed || !productId || !profileId || !edition || retrying) return;
+    setRetrying(true);
+    setRetryError(null);
+    try {
+      const response = await fetch("/api/paid-reports/retry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, profileId, edition }),
+      });
+      const result = await response.json().catch(() => null) as { error?: string } | null;
+      if (!response.ok) throw new Error(result?.error ?? "기존 구매 리포트를 다시 준비하지 못했습니다.");
+      router.refresh();
+    } catch (error) {
+      setRetryError(error instanceof Error ? error.message : "리포트 재생성을 시작하지 못했습니다.");
+    } finally {
+      setRetrying(false);
+    }
+  };
+
   return (
-    <section className="mx-auto mt-8 max-w-2xl rounded-[1.75rem] border border-[#dce1ef] bg-white p-6 text-center sm:p-8 shadow-[0_16px_45px_rgba(33,40,83,0.07)]">
-      <p className="text-xs font-semibold tracking-[0.18em] text-[#6f5ce7]">궁합 리포트</p>
-      <h2 className="mt-3 text-2xl font-bold text-[#11162d]">{failed ? "리포트 준비에 문제가 생겼어요" : "두 사람의 궁합 리포트를 준비하고 있어요"}</h2>
-      <p className="mt-4 text-[15px] leading-7 text-slate-700">
-        {failed
-          ? "결제 내역은 보존되어 있습니다. 구매한 분석에서 다시 확인하거나 고객지원으로 문의해 주세요."
-          : "결제는 완료되었습니다. 관계 근거와 현재 흐름을 정리해 저장하는 중이며, 이 화면은 자동으로 갱신됩니다."}
-      </p>
-    </section>
+    <>
+      <PaidReportPreparing kind="compatibility" failed={failed} />
+      {failed && productId && profileId && edition ? (
+        <div className="mx-auto mt-4 max-w-2xl text-center">
+          <button type="button" onClick={() => void retry()} disabled={retrying} className="rounded-xl bg-[#171a3d] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60">
+            {retrying ? "기존 구매로 다시 준비 중..." : "다시 결제 없이 리포트 재생성"}
+          </button>
+          {retryError ? <p className="mt-3 text-sm leading-6 text-red-700" role="alert">{retryError}</p> : null}
+        </div>
+      ) : null}
+    </>
   );
 }

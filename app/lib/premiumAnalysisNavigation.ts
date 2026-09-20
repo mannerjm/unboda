@@ -10,7 +10,8 @@ export function getPremiumAnalysisHref(
   state: PremiumAnalysisProductState,
   profileId?: string,
 ): string | null {
-  if (state === "none" || state === "generating") return null;
+  // Purchased reports must remain reachable while generating so users can reopen the waiting screen.
+  if ((state === "none" || state === "generating") && !profileId) return null;
 
   const query = profileId ? `?profileId=${encodeURIComponent(profileId)}` : "";
   return state === "not_purchased"

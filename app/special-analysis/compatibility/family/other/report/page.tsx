@@ -77,7 +77,7 @@ export default async function FamilyOtherPurchasedReportPage({ searchParams }: P
               />
             </>
           ) : (
-            <CompatibilityPaidReportPreparing failed={report?.status === "failed"} />
+            <CompatibilityPaidReportPreparing failed={report?.status === "failed"} productId={COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID} profileId={profileId} edition={entitlement.analysisEditionKey} />
           )}
         </div>
       </main>

@@ -174,13 +174,9 @@ export default function PurchasedAnalysesList({
           </div>
 
           <div className="flex shrink-0 flex-wrap gap-2">
-            {recent.edition.reportStatus === "none" || recent.edition.reportStatus === "generating" ? (
-              <span className="rounded-2xl bg-[#eef0f6] px-4 py-3 text-sm font-bold text-slate-500">리포트 준비 중</span>
-            ) : (
-              <Link href={recentReportHref} className="rounded-2xl bg-[#171a3d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#242957]">
-                {recent.edition.reportStatus === "failed" ? "다시 준비하기" : "리포트 보기"}
-              </Link>
-            )}
+            <Link href={recentReportHref} className="rounded-2xl bg-[#171a3d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#242957]">
+              {recent.edition.reportStatus === "failed" ? "다시 준비하기" : recent.edition.reportStatus === "none" || recent.edition.reportStatus === "generating" ? "리포트 준비 화면 보기" : "리포트 보기"}
+            </Link>
           </div>
         </div>
       </section>
@@ -270,13 +266,9 @@ export default function PurchasedAnalysesList({
                         </div>
 
                         <div className="flex flex-wrap gap-2 sm:justify-end">
-                          {isPreparing ? (
-                            <span className="rounded-xl bg-[#eef0f6] px-4 py-2.5 text-xs font-bold text-slate-500">준비 중</span>
-                          ) : (
-                            <Link href={href} className="rounded-xl border border-[#cfd5e6] bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition hover:bg-[#f7f8fc]">
-                              {edition.reportStatus === "failed" ? "다시 준비하기" : "리포트 보기"}
-                            </Link>
-                          )}
+                          <Link href={href} className="rounded-xl border border-[#cfd5e6] bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition hover:bg-[#f7f8fc]">
+                            {edition.reportStatus === "failed" ? "다시 준비하기" : isPreparing ? "리포트 준비 화면 보기" : "리포트 보기"}
+                          </Link>
                         </div>
                       </div>
                     );

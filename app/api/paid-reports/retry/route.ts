@@ -23,12 +23,14 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "요청 형식을 확인해 주세요." }, { status: 400 });
   }
-  const { productId, profileId, edition } = payload;
+  const productId = typeof payload.productId === "string" ? payload.productId : "";
+  const profileId = typeof payload.profileId === "string" ? payload.profileId : "";
+  const edition = typeof payload.edition === "string" ? payload.edition : "";
   const validProduct = isCompatibilityPairProductId(productId)
     || isCompatibilityFamilyParentChildProductId(productId)
     || isCompatibilityFamilySiblingProductId(productId)
     || isCompatibilityFamilyOtherProductId(productId);
-  if (!validProduct || !isProfileId(profileId) || typeof edition !== "string" || !edition) {
+  if (!validProduct || !isProfileId(profileId) || !edition) {
     return NextResponse.json({ error: "구매 리포트 정보를 확인해 주세요." }, { status: 400 });
   }
 

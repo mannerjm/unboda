@@ -14,6 +14,7 @@ const commonWaiting = read("app/components/PaidReportPreparing.tsx");
 const compatibilityWaiting = read("app/components/CompatibilityPaidReportPreparing.tsx");
 const premiumClient = read("app/paid-analysis/[productId]/PaidAnalysisDetailV2Client.tsx");
 const statusRoute = read("app/api/paid-analysis-detail-v2/status/route.ts");
+const compatibilityRetry = read("app/api/paid-reports/retry/route.ts");
 const premiumReportRoute = read("app/paid-analysis/[productId]/report/page.tsx");
 const recommendation = read("app/components/RecommendationTop3.tsx");
 const catalogDetail = read("app/components/PremiumProductDetail.tsx");
@@ -61,6 +62,28 @@ for (const boundary of [
   assert(statusRoute.includes(boundary), `read-only paid report status boundary missing: ${boundary}`);
 }
 assert(!statusRoute.includes("claimPaidReport(") && !statusRoute.includes("runPaidReportGeneration("), "status polling must never create, replay or alter a paid report");
+assert(
+  compatibilityRetry.includes("getCurrentUser()")
+    && compatibilityRetry.includes("getActiveProfile(user.id)")
+    && compatibilityRetry.includes("getActiveEntitlementForProfileEdition(user.id, profile.id, productId, edition)")
+    && compatibilityRetry.includes('report.status !== "failed"')
+    && compatibilityRetry.includes("preparePaidReportGeneration(input)")
+    && compatibilityRetry.includes("after(() => runPaidReportGeneration(input, claim)")
+    && !compatibilityRetry.includes("createCompatibilityPendingOrder(")
+    && !compatibilityRetry.includes("createPurchaseFromPaidOrder("),
+  "failed compatibility reports must retry only against the existing paid exact-edition entitlement, never charge again",
+);
+assert(compatibilityWaiting.includes("/api/paid-reports/retry") && compatibilityWaiting.includes("다시 결제 없이 리포트 재생성"), "all compatibility waiting screens must offer safe manual retry after a failure");
+for (const path of [
+  "app/special-analysis/compatibility/PairCompatibilityReportPage.tsx",
+  "app/special-analysis/compatibility/family/parent-child/report/page.tsx",
+  "app/special-analysis/compatibility/family/siblings/report/page.tsx",
+  "app/special-analysis/compatibility/family/other/report/page.tsx",
+]) {
+  const source = read(path);
+  assert(source.includes("profileId={profileId} edition={entitlement.analysisEditionKey}"), `retry must use the purchased report edition in ${path}`);
+}
+
 for (const copy of [
   "예상 소요 시간: 약 1~3분",
   "시간이 더 걸릴 수 있습니다",

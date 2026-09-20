@@ -21,8 +21,8 @@ type PremiumProductDetailProps = {
 
 const ACTION_LABELS: Record<PremiumAnalysisProductState, string> = {
   not_purchased: "이 분석 시작하기",
-  none: "분석 준비 중",
-  generating: "분석 준비 중",
+  none: "리포트 준비 화면 보기",
+  generating: "리포트 준비 화면 보기",
   completed: "리포트 보기",
   failed: "다시 생성하기",
 };
@@ -223,11 +223,7 @@ export default function PremiumProductDetail({
             </div>
 
             <div className="flex flex-col gap-2 sm:min-w-56">
-              {state === "none" || state === "generating" ? (
-                <span className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-center text-sm font-bold text-sky-700">
-                  {ACTION_LABELS[state]}
-                </span>
-              ) : href ? (
+              {href ? (
                 <Link
                   href={href}
                   className="rounded-xl bg-[#6f5ce7] px-5 py-3.5 text-center text-sm font-bold text-white shadow-[0_10px_24px_rgba(93,76,209,0.2)] transition hover:bg-[#5f4fd2]"

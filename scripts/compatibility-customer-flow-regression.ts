@@ -8,7 +8,10 @@ import { buildCompatibilityTiming } from "../app/lib/compatibilityTiming";
 import {
   buildCompatibilityPaidEditionKey,
   buildCompatibilityPaidInputSnapshot,
+  parseCompatibilityPaidInputSnapshot,
 } from "../app/lib/compatibilityPaidAnalysis";
+import { buildCompatibilityReportContext, buildCompatibilityReportPrompt } from "../app/lib/compatibilityReportContract";
+import { WORKPLACE_RELATIONS } from "../app/lib/workplaceCompatibilityRelation";
 import {
   buildFamilyOtherPaidEditionKey,
   buildFamilyOtherPaidInputSnapshot,
@@ -25,6 +28,7 @@ import {
   COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT,
   COMPATIBILITY_FAMILY_SIBLING_PRODUCT,
   COMPATIBILITY_ROMANTIC_PRODUCT,
+  COMPATIBILITY_WORKPLACE_PRODUCT_ID,
 } from "../app/lib/specialAnalysisProducts";
 import type { ProfileDto } from "../app/lib/profiles/types";
 
@@ -86,6 +90,45 @@ const romantic = buildCompatibilityPaidInputSnapshot({
   partner: member,
 });
 assert(/^PAIR_YEAR:2026:[a-f0-9]{16}$/.test(buildCompatibilityPaidEditionKey(romantic)), "romantic edition must remain yearly");
+
+const workplaceBase = { ...familyInput.value };
+assert(!validateCompatibilityPartnerInput(workplaceBase, COMPATIBILITY_WORKPLACE_PRODUCT_ID).valid, "workplace checkout must require role selection");
+assert(!validateCompatibilityPartnerInput({ ...workplaceBase, workplaceRelation: "fake" }, COMPATIBILITY_WORKPLACE_PRODUCT_ID).valid, "workplace checkout must reject unknown roles");
+assert(!validateCompatibilityPartnerInput({ ...workplaceBase, workplaceRelation: "my_manager" }, COMPATIBILITY_ROMANTIC_PRODUCT.id).valid, "other compatibility products must reject a workplace role");
+const workplaceEditions = new Set<string>();
+const workplaceContext = buildCompatibilityReportContext(timing);
+for (const role of WORKPLACE_RELATIONS) {
+  const validated = validateCompatibilityPartnerInput({ ...workplaceBase, workplaceRelation: role.id }, COMPATIBILITY_WORKPLACE_PRODUCT_ID);
+  assert(validated.valid && validated.value.workplaceRelation === role.id, `workplace role ${role.id} must validate and round-trip`);
+  const snapshot = buildCompatibilityPaidInputSnapshot({
+    productId: COMPATIBILITY_WORKPLACE_PRODUCT_ID,
+    evaluationDate,
+    evaluationYear: 2026,
+    myProfileLabel: profile.label,
+    partnerLabel: workplaceBase.label,
+    partnerBirthTimeKnown: true,
+    workplaceRelation: validated.value.workplaceRelation,
+    mine,
+    partner: member,
+  });
+  assert(parseCompatibilityPaidInputSnapshot(snapshot).workplaceRelation === role.id, `workplace role ${role.id} must survive snapshot parsing`);
+  workplaceEditions.add(buildCompatibilityPaidEditionKey(snapshot));
+  const prompt = buildCompatibilityReportPrompt(workplaceContext, "workplace_colleague", role.id);
+  assert(prompt.user.includes(`사용자(나)의 역할: ${role.myRole}`) && prompt.user.includes(`상대방의 역할: ${role.partnerRole}`), `workplace prompt must respect both role directions for ${role.id}`);
+  assert(prompt.user.includes(role.reportFocus[0]), `workplace prompt must include the ${role.id} interpretation lens`);
+}
+assert(workplaceEditions.size === WORKPLACE_RELATIONS.length, "same natal pair must retain a different purchased edition per workplace role");
+const legacyWorkplace = buildCompatibilityPaidInputSnapshot({
+  productId: COMPATIBILITY_WORKPLACE_PRODUCT_ID,
+  evaluationDate,
+  evaluationYear: 2026,
+  myProfileLabel: profile.label,
+  partnerLabel: workplaceBase.label,
+  partnerBirthTimeKnown: true,
+  mine,
+  partner: member,
+});
+assert(parseCompatibilityPaidInputSnapshot(legacyWorkplace).workplaceRelation === undefined, "previous workplace purchases without role must remain readable");
 
 const parentChild = buildFamilyParentChildPaidInputSnapshot({
   evaluationDate,

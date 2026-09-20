@@ -133,7 +133,7 @@ export async function POST(request: Request) {
 
   let compatibilitySnapshot: ReturnType<typeof buildCompatibilityPaidInputSnapshot> | null = null;
   if (isCompatibilityPairProductId(resolved.productId)) {
-    const validation = validateCompatibilityPartnerInput(requestBody?.compatibilityPartner);
+    const validation = validateCompatibilityPartnerInput(requestBody?.compatibilityPartner, resolved.productId);
     if (!validation.valid) {
       return NextResponse.json({ error: validation.error, code: "COMPATIBILITY_PARTNER_REQUIRED" }, { status: 400 });
     }
@@ -150,6 +150,7 @@ export async function POST(request: Request) {
         myProfileLabel: profile.label,
         partnerLabel: validation.value.label,
         partnerBirthTimeKnown: validation.value.birthTimeKnown,
+        workplaceRelation: validation.value.workplaceRelation,
         mine,
         partner,
       });

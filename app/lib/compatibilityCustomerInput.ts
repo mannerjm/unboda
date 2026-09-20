@@ -9,6 +9,8 @@ import type {
 } from "./profiles/types";
 import type { CompatibilityPersonInput } from "./compatibilityEngine";
 import type { CompatibilityTimingPersonInput } from "./compatibilityTiming";
+import { COMPATIBILITY_WORKPLACE_PRODUCT_ID, type CompatibilityPairProductId } from "./specialAnalysisProducts";
+import { isWorkplaceRelation, type WorkplaceRelation } from "./workplaceCompatibilityRelation";
 
 export type CompatibilityPartnerInput = {
   label: string;
@@ -18,6 +20,7 @@ export type CompatibilityPartnerInput = {
   gender: ProfileAppGender;
   calendarType: ProfileAppCalendarType;
   isLeapMonth: boolean;
+  workplaceRelation?: WorkplaceRelation;
 };
 
 export type CompatibilityCustomerSnapshot = {
@@ -43,7 +46,7 @@ function isRealDate(value: string): boolean {
     && date.getUTCDate() === day;
 }
 
-export function validateCompatibilityPartnerInput(input: unknown):
+export function validateCompatibilityPartnerInput(input: unknown, productId?: CompatibilityPairProductId):
   | { valid: true; value: CompatibilityPartnerInput }
   | { valid: false; error: string } {
   if (!input || typeof input !== "object" || Array.isArray(input)) {
@@ -87,6 +90,15 @@ export function validateCompatibilityPartnerInput(input: unknown):
   if (raw.calendarType === "양력" && raw.isLeapMonth) {
     return { valid: false, error: "양력 날짜에는 윤달을 선택할 수 없습니다." };
   }
+  if (productId === COMPATIBILITY_WORKPLACE_PRODUCT_ID && !isWorkplaceRelation(raw.workplaceRelation)) {
+    return { valid: false, error: "나를 기준으로 직장 관계를 선택해 주세요." };
+  }
+  if (raw.workplaceRelation !== undefined && !isWorkplaceRelation(raw.workplaceRelation)) {
+    return { valid: false, error: "직장 관계 선택값이 올바르지 않습니다." };
+  }
+  if (productId && productId !== COMPATIBILITY_WORKPLACE_PRODUCT_ID && raw.workplaceRelation !== undefined) {
+    return { valid: false, error: "이 궁합 상품에는 직장 관계를 지정할 수 없습니다." };
+  }
 
   return {
     valid: true,
@@ -98,6 +110,7 @@ export function validateCompatibilityPartnerInput(input: unknown):
       gender: raw.gender,
       calendarType: raw.calendarType,
       isLeapMonth: raw.isLeapMonth,
+      ...(raw.workplaceRelation ? { workplaceRelation: raw.workplaceRelation } : {}),
     },
   };
 }

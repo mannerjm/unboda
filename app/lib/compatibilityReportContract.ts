@@ -8,6 +8,7 @@ import type {
   CompatibilityTimingResult,
 } from "./compatibilityTiming";
 import { getPairCompatibilityConfigByRelationshipType } from "./pairCompatibilityConfig";
+import { getWorkplaceRelation, type WorkplaceRelation } from "./workplaceCompatibilityRelation";
 import type { CompatibilityPairRelationshipType } from "./specialAnalysisProducts";
 
 export const COMPATIBILITY_REPORT_CONTRACT_VERSION = "compatibility-report-v1" as const;
@@ -553,8 +554,17 @@ export function buildCompatibilityReportJsonContract(): string {
 export function buildCompatibilityReportPrompt(
   context: CompatibilityReportContext,
   relationshipType: CompatibilityPairRelationshipType = "romantic_partner",
+  workplaceRelation?: WorkplaceRelation,
 ): { system: string; user: string } {
   const relationshipConfig = getPairCompatibilityConfigByRelationshipType(relationshipType);
+  const role = relationshipType === "workplace_colleague" && workplaceRelation
+    ? getWorkplaceRelation(workplaceRelation)
+    : null;
+  const workplaceRoleContext = role
+    ? `[WORKPLACE_RELATION_FROM_BUYER_VIEWPOINT]\n사용자(나)의 역할: ${role.myRole}\n상대방의 역할: ${role.partnerRole}\n선택된 관계: ${role.shortLabel}\n관계별 해석 기준:\n${role.reportFocus.map((item, index) => `${index + 1}. ${item}`).join("\n")}\n- 이 역할 선택은 실제 업무 관계의 맥락이지 사주 계산 근거가 아닙니다. 동일한 명리 계산에 역할 관점만 적용하세요.\n- 지시·보고·피드백·업무 위임의 주체를 뒤바꾸지 마세요. 실제 성격·실적·마음이나 조직 내 결과를 단정하지 마세요.\n`
+    : relationshipType === "workplace_colleague"
+      ? "[WORKPLACE_RELATION_FROM_BUYER_VIEWPOINT]\n구매 당시 상세 직장 역할이 저장되지 않은 리포트입니다. 상사/후배 역할을 추정하지 않고 중립적인 업무 협업 관점으로 해석하세요.\n"
+      : "";
   const system = `당신은 운보다 궁합 엔진의 설명 레이어입니다.
 
 계산하거나 추측하지 말고 제공된 structured evidence만 설명하세요.
@@ -579,6 +589,7 @@ export function buildCompatibilityReportPrompt(
 [RELATIONSHIP_TYPE]
 ${relationshipConfig.label} 궁합
 
+${workplaceRoleContext}
 [RELATIONSHIP_FOCUS]
 ${relationshipConfig.promptFocus.map((item, index) => `${index + 1}. ${item}`).join("\n")}
 

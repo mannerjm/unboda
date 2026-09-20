@@ -1,9 +1,11 @@
 import { createHash } from "node:crypto";
+import { isWorkplaceRelation, type WorkplaceRelation } from "./workplaceCompatibilityRelation";
 import type { CompatibilityCustomerSnapshot } from "./compatibilityCustomerInput";
 import type { CompatibilityPairPerspectives } from "./compatibilityPairPerspective";
 import type { CompatibilityReportOutput } from "./compatibilityReportContract";
 import {
   COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  COMPATIBILITY_WORKPLACE_PRODUCT_ID,
   getCompatibilityPairRelationshipType,
   isCompatibilityPairProductId,
   type CompatibilityPairProductId,
@@ -24,6 +26,7 @@ export type CompatibilityPaidInputSnapshot = Readonly<{
   myProfileLabel: string;
   partnerLabel: string;
   partnerBirthTimeKnown: boolean;
+  workplaceRelation?: WorkplaceRelation;
   mine: CompatibilityCustomerSnapshot;
   partner: CompatibilityCustomerSnapshot;
 }>;
@@ -39,6 +42,7 @@ export type StoredCompatibilityReport = Readonly<{
     partnerBirthTimeKnown: boolean;
     productId?: CompatibilityPairProductId;
     relationshipType?: CompatibilityPairRelationshipType;
+    workplaceRelation?: WorkplaceRelation;
     natalDataQuality: { level: string; score: number; missing: readonly string[] };
     timingDataQuality: { level: string; score: number; missing: readonly string[] };
   };
@@ -69,10 +73,17 @@ export function buildCompatibilityPaidInputSnapshot(input: {
   myProfileLabel: string;
   partnerLabel: string;
   partnerBirthTimeKnown: boolean;
+  workplaceRelation?: WorkplaceRelation;
   mine: CompatibilityCustomerSnapshot;
   partner: CompatibilityCustomerSnapshot;
 }): CompatibilityPaidInputSnapshot {
   const productId = input.productId ?? COMPATIBILITY_ROMANTIC_PRODUCT_ID;
+  if (productId === COMPATIBILITY_WORKPLACE_PRODUCT_ID && input.workplaceRelation !== undefined && !isWorkplaceRelation(input.workplaceRelation)) {
+    throw new Error("직장 관계 선택값이 올바르지 않습니다.");
+  }
+  if (productId !== COMPATIBILITY_WORKPLACE_PRODUCT_ID && input.workplaceRelation !== undefined) {
+    throw new Error("다른 궁합에는 직장 관계를 저장할 수 없습니다.");
+  }
   return {
     version: COMPATIBILITY_PAIR_PAID_INPUT_VERSION,
     productId,
@@ -82,6 +93,7 @@ export function buildCompatibilityPaidInputSnapshot(input: {
     myProfileLabel: input.myProfileLabel,
     partnerLabel: input.partnerLabel,
     partnerBirthTimeKnown: input.partnerBirthTimeKnown,
+    ...(input.workplaceRelation ? { workplaceRelation: input.workplaceRelation } : {}),
     mine: input.mine,
     partner: input.partner,
   };
@@ -112,6 +124,7 @@ export function parseCompatibilityPaidInputSnapshot(value: unknown): Compatibili
     || typeof row.partnerBirthTimeKnown !== "boolean"
     || !isSnapshotPerson(row.mine)
     || !isSnapshotPerson(row.partner)
+    || (row.workplaceRelation !== undefined && (row.productId !== COMPATIBILITY_WORKPLACE_PRODUCT_ID || !isWorkplaceRelation(row.workplaceRelation)))
   ) {
     throw new Error("궁합 구매 입력 정보가 올바르지 않습니다.");
   }
@@ -132,6 +145,9 @@ export function buildCompatibilityPaidEditionKey(snapshot: CompatibilityPaidInpu
         timing: snapshot.partner.timing,
         birthTimeKnown: snapshot.partnerBirthTimeKnown,
       },
+      ...(snapshot.productId === COMPATIBILITY_WORKPLACE_PRODUCT_ID && snapshot.workplaceRelation
+        ? { workplaceRelation: snapshot.workplaceRelation }
+        : {}),
     }))
     .digest("hex")
     .slice(0, 16);

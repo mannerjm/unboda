@@ -100,7 +100,7 @@ async function runCompatibilityPaidReportGeneration(
       B: snapshot.partner.timing,
     },
   );
-  const generated = await generateCompatibilityReport(timingResult, snapshot.relationshipType);
+  const generated = await generateCompatibilityReport(timingResult, snapshot.relationshipType, snapshot.workplaceRelation);
   const perspectives = buildCompatibilityPairPerspectives(timingResult);
 
   if (!(await canPublish(input))) return { state: "skipped" as const };
@@ -116,6 +116,7 @@ async function runCompatibilityPaidReportGeneration(
       partnerBirthTimeKnown: snapshot.partnerBirthTimeKnown,
       productId: snapshot.productId,
       relationshipType: snapshot.relationshipType,
+      ...(snapshot.workplaceRelation ? { workplaceRelation: snapshot.workplaceRelation } : {}),
       natalDataQuality: generated.context.natalDataQuality,
       timingDataQuality: generated.context.timingDataQuality,
     },

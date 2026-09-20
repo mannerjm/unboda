@@ -81,7 +81,7 @@ export default async function PairCompatibilityReportPage({
               />
             </>
           ) : (
-            <CompatibilityPaidReportPreparing failed={report?.status === "failed"} />
+            <CompatibilityPaidReportPreparing failed={report?.status === "failed"} productId={productId} profileId={profileId} edition={entitlement.analysisEditionKey} />
           )}
         </div>
       </main>

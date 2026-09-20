@@ -4,6 +4,7 @@ import {
   type StoredCompatibilityReport,
 } from "@/app/lib/compatibilityPaidAnalysis";
 import { getPairCompatibilityConfigByRelationshipType } from "@/app/lib/pairCompatibilityConfig";
+import { getWorkplaceRelation } from "@/app/lib/workplaceCompatibilityRelation";
 
 function ReportSectionHeader({
   eyebrow,
@@ -83,6 +84,9 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
   const config = getPairCompatibilityConfigByRelationshipType(
     resolveStoredCompatibilityRelationshipType(content),
   );
+  const workplaceRole = meta.relationshipType === "workplace_colleague" && meta.workplaceRelation
+    ? getWorkplaceRelation(meta.workplaceRelation)
+    : null;
   const firstStrength = report.strengths[0];
   const conflictPoint = report.conflict.keyPoints[0] ?? report.conflict.summary;
   const timingPoint = report.currentTiming?.keyPoints[0] ?? report.currentTiming?.summary ?? "현재 관계 흐름은 두 사람의 기본 관계 구조와 함께 살펴봅니다.";
@@ -103,11 +107,18 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full border border-[#cfd5e6]/80 bg-white/70 px-3 py-1.5 text-xs font-bold tracking-[0.12em] text-slate-600">궁합 리포트</span>
                   <span className="rounded-full bg-[#6f5ce7] px-3 py-1.5 text-xs font-bold text-white">{config.reportBadge}</span>
+                  {workplaceRole ? <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#5e4bd1] ring-1 ring-[#d8d3ff]">{workplaceRole.shortLabel}</span> : null}
                 </div>
                 <p className="mt-5 text-sm font-semibold text-slate-500">{meta.myProfileLabel} <span className="mx-2 text-slate-300">×</span> {meta.partnerLabel}</p>
               </div>
               <Link href="/special-analysis/compatibility" className="rounded-full border border-[#cfd5e6]/80 bg-white/70 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-white">다른 상대 분석</Link>
             </div>
+
+            {workplaceRole ? (
+              <div className="mt-5 rounded-2xl bg-white/70 px-4 py-3 text-sm font-semibold text-slate-700 ring-1 ring-[#dce1ef]">
+                나: {workplaceRole.myRole} · 상대방: {workplaceRole.partnerRole} — 선택한 실제 업무 관계를 기준으로 해석합니다.
+              </div>
+            ) : null}
 
             <div className="mt-8 max-w-4xl">
               <p className="text-xs font-bold tracking-[0.16em] text-[#6f5ce7]">{config.reportCoreEyebrow}</p>
@@ -155,8 +166,8 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
         <section data-section="pair-perspective" className="border-t border-[#dce1ef] bg-[#f3f1ff] px-6 py-10 sm:px-10 sm:py-12">
           <ReportSectionHeader eyebrow="02 · 양방향 영향" title={config.reportDirectionTitle} description={config.reportDirectionDescription} />
           <div className="mt-7 grid gap-4 lg:grid-cols-2">
-            <PerspectiveCard label={`${meta.myProfileLabel} → ${meta.partnerLabel}`} headline={perspectives.meToPartner.headline} summary={perspectives.meToPartner.summary} signals={perspectives.meToPartner.signals} />
-            <PerspectiveCard label={`${meta.partnerLabel} → ${meta.myProfileLabel}`} headline={perspectives.partnerToMe.headline} summary={perspectives.partnerToMe.summary} signals={perspectives.partnerToMe.signals} />
+            <PerspectiveCard label={`${meta.myProfileLabel}${workplaceRole ? ` (${workplaceRole.myRole})` : ""} → ${meta.partnerLabel}${workplaceRole ? ` (${workplaceRole.partnerRole})` : ""}`} headline={perspectives.meToPartner.headline} summary={perspectives.meToPartner.summary} signals={perspectives.meToPartner.signals} />
+            <PerspectiveCard label={`${meta.partnerLabel}${workplaceRole ? ` (${workplaceRole.partnerRole})` : ""} → ${meta.myProfileLabel}${workplaceRole ? ` (${workplaceRole.myRole})` : ""}`} headline={perspectives.partnerToMe.headline} summary={perspectives.partnerToMe.summary} signals={perspectives.partnerToMe.signals} />
           </div>
         </section>
 

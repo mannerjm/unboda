@@ -10,6 +10,7 @@ import {
   getSpecialAnalysisProduct,
 } from "../app/lib/specialAnalysisProducts";
 import { getPairCompatibilityConfig } from "../app/lib/pairCompatibilityConfig";
+import { WORKPLACE_RELATIONS } from "../app/lib/workplaceCompatibilityRelation";
 import { evaluateCompatibilityAiConsultingScope } from "../app/lib/aiConsultingCompatibilityScope";
 
 function read(path: string): string {
@@ -97,11 +98,23 @@ for (const route of [
   assert(overview.includes(route), `compatibility overview must link ${route}`);
 }
 
+const workplaceInput = read("app/components/PaidCompatibilityAnalysisClient.tsx");
+const partnerValidation = read("app/lib/compatibilityCustomerInput.ts");
+const paidInput = read("app/lib/compatibilityPaidAnalysis.ts");
+const reportPrompt = read("app/lib/compatibilityReportContract.ts");
+const reportService = read("app/lib/compatibilityReportService.ts");
+const consultingPipeline = read("app/lib/aiConsulting/answerPipeline.ts");
+assert(WORKPLACE_RELATIONS.length === 4 && new Set(WORKPLACE_RELATIONS.map((item) => item.id)).size === 4, "workplace relationship selector must have four unique buyer-relative roles");
+assert(workplaceInput.includes("상대방과 어떤 업무 관계인가요?") && workplaceInput.includes("workplaceRelation") && workplaceInput.includes("WORKPLACE_RELATIONS.map"), "workplace input must require a role-specific dropdown");
+assert(partnerValidation.includes("productId === COMPATIBILITY_WORKPLACE_PRODUCT_ID && !isWorkplaceRelation(raw.workplaceRelation)"), "server must reject workplace checkout without a valid role");
+assert(paidInput.includes("workplaceRelation: snapshot.workplaceRelation"), "workplace role must be part of the paid edition fingerprint");
+assert(reportPrompt.includes("[WORKPLACE_RELATION_FROM_BUYER_VIEWPOINT]") && reportService.includes("workplaceRelation?: WorkplaceRelation"), "workplace role must shape the evidence-grounded report prompt");
+assert(consultingPipeline.includes("role.consultingFocus") && consultingPipeline.includes("workplaceContext + clipText"), "AI consulting must keep the purchased role in the report context");
+
 const orderRoute = read("app/api/orders/route.ts");
 const checkout = read("app/checkout/[productId]/CheckoutAccessPanel.tsx");
 const checkoutSuccess = read("app/checkout/success/page.tsx");
 const generation = read("app/lib/paidReports/generation.ts");
-const reportPrompt = read("app/lib/compatibilityReportContract.ts");
 const reportView = read("app/components/CompatibilityPaidReportView.tsx");
 const sharedReport = read("app/special-analysis/compatibility/PairCompatibilityReportPage.tsx");
 const library = read("app/components/PurchasedAnalysesListMultiEdition.tsx");
@@ -111,7 +124,7 @@ const phase9 = read("app/lib/phase9NextAnalysis.ts");
 assert(orderRoute.includes("isCompatibilityPairProductId") && orderRoute.includes("productId: resolved.productId"), "orders must freeze the selected pair product into its snapshot");
 assert(checkout.includes("getCompatibilityPairSessionKey") && checkout.includes("isPairCompatibility ? { compatibilityPartner }"), "checkout must preserve per-category partner input");
 assert(checkoutSuccess.includes("getCompatibilityPairReportPath") && checkoutSuccess.includes("getCompatibilityPairSessionKey"), "payment success must clear and route the exact pair category");
-assert(generation.includes("generateCompatibilityReport(timingResult, snapshot.relationshipType)"), "report generation must pass the exact relationship type");
+assert(generation.includes("generateCompatibilityReport(timingResult, snapshot.relationshipType, snapshot.workplaceRelation)"), "report generation must pass the purchased relationship type and workplace role");
 assert(generation.includes("COMPATIBILITY_PAIR_PAID_REPORT_VERSION"), "new pair reports must use the v2 pair schema");
 assert(reportPrompt.includes("[RELATIONSHIP_FOCUS]") && reportPrompt.includes("[DO_NOT_EXPAND_INTO]"), "AI report prompt must receive relation-specific focus and exclusions");
 assert(reportView.includes("getPairCompatibilityConfigByRelationshipType") && reportView.includes("config.reportConflictTitle"), "shared report UI must render relation-specific labels");

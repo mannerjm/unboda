@@ -12,6 +12,7 @@ import {
 } from "@/app/lib/premiumProductRegistry";
 import PeriodTimelineSection from "./PeriodTimelineSection";
 import PaidAnalysisV4Report from "./PaidAnalysisV4Report";
+import PaidReportPreparing from "@/app/components/PaidReportPreparing";
 
 
 type PaidAnalysisDetailV2ClientProps = {
@@ -60,6 +61,7 @@ void detail;
     return;
   }
   let isCancelled = false;
+  let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
   async function loadDetail() {
   setIsLoading(true);
@@ -78,6 +80,9 @@ void detail;
     if (response.status === 202) {
       if (!isCancelled) {
         setIsGeneratingElsewhere(true);
+        retryTimer = window.setTimeout(() => {
+          if (!isCancelled) setRetryCount((count) => count + 1);
+        }, 4_000);
       }
       return;
     }
@@ -120,6 +125,7 @@ void detail;
 
   return () => {
     isCancelled = true;
+    if (retryTimer !== null) window.clearTimeout(retryTimer);
   };
 }, [edition, productId, profileId, retryCount]);
 
@@ -132,106 +138,24 @@ void detail;
     );
   }
 
-    if (errorMessage) {
+  if (errorMessage) {
     return (
-      <main className="min-h-screen bg-[#f5f7fc]">
-        <div className="mx-auto flex min-h-screen max-w-2xl items-center justify-center px-6">
-          <div className="w-full rounded-3xl bg-white p-10 text-center shadow-sm">
-            <p className="text-sm font-semibold tracking-[0.2em] text-slate-500">
-              UNBODA PREMIUM REPORT
-            </p>
-
-            <h1 className="mt-3 text-2xl font-bold text-[#11162d]">
-              심층분석을 완성하지 못했습니다
-            </h1>
-
-            <p className="mt-4 leading-7 text-slate-600">
-              분석을 생성하는 과정에서 문제가 발생했습니다.
-              잠시 후 다시 시도해 주세요.
-            </p>
-
-            <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-              {errorMessage}
-            </p>
-
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="mt-6 rounded-xl bg-[#171a3d] px-6 py-3 font-semibold text-white"
-            >
-              다시 시도하기
-            </button>
-          </div>
+      <main className="min-h-screen bg-[#f5f7fc] px-5 py-8">
+        <PaidReportPreparing kind="premium" failed />
+        <div className="mx-auto mt-5 max-w-2xl text-center">
+          <p className="text-sm leading-6 text-red-700">리포트 생성 요청을 완료하지 못했습니다. 다시 결제할 필요는 없습니다.</p>
+          <button type="button" onClick={() => setRetryCount((count) => count + 1)} className="mt-4 rounded-xl bg-[#171a3d] px-6 py-3 text-sm font-semibold text-white">
+            기존 구매로 다시 확인하기
+          </button>
         </div>
       </main>
     );
   }
 
-  if (isGeneratingElsewhere) {
+  if (isGeneratingElsewhere || isLoading || !detail) {
     return (
-      <main className="min-h-screen bg-[#f5f7fc]">
-        <div className="mx-auto flex min-h-screen max-w-2xl items-center justify-center px-6">
-          <div className="w-full rounded-3xl bg-white p-10 text-center shadow-sm">
-            <p className="text-sm font-semibold tracking-[0.2em] text-slate-500">UNBODA PREMIUM REPORT</p>
-            <h1 className="mt-3 text-2xl font-bold text-[#11162d]">심층분석 결과를 만들고 있어요</h1>
-            <p className="mt-4 leading-7 text-slate-600">다른 요청에서 같은 분석을 생성 중입니다. 잠시 후 결과 확인을 다시 시도해 주세요.</p>
-            <button
-              type="button"
-              onClick={() => setRetryCount((count) => count + 1)}
-              className="mt-6 rounded-xl bg-[#171a3d] px-6 py-3 font-semibold text-white"
-            >
-              결과 다시 확인하기
-            </button>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  if (isLoading || !detail) {
-    return (
-      <main className="min-h-screen bg-[#f5f7fc]">
-        <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
-          <div className="w-full rounded-3xl bg-white p-10 text-center shadow-sm">
-            <div className="mx-auto mb-6 h-12 w-12 animate-spin rounded-full border-4 border-[#dce1ef] border-t-[#6f5ce7]" />
-
-            <p className="text-sm font-semibold tracking-[0.2em] text-slate-500">
-              UNBODA PREMIUM REPORT
-            </p>
-
-            <h1 className="mt-3 text-3xl font-bold text-[#11162d]">
-              심층분석 결과를 만들고 있어요
-            </h1>
-
-            <p className="mt-4 leading-7 text-slate-600">
-              사주 원국과 현재 운의 흐름을 연결하고,
-              결과의 일관성과 품질을 확인하고 있습니다.
-            </p>
-
-            <div className="mt-8 space-y-3 text-left text-slate-700">
-              <div className="rounded-xl bg-[#f7f8fc] px-5 py-4">
-                원국과 오행 구조 확인
-              </div>
-
-              <div className="rounded-xl bg-[#f7f8fc] px-5 py-4">
-                대운·세운 흐름 연결
-              </div>
-
-              <div className="rounded-xl bg-[#f7f8fc] px-5 py-4">
-                개인 맞춤 심층 리포트 작성
-              </div>
-
-              <div className="rounded-xl bg-[#f7f8fc] px-5 py-4">
-                결과의 일관성과 안전성 검증
-              </div>
-            </div>
-
-            <p className="mt-7 text-sm text-slate-500">
-              분석에는 잠시 시간이 걸릴 수 있습니다.
-              화면을 닫지 말고 기다려 주세요.
-            </p>
-          </div>
-        </div>
+      <main className="min-h-screen bg-[#f5f7fc] px-5 py-8">
+        <PaidReportPreparing kind="premium" />
       </main>
     );
   }

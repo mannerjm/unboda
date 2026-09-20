@@ -64,7 +64,7 @@ function CheckoutSuccessContent() {
           window.sessionStorage.removeItem(COMPATIBILITY_FAMILY_OTHER_SESSION_KEY);
           router.replace(`/special-analysis/compatibility/family/other/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`);
         } else {
-          router.replace(`/paid-analysis/${encodeURIComponent(productId)}?profileId=${encodeURIComponent(profileId)}`);
+          router.replace(`/paid-analysis/${encodeURIComponent(productId)}/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`);
         }
         router.refresh();
       })

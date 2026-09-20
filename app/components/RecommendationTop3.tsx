@@ -221,11 +221,9 @@ function RecommendationDetail({
             >
               {guestIntentPending ? "계속 준비 중..." : "이 질문 더 깊게 보기"}
             </button>
-          ) : state === "generating" ? (
-            <span className="rounded-xl bg-[#eef0f6] px-4 py-3 text-xs font-semibold text-slate-500">생성 중</span>
           ) : href ? (
             <Link href={href} className="rounded-xl bg-[#171a3d] px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-[#25213d]">
-              {state === "not_purchased" ? "이 질문 더 깊게 보기" : "리포트 보기"}
+              {state === "not_purchased" ? "이 질문 더 깊게 보기" : state === "none" || state === "generating" ? "리포트 준비 화면 보기" : "리포트 보기"}
             </Link>
           ) : null}
         </div>

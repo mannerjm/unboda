@@ -28,6 +28,7 @@ import {
   COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT,
   COMPATIBILITY_FAMILY_SIBLING_PRODUCT,
   COMPATIBILITY_ROMANTIC_PRODUCT,
+  COMPATIBILITY_ROMANTIC_PRODUCT_ID,
   COMPATIBILITY_WORKPLACE_PRODUCT_ID,
 } from "../app/lib/specialAnalysisProducts";
 import type { ProfileDto } from "../app/lib/profiles/types";
@@ -94,7 +95,7 @@ assert(/^PAIR_YEAR:2026:[a-f0-9]{16}$/.test(buildCompatibilityPaidEditionKey(rom
 const workplaceBase = { ...familyInput.value };
 assert(!validateCompatibilityPartnerInput(workplaceBase, COMPATIBILITY_WORKPLACE_PRODUCT_ID).valid, "workplace checkout must require role selection");
 assert(!validateCompatibilityPartnerInput({ ...workplaceBase, workplaceRelation: "fake" }, COMPATIBILITY_WORKPLACE_PRODUCT_ID).valid, "workplace checkout must reject unknown roles");
-assert(!validateCompatibilityPartnerInput({ ...workplaceBase, workplaceRelation: "my_manager" }, COMPATIBILITY_ROMANTIC_PRODUCT.id).valid, "other compatibility products must reject a workplace role");
+assert(!validateCompatibilityPartnerInput({ ...workplaceBase, workplaceRelation: "my_manager" }, COMPATIBILITY_ROMANTIC_PRODUCT_ID).valid, "other compatibility products must reject a workplace role");
 const workplaceEditions = new Set<string>();
 const workplaceContext = buildCompatibilityReportContext(timing);
 for (const role of WORKPLACE_RELATIONS) {

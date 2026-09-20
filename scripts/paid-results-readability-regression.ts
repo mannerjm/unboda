@@ -17,6 +17,7 @@ const recommendations = read("app/components/RecommendationTop3.tsx");
 const premiumDetail = read("app/components/PremiumProductDetail.tsx");
 const consulting = read("app/paid-analysis/[productId]/report/AiConsultingEntryCard.tsx");
 const preparing = read("app/components/CompatibilityPaidReportPreparing.tsx");
+const sharedPreparing = read("app/components/PaidReportPreparing.tsx");
 
 const readabilitySurfaces = [
   ["V4 paid report", v4],
@@ -31,6 +32,7 @@ const readabilitySurfaces = [
   ["premium product detail", premiumDetail],
   ["AI consulting entry", consulting],
   ["compatibility preparing", preparing],
+  ["shared paid report waiting", sharedPreparing],
 ] as const;
 
 for (const [name, source] of readabilitySurfaces) {
@@ -84,7 +86,7 @@ assert(premiumDetail.includes("getPremiumAnalysisHref(product.id, state, profile
 
 assert(consulting.includes('text-[15px] leading-7 text-slate-700'), "AI consulting entry copy must use the shared readable scale");
 assert(consulting.includes("이 리포트를 바탕으로 AI에게 질문하기"), "AI consulting CTA contract must remain intact");
-assert(preparing.includes('text-[15px] leading-7 text-slate-700'), "report preparing state must use readable body copy");
+assert(sharedPreparing.includes('text-[15px] leading-7 text-slate-700'), "shared report waiting must use readable body copy");
 assert(preparing.includes("window.setInterval") && preparing.includes("router.refresh()"), "report preparing auto-refresh must remain intact");
 
 console.log("Paid results readability polish regression passed ✓");

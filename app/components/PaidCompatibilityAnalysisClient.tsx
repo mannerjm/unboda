@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { WORKPLACE_RELATIONS, getWorkplaceRelation, type WorkplaceRelation } from "@/app/lib/workplaceCompatibilityRelation";
 import CompatibilityReportValuePreview from "@/app/components/CompatibilityReportValuePreview";
 import {
   COMPATIBILITY_ROMANTIC_PRODUCT_ID,
@@ -184,6 +185,8 @@ export default function PaidCompatibilityAnalysisClient({
 }) {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const [workplaceRelation, setWorkplaceRelation] = useState<WorkplaceRelation | "">("");
+  const isWorkplace = previewMode === "workplace";
   const [error, setError] = useState<string | null>(null);
 
   const birthDate = buildBirthDate(form);
@@ -191,7 +194,8 @@ export default function PaidCompatibilityAnalysisClient({
     form.label.trim()
       && birthDate
       && form.gender
-      && (!form.birthTimeKnown || form.birthTime),
+      && (!form.birthTimeKnown || form.birthTime)
+      && (!isWorkplace || workplaceRelation),
   );
   const evaluationYear = getKoreaTodayParts().year;
   const product = getSpecialAnalysisProduct(productId);
@@ -211,6 +215,7 @@ export default function PaidCompatibilityAnalysisClient({
         gender: form.gender,
         calendarType: form.calendarType,
         isLeapMonth: form.calendarType === "음력" ? form.isLeapMonth : false,
+        ...(isWorkplace && workplaceRelation ? { workplaceRelation } : {}),
       };
       window.sessionStorage.setItem(sessionKey, JSON.stringify(partner));
       router.push(`/checkout/${productId}?profileId=${encodeURIComponent(profileId)}`);
@@ -240,6 +245,27 @@ export default function PaidCompatibilityAnalysisClient({
 
       <div className="p-6 sm:p-8">
         <div className="grid gap-5 sm:grid-cols-2">
+          {isWorkplace ? (
+            <label className="sm:col-span-2">
+              <span className="text-sm font-semibold text-slate-800">상대방과 어떤 업무 관계인가요?</span>
+              <select
+                value={workplaceRelation}
+                onChange={(event) => setWorkplaceRelation(event.target.value as WorkplaceRelation | "")}
+                required
+                className="mt-2 w-full rounded-2xl border border-[#cfd5e6] bg-white px-4 py-3.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#6f5ce7] focus:ring-2 focus:ring-[#e5e1ff]"
+              >
+                <option value="" disabled>나를 기준으로 관계를 선택해 주세요</option>
+                {WORKPLACE_RELATIONS.map((relation) => (
+                  <option key={relation.id} value={relation.id}>{relation.label}</option>
+                ))}
+              </select>
+              <span className="mt-2 block text-xs leading-6 text-slate-500">
+                {workplaceRelation
+                  ? `나: ${getWorkplaceRelation(workplaceRelation).myRole} · 상대방: ${getWorkplaceRelation(workplaceRelation).partnerRole}. 선택한 역할에 맞춰 리포트와 AI 상담의 해석 관점이 달라집니다.`
+                  : "내가 상사인지, 동료인지, 후배인지에 따라 업무 관계 해석 관점을 조정합니다."}
+              </span>
+            </label>
+          ) : null}
           <label className="sm:col-span-2">
             <span className="text-sm font-semibold text-slate-800">{partnerNoun} 이름 또는 별칭</span>
             <input

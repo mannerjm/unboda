@@ -9,6 +9,7 @@ import {
 } from "./compatibilityReportContract";
 import type { CompatibilityTimingResult } from "./compatibilityTiming";
 import type { CompatibilityPairRelationshipType } from "./specialAnalysisProducts";
+import type { WorkplaceRelation } from "./workplaceCompatibilityRelation";
 
 export type GeneratedCompatibilityReport = {
   report: CompatibilityReportOutput;
@@ -75,9 +76,10 @@ function buildGenerationRequest(
 export async function generateCompatibilityReport(
   timingResult: CompatibilityTimingResult,
   relationshipType: CompatibilityPairRelationshipType = "romantic_partner",
+  workplaceRelation?: WorkplaceRelation,
 ): Promise<GeneratedCompatibilityReport> {
   const context = buildCompatibilityReportContext(timingResult);
-  const prompt = buildCompatibilityReportPrompt(context, relationshipType);
+  const prompt = buildCompatibilityReportPrompt(context, relationshipType, workplaceRelation);
   let lastError: unknown;
 
   for (let attempt = 0; attempt < COMPATIBILITY_REPORT_GENERATION_MAX_ATTEMPTS; attempt += 1) {

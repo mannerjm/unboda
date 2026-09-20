@@ -61,7 +61,6 @@ void detail;
     return;
   }
   let isCancelled = false;
-  let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
   async function loadDetail() {
   setIsLoading(true);
@@ -80,9 +79,6 @@ void detail;
     if (response.status === 202) {
       if (!isCancelled) {
         setIsGeneratingElsewhere(true);
-        retryTimer = window.setTimeout(() => {
-          if (!isCancelled) setRetryCount((count) => count + 1);
-        }, 4_000);
       }
       return;
     }
@@ -125,9 +121,46 @@ void detail;
 
   return () => {
     isCancelled = true;
-    if (retryTimer !== null) window.clearTimeout(retryTimer);
   };
 }, [edition, productId, profileId, retryCount]);
+
+  useEffect(() => {
+    if (!isGeneratingElsewhere || !profileId) return;
+    let cancelled = false;
+    let inFlight = false;
+    const params = new URLSearchParams({ productId, profileId });
+    if (edition) params.set("edition", edition);
+
+    const pollStatus = async () => {
+      if (inFlight || cancelled) return;
+      inFlight = true;
+      try {
+        const response = await fetch(`/api/paid-analysis-detail-v2/status?${params.toString()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("리포트 생성 상태를 확인하지 못했습니다.");
+        const result = await response.json() as { status: "preparing" | "generating" | "completed" | "failed" };
+        if (cancelled) return;
+        if (result.status === "completed") {
+          setIsGeneratingElsewhere(false);
+          setRetryCount((count) => count + 1);
+        } else if (result.status === "failed") {
+          setIsGeneratingElsewhere(false);
+          setErrorMessage("리포트 생성 중 문제가 발생했습니다. 기존 구매로 다시 확인해 주세요.");
+        }
+      } catch {
+        if (!cancelled) {
+          setIsGeneratingElsewhere(false);
+          setErrorMessage("리포트 상태를 확인하지 못했습니다. 기존 구매로 다시 확인해 주세요.");
+        }
+      } finally {
+        inFlight = false;
+      }
+    };
+    const timer = window.setInterval(() => { void pollStatus(); }, 4_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [isGeneratingElsewhere, productId, profileId, edition]);
 
   void detail;
   void isLoading;

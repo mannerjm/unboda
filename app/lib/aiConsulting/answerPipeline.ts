@@ -3,6 +3,9 @@ import { resolveModel } from "../ai/generateAnalysisText";
 import { evaluateAiConsultingScope } from "../aiConsultingScope";
 import { AI_CONSULTING_CONTEXT_LIMITS } from "../aiConsultingDataModel";
 import { getPaidReport } from "../paidReports/server";
+import { isStoredCompatibilityReport } from "../compatibilityPaidAnalysis";
+import { COMPATIBILITY_WORKPLACE_PRODUCT_ID } from "../specialAnalysisProducts";
+import { getWorkplaceRelation } from "../workplaceCompatibilityRelation";
 import { createAdminClient } from "../supabase/admin";
 import {
   completeAiConsultingAnswer,
@@ -327,9 +330,19 @@ export async function answerAiConsultingQuestion(input: {
     const systemSummariesForThread = partitioned.systemSummaries.filter(
       (memory) => memory.source_thread_id === thread.id,
     );
-    const reportContext = clipText(
+    // Keep the purchased workplace roles at the front even when a long report is clipped.
+    // The role is recorded at purchase, not inferred from prior chats or the buyer’s profile.
+    const workplaceContext = thread.base_product_id === COMPATIBILITY_WORKPLACE_PRODUCT_ID
+      && isStoredCompatibilityReport(paidReport.content)
+      && paidReport.content.meta.workplaceRelation
+      ? (() => {
+          const role = getWorkplaceRelation(paidReport.content.meta.workplaceRelation);
+          return `[구매 시 선택한 직장 관계 — 분석 관점]\n나: ${role.myRole} / 상대방: ${role.partnerRole} (${role.shortLabel})\n${role.consultingFocus}\n기존 명리 계산 결과는 그대로 유지하고 역할에 따라 해석·실천 장면만 구분하세요. 상대의 실제 능력, 감정이나 인사 결과를 단정하지 마세요.\n\n`;
+        })()
+      : "";
+    const reportContext = workplaceContext + clipText(
       safeJson(paidReport.content),
-      AI_CONSULTING_REPORT_CONTEXT_CHAR_CAP,
+      AI_CONSULTING_REPORT_CONTEXT_CHAR_CAP - workplaceContext.length,
     );
 
     const prompt = buildPrompt({

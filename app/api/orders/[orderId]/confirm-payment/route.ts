@@ -12,6 +12,7 @@ import {
   recordTossProviderConfirmation,
 } from "@/app/lib/purchases/server";
 import { confirmPaymentWithToss, TossConfirmationError } from "@/app/lib/toss/server";
+import { isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
 import { emitPaymentEvent } from "@/app/lib/payments/observability";
 import {
   preparePaidReportGeneration,
@@ -120,6 +121,10 @@ export async function POST(request: Request, context: RouteContext) {
         },
         { status: 200 },
       );
+    }
+
+    if (!isTossCheckoutUserAllowed(user.id)) {
+      return NextResponse.json({ error: "토스 테스트 결제는 승인된 심사용 계정에서만 이용할 수 있습니다.", code: "TOSS_REVIEW_ACCOUNT_REQUIRED" }, { status: 403 });
     }
 
     if (order.paymentProvider !== "toss") {

@@ -4,6 +4,7 @@ import { reconcilePaymentsBatch } from "@/app/lib/purchases/server";
 import { reconcileRefundsBatch } from "@/app/lib/refunds/server";
 import { reconcileAccountClosureFinalizations } from "@/app/lib/accounts/server";
 import { cleanupExpiredGuestFreeAnalyses } from "@/app/lib/guestFreeAnalyses/server";
+import { cleanupCustomerJourneyEvents } from "@/app/lib/analytics/customerJourney";
 import { sendOwnerReviewAlertIfNeeded } from "@/app/lib/operators/ownerAlerts";
 import { dispatchSupportNotificationDeliveries } from "@/app/lib/support/notifications";
 
@@ -164,10 +165,20 @@ async function dispatch(request: Request) {
     console.error("[support-email]", { trigger: "scheduled_retry", status: "worker_failed" });
   }
 
+  // Analytics retention is isolated from financial reconciliation and can never block it.
+  let journeyCleanup: WorkerReport<{ removed: number }>;
+  try {
+    const removed = await cleanupCustomerJourneyEvents();
+    journeyCleanup = { ok: true, removed };
+  } catch {
+    journeyCleanup = { ok: false };
+    console.error("[customer-journey] retention cleanup unavailable");
+  }
+
   const ok = payments.ok && refunds.ok && accountClosures.ok && guestCleanup.ok;
 
   return NextResponse.json(
-    { ok, payments, refunds, accountClosures, guestCleanup, operatorAlerts, supportNotifications },
+    { ok, payments, refunds, accountClosures, guestCleanup, journeyCleanup, operatorAlerts, supportNotifications },
     { status: ok ? 200 : 500, headers: { "Cache-Control": "no-store" } },
   );
 }

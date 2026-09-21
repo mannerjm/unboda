@@ -1,0 +1,75 @@
+import assert from "node:assert/strict";
+import { getTossConfig, isTossCheckoutUserAllowed } from "../app/lib/toss/config";
+import { readFileSync } from "node:fs";
+
+const keys = ["NODE_ENV","TOSS_ENVIRONMENT","TOSS_REVIEW_MODE","TOSS_ALLOW_LIVE",
+  "TOSS_CLIENT_KEY","NEXT_PUBLIC_TOSS_CLIENT_KEY","TOSS_SECRET_KEY","TOSS_REVIEW_ACCOUNT_IDS"] as const;
+const saved = Object.fromEntries(keys.map((key) => [key, process.env[key]])) as Record<string,string|undefined>;
+const reviewer = "f131d7ca-4024-4e91-a766-d81722f78c51";
+const other = "aeb73ee0-15e1-4f4c-80a7-ce3a5a39a22d";
+function configure(client: string, secret: string, review: boolean) {
+  process.env.NODE_ENV = "production";
+  process.env.TOSS_ENVIRONMENT = "sandbox";
+  process.env.TOSS_REVIEW_MODE = review ? "enabled" : "";
+  delete process.env.TOSS_ALLOW_LIVE;
+  process.env.TOSS_CLIENT_KEY = client;
+  delete process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
+  process.env.TOSS_SECRET_KEY = secret;
+  process.env.TOSS_REVIEW_ACCOUNT_IDS = reviewer;
+}
+function expectFailure(reason: string) {
+  assert.throws(() => getTossConfig(), undefined, reason);
+}
+try {
+  configure("test_ck_review", "test_sk_review", false);
+  expectFailure("TEST keys must fail closed in production without explicit review mode");
+  configure("test_ck_review", "test_sk_review", true);
+  const config = getTossConfig();
+  assert.equal(config.environment,"sandbox");
+  assert.equal(config.isProduction,false);
+  assert.equal(config.clientKey,"test_ck_review");
+  assert(isTossCheckoutUserAllowed(reviewer), "allowlisted reviewer can open TEST checkout");
+  assert(!isTossCheckoutUserAllowed(other), "ordinary accounts cannot mint TEST purchases");
+
+  process.env.TOSS_REVIEW_ACCOUNT_IDS = "";
+  expectFailure("review mode without a reviewer allowlist must fail closed");
+  process.env.TOSS_REVIEW_ACCOUNT_IDS = reviewer;
+  process.env.TOSS_ALLOW_LIVE = "true";
+  expectFailure("live flag must prevent TEST mode even if review mode is enabled");
+  delete process.env.TOSS_ALLOW_LIVE;
+  configure("live_ck_mismatched", "test_sk_review", true);
+  expectFailure("live client and test secret may never be mixed");
+
+  configure("live_ck_live", "live_sk_live", false);
+  process.env.TOSS_ENVIRONMENT = "production";
+  const live = getTossConfig();
+  assert.equal(live.environment,"production");
+  assert(isTossCheckoutUserAllowed(other), "live-mode commercial accounts are not restricted by sandbox allowlist");
+
+  const read = (path: string) => readFileSync(path,"utf8");
+  const configRoute = read("app/api/payments/toss/client-config/route.ts");
+  const client = read("app/lib/toss/checkoutClient.ts");
+  for(const route of ["app/api/orders/route.ts","app/api/orders/family-extended/route.ts",
+    "app/api/ai-consulting/credits/orders/route.ts",
+    "app/api/orders/[orderId]/confirm-payment/route.ts",
+    "app/api/ai-consulting/credits/orders/[orderId]/confirm-payment/route.ts"]) {
+    assert(read(route).includes("isTossCheckoutUserAllowed(user.id)"), "review guard missing in "+route);
+  }
+  assert(configRoute.includes("getCurrentUser()") && configRoute.includes("isTossCheckoutUserAllowed(user.id)"),
+    "client key route requires session and reviewer allowlist");
+  assert(!configRoute.includes("config.secretKey"), "server secret cannot be returned to browser");
+  assert(client.includes('fetch("/api/payments/toss/client-config"'), "checkout must use runtime public key");
+  for(const path of ["app/checkout/[productId]/CheckoutAccessPanel.tsx",
+    "app/checkout/[productId]/FamilyExtendedCheckoutAccessPanel.tsx",
+    "app/ai-consulting/credits/CreditCheckoutClient.tsx"]) {
+    const source=read(path);
+    assert(source.includes("getTossCheckoutClientKey()"),"runtime public key missing in "+path);
+    assert(!source.includes("process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY"),"bundled key must not gate "+path);
+  }
+  console.log("[toss-review-sandbox] PASS production TEST isolation, reviewer allowlist, live-key separation, runtime key route, and 3 checkout clients");
+} finally {
+  for(const key of keys) {
+    if(saved[key] === undefined) delete process.env[key];
+    else process.env[key] = saved[key];
+  }
+}

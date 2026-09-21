@@ -36,7 +36,7 @@ import {
   isCompatibilityFamilySiblingProductId,
 } from "@/app/lib/specialAnalysisProducts";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { getTossConfig } from "@/app/lib/toss/config";
+import { getTossConfig, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
 
 function koreaDate(now = new Date()): string {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -147,6 +147,10 @@ export async function POST(request: Request) {
       { error: "결제 기능이 아직 준비되지 않았습니다.", code: "PAYMENT_PROVIDER_NOT_READY" },
       { status: 503 },
     );
+  }
+
+  if (!isTossCheckoutUserAllowed(user.id)) {
+    return NextResponse.json({ error: "토스 테스트 결제는 승인된 심사용 계정에서만 이용할 수 있습니다.", code: "TOSS_REVIEW_ACCOUNT_REQUIRED" }, { status: 403 });
   }
 
   try {

@@ -9,7 +9,6 @@ import { OperatorAuthorizationError, requireOperator } from "@/app/lib/operators
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getActiveSupportRequestCount } from "@/app/lib/support/operatorServer";
 import AdminGrowthOverview from "./AdminGrowthOverview";
-import AdminCustomerJourneyOverview from "./AdminCustomerJourneyOverview";
 import AdminRefundClosureOverview from "./AdminRefundClosureOverview";
 import AdminLookupConsole from "./AdminLookupConsole";
 import AdminOperationsOverview from "./AdminOperationsOverview";
@@ -95,7 +94,7 @@ export default async function AdminPage() {
     <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
       <div className="mx-auto w-full max-w-6xl">
         {growth ? (
-          <AdminGrowthOverview report={growth} productLabels={productLabels} />
+          <AdminGrowthOverview report={growth} productLabels={productLabels} journey={journey} />
         ) : (
           <section className="border-b border-slate-200 pb-8">
             <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">GROWTH & REVENUE</p>
@@ -105,8 +104,6 @@ export default async function AdminPage() {
             </div>
           </section>
         )}
-
-        <AdminCustomerJourneyOverview report={journey} />
 
         {refundClosure ? (
           <AdminRefundClosureOverview report={refundClosure} productLabels={productLabels} />

@@ -2,23 +2,26 @@ import assert from "node:assert/strict";
 import { getTossConfig, isTossCheckoutUserAllowed } from "../app/lib/toss/config";
 import { readFileSync } from "node:fs";
 
+const env = process.env as Record<string, string | undefined>;
 const keys = ["NODE_ENV","TOSS_ENVIRONMENT","TOSS_REVIEW_MODE","TOSS_ALLOW_LIVE",
   "TOSS_CLIENT_KEY","NEXT_PUBLIC_TOSS_CLIENT_KEY","TOSS_SECRET_KEY","TOSS_REVIEW_ACCOUNT_IDS"] as const;
-const saved = Object.fromEntries(keys.map((key) => [key, process.env[key]])) as Record<string,string|undefined>;
+const saved = Object.fromEntries(keys.map((key) => [key, env[key]])) as Record<string,string|undefined>;
 const reviewer = "f131d7ca-4024-4e91-a766-d81722f78c51";
 const other = "aeb73ee0-15e1-4f4c-80a7-ce3a5a39a22d";
 function configure(client: string, secret: string, review: boolean) {
-  process.env.NODE_ENV = "production";
-  process.env.TOSS_ENVIRONMENT = "sandbox";
-  process.env.TOSS_REVIEW_MODE = review ? "enabled" : "";
-  delete process.env.TOSS_ALLOW_LIVE;
-  process.env.TOSS_CLIENT_KEY = client;
-  delete process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
-  process.env.TOSS_SECRET_KEY = secret;
-  process.env.TOSS_REVIEW_ACCOUNT_IDS = reviewer;
+  env.NODE_ENV = "production";
+  env.TOSS_ENVIRONMENT = "sandbox";
+  env.TOSS_REVIEW_MODE = review ? "enabled" : "";
+  delete env.TOSS_ALLOW_LIVE;
+  env.TOSS_CLIENT_KEY = client;
+  delete env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
+  env.TOSS_SECRET_KEY = secret;
+  env.TOSS_REVIEW_ACCOUNT_IDS = reviewer;
 }
 function expectFailure(reason: string) {
-  assert.throws(() => getTossConfig(), undefined, reason);
+  let failed = false;
+  try { getTossConfig(); } catch { failed = true; }
+  assert.equal(failed, true, reason);
 }
 try {
   configure("test_ck_review", "test_sk_review", false);
@@ -31,17 +34,17 @@ try {
   assert(isTossCheckoutUserAllowed(reviewer), "allowlisted reviewer can open TEST checkout");
   assert(!isTossCheckoutUserAllowed(other), "ordinary accounts cannot mint TEST purchases");
 
-  process.env.TOSS_REVIEW_ACCOUNT_IDS = "";
+  env.TOSS_REVIEW_ACCOUNT_IDS = "";
   expectFailure("review mode without a reviewer allowlist must fail closed");
-  process.env.TOSS_REVIEW_ACCOUNT_IDS = reviewer;
-  process.env.TOSS_ALLOW_LIVE = "true";
+  env.TOSS_REVIEW_ACCOUNT_IDS = reviewer;
+  env.TOSS_ALLOW_LIVE = "true";
   expectFailure("live flag must prevent TEST mode even if review mode is enabled");
-  delete process.env.TOSS_ALLOW_LIVE;
+  delete env.TOSS_ALLOW_LIVE;
   configure("live_ck_mismatched", "test_sk_review", true);
   expectFailure("live client and test secret may never be mixed");
 
   configure("live_ck_live", "live_sk_live", false);
-  process.env.TOSS_ENVIRONMENT = "production";
+  env.TOSS_ENVIRONMENT = "production";
   const live = getTossConfig();
   assert.equal(live.environment,"production");
   assert(isTossCheckoutUserAllowed(other), "live-mode commercial accounts are not restricted by sandbox allowlist");
@@ -69,7 +72,7 @@ try {
   console.log("[toss-review-sandbox] PASS production TEST isolation, reviewer allowlist, live-key separation, runtime key route, and 3 checkout clients");
 } finally {
   for(const key of keys) {
-    if(saved[key] === undefined) delete process.env[key];
-    else process.env[key] = saved[key];
+    if(saved[key] === undefined) delete env[key];
+    else env[key] = saved[key];
   }
 }

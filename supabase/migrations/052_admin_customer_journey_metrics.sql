@@ -178,3 +178,49 @@ select jsonb_build_object(
 $$;
 revoke all on function public.get_admin_customer_journey_dashboard() from public,anon,authenticated;
 grant execute on function public.get_admin_customer_journey_dashboard() to service_role;
+
+-- Remove new account-linked analytics in the same DB transaction as the existing account scrub.
+create or replace function public.remove_closed_account_journey()
+returns trigger language plpgsql security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if old.data_scrubbed_at is null and new.data_scrubbed_at is not null then
+    delete from public.customer_journey_events where account_id = new.user_id;
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.remove_closed_account_journey() from public,anon,authenticated;
+drop trigger if exists remove_closed_account_journey on public.account_lifecycles;
+create trigger remove_closed_account_journey
+after update of data_scrubbed_at on public.account_lifecycles
+for each row
+when (old.data_scrubbed_at is null and new.data_scrubbed_at is not null)
+execute function public.remove_closed_account_journey();
+
+-- Existing authenticated scheduler periodically removes event-level journey rows after 90 days.
+create index if not exists customer_journey_events_occurred_idx
+  on public.customer_journey_events(occurred_at);
+create or replace function public.prune_customer_journey_events(p_limit integer default 2000)
+returns integer language plpgsql security invoker
+set search_path = public
+as $$
+declare removed integer;
+begin
+  with expired as (
+    select id from public.customer_journey_events
+    where occurred_at < now() - interval '90 days'
+    order by occurred_at
+    limit greatest(1,least(coalesce(p_limit,2000),2000))
+  )
+  delete from public.customer_journey_events e
+  using expired x
+  where e.id = x.id;
+  get diagnostics removed = row_count;
+  return removed;
+end;
+$$;
+revoke all on function public.prune_customer_journey_events(integer) from public,anon,authenticated;
+grant execute on function public.prune_customer_journey_events(integer) to service_role;
+grant delete on public.customer_journey_events to service_role;

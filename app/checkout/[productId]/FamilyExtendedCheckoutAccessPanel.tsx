@@ -1,4 +1,5 @@
 "use client";
+import { getTossCheckoutClientKey } from "@/app/lib/toss/checkoutClient";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -129,7 +130,7 @@ export default function FamilyExtendedCheckoutAccessPanel({
       return;
     }
 
-    const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
+    const { clientKey } = await getTossCheckoutClientKey();
     if (!isCheckoutCompatibleTossClientKey(clientKey) || !window.TossPayments) {
       setErrorMessage("결제 기능이 아직 준비되지 않았습니다.");
       return;

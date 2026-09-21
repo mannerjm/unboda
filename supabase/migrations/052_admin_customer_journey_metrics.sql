@@ -68,29 +68,30 @@ with bounds as (
         ))::integer returned30
   from first_browser f
 ), first_buy as (
-  select user_id, min(paid_at) as first_paid
-  from public.orders where status='paid' and paid_at is not null
-  group by user_id
+  select p.user_id, min(o.paid_at) as first_paid
+  from public.purchases p join public.orders o on o.id=p.order_id
+  where o.status='paid' and o.paid_at is not null
+  group by p.user_id
 ), buyer_cohort as (
   select count(*) filter (where first_paid >= (select journey_since from bounds)
-        and first_paid::date <= (select today-7 from bounds))::integer eligible7,
+        and timezone('Asia/Seoul',first_paid)::date <= (select today-7 from bounds))::integer eligible7,
     count(*) filter (where first_paid >= (select journey_since from bounds)
-        and first_paid::date <= (select today-7 from bounds)
+        and timezone('Asia/Seoul',first_paid)::date <= (select today-7 from bounds)
         and exists (
           select 1 from public.customer_journey_events v
           where v.event_name='PAGE_VISIT' and v.account_id=b.user_id
-            and v.occurred_at > b.first_paid + interval '1 day'
-            and v.occurred_at <= b.first_paid + interval '7 days'
+            and v.event_date_kst > timezone('Asia/Seoul',b.first_paid)::date
+            and v.event_date_kst <= timezone('Asia/Seoul',b.first_paid)::date+7
         ))::integer returned7,
     count(*) filter (where first_paid >= (select journey_since from bounds)
-        and first_paid::date <= (select today-30 from bounds))::integer eligible30,
+        and timezone('Asia/Seoul',first_paid)::date <= (select today-30 from bounds))::integer eligible30,
     count(*) filter (where first_paid >= (select journey_since from bounds)
-        and first_paid::date <= (select today-30 from bounds)
+        and timezone('Asia/Seoul',first_paid)::date <= (select today-30 from bounds)
         and exists (
           select 1 from public.customer_journey_events v
           where v.event_name='PAGE_VISIT' and v.account_id=b.user_id
-            and v.occurred_at > b.first_paid + interval '1 day'
-            and v.occurred_at <= b.first_paid + interval '30 days'
+            and v.event_date_kst > timezone('Asia/Seoul',b.first_paid)::date
+            and v.event_date_kst <= timezone('Asia/Seoul',b.first_paid)::date+30
         ))::integer returned30
   from first_buy b
 ), selection_cohort as (
@@ -112,15 +113,16 @@ with bounds as (
     ))::integer purchased
   from selection_cohort s
 ), paid_buyers as (
-  select count(distinct user_id)::integer buyers
-  from public.orders where status='paid' and paid_at is not null
+  select count(distinct p.user_id)::integer buyers
+  from public.purchases p join public.orders o on o.id=p.order_id
+  where o.status='paid' and o.paid_at is not null
 ), consulting_buyers as (
-  select count(distinct o.user_id)::integer consulted
-  from public.orders o
+  select count(distinct p.user_id)::integer consulted
+  from public.purchases p join public.orders o on o.id=p.order_id
   where o.status='paid' and o.paid_at is not null
     and exists (
       select 1 from public.ai_consulting_messages m
-      where m.user_id=o.user_id and m.role='user' and m.charged=true
+      where m.user_id=p.user_id and m.role='user' and m.charged=true
         and m.created_at>=o.paid_at
     )
 ), report_perf as (
@@ -157,8 +159,9 @@ select jsonb_build_object(
     where event_name='CHECKOUT_VIEWED' and occurred_at >= (select since30 from bounds)),
   'reportPageOpened',(select count(*) from public.customer_journey_events
     where event_name='REPORT_PAGE_OPENED' and occurred_at >= (select since30 from bounds)),
-  'paidOrders30',(select count(*) from public.orders
-    where status='paid' and paid_at >= (select since30 from bounds)),
+  'paidOrders30',(select count(distinct o.id) from public.purchases p
+    join public.orders o on o.id=p.order_id
+    where o.status='paid' and o.paid_at >= (select since30 from bounds)),
   'paidBuyers',(select buyers from paid_buyers),
   'consultingBuyers',(select consulted from consulting_buyers),
   'reportsCompleted30',(select completed from report_perf),

@@ -11,6 +11,7 @@ import type { AnalysisProductRecommendation } from "@/app/lib/analysisProductRec
 import type { PaidAnalysisSummary } from "@/app/lib/paidReports/server";
 import type { AnalysisRecommendationOutput } from "@/app/lib/analysisRecommendationOutput";
 import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
+import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
 import { formatTopicExpectedUnderstanding } from "@/app/lib/purchaseDecisionCopy";
 import PremiumReportValuePreview from "@/app/components/PremiumReportValuePreview";
 
@@ -34,7 +35,7 @@ function getReadableRecommendationReason(
 }
 
 function getRecommendationQuestion(productId: string, fallback: string): string {
-  return getPaidAnalysisTopicConfig(productId)?.purchaseDecision.decisionQuestion ?? fallback;
+  return getReadablePaidQuestion(productId, getPaidAnalysisTopicConfig(productId)?.purchaseDecision.decisionQuestion ?? fallback);
 }
 
 export default function RecommendationTop3({
@@ -194,7 +195,7 @@ function RecommendationDetail({
           <p className="text-xs font-black tracking-[0.14em] text-[#b7a9ff]">{isPrimary ? "가장 먼저 이어볼 질문" : "선택한 다음 질문"}</p>
           <span className="rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-semibold text-[#d9d5ea]">{displayTitle}</span>
         </div>
-        <h3 id="recommendation-detail-title" className="mt-3 max-w-3xl text-2xl font-black leading-9 tracking-[-0.03em]">{decision.decisionQuestion}</h3>
+        <h3 id="recommendation-detail-title" className="mt-3 max-w-3xl text-2xl font-black leading-9 tracking-[-0.03em]">{getReadablePaidQuestion(product.id, decision.decisionQuestion)}</h3>
       </div>
 
       <div className="p-6 sm:p-7">

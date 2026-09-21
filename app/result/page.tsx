@@ -21,6 +21,7 @@ import {
 import { resolveCanonicalRecommendationProduct } from "@/app/lib/analysisProductRecommendations";
 import { getProductPricing } from "@/app/lib/productPricing";
 import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
+import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
 import type {
   AnalysisRecommendationOutput,
 } from "@/app/lib/analysisRecommendationOutput";
@@ -590,9 +591,10 @@ const recommendationQuestionPreviews = displayedPaidAnalysisProducts
   .map((product) => ({
     id: product.id,
     title: product.title,
-    question:
-      getPaidAnalysisTopicConfig(product.id)?.purchaseDecision.decisionQuestion
-      ?? product.description,
+    question: getReadablePaidQuestion(
+      product.id,
+      getPaidAnalysisTopicConfig(product.id)?.purchaseDecision.decisionQuestion ?? product.description,
+    ),
   }));
 
 const selectedPaidAnalysis = displayedPaidAnalysisProducts.find(

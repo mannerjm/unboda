@@ -67,7 +67,7 @@ function Dashboard({ report: r }: { report: CustomerJourneyDashboard }) {
           note={fmt(r.paidBuyers)+"명 중 구매 후 실제 유료 질문을 이용한 고객 "+fmt(r.consultingBuyers)+"명"}/>
         <Card title="리포트 화면 진입" value={fmt(r.reportPageOpened)+"건"} note="최근 30일 페이지 진입 수 · 실제 정독 여부는 측정하지 않음"/>
         <Card title="리포트 생성 성공률" value={rate(r.reportsCompleted30,determinedReports)}
-          note="최근 30일에 생성 시작한 구매 리포트의 완료 "+fmt(r.reportsCompleted30)+"건 / 실패 "+fmt(r.reportsFailed30)+"건 (생성 중 제외)"/>
+          note={"최근 30일에 생성 시작한 구매 리포트의 완료 "+fmt(r.reportsCompleted30)+"건 / 실패 "+fmt(r.reportsFailed30)+"건 (생성 중 제외)"}/>
         <Card title="평균 생성 완료 시간" value={r.reportAverageSeconds30 === null ? "—" : fmt(r.reportAverageSeconds30)+"초"}
           note="최근 30일 완료된 구매 리포트의 등록부터 완료까지 · 지연·재시도 시간 포함"/>
       </div>

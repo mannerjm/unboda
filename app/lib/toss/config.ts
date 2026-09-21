@@ -23,7 +23,8 @@ export function getTossConfig(): TossSandboxConfig {
   );
 
   const secretKey = process.env.TOSS_SECRET_KEY;
-  const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
+  // TOSS_CLIENT_KEY is server-runtime configuration; NEXT_PUBLIC_ may be absent from an earlier build.
+  const clientKey = process.env.TOSS_CLIENT_KEY || process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
 
   if (!secretKey || secretKey.trim().length === 0) {
     throw new Error(
@@ -32,7 +33,7 @@ export function getTossConfig(): TossSandboxConfig {
   }
 
   if (!clientKey || clientKey.trim().length === 0) {
-    throw new Error("NEXT_PUBLIC_TOSS_CLIENT_KEY 환경 변수가 설정되지 않았습니다.");
+    throw new Error("TOSS_CLIENT_KEY 환경 변수가 설정되지 않았습니다.");
   }
 
   const isTestPair = clientKey.startsWith("test_ck_") && secretKey.startsWith("test_sk_");

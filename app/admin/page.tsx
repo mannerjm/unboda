@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAdminGrowthDashboard, getAdminRefundClosureDashboard } from "@/app/lib/analytics/server";
+import { getAdminCustomerJourneyDashboard } from "@/app/lib/analytics/customerJourney";
 import { getAiConsultingCreditBundle } from "@/app/lib/aiConsulting/commercialPolicy";
 import { getAiConsultingOperationsReport } from "@/app/lib/aiConsulting/operations";
 import { getAiConsultingQualityCostReport } from "@/app/lib/aiConsulting/qualityCost";
@@ -33,16 +34,18 @@ export default async function AdminPage() {
     );
   }
 
-  const [growthResult, refundClosureResult, failureResult, operationsResult, qualityResult, supportResult] = await Promise.allSettled([
+  const [growthResult, refundClosureResult, failureResult, operationsResult, qualityResult, supportResult, journeyResult] = await Promise.allSettled([
     getAdminGrowthDashboard(30),
     getAdminRefundClosureDashboard(20),
     getOperationalFailureSummary(),
     getAiConsultingOperationsReport(24),
     getAiConsultingQualityCostReport(100),
     getActiveSupportRequestCount(),
+    getAdminCustomerJourneyDashboard(),
   ]);
 
   const growth = growthResult.status === "fulfilled" ? growthResult.value : null;
+  const journey = journeyResult.status === "fulfilled" ? journeyResult.value : null;
   const refundClosure = refundClosureResult.status === "fulfilled" ? refundClosureResult.value : null;
   const failureSummary = failureResult.status === "fulfilled" ? failureResult.value : null;
   const operations = operationsResult.status === "fulfilled" ? operationsResult.value : null;
@@ -91,7 +94,7 @@ export default async function AdminPage() {
     <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
       <div className="mx-auto w-full max-w-6xl">
         {growth ? (
-          <AdminGrowthOverview report={growth} productLabels={productLabels} />
+          <AdminGrowthOverview report={growth} productLabels={productLabels} journey={journey} />
         ) : (
           <section className="border-b border-slate-200 pb-8">
             <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">GROWTH & REVENUE</p>
@@ -121,6 +124,7 @@ export default async function AdminPage() {
             aiQuality={aiQuality}
             operatorAlertConfigured={Boolean(process.env.RESEND_API_KEY?.trim())}
             supportQueueCount={supportQueueCount}
+            reportPerformance={journey}
           />
         </div>
         <AdminLookupConsole initialFailureSummary={failureSummary} />

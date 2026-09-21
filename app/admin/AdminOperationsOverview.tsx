@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { CustomerJourneyDashboard } from "@/app/lib/analytics/customerJourney";
 
 type FailureCategory =
   | "PAYMENT_RECONCILIATION"
@@ -59,12 +60,14 @@ export default function AdminOperationsOverview({
   aiQuality,
   operatorAlertConfigured,
   supportQueueCount,
+  reportPerformance,
 }: {
   failureSummary: FailureSummary | null;
   aiOperations: AiOperationsSnapshot | null;
   aiQuality: AiQualitySnapshot | null;
   operatorAlertConfigured: boolean;
   supportQueueCount: number | null;
+  reportPerformance: CustomerJourneyDashboard | null;
 }) {
   const operationalAttention = failureSummary
     ? Object.values(failureSummary).reduce((sum, count) => sum + count, 0)
@@ -128,6 +131,31 @@ export default function AdminOperationsOverview({
           value={aiOperations ? percent(aiOperations.successRate) : "-"}
           note={aiOperations ? `최근 24시간 시도 ${number(aiOperations.attempts)}건 · 실패 ${number(aiOperations.failed + aiOperations.timedOut)}건` : "AI 운영 현황을 읽지 못했습니다."}
         />
+      </div>
+
+      <div className="mt-7 rounded-2xl border border-[#dce1ef] bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold">유료 리포트 생성 현황</h2>
+            <p className="mt-1 text-xs text-slate-500">최근 30일에 생성 시작한 구매 리포트 기준 · 생성 중 제외한 완료/실패 비율입니다.</p>
+          </div>
+          <Link href="/admin/customer-journey" className="text-sm font-semibold text-[#5e4bd1] underline underline-offset-4">생성·고객 행동 상세 →</Link>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Stat label="리포트 생성 성공률"
+            value={reportPerformance && reportPerformance.reportsCompleted30 + reportPerformance.reportsFailed30 > 0
+              ? percent(reportPerformance.reportsCompleted30 / (reportPerformance.reportsCompleted30 + reportPerformance.reportsFailed30)) : "—"}
+            note={reportPerformance ? "완료 " + number(reportPerformance.reportsCompleted30) + "건 · 실패 " + number(reportPerformance.reportsFailed30) + "건" : "집계 조회 불가"}/>
+          <Stat label="평균 생성 완료 시간"
+            value={reportPerformance?.reportAverageSeconds30 == null ? "—" : number(reportPerformance.reportAverageSeconds30) + "초"}
+            note="등록부터 완료까지 · 대기·재시도 시간 포함"/>
+          <Stat label="생성 실패"
+            value={reportPerformance ? number(reportPerformance.reportsFailed30) + "건" : "—"}
+            note="최종 리포트 실패 상태 · 기존 실패/지연 조회 유지"/>
+          <Stat label="생성 재시도"
+            value={reportPerformance ? number(reportPerformance.generationRetries30) + "회" : "—"}
+            note="생성 시도 기록의 재시도 횟수 · 리포트 건수 아님"/>
+        </div>
       </div>
 
       <div className="mt-4 grid gap-3 lg:grid-cols-5">

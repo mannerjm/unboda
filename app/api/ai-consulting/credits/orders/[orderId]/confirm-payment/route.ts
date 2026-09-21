@@ -15,7 +15,7 @@ import {
   recordTossProviderConfirmation,
 } from "@/app/lib/purchases/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { getTossConfig } from "@/app/lib/toss/config";
+import { getTossConfig, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
 import { confirmPaymentWithToss, TossConfirmationError } from "@/app/lib/toss/server";
 
 type RouteContext = {
@@ -84,6 +84,10 @@ export async function POST(request: Request, context: RouteContext) {
         { error: "결제 확인 기능이 아직 준비되지 않았습니다.", code: "PAYMENT_PROVIDER_NOT_READY" },
         { status: 503 },
       );
+    }
+
+    if (!isTossCheckoutUserAllowed(user.id)) {
+      return NextResponse.json({ error: "토스 테스트 결제는 승인된 심사용 계정에서만 이용할 수 있습니다.", code: "TOSS_REVIEW_ACCOUNT_REQUIRED" }, { status: 403 });
     }
 
     await recordTossConfirmationStarted(order);

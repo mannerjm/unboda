@@ -130,8 +130,7 @@ export default function FamilyExtendedCheckoutAccessPanel({
       return;
     }
 
-    const { clientKey } = await getTossCheckoutClientKey();
-    if (!isCheckoutCompatibleTossClientKey(clientKey) || !window.TossPayments) {
+    if (!window.TossPayments) {
       setErrorMessage("결제 기능이 아직 준비되지 않았습니다.");
       return;
     }
@@ -139,6 +138,8 @@ export default function FamilyExtendedCheckoutAccessPanel({
     setIsPaying(true);
     setErrorMessage(null);
     try {
+      const { clientKey } = await getTossCheckoutClientKey();
+      if (!isCheckoutCompatibleTossClientKey(clientKey)) throw new Error("토스 결제 키를 확인하지 못했습니다.");
       const response = await fetch("/api/orders/family-extended", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -1,4 +1,5 @@
 "use client";
+import { getTossCheckoutClientKey } from "@/app/lib/toss/checkoutClient";
 
 import { useState } from "react";
 
@@ -53,8 +54,7 @@ export default function CreditCheckoutClient({
   async function startCheckout(bundle: CreditBundle) {
     if (activeBundleId || !checkoutEnabled) return;
 
-    const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
-    if (!isCheckoutCompatibleTossClientKey(clientKey) || !window.TossPayments) {
+    if (!window.TossPayments) {
       setErrorMessage("결제 기능이 아직 준비되지 않았습니다.");
       return;
     }
@@ -63,6 +63,8 @@ export default function CreditCheckoutClient({
     setErrorMessage(null);
 
     try {
+      const { clientKey } = await getTossCheckoutClientKey();
+      if (!isCheckoutCompatibleTossClientKey(clientKey)) throw new Error("토스 결제 키를 확인하지 못했습니다.");
       const response = await fetch("/api/ai-consulting/credits/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

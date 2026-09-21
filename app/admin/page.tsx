@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAdminGrowthDashboard, getAdminRefundClosureDashboard } from "@/app/lib/analytics/server";
+import { getAdminCustomerJourneyDashboard } from "@/app/lib/analytics/customerJourney";
 import { getAiConsultingCreditBundle } from "@/app/lib/aiConsulting/commercialPolicy";
 import { getAiConsultingOperationsReport } from "@/app/lib/aiConsulting/operations";
 import { getAiConsultingQualityCostReport } from "@/app/lib/aiConsulting/qualityCost";
@@ -8,6 +9,7 @@ import { OperatorAuthorizationError, requireOperator } from "@/app/lib/operators
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getActiveSupportRequestCount } from "@/app/lib/support/operatorServer";
 import AdminGrowthOverview from "./AdminGrowthOverview";
+import AdminCustomerJourneyOverview from "./AdminCustomerJourneyOverview";
 import AdminRefundClosureOverview from "./AdminRefundClosureOverview";
 import AdminLookupConsole from "./AdminLookupConsole";
 import AdminOperationsOverview from "./AdminOperationsOverview";
@@ -33,16 +35,18 @@ export default async function AdminPage() {
     );
   }
 
-  const [growthResult, refundClosureResult, failureResult, operationsResult, qualityResult, supportResult] = await Promise.allSettled([
+  const [growthResult, refundClosureResult, failureResult, operationsResult, qualityResult, supportResult, journeyResult] = await Promise.allSettled([
     getAdminGrowthDashboard(30),
     getAdminRefundClosureDashboard(20),
     getOperationalFailureSummary(),
     getAiConsultingOperationsReport(24),
     getAiConsultingQualityCostReport(100),
     getActiveSupportRequestCount(),
+    getAdminCustomerJourneyDashboard(),
   ]);
 
   const growth = growthResult.status === "fulfilled" ? growthResult.value : null;
+  const journey = journeyResult.status === "fulfilled" ? journeyResult.value : null;
   const refundClosure = refundClosureResult.status === "fulfilled" ? refundClosureResult.value : null;
   const failureSummary = failureResult.status === "fulfilled" ? failureResult.value : null;
   const operations = operationsResult.status === "fulfilled" ? operationsResult.value : null;
@@ -102,6 +106,8 @@ export default async function AdminPage() {
           </section>
         )}
 
+        <AdminCustomerJourneyOverview report={journey} />
+
         {refundClosure ? (
           <AdminRefundClosureOverview report={refundClosure} productLabels={productLabels} />
         ) : (
@@ -121,6 +127,7 @@ export default async function AdminPage() {
             aiQuality={aiQuality}
             operatorAlertConfigured={Boolean(process.env.RESEND_API_KEY?.trim())}
             supportQueueCount={supportQueueCount}
+            reportPerformance={journey}
           />
         </div>
         <AdminLookupConsole initialFailureSummary={failureSummary} />

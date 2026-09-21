@@ -68,3 +68,10 @@ export async function getAdminCustomerJourneyDashboard(): Promise<CustomerJourne
   }
   return data as CustomerJourneyDashboard;
 }
+
+/** Bounded cleanup; invoked only by the existing authenticated reconciliation scheduler. */
+export async function cleanupCustomerJourneyEvents(): Promise<number> {
+  const { data, error } = await createAdminClient().rpc("prune_customer_journey_events", { p_limit: 2000 });
+  if (error) throw new Error("CUSTOMER_JOURNEY_CLEANUP_FAILED");
+  return typeof data === "number" ? data : 0;
+}

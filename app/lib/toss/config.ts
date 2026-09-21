@@ -11,10 +11,16 @@ export function hasTossSandboxConfig(): boolean {
 }
 
 export function getTossConfig(): TossSandboxConfig {
-  const isProductionRequest =
+  // Next.js uses NODE_ENV=production for every deployed build, including Toss review.
+  // A production-hosted TEST checkout must be an explicit, reviewer-only sandbox.
+  const reviewSandboxRequested = process.env.TOSS_ENVIRONMENT === "sandbox"
+    && process.env.TOSS_REVIEW_MODE === "enabled"
+    && process.env.TOSS_ALLOW_LIVE !== "true";
+  const isProductionRequest = !reviewSandboxRequested && (
     process.env.NODE_ENV === "production" ||
     process.env.TOSS_ENVIRONMENT === "production" ||
-    process.env.TOSS_ALLOW_LIVE === "true";
+    process.env.TOSS_ALLOW_LIVE === "true"
+  );
 
   const secretKey = process.env.TOSS_SECRET_KEY;
   const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
@@ -48,6 +54,11 @@ export function getTossConfig(): TossSandboxConfig {
   if (!isTestPair) {
     throw new Error("Sandbox Toss requires a matching test_ck_ and test_sk_ pair.");
   }
+  if (process.env.NODE_ENV === "production") {
+    if (!reviewSandboxRequested || !hasTossReviewAccountAllowlist()) {
+      throw new Error("Production TEST checkout requires explicit review mode and reviewer account allowlist.");
+    }
+  }
 
   return {
     environment: "sandbox",
@@ -58,4 +69,18 @@ export function getTossConfig(): TossSandboxConfig {
     clientKey,
     isProduction: false,
   };
+}
+/** Do not allow a production TEST payment to mint paid access for ordinary visitors. */
+function hasTossReviewAccountAllowlist(): boolean {
+  return (process.env.TOSS_REVIEW_ACCOUNT_IDS ?? "")
+    .split(",")
+    .some((id) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id.trim()));
+}
+
+export function isTossCheckoutUserAllowed(userId: string): boolean {
+  const config = getTossConfig();
+  if (process.env.NODE_ENV !== "production" || config.environment !== "sandbox") return true;
+  return (process.env.TOSS_REVIEW_ACCOUNT_IDS ?? "")
+    .split(",")
+    .some((id) => id.trim().toLowerCase() === userId.toLowerCase());
 }

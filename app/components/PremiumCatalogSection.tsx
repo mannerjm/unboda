@@ -1,4 +1,5 @@
 "use client";
+import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
 
 import { useEffect, useMemo, useState } from "react";
 import type { ReactElement } from "react";
@@ -344,7 +345,7 @@ function TopicDiscovery({
                 {recommendedIdSet.has(product.id) ? <span className="rounded-full bg-[#eeeaff] px-2.5 py-1 text-[#6f58d7]">내 추천</span> : null}
                 {owned ? <span className="rounded-full bg-[#eef3f0] px-2.5 py-1 text-[#52705f]">{STATUS_LABELS[state]}</span> : null}
               </div>
-              <p className="mt-3 text-[17px] font-black leading-7 tracking-[-0.025em] text-stone-900">{decision.decisionQuestion}</p>
+              <p className="mt-3 text-[17px] font-black leading-7 tracking-[-0.025em] text-stone-900">{getReadablePaidQuestion(product.id, decision.decisionQuestion)}</p>
               <div className="mt-4 flex items-center justify-between gap-3 border-t border-stone-100 pt-3">
                 <span className="text-xs text-stone-500">{product.details?.[0] ?? product.description}</span>
                 <span className="shrink-0 text-xs font-black text-stone-700">{formatPrice(product.id)}</span>
@@ -424,7 +425,7 @@ function PeriodDiscovery({
                 </div>
               </div>
               <p className="mt-4 text-xs font-black tracking-[0.08em] text-[#7662c6]">{product.title}</p>
-              <p className="mt-2 text-[16px] font-black leading-7 tracking-[-0.025em] text-stone-900">{decision.primaryQuestion}</p>
+              <p className="mt-2 text-[16px] font-black leading-7 tracking-[-0.025em] text-stone-900">{getReadablePaidQuestion(product.id, decision.primaryQuestion)}</p>
               <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3 text-xs">
                 <span className="text-stone-500">{decision.recommendedFor[0]}</span>
                 <span className="ml-3 shrink-0 font-black text-stone-700">{formatPrice(product.id)}</span>

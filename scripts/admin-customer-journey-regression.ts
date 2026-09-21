@@ -10,6 +10,7 @@ const eventRoute = read("app/api/analytics/journey/route.ts");
 const visitRoute = read("app/api/analytics/visit/route.ts");
 const admin = read("app/admin/page.tsx");
 const summary = read("app/admin/AdminCustomerJourneyOverview.tsx");
+const growth = read("app/admin/AdminGrowthOverview.tsx");
 const details = read("app/admin/customer-journey/page.tsx");
 const operations = read("app/admin/AdminOperationsOverview.tsx");
 const server = read("app/lib/analytics/customerJourney.ts");
@@ -32,8 +33,7 @@ assert(visitRoute.includes('eventName: "PAGE_VISIT"') && visitRoute.includes("us
   "authenticated account visit must be recorded separately");
 assert(server.includes('import "server-only"') && server.includes('rpc("get_admin_customer_journey_dashboard")'),
   "dashboard must be service role server-only read");
-assert(admin.includes("<AdminCustomerJourneyOverview report={journey} />") &&
-  admin.includes("reportPerformance={journey}"),"dashboard should reuse existing admin sections");
+assert(admin.includes("journey={journey}") && admin.includes("reportPerformance={journey}") && growth.includes("<AdminCustomerJourneyOverview report={journey} />"),"dashboard should reuse existing admin sections with summary directly below growth cards");
 assert(summary.includes('href="/admin/customer-journey"') && summary.includes('d > 0') &&
   summary.includes("관측 기간"),"summary requires a real denominator and a detail entry");
 assert(details.includes("await requireOperator()") && details.includes("getAdminCustomerJourneyDashboard"),

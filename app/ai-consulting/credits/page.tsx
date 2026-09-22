@@ -156,12 +156,18 @@ export default async function AiConsultingCreditsPage({
           ← AI 상담으로 돌아가기
         </Link>
 
-        <header className="mt-5 rounded-[2rem] border border-[#35375f] bg-[radial-gradient(circle_at_top_right,rgba(113,89,233,0.24),transparent_28%),linear-gradient(145deg,#0b1025_0%,#171a3d_62%,#24204d_100%)] p-6 text-white shadow-[0_22px_60px_rgba(24,29,67,0.14)] sm:p-8">
-          <p className="text-xs font-semibold tracking-[0.2em] text-[#b9b2f6]">UNBODA AI CREDIT</p>
-          <h1 className="mt-3 text-3xl font-bold">AI 질문권 관리</h1>
-          <p className="mt-4 text-sm leading-7 text-slate-200">
-            {profile.label} 프로필의 공통 질문권입니다. 남은 질문권은 다른 시기·다른 주제의 구매 심층 분석에서도 같은 프로필이라면 이어서 사용할 수 있습니다.
-          </p>
+        <header className="mt-4 flex flex-col gap-3 rounded-[1.75rem] border border-[#35375f] bg-[linear-gradient(135deg,#111734,#282052)] p-5 text-white shadow-[0_12px_30px_rgba(24,29,67,0.12)] sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div>
+            <p className="text-xs font-bold tracking-[0.12em] text-[#c9c3ff]">AI 상담 이어가기</p>
+            <h1 className="mt-1 text-2xl font-black">AI 질문권 구매</h1>
+            <p className="mt-2 text-sm leading-6 text-slate-200">
+              원하는 횟수 선택 → 결제 → AI 상담으로 돌아가 질문하기
+            </p>
+          </div>
+          <div className="self-start rounded-2xl border border-white/20 bg-white/10 px-4 py-3 sm:self-center">
+            <p className="text-xs text-slate-300">{profile.label} · 남은 질문권</p>
+            <p className="mt-1 text-2xl font-black">{session.questionsRemaining}회</p>
+          </div>
         </header>
 
         <CreditCheckoutClient

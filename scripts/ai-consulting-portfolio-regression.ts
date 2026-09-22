@@ -62,10 +62,10 @@ assert(client.includes("최근 보유 분석 3개") && client.includes("전체 �
 assert(client.includes("상담 이용 안내") && client.includes('border-t border-[#e4e7f0]'), "consulting guidance must be visually separated from the owned-analysis list");
 assert(!client.includes("dangerouslySetInnerHTML"), "unified consultation must render model output as plain text");
 
-assert(entry.includes("질문권은 프로필 공용입니다."), "paid-report entry must explain that AI credits are shared");
-assert(entry.includes("다른 유료 분석을 추가로 보유하면 통합 AI 상담에서 그 분석 범위도 함께 사용할 수 있습니다."), "report entry must explain scope expansion after later purchases");
-assert(entry.includes("const href = `/ai-consulting?") && entry.includes("이전 상담 이어보기"), "report entry must preserve familiar continuation copy while routing into the shared hub");
-assert(entry.includes("이 리포트로 AI 상담 시작하기") && entry.includes("AI 상담 이용 안내 확인"), "first-time buyer must see a report-scoped consulting action even when question credits are depleted");
+assert(entry.includes("질문권은 보유 분석에서 함께 사용해요."), "paid-report entry must explain shared credits in customer language");
+assert(entry.includes("presentation.productTitle") && client.includes("질문권은 상품별로 나뉘지 않습니다."), "report entry must identify its purchased analysis; full portfolio scope policy remains in the unified consulting hub");
+assert(entry.includes("const href = `/ai-consulting?") && entry.includes("지난 상담 이어가기"), "report entry must preserve report-scoped routing and concise continuation copy into the shared hub");
+assert(entry.includes("이 리포트로 AI에게 질문하기") && entry.includes("AI 상담 화면 보기") && entry.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyer must see a clear report-scoped action without claiming zero-credit consultations are free");
 
 assert(library.includes("UNBODA AI CONSULTING · 핵심 기능"), "purchased library must visually foreground the unified AI consultation hub");
 assert(library.includes("질문권은 상품별로 나뉘지 않습니다."), "library must explicitly explain shared credits");

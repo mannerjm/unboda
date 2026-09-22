@@ -5,6 +5,8 @@ import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import AiConsultingPortfolioClient from "./AiConsultingPortfolioClient";
 import { getProfileFreeAnalysisFoundationStatus } from "@/app/lib/freeAnalysisEligibility";
+import { isAiConsultingCreditCheckoutEnabled } from "@/app/lib/aiConsulting/creditCheckout";
+import { isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
 
 export default async function AiConsultingPage({
   searchParams,
@@ -42,6 +44,16 @@ export default async function AiConsultingPage({
   }
 
   const freeAnalysisStatus = await getProfileFreeAnalysisFoundationStatus(user.id, activeProfile);
+  // No misleading "buy now" call to action for customers blocked by the
+  // production-hosted TEST allowlist or the disabled credit checkout feature.
+  let creditCheckoutAvailable = false;
+  if (isAiConsultingCreditCheckoutEnabled()) {
+    try {
+      creditCheckoutAvailable = isTossCheckoutUserAllowed(user.id);
+    } catch {
+      creditCheckoutAvailable = false;
+    }
+  }
 
   return (
     <AiConsultingPortfolioClient
@@ -49,6 +61,7 @@ export default async function AiConsultingPage({
       focusProductId={params.productId ?? null}
       focusEdition={params.edition ?? null}
       freeAnalysisStatus={freeAnalysisStatus}
+      creditCheckoutAvailable={creditCheckoutAvailable}
     />
   );
 }

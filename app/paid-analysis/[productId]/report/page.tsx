@@ -84,7 +84,13 @@ async function PaidReportBody({
         edition={exactEdition}
         initialDetail={initialDetail}
       />
-      <AiConsultingEntryCard productId={productId} profileId={profileId} edition={exactEdition} />
+      <AiConsultingEntryCard
+        key={`${profileId}:${productId}:${exactEdition}`}
+        productId={productId}
+        profileId={profileId}
+        edition={exactEdition}
+        reportCompleted={Boolean(initialDetail)}
+      />
       <Phase9NextAnalysisSection
         profileId={profileId}
         sourceProductId={productId}

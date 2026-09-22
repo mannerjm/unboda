@@ -23,52 +23,110 @@ export default function AiConsultingEntryCard({
   productId,
   profileId,
   edition,
+  reportCompleted = false,
 }: {
   productId: string;
   profileId?: string;
   edition?: string;
+  /** An authenticated server read has verified the persisted report is completed. */
+  reportCompleted?: boolean;
 }) {
   const [session, setSession] = useState<SessionPreview | null>(null);
+  const [reportDisplayed, setReportDisplayed] = useState(reportCompleted);
   const presentation = useMemo(
     () => edition ? getAiConsultingPresentation(productId, edition) : null,
     [edition, productId],
   );
 
   useEffect(() => {
+    if (reportCompleted) setReportDisplayed(true);
+  }, [reportCompleted]);
+
+  useEffect(() => {
     if (!profileId || !edition) return;
     const controller = new AbortController();
     const query = new URLSearchParams({ profileId, productId, edition });
+    let inFlight = false;
+    let lastState: SessionPreview["state"] | null = null;
 
-    void fetch(`/api/ai-consulting/session?${query.toString()}`, {
-      signal: controller.signal,
-      cache: "no-store",
-    })
-      .then(async (response) => {
-        if (!response.ok) return null;
-        return (await response.json()) as SessionPreview;
-      })
-      .then((value) => setSession(value))
-      .catch(() => undefined);
+    const refreshSession = async () => {
+      if (inFlight || controller.signal.aborted) return;
+      inFlight = true;
+      try {
+        const response = await fetch(`/api/ai-consulting/session?${query.toString()}`, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+        const result = (await response.json()) as SessionPreview;
+        if (controller.signal.aborted) return;
+        lastState = result.state;
+        setSession(result);
+      } catch {
+        // Keep the last known state; a subsequent completed-report signal or
+        // bounded status retry may restore the read-only session preview.
+      } finally {
+        inFlight = false;
+      }
+    };
 
-    return () => controller.abort();
+    // This card can read report_required while the report body is still being
+    // generated. A one-shot lookup left that value on screen after completion.
+    const onReportReady = (event: Event) => {
+      const detail = (event as CustomEvent<{
+        productId: string; profileId: string; edition?: string;
+      }>).detail;
+      if (
+        detail?.profileId !== profileId ||
+        detail.productId !== productId ||
+        (detail.edition && detail.edition !== edition)
+      ) return;
+      setReportDisplayed(true);
+      void refreshSession();
+    };
+
+    window.addEventListener("unboda:paid-report-ready", onReportReady);
+    void refreshSession();
+    // Retry only while the report was not yet saved (or the initial read
+    // failed); stop once credit status is known. No report-generation writes.
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      if (
+        document.visibilityState === "visible" &&
+        Date.now() - startedAt < 10 * 60 * 1000 &&
+        (lastState === null || lastState === "report_required")
+      ) void refreshSession();
+    }, 8_000);
+
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+      window.removeEventListener("unboda:paid-report-ready", onReportReady);
+    };
   }, [edition, productId, profileId]);
 
   if (!profileId || !edition || !presentation) return null;
 
   const href = `/ai-consulting?${new URLSearchParams({ profileId, productId, edition }).toString()}`;
-  const reportPending = session?.state === "report_required";
+  // Never show a misleading "report in preparation" badge while an already
+  // persisted report is visible. Session status may precede report completion.
+  const consultationStatusStale = session?.state === "report_required";
+  const reportAvailable = reportDisplayed
+    || session?.state === "ready"
+    || session?.state === "credit_required";
   const depleted = session?.state === "credit_required";
   const hasPreviousConversation = Boolean(
     session && session.state !== "report_required" && session.messages.length > 0,
   );
 
+  // A real generating report has no follow-up CTA yet.
+  if (!reportAvailable) return null;
+
   const balanceLabel = session?.state === "ready"
     ? `남은 질문 ${session.questionsRemaining}회`
     : depleted
       ? "남은 질문 0회"
-      : reportPending
-        ? "리포트 준비 중"
-        : "질문권 확인 중";
+      : "상담 상태 확인 중";
 
   const actionLabel = depleted
     ? hasPreviousConversation
@@ -109,22 +167,16 @@ export default function AiConsultingEntryCard({
             </span>
             {depleted ? (
               <span className="text-sm leading-6 text-slate-600">새 답변을 받으려면 질문권이 필요해요.</span>
-            ) : reportPending ? (
-              <span className="text-sm leading-6 text-slate-600">리포트가 완성되면 상담할 수 있어요.</span>
+            ) : consultationStatusStale ? (
+              <span className="text-sm leading-6 text-slate-600">상담 연결 상태를 다시 확인하고 있어요.</span>
             ) : null}
           </div>
-          {reportPending ? (
-            <span className="inline-flex shrink-0 items-center justify-center rounded-2xl bg-slate-200 px-5 py-3 text-sm font-bold text-slate-600">
-              리포트 준비 중
-            </span>
-          ) : (
-            <Link
-              href={href}
-              className="inline-flex shrink-0 items-center justify-center rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]"
-            >
-              {actionLabel} <span aria-hidden="true" className="ml-2">→</span>
-            </Link>
-          )}
+          <Link
+            href={href}
+            className="inline-flex shrink-0 items-center justify-center rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]"
+          >
+            {actionLabel} <span aria-hidden="true" className="ml-2">→</span>
+          </Link>
         </div>
         <p className="mt-3 text-xs leading-5 text-slate-500">
           질문권은 보유 분석에서 함께 사용해요. 정상 답변 1회에 질문권 1회가 차감됩니다.

@@ -111,6 +111,12 @@ void detail;
         setDetail(generatedDetail);
         setV4Detail(null);
       }
+      // The paid report POST returns 200 only after its completed snapshot is
+      // persisted. Notify the consultation card to refresh its earlier session
+      // result, which may still say report_required from the generation phase.
+      window.dispatchEvent(new CustomEvent("unboda:paid-report-ready", {
+        detail: { productId, profileId, edition },
+      }));
     }
   } catch (error) {
     if (!isCancelled) {

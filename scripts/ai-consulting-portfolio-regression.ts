@@ -67,10 +67,10 @@ assert(entry.includes("presentation.productTitle") && client.includes("질문권
 assert(entry.includes("const href = `/ai-consulting?") && entry.includes("지난 상담 이어가기"), "report entry must preserve report-scoped routing and concise continuation copy into the shared hub");
 assert(entry.includes("이 리포트로 AI에게 질문하기") && entry.includes("AI 상담 화면 보기") && entry.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyer must see a clear report-scoped action without claiming zero-credit consultations are free");
 
-assert(library.includes("UNBODA AI CONSULTING · 핵심 기능"), "purchased library must visually foreground the unified AI consultation hub");
-assert(library.includes("질문권은 상품별로 나뉘지 않습니다."), "library must explicitly explain shared credits");
-assert(library.includes("완료된 구매 분석이 늘어날수록 AI 상담 범위가 자동으로 넓어지고"), "library must explain expanding owned scope");
-assert(library.includes("이전 상담 기록") && library.includes("직접 저장한 기억"), "library must explain conversation and explicit memory continuity");
+assert(library.includes("AI 상담 · 구매한 분석 이어보기") && library.includes("리포트 읽고 끝내지 말고, AI에게 바로 물어보세요"), "purchased library must foreground a concise report-to-AI action");
+assert(library.includes("새 답변에는 질문권이 필요해요."), "library must not imply AI answers are free without question credits");
+assert(library.includes("구매한 분석 바탕으로 답변") && library.includes("리포트 이어서 질문"), "library must concisely explain report-grounded AI consulting");
+assert(library.includes("지난 상담 이어보기") && library.includes("리포트 읽고 끝내지 말고, AI에게 바로 물어보세요"), "library should expose continuation without a lengthy policy paragraph");
 assert(library.includes("통합 AI 상담 바로가기"), "library must expose a single prominent global AI consultation entry");
 assert(library.includes("다른 심층 분석이나 전문 분석을 둘러볼 수 있습니다."), "library next-question copy must remain future-category neutral");
 assert(library.includes("전문 분석 보기"), "library specialist CTA must use the generic label");

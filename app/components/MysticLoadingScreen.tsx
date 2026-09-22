@@ -25,7 +25,7 @@ export default function MysticLoadingScreen({
       <div className="relative flex w-full max-w-lg flex-col items-center">
         <div className="relative h-44 w-44" aria-hidden="true">
           <div className="absolute inset-[18px] rounded-full border border-[#786be5]/45" />
-          <div className={`absolute inset-[35px] ${showAnimation ? "animate-pulse" : ""} rounded-full bg-[radial-gradient(circle,#7663e7_0%,rgba(118,99,231,0.22)_45%,transparent_72%)]" />
+          <div className={`absolute inset-[35px] ${showAnimation ? "animate-pulse" : ""} rounded-full bg-[radial-gradient(circle,#7663e7_0%,rgba(118,99,231,0.22)_45%,transparent_72%)]`} />
           <div className="absolute inset-[54px] flex items-center justify-center rounded-full border border-white/10 bg-[#0c1430] shadow-[0_0_40px_rgba(118,99,231,0.35)]">
             <div>
               <p className="text-[10px] font-bold tracking-[0.16em] text-[#9184e8]">운보다</p>

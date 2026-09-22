@@ -110,7 +110,7 @@ export default function AiConsultingEntryCard({
   const href = `/ai-consulting?${new URLSearchParams({ profileId, productId, edition }).toString()}`;
   // Never show a misleading "report in preparation" badge while an already
   // persisted report is visible. Session status may precede report completion.
-  const reportPending = session?.state === "report_required" && !reportDisplayed;
+  const consultationStatusStale = session?.state === "report_required";
   const reportAvailable = reportDisplayed
     || session?.state === "ready"
     || session?.state === "credit_required";
@@ -167,22 +167,16 @@ export default function AiConsultingEntryCard({
             </span>
             {depleted ? (
               <span className="text-sm leading-6 text-slate-600">새 답변을 받으려면 질문권이 필요해요.</span>
-            ) : reportPending ? (
+            ) : consultationStatusStale ? (
               <span className="text-sm leading-6 text-slate-600">상담 연결 상태를 다시 확인하고 있어요.</span>
             ) : null}
           </div>
-          {reportPending ? (
-            <span className="inline-flex shrink-0 items-center justify-center rounded-2xl bg-slate-200 px-5 py-3 text-sm font-bold text-slate-600">
-              상담 연결 확인 중
-            </span>
-          ) : (
-            <Link
-              href={href}
-              className="inline-flex shrink-0 items-center justify-center rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]"
-            >
-              {actionLabel} <span aria-hidden="true" className="ml-2">→</span>
-            </Link>
-          )}
+          <Link
+            href={href}
+            className="inline-flex shrink-0 items-center justify-center rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]"
+          >
+            {actionLabel} <span aria-hidden="true" className="ml-2">→</span>
+          </Link>
         </div>
         <p className="mt-3 text-xs leading-5 text-slate-500">
           질문권은 보유 분석에서 함께 사용해요. 정상 답변 1회에 질문권 1회가 차감됩니다.

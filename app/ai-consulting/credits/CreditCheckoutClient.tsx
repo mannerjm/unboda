@@ -107,50 +107,50 @@ export default function CreditCheckoutClient({
   }
 
   return (
-    <section className="mt-6">
-      <div className="rounded-[1.75rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-6">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold tracking-[0.18em] text-slate-500">PROFILE CREDIT</p>
-            <h2 className="mt-2 text-xl font-bold text-[#11162d]">AI 질문권</h2>
-          </div>
-          <div className="rounded-2xl bg-[#eef0f6] px-4 py-3 text-right">
-            <p className="text-xs text-slate-500">현재 잔액</p>
-            <p className="mt-1 text-lg font-bold text-[#11162d]">{currentBalance}회</p>
-          </div>
+    <section id="question-bundles" aria-labelledby="question-bundles-heading" className="mt-4 scroll-mt-5">
+      <div className="flex flex-col gap-2 rounded-[1.5rem] border border-[#d8d3ff] bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-black tracking-[0.1em] text-[#6f5ce7]">01 · 원하는 횟수 선택</p>
+          <h2 id="question-bundles-heading" className="mt-1 text-xl font-black text-[#11162d]">
+            몇 번 더 물어보고 싶으세요?
+          </h2>
+          <p className="mt-2 text-sm text-slate-600">구매한 리포트에 질문할 때 함께 사용할 수 있어요.</p>
         </div>
-
-        <p className="mt-4 text-sm leading-7 text-slate-700">
-          질문권은 이 프로필에서 공통으로 사용합니다. 구매한 심층 분석의 상담 범위 안에서 정상 답변이 완료된 경우에만 1회 차감됩니다.
+        <p className="self-start rounded-full bg-[#f3f1ff] px-4 py-2 text-sm font-bold text-[#5e4bd1] sm:self-center">
+          현재 {currentBalance}회 남음
         </p>
       </div>
 
-      <div className="mt-4 grid gap-4 md:grid-cols-3">
+      {!checkoutEnabled ? (
+        <p role="status" className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-900">
+          현재 이 계정에서는 질문권 결제가 준비 중입니다. 상품 구성과 가격은 확인할 수 있지만 결제는 진행할 수 없습니다.
+        </p>
+      ) : null}
+
+      <div className="mt-3 grid gap-3 md:grid-cols-3">
         {bundles.map((bundle) => (
-          <article key={bundle.id} className="relative rounded-[1.5rem] border border-[#dce1ef] bg-white p-5 shadow-sm">
+          <article key={bundle.id} className={`relative rounded-[1.5rem] border bg-white p-5 shadow-sm ${bundle.recommended ? "border-[#9283f5] ring-1 ring-[#d8d3ff]" : "border-[#dce1ef]"}`}>
             {bundle.recommended ? (
               <span className="absolute right-4 top-4 rounded-full bg-[#6f5ce7] px-3 py-1 text-xs font-semibold text-white">추천</span>
             ) : null}
-            <p className="text-sm font-semibold text-slate-500">AI 질문권</p>
+            <p className="text-sm font-semibold text-slate-500">AI 상담 질문권</p>
             <h3 className="mt-2 text-2xl font-bold text-[#11162d]">{bundle.questions}회</h3>
             <p className="mt-4 text-lg font-semibold text-[#11162d]">{bundle.priceKrw.toLocaleString("ko-KR")}원</p>
             <button
               type="button"
               onClick={() => void startCheckout(bundle)}
               disabled={!checkoutEnabled || activeBundleId !== null}
-              className="mt-5 w-full rounded-2xl bg-[#6f5ce7] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="mt-5 w-full rounded-2xl bg-[#6f5ce7] px-4 py-3.5 text-sm font-black text-white transition hover:bg-[#5f4fd2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7] disabled:cursor-not-allowed disabled:bg-slate-300"
             >
-              {activeBundleId === bundle.id ? "결제 준비 중..." : checkoutEnabled ? "구매하기" : "결제 준비 중"}
+              {activeBundleId === bundle.id ? "결제 준비 중..." : checkoutEnabled ? `${bundle.questions}회 구매하기 →` : "결제 준비 중"}
             </button>
           </article>
         ))}
       </div>
 
-      {!checkoutEnabled ? (
-        <p className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
-          현재 AI 질문권 결제는 준비 중입니다. 정식 결제 연결이 완료된 뒤 구매할 수 있습니다.
-        </p>
-      ) : null}
+      <p className="mt-4 text-sm leading-6 text-slate-600">
+        정상 AI 답변 1회에 질문권 1회가 차감됩니다. 결제 확인이 끝나면 AI 상담 화면으로 돌아갑니다.
+      </p>
 
       {errorMessage ? (
         <p className="mt-4 rounded-2xl bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-800">{errorMessage}</p>

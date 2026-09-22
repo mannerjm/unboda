@@ -56,12 +56,15 @@ export default function AiConsultingPortfolioClient({
   focusEdition,
   previewData,
   freeAnalysisStatus,
+  creditCheckoutAvailable = false,
 }: {
   profileId: string;
   focusProductId?: string | null;
   focusEdition?: string | null;
   previewData?: AiConsultingPortfolioPreviewData;
   freeAnalysisStatus?: ProfileFreeAnalysisStatus | null;
+  /** Server-confirmed availability for this user, including Toss TEST allowlist. */
+  creditCheckoutAvailable?: boolean;
 }) {
   const [portfolio, setPortfolio] = useState<AiConsultingPortfolioState | null>(previewData?.state ?? null);
   const [memories, setMemories] = useState<AiConsultingUserMemory[]>(previewData?.memories ?? []);
@@ -75,7 +78,7 @@ export default function AiConsultingPortfolioClient({
   const [deletingMemoryId, setDeletingMemoryId] = useState<string | null>(null);
   const [showAllAnalyses, setShowAllAnalyses] = useState(false);
   const isPreview = Boolean(previewData);
-  const creditCheckoutEnabled = process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true";
+  const creditCheckoutEnabled = creditCheckoutAvailable;
   const freeAnalysisReady = freeAnalysisStatus === "completed" || freeAnalysisStatus === "needs_retry";
 
   const loadPortfolio = useCallback(async () => {

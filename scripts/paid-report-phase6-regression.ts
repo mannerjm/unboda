@@ -137,7 +137,7 @@ for (const [name, source, marker] of [
   assert(source.includes("getPaidReport") && source.includes(marker), `${name} must keep its paid report renderer`);
   assert(source.includes("AiConsultingEntryCard"), `${name} must keep AI consulting entry`);
 }
-assert(consulting.includes("이 리포트를 바탕으로 AI에게 질문하기"), "AI consulting entry contract must remain intact");
+assert(consulting.includes("이 리포트로 AI에게 질문하기") && consulting.includes("presentation.productTitle"), "AI consulting entry must preserve concise report-scoped CTA");
 assert(preparing.includes("window.setInterval") && preparing.includes("router.refresh()"), "compatibility preparing state must keep automatic refresh");
 
 console.log("Paid report Phase 6 reading UX regression passed ✓");

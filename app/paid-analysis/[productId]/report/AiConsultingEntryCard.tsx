@@ -71,21 +71,15 @@ export default function AiConsultingEntryCard({
   const hasPreviousConversation =
     session && session.state !== "report_required" && session.messages.length > 0;
 
-  if (
-    !profileId ||
-    !edition ||
-    !presentation ||
-    !session ||
-    session.state === "report_required" ||
-    (session.state === "credit_required" && !hasPreviousConversation)
-  ) {
-    return null;
-  }
+  // A newly purchased report with zero questions used to hide this entire section.
+  // Always explain the consulting route and current entitlement instead.
+  if (!profileId || !edition || !presentation) return null;
 
   const href = `/ai-consulting?${new URLSearchParams({ profileId, productId, edition }).toString()}`;
-  const depleted = session.state === "credit_required";
+  const reportPending = session?.state === "report_required";
+  const depleted = session?.state === "credit_required";
   const lastActivityAt = hasPreviousConversation
-    ? formatRecentActivity(session.messages[session.messages.length - 1]?.createdAt)
+    ? formatRecentActivity(session && session.state !== "report_required" ? session.messages[session.messages.length - 1]?.createdAt : undefined)
     : null;
   const historySummary = hasPreviousConversation
     ? `이전 상담 ${session.messages.length}개 메시지${lastActivityAt ? ` · 최근 ${lastActivityAt}` : ""}`
@@ -98,36 +92,42 @@ export default function AiConsultingEntryCard({
           <div>
             <p className="text-xs font-bold tracking-[0.16em] text-[#6f5ce7]">AI CONSULTING</p>
             <h2 className="mt-3 text-xl font-black text-[#11162d]">
-              {hasPreviousConversation ? "지난 AI 상담을 이어서 질문하기" : "이 리포트를 바탕으로 AI에게 질문하기"}
+              {hasPreviousConversation ? "지난 AI 상담을 이어서 질문하기" : "이 리포트로 AI 상담 이어가기"}
             </h2>
             <p className="mt-3 text-[15px] leading-7 text-slate-700">
-              <strong className="font-bold text-[#11162d]">{presentation.productTitle}</strong> 리포트에서 상담을 시작하지만 질문권은 프로필 공용입니다. 다른 유료 분석을 추가로 보유하면 통합 AI 상담에서 그 분석 범위도 함께 사용할 수 있습니다. 출생정보를 변경한 뒤에는 변경 전 리포트 상담과 현재 정보 기준 상담을 자동으로 섞지 않습니다.
+              <strong className="font-bold text-[#11162d]">{presentation.productTitle}</strong>를 읽다가 이해하기 어려웠던 부분을 AI에게 바로 물어보세요. 이 리포트를 기준으로 상담을 시작하고, 저장된 이전 상담이 있다면 이어서 확인할 수 있습니다.
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
               <span className="rounded-full border border-[#d8d3ff] bg-white px-3 py-2 text-[#5e4bd1]">{presentation.editionLabel}</span>
               <span className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-slate-600">
-                {depleted ? "남은 질문 0회" : `남은 질문 ${session.questionsRemaining}회`}
+                {!session || reportPending ? "상담 상태 확인 중" : depleted ? "남은 질문 0회" : `남은 질문 ${session.questionsRemaining}회`}
               </span>
             </div>
 
             {historySummary ? (
               <p className="mt-4 text-sm font-semibold leading-6 text-slate-600">{historySummary}</p>
             ) : null}
-            {depleted ? (
-              <p className="mt-2 text-sm leading-6 text-slate-600">남은 질문 0회 · 이전 상담 기록은 계속 볼 수 있습니다.</p>
+            {reportPending ? (
+              <p className="mt-2 text-sm leading-6 text-slate-600">리포트 생성이 끝나면 이 분석을 바탕으로 상담할 수 있습니다.</p>
+            ) : depleted ? (
+              <p className="mt-2 text-sm leading-6 text-slate-600">남은 질문권이 0회입니다. 이전 상담은 확인할 수 있지만, 새 답변에는 질문권이 필요합니다.</p>
             ) : null}
 
-            <Link
-              href={href}
-              className="mt-5 inline-flex rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]"
-            >
-              {depleted
-                ? "이전 상담 기록 보기"
-                : hasPreviousConversation
-                  ? "이전 상담 이어보기"
-                  : "이 리포트로 통합 상담 시작"}
-            </Link>
+            {reportPending ? (
+              <span className="mt-5 inline-flex rounded-2xl bg-slate-200 px-5 py-3 text-sm font-bold text-slate-600">리포트 준비 중</span>
+            ) : (
+              <Link
+                href={href}
+                className="mt-5 inline-flex rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]"
+              >
+                {depleted
+                  ? hasPreviousConversation ? "이전 상담 기록 보기" : "AI 상담 이용 안내 확인"
+                  : hasPreviousConversation
+                    ? "지난 AI 상담 이어가기"
+                    : "이 리포트로 AI 상담 시작하기"}
+              </Link>
+            )}
           </div>
 
           <div className="rounded-[1.5rem] border border-[#dce1ef] bg-white p-4">
@@ -140,7 +140,7 @@ export default function AiConsultingEntryCard({
               ))}
             </div>
             <p className="mt-3 text-xs leading-5 text-slate-500">
-              통합 상담에서는 상담 화면에 표시된 보유 분석 범위 안에서 관련 리포트를 자동 선택합니다. 출생정보 변경 전 리포트에서 이어가는 상담은 해당 이전 리포트 기준으로 분리됩니다. 보유 분석 전체 범위 밖 질문은 답변하지 않고 미차감합니다.
+              AI 상담에서는 구매한 분석 범위에 맞춰 답변합니다. 질문권이 남아 있는지 상담 화면에서 확인할 수 있습니다.
             </p>
           </div>
         </div>

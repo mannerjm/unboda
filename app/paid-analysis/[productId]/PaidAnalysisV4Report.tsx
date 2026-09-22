@@ -144,6 +144,20 @@ export default function PaidAnalysisV4Report({
           </div>
         </section>
 
+        <div className="mt-5 rounded-[1.65rem] border border-[#d8d3ff] bg-white p-5 sm:p-6">
+          <p className="text-base font-black text-[#11162d]">이 리포트는 이렇게 읽어 주세요</p>
+          <p className="mt-2 text-[15px] leading-7 text-slate-700">먼저 위의 결론과 ‘지금 바로 할 것’을 확인하세요. 아래에는 그 판단이 나온 이유와 실제로 살펴볼 조건이 나옵니다. 사주 용어나 계산 숫자가 어려우면 ‘계산 근거 펼쳐보기’에서 확인할 수 있어요.</p>
+          <details className="mt-3 rounded-xl border border-[#dce1ef] bg-[#f9faff] px-4 py-3">
+            <summary className="cursor-pointer text-sm font-bold text-[#5e4bd1]">자주 나오는 사주 용어 쉽게 보기</summary>
+            <dl className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+              <div><dt className="inline font-bold">원국 · </dt><dd className="inline">태어난 날짜와 시간으로 계산한 사주의 기본 구조입니다.</dd></div>
+              <div><dt className="inline font-bold">오행 · </dt><dd className="inline">목·화·토·금·수라는 다섯 가지 명리 해석 요소입니다. 숫자가 실제 건강이나 성격을 측정한 값은 아닙니다.</dd></div>
+              <div><dt className="inline font-bold">대운·세운 · </dt><dd className="inline">명리에서 긴 기간의 흐름과 한 해의 흐름을 살펴보는 기준입니다. 실제 사건의 발생을 확정하는 예측은 아닙니다.</dd></div>
+              <div><dt className="inline font-bold">합·충 · </dt><dd className="inline">사주 요소 사이의 상호작용을 읽는 용어입니다. 좋거나 나쁜 사건을 확정한다는 뜻은 아닙니다.</dd></div>
+            </dl>
+          </details>
+        </div>
+
         <div className="mt-5 space-y-4">
           <DetailSection
             eyebrow="01 · 문제 정의"
@@ -167,9 +181,12 @@ export default function PaidAnalysisV4Report({
                     <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6f5ce7] text-xs font-bold text-white">{String(index + 1).padStart(2, "0")}</span>
                     <p className="text-sm font-bold text-[#11162d]">{reason.title}</p>
                   </div>
-                  <p className="mt-4 text-[15px] leading-7 text-slate-700">{reason.observedStructure}</p>
-                  <p className="mt-2 text-[15px] leading-7 text-slate-700">{reason.realWorldPattern}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{reason.problemLinkage}</p>
+                  <p className="mt-4 text-[15px] leading-7 text-slate-700">{reason.realWorldPattern}</p>
+                  <p className="mt-2 text-[15px] leading-7 text-slate-700">{reason.problemLinkage}</p>
+                  <details className="mt-3 rounded-xl border border-[#dce1ef] bg-white px-4 py-3">
+                    <summary className="cursor-pointer text-sm font-semibold text-[#5e4bd1]">계산 근거 펼쳐보기</summary>
+                    <p className="mt-2 text-sm leading-7 text-slate-600">{reason.observedStructure}</p>
+                  </details>
                 </article>
               ))}
             </div>
@@ -183,10 +200,13 @@ export default function PaidAnalysisV4Report({
             <div className="grid gap-4 lg:grid-cols-2">
               {detail.evidence.map((item) => (
                 <article key={item.evidenceKey} className="rounded-[1.5rem] border border-[#dce1ef] bg-white p-5">
-                  <p className="text-xs font-bold tracking-[0.12em] text-[#6f5ce7]">{item.label}</p>
-                  <p className="mt-3 rounded-xl bg-[#f3f1ff] px-3 py-2 text-sm font-bold text-[#11162d]">{item.fact}</p>
+                  <p className="text-xs font-bold tracking-[0.12em] text-[#6f5ce7]">이 결과가 뜻하는 것</p>
                   <p className="mt-3 text-[15px] leading-7 text-slate-700">{item.meaning}</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">{item.linkage}</p>
+                  <details className="mt-3 rounded-xl border border-[#dce1ef] bg-[#f9faff] px-4 py-3">
+                    <summary className="cursor-pointer text-sm font-semibold text-[#5e4bd1]">계산 근거 펼쳐보기 · {item.label}</summary>
+                    <p className="mt-2 text-sm leading-7 text-slate-600">{item.fact}</p>
+                  </details>
                 </article>
               ))}
             </div>

@@ -181,26 +181,27 @@ export default function PurchasedAnalysesList({
         </div>
       </section>
 
-      <section className="relative mt-4 overflow-hidden rounded-[1.9rem] border border-[#4d4f87] bg-[radial-gradient(circle_at_86%_12%,rgba(128,105,255,.28),transparent_30%),linear-gradient(135deg,#111734_0%,#1a1942_55%,#282052_100%)] p-5 text-white shadow-[0_18px_50px_rgba(28,31,76,0.16)] sm:p-7">
+      <section aria-labelledby="library-ai-consulting-heading" className="relative mt-4 overflow-hidden rounded-[1.9rem] border border-[#4d4f87] bg-[radial-gradient(circle_at_86%_12%,rgba(128,105,255,.28),transparent_30%),linear-gradient(135deg,#111734_0%,#1a1942_55%,#282052_100%)] p-5 text-white shadow-[0_18px_50px_rgba(28,31,76,0.16)] sm:p-7">
         <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full bg-[#7b61ff]/15 blur-3xl" />
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-xs font-black tracking-[0.15em] text-[#b5aaff]">UNBODA AI CONSULTING · 핵심 기능</p>
-            <h2 className="mt-2 text-2xl font-black tracking-[-0.025em]">리포트가 끝나도, 상담은 계속 이어집니다</h2>
-            <p className="mt-3 text-sm leading-7 text-slate-200">
-              질문권은 상품별로 나뉘지 않습니다. 완료된 구매 분석이 늘어날수록 AI 상담 범위가 자동으로 넓어지고, 질문마다 관련 리포트를 자동으로 연결합니다. 출생정보를 변경한 경우 변경 전 리포트와 상담은 이전 정보 기준으로 보관되며 일반 자동 상담 범위와 섞이지 않습니다. 이전 상담 기록과 내가 직접 저장한 기억도 각 상담 경계에 맞춰 이어서 참고합니다.
+          <div className="min-w-0 max-w-2xl">
+            <p className="text-xs font-black tracking-[0.12em] text-[#b5aaff]">AI 상담 · 구매한 분석 이어보기</p>
+            <h2 id="library-ai-consulting-heading" className="mt-2 text-xl font-black leading-snug tracking-[-0.025em] sm:text-2xl">리포트 읽고 끝내지 말고, AI에게 바로 물어보세요</h2>
+            <p className="mt-2 text-[15px] leading-7 text-slate-100">
+              읽다가 헷갈린 부분이나 지금 중요한 점을 구매한 분석을 바탕으로 쉽게 풀어드려요.
             </p>
-            <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-[#ddd8ff]">
-              <span className="rounded-full border border-white/12 bg-white/[0.07] px-3 py-2">보유 리포트 통합</span>
-              <span className="rounded-full border border-white/12 bg-white/[0.07] px-3 py-2">상담 기록 이어보기</span>
-              <span className="rounded-full border border-white/12 bg-white/[0.07] px-3 py-2">직접 저장한 기억 참고</span>
-            </div>
+            <ul className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-[#f0edff]">
+              <li className="rounded-full border border-white/15 bg-white/10 px-3 py-2">리포트 이어서 질문</li>
+              <li className="rounded-full border border-white/15 bg-white/10 px-3 py-2">지난 상담 이어보기</li>
+              <li className="rounded-full border border-white/15 bg-white/10 px-3 py-2">구매한 분석 바탕으로 답변</li>
+            </ul>
+            <p className="mt-3 text-xs leading-5 text-[#d8d3f0]">새 답변에는 질문권이 필요해요.</p>
           </div>
           <Link
             href={consultingHubHref}
-            className="shrink-0 rounded-2xl bg-white px-5 py-3.5 text-sm font-black text-[#191833] shadow-[0_12px_28px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 hover:bg-[#eeeaff]"
+            className="inline-flex w-full shrink-0 items-center justify-center rounded-2xl bg-white px-5 py-3.5 text-sm font-black text-[#191833] shadow-[0_12px_28px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 hover:bg-[#eeeaff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:w-auto"
           >
-            통합 AI 상담 바로가기
+            통합 AI 상담 바로가기 <span aria-hidden="true" className="ml-2">→</span>
           </Link>
         </div>
       </section>

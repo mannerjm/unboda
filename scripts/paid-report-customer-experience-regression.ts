@@ -41,7 +41,7 @@ assert(premium.includes("이 리포트는 이렇게 읽어 주세요") && premiu
 assert(premium.indexOf("{reason.realWorldPattern}") < premium.indexOf("{reason.observedStructure}"), "customer meaning must precede technical cause details");
 assert(premium.indexOf("{item.meaning}") < premium.indexOf("{item.fact}"), "customer meaning must precede server-calculated evidence");
 assert(premium.includes("계산 근거 펼쳐보기") && premium.includes("{item.fact}"), "technical evidence must be inspectable, not deleted");
-assert(consulting.includes("AI 상담 이용 안내 확인") && consulting.includes("남은 질문 0회") && consulting.includes("이 리포트로 AI 상담 시작하기"), "first-time buyers must always see honest consulting entry even without credits");
+assert(consulting.includes("AI 상담 화면 보기") && consulting.includes("남은 질문 0회") && consulting.includes("이 리포트로 AI에게 질문하기") && consulting.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyers must see a concise truthful consultation entry for both zero-credit and ready states");
 assert(!consulting.includes('(session.state === "credit_required" && !hasPreviousConversation)'), "no-credit state must never hide the consulting entry");
 assert(report.indexOf("<AiConsultingEntryCard") < report.indexOf("<Phase9NextAnalysisSection"), "report-based consultation appears before upsell recommendations");
 assert(paidLoading.includes("MysticLoadingScreen") && paidLoading.includes('href="/purchased-analyses"'), "paid loading reuses free visual and preserves purchase recovery");

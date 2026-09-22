@@ -19,6 +19,8 @@ type PaidAnalysisDetailV2ClientProps = {
   productId: string;
   profileId?: string;
   edition?: string;
+  /** Verified, persisted, entitlement-scoped report loaded by the server. */
+  initialDetail?: StoredPaidAnalysisDetail | null;
 };
 
 function getAnalysisType(productId: string): string {
@@ -36,12 +38,17 @@ export default function PaidAnalysisDetailV2Client({
   productId,
   profileId,
   edition,
+  initialDetail = null,
 }: PaidAnalysisDetailV2ClientProps) {
   const [detail, setDetail] =
-  useState<PaidAnalysisDetailOutputV3 | null>(null);
+  useState<PaidAnalysisDetailOutputV3 | null>(
+    () => initialDetail && !isPaidAnalysisDetailV4(initialDetail) ? initialDetail : null,
+  );
 
   const [v4Detail, setV4Detail] =
-  useState<ResolvedPaidAnalysisDetailV4 | null>(null);
+  useState<ResolvedPaidAnalysisDetailV4 | null>(
+    () => initialDetail && isPaidAnalysisDetailV4(initialDetail) ? initialDetail : null,
+  );
 
   const [isLoading, setIsLoading] = useState(false);
  
@@ -56,6 +63,9 @@ void analysisType;
 void detail;
 
   useEffect(() => {
+  // A previously completed report is already rendered from its stored snapshot.
+  // Never POST the generation route or display the generation animation on reopen.
+  if (initialDetail) return;
   if (!profileId) {
     startTransition(() => setErrorMessage("분석 대상을 확인하지 못했습니다."));
     return;
@@ -122,7 +132,7 @@ void detail;
   return () => {
     isCancelled = true;
   };
-}, [edition, productId, profileId, retryCount]);
+}, [edition, initialDetail, productId, profileId, retryCount]);
 
   useEffect(() => {
     if (!isGeneratingElsewhere || !profileId) return;
@@ -185,11 +195,21 @@ void detail;
     );
   }
 
-  if (isGeneratingElsewhere || isLoading || !detail) {
+  // The full-screen Mystic generation animation is reserved for a real
+  // 202/generating response. Initial read-only loading never implies regeneration.
+  if (isGeneratingElsewhere) {
     return (
-      <main className="min-h-screen bg-[#f5f7fc] px-5 py-8">
+      <section className="min-h-screen bg-[#f5f7fc] px-5 py-8">
         <PaidReportPreparing kind="premium" />
-      </main>
+      </section>
+    );
+  }
+
+  if (isLoading || !detail) {
+    return (
+      <section role="status" aria-live="polite" className="mx-auto max-w-3xl px-5 py-10 text-center text-sm text-slate-600">
+        저장된 리포트를 열고 있습니다.
+      </section>
     );
   }
 

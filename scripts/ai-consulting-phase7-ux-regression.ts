@@ -53,7 +53,7 @@ assert(chat.includes("presentation.suggestedQuestions.map"), "chat must render d
 assert(chat.includes("범위 밖 질문은 답변하지 않아요"), "consulting scope chip must clearly say out-of-scope questions are not answered");
 assert(chat.includes("범위를 벗어나 AI 답변을 생성하지 않았습니다. 질문권도 차감되지 않았습니다."), "DENY policy copy must state that no AI answer is generated and no credit is charged");
 assert(chat.includes("범위를 벗어난 질문은 AI 답변을 생성하지 않으며 질문권도 차감되지 않습니다."), "composer helper must explain blocked out-of-scope behavior");
-assert(entry.includes("AI 상담에서는 구매한 분석 범위에 맞춰 답변합니다."), "report entry must explain grounded owned-scope behavior in plain Korean");
+assert(entry.includes("내용을 바탕으로 어려운 부분을 쉽게 풀어 설명해 드려요."), "report entry must explain its contextual value in plain Korean");
 assert(chat.includes("setQuestion(suggestion)"), "suggested questions must fill the composer without bypassing submission");
 assert(chat.includes("지난 상담에서 이어서 궁금한 점을 질문해 주세요."), "resumed chat composer contract must remain intact");
 assert(chat.includes("이전 상담 이어보기") && chat.includes("최근 상담") && chat.includes("이전 대화"), "prior-conversation orientation must remain intact");
@@ -82,11 +82,11 @@ assert(chat.includes('space-y-4 pb-44 sm:pb-40'), "conversation must reserve spa
 assert(!chat.includes('← {isPreview ? "미리보기 목록으로" : "리포트로 돌아가기"}'), "operator preview must not duplicate the admin preview navigation");
 assert(!chat.includes('남은 질문 {session.questionsRemaining}회'), "mid-page continuation card must not duplicate the primary remaining-question counter");
 
-assert(entry.includes("이 리포트를 바탕으로 AI에게 질문하기"), "report entry must preserve the established AI consulting CTA language");
+assert(entry.includes("이 리포트로 AI에게 질문하기"), "report entry must show a clear report-grounded CTA when credits are available");
 assert(entry.includes("presentation.productTitle"), "report entry must name the report that grounds consultation");
-assert(entry.includes("presentation.suggestedQuestions.slice(0, 3)"), "report entry must preview suggested follow-up questions");
-assert(entry.includes("이전 상담 기록 보기") && entry.includes("이전 상담 이어보기"), "report entry must preserve familiar continuation/history actions inside the unified hub");
-assert(entry.includes("이전 상담 기록은 계속 볼 수 있습니다"), "zero-credit prior conversations must remain readable");
+assert(entry.includes("presentation.suggestedQuestions.slice(0, 2)"), "report entry must preview only two relevant follow-up questions");
+assert(entry.includes("지난 상담 보기") && entry.includes("지난 상담 이어가기"), "report entry must preserve concise continuation/history actions inside the unified hub");
+assert(entry.includes("hasPreviousConversation") && entry.includes("새 답변을 받으려면 질문권이 필요해요."), "zero-credit state must keep past consultation entry while honestly explaining new answers require credits");
 
 assert(page.includes("AiConsultingPortfolioClient") && page.includes("getActiveProfile"), "AI consultation page must resolve the active profile and render the unified portfolio hub");
 assert(credits.includes('bg-[#f5f7fc]'), "AI credit management must use the Phase 7 cool canvas");

@@ -85,7 +85,7 @@ assert(premiumDetail.includes('text-[15px] leading-7 text-slate-700'), "premium 
 assert(premiumDetail.includes("getPremiumAnalysisHref(product.id, state, profileId)"), "premium product navigation contract must remain intact");
 
 assert(consulting.includes('text-[15px] leading-7 text-slate-700'), "AI consulting entry copy must use the shared readable scale");
-assert(consulting.includes("이 리포트를 바탕으로 AI에게 질문하기"), "AI consulting CTA contract must remain intact");
+assert(consulting.includes("이 리포트로 AI에게 질문하기") && consulting.includes("presentation.productTitle"), "AI consulting CTA must retain report context with concise customer-facing action");
 assert(sharedPreparing.includes("MysticLoadingScreen") && sharedPreparing.includes('text-sm leading-7 text-[#d9ddef]'), "shared paid waiting must reuse the free visual while keeping readable high-contrast copy");
 assert(preparing.includes("window.setInterval") && preparing.includes("router.refresh()"), "report preparing auto-refresh must remain intact");
 

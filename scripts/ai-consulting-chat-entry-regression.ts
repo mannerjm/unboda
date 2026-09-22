@@ -37,10 +37,10 @@ assert(questionRoute.includes("answerAiConsultingQuestion"), "question API must 
 assert(questionRoute.includes("crypto") === false, "server question API must never generate hidden retries on behalf of the browser");
 assert(questionRoute.includes("300"), "question API must enforce the 300-char cap");
 
-assert(entryCard.includes("const depleted =") && entryCard.includes("AI 상담 이용 안내 확인") && !entryCard.includes('(session.state === "credit_required" && !hasPreviousConversation)'), "first-time buyers must see honest zero-credit guidance instead of a hidden consulting CTA");
+assert(entryCard.includes("const depleted =") && entryCard.includes("AI 상담 화면 보기") && entryCard.includes("새 답변을 받으려면 질문권이 필요해요.") && !entryCard.includes('(session.state === "credit_required" && !hasPreviousConversation)'), "first-time buyers must see a compact honest zero-credit CTA instead of a hidden consulting entry");
 assert(entryCard.includes("session.messages.length > 0"), "report CTA must distinguish an actual prior conversation from an empty thread");
-assert(entryCard.includes("이전 상담 이어보기") && entryCard.includes("이전 상담 기록 보기"), "report CTA must expose explicit continuation and history-reading actions");
-assert(entryCard.includes("최근"), "report CTA must show recent prior-conversation activity when available");
+assert(entryCard.includes("지난 상담 이어가기") && entryCard.includes("지난 상담 보기"), "report CTA must expose explicit concise continuation and history-reading actions");
+assert(entryCard.includes("session.messages.length > 0"), "report CTA must avoid inventing prior conversation history and show accurate continuation state");
 assert(reportPage.includes("AiConsultingEntryCard"), "paid report page must wire the credit-gated entry card");
 assert(chatClient.includes("crypto.randomUUID()"), "each browser submission must get an idempotency request id");
 assert(chatClient.includes("scopeDecision") && chatClient.includes("차감되지 않았습니다"), "non-chargeable scope outcomes must be visible without pretending they are answers");

@@ -166,9 +166,9 @@ for (const required of [
 }
 const reportEntry = read("app/paid-analysis/[productId]/report/AiConsultingEntryCard.tsx");
 for (const required of [
-  "이전 상담 기록 보기",
-  "이전 상담 이어보기",
-  "이전 상담 기록은 계속 볼 수 있습니다",
+  "지난 상담 보기",
+  "지난 상담 이어가기",
+  "새 답변을 받으려면 질문권이 필요해요.",
 ]) {
   assert.ok(reportEntry.includes(required), `report continuation entry checkpoint missing: ${required}`);
 }

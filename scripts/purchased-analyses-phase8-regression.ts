@@ -98,7 +98,7 @@ assert(list.includes("전문 분석 보기") && !list.includes("관계·전문 �
 assert(list.includes("allEditions") && list.includes("acquiredAt.localeCompare"), "recent item must derive from acquisition time");
 assert(list.includes("completedCount") && list.includes("preparingCount"), "library must summarize completed/preparing states");
 assert(list.includes("const consultingHubHref") && list.includes("/ai-consulting?profileId="), "library must expose exactly one profile-wide AI consultation hub entry");
-assert(list.includes("UNBODA AI CONSULTING · 핵심 기능") && list.includes("직접 저장한 기억"), "library must visually foreground the unified AI consultation differentiator");
+assert(list.includes("리포트 읽고 끝내지 말고, AI에게 바로 물어보세요") && list.includes("지난 상담 이어보기") && list.includes("새 답변에는 질문권이 필요해요."), "library must foreground readable counseling CTA without hiding question-credit requirements");
 assert(!list.includes("이 리포트로 질문하기"), "library must not expose per-report AI consultation buttons");
 assert(!list.includes("consultingHref("), "library must not retain per-report AI consultation routing helpers");
 assert(list.includes("reportHref(") && list.includes("encodeURIComponent(editionKey)"), "report reopening must preserve the exact edition");

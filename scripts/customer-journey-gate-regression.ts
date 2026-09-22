@@ -33,7 +33,7 @@ for (const source of [orders, familyOrders]) {
 
 assert(aiPage.includes("getProfileFreeAnalysisFoundationStatus") && aiPage.includes("freeAnalysisStatus"), "AI hub must know the active profile's free-analysis journey state");
 assert(aiClient.includes("무료 사주부터 확인해 주세요") && aiClient.includes("유료 분석 리포트가 먼저 필요합니다"), "AI empty state must guide users through free then paid analysis");
-assert(aiClient.includes("질문권 충전·내역") && aiClient.includes("AI 상담 질문권 구매·충전"), "AI hub must expose a clear credit purchase/recharge path");
+assert(aiClient.includes("질문권 구매하기 →") && aiClient.includes("질문권 상품 보기 →") && aiClient.includes("creditCheckoutAvailable"), "AI hub must expose a prominent credit purchase path only when checkout is available for the active user");
 
 assert(!deepAnalysis.includes('redirect("/auth/login'), "deep-analysis discovery must remain publicly browsable");
 assert(!specialAnalysis.includes('redirect("/auth/login'), "special-analysis discovery must remain publicly browsable");

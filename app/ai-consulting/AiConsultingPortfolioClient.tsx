@@ -10,6 +10,7 @@ import type {
   AiConsultingPortfolioState,
 } from "@/app/lib/aiConsulting/portfolio";
 import type { ProfileFreeAnalysisStatus } from "@/app/lib/freeAnalysisResults/server";
+import { AI_CONSULTING_CREDIT_BUNDLES } from "@/app/lib/aiConsulting/commercialPolicy";
 
 type AiConsultingUserMemory = {
   id: string;
@@ -55,12 +56,15 @@ export default function AiConsultingPortfolioClient({
   focusEdition,
   previewData,
   freeAnalysisStatus,
+  creditCheckoutAvailable = false,
 }: {
   profileId: string;
   focusProductId?: string | null;
   focusEdition?: string | null;
   previewData?: AiConsultingPortfolioPreviewData;
   freeAnalysisStatus?: ProfileFreeAnalysisStatus | null;
+  /** Server-confirmed availability for this user, including Toss TEST allowlist. */
+  creditCheckoutAvailable?: boolean;
 }) {
   const [portfolio, setPortfolio] = useState<AiConsultingPortfolioState | null>(previewData?.state ?? null);
   const [memories, setMemories] = useState<AiConsultingUserMemory[]>(previewData?.memories ?? []);
@@ -74,7 +78,7 @@ export default function AiConsultingPortfolioClient({
   const [deletingMemoryId, setDeletingMemoryId] = useState<string | null>(null);
   const [showAllAnalyses, setShowAllAnalyses] = useState(false);
   const isPreview = Boolean(previewData);
-  const creditCheckoutEnabled = process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true";
+  const creditCheckoutEnabled = creditCheckoutAvailable;
   const freeAnalysisReady = freeAnalysisStatus === "completed" || freeAnalysisStatus === "needs_retry";
 
   const loadPortfolio = useCallback(async () => {
@@ -180,6 +184,7 @@ export default function AiConsultingPortfolioClient({
         edition: creditContext.analysisEditionKey,
       }).toString()}`
     : null;
+  const creditPurchaseHref = creditCheckoutHref ? `${creditCheckoutHref}#question-bundles` : null;
 
   async function sendQuestion(content: string, preferred?: AiConsultingPortfolioSource) {
     if (isPreview || !content.trim() || content.trim().length < 2 || content.trim().length > 300) return;
@@ -307,9 +312,9 @@ export default function AiConsultingPortfolioClient({
           <Link href="/purchased-analyses" className="inline-flex rounded-full border border-[#dce1ef] bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm">
             ← 구매한 분석 보관함
           </Link>
-          {creditCheckoutHref ? (
-            <Link href={creditCheckoutHref} className="text-sm font-semibold text-slate-600 underline decoration-slate-300 underline-offset-4">
-              {creditCheckoutEnabled ? "질문권 충전·내역" : "질문권 내역"}
+          {creditCheckoutHref && !isPreview ? (
+            <Link href={creditPurchaseHref ?? creditCheckoutHref} className="inline-flex items-center justify-center rounded-full border border-[#d8d3ff] bg-white px-4 py-2 text-sm font-bold text-[#5e4bd1] shadow-sm transition hover:bg-[#f7f6ff]">
+              {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 보기 →"}
             </Link>
           ) : null}
         </div>
@@ -358,16 +363,51 @@ export default function AiConsultingPortfolioClient({
                   : "현재 출생정보와 일치하는 완료 리포트만 자동 상담 범위에 포함됩니다."}
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.07] px-5 py-4 sm:min-w-36">
+            <div className="rounded-2xl border border-white/15 bg-white/[0.11] px-5 py-4 sm:min-w-56">
               <p className="text-xs font-bold tracking-[0.12em] text-slate-300">공용 질문권</p>
-              <p className="mt-1 text-2xl font-black">
+              <p className="mt-1 text-3xl font-black" aria-live="polite">
                 {portfolio ? portfolio.questionsRemaining : "—"}
-                <span className="ml-1 text-sm font-semibold text-slate-300">회</span>
+                <span className="ml-1 text-sm font-semibold text-slate-300">회 남음</span>
               </p>
-              <p className="mt-1 text-xs text-slate-400">모든 보유 분석에서 함께 사용</p>
+              <p className="mt-1 text-xs text-slate-300">모든 보유 분석에서 함께 사용</p>
+              {creditPurchaseHref && !isPreview && portfolio?.analyses.length ? (
+                <Link href={creditPurchaseHref} className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-black text-[#211b52] transition hover:bg-[#eeeaff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                  {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 보기 →"}
+                </Link>
+              ) : null}
+              {!creditCheckoutEnabled && !isPreview ? <p className="mt-2 text-xs text-slate-300">현재 질문권 결제 준비 중</p> : null}
             </div>
           </div>
         </header>
+
+        {!isLoading && portfolio && portfolio.analyses.length > 0 && portfolio.questionsRemaining === 0 && !isPreview ? (
+          <section aria-labelledby="credit-recharge-title" className="mt-4 rounded-[1.75rem] border-2 border-[#b3a5ff] bg-white p-5 shadow-[0_16px_42px_rgba(71,54,161,0.10)] sm:p-6">
+            <p className="text-xs font-black tracking-[0.1em] text-[#5e4bd1]">AI 상담 계속하기</p>
+            <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <h2 id="credit-recharge-title" className="text-xl font-black text-[#11162d]">질문권이 0회예요. 이어서 질문해 보세요!</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-700">
+                  {creditCheckoutEnabled
+                    ? "원하는 횟수를 선택해 결제하면 이 상담으로 돌아와 바로 질문할 수 있어요."
+                    : "질문권 상품은 아래에서 확인할 수 있어요. 현재 결제는 준비 중입니다."}
+                </p>
+              </div>
+              {creditPurchaseHref ? (
+                <Link href={creditPurchaseHref} className="inline-flex shrink-0 items-center justify-center rounded-2xl bg-[#6f5ce7] px-6 py-4 text-base font-black text-white transition hover:bg-[#5f4fd2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]">
+                  {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 보기 →"}
+                </Link>
+              ) : null}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2" aria-label="AI 질문권 상품 구성">
+              {AI_CONSULTING_CREDIT_BUNDLES.map((bundle) => (
+                <span key={bundle.id} className="rounded-full border border-[#e3ddff] bg-[#f8f6ff] px-3 py-2 text-sm font-bold text-[#352b75]">
+                  {bundle.questions}회 · {bundle.priceKrw.toLocaleString("ko-KR")}원
+                </span>
+              ))}
+            </div>
+            <p className="mt-3 text-xs leading-5 text-slate-500">지난 상담 기록은 질문권 없이 다시 볼 수 있어요.</p>
+          </section>
+        ) : null}
 
         {isLoading ? (
           <section className="mt-5 rounded-[1.75rem] border border-[#dce1ef] bg-white p-7 text-center shadow-sm">
@@ -665,12 +705,20 @@ export default function AiConsultingPortfolioClient({
                   </div>
                 </form>
               ) : (
-                <div className="sticky bottom-4 z-10 -mt-28 rounded-[1.5rem] border border-[#dce1ef] bg-white/95 p-4 shadow-lg backdrop-blur">
-                  <p className="text-sm leading-6 text-slate-700">공용 질문권을 모두 사용했습니다. 기존 상담 기록은 계속 볼 수 있습니다.</p>
-                  {creditCheckoutHref ? (
-                    <Link href={creditCheckoutHref} className="mt-3 inline-flex text-sm font-bold text-[#5e4bd1] underline underline-offset-4">
-                      {creditCheckoutEnabled ? "AI 상담 질문권 구매·충전" : "질문권 내역 보기"}
-                    </Link>
+                <div className="sticky bottom-4 z-10 -mt-28 rounded-[1.5rem] border border-[#d8d3ff] bg-white/95 p-4 shadow-[0_12px_35px_rgba(33,40,83,0.14)] backdrop-blur">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-base font-black text-[#11162d]">질문권 0회 · 새 답변에는 질문권이 필요해요.</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">지난 상담 기록은 그대로 볼 수 있어요.</p>
+                    </div>
+                    {creditPurchaseHref && !isPreview ? (
+                      <Link href={creditPurchaseHref} className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#6f5ce7] px-5 py-3 text-sm font-black text-white transition hover:bg-[#5f4fd2]">
+                        {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 보기 →"}
+                      </Link>
+                    ) : null}
+                  </div>
+                  {!creditCheckoutEnabled && !isPreview ? (
+                    <p className="mt-2 text-xs text-slate-500">질문권 결제는 현재 준비 중이며, 구매 가능해지면 이 화면에서 바로 이동할 수 있어요.</p>
                   ) : null}
                 </div>
               )}

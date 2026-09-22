@@ -16,7 +16,7 @@ import { getAiConsultingSessionState } from "@/app/lib/aiConsulting/session";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { getTossConfig } from "@/app/lib/toss/config";
+import { getTossConfig, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
 
 function getHistoryLabel(entry: AiConsultingCreditHistoryEntry): string {
   if (entry.entryType === "PURCHASE") {
@@ -142,7 +142,9 @@ export default async function AiConsultingCreditsPage({
   if (isAiConsultingCreditCheckoutEnabled()) {
     try {
       getTossConfig();
-      providerReady = true;
+      // A production-hosted Toss TEST checkout is restricted to review accounts.
+      // Display purchase as available only when the authenticated user can use it.
+      providerReady = isTossCheckoutUserAllowed(user.id);
     } catch {
       providerReady = false;
     }

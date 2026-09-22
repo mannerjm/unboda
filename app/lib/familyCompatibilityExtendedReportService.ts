@@ -1,5 +1,6 @@
 import { ZodError } from "zod";
 import { generateAnalysisText } from "./ai";
+import { PAID_REPORT_CUSTOMER_LANGUAGE_RULES } from "./paidReportCustomerLanguage";
 import type {
   FamilyOtherCompatibilityResult,
   FamilySiblingCompatibilityResult,

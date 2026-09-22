@@ -125,7 +125,7 @@ for (const helper of [
 }
 
 const entryCard = readFileSync("app/paid-analysis/[productId]/report/AiConsultingEntryCard.tsx", "utf8");
-assert(entryCard.includes("이 리포트를 바탕으로 AI에게 질문하기"), "entry copy must work for deep and compatibility reports");
+assert(entryCard.includes("이 리포트로 AI에게 질문하기") && entryCard.includes("presentation.productTitle"), "entry copy must work for deep and compatibility reports without dropping report context");
 assert(!entryCard.includes("구매한 심층 분석들에서 공통"), "entry copy must not describe compatibility reports as deep-analysis products");
 
 console.log("AI consulting compatibility regression passed ✓");

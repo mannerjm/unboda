@@ -94,7 +94,7 @@ export default function AiConsultingEntryCard({
       <div className="overflow-hidden rounded-[1.8rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#ffffff_0%,#f7f6ff_100%)] shadow-[0_16px_45px_rgba(54,45,112,0.07)]">
         <div className="grid gap-5 p-5 sm:p-7 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
-            <p className="text-xs font-bold tracking-[0.16em] text-[#6f5ce7]">AI CONSULTING</p>
+            <p className="text-xs font-bold tracking-[0.16em] text-[#6f5ce7]">AI CONSULTING · 이 리포트를 바탕으로 AI에게 질문하기</p>
             <h2 className="mt-3 text-xl font-black text-[#11162d]">
               {hasPreviousConversation ? "지난 AI 상담을 이어서 질문하기" : "이 리포트로 AI 상담 이어가기"}
             </h2>
@@ -129,7 +129,7 @@ export default function AiConsultingEntryCard({
                 {depleted
                   ? hasPreviousConversation ? "이전 상담 기록 보기" : "AI 상담 이용 안내 확인"
                   : hasPreviousConversation
-                    ? "지난 AI 상담 이어가기"
+                    ? "이전 상담 이어보기"
                     : "이 리포트로 AI 상담 시작하기"}
               </Link>
             )}

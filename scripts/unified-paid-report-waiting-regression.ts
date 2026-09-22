@@ -86,15 +86,15 @@ for (const path of [
 
 for (const copy of [
   "예상 소요 시간: 약 1~3분",
-  "시간이 더 걸릴 수 있습니다",
-  "완료되면 결과 화면으로 자동 전환됩니다",
-  "리포트 생성이 조금 더 걸리고 있어요",
+  "실제 생성 시간은 분석 내용과 시스템 상황에 따라 달라질 수 있습니다",
+  "리포트 준비에 시간이 더 걸리고 있어요",
   "구매 내역은 보존됩니다",
-  "리포트 준비에 문제가 생겼어요",
+  "리포트를 준비하는 중 문제가 생겼어요",
   "구매한 분석으로 이동",
 ]) {
   assert(commonWaiting.includes(copy), `shared waiting UI must explain: ${copy}`);
 }
+assert(commonWaiting.includes("MysticLoadingScreen") && read("app/components/MysticLoadingScreen.tsx").includes("완료되면 결과 화면으로 자동 이동합니다"), "paid waiting must reuse the free-analysis loading animation and completion explanation");
 for (const state of ["none", "generating"] as const) {
   const href = getPremiumAnalysisHref("career", state, "00000000-0000-4000-8000-000000000001");
   assert(href?.startsWith("/paid-analysis/career/report?profileId=") === true, `${state} premium report must remain reopenable without new payment`);

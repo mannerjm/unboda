@@ -86,7 +86,7 @@ assert(premiumDetail.includes("getPremiumAnalysisHref(product.id, state, profile
 
 assert(consulting.includes('text-[15px] leading-7 text-slate-700'), "AI consulting entry copy must use the shared readable scale");
 assert(consulting.includes("이 리포트를 바탕으로 AI에게 질문하기"), "AI consulting CTA contract must remain intact");
-assert(sharedPreparing.includes('text-[15px] leading-7 text-slate-700'), "shared report waiting must use readable body copy");
+assert(sharedPreparing.includes("MysticLoadingScreen") && sharedPreparing.includes('text-sm leading-7 text-[#d9ddef]'), "shared paid waiting must reuse the free visual while keeping readable high-contrast copy");
 assert(preparing.includes("window.setInterval") && preparing.includes("router.refresh()"), "report preparing auto-refresh must remain intact");
 
 console.log("Paid results readability polish regression passed ✓");

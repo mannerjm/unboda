@@ -4,6 +4,7 @@ import { getHealthPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/he
 import { getRelationshipPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/relationshipPrompt";
 import { getFortunePaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/fortunePrompt";
 import { getCommonPaidAnalysisPromptRules } from "./paidAnalysisPromptPlugins/commonPrompt";
+import { PAID_REPORT_CUSTOMER_LANGUAGE_RULES } from "./paidReportCustomerLanguage";
 import {
   formatReferencePeriodForPrompt,
   type ReferencePeriodSnapshot,
@@ -767,6 +768,8 @@ ${futureTimelineRuleText}- actionGuide는 중심 결론을 실제 행동으로 �
 - decisionAnchor를 먼저 확정한 뒤 모든 섹션을 작성하며, 각 섹션은 decisionAnchor의 direction과 focus를 변경하거나 뒤집지 않는다.
 
 ${productRules}
+
+${PAID_REPORT_CUSTOMER_LANGUAGE_RULES}
 
 작성 원칙:
 
@@ -1626,5 +1629,7 @@ confidence 작성 규칙:
 
 상품별 작성 규칙:
 ${productRules}
+
+${PAID_REPORT_CUSTOMER_LANGUAGE_RULES}
 `;
 }

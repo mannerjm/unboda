@@ -1,5 +1,6 @@
 import { ZodError } from "zod";
 import { generateAnalysisText } from "./ai";
+import { PAID_REPORT_CUSTOMER_LANGUAGE_RULES } from "./paidReportCustomerLanguage";
 import type {
   FamilyOtherCompatibilityResult,
   FamilySiblingCompatibilityResult,
@@ -112,7 +113,7 @@ async function generateWithRepair<T>(input: {
   let lastError: unknown;
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
     const output = await generateAnalysisText(
-      `[SYSTEM]\n${input.system}\n\n${input.requiredShape}\n\n${CARDINALITY_GUIDE}\n\n${COMMON_GUIDE}\n\n${participantContext(input.labels)}${repair ? `\n\n${repair}` : ""}\n\n[USER]\n${input.user}`,
+      `[SYSTEM]\n${input.system}\n\n${input.requiredShape}\n\n${CARDINALITY_GUIDE}\n\n${COMMON_GUIDE}\n\n${PAID_REPORT_CUSTOMER_LANGUAGE_RULES}\n\n${participantContext(input.labels)}${repair ? `\n\n${repair}` : ""}\n\n[USER]\n${input.user}`,
       { callType: "recommendation-analysis" },
     );
     try {

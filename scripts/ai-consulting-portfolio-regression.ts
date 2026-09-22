@@ -81,12 +81,12 @@ assert(preview.includes("재물·이직·관계·학업·창업 리포트를 한
 assert(preview.includes("previewData={PREVIEW_DATA}"), "operator preview must remain static and non-mutating");
 assert(preview.includes('productId: "study-learning-strategy"') && preview.includes('productId: "business-startup-readiness"'), "operator preview must include more than three analyses so expand/collapse is visible");
 assert(!client.includes('공용 질문권 {portfolio.questionsRemaining}회'), "shared credit count must not be duplicated in the continuation card");
-assert((client.match(/질문권 구매하기 →/g) ?? []).length === 1, "paid credit purchase CTA must appear exactly once in the balance card");
-assert((client.match(/질문권 상품 보기 →/g) ?? []).length === 1, "credit product browse CTA must appear exactly once when checkout is disabled");
+assert((client.match(/질문권 구매하기 →/g) ?? []).length === 2, "purchase CTA must remain in both the top balance card and bottom conversation area as requested");
+assert((client.match(/질문권 상품 보기 →/g) ?? []).length === 2, "disabled-checkout product browse CTA must remain in top balance and bottom conversation without enabling purchase");
 assert(!client.includes("credit-recharge-title") && !client.includes("질문권이 0회예요. 이어서 질문해 보세요!"), "zero-credit state must not repeat a full-width purchase banner");
 assert(!client.includes("AI_CONSULTING_CREDIT_BUNDLES"), "bundle prices belong on the credit purchase page, not in a duplicate consultation banner");
-assert(client.includes("새 답변에는 질문권이 필요해요. 지난 상담 기록은 그대로 볼 수 있어요."), "depleted composer must explain the blocked action without another purchase CTA");
-assert(client.includes('href={creditPurchaseHref}') && client.includes('data-ai-composer="portfolio-sticky"'), "the single credit CTA and existing conversation composer must remain available");
+assert(client.includes("질문권 0회 · 새 답변에는 질문권이 필요해요.") && client.includes("지난 상담 기록은 그대로 볼 수 있어요.") && client.includes("sticky bottom-4 z-10 -mt-28"), "depleted composer must preserve zero-credit notice and the requested bottom credit action");
+assert((client.match(/href=\{creditPurchaseHref\}/g) ?? []).length === 2 && client.includes('data-ai-composer="portfolio-sticky"'), "two authorized purchase links must coexist with the unchanged active conversation composer");
 
 
 assert(creditMigration.includes("unused paid questions can be used later against any separately purchased"), "profile credit ledger must remain explicitly cross-product");

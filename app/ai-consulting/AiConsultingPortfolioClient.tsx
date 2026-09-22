@@ -670,8 +670,21 @@ export default function AiConsultingPortfolioClient({
                   </div>
                 </form>
               ) : (
-                <div role="status" className="mt-4 rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm leading-6 text-slate-600">
-                  새 답변에는 질문권이 필요해요. 지난 상담 기록은 그대로 볼 수 있어요.
+                <div role="status" className="sticky bottom-4 z-10 -mt-28 rounded-[1.5rem] border border-[#d8d3ff] bg-white/95 p-4 shadow-[0_12px_35px_rgba(33,40,83,0.14)] backdrop-blur">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-base font-black text-[#11162d]">질문권 0회 · 새 답변에는 질문권이 필요해요.</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">지난 상담 기록은 그대로 볼 수 있어요.</p>
+                    </div>
+                    {creditPurchaseHref && !isPreview ? (
+                      <Link href={creditPurchaseHref} className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#6f5ce7] px-5 py-3 text-sm font-black text-white transition hover:bg-[#5f4fd2]">
+                        {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 보기 →"}
+                      </Link>
+                    ) : null}
+                  </div>
+                  {!creditCheckoutEnabled && !isPreview ? (
+                    <p className="mt-2 text-xs text-slate-500">질문권 결제는 현재 준비 중이며, 구매 가능해지면 이 화면에서 바로 이동할 수 있어요.</p>
+                  ) : null}
                 </div>
               )}
             </section>

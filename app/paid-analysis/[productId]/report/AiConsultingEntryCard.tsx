@@ -68,8 +68,12 @@ export default function AiConsultingEntryCard({
     return () => controller.abort();
   }, [edition, productId, profileId]);
 
-  const hasPreviousConversation =
-    session && session.state !== "report_required" && session.messages.length > 0;
+  const hasPreviousConversation = Boolean(
+    session && session.state !== "report_required" && session.messages.length > 0,
+  );
+  const latestMessageAt = session && session.state !== "report_required"
+    ? session.messages[session.messages.length - 1]?.createdAt
+    : undefined;
 
   // A newly purchased report with zero questions used to hide this entire section.
   // Always explain the consulting route and current entitlement instead.
@@ -79,9 +83,9 @@ export default function AiConsultingEntryCard({
   const reportPending = session?.state === "report_required";
   const depleted = session?.state === "credit_required";
   const lastActivityAt = hasPreviousConversation
-    ? formatRecentActivity(session && session.state !== "report_required" ? session.messages[session.messages.length - 1]?.createdAt : undefined)
+    ? formatRecentActivity(latestMessageAt)
     : null;
-  const historySummary = hasPreviousConversation
+  const historySummary = hasPreviousConversation && session && session.state !== "report_required"
     ? `이전 상담 ${session.messages.length}개 메시지${lastActivityAt ? ` · 최근 ${lastActivityAt}` : ""}`
     : null;
 
@@ -96,12 +100,13 @@ export default function AiConsultingEntryCard({
             </h2>
             <p className="mt-3 text-[15px] leading-7 text-slate-700">
               <strong className="font-bold text-[#11162d]">{presentation.productTitle}</strong>를 읽다가 이해하기 어려웠던 부분을 AI에게 바로 물어보세요. 이 리포트를 기준으로 상담을 시작하고, 저장된 이전 상담이 있다면 이어서 확인할 수 있습니다.
+              질문권은 프로필 공용입니다. 다른 유료 분석을 추가로 보유하면 통합 AI 상담에서 그 분석 범위도 함께 사용할 수 있습니다.
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
               <span className="rounded-full border border-[#d8d3ff] bg-white px-3 py-2 text-[#5e4bd1]">{presentation.editionLabel}</span>
               <span className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-slate-600">
-                {!session || reportPending ? "상담 상태 확인 중" : depleted ? "남은 질문 0회" : `남은 질문 ${session.questionsRemaining}회`}
+                {session?.state === "ready" ? `남은 질문 ${session.questionsRemaining}회` : depleted ? "남은 질문 0회" : reportPending ? "리포트 준비 중" : "상담 상태 확인 중"}
               </span>
             </div>
 
@@ -111,7 +116,7 @@ export default function AiConsultingEntryCard({
             {reportPending ? (
               <p className="mt-2 text-sm leading-6 text-slate-600">리포트 생성이 끝나면 이 분석을 바탕으로 상담할 수 있습니다.</p>
             ) : depleted ? (
-              <p className="mt-2 text-sm leading-6 text-slate-600">남은 질문권이 0회입니다. 이전 상담은 확인할 수 있지만, 새 답변에는 질문권이 필요합니다.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">남은 질문권이 0회입니다. 이전 상담 기록은 계속 볼 수 있습니다. 새 답변에는 질문권이 필요합니다.</p>
             ) : null}
 
             {reportPending ? (

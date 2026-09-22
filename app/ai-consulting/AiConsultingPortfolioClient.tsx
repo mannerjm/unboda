@@ -369,7 +369,7 @@ export default function AiConsultingPortfolioClient({
                 {portfolio ? portfolio.questionsRemaining : "—"}
                 <span className="ml-1 text-sm font-semibold text-slate-300">회 남음</span>
               </p>
-              <p className="mt-1 text-xs text-slate-300">정상 답변 1회에 질문권 1회 사용</p>
+              <p className="mt-1 text-xs text-slate-300">모든 보유 분석에서 함께 사용</p>
               {creditPurchaseHref && !isPreview && portfolio?.analyses.length ? (
                 <Link href={creditPurchaseHref} className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-black text-[#211b52] transition hover:bg-[#eeeaff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                   {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 보기 →"}

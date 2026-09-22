@@ -5,6 +5,12 @@ import ReportAccessGate from "./ReportAccessGate";
 import AiConsultingEntryCard from "./AiConsultingEntryCard";
 import Phase9NextAnalysisSection from "@/app/components/Phase9NextAnalysisSection";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
+import { getCurrentUser } from "@/app/lib/supabase/auth";
+import {
+  getActiveEntitlementForProfile,
+  getActiveEntitlementForProfileEdition,
+} from "@/app/lib/purchases/server";
+import { getPaidReport } from "@/app/lib/paidReports/server";
 import {
   getCompatibilityPairReportPath,
   isCompatibilityFamilyOtherProductId,
@@ -37,6 +43,55 @@ function compatibilityReportHref(productId: string, profileId: string, edition?:
     return `/special-analysis/compatibility/family/other/report${profileQuery}`;
   }
   return null;
+}
+
+/**
+ * Runs only after ReportAccessGate has checked the active profile and purchase.
+ * Reading the exact purchased edition is read-only: it never claims or starts
+ * generation. Completed reports are rendered by the server on the first view,
+ * so returning customers never see the first-purchase generation animation.
+ */
+async function PaidReportBody({
+  productId,
+  profileId,
+  edition,
+}: {
+  productId: string;
+  profileId: string;
+  edition?: string;
+}) {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const entitlement = edition
+    ? await getActiveEntitlementForProfileEdition(user.id, profileId, productId, edition)
+    : await getActiveEntitlementForProfile(user.id, profileId, productId);
+
+  if (!entitlement?.analysisEditionKey) return null;
+
+  const exactEdition = entitlement.analysisEditionKey;
+  const stored = await getPaidReport(user.id, profileId, productId, exactEdition);
+  const initialDetail = stored?.status === "completed" && stored.content
+    ? stored.content
+    : null;
+
+  return (
+    <>
+      <PaidAnalysisDetailV2Client
+        key={`${profileId}:${productId}:${exactEdition}`}
+        productId={productId}
+        profileId={profileId}
+        edition={exactEdition}
+        initialDetail={initialDetail}
+      />
+      <AiConsultingEntryCard productId={productId} profileId={profileId} edition={exactEdition} />
+      <Phase9NextAnalysisSection
+        profileId={profileId}
+        sourceProductId={productId}
+        sourceEditionKey={exactEdition}
+      />
+    </>
+  );
 }
 
 export default async function PaidAnalysisReportPage({
@@ -75,13 +130,9 @@ export default async function PaidAnalysisReportPage({
   return (
     <main className="min-h-screen bg-[#f5f7fc] text-[#11162d]">
       <ReportAccessGate productId={productId} profileId={profileId} edition={edition}>
-        <PaidAnalysisDetailV2Client productId={productId} profileId={profileId} edition={edition} />
-        <AiConsultingEntryCard productId={productId} profileId={profileId} edition={edition} />
-        <Phase9NextAnalysisSection
-          profileId={profileId}
-          sourceProductId={productId}
-          sourceEditionKey={edition}
-        />
+        {profileId ? (
+          <PaidReportBody productId={productId} profileId={profileId} edition={edition} />
+        ) : null}
       </ReportAccessGate>
     </main>
   );

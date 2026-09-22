@@ -1,5 +1,6 @@
 import { ZodError } from "zod";
 import { generateAnalysisText } from "./ai";
+import { PAID_REPORT_CUSTOMER_LANGUAGE_RULES } from "./paidReportCustomerLanguage";
 import {
   buildCompatibilityReportContext,
   buildCompatibilityReportPrompt,
@@ -70,7 +71,7 @@ function buildGenerationRequest(
     ? ""
     : `\n\n[REPAIR_INSTRUCTION]\n직전 응답은 배열 개수 제한을 초과했습니다. 내용과 근거 관계는 유지하되 아래 개수 제한에 맞춰 가장 중요한 항목만 남겨 JSON 전체를 다시 작성하세요.`;
 
-  return `[SYSTEM]\n${prompt.system}\n\n${STRICT_CARDINALITY_LIMITS}\n\n${CUSTOMER_COPY_GUIDE}${retryInstruction}\n\n[USER]\n${prompt.user}`;
+  return `[SYSTEM]\n${prompt.system}\n\n${STRICT_CARDINALITY_LIMITS}\n\n${CUSTOMER_COPY_GUIDE}\n\n${PAID_REPORT_CUSTOMER_LANGUAGE_RULES}${retryInstruction}\n\n[USER]\n${prompt.user}`;
 }
 
 export async function generateCompatibilityReport(

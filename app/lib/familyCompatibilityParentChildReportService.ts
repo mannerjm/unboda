@@ -1,5 +1,6 @@
 import { ZodError } from "zod";
 import { generateAnalysisText } from "./ai";
+import { PAID_REPORT_CUSTOMER_LANGUAGE_RULES } from "./paidReportCustomerLanguage";
 import {
   buildFamilyParentChildReportContext,
   buildFamilyParentChildReportPrompt,
@@ -137,7 +138,7 @@ function buildGenerationRequest(
   const participantContext = buildParticipantContext(participants);
   const participantBlock = participantContext ? `\n\n${participantContext}` : "";
   const repairBlock = repairInstruction ? `\n\n${repairInstruction}` : "";
-  return `[SYSTEM]\n${prompt.system}\n\n${REQUIRED_JSON_SHAPE}\n\n${STRICT_CARDINALITY_LIMITS}\n\n${CUSTOMER_COPY_GUIDE}\n\n${SPECIFICITY_GUIDE}\n\n${CUSTOMER_LANGUAGE_GUIDE}${participantBlock}${repairBlock}\n\n[USER]\n${prompt.user}`;
+  return `[SYSTEM]\n${prompt.system}\n\n${REQUIRED_JSON_SHAPE}\n\n${STRICT_CARDINALITY_LIMITS}\n\n${CUSTOMER_COPY_GUIDE}\n\n${SPECIFICITY_GUIDE}\n\n${CUSTOMER_LANGUAGE_GUIDE}\n\n${PAID_REPORT_CUSTOMER_LANGUAGE_RULES}${participantBlock}${repairBlock}\n\n[USER]\n${prompt.user}`;
 }
 
 export async function generateFamilyParentChildReport(

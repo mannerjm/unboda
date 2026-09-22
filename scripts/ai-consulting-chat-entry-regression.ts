@@ -37,7 +37,7 @@ assert(questionRoute.includes("answerAiConsultingQuestion"), "question API must 
 assert(questionRoute.includes("crypto") === false, "server question API must never generate hidden retries on behalf of the browser");
 assert(questionRoute.includes("300"), "question API must enforce the 300-char cap");
 
-assert(entryCard.includes('session.state === "credit_required"') && entryCard.includes("return null"), "report CTA must stay hidden when no credit and no readable prior conversation exists");
+assert(entryCard.includes("const depleted =") && entryCard.includes("AI 상담 이용 안내 확인") && !entryCard.includes('(session.state === "credit_required" && !hasPreviousConversation)'), "first-time buyers must see honest zero-credit guidance instead of a hidden consulting CTA");
 assert(entryCard.includes("session.messages.length > 0"), "report CTA must distinguish an actual prior conversation from an empty thread");
 assert(entryCard.includes("이전 상담 이어보기") && entryCard.includes("이전 상담 기록 보기"), "report CTA must expose explicit continuation and history-reading actions");
 assert(entryCard.includes("최근"), "report CTA must show recent prior-conversation activity when available");

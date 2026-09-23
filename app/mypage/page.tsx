@@ -193,6 +193,8 @@ type SummaryBody = {
   profileDeletability?: Array<{ profileId: string; deletable: boolean; reason?: ProfileDeleteReason }>;
   paidAnalysis?: PaidAnalysisSummary[];
   purchaseHistory?: PurchaseHistoryItem[];
+  paymentHistoryTotal?: number;
+  paidProfileIds?: string[];
 };
 
 type ProfileDeletabilityState = { deletable: boolean; reason?: ProfileDeleteReason };
@@ -232,6 +234,8 @@ export default function MyPage() {
   const [isDeleteEligibilityLoading, setIsDeleteEligibilityLoading] = useState(true);
   const [paidAnalysisByProfileId, setPaidAnalysisByProfileId] = useState<Record<string, PaidAnalysisSummary[]>>({});
   const [purchaseHistory, setPurchaseHistory] = useState<PurchaseHistoryItem[]>([]);
+  const [paymentHistoryTotal, setPaymentHistoryTotal] = useState(0);
+  const [paidProfileIds, setPaidProfileIds] = useState<string[]>([]);
   const [accountStatus, setAccountStatus] = useState<AccountStatus | null>(null);
   const [pendingDeleteProfileId, setPendingDeleteProfileId] = useState<string | null>(null);
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
@@ -329,6 +333,8 @@ export default function MyPage() {
     }
     setPaidAnalysisByProfileId(paidByProfileId);
     setPurchaseHistory(body.purchaseHistory ?? []);
+    setPaymentHistoryTotal(body.paymentHistoryTotal ?? body.purchaseHistory?.length ?? 0);
+    setPaidProfileIds(body.paidProfileIds ?? []);
   }
 
   function formatPurchaseDate(value: string): string {
@@ -574,9 +580,7 @@ export default function MyPage() {
     );
     const hasPaidHistory = Boolean(
       editingProfileId
-      && purchaseHistory.some(
-        (item) => item.profileId === editingProfileId && item.paymentStatus === "paid",
-      ),
+      && paidProfileIds.includes(editingProfileId),
     );
 
     if (canonicalBirthChanged && !birthDataChangeAcknowledged) {
@@ -1094,7 +1098,8 @@ export default function MyPage() {
         <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7" aria-labelledby="payment-history-heading">
             <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">PAYMENT HISTORY</p>
             <h2 id="payment-history-heading" className="mt-2 text-2xl font-bold text-slate-900">결제 내역</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">구매한 분석은 보관함에서, 결제와 환불 기록은 여기에서 확인합니다. 환불·취소 문의는 해당 주문에서 고객지원센터로 연결됩니다.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">구매한 분석은 보관함에서, 결제와 환불 기록은 여기에서 확인합니다. 최근 결제 5건을 먼저 보여드리며, 환불·취소 문의는 해당 주문에서 고객지원센터로 연결됩니다.</p>
+            {paymentHistoryTotal > 0 ? <p className="mt-2 text-xs font-semibold text-slate-600">전체 결제 내역 {paymentHistoryTotal}건 · 최근 최대 5건 표시</p> : null}
             {purchaseHistory.length > 0 ? (
             <ul className="mt-5 divide-y divide-stone-200">
               {purchaseHistory.map((item) => {
@@ -1127,6 +1132,11 @@ export default function MyPage() {
               })}
             </ul>
             ) : <p className="mt-5 border-t border-slate-100 pt-5 text-sm leading-6 text-slate-500">아직 결제 또는 환불 내역이 없습니다.</p>}
+            {paymentHistoryTotal > 0 ? (
+              <Link href="/mypage/payments" className={`mt-5 inline-flex w-full items-center justify-center rounded-xl border border-[#cfd5e6] bg-[#f7f8fc] px-4 py-3 text-sm font-bold text-[#171a3d] transition hover:bg-[#eeeffa] ${restingFocusRing}`}>
+                전체 결제 내역 보기 →
+              </Link>
+            ) : null}
         </section>
         {message ? <p className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{message}</p> : null}
         <section className="mt-10 border-t border-slate-200 pt-6" aria-labelledby="account-management-heading">

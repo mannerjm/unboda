@@ -14,6 +14,8 @@ function read(relativePath: string): string {
 const mypage = read("app/mypage/page.tsx");
 const summaryRoute = read("app/api/mypage/summary/route.ts");
 const purchases = read("app/lib/purchases/server.ts");
+const accountLedger = read("app/lib/accountPaymentHistory.ts");
+const archive = read("app/mypage/payments/page.tsx");
 const paidReports = read("app/lib/paidReports/server.ts");
 const reportGate = read("app/paid-analysis/[productId]/report/ReportAccessGate.tsx");
 const refunds = read("app/lib/refunds/server.ts");
@@ -34,11 +36,14 @@ assert(
 );
 assert(mypage.includes("구매한 심층 분석") && mypage.includes("아직 구매한 심층 분석이 없습니다."), "zero-paid-analysis profiles must show a compact library empty state");
 assert(mypage.includes("내 프로필 및 이용 가능한 분석") && mypage.includes("결제 내역") && mypage.includes("구매한 분석은 보관함에서"), "My Page must distinguish current analysis content from financial purchase history");
-assert(summaryRoute.includes("listUserPurchaseHistory(user.id)") && summaryRoute.includes("purchaseHistory"), "summary must expose historical purchase records");
+assert(summaryRoute.includes("getAccountPaymentHistory(user.id)") && summaryRoute.includes("purchaseHistory: purchaseHistory.slice(0, 5)"), "summary exposes five recent account transactions");
+assert(summaryRoute.includes("paymentHistoryTotal") && summaryRoute.includes("paidProfileIds"), "summary preserves account-wide counts and profile purchase flags");
+assert(accountLedger.includes("listUserPurchaseHistory(userId)") && accountLedger.includes("listUserSpecialAnalysisPurchaseHistory(userId)") && accountLedger.includes("listUserRefundSummaries(userId)"), "full history remains account-wide and combines standard, specialist and refund records");
 assert(summaryRoute.includes("listUserPaidAnalysisSummaries(user.id)"), "summary must preserve active entitlement-backed analysis summaries");
 assert(purchases.includes("export async function listUserPurchaseHistory") && purchases.includes('.from("purchases")'), "purchase history must derive from purchases, not entitlements");
 assert(purchases.includes('.from("orders")') && purchases.includes("amount") && purchases.includes("currency"), "purchase history must include persisted order/payment customer fields");
-assert(summaryRoute.includes("refundByOrderId") && summaryRoute.includes("refund"), "purchase history must connect refund state by order");
+assert(accountLedger.includes("refundByOrderId") && accountLedger.includes("refund"), "account history must connect refund status to its exact order");
+assert(archive.includes("item.refund.customerMessage") && archive.includes("encodeURIComponent(item.orderId)"), "full archive shows historic refunds and keeps the same order-linked support path");
 assert(refunds.includes("export async function listUserRefundSummaries") && refunds.includes("getRefundCustomerMessage"), "refund summaries must use customer-safe status messages");
 for (const status of ["REFUND_REQUESTED", "REFUND_PROCESSING", "REFUND_FAILED_RETRYING", "REFUND_COMPLETED", "OWNER_REVIEW_REQUIRED"]) {
   assert(purchaseTypes.includes(status), `refund status ${status} must remain supported`);

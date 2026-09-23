@@ -7,10 +7,8 @@ import {
 } from "@/app/lib/freeAnalysisResults/server";
 import { listProfileDeleteBlockers, listUserProfiles } from "@/app/lib/profiles/server";
 import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
-import { listUserPurchaseHistory } from "@/app/lib/purchases/server";
-import { listUserSpecialAnalysisPurchaseHistory } from "@/app/lib/specialAnalysisPurchaseHistory";
 import { getSpecialAnalysisProduct } from "@/app/lib/specialAnalysisProducts";
-import { listUserRefundSummaries } from "@/app/lib/refunds/server";
+import { getAccountPaymentHistory } from "@/app/lib/accountPaymentHistory";
 import { createEvaluationContext } from "@/app/lib/evaluationContext";
 
 export async function GET() {
@@ -19,14 +17,12 @@ export async function GET() {
 
   try {
     const evaluationContext = createEvaluationContext();
-    const [profiles, summaries, deleteBlockers, rawPaidAnalysis, standardPurchaseHistory, specialPurchaseHistory, refunds] = await Promise.all([
+    const [profiles, summaries, deleteBlockers, rawPaidAnalysis, purchaseHistory] = await Promise.all([
       listUserProfiles(user.id),
       listUserFreeAnalysisResults(user.id),
       listProfileDeleteBlockers(user.id),
       listUserPaidAnalysisSummaries(user.id),
-      listUserPurchaseHistory(user.id),
-      listUserSpecialAnalysisPurchaseHistory(user.id),
-      listUserRefundSummaries(user.id),
+      getAccountPaymentHistory(user.id),
     ]);
     const freeAnalysisResults = profiles.map((profile) => {
       const summary = summaries.find((item) => item.profileId === profile.id);
@@ -62,15 +58,16 @@ export async function GET() {
       return specialProduct ? { ...item, productName: specialProduct.title } : item;
     });
 
-    const purchaseHistory = [...standardPurchaseHistory, ...specialPurchaseHistory]
-      .sort((left, right) => right.purchasedAt.localeCompare(left.purchasedAt));
-    const refundByOrderId = new Map(refunds.map((refund) => [refund.orderId, refund]));
-    const purchaseHistoryWithRefunds = purchaseHistory.map((purchase) => ({
-      ...purchase,
-      refund: refundByOrderId.get(purchase.orderId) ?? null,
-    }));
-
-    return NextResponse.json({ freeAnalysisResults, profileDeletability, paidAnalysis, purchaseHistory: purchaseHistoryWithRefunds });
+    const paidProfileIds = [...new Set(
+      purchaseHistory.filter((item) => item.paymentStatus === "paid")
+        .map((item) => item.profileId),
+    )];
+    return NextResponse.json({
+      freeAnalysisResults, profileDeletability, paidAnalysis,
+      purchaseHistory: purchaseHistory.slice(0, 5),
+      paymentHistoryTotal: purchaseHistory.length,
+      paidProfileIds,
+    }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("[mypage-summary] list failed", error);
     return NextResponse.json({ error: "요약 정보를 불러오지 못했습니다." }, { status: 500 });

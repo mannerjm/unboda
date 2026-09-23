@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { listUserProfiles } from "@/app/lib/profiles/server";
+import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getKoreaEvaluationDate } from "@/app/lib/evaluationContext";
 import type { TodayReading } from "@/app/lib/dailyUnboda";
 import { getCachedTodayReading } from "@/app/lib/dailyUnboda/server";
@@ -16,21 +16,21 @@ export default async function TodayPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login?returnTo=/today");
 
-  // The member's own daily result must never silently switch to a family
-  // member when the active analysis profile changes elsewhere in the app.
-  const profiles = await listUserProfiles(user.id);
-  const selfProfile = profiles.find((profile) => profile.relationshipType === "self");
+  // The free daily reading follows the member's explicitly selected analysis
+  // profile, while paid-report entitlements remain independently profile-scoped.
+  // Read the current selection outside the cached daily computation.
+  const activeProfile = await getActiveProfile(user.id);
   const date = getKoreaEvaluationDate();
 
-  if (!selfProfile) {
+  if (!activeProfile) {
     return (
       <AppShell>
         <main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10 sm:px-8">
           <section className="w-full rounded-[2rem] border border-[#dfe3ef] bg-white p-7 shadow-[0_16px_44px_rgba(32,38,72,.06)] sm:p-10">
             <p className="text-xs font-black tracking-[.16em] text-[#7866d8]">DAILY UNBODA · 매일 무료</p>
             <h1 className="mt-3 text-3xl font-black tracking-tight text-[#11162d]">오늘의 운보다</h1>
-            <p className="mt-4 text-sm leading-7 text-[#59647c]">본인의 출생정보를 등록하면 매일 짧은 일일 흐름을 무료로 확인할 수 있어요. 가족 등 다른 분석 대상으로 선택한 프로필은 본인의 결과로 사용하지 않습니다.</p>
-            <Link href="/mypage" className="mt-7 inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#6755d2] px-5 py-3 text-sm font-black text-white hover:bg-[#5543c0]">마이페이지에서 본인 등록하기</Link>
+            <p className="mt-4 text-sm leading-7 text-[#59647c]">마이페이지에서 분석 대상을 선택하면 해당 대상의 오늘의 흐름을 무료로 확인할 수 있어요. 다른 대상을 선택하면 그 대상의 오늘의 운보다로 변경됩니다.</p>
+            <Link href="/mypage" className="mt-7 inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#6755d2] px-5 py-3 text-sm font-black text-white hover:bg-[#5543c0]">마이페이지에서 분석 대상 선택하기</Link>
           </section>
         </main>
       </AppShell>
@@ -40,7 +40,7 @@ export default async function TodayPage() {
   let reading: TodayReading | null = null;
   try {
     // Cache only the derived daily text, never the user's session/profile lookup.
-    reading = await getCachedTodayReading(user.id, selfProfile, date);
+    reading = await getCachedTodayReading(user.id, activeProfile, date);
   } catch (error) {
     // Fail closed: never show a generic daily fortune as though calculated.
     console.error("[today] Daily reading calculation failed", error instanceof Error ? error.message : "unknown");
@@ -65,7 +65,7 @@ export default async function TodayPage() {
                   <p className="text-xs font-black tracking-[.16em] text-[#c0b4ff]">DAILY UNBODA · 매일 무료</p>
                   <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">오늘의 운보다</h1>
                   <p className="mt-3 text-sm text-[#ccd1e6]">{formattedDate}</p>
-                  <p className="mt-2 text-xs text-[#aab2ce]">{selfProfile.label}님의 오늘</p>
+                  <p className="mt-2 text-xs text-[#aab2ce]">{activeProfile.label}님의 오늘</p>
                 </div>
                 <span aria-hidden="true" className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-[#e1d9ff]/20 bg-[#a58bff]/15 text-2xl text-[#f5d28a]">✦</span>
               </div>
@@ -87,7 +87,7 @@ export default async function TodayPage() {
                     <p className="mt-2 text-sm leading-7 text-[#36415e]">{reading.action}</p>
                   </div>
                 </section>
-                <p className="text-xs leading-6 text-[#778197]">본인의 사주와 오늘의 일진 사이의 십성·지지 관계를 참고해 구성한 짧은 명리 콘텐츠입니다. 실제 사건이나 결과를 확정적으로 예측하지 않습니다.</p>
+                <p className="text-xs leading-6 text-[#778197]">현재 선택한 분석 대상의 사주와 오늘의 일진 사이의 십성·지지 관계를 참고해 구성한 짧은 명리 콘텐츠입니다. 실제 사건이나 결과를 확정적으로 예측하지 않습니다.</p>
                 <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#e9eaf2] pt-5">
                   <p className="text-xs text-[#79829a]">내일은 새로운 날짜의 흐름을 확인할 수 있어요.</p>
                   <Link href="/" className="text-sm font-bold text-[#6553cd] underline underline-offset-4 hover:text-[#4933a4]">운보다 홈으로</Link>

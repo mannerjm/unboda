@@ -10,6 +10,26 @@ import {
   type SupportRequestDto,
 } from "@/app/lib/support/types";
 
+export type SupportRefundOrder = {
+  orderId: string;
+  productName: string;
+  profileLabel: string;
+  amount: number;
+  purchasedAt: string;
+  paymentStatus: string;
+  refundStatus: string | null;
+};
+
+const refundInquiryReasons = [
+  { value: "DUPLICATE_PAYMENT", label: "중복 결제 또는 결제 오류" },
+  { value: "REPORT_NOT_PROVIDED", label: "리포트 미제공 또는 생성 오류" },
+  { value: "DIFFERENT_REPORT", label: "구매한 내용과 다른 리포트 제공" },
+  { value: "BEFORE_SUPPLY", label: "리포트 제공 전 구매 취소" },
+  { value: "OTHER", label: "기타 환불·결제 문의" },
+] as const;
+
+type RefundInquiryReason = (typeof refundInquiryReasons)[number]["value"];
+
 type Guide = {
   title: string;
   description: string;

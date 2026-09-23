@@ -109,7 +109,15 @@ export default function SupportCenterClient({
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (!category || submitting) return;
+    if (!category || submitting || invalidRefundOrder) return;
+    if (category === "PAYMENT_REFUND" && !refundReason) {
+      setFeedback("환불·취소 문의 사유를 선택해 주세요.");
+      return;
+    }
+    const reasonLabel = refundInquiryReasons.find((reason) => reason.value === refundReason)?.label;
+    const requestMessage = category === "PAYMENT_REFUND"
+      ? `환불·취소 문의 사유: ${reasonLabel ?? "기타 문의"}${message.trim() ? `\n추가 설명: ${message.trim()}` : ""}`
+      : message;
     setSubmitting(true);
     setFeedback(null);
     try {
@@ -117,15 +125,18 @@ export default function SupportCenterClient({
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ category, message, orderId: orderId.trim() || null }),
+        body: JSON.stringify({ category, message: requestMessage, orderId: orderId.trim() || null }),
       });
       const body = await response.json().catch(() => null) as { request?: SupportRequestDto; error?: string } | null;
       if (!response.ok || !body?.request) throw new Error(body?.error ?? "문의를 접수하지 못했습니다.");
       setRequests((current) => [body.request!, ...current]);
       setMessage("");
+      setRefundReason("");
       setOrderId("");
       setShowForm(false);
-      setFeedback("문의가 접수되었습니다. 답변이 등록되면 가입 이메일로 알려드리며, 답변 내용은 이 고객지원 센터에서 확인할 수 있습니다.");
+      setFeedback(category === "PAYMENT_REFUND"
+        ? "환불·취소 문의가 접수되었습니다. 접수만으로 결제가 취소되지는 않습니다. 답변은 고객지원센터에서, 환불 처리 상태는 마이페이지에서 확인해 주세요."
+        : "문의가 접수되었습니다. 답변이 등록되면 가입 이메일로 알려드리며, 답변 내용은 이 고객지원 센터에서 확인할 수 있습니다.");
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "문의를 접수하지 못했습니다.");
     } finally {

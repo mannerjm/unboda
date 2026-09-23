@@ -1,5 +1,7 @@
 import { calculateSaju } from "@fullstackfamily/manseryeok";
 import { getTenGod } from "./tenGod";
+import { branchElementMap } from "./elements";
+import { findBranchClash, findBranchCombination } from "./fortuneRelations";
 
 /**
  * Free daily reading, isolated from paid reports and monthly free-analysis generation.
@@ -9,8 +11,34 @@ import { getTenGod } from "./tenGod";
  * The service publication date is a KST civil day. At 12:00 of that day the
  * library's day pillar is unambiguous, including around the 子時 boundary.
  */
-const DAILY_COPY_VERSION = "daily-v1" as const;
+export const DAILY_COPY_VERSION = "daily-v2" as const;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+// Only the new daily presentation adapts Hanja branches to the existing Hangul
+// relation helpers. The paid/monthly saju relation engine is never modified.
+const DAILY_BRANCH_HANGUL: Record<string, string> = {
+  子: "자", 丑: "축", 寅: "인", 卯: "묘", 辰: "진", 巳: "사",
+  午: "오", 未: "미", 申: "신", 酉: "유", 戌: "술", 亥: "해",
+};
+
+export type TodayBranchRelation = "합" | "충" | "같은 오행" | null;
+
+export function getTodayBranchRelation(personDayBranch: string, todayBranch: string): TodayBranchRelation {
+  const person = DAILY_BRANCH_HANGUL[personDayBranch];
+  const today = DAILY_BRANCH_HANGUL[todayBranch];
+  if (!person || !today) throw new Error("Unrecognized daily branch");
+  if (findBranchClash(person, today)) return "충";
+  if (findBranchCombination(person, today)) return "합";
+  const personElement = branchElementMap[personDayBranch];
+  const todayElement = branchElementMap[todayBranch];
+  return personElement && personElement === todayElement ? "같은 오행" : null;
+}
+
+const branchNoteByRelation: Record<Exclude<TodayBranchRelation, null>, string> = {
+  "합": "태어난 날의 지지와 오늘의 지지가 합 관계로 분류됩니다. 서로 다른 의견이나 일정을 조율할 기회가 있다면 차분히 살펴보세요.",
+  "충": "태어난 날의 지지와 오늘의 지지가 충 관계로 분류됩니다. 평소의 계획과 다른 조건이 있다면 한 번 더 확인해 보세요.",
+  "같은 오행": "태어난 날의 지지와 오늘의 지지가 같은 오행으로 분류됩니다. 익숙한 방식에서 계속 유지할 점과 바꾸고 싶은 점을 살펴보세요.",
+};
 
 const copyByTenGod: Record<string, {
   topic: string;
@@ -74,6 +102,7 @@ export type TodayReading = {
   version: typeof DAILY_COPY_VERSION;
   dayPillarHanja: string;
   tenGod: string;
+  branchRelation: TodayBranchRelation;
   topic: string;
   flow: string;
   action: string;
@@ -99,20 +128,26 @@ export function getTodayDayPillar(date: string): string {
 export function buildTodayReading(input: {
   date: string;
   personDayStem: string;
+  personDayBranch?: string;
   dayPillarHanja: string;
 }): TodayReading {
-  const { date, personDayStem, dayPillarHanja } = input;
+  const { date, personDayStem, personDayBranch, dayPillarHanja } = input;
   if (!/^[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]$/.test(dayPillarHanja)) {
     throw new Error("Unrecognized day pillar");
   }
   const tenGod = getTenGod(personDayStem, dayPillarHanja[0]);
   const copy = copyByTenGod[tenGod];
   if (!copy) throw new Error("Unrecognized ten-god relation");
+  const branchRelation = personDayBranch
+    ? getTodayBranchRelation(personDayBranch, dayPillarHanja[1])
+    : null;
   return {
     date,
     version: DAILY_COPY_VERSION,
     dayPillarHanja,
     tenGod,
+    branchRelation,
     ...copy,
+    flow: branchRelation ? `${copy.flow} ${branchNoteByRelation[branchRelation]}` : copy.flow,
   };
 }

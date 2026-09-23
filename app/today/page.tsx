@@ -110,22 +110,16 @@ export default async function TodayPage() {
             </header>
             {reading ? (
               <div className="space-y-6 px-6 py-8 sm:px-10 sm:py-10">
-                <section aria-labelledby="today-flow">
-                  <p className="inline-flex rounded-full bg-[#f0edff] px-3 py-1.5 text-xs font-bold text-[#6150be]">오늘의 짧은 흐름</p>
-                  <h2 id="today-flow" className="sr-only">오늘의 짧은 흐름</h2>
+                <section aria-labelledby="today-topic">
+                  <p className="text-xs font-black tracking-wide text-[#7165aa]">오늘 살펴볼 흐름</p>
+                  <h2 id="today-topic" className="mt-2 text-2xl font-black leading-snug tracking-tight text-[#1a2340] sm:text-3xl">{reading.topic}</h2>
                   <p className="mt-4 text-base font-medium leading-8 text-[#263049] sm:text-lg">{reading.flow}</p>
                 </section>
-                <section className="space-y-5 rounded-2xl border border-[#e7e6f1] bg-[#f8f8fd] p-5 sm:p-6" aria-label="오늘 살펴볼 주제와 한 가지 제안">
-                  <div>
-                    <h2 className="text-xs font-black tracking-wide text-[#7165aa]">오늘 살펴볼 주제</h2>
-                    <p className="mt-2 text-lg font-black text-[#1a2340]">{reading.topic}</p>
-                  </div>
-                  <div className="border-t border-[#e1e0ee] pt-5">
-                    <h2 className="text-xs font-black tracking-wide text-[#7165aa]">오늘의 한 가지 제안</h2>
-                    <p className="mt-2 text-sm leading-7 text-[#36415e]">{reading.action}</p>
-                  </div>
+                <section className="rounded-2xl border border-[#e7e6f1] bg-[#f8f8fd] p-5 sm:p-6" aria-labelledby="today-action">
+                  <h2 id="today-action" className="text-sm font-black text-[#6150be]">오늘의 한 가지 제안</h2>
+                  <p className="mt-2 text-sm leading-7 text-[#36415e] sm:text-base">{reading.action}</p>
                 </section>
-                <p className="text-xs leading-6 text-[#778197]">현재 선택한 분석 대상의 사주와 오늘의 일진 사이의 십성·지지 관계를 참고해 구성한 짧은 명리 콘텐츠입니다. 실제 사건이나 결과를 확정적으로 예측하지 않습니다.</p>
+                <p className="text-xs leading-6 text-[#778197]">선택한 분석 대상의 사주와 오늘의 일진을 참고한 내용입니다. 실제 사건이나 결과를 확정적으로 예측하지 않습니다.</p>
                 <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#e9eaf2] pt-5">
                   <p className="text-xs text-[#79829a]">내일은 새로운 날짜의 흐름을 확인할 수 있어요.</p>
                   <Link href="/" className="text-sm font-bold text-[#6553cd] underline underline-offset-4 hover:text-[#4933a4]">운보다 홈으로</Link>

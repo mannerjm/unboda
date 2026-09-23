@@ -4,8 +4,8 @@ import AppShell from "@/app/components/AppShell";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { listUserProfiles } from "@/app/lib/profiles/server";
 import { getKoreaEvaluationDate } from "@/app/lib/evaluationContext";
-import { getSaju } from "@/app/lib/manse";
-import { buildTodayReading, getTodayDayPillar } from "@/app/lib/dailyUnboda";
+import type { TodayReading } from "@/app/lib/dailyUnboda";
+import { getCachedTodayReading } from "@/app/lib/dailyUnboda/server";
 
 export const metadata = {
   title: "오늘의 운보다 | 운보다",
@@ -37,23 +37,10 @@ export default async function TodayPage() {
     );
   }
 
-  let reading: ReturnType<typeof buildTodayReading> | null = null;
+  let reading: TodayReading | null = null;
   try {
-    // Reuse the existing personal saju engine without triggering its AI free-
-    // analysis pipeline, monthly refresh, paid report or consulting paths.
-    const saju = getSaju(
-      selfProfile.birthDate,
-      selfProfile.birthTime,
-      selfProfile.calendarType,
-      selfProfile.isLeapMonth ? "윤달" : "평달",
-      selfProfile.gender,
-      date,
-    );
-    reading = buildTodayReading({
-      date,
-      personDayStem: saju.dayStem,
-      dayPillarHanja: getTodayDayPillar(date),
-    });
+    // Cache only the derived daily text, never the user's session/profile lookup.
+    reading = await getCachedTodayReading(user.id, selfProfile, date);
   } catch (error) {
     // Fail closed: never show a generic daily fortune as though calculated.
     console.error("[today] Daily reading calculation failed", error instanceof Error ? error.message : "unknown");
@@ -100,7 +87,7 @@ export default async function TodayPage() {
                     <p className="mt-2 text-sm leading-7 text-[#36415e]">{reading.action}</p>
                   </div>
                 </section>
-                <p className="text-xs leading-6 text-[#778197]">본인의 사주 일간과 오늘의 일진 사이의 십성 관계를 바탕으로 구성한 참고용 명리 콘텐츠입니다. 실제 사건이나 결과를 확정적으로 예측하지 않습니다.</p>
+                <p className="text-xs leading-6 text-[#778197]">본인의 사주와 오늘의 일진 사이의 십성·지지 관계를 참고해 구성한 짧은 명리 콘텐츠입니다. 실제 사건이나 결과를 확정적으로 예측하지 않습니다.</p>
                 <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#e9eaf2] pt-5">
                   <p className="text-xs text-[#79829a]">내일은 새로운 날짜의 흐름을 확인할 수 있어요.</p>
                   <Link href="/" className="text-sm font-bold text-[#6553cd] underline underline-offset-4 hover:text-[#4933a4]">운보다 홈으로</Link>

@@ -100,7 +100,9 @@ export default function SupportCenterClient({
   const [showForm, setShowForm] = useState(Boolean(initialCategory));
   const [refundReason, setRefundReason] = useState<RefundInquiryReason | "">("");
   const [message, setMessage] = useState("");
-  const [orderId, setOrderId] = useState(initialRefundOrder?.orderId ?? "");
+  // Refund order identity is verified by the server and never entered by the customer.
+  // The unrelated paid-analysis support form retains its optional legacy order reference.
+  const [analysisOrderId, setAnalysisOrderId] = useState("");
   const [requests, setRequests] = useState(initialRequests);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -109,7 +111,7 @@ export default function SupportCenterClient({
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (!category || submitting || invalidRefundOrder) return;
+    if (!category || submitting || (category === "PAYMENT_REFUND" && invalidRefundOrder)) return;
     if (category === "PAYMENT_REFUND" && !refundReason) {
       setFeedback("환불·취소 문의 사유를 선택해 주세요.");
       return;
@@ -118,6 +120,9 @@ export default function SupportCenterClient({
     const requestMessage = category === "PAYMENT_REFUND"
       ? `환불·취소 문의 사유: ${reasonLabel ?? "기타 문의"}${message.trim() ? `\n추가 설명: ${message.trim()}` : ""}`
       : message;
+    const linkedOrderId = category === "PAYMENT_REFUND"
+      ? initialRefundOrder?.orderId ?? null
+      : category === "PAID_ANALYSIS" ? analysisOrderId.trim() || null : null;
     setSubmitting(true);
     setFeedback(null);
     try {
@@ -125,14 +130,14 @@ export default function SupportCenterClient({
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ category, message: requestMessage, orderId: orderId.trim() || null }),
+        body: JSON.stringify({ category, message: requestMessage, orderId: linkedOrderId }),
       });
       const body = await response.json().catch(() => null) as { request?: SupportRequestDto; error?: string } | null;
       if (!response.ok || !body?.request) throw new Error(body?.error ?? "문의를 접수하지 못했습니다.");
       setRequests((current) => [body.request!, ...current]);
       setMessage("");
       setRefundReason("");
-      setOrderId("");
+      setAnalysisOrderId("");
       setShowForm(false);
       setFeedback(category === "PAYMENT_REFUND"
         ? "환불·취소 문의가 접수되었습니다. 접수만으로 결제가 취소되지는 않습니다. 답변은 고객지원센터에서, 환불 처리 상태는 마이페이지에서 확인해 주세요."
@@ -210,7 +215,7 @@ export default function SupportCenterClient({
                   <h2 className="text-lg font-bold">{category === "PAYMENT_REFUND" ? "환불·취소 문의 접수" : "해결되지 않은 문제 접수"}</h2>
                   <p className="mt-2 text-xs leading-6 text-slate-500">비밀번호, 카드번호, 결제키, 주민등록번호, 사주 원문이나 상담 전체 내용 같은 불필요한 민감정보는 적지 마세요. 운영자는 필요한 주문·계정 상태만 별도로 확인합니다.</p>
                 </div>
-                {category === "PAYMENT_REFUND" && initialRefundOrder && orderId === initialRefundOrder.orderId ? (
+                {category === "PAYMENT_REFUND" && initialRefundOrder ? (
                   <div className="rounded-xl border border-[#dce1ef] bg-[#f7f8fc] p-4 text-sm">
                     <p className="font-bold text-[#11162d]">선택한 주문</p>
                     <p className="mt-2 font-semibold text-slate-800">{initialRefundOrder.productName}</p>
@@ -232,9 +237,9 @@ export default function SupportCenterClient({
                     </select>
                   </label>
                 ) : null}
-                {selectedGuide?.needsOrderId ? (
+                {category === "PAID_ANALYSIS" ? (
                   <label className="block text-sm font-semibold">주문 ID <span className="font-normal text-slate-400">(알고 있는 경우)</span>
-                    <input value={orderId} onChange={(event) => setOrderId(event.target.value)} readOnly={Boolean(initialRefundOrder && orderId === initialRefundOrder.orderId)} placeholder="마이페이지 결제 내역에서 주문 선택" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-mono text-sm read-only:bg-slate-100" />
+                    <input value={analysisOrderId} onChange={(event) => setAnalysisOrderId(event.target.value)} placeholder="주문 ID (선택)" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-mono text-sm" />
                   </label>
                 ) : null}
                 <label className="block text-sm font-semibold">{category === "PAYMENT_REFUND" ? "추가 설명 (선택)" : "문제 상황"}
@@ -250,7 +255,7 @@ export default function SupportCenterClient({
                 ) : null}
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-xs text-slate-400">{message.length}/{category === "PAYMENT_REFUND" ? 900 : 1200} · 일반 문의는 진행 중 최대 3건</span>
-                  <button type="submit" disabled={submitting || invalidRefundOrder} className="rounded-xl bg-[#6f5ce7] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5f4fd2] disabled:bg-slate-400">{submitting ? "접수 중..." : category === "PAYMENT_REFUND" ? "환불·취소 문의 접수" : "문의 접수"}</button>
+                  <button type="submit" disabled={submitting || (category === "PAYMENT_REFUND" && invalidRefundOrder)} className="rounded-xl bg-[#6f5ce7] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5f4fd2] disabled:bg-slate-400">{submitting ? "접수 중..." : category === "PAYMENT_REFUND" ? "환불·취소 문의 접수" : "문의 접수"}</button>
                 </div>
               </form>
             )}

@@ -14,11 +14,11 @@ const source = read("app/mypage/page.tsx");
 // --- Static structural checks -------------------------------------------------
 
 assert(!source.includes("isActivating"), "confirmed activation keeps the existing serialized persistence");
-assert(source.includes("const [pendingProfileSwitchId, setPendingProfileSwitchId] = useState<string | null>(null)"));
+assert(source.includes("const [pendingProfileSwitchId, setPendingProfileSwitchId] = useState<string | null>(null)"), "profile switch must have a distinct unconfirmed candidate");
 const requestSection = source.slice(source.indexOf("function requestProfileSwitch("), source.indexOf("function confirmProfileSwitch("));
 assert(requestSection.includes("setPendingProfileSwitchId(profileId)") && !requestSection.includes("setActiveProfileId(") && !requestSection.includes("persistPendingActiveProfile("), "clicking must only open confirmation, not switch profile");
-assert(source.includes("onClick={confirmProfileSwitch}") && source.includes("프로필을 변경하시겠습니까?"));
-assert(source.includes("onClick={() => setPendingProfileSwitchId(null)}") && source.includes("아니오"));
+assert(source.includes("onClick={confirmProfileSwitch}") && source.includes("프로필을 변경하시겠습니까?"), "confirmation dialog and accept action required");
+assert(source.includes("onClick={() => setPendingProfileSwitchId(null)}") && source.includes("아니오"), "No must dismiss without persisting");
 assert(source.includes("activate(profileId);"), "explicit acceptance triggers the existing activation");
 assert(source.includes("if (profileId === activeProfileId) return;"), "activate() must only skip a click that repeats the currently displayed selection");
 assert(source.includes("setActiveProfileId(profileId);") && source.includes("pendingActiveProfileIdRef.current = profileId;"), "only accepted selection updates the UI and queue");

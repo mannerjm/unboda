@@ -181,12 +181,12 @@ export default function SupportCenterClient({
 
         {selectedGuide ? (
           <section className="mt-6 rounded-2xl border border-[#d8d3ff] bg-[#f1efff] p-5">
-            <p className="text-xs font-semibold text-[#5e4bd1]">먼저 자동 해결을 확인해 주세요</p>
+            <p className="text-xs font-semibold text-[#5e4bd1]">{category === "PAYMENT_REFUND" ? "환불·취소 문의" : "먼저 자동 해결을 확인해 주세요"}</p>
             <h2 className="mt-2 text-lg font-bold">{selectedGuide.title}</h2>
             <p className="mt-2 text-sm leading-7 text-slate-700">{selectedGuide.description}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Link href={selectedGuide.href} className="rounded-xl bg-[#6f5ce7] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5f4fd2]">{selectedGuide.actionLabel}</Link>
-              {category !== "OTHER" ? (
+              {category !== "OTHER" && category !== "PAYMENT_REFUND" ? (
                 <button type="button" onClick={() => setShowForm(true)} className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700">안내대로 했지만 해결되지 않았어요</button>
               ) : null}
             </div>
@@ -207,9 +207,31 @@ export default function SupportCenterClient({
             ) : (
               <form onSubmit={submit} className="space-y-4">
                 <div>
-                  <h2 className="text-lg font-bold">해결되지 않은 문제 접수</h2>
+                  <h2 className="text-lg font-bold">{category === "PAYMENT_REFUND" ? "환불·취소 문의 접수" : "해결되지 않은 문제 접수"}</h2>
                   <p className="mt-2 text-xs leading-6 text-slate-500">비밀번호, 카드번호, 결제키, 주민등록번호, 사주 원문이나 상담 전체 내용 같은 불필요한 민감정보는 적지 마세요. 운영자는 필요한 주문·계정 상태만 별도로 확인합니다.</p>
                 </div>
+                {category === "PAYMENT_REFUND" && initialRefundOrder && orderId === initialRefundOrder.orderId ? (
+                  <div className="rounded-xl border border-[#dce1ef] bg-[#f7f8fc] p-4 text-sm">
+                    <p className="font-bold text-[#11162d]">선택한 주문</p>
+                    <p className="mt-2 font-semibold text-slate-800">{initialRefundOrder.productName}</p>
+                    <p className="mt-1 text-slate-600">분석 대상 · {initialRefundOrder.profileLabel}</p>
+                    <p className="mt-1 text-slate-600">{time(initialRefundOrder.purchasedAt)} · {initialRefundOrder.amount.toLocaleString("ko-KR")}원</p>
+                    {initialRefundOrder.refundStatus ? <p className="mt-2 text-xs text-[#5e4bd1]">기존 환불 처리 상태는 마이페이지에서 확인할 수 있습니다.</p> : null}
+                  </div>
+                ) : null}
+                {category === "PAYMENT_REFUND" && invalidRefundOrder ? (
+                  <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                    이 계정의 주문을 확인하지 못했습니다. <Link href="/mypage" className="font-bold underline">결제 내역에서 다시 선택</Link>해 주세요.
+                  </p>
+                ) : null}
+                {category === "PAYMENT_REFUND" ? (
+                  <label className="block text-sm font-semibold">문의 사유
+                    <select value={refundReason} onChange={(event) => setRefundReason(event.target.value as RefundInquiryReason | "")} required className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm">
+                      <option value="">사유를 선택해 주세요</option>
+                      {refundInquiryReasons.map((reason) => <option key={reason.value} value={reason.value}>{reason.label}</option>)}
+                    </select>
+                  </label>
+                ) : null}
                 {selectedGuide?.needsOrderId ? (
                   <label className="block text-sm font-semibold">주문 ID <span className="font-normal text-slate-400">(알고 있는 경우)</span>
                     <input value={orderId} onChange={(event) => setOrderId(event.target.value)} placeholder="마이페이지에 표시된 주문 UUID" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-mono text-sm" />

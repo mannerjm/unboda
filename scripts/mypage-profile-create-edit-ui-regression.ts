@@ -15,7 +15,7 @@ assert(source.includes("인원 추가"), "mypage must expose an add-person entry
 assert(source.includes("수정"), "mypage must expose an edit button on each profile card");
 assert(source.includes("/api/profiles/${editingProfileId}") && source.includes('"/api/profiles"'), "form submit must call POST /api/profiles for create and PATCH /api/profiles/{id} for edit");
 assert(source.includes('method: editingProfileId ? "PATCH" : "POST"'), "form submit must switch HTTP method based on edit mode");
-assert(source.includes('fetch("/api/mypage/summary")'), "creating or editing a profile must re-fetch the free analysis summary");
+assert(source.includes('fetch("/api/mypage/summary"'), "creating or editing a profile must re-fetch the free analysis summary");
 assert(source.includes("reloadMypageData"), "create/edit success must trigger a shared profiles+active+summary reload");
 
 assert(source.includes('onClick={() => requestProfileSwitch(profile.id)}'), "profile selection must require confirmation before activation");

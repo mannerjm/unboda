@@ -30,6 +30,37 @@ assert(source.includes("pendingActiveProfileIdRef.current === profileId") && sou
 assert(source.includes("confirmedActiveProfileIdRef.current = activeBody.profile?.id ?? null;"), "the confirmed active profile ref must be synced from the server's initial active profile on load");
 const activationSection = source.slice(source.indexOf("function activate("), source.indexOf("async function signOut("));
 assert(activationSection.length > 0 && !activationSection.includes("reloadMypageData()"), "activation must not trigger the full profiles/summary reload; only explicit mutations may");
+// Deletion eligibility is a different asynchronous state from the active
+// profile's UI selection. It must fail closed until the server revalidates it.
+assert(source.includes("const deleteEligibilityEpochRef = useRef(0)"), "profile switching must invalidate older eligibility responses");
+assert(source.includes("deleteEligibilityEpochRef.current += 1") && source.includes("setDeletabilityById({})") && source.includes("setIsDeleteEligibilityLoading(true)"), "confirmed switching must immediately invalidate old deletion hints");
+assert(source.includes("setPendingDeleteProfileId(null)"), "switching a profile must close any pending delete confirmation");
+assert(source.includes("void refreshProfileDeleteEligibility(profileId, deleteEligibilityEpochRef.current)"), "successful profile persistence must revalidate deletion hints from the server");
+const refreshSection = source.slice(source.indexOf("async function refreshProfileDeleteEligibility("), source.indexOf("function selectFromCardClick("));
+assert(refreshSection.includes('fetch("/api/mypage/summary", { cache: "no-store" })'), "delete hints must be refetched without using stale HTTP cache");
+assert(refreshSection.includes("deleteEligibilityEpochRef.current !== eligibilityEpoch") &&
+  refreshSection.includes("pendingActiveProfileIdRef.current !== profileId") &&
+  refreshSection.includes("confirmedActiveProfileIdRef.current !== profileId"), "stale or unconfirmed eligibility responses must be discarded");
+assert(source.includes("disabled={profile.id === activeProfileId || isDeleteEligibilityLoading ||") &&
+  source.includes("deletabilityById[profile.id]?.deletable !== true}"), "current, loading, failed and unknown profiles must not be deletable");
+assert(source.includes("profile.id !== activeProfileId &&") &&
+  source.includes("deletabilityById[profile.id]?.deletable === true ? ("), "an old deletion confirmation cannot survive a profile switch");
+assert(source.includes('return "현재 분석 대상으로 선택된 프로필입니다. 다른 프로필을 선택한 후 삭제할 수 있습니다."'), "current profile must always show accurate deletion guidance");
+const profileDeletion = source.slice(source.indexOf("async function deleteProfile("), source.indexOf("function openCreateForm("));
+assert(profileDeletion.includes("isDeleteEligibilityLoading || profileId === activeProfileId") &&
+  profileDeletion.includes("deletabilityById[profileId]?.deletable !== true) return;"),
+  "stale delete confirmations must never send DELETE for an active, loading, or unverified profile");
+assert(source.includes("pendingActiveProfileIdRef.current === confirmedActiveProfileIdRef.current) {"),
+  "summary responses must not clear deletion loading while a profile switch is unconfirmed");
+assert(source.includes('fetch("/api/mypage/summary", { cache: "no-store" })'),
+  "delete eligibility refresh must bypass cached summary responses");
+const profileDeleteServer = read("app/lib/profiles/server.ts");
+const profileDeleteRoute = read("app/api/profiles/[profileId]/route.ts");
+for (const rule of ["PROFILE_HAS_PURCHASE", "PROFILE_IS_ACTIVE", "PROFILE_HAS_TRANSFER_HISTORY"]) {
+  assert(profileDeleteServer.includes(rule), `server-side deletion rule must remain: ${rule}`);
+}
+assert(profileDeleteRoute.includes("getProfileDeletability(profileId, user.id)"),
+  "server must recheck purchase and active-profile blockers for each DELETE");
 console.log("1. serialized single-PUT persistence structure present ✓");
 
 // --- Behavioral simulation: A -> B -> C -> A rapid clicks -----------------------

@@ -244,6 +244,7 @@ export default function MyPage() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [freeAnalysisStatusById, setFreeAnalysisStatusById] = useState<Record<string, FreeAnalysisResultStatus>>({});
   const [deletabilityById, setDeletabilityById] = useState<Record<string, ProfileDeletabilityState>>({});
+  const [isDeleteEligibilityLoading, setIsDeleteEligibilityLoading] = useState(true);
   const [paidAnalysisByProfileId, setPaidAnalysisByProfileId] = useState<Record<string, PaidAnalysisSummary[]>>({});
   const [purchaseHistory, setPurchaseHistory] = useState<PurchaseHistoryItem[]>([]);
   const [refundFormOrderId, setRefundFormOrderId] = useState<string | null>(null);
@@ -265,6 +266,7 @@ export default function MyPage() {
   const confirmedActiveProfileIdRef = useRef<string | null>(null);
   const pendingActiveProfileIdRef = useRef<string | null>(null);
   const isPersistingActiveProfileRef = useRef(false);
+  const deleteEligibilityEpochRef = useRef(0);
 
   useEffect(() => {
     void fetch("/api/account/status")
@@ -306,25 +308,41 @@ export default function MyPage() {
   }, []);
 
   useEffect(() => {
-    void fetch("/api/mypage/summary")
+    const eligibilityEpoch = deleteEligibilityEpochRef.current;
+    void fetch("/api/mypage/summary", { cache: "no-store" })
       .then(async (response) => {
+        if (!response.ok) throw new Error("Summary unavailable");
         const body = await response.json() as SummaryBody;
-        if (!response.ok) return;
-        applySummaryBody(body);
+        applySummaryBody(body, eligibilityEpoch);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (deleteEligibilityEpochRef.current !== eligibilityEpoch) return;
+        setDeletabilityById({});
+        setIsDeleteEligibilityLoading(false);
+        setMessage("삭제 가능 여부를 확인하지 못했습니다. 마이페이지를 새로고침해 주세요.");
+      });
   }, []);
 
-  function applySummaryBody(body: SummaryBody) {
+  function applySummaryBody(body: SummaryBody, eligibilityEpoch = deleteEligibilityEpochRef.current) {
     const statusById: Record<string, FreeAnalysisResultStatus> = {};
     for (const item of body.freeAnalysisResults ?? []) statusById[item.profileId] = item.status;
     setFreeAnalysisStatusById(statusById);
 
-    const deletableById: Record<string, ProfileDeletabilityState> = {};
-    for (const item of body.profileDeletability ?? []) {
-      deletableById[item.profileId] = { deletable: item.deletable, reason: item.reason };
+    // A stale summary must never restore permissions from a prior selection.
+    // Missing or invalid eligibility remains unknown rather than deletable.
+    if (eligibilityEpoch === deleteEligibilityEpochRef.current &&
+        pendingActiveProfileIdRef.current === confirmedActiveProfileIdRef.current) {
+      const deletableById: Record<string, ProfileDeletabilityState> = {};
+      if (Array.isArray(body.profileDeletability)) {
+        for (const item of body.profileDeletability) {
+          if (typeof item.profileId === "string" && typeof item.deletable === "boolean") {
+            deletableById[item.profileId] = { deletable: item.deletable, reason: item.reason };
+          }
+        }
+      }
+      setDeletabilityById(deletableById);
+      setIsDeleteEligibilityLoading(false);
     }
-    setDeletabilityById(deletableById);
 
     const paidByProfileId: Record<string, PaidAnalysisSummary[]> = {};
     for (const item of body.paidAnalysis ?? []) {
@@ -362,11 +380,43 @@ export default function MyPage() {
   function activate(profileId: string) {
     if (profileId === activeProfileId) return;
 
-    // Every click updates the UI immediately and is never blocked by an in-flight PUT.
+    // Invalidate old profile's deletion permissions before the selected target
+    // changes. No profile is deletable while the PUT is in flight.
+    deleteEligibilityEpochRef.current += 1;
+    setDeletabilityById({});
+    setIsDeleteEligibilityLoading(true);
+    setPendingDeleteProfileId(null);
     setActiveProfileId(profileId);
     setMessage(null);
     pendingActiveProfileIdRef.current = profileId;
     void persistPendingActiveProfile();
+  }
+
+  async function refreshProfileDeleteEligibility(profileId: string, eligibilityEpoch: number) {
+    try {
+      const response = await fetch("/api/mypage/summary", { cache: "no-store" });
+      if (!response.ok) throw new Error("Summary unavailable");
+      const body = await response.json() as SummaryBody;
+      if (!Array.isArray(body.profileDeletability)) throw new Error("Deletion eligibility unavailable");
+      // Ignore any request overtaken by an A -> B -> A profile switch.
+      if (deleteEligibilityEpochRef.current !== eligibilityEpoch ||
+          pendingActiveProfileIdRef.current !== profileId ||
+          confirmedActiveProfileIdRef.current !== profileId) return;
+      const deletableById: Record<string, ProfileDeletabilityState> = {};
+      for (const item of body.profileDeletability) {
+        if (typeof item.profileId === "string" && typeof item.deletable === "boolean") {
+          deletableById[item.profileId] = { deletable: item.deletable, reason: item.reason };
+        }
+      }
+      setDeletabilityById(deletableById);
+      setIsDeleteEligibilityLoading(false);
+    } catch {
+      if (deleteEligibilityEpochRef.current !== eligibilityEpoch ||
+          pendingActiveProfileIdRef.current !== profileId) return;
+      setDeletabilityById({});
+      setIsDeleteEligibilityLoading(false);
+      setMessage("삭제 가능 여부를 확인하지 못했습니다. 마이페이지를 새로고침해 주세요.");
+    }
   }
 
   // Mouse users may click anywhere on the card; the header button stays the
@@ -396,17 +446,30 @@ export default function MyPage() {
 
       if (response.ok) {
         confirmedActiveProfileIdRef.current = profileId;
+        if (pendingActiveProfileIdRef.current === profileId) {
+          void refreshProfileDeleteEligibility(profileId, deleteEligibilityEpochRef.current);
+        }
       } else if (pendingActiveProfileIdRef.current === profileId) {
         // Still the user's latest desired selection: surface the failure and roll back.
         pendingActiveProfileIdRef.current = confirmedActiveProfileIdRef.current;
         setActiveProfileId(confirmedActiveProfileIdRef.current);
         setMessage("활성 프로필을 변경하지 못했습니다.");
+        if (confirmedActiveProfileIdRef.current) {
+          void refreshProfileDeleteEligibility(confirmedActiveProfileIdRef.current, deleteEligibilityEpochRef.current);
+        } else {
+          setIsDeleteEligibilityLoading(false);
+        }
       }
     } catch {
       if (pendingActiveProfileIdRef.current === profileId) {
         pendingActiveProfileIdRef.current = confirmedActiveProfileIdRef.current;
         setActiveProfileId(confirmedActiveProfileIdRef.current);
         setMessage("활성 프로필을 변경하지 못했습니다.");
+        if (confirmedActiveProfileIdRef.current) {
+          void refreshProfileDeleteEligibility(confirmedActiveProfileIdRef.current, deleteEligibilityEpochRef.current);
+        } else {
+          setIsDeleteEligibilityLoading(false);
+        }
       }
     } finally {
       isPersistingActiveProfileRef.current = false;
@@ -430,10 +493,13 @@ export default function MyPage() {
   }
 
   async function reloadMypageData() {
+    const eligibilityEpoch = deleteEligibilityEpochRef.current;
+    setIsDeleteEligibilityLoading(true);
+    setDeletabilityById({});
     const [profilesResponse, activeResponse, summaryResponse] = await Promise.all([
       fetch("/api/profiles"),
       fetch("/api/profiles/active"),
-      fetch("/api/mypage/summary"),
+      fetch("/api/mypage/summary", { cache: "no-store" }),
     ]);
 
     const profilesBody = await profilesResponse.json() as { profiles?: ProfileDto[] };
@@ -441,8 +507,16 @@ export default function MyPage() {
     const summaryBody = await summaryResponse.json() as SummaryBody;
 
     if (profilesResponse.ok) setProfiles(profilesBody.profiles ?? []);
-    if (activeResponse.ok) setActiveProfileId(activeBody.profile?.id ?? null);
-    if (summaryResponse.ok) applySummaryBody(summaryBody);
+    if (activeResponse.ok && eligibilityEpoch === deleteEligibilityEpochRef.current &&
+        pendingActiveProfileIdRef.current === confirmedActiveProfileIdRef.current) {
+      setActiveProfileId(activeBody.profile?.id ?? null);
+      confirmedActiveProfileIdRef.current = activeBody.profile?.id ?? null;
+    }
+    if (summaryResponse.ok) applySummaryBody(summaryBody, eligibilityEpoch);
+    else if (eligibilityEpoch === deleteEligibilityEpochRef.current) {
+      setIsDeleteEligibilityLoading(false);
+      setMessage("삭제 가능 여부를 확인하지 못했습니다. 마이페이지를 새로고침해 주세요.");
+    }
   }
 
   function openRefundForm(orderId: string) {
@@ -564,7 +638,10 @@ export default function MyPage() {
 
   // The summary flag is only a hint; the server re-checks every rule on DELETE.
   async function deleteProfile(profileId: string) {
-    if (isDeletingProfile) return;
+    // The server independently rechecks all deletion blockers; this client
+    // guard also prevents a stale confirmation from initiating a DELETE.
+    if (isDeletingProfile || isDeleteEligibilityLoading || profileId === activeProfileId ||
+        deletabilityById[profileId]?.deletable !== true) return;
     setIsDeletingProfile(true);
     setMessage(null);
 
@@ -586,8 +663,14 @@ export default function MyPage() {
   }
 
   function getDeleteBlockMessage(profileId: string): string | null {
+    if (profileId === activeProfileId) {
+      return "현재 분석 대상으로 선택된 프로필입니다. 다른 프로필을 선택한 후 삭제할 수 있습니다.";
+    }
     const state = deletabilityById[profileId];
-    return state && !state.deletable && state.reason ? profileDeleteBlockMessages[state.reason] : null;
+    if (!state) return isDeleteEligibilityLoading
+      ? "삭제 가능 여부를 확인하고 있습니다."
+      : "삭제 가능 여부를 확인할 수 없습니다. 마이페이지를 새로고침해 주세요.";
+    return !state.deletable && state.reason ? profileDeleteBlockMessages[state.reason] : null;
   }
 
   function openCreateForm() {
@@ -1059,7 +1142,8 @@ export default function MyPage() {
                 <button
                   type="button"
                   onClick={() => { setMessage(null); setPendingDeleteProfileId(profile.id); }}
-                  disabled={deletabilityById[profile.id]?.deletable === false}
+                  disabled={profile.id === activeProfileId || isDeleteEligibilityLoading ||
+                    deletabilityById[profile.id]?.deletable !== true}
                   className={deleteActionClass(profile.id === activeProfileId)}
                 >
                   삭제
@@ -1073,7 +1157,8 @@ export default function MyPage() {
                   {getDeleteBlockMessage(profile.id)}
                 </p>
               ) : null}
-              {pendingDeleteProfileId === profile.id ? (
+              {pendingDeleteProfileId === profile.id && profile.id !== activeProfileId &&
+                !isDeleteEligibilityLoading && deletabilityById[profile.id]?.deletable === true ? (
                 <div className={profile.id === activeProfileId
                   ? "mt-3 rounded-2xl border border-[#d9dded] bg-[#f5f6fc] p-4"
                   : "mt-3 rounded-2xl border border-red-200 bg-red-50 p-4"}
@@ -1088,7 +1173,8 @@ export default function MyPage() {
                     <button
                       type="button"
                       onClick={() => void deleteProfile(profile.id)}
-                      disabled={isDeletingProfile}
+                      disabled={isDeletingProfile || isDeleteEligibilityLoading ||
+                        profile.id === activeProfileId || deletabilityById[profile.id]?.deletable !== true}
                       className={`rounded-full bg-red-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-slate-400 ${restingFocusRing}`}
                     >
                       {isDeletingProfile ? "삭제 중..." : "삭제 확인"}

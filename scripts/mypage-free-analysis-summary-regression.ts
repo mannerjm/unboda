@@ -28,7 +28,7 @@ assert((listBody.match(/\.from\(/g) ?? []).length === 1, "free analysis summary 
 assert(!/\.(insert|update|delete|upsert)\(/.test(listBody), "free analysis summary lookup must stay read-only");
 console.log("2. listUserFreeAnalysisResults is a scoped, read-only server function ✓");
 
-assert(myPage.includes('fetch("/api/mypage/summary")'), "mypage must fetch the new read-only summary endpoint");
+assert(myPage.includes('fetch("/api/mypage/summary"'), "mypage must fetch the new read-only summary endpoint");
 assert(myPage.includes('fetch("/api/profiles")') && myPage.includes('fetch("/api/profiles/active")'), "mypage must keep using the existing profiles and active-profile endpoints unchanged");
 assert(myPage.includes("무료 분석 완료") && myPage.includes("분석 생성 중") && myPage.includes("분석 실패") && myPage.includes("무료 분석 없음"), "mypage must render all four free analysis status labels");
 assert(!myPage.includes("router.push(`/result?profileId=${profile.id}`)"), "the per-card free analysis result button must be removed in favor of the single bottom CTA");

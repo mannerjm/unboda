@@ -65,15 +65,16 @@ assert(activeDeleteHandler.includes("clearActiveProfile(user.id)") && activeDele
 assert(activeServer.includes('.from("active_profiles").delete().eq("user_id", userId)'), "clearing must delete only this user's active_profiles row");
 assert(!activeServer.includes('.from("profiles").delete()'), "clearing the selection must never delete a profile");
 assert(activeRoute.includes("export async function GET") && activeRoute.includes("export async function PUT") && activeRoute.includes("setActiveProfile(user.id, body.profileId)"), "existing active GET/PUT behaviour must stay unchanged");
-assert(myPage.includes('fetch("/api/profiles/active", { method: "DELETE" })') && myPage.includes("분석 대상 선택 해제"), "mypage must expose the deselect action");
-console.log("7. active selection can be cleared without touching profiles, GET/PUT unchanged ✓");
+assert(!myPage.includes('fetch("/api/profiles/active", { method: "DELETE" })') && !myPage.includes("분석 대상 선택 해제"), "mypage must not expose the obsolete deselect control");
+assert(myPage.includes("requestProfileSwitch(profile.id)") && myPage.includes("confirmProfileSwitch"), "mypage must switch the active profile only after confirmation");
+console.log("7. internal active-selection clear remains available but the user-facing control stays hidden ✓");
 
 assert(!profileServer.includes("PROFILE_IS_LAST") && !itemRoute.includes("PROFILE_IS_LAST"), "deleting the last profile must not be blocked");
 assert(!deleteHandler.includes("profiles.length") && !deleteHandler.includes("MAX_PROFILES_PER_USER"), "no profile-count rule may gate deletion");
 console.log("8. the last profile stays deletable once its selection is cleared ✓");
 
 assert(summaryRoute.includes("listProfileDeleteBlockers(user.id)") && summaryRoute.includes("profileDeletability"), "summary must expose the deletability hint");
-assert(summaryRoute.includes("resolveProfileFreeAnalysisStatus(profile, summaries)") && summaryRoute.includes("freeAnalysisResults"), "summary must keep the existing free analysis status contract");
+assert(summaryRoute.includes("resolveProfileFreeAnalysisStatus(profile, summaries, evaluationContext)") && summaryRoute.includes("freeAnalysisResults"), "summary must keep the existing free analysis status contract");
 assert(!summaryRoute.includes("delete(") && !summaryRoute.includes("update("), "summary must stay read-only");
 const freeAnalysisServer = read("app/lib/freeAnalysisResults/server.ts");
 assert(freeAnalysisServer.includes("export function resolveProfileFreeAnalysisStatus") && freeAnalysisServer.includes("summary.profileFingerprint === getProfileFingerprint(profile)"), "the P0-3 stale rule must be untouched");

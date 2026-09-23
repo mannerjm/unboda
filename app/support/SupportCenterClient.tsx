@@ -234,15 +234,23 @@ export default function SupportCenterClient({
                 ) : null}
                 {selectedGuide?.needsOrderId ? (
                   <label className="block text-sm font-semibold">주문 ID <span className="font-normal text-slate-400">(알고 있는 경우)</span>
-                    <input value={orderId} onChange={(event) => setOrderId(event.target.value)} placeholder="마이페이지에 표시된 주문 UUID" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-mono text-sm" />
+                    <input value={orderId} onChange={(event) => setOrderId(event.target.value)} readOnly={Boolean(initialRefundOrder && orderId === initialRefundOrder.orderId)} placeholder="마이페이지 결제 내역에서 주문 선택" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-mono text-sm read-only:bg-slate-100" />
                   </label>
                 ) : null}
-                <label className="block text-sm font-semibold">문제 상황
-                  <textarea value={message} onChange={(event) => setMessage(event.target.value)} minLength={20} maxLength={1200} required rows={6} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm leading-6" placeholder="자동 안내를 따라 해본 뒤에도 남아 있는 문제와 화면에 표시된 안전한 상태 문구를 적어 주세요." />
+                <label className="block text-sm font-semibold">{category === "PAYMENT_REFUND" ? "추가 설명 (선택)" : "문제 상황"}
+                  <textarea value={message} onChange={(event) => setMessage(event.target.value)}
+                    minLength={category === "PAYMENT_REFUND" ? undefined : 20}
+                    maxLength={category === "PAYMENT_REFUND" ? 900 : 1200}
+                    required={category !== "PAYMENT_REFUND"} rows={category === "PAYMENT_REFUND" ? 3 : 6}
+                    className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm leading-6"
+                    placeholder={category === "PAYMENT_REFUND" ? "문제 내용을 간단히 적어 주세요." : "자동 안내를 따라 해본 뒤에도 남아 있는 문제와 화면에 표시된 안전한 상태 문구를 적어 주세요."} />
                 </label>
+                {category === "PAYMENT_REFUND" ? (
+                  <p className="text-xs leading-5 text-slate-600">정상 제공된 리포트에 대한 주관적인 해석 불만족은 자동 환불 사유가 아닙니다. 결제 오류·미제공·계약과 다른 제공 및 법정 청약철회 권리는 별도로 확인합니다. 문의 접수만으로 결제가 취소되지는 않습니다. <Link href="/refund" className="font-semibold underline">환불정책 보기</Link></p>
+                ) : null}
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs text-slate-400">{message.length}/1200 · 진행 중 문의는 최대 3건</span>
-                  <button type="submit" disabled={submitting} className="rounded-xl bg-[#6f5ce7] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5f4fd2] disabled:bg-slate-400">{submitting ? "접수 중..." : "문의 접수"}</button>
+                  <span className="text-xs text-slate-400">{message.length}/{category === "PAYMENT_REFUND" ? 900 : 1200} · 일반 문의는 진행 중 최대 3건</span>
+                  <button type="submit" disabled={submitting || invalidRefundOrder} className="rounded-xl bg-[#6f5ce7] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5f4fd2] disabled:bg-slate-400">{submitting ? "접수 중..." : category === "PAYMENT_REFUND" ? "환불·취소 문의 접수" : "문의 접수"}</button>
                 </div>
               </form>
             )}

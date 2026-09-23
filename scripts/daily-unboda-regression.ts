@@ -69,6 +69,18 @@ assert(page.includes('import { getActiveProfile } from "@/app/lib/profiles/activ
 assert(page.includes("const activeProfile = await getActiveProfile(user.id)"));
 assert(page.includes("if (!activeProfile)"));
 assert(page.includes("getCachedTodayReading(user.id, activeProfile, date)"));
+// Daily must not display paid-like/personal content for a profile with only
+// birth details: require the SAME profile's saved free-saju foundation first.
+assert(page.includes("getProfileFreeAnalysisFoundationStatus(user.id, activeProfile)"));
+assert(page.includes("if (!isFreeAnalysisFoundationReady(freeAnalysisStatus))"));
+assert(page.includes('freeAnalysisStatus === "stale"') && page.includes('freeAnalysisStatus === "generating"'));
+assert(page.includes("무료 사주 먼저 조회하기") && page.includes('"/saju"'));
+assert(page.includes("`/loading?profileId=${encodeURIComponent(activeProfile.id)}`"));
+assert(page.indexOf("if (!isFreeAnalysisFoundationReady(freeAnalysisStatus))") < page.indexOf("getCachedTodayReading(user.id, activeProfile, date)"), "free-saju guard must run before daily calculation/cache");
+assert(!page.includes("startAnalysis("), "daily must not automatically trigger a free analysis (including AI calls)");
+const foundation = readFileSync("app/lib/freeAnalysisEligibility.ts", "utf8");
+assert(foundation.includes("resolveProfileFreeAnalysisStatus(profile, summaries)"), "gate must use the existing profile+birth fingerprint eligibility, not a new analysis engine");
+assert(foundation.includes('status === "completed" || status === "needs_retry"'), "a completed free analysis with only AI-summary retry pending still has valid free-saju foundations");
 assert(page.includes("{activeProfile.label}님의 오늘"));
 assert(!page.includes("selfProfile") && !page.includes("listUserProfiles"));
 const activeProfileSource = readFileSync("app/lib/profiles/activeServer.ts", "utf8");

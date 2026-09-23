@@ -46,6 +46,21 @@ assert(source.includes("disabled={profile.id === activeProfileId || isDeleteElig
 assert(source.includes("profile.id !== activeProfileId &&") &&
   source.includes("deletabilityById[profile.id]?.deletable === true ? ("), "an old deletion confirmation cannot survive a profile switch");
 assert(source.includes('return "현재 분석 대상으로 선택된 프로필입니다. 다른 프로필을 선택한 후 삭제할 수 있습니다."'), "current profile must always show accurate deletion guidance");
+const profileDeletion = source.slice(source.indexOf("async function deleteProfile("), source.indexOf("function openCreateForm("));
+assert(profileDeletion.includes("isDeleteEligibilityLoading || profileId === activeProfileId") &&
+  profileDeletion.includes("deletabilityById[profileId]?.deletable !== true) return;"),
+  "stale delete confirmations must never send DELETE for an active, loading, or unverified profile");
+assert(source.includes("pendingActiveProfileIdRef.current === confirmedActiveProfileIdRef.current) {"),
+  "summary responses must not clear deletion loading while a profile switch is unconfirmed");
+assert(source.includes('fetch("/api/mypage/summary", { cache: "no-store" })'),
+  "delete eligibility refresh must bypass cached summary responses");
+const profileDeleteServer = read("app/lib/profiles/server.ts");
+const profileDeleteRoute = read("app/api/profiles/[profileId]/route.ts");
+for (const rule of ["PROFILE_HAS_PURCHASE", "PROFILE_IS_ACTIVE", "PROFILE_HAS_TRANSFER_HISTORY"]) {
+  assert(profileDeleteServer.includes(rule), `server-side deletion rule must remain: ${rule}`);
+}
+assert(profileDeleteRoute.includes("getProfileDeletability(profileId, user.id)"),
+  "server must recheck purchase and active-profile blockers for each DELETE");
 console.log("1. serialized single-PUT persistence structure present ✓");
 
 // --- Behavioral simulation: A -> B -> C -> A rapid clicks -----------------------

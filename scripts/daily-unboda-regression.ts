@@ -63,8 +63,21 @@ const shell = readFileSync("app/components/AppShell.tsx", "utf8");
 const daily = readFileSync("app/lib/dailyUnboda.ts", "utf8");
 const server = readFileSync("app/lib/dailyUnboda/server.ts", "utf8");
 assert(page.includes('if (!user) redirect("/auth/login?returnTo=/today")'));
-assert(page.includes('profile.relationshipType === "self"'), "daily reading must not switch to an active family profile");
-assert(page.includes("getCachedTodayReading(user.id, selfProfile, date)"));
+// The member explicitly selects the profile in mypage: today's reading must
+// follow that selection, including a spouse, never force relationshipType=self.
+assert(page.includes('import { getActiveProfile } from "@/app/lib/profiles/activeServer";'));
+assert(page.includes("const activeProfile = await getActiveProfile(user.id)"));
+assert(page.includes("if (!activeProfile)"));
+assert(page.includes("getCachedTodayReading(user.id, activeProfile, date)"));
+assert(page.includes("{activeProfile.label}님의 오늘"));
+assert(!page.includes("selfProfile") && !page.includes("listUserProfiles"));
+const activeProfileSource = readFileSync("app/lib/profiles/activeServer.ts", "utf8");
+assert(activeProfileSource.includes('.eq("user_id", userId)'));
+assert(activeProfileSource.includes("getUserProfile(data.profile_id, userId)"), "active profile must be owned by the current user");
+const aProfileReading = buildTodayReading({ date, personDayStem: "甲", personDayBranch: "子", dayPillarHanja: "甲午" });
+const bProfileReading = buildTodayReading({ date, personDayStem: "乙", personDayBranch: "丑", dayPillarHanja: "甲午" });
+assert.notDeepEqual(aProfileReading, bProfileReading, "distinct natal pillars must remain independently calculated");
+assert.deepEqual(aProfileReading, buildTodayReading({ date, personDayStem: "甲", personDayBranch: "子", dayPillarHanja: "甲午" }), "returning to A must reuse A's deterministic reading");
 assert(server.includes("getSaju(") && server.includes("getTodayDayPillar(date)"));
 assert(server.includes("personDayBranch: saju.dayBranch"));
 for (const scope of ["DAILY_COPY_VERSION", "userId", "profile.id", "fingerprint", "date"]) {

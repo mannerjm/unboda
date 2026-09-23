@@ -93,6 +93,22 @@ function HeroActions({ state, copy }: { state: LandingState; copy: LandingCopy }
   </div>;
 }
 
+function DailyVisitEntry({ state }: { state: LandingState }) {
+  const href = state.kind === "guest" ? "/auth/login?returnTo=/today" : "/today";
+  return (
+    <section className="mx-auto mt-5 flex w-full max-w-6xl flex-col gap-4 rounded-[1.55rem] border border-[#e9d7a4]/25 bg-[linear-gradient(110deg,rgba(223,179,101,.14),rgba(107,93,198,.10),rgba(255,255,255,.035))] px-5 py-5 shadow-[0_10px_40px_rgba(1,6,22,.16)] sm:flex-row sm:items-center sm:justify-between sm:px-7" aria-label="무료 일일 콘텐츠">
+      <div>
+        <p className="text-xs font-black tracking-[.12em] text-[#e7c98e]">매일 무료 · DAILY UNBODA</p>
+        <h2 className="mt-2 text-xl font-black text-white sm:text-2xl">오늘의 운보다</h2>
+        <p className="mt-2 text-sm leading-6 text-[#c5c3d4]">본인의 사주를 바탕으로 오늘의 짧은 흐름을 확인해 보세요. 매일 새로운 날짜의 내용이 열립니다.</p>
+      </div>
+      <Link href={href} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#f7e0af] px-5 py-3 text-sm font-black text-[#29233b] transition hover:bg-[#fff1cd]">
+        {state.kind === "guest" ? "로그인하고 오늘 보기" : "오늘의 운보다 보기"}<Icon name="arrow" className="h-4 w-4"/>
+      </Link>
+    </section>
+  );
+}
+
 function QuickRoutes({ state }: { state: LandingState }) {
   const guest = state.kind === "guest";
   const routes = [
@@ -173,7 +189,7 @@ function StarField() {
 
 function HomeShell({ state, copy, returning }: { state: LandingState; copy: LandingCopy; returning?: ReturningLandingState }) {
   const statusLabel = returning ? returning.kind === "analysis_stale" ? "갱신 필요" : returning.kind === "analysis_in_progress" ? "생성 중" : returning.kind === "analysis_complete" && returning.status === "needs_retry" ? "해석 재생성 필요" : "최신 상태" : null;
-  return <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#070d20_0%,#0b1330_40%,#090f24_100%)] text-white"><StarField/><div className="relative px-5 pb-8 pt-5 sm:px-8 sm:pt-7"><div className="mx-auto w-full max-w-6xl"><Header state={state}/><section className="grid min-h-[520px] items-center gap-6 py-7 lg:min-h-[550px] lg:grid-cols-[1fr_0.94fr] lg:gap-10 lg:py-10"><div className="relative z-10">{returning ? <div className="flex flex-wrap items-center gap-2"><span className="rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-black text-white">{returning.profileLabel}</span><span className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-bold text-[#b1b6c9]">{statusLabel}</span></div> : <p className="inline-flex items-center gap-2 rounded-full border border-[#8172e6]/30 bg-[#17183a]/75 px-4 py-2 text-xs font-black tracking-[0.08em] text-[#b3a6ff] shadow-[0_0_25px_rgba(111,86,232,0.15)]"><Icon name="spark" className="h-4 w-4"/>{copy.eyebrow}</p>}<h1 className={`${returning ? "mt-4" : "mt-6"} max-w-[38rem] text-[2.75rem] font-black leading-[1.05] tracking-[-0.065em] text-white sm:text-[4.25rem] lg:text-[4.7rem]`}>{copy.title}</h1><p className="mt-6 max-w-xl text-[15px] leading-8 text-[#aeb4c9] sm:text-lg">{copy.description}</p><HeroActions state={state} copy={copy}/>{copy.secondary ? <Link href={copy.secondaryHref} className="mt-4 inline-flex text-xs font-bold text-[#969db5] underline decoration-[#59617b] underline-offset-4 transition hover:text-white">{copy.secondary}</Link> : null}{returning ? <Link href="/deep-analysis" className="ml-4 mt-4 inline-flex items-center gap-2 text-xs font-bold text-[#969db5] underline decoration-[#59617b] underline-offset-4 transition hover:text-white">다른 심층 분석 직접 찾기<Icon name="search" className="h-4 w-4"/></Link> : null}</div><FlowVisual/></section><QuickRoutes state={state}/></div></div><div className="relative px-5 sm:px-8"><AiConsultingSection state={state}/><CuriositySection/><CompatibilitySection/><TrustSection copy={copy}/><Footer/></div></main>;
+  return <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#070d20_0%,#0b1330_40%,#090f24_100%)] text-white"><StarField/><div className="relative px-5 pb-8 pt-5 sm:px-8 sm:pt-7"><div className="mx-auto w-full max-w-6xl"><Header state={state}/><section className="grid min-h-[520px] items-center gap-6 py-7 lg:min-h-[550px] lg:grid-cols-[1fr_0.94fr] lg:gap-10 lg:py-10"><div className="relative z-10">{returning ? <div className="flex flex-wrap items-center gap-2"><span className="rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-black text-white">{returning.profileLabel}</span><span className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-bold text-[#b1b6c9]">{statusLabel}</span></div> : <p className="inline-flex items-center gap-2 rounded-full border border-[#8172e6]/30 bg-[#17183a]/75 px-4 py-2 text-xs font-black tracking-[0.08em] text-[#b3a6ff] shadow-[0_0_25px_rgba(111,86,232,0.15)]"><Icon name="spark" className="h-4 w-4"/>{copy.eyebrow}</p>}<h1 className={`${returning ? "mt-4" : "mt-6"} max-w-[38rem] text-[2.75rem] font-black leading-[1.05] tracking-[-0.065em] text-white sm:text-[4.25rem] lg:text-[4.7rem]`}>{copy.title}</h1><p className="mt-6 max-w-xl text-[15px] leading-8 text-[#aeb4c9] sm:text-lg">{copy.description}</p><HeroActions state={state} copy={copy}/>{copy.secondary ? <Link href={copy.secondaryHref} className="mt-4 inline-flex text-xs font-bold text-[#969db5] underline decoration-[#59617b] underline-offset-4 transition hover:text-white">{copy.secondary}</Link> : null}{returning ? <Link href="/deep-analysis" className="ml-4 mt-4 inline-flex items-center gap-2 text-xs font-bold text-[#969db5] underline decoration-[#59617b] underline-offset-4 transition hover:text-white">다른 심층 분석 직접 찾기<Icon name="search" className="h-4 w-4"/></Link> : null}</div><FlowVisual/></section><DailyVisitEntry state={state}/><QuickRoutes state={state}/></div></div><div className="relative px-5 sm:px-8"><AiConsultingSection state={state}/><CuriositySection/><CompatibilitySection/><TrustSection copy={copy}/><Footer/></div></main>;
 }
 
 function NewHome({ state, copy }: { state: LandingState; copy: LandingCopy }) { return <HomeShell state={state} copy={copy}/>; }

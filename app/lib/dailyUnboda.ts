@@ -238,16 +238,16 @@ function expandedTodayCopy(input: {
   // interaction with month/year. This is descriptive, not a fortune score.
   // getTenGod is the established stem-to-stem element+polarity mapping.
   const stemRelations: Record<string, string> = {
-    비견: "같은 오행", 겁재: "같은 오행",
-    식신: "태어난 쪽이 오늘을 생하는", 상관: "태어난 쪽이 오늘을 생하는",
-    편재: "태어난 쪽이 오늘을 극하는", 정재: "태어난 쪽이 오늘을 극하는",
-    편관: "오늘이 태어난 쪽을 극하는", 정관: "오늘이 태어난 쪽을 극하는",
-    편인: "오늘이 태어난 쪽을 생하는", 정인: "오늘이 태어난 쪽을 생하는",
+    비견: "오늘과 같은 오행", 겁재: "오늘과 같은 오행",
+    식신: "오늘의 오행을 생하는", 상관: "오늘의 오행을 생하는",
+    편재: "오늘의 오행을 극하는", 정재: "오늘의 오행을 극하는",
+    편관: "오늘의 오행으로부터 극을 받는", 정관: "오늘의 오행으로부터 극을 받는",
+    편인: "오늘의 오행으로부터 생을 받는", 정인: "오늘의 오행으로부터 생을 받는",
   };
   const monthStemRelation = stemRelations[getTenGod(monthPillar[0], todayPillar[0])];
   const yearStemRelation = stemRelations[getTenGod(yearPillar[0], todayPillar[0])];
   if (monthStemRelation && yearStemRelation) {
-    notes.push(`태어난 달과 해의 천간은 오늘의 천간과 각각 ${monthStemRelation}, ${yearStemRelation} 관계로 분류됩니다.`);
+    notes.push(`천간의 오행 관계에서는 태어난 달이 ${monthStemRelation} 흐름, 태어난 해가 ${yearStemRelation} 흐름으로 분류됩니다.`);
   }
 
   // Use the EXISTING weighted five-element implementation, restricted to the

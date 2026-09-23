@@ -5,10 +5,13 @@ import PurchasedAnalysesAutoRefresh from "@/app/components/PurchasedAnalysesAuto
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
 import { groupPurchasedAnalysesByProduct } from "@/app/lib/purchasedAnalysesGrouping";
+import { parseLibraryParams, selectPurchasedLibraryPage } from "@/app/lib/purchasedAnalysesLibrary";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getPhase9NextAnalysisRecommendations } from "@/app/lib/phase9NextAnalysis";
 
-export default async function PurchasedAnalysesPage() {
+export default async function PurchasedAnalysesPage({ searchParams }: {
+  searchParams: Promise<{ q?: string | string[]; kind?: string | string[]; order?: string | string[]; page?: string | string[] }>;
+}) {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -38,6 +41,8 @@ export default async function PurchasedAnalysesPage() {
   const analyses = (await listUserPaidAnalysisSummaries(user.id))
     .filter((analysis) => analysis.profileId === activeProfile.id);
   const groups = groupPurchasedAnalysesByProduct(analyses);
+  const { filters, requestedPage } = parseLibraryParams(await searchParams);
+  const libraryPage = selectPurchasedLibraryPage(groups, filters, requestedPage);
   const recentSource = [...analyses]
     .sort((left, right) =>
       (right.reportStatus === "completed" ? 1 : 0) - (left.reportStatus === "completed" ? 1 : 0)
@@ -73,7 +78,7 @@ export default async function PurchasedAnalysesPage() {
               </Link>
             </div>
           </header>
-          <PurchasedAnalysesAutoRefresh groups={groups} profileId={activeProfile.id} phase9Recommendations={phase9Recommendations} />
+          <PurchasedAnalysesAutoRefresh groups={groups} profileId={activeProfile.id} libraryPage={libraryPage} phase9Recommendations={phase9Recommendations} />
         </div>
       </main>
     </AppShell>

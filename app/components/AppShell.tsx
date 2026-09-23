@@ -39,9 +39,9 @@ const analysisNavItems: NavItem[] = [
   { href: "/recommendations", label: "추천 분석", icon: "chart" },
   { href: "/deep-analysis", label: "심층 분석", icon: "spark" },
   { href: "/special-analysis", label: "전문 분석", icon: "compass" },
-  { href: "/ai-consulting", label: "AI 상담", icon: "chat" },
   { href: "/interests", label: "관심 분석", icon: "book" },
   { href: "/purchased-analyses", label: "구매한 분석", icon: "book" },
+  { href: "/ai-consulting", label: "AI 상담", icon: "chat" },
 ];
 
 const managementNavItems: NavItem[] = [
@@ -196,19 +196,25 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
   return (
     <div className="min-h-screen bg-[#f5f7fc] text-[#11162d]">
       <div className="flex min-h-screen">
-        <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 shrink-0 border-r border-white/10 bg-[linear-gradient(180deg,#091127_0%,#0d1530_58%,#15143a_100%)] px-4 py-6 text-white lg:flex lg:flex-col">
+        <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 shrink-0 overflow-y-auto border-r border-white/10 bg-[linear-gradient(180deg,#091127_0%,#0d1530_58%,#15143a_100%)] px-4 py-6 text-white lg:flex lg:flex-col">
           <div className="mb-10">
             <Link href="/" className="inline-flex items-center gap-2.5 text-xl font-black tracking-tight text-white"><span aria-hidden="true" className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#ff7f9f,#7b61ff)] shadow-[0_0_28px_rgba(123,97,255,0.35)]"><span className="h-3 w-3 rounded-full border border-white/80" /></span>운보다</Link>
             <p className="mt-3 text-[11px] leading-5 text-[#8f98b5]">AI 명리 분석 플랫폼</p>
           </div>
 
           <nav aria-label="메인 네비게이션">
-            <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.18em] text-[#66708f]">분석</p>
+            <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.18em] text-[#66708f]">매일 이용</p>
             <div className="space-y-1">
             {resolvedAnalysisNavItems.map((item) => {
               const active = isActivePath(pathname, item.activeHref);
 
               return (
+                <div key={item.activeHref}>
+                  {item.activeHref === "/saju" || item.activeHref === "/interests" ? (
+                    <p className="mb-3 mt-6 px-3 text-[10px] font-semibold tracking-[0.14em] text-[#7883a4]">
+                      {item.activeHref === "/saju" ? "사주 · 분석" : "나의 분석 · 상담"}
+                    </p>
+                  ) : null}
                 <Link
                   key={item.href}
                   href={item.href}
@@ -223,10 +229,11 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                   <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" ? <LockIcon /> : null}<span>{item.label}</span>
                   {item.activeHref === "/ai-consulting" ? <span className="ml-auto rounded-full border border-[#8f7cff]/30 bg-[#6f5ce7]/15 px-2 py-0.5 text-[9px] font-black tracking-[0.08em] text-[#c8beff]">이어가기</span> : null}
                 </Link>
+                </div>
               );
             })}
             </div>
-            <p className="mb-3 mt-9 px-3 text-[10px] font-semibold tracking-[0.18em] text-[#66708f]">관리</p>
+            <p className="mb-3 mt-9 px-3 text-[10px] font-semibold tracking-[0.18em] text-[#66708f]">계정 · 고객지원</p>
             <div className="space-y-1">
               {managementNavItems.map((item) => {
                 const active = isActivePath(pathname, item.href);

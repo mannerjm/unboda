@@ -26,7 +26,7 @@ assert.equal(readingA.focusPillar, "day");
 assert.equal(readingA.focusRelation, "충");
 assert(readingA.topic.includes("조건 점검"), "day stem theme must be refined by daily branch relationship");
 assert(readingA.action.includes("달라진 조건 한 가지"), "a single contextual action must match the selected focus");
-assert(readingA.flow.includes("태어난 날") && readingA.flow.includes("태어난 해"), "specific source of daily interactions must be explained");
+assert(readingA.flow.includes("태어난 날") && readingB.flow.includes("태어난 해"), "selected and supporting natal pillars must be attributed precisely");
 assert(readingA.flow.includes("오행"), "weighted natal three-pillar element comparison must appear when meaningful");
 
 const monthFocus = buildTodayReading({ date, personDayStem: "甲", personDayBranch: "寅", personMonthPillarHanja: "丙子", personYearPillarHanja: "甲辰", dayPillarHanja: "庚午" });

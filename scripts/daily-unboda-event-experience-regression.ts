@@ -28,6 +28,10 @@ assert(today.includes("if (!activeProfile)") && today.includes("마이페이지�
 assert(today.includes('freeAnalysisStatus === "stale"') && today.includes('isGenerating ? "무료 사주 분석 진행 상황 보기"'), "stale and loading must keep original routes");
 assert(today.includes("계산 결과가 확인되지 않아 임의의 운세를 보여드리지 않습니다."), "missing calculation must never show fabricated fortune");
 assert(today.includes('href="#today-topic"') && today.includes('id="today-topic"'), "read-today action must lead to real content");
+assert(!today.includes('aria-label="오늘의 운보다 이동"') && !today.includes("← 운보다 홈"), "daily detail must not show redundant top home navigation");
+assert(!today.includes("<footer className="), "daily detail must not show redundant footer home navigation");
+assert(today.includes('sm:mt-0">운보다 홈으로 →</Link>'), "single return action after the daily reading must stay available");
+
 assert(!today.includes("requestPayment(") && !today.includes("/ai-consulting") && !today.includes("/checkout/") && !today.includes("/deep-analysis"), "free daily visit must not become paid funnel");
 assert(!today.includes("localStorage") && !today.includes("streak") && !today.includes("출석 보상") && !today.includes("알림 신청") && !today.includes("내일 알림"), "do not invent retention rewards or persistence");
 assert(dailyServer.includes("DAILY_COPY_VERSION") && dailyServer.includes("fingerprint") && dailyServer.includes("date"), "profile, birth and date scoped cache contract unchanged");

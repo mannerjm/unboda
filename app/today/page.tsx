@@ -48,11 +48,6 @@ function TodayEventShell({
         <div aria-hidden="true" className="pointer-events-none absolute -left-28 top-[32rem] h-80 w-80 rounded-full bg-[#284b88]/15 blur-3xl" />
 
         <div className="relative mx-auto w-full max-w-5xl">
-          <nav className="mb-5 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm" aria-label="오늘의 운보다 이동">
-            <Link href="/" className="font-semibold text-[#aeb4ca] transition hover:text-white">← 운보다 홈</Link>
-            <span className="rounded-full border border-[#f0d39b]/25 bg-[#f0d39b]/10 px-3 py-1.5 font-bold text-[#f1d8a5]">매일 무료 · 오늘의 운보다</span>
-          </nav>
-
           <header className="relative overflow-hidden rounded-[1.7rem] border border-[#e4d3aa]/25 bg-[linear-gradient(115deg,rgba(238,187,114,.14),rgba(120,95,221,.16)_47%,rgba(255,255,255,.04))] px-6 pb-8 pt-7 shadow-[0_18px_70px_rgba(1,6,22,.3)] sm:rounded-[2rem] sm:px-10 sm:pb-10 sm:pt-10">
             <div aria-hidden="true" className="pointer-events-none absolute right-[-5rem] top-[-7rem] h-72 w-72 rounded-full bg-[#af8dff]/10 blur-3xl sm:right-5" />
             <div className="relative z-10 grid gap-7 md:grid-cols-[1fr_16rem] md:items-center">
@@ -92,10 +87,6 @@ function TodayEventShell({
 
           {children}
 
-          <footer className="mt-9 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-5 text-xs text-[#959cb5]">
-            <span>운보다 · 매일 새로운 날짜에 만나는 무료 명리 콘텐츠</span>
-            <Link href="/" className="font-semibold text-[#e1d5ff] underline decoration-[#8877b8] underline-offset-4 hover:text-white">운보다 홈으로 →</Link>
-          </footer>
         </div>
       </main>
     </AppShell>

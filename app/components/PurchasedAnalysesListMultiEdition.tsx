@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { PurchasedAnalysisProductGroup } from "@/app/lib/purchasedAnalysesGrouping";
+import { purchasedLibraryHref, type PurchasedLibraryPage, type PurchasedLibraryOverview } from "@/app/lib/purchasedAnalysesLibrary";
 import Phase9NextAnalysisCards from "@/app/components/Phase9NextAnalysisCards";
 import type { Phase9NextAnalysisRecommendation } from "@/app/lib/phase9NextAnalysis";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
@@ -29,6 +30,8 @@ const statusClasses: Record<string, string> = {
 type PurchasedAnalysesListProps = {
   groups: readonly PurchasedAnalysisProductGroup[];
   profileId: string;
+  libraryPage?: PurchasedLibraryPage;
+  libraryOverview?: PurchasedLibraryOverview;
   previewMode?: boolean;
   phase9Recommendations?: readonly Phase9NextAnalysisRecommendation[];
 };
@@ -117,6 +120,8 @@ function reportHref(
 export default function PurchasedAnalysesList({
   groups,
   profileId,
+  libraryPage,
+  libraryOverview,
   previewMode = false,
   phase9Recommendations = [],
 }: PurchasedAnalysesListProps) {
@@ -143,8 +148,13 @@ export default function PurchasedAnalysesList({
     .flatMap((group) => group.editions.map((edition) => ({ group, edition })))
     .sort((a, b) => b.edition.acquiredAt.localeCompare(a.edition.acquiredAt));
   const recent = allEditions[0]!;
-  const completedCount = allEditions.filter(({ edition }) => edition.reportStatus === "completed").length;
-  const preparingCount = allEditions.filter(({ edition }) =>
+  const visibleGroups = libraryPage?.groups ?? groups;
+  const fullEditionCounts = new Map(groups.map((group) => [group.productId, group.editions.length]));
+  if (libraryOverview) {
+    for (const [productId, count] of Object.entries(libraryOverview.editionCounts)) fullEditionCounts.set(productId, count);
+  }
+  const completedCount = libraryOverview?.completedCount ?? allEditions.filter(({ edition }) => edition.reportStatus === "completed").length;
+  const preparingCount = libraryOverview?.preparingCount ?? allEditions.filter(({ edition }) =>
     edition.reportStatus === "none" || edition.reportStatus === "generating",
   ).length;
   const recentReportHref = reportHref(recent.group, profileId, recent.edition.analysisEditionKey, previewMode);
@@ -214,7 +224,7 @@ export default function PurchasedAnalysesList({
             <p className="mt-2 text-sm leading-6 text-slate-600">연도판과 분석 상태를 확인하고, 완료된 리포트는 언제든 다시 열 수 있습니다.</p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-semibold">
-            <span className="rounded-full bg-[#eef0f6] px-3 py-2 text-slate-600">보관 {allEditions.length}개</span>
+            <span className="rounded-full bg-[#eef0f6] px-3 py-2 text-slate-600">보관 {libraryOverview?.total ?? allEditions.length}개</span>
             <span className="rounded-full bg-emerald-50 px-3 py-2 text-emerald-800">완료 {completedCount}개</span>
             {preparingCount > 0 ? (
               <span className="rounded-full bg-slate-100 px-3 py-2 text-slate-600">준비 중 {preparingCount}개</span>
@@ -222,8 +232,51 @@ export default function PurchasedAnalysesList({
           </div>
         </div>
 
+        {libraryPage ? (
+          <div className="mt-5 rounded-2xl border border-[#dce1ef] bg-white p-4 sm:p-5">
+            <form action="/purchased-analyses" method="get" role="search" className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto] sm:items-end">
+              <div className="min-w-0">
+                <label htmlFor="library-query" className="mb-1.5 block text-xs font-bold text-slate-700">리포트 이름 검색</label>
+                <input id="library-query" name="q" type="search" maxLength={80}
+                  defaultValue={libraryPage.filters.query} placeholder="예: 재물운, 수면, 궁합"
+                  className="w-full rounded-xl border border-[#cfd5e6] bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus-visible:border-[#6f5ce7] focus-visible:ring-2 focus-visible:ring-[#c9c1ff]" />
+              </div>
+              <div>
+                <label htmlFor="library-kind" className="mb-1.5 block text-xs font-bold text-slate-700">분석 종류</label>
+                <select id="library-kind" name="kind" defaultValue={libraryPage.filters.kind}
+                  className="w-full rounded-xl border border-[#cfd5e6] bg-white px-3 py-2.5 text-sm text-slate-900 focus-visible:outline-[#6f5ce7]">
+                  <option value="all">전체 분석</option>
+                  <option value="deep">심층 분석</option>
+                  <option value="special">전문 분석</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="library-order" className="mb-1.5 block text-xs font-bold text-slate-700">정렬</label>
+                <select id="library-order" name="order" defaultValue={libraryPage.filters.order}
+                  className="w-full rounded-xl border border-[#cfd5e6] bg-white px-3 py-2.5 text-sm text-slate-900 focus-visible:outline-[#6f5ce7]">
+                  <option value="newest">최신 구매순</option>
+                  <option value="oldest">오래된 구매순</option>
+                </select>
+              </div>
+              <button type="submit" className="rounded-xl bg-[#171a3d] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#242957] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]">검색</button>
+            </form>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600" aria-live="polite">
+              <span>검색 결과 {libraryPage.total}개 · {libraryPage.from}~{libraryPage.to}개 표시</span>
+              {(libraryPage.filters.query || libraryPage.filters.kind !== "all" || libraryPage.filters.order !== "newest") ? (
+                <Link href="/purchased-analyses" className="font-bold text-[#5e4bd1] underline underline-offset-4">검색·필터 초기화</Link>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
         <div className="mt-4 space-y-4">
-          {groups.map((group) => {
+          {visibleGroups.length === 0 ? (
+            <div className="rounded-[1.5rem] border border-[#dce1ef] bg-white px-5 py-10 text-center">
+              <p className="font-bold text-[#11162d]">검색 조건에 맞는 리포트가 없습니다.</p>
+              <p className="mt-2 text-sm text-slate-600">검색어 또는 분석 종류를 변경해 주세요.</p>
+              <Link href="/purchased-analyses" className="mt-4 inline-flex text-sm font-bold text-[#5e4bd1] underline underline-offset-4">전체 보관함 다시 보기</Link>
+            </div>
+          ) : visibleGroups.map((group) => {
             const specialProduct = getSpecialAnalysisProduct(group.productId);
             const isCompatibility =
               isCompatibilityPairProductId(group.productId)
@@ -239,7 +292,7 @@ export default function PurchasedAnalysesList({
                     <h3 className="mt-2 text-lg font-black text-[#11162d]">{getDisplayTitle(group)}</h3>
                   </div>
                   <span className="self-start rounded-full bg-[#f3f1ff] px-3 py-1.5 text-xs font-bold text-[#5e4bd1]">
-                    {group.editions.length > 1 ? `${group.editions.length}개 연도판·에디션` : "1개 보관"}
+                    {(fullEditionCounts.get(group.productId) ?? group.editions.length) > 1 ? `${fullEditionCounts.get(group.productId) ?? group.editions.length}개 연도판·에디션` : "1개 보관"}
                   </span>
                 </div>
 
@@ -254,7 +307,7 @@ export default function PurchasedAnalysesList({
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="text-[15px] font-bold text-[#11162d]">{displayEditionLabel}</p>
-                            {!isCompatibility && edition.isLatest && group.editions.length > 1 ? (
+                            {!isCompatibility && edition.isLatest && (fullEditionCounts.get(group.productId) ?? group.editions.length) > 1 ? (
                               <span className="rounded-full bg-[#f3f1ff] px-2.5 py-1 text-xs font-bold text-[#5e4bd1]">최신 연도판</span>
                             ) : null}
                           </div>
@@ -279,6 +332,19 @@ export default function PurchasedAnalysesList({
             );
           })}
         </div>
+        {libraryPage && libraryPage.totalPages > 1 ? (
+          <nav aria-label="보관함 페이지 이동" className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            {libraryPage.page > 1 ? (
+              <Link href={purchasedLibraryHref(libraryPage.filters, libraryPage.page - 1) + "#purchased-library-heading"}
+                className="rounded-xl border border-[#cfd5e6] bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-[#f7f8fc]">이전 목록</Link>
+            ) : null}
+            <span className="px-2 text-sm font-semibold text-slate-700">{libraryPage.page} / {libraryPage.totalPages} 페이지</span>
+            {libraryPage.page < libraryPage.totalPages ? (
+              <Link href={purchasedLibraryHref(libraryPage.filters, libraryPage.page + 1) + "#purchased-library-heading"}
+                className="rounded-xl border border-[#cfd5e6] bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-[#f7f8fc]">다음 목록 보기</Link>
+            ) : null}
+          </nav>
+        ) : null}
       </section>
 
       <section data-next-question-slot="phase9" className="mt-6 rounded-[1.75rem] border border-[#dce1ef] bg-[#f9faff] p-5 sm:p-6">

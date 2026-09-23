@@ -11,12 +11,13 @@ type NavItem = {
   href: string;
   label: string;
   shortLabel?: string;
-  icon: "home" | "chart" | "spark" | "compass" | "book" | "user" | "chat";
+  icon: "home" | "chart" | "spark" | "compass" | "book" | "user" | "chat" | "sun";
 };
 
 function NavIcon({ icon }: { icon: NavItem["icon"] }) {
   const paths = {
     home: "M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5M9 21v-6h6v6",
+    sun: "M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z",
     chart: "M4 19V5M4 19h16M7 15l3-4 3 2 4-6",
     spark: "m12 3 1.7 6.3L20 11l-6.3 1.7L12 19l-1.7-6.3L4 11l6.3-1.7L12 3Z",
     compass: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Zm3.5-13.5-2.2 4.8-4.8 2.2 2.2-4.8 4.8-2.2Z",
@@ -33,6 +34,7 @@ function NavIcon({ icon }: { icon: NavItem["icon"] }) {
 }
 
 const analysisNavItems: NavItem[] = [
+  { href: "/today", label: "오늘의 운보다", icon: "sun" },
   { href: "/saju", label: "내 분석", icon: "home" },
   { href: "/recommendations", label: "추천 분석", icon: "chart" },
   { href: "/deep-analysis", label: "심층 분석", icon: "spark" },
@@ -266,7 +268,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
             {pathname === "/mypage" && isGuest === false && profileId ? (
               <span className="rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-xs font-semibold text-[#d9dcef]">AI 질문권 {aiCreditBalanceLabel}</span>
             ) : (
-              <span className="text-xs font-medium text-[#919ab7]">명리 분석</span>
+              <Link href={isGuest === true ? "/auth/login?returnTo=/today" : "/today"} className="rounded-full border border-[#cebaff]/25 bg-[#7560d5]/20 px-3 py-1.5 text-xs font-bold text-[#e9e2ff]">오늘의 운보다</Link>
             )}
           </header>
           <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">

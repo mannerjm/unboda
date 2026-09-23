@@ -100,7 +100,7 @@ function DailyVisitEntry({ state }: { state: LandingState }) {
       <div>
         <p className="text-xs font-black tracking-[.12em] text-[#e7c98e]">매일 무료 · DAILY UNBODA</p>
         <h2 className="mt-2 text-xl font-black text-white sm:text-2xl">오늘의 운보다</h2>
-        <p className="mt-2 text-sm leading-6 text-[#c5c3d4]">본인의 사주를 바탕으로 오늘의 짧은 흐름을 확인해 보세요. 매일 새로운 날짜의 내용이 열립니다.</p>
+        <p className="mt-2 text-sm leading-6 text-[#c5c3d4]">선택한 분석 대상의 사주를 바탕으로 오늘의 짧은 흐름을 확인해 보세요. 매일 새로운 날짜의 내용이 열립니다.</p>
       </div>
       <Link href={href} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#f7e0af] px-5 py-3 text-sm font-black text-[#29233b] transition hover:bg-[#fff1cd]">
         {state.kind === "guest" ? "로그인하고 오늘 보기" : "오늘의 운보다 보기"}<Icon name="arrow" className="h-4 w-4"/>
@@ -117,7 +117,7 @@ function QuickRoutes({ state }: { state: LandingState }) {
     { icon: "people" as const, title: "두 사람 궁합", detail: "관계의 차이를 함께", href: "/special-analysis/compatibility", tone: "text-[#ff99cc]" },
     { icon: "folder" as const, title: "구매한 분석", detail: "저장한 리포트 이어보기", href: guest ? "/auth/login?returnTo=/purchased-analyses" : "/purchased-analyses", tone: "text-[#f0c57a]" },
   ];
-  return <section className="mx-auto grid w-full max-w-6xl gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map(route => <Link key={route.title} href={route.href} className={`group flex items-center gap-4 rounded-[1.45rem] p-4 transition hover:-translate-y-1 hover:border-[#8d7cff]/35 ${glass}`}><span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/[0.07] ${route.tone}`}><Icon name={route.icon}/></span><span className="min-w-0"><strong className="block text-sm font-black text-white">{route.title}</strong><span className="mt-1 block text-xs leading-5 text-[#9ea5bc]">{route.detail}</span></span><Icon name="arrow" className="ml-auto h-4 w-4 shrink-0 text-[#707997] transition group-hover:translate-x-1 group-hover:text-[#b8a8ff]"/></Link>)}</section>;
+  return <section className="mx-auto mt-5 grid w-full max-w-6xl gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map(route => <Link key={route.title} href={route.href} className={`group flex items-center gap-4 rounded-[1.45rem] p-4 transition hover:-translate-y-1 hover:border-[#8d7cff]/35 ${glass}`}><span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/[0.07] ${route.tone}`}><Icon name={route.icon}/></span><span className="min-w-0"><strong className="block text-sm font-black text-white">{route.title}</strong><span className="mt-1 block text-xs leading-5 text-[#9ea5bc]">{route.detail}</span></span><Icon name="arrow" className="ml-auto h-4 w-4 shrink-0 text-[#707997] transition group-hover:translate-x-1 group-hover:text-[#b8a8ff]"/></Link>)}</section>;
 }
 
 function CardScene({ scene }: { scene: "sunset" | "city" | "wealth" | "growth" | "people" | "path" }) {

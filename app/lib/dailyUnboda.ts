@@ -234,6 +234,22 @@ function expandedTodayCopy(input: {
     notes.push(`${PILLAR_LANGUAGE[supplementary.pillar].subject}의 지지에서도 ${supplementary.relation} 관계를 확인할 수 있습니다.`);
   }
 
+  // The branch comparison above is complemented by heavenly-STEM elemental
+  // interaction with month/year. This is descriptive, not a fortune score.
+  // getTenGod is the established stem-to-stem element+polarity mapping.
+  const stemRelations: Record<string, string> = {
+    비견: "같은 오행", 겁재: "같은 오행",
+    식신: "태어난 쪽이 오늘을 생하는", 상관: "태어난 쪽이 오늘을 생하는",
+    편재: "태어난 쪽이 오늘을 극하는", 정재: "태어난 쪽이 오늘을 극하는",
+    편관: "오늘이 태어난 쪽을 극하는", 정관: "오늘이 태어난 쪽을 극하는",
+    편인: "오늘이 태어난 쪽을 생하는", 정인: "오늘이 태어난 쪽을 생하는",
+  };
+  const monthStemRelation = stemRelations[getTenGod(monthPillar[0], todayPillar[0])];
+  const yearStemRelation = stemRelations[getTenGod(yearPillar[0], todayPillar[0])];
+  if (monthStemRelation && yearStemRelation) {
+    notes.push(`태어난 달과 해의 천간은 오늘의 천간과 각각 ${monthStemRelation}, ${yearStemRelation} 관계로 분류됩니다.`);
+  }
+
   // Use the EXISTING weighted five-element implementation, restricted to the
   // three reliable natal pillars. Never treat the form's default noon hour as
   // confirmed, and do not equate low/high weight with auspiciousness.

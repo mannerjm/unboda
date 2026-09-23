@@ -265,7 +265,11 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
         <div className="min-w-0 flex-1 lg:pl-60">
           <header className="flex h-14 items-center justify-between border-b border-white/10 bg-[#0b122b] px-5 text-white lg:hidden">
             <Link href="/" className="text-lg font-black tracking-tight text-white">운보다</Link>
-            <Link href={isGuest === true ? "/auth/login?returnTo=/today" : "/today"} className="rounded-full border border-[#cebaff]/25 bg-[#7560d5]/20 px-3 py-1.5 text-xs font-bold text-[#e9e2ff]">오늘의 운보다</Link>
+            {pathname === "/mypage" && isGuest === false && profileId ? (
+              <span className="rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-xs font-semibold text-[#d9dcef]">AI 질문권 {aiCreditBalanceLabel}</span>
+            ) : (
+              <Link href={isGuest === true ? "/auth/login?returnTo=/today" : "/today"} className="rounded-full border border-[#cebaff]/25 bg-[#7560d5]/20 px-3 py-1.5 text-xs font-bold text-[#e9e2ff]">오늘의 운보다</Link>
+            )}
           </header>
           <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
             {isGuest === false && profileId && refreshNoticeSurface ? (

@@ -4,7 +4,7 @@ import { calculateSaju } from "@fullstackfamily/manseryeok";
 import { buildTodayReading, getTodayBranchRelation, getTodayDayPillar, DAILY_COPY_VERSION } from "../app/lib/dailyUnboda";
 
 const date = "2026-09-24";
-assert.equal(DAILY_COPY_VERSION, "daily-v3", "changed copy rules must not reuse cached daily-v2 copy");
+assert.equal(DAILY_COPY_VERSION, "daily-v4", "new hidden-stem and annual-cycle copy must not reuse cached daily-v3 copy");
 assert.equal(getTodayBranchRelation("子", "午"), "충");
 assert.equal(getTodayBranchRelation("子", "丑"), "합");
 assert.equal(getTodayBranchRelation("子", "卯"), "형");

@@ -21,6 +21,12 @@ assert(!mypage.includes("openRefundForm") && !mypage.includes("/api/orders/${enc
 assert(supportPage.includes("getOrderForUser(orderId, user.id)") && supportPage.includes("listUserProfiles(user.id)"), "support order details resolved after authentication/ownership check");
 assert(supportPage.includes("initialRefundOrder={refundOrder}") && supportPage.includes("invalidRefundOrder="), "verified order data and invalid order state are passed separately");
 assert(support.includes("initialRefundOrder.productName") && support.includes("initialRefundOrder.profileLabel") && support.includes("initialRefundOrder.amount"), "order context presented without manual reentry");
+assert(support.includes('category === "PAID_ANALYSIS" ? (') && support.includes("value={analysisOrderId}"), "only unrelated analysis support may ask for a legacy optional order reference");
+assert(support.includes("const linkedOrderId = category === \"PAYMENT_REFUND\"") && support.includes("initialRefundOrder?.orderId ?? null"), "refund request must use the server-verified order reference");
+assert(support.includes("orderId: linkedOrderId"), "only verified refund order reference reaches the existing support API");
+assert(!support.includes('value={orderId}') && !support.includes('setOrderId(') && !support.includes("orderId.trim()"), "refund intake must not render or collect order ID from the customer");
+assert(support.includes('category === "PAYMENT_REFUND" && invalidRefundOrder'), "invalid refund order blocks only refund submission");
+
 assert(support.includes("initialCategory = null") && support.includes('useState(Boolean(initialCategory))'), "order-link opens refund intake directly");
 for (const label of ["중복 결제 또는 결제 오류","리포트 미제공 또는 생성 오류","구매한 내용과 다른 리포트 제공","리포트 제공 전 구매 취소","기타 환불·결제 문의"]) assert(support.includes(label), `missing refund reason ${label}`);
 assert(support.includes('category === "PAYMENT_REFUND" && !refundReason'), "refund request must include reason");

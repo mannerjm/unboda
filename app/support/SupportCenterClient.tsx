@@ -41,7 +41,7 @@ type Guide = {
 const guides: Record<SupportRequestCategory, Guide> = {
   PAYMENT_REFUND: {
     title: "결제·환불",
-    description: "결제·환불 상태는 마이페이지의 실제 주문 기록이 기준입니다. 처리 중이면 중복 요청하지 말고 현재 상태를 먼저 확인하세요.",
+    description: "결제·환불 현황은 마이페이지에서 확인하고, 환불·취소 문의는 이곳에서 해당 주문과 연결해 접수할 수 있습니다.",
     actionLabel: "마이페이지 결제 이력 확인",
     href: "/mypage",
     needsOrderId: true,
@@ -86,14 +86,21 @@ function time(value: string): string {
 export default function SupportCenterClient({
   isAuthenticated,
   initialRequests,
+  initialRefundOrder = null,
+  invalidRefundOrder = false,
+  initialCategory = null,
 }: {
   isAuthenticated: boolean;
   initialRequests: SupportRequestDto[];
+  initialRefundOrder?: SupportRefundOrder | null;
+  invalidRefundOrder?: boolean;
+  initialCategory?: SupportRequestCategory | null;
 }) {
-  const [category, setCategory] = useState<SupportRequestCategory | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  const [category, setCategory] = useState<SupportRequestCategory | null>(initialCategory);
+  const [showForm, setShowForm] = useState(Boolean(initialCategory));
+  const [refundReason, setRefundReason] = useState<RefundInquiryReason | "">("");
   const [message, setMessage] = useState("");
-  const [orderId, setOrderId] = useState("");
+  const [orderId, setOrderId] = useState(initialRefundOrder?.orderId ?? "");
   const [requests, setRequests] = useState(initialRequests);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -141,7 +148,7 @@ export default function SupportCenterClient({
         <header className="mt-8 border-b border-slate-200 pb-7">
           <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">SUPPORT CENTER</p>
           <h1 className="mt-3 text-3xl font-bold sm:text-4xl">고객지원 센터</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">반복되는 문제는 먼저 자동 해결 경로로 안내합니다. 그래도 해결되지 않는 경우에만 문의를 접수해 필요한 지원을 받을 수 있도록 운영합니다.</p>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">결제·환불 문의는 해당 주문을 연결해 접수할 수 있습니다. 다른 문제는 안내된 해결 방법을 확인하거나 문의를 남겨 주세요.</p>
         </header>
 
         <section className="mt-7">
@@ -151,7 +158,7 @@ export default function SupportCenterClient({
               <button
                 key={item}
                 type="button"
-                onClick={() => { setCategory(item); setShowForm(item === "OTHER"); setFeedback(null); }}
+                onClick={() => { setCategory(item); setShowForm(item === "OTHER" || item === "PAYMENT_REFUND"); setRefundReason(""); setFeedback(null); }}
                 className={`min-h-24 rounded-2xl border p-4 text-left shadow-sm transition ${category === item ? "border-[#6f5ce7] bg-[#171a3d] text-white shadow-[0_10px_28px_rgba(66,56,150,0.18)]" : "border-[#dce1ef] bg-white hover:border-[#aaa0f4] hover:shadow-md"}`}
               >
                 <span className="text-sm font-bold">{SUPPORT_CATEGORY_LABELS[item]}</span>

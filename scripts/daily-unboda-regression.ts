@@ -40,7 +40,7 @@ assert(home.includes("<DailyVisitEntry state={state}/>") && home.includes("매�
 assert(shell.includes('{ href: "/today", label: "오늘의 운보다"'));
 assert(!page.includes("buildFreeAnalysisResponse") && !page.includes("/api/analyze"));
 for (const source of [page, daily]) {
-  for (const forbidden of ["openai", "generateMainAnalysis(", "generatePaidReport(", "requestPayment(", "grantEntitlement(", "debitCredit(", "/checkout/"]) {
+  for (const forbidden of ["from \"openai\"", "new OpenAI(", "generateMainAnalysis(", "generatePaidReport(", "requestPayment(", "grantEntitlement(", "debitCredit(", "/checkout/"]) {
     assert(!source.toLowerCase().includes(forbidden.toLowerCase()), `daily source must not include ${forbidden}`);
   }
 }

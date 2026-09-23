@@ -7,6 +7,14 @@ export type LibraryKind = "all" | "deep" | "special";
 export type LibraryOrder = "newest" | "oldest";
 export type LibraryFilters = { query: string; kind: LibraryKind; order: LibraryOrder };
 
+/** Compact server-derived totals. Only 20 visible editions + recent are sent to the client. */
+export type PurchasedLibraryOverview = {
+  total: number;
+  completedCount: number;
+  preparingCount: number;
+  editionCounts: Record<string, number>;
+};
+
 export type PurchasedLibraryPage = {
   filters: LibraryFilters;
   page: number;

@@ -1,7 +1,13 @@
 import { calculateSaju } from "@fullstackfamily/manseryeok";
 import { getTenGod } from "./tenGod";
-import { branchElementMap } from "./elements";
-import { findBranchClash, findBranchCombination } from "./fortuneRelations";
+import { branchElementMap, stemElementMap, calculateWeightedElements, type Element } from "./elements";
+import {
+  findBranchClash,
+  findBranchCombination,
+  findBranchPunishment,
+  findBranchBreak,
+  findBranchHarm,
+} from "./fortuneRelations";
 
 /**
  * Free daily reading, isolated from paid reports and monthly free-analysis generation.
@@ -11,7 +17,7 @@ import { findBranchClash, findBranchCombination } from "./fortuneRelations";
  * The service publication date is a KST civil day. At 12:00 of that day the
  * library's day pillar is unambiguous, including around the 子時 boundary.
  */
-export const DAILY_COPY_VERSION = "daily-v2" as const;
+export const DAILY_COPY_VERSION = "daily-v3" as const;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 // Only the new daily presentation adapts Hanja branches to the existing Hangul
@@ -21,14 +27,19 @@ const DAILY_BRANCH_HANGUL: Record<string, string> = {
   午: "오", 未: "미", 申: "신", 酉: "유", 戌: "술", 亥: "해",
 };
 
-export type TodayBranchRelation = "합" | "충" | "같은 오행" | null;
+export type TodayBranchRelation = "합" | "충" | "형" | "파" | "해" | "같은 오행" | null;
 
 export function getTodayBranchRelation(personDayBranch: string, todayBranch: string): TodayBranchRelation {
   const person = DAILY_BRANCH_HANGUL[personDayBranch];
   const today = DAILY_BRANCH_HANGUL[todayBranch];
   if (!person || !today) throw new Error("Unrecognized daily branch");
+  // More than one traditional label can fit the same pair. Select a single
+  // consistent short-note label; no relation is scored good or bad.
   if (findBranchClash(person, today)) return "충";
   if (findBranchCombination(person, today)) return "합";
+  if (findBranchPunishment(person, today)) return "형";
+  if (findBranchBreak(person, today)) return "파";
+  if (findBranchHarm(person, today)) return "해";
   const personElement = branchElementMap[personDayBranch];
   const todayElement = branchElementMap[todayBranch];
   return personElement && personElement === todayElement ? "같은 오행" : null;
@@ -37,6 +48,9 @@ export function getTodayBranchRelation(personDayBranch: string, todayBranch: str
 const branchNoteByRelation: Record<Exclude<TodayBranchRelation, null>, string> = {
   "합": "태어난 날의 지지와 오늘의 지지가 합 관계로 분류됩니다. 서로 다른 의견이나 일정을 조율할 기회가 있다면 차분히 살펴보세요.",
   "충": "태어난 날의 지지와 오늘의 지지가 충 관계로 분류됩니다. 평소의 계획과 다른 조건이 있다면 한 번 더 확인해 보세요.",
+  "형": "태어난 날의 지지와 오늘의 지지가 형 관계로 분류됩니다. 기준이나 순서가 엇갈리는 일이 있다면 차근차근 살펴보세요.",
+  "파": "태어난 날의 지지와 오늘의 지지가 파 관계로 분류됩니다. 평소의 진행 방식을 점검할 부분이 있는지 살펴보세요.",
+  "해": "태어난 날의 지지와 오늘의 지지가 해 관계로 분류됩니다. 서로의 기대가 다른 부분을 미리 확인해 보세요.",
   "같은 오행": "태어난 날의 지지와 오늘의 지지가 같은 오행으로 분류됩니다. 익숙한 방식에서 계속 유지할 점과 바꾸고 싶은 점을 살펴보세요.",
 };
 
@@ -103,6 +117,9 @@ export type TodayReading = {
   dayPillarHanja: string;
   tenGod: string;
   branchRelation: TodayBranchRelation;
+  /** One selected context; never a fabricated claim of a predicted event. */
+  focusPillar?: "day" | "month" | "year" | "hour" | null;
+  focusRelation?: TodayBranchRelation;
   topic: string;
   flow: string;
   action: string;
@@ -124,12 +141,158 @@ export function getTodayDayPillar(date: string): string {
   return pillar;
 }
 
+
+type NatalPillar = "day" | "month" | "year" | "hour";
+type NonNullRelation = Exclude<TodayBranchRelation, null>;
+type PillarSignal = { pillar: NatalPillar; relation: NonNullRelation };
+
+const PILLAR_LANGUAGE: Record<NatalPillar, { title: string; subject: string }> = {
+  day: { title: "내 일상", subject: "태어난 날" },
+  month: { title: "일과 생활", subject: "태어난 달" },
+  year: { title: "주변과의 관계", subject: "태어난 해" },
+  hour: { title: "개인적인 계획", subject: "태어난 시간" },
+};
+
+const RELATION_LANGUAGE: Record<NonNullRelation, {
+  title: string;
+  note: string;
+  action: string;
+}> = {
+  "합": { title: "조율", note: "서로 맞춰 볼 부분을 살펴보는 관점으로 읽어 보세요.", action: "서로 맞춰 볼 기준 한 가지를 확인해 보세요." },
+  "충": { title: "조건 점검", note: "계획과 다른 조건이 있는지 살펴보는 관점으로 읽어 보세요.", action: "달라진 조건 한 가지를 확인해 보세요." },
+  "형": { title: "순서 정리", note: "기준이나 순서가 엇갈리는 부분을 확인하는 관점으로 읽어 보세요.", action: "먼저 정리할 순서 한 가지를 적어 보세요." },
+  "파": { title: "방식 점검", note: "기존에 하던 방식 중 조정할 부분이 있는지 살펴보세요.", action: "점검할 진행 단계 한 가지를 골라 보세요." },
+  "해": { title: "기대 확인", note: "기대가 서로 다른 부분을 확인하는 관점으로 읽어 보세요.", action: "서로의 기대가 다른 부분 한 가지를 확인해 보세요." },
+  "같은 오행": { title: "기존 흐름 살피기", note: "익숙한 기준에서 이어갈 점과 바꿀 점을 살펴보세요.", action: "계속 유지할 기준 한 가지를 적어 보세요." },
+};
+
+// Ten-god context is the starting point for the single practical action.
+// A relation changes the ACTION, rather than appending a second unrelated task.
+const ACTION_CONTEXT: Record<string, string> = {
+  "비견": "내가 직접 결정할 일",
+  "겁재": "함께 사용하는 시간과 자원",
+  "식신": "준비해 둔 작은 일",
+  "상관": "새로운 생각을 전할 일",
+  "편재": "새로 살펴볼 선택지",
+  "정재": "오늘 쓸 시간과 예산",
+  "편관": "지금 맡은 과제",
+  "정관": "지켜야 할 역할과 기준",
+  "편인": "다른 시선으로 볼 고민",
+  "정인": "오늘 필요한 정보와 준비",
+};
+
+const VALID_PILLAR = /^[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]$/;
+function checkedPillar(value: string | undefined): string | null {
+  if (!value) return null;
+  if (!VALID_PILLAR.test(value)) throw new Error("Unrecognized natal pillar");
+  return value;
+}
+function relationSignal(pillar: NatalPillar, natalPillar: string | null, todayBranch: string): PillarSignal | null {
+  if (!natalPillar) return null;
+  const relation = getTodayBranchRelation(natalPillar[1], todayBranch);
+  return relation ? { pillar, relation } : null;
+}
+
+/**
+ * Relationship-first daily copy. The day stem's ten-god theme is always the
+ * primary context; natal day/month/year branch interactions then refine it.
+ * An "hour" signal is optional and must only be explicitly supplied for a
+ * VERIFIED birth time; our current profile form defaults to 12:00 and has
+ * no verification bit, so the server intentionally does NOT pass an hour.
+ */
+function expandedTodayCopy(input: {
+  tenGod: string;
+  dayPillar: string;
+  monthPillar: string;
+  yearPillar: string;
+  verifiedHourPillar: string | null;
+  todayPillar: string;
+}): { topic: string; flowNote: string; action: string; focusPillar: NatalPillar | null; focusRelation: TodayBranchRelation } {
+  const { tenGod, dayPillar, monthPillar, yearPillar, verifiedHourPillar, todayPillar } = input;
+  const original = copyByTenGod[tenGod]!;
+  const todayBranch = todayPillar[1];
+  const signals: PillarSignal[] = [
+    relationSignal("day", dayPillar, todayBranch),
+    relationSignal("month", monthPillar, todayBranch),
+    relationSignal("year", yearPillar, todayBranch),
+    relationSignal("hour", verifiedHourPillar, todayBranch),
+  ].filter((signal): signal is PillarSignal => Boolean(signal));
+
+  // The highest-priority available non-neutral day/month/year interaction
+  // supplies the headline/action. Same-element is a descriptive fallback.
+  // We do not infer auspiciousness or add up "good/bad" fortune points.
+  const focus = signals.find((signal) => signal.relation !== "같은 오행") ?? signals[0] ?? null;
+  const supplementary = signals.find((signal) => signal !== focus && signal.pillar !== "hour" && signal.relation !== "같은 오행") ?? null;
+  const focusCopy = focus ? RELATION_LANGUAGE[focus.relation] : null;
+  const focusName = focus ? PILLAR_LANGUAGE[focus.pillar] : null;
+
+  const notes: string[] = [];
+  if (focus && focusCopy && focusName) {
+    notes.push(`${focusName.subject}의 지지와 오늘의 지지는 ${focus.relation} 관계로 분류됩니다. ${focusCopy.note}`);
+  }
+  if (supplementary) {
+    notes.push(`${PILLAR_LANGUAGE[supplementary.pillar].subject}의 지지에서도 ${supplementary.relation} 관계를 확인할 수 있습니다.`);
+  }
+
+  // The branch comparison above is complemented by heavenly-STEM elemental
+  // interaction with month/year. This is descriptive, not a fortune score.
+  // getTenGod is the established stem-to-stem element+polarity mapping.
+  const stemRelations: Record<string, string> = {
+    비견: "오늘과 같은 오행", 겁재: "오늘과 같은 오행",
+    식신: "오늘의 오행을 생하는", 상관: "오늘의 오행을 생하는",
+    편재: "오늘의 오행을 극하는", 정재: "오늘의 오행을 극하는",
+    편관: "오늘의 오행으로부터 극을 받는", 정관: "오늘의 오행으로부터 극을 받는",
+    편인: "오늘의 오행으로부터 생을 받는", 정인: "오늘의 오행으로부터 생을 받는",
+  };
+  const monthStemRelation = stemRelations[getTenGod(monthPillar[0], todayPillar[0])];
+  const yearStemRelation = stemRelations[getTenGod(yearPillar[0], todayPillar[0])];
+  if (monthStemRelation && yearStemRelation) {
+    notes.push(`천간의 오행 관계에서는 태어난 달이 ${monthStemRelation} 흐름, 태어난 해가 ${yearStemRelation} 흐름으로 분류됩니다.`);
+  }
+
+  // Use the EXISTING weighted five-element implementation, restricted to the
+  // three reliable natal pillars. Never treat the form's default noon hour as
+  // confirmed, and do not equate low/high weight with auspiciousness.
+  const elements = calculateWeightedElements(
+    [yearPillar[0], monthPillar[0], dayPillar[0], ...(verifiedHourPillar ? [verifiedHourPillar[0]] : [])],
+    [yearPillar[1], monthPillar[1], dayPillar[1], ...(verifiedHourPillar ? [verifiedHourPillar[1]] : [])],
+  );
+  const todayStemElement: Element | undefined = stemElementMap[todayPillar[0]];
+  const todayBranchElement: Element | undefined = branchElementMap[todayPillar[1]];
+  const high = elements.strongest.length === 1 ? elements.strongest[0] : null;
+  const low = elements.weakest.length === 1 ? elements.weakest[0] : null;
+  const elementNote =
+    todayStemElement && high === todayStemElement
+      ? `연·월·일주에 나타난 오행 중 ${todayStemElement}의 상대 비중이 높고 오늘의 천간도 같은 오행입니다.`
+      : todayStemElement && low === todayStemElement
+        ? `연·월·일주에 나타난 오행 중 ${todayStemElement}의 상대 비중이 낮고 오늘의 천간은 해당 오행입니다.`
+        : todayBranchElement && high === todayBranchElement
+          ? `연·월·일주에 나타난 오행 중 ${todayBranchElement}의 상대 비중이 높고 오늘의 지지도 같은 오행입니다.`
+          : todayBranchElement && low === todayBranchElement
+            ? `연·월·일주에 나타난 오행 중 ${todayBranchElement}의 상대 비중이 낮고 오늘의 지지는 해당 오행입니다.`
+            : null;
+  if (elementNote) notes.push(elementNote);
+  return {
+    topic: focus ? `${original.topic} · ${focusName!.title} ${focusCopy!.title}` : original.topic,
+    flowNote: notes.join(" "),
+    action: focusCopy
+      ? `${ACTION_CONTEXT[tenGod]}에서 ${focusCopy.action}`
+      : original.action,
+    focusPillar: focus?.pillar ?? null,
+    focusRelation: focus?.relation ?? null,
+  };
+}
+
 /** Pure, deterministic presentation: no OpenAI call, randomness, billing or persistence. */
 export function buildTodayReading(input: {
   date: string;
   personDayStem: string;
   personDayBranch?: string;
   dayPillarHanja: string;
+  personYearPillarHanja?: string;
+  personMonthPillarHanja?: string;
+  /** Do not set unless actual time was explicitly verified by the user. */
+  verifiedHourPillarHanja?: string;
 }): TodayReading {
   const { date, personDayStem, personDayBranch, dayPillarHanja } = input;
   if (!/^[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]$/.test(dayPillarHanja)) {
@@ -141,13 +304,32 @@ export function buildTodayReading(input: {
   const branchRelation = personDayBranch
     ? getTodayBranchRelation(personDayBranch, dayPillarHanja[1])
     : null;
+  const year = checkedPillar(input.personYearPillarHanja);
+  const month = checkedPillar(input.personMonthPillarHanja);
+  const hour = checkedPillar(input.verifiedHourPillarHanja);
+  // Existing standalone callers remain on safe day-pillar-only copy. Expanded
+  // interpretation requires BOTH actual year and month natal pillars.
+  const expanded = personDayBranch && year && month
+    ? expandedTodayCopy({
+      tenGod,
+      dayPillar: `${personDayStem}${personDayBranch}`,
+      monthPillar: month,
+      yearPillar: year,
+      verifiedHourPillar: hour,
+      todayPillar: dayPillarHanja,
+    })
+    : null;
   return {
     date,
     version: DAILY_COPY_VERSION,
     dayPillarHanja,
     tenGod,
     branchRelation,
+    ...(expanded ? { focusPillar: expanded.focusPillar, focusRelation: expanded.focusRelation } : {}),
     ...copy,
-    flow: branchRelation ? `${copy.flow} ${branchNoteByRelation[branchRelation]}` : copy.flow,
+    topic: expanded?.topic ?? copy.topic,
+    action: expanded?.action ?? copy.action,
+    flow: expanded ? `${copy.flow} ${expanded.flowNote}`.trim()
+      : branchRelation ? `${copy.flow} ${branchNoteByRelation[branchRelation]}` : copy.flow,
   };
 }

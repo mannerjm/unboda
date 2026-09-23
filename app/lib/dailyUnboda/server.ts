@@ -46,6 +46,10 @@ export async function getCachedTodayReading(
         date,
         personDayStem: saju.dayStem,
         personDayBranch: saju.dayBranch,
+        personYearPillarHanja: saju.yearPillarHanja,
+        personMonthPillarHanja: saju.monthPillarHanja,
+        // The saved profile has a default 12:00 time but no verified-time flag.
+        // Never pass saju.hourPillarHanja as a confirmed birth-hour signal.
         dayPillarHanja: getTodayDayPillar(date),
       });
     },

@@ -20,6 +20,9 @@ const readingA = buildTodayReading({ date, ...natalA, dayPillarHanja: todaysPill
 const readingB = buildTodayReading({ date, ...natalB, dayPillarHanja: todaysPillar });
 assert.equal(readingA.tenGod, readingB.tenGod);
 assert.equal(readingA.branchRelation, readingB.branchRelation);
+const changedStemsOnly = buildTodayReading({ date, ...natalA, personYearPillarHanja: "壬午", personMonthPillarHanja: "戊寅", dayPillarHanja: todaysPillar });
+assert.equal(changedStemsOnly.focusRelation, readingA.focusRelation);
+assert.notEqual(changedStemsOnly.flow, readingA.flow, "month/year heavenly stems must contribute beyond their branch and the base ten-god");
 assert.notEqual(readingA.flow, readingB.flow, "different natal month/year must meaningfully refine otherwise equal day stem and branch");
 assert.deepEqual(readingA, buildTodayReading({ date, ...natalA, dayPillarHanja: todaysPillar }), "no randomness between repeat reads");
 assert.equal(readingA.focusPillar, "day");
@@ -78,5 +81,6 @@ assert(server.includes("personMonthPillarHanja: saju.monthPillarHanja"));
 assert(!server.includes("verifiedHourPillarHanja:"), "default 12:00 is not an explicitly verified birth hour");
 assert(server.includes("fingerprint") && server.includes("DAILY_COPY_VERSION") && server.includes("profile.id") && server.includes("date"), "cache scope must protect personal readings and new copy version");
 assert(daily.includes("calculateWeightedElements(") && daily.includes("findBranchPunishment(") && daily.includes("findBranchBreak(") && daily.includes("findBranchHarm("));
+assert(daily.includes("getTenGod(monthPillar[0], todayPillar[0])") && daily.includes("getTenGod(yearPillar[0], todayPillar[0])"), "both month and year heavenly stems must be compared to the current day stem");
 for (const banned of ["requestPayment(", "grantEntitlement(", "new OpenAI(", "generatePaidReport(", "Math.random("]) assert(!daily.includes(banned));
 console.log("daily-full-pillar-diversity-regression: PASS", JSON.stringify(statistics));

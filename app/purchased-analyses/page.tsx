@@ -43,6 +43,24 @@ export default async function PurchasedAnalysesPage({ searchParams }: {
   const groups = groupPurchasedAnalysesByProduct(analyses);
   const { filters, requestedPage } = parseLibraryParams(await searchParams);
   const libraryPage = selectPurchasedLibraryPage(groups, filters, requestedPage);
+  // Preserve the original full-library calculations on the authenticated server.
+  // Only the recent card, small counters and the 20 visible editions are sent
+  // through the existing client auto-refresh boundary.
+  const mostRecent = groups
+    .flatMap((group) => group.editions.map((edition) => ({ group, edition })))
+    .sort((a, b) => b.edition.acquiredAt.localeCompare(a.edition.acquiredAt))[0] ?? null;
+  const recentGroups = mostRecent
+    ? [{ ...mostRecent.group, editions: [mostRecent.edition] }]
+    : [];
+  const libraryOverview = {
+    total: analyses.length,
+    completedCount: analyses.filter((analysis) => analysis.reportStatus === "completed").length,
+    preparingCount: analyses.filter((analysis) => analysis.reportStatus === "none" || analysis.reportStatus === "generating").length,
+    editionCounts: Object.fromEntries(libraryPage.groups.map((visible) => [
+      visible.productId,
+      groups.find((full) => full.productId === visible.productId)?.editions.length ?? visible.editions.length,
+    ])),
+  };
   const recentSource = [...analyses]
     .sort((left, right) =>
       (right.reportStatus === "completed" ? 1 : 0) - (left.reportStatus === "completed" ? 1 : 0)
@@ -78,7 +96,7 @@ export default async function PurchasedAnalysesPage({ searchParams }: {
               </Link>
             </div>
           </header>
-          <PurchasedAnalysesAutoRefresh groups={groups} profileId={activeProfile.id} libraryPage={libraryPage} phase9Recommendations={phase9Recommendations} />
+          <PurchasedAnalysesAutoRefresh groups={recentGroups} profileId={activeProfile.id} libraryPage={libraryPage} libraryOverview={libraryOverview} phase9Recommendations={phase9Recommendations} />
         </div>
       </main>
     </AppShell>

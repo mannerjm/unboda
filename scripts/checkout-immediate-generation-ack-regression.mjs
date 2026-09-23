@@ -12,7 +12,9 @@ assert.match(panel, /immediateGenerationAcknowledged: true/, "checked UI sends a
 assert.match(panel, /결제 및 분석 생성 안내/);
 assert.match(panel, /결제가 승인되면 선택한 프로필의 개인화 분석 생성이 즉시 시작됩니다\./);
 assert.match(panel, /href="\/refund"/);
-assert.match(panel, /결제 승인 후 개인화 분석 생성이 즉시 시작된다는 내용을 확인했습니다\./);
+assert.match(panel, /결제 승인 후 개인화 분석 생성이 즉시 시작된다는 내용과 콘텐츠 제공 개시 후 청약철회가 관련 법령에 따라 제한될 수 있음을 확인했습니다\./);
+assert.match(panel, /구매 전 확인해 주세요/);
+assert.match(panel, /단순 변심에 따른 청약철회가 제한될 수 있습니다/);
 assert.doesNotMatch(panel, /termsAccepted|age14OrOlderConfirmed|privacy|VERIFIED_ADULT/);
 assert.doesNotMatch(panel, /결제 후 환불 불가|디지털 상품이므로 환불 불가|청약철회권을 포기합니다|환불받을 수 없습니다/);
 

@@ -318,10 +318,14 @@ export default function CheckoutAccessPanel({
                   {editionLabel ? <div className="flex justify-between gap-4"><dt className="text-slate-500">분석 기준</dt><dd className="text-right font-semibold">{editionLabel}</dd></div> : null}
                 </dl>
                 <p className="mt-5 text-sm font-semibold leading-6 text-[#11162d]">결제가 승인되면 개인화 분석 생성이 즉시 시작되고 구매한 분석에 보관됩니다.</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">환불·취소·청약철회에 관한 자세한 내용은 <Link href="/refund" className="font-semibold text-[#11162d] underline underline-offset-4">환불·취소·청약철회 정책</Link>에서 확인할 수 있습니다.</p>
+                <div className="mt-3 rounded-xl border border-[#e0e4f0] bg-[#f8f9fd] px-4 py-3">
+                  <p className="text-sm font-bold text-[#11162d]">구매 전 확인해 주세요</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">결제 후 개인화 리포트 생성이 시작됩니다. 콘텐츠 제공이 시작된 뒤에는 법정 요건에 따라 단순 변심에 따른 청약철회가 제한될 수 있습니다.</p>
+                  <Link href="/refund" className="mt-2 inline-flex text-sm font-semibold text-[#5e4bd1] underline underline-offset-4">환불·취소·청약철회 정책 자세히 보기 →</Link>
+                </div>
                 <label className="mt-5 flex items-start gap-3 text-sm leading-6 text-slate-700">
                   <input ref={acknowledgementRef} type="checkbox" checked={immediateGenerationAcknowledged} onChange={(event) => setImmediateGenerationAcknowledged(event.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[#6f5ce7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]" />
-                  <span>결제 승인 후 개인화 분석 생성이 즉시 시작된다는 내용을 확인했습니다.</span>
+                  <span>결제 승인 후 개인화 분석 생성이 즉시 시작된다는 내용과 콘텐츠 제공 개시 후 청약철회가 관련 법령에 따라 제한될 수 있음을 확인했습니다.</span>
                 </label>
               </div>
               <button type="button" onClick={handlePayment} disabled={isPaying || !immediateGenerationAcknowledged} className="mt-7 w-full rounded-2xl bg-[#6f5ce7] px-5 py-4 font-bold text-white shadow-[0_12px_28px_rgba(93,76,209,0.22)] transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:bg-slate-400 disabled:shadow-none">

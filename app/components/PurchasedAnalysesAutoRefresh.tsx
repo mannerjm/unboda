@@ -4,6 +4,7 @@ import { useEffect, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import PurchasedAnalysesListMultiEdition from "./PurchasedAnalysesListMultiEdition";
 import type { PurchasedAnalysisProductGroup } from "@/app/lib/purchasedAnalysesGrouping";
+import type { PurchasedLibraryPage } from "@/app/lib/purchasedAnalysesLibrary";
 import type { Phase9NextAnalysisRecommendation } from "@/app/lib/phase9NextAnalysis";
 
 const REFRESH_INTERVAL_MS = 4_000;
@@ -11,12 +12,14 @@ const REFRESH_INTERVAL_MS = 4_000;
 type PurchasedAnalysesAutoRefreshProps = {
   groups: readonly PurchasedAnalysisProductGroup[];
   profileId: string;
+  libraryPage?: PurchasedLibraryPage;
   phase9Recommendations?: readonly Phase9NextAnalysisRecommendation[];
 };
 
 export default function PurchasedAnalysesAutoRefresh({
   groups,
   profileId,
+  libraryPage,
   phase9Recommendations = [],
 }: PurchasedAnalysesAutoRefreshProps) {
   const router = useRouter();
@@ -54,5 +57,5 @@ export default function PurchasedAnalysesAutoRefresh({
     }
   }, [isRefreshing]);
 
-  return <PurchasedAnalysesListMultiEdition groups={groups} profileId={profileId} phase9Recommendations={phase9Recommendations} />;
+  return <PurchasedAnalysesListMultiEdition groups={groups} profileId={profileId} libraryPage={libraryPage} phase9Recommendations={phase9Recommendations} />;
 }

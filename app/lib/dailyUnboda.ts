@@ -348,16 +348,29 @@ function buildSupplementalDailyFocus(input: {
     if (otherCycle) notes.push(`${otherCycle.label}의 지지에서도 ${otherCycle.relation} 관계를 확인할 수 있습니다.`);
   }
   const cycleCue = selectedCycle ? `${selectedCycle.type === "seun" ? "올해" : "대운"} ${RELATION_LANGUAGE[selectedCycle.relation].title}` : null;
-  const extraTitle = [hiddenCue?.title, cycleCue].filter(Boolean).join(" · ");
+  const hiddenTitle = hiddenCue?.title ?? null;
+  // The existing day/month/year headline remains primary when no cycle is
+  // available. With a cycle, use the shorter ten-god theme followed by its
+  // computed hidden/cycle cues; the natal focus remains described in flow.
+  const originalTheme = copyByTenGod[input.tenGod]!.topic;
+  const cycleHeadline = [hiddenTitle ?? input.baseTopic.split(" · ")[1], cycleCue].filter(Boolean).join(" · ");
+  const headline = selectedCycle && cycleHeadline
+    ? `${originalTheme} · ${cycleHeadline}`
+    : hiddenTitle ? `${input.baseTopic} · ${hiddenTitle}` : input.baseTopic;
+
+  // Keep the natal day/month/year practical action as the primary instruction.
+  // Previously overwriting it with the selected cycle collapsed 60-day action
+  // variety. A cycle may supply a short context, not erase the actual natal
+  // comparison or turn one suggestion into several unrelated tasks.
   const actionSubject = hiddenCue?.subject ?? ACTION_CONTEXT[input.tenGod];
-  const prompt = selectedCycle
-    ? RELATION_LANGUAGE[selectedCycle.relation].action
-    : hiddenCue && input.baseRelation
-      ? RELATION_LANGUAGE[input.baseRelation].action
-      : null;
+  const natalAction = input.baseRelation ? RELATION_LANGUAGE[input.baseRelation].action : null;
+  const prompt = natalAction ?? (selectedCycle ? RELATION_LANGUAGE[selectedCycle.relation].action : null);
+  const cycleContext = selectedCycle
+    ? `${selectedCycle.type === "seun" ? "올해" : "대운"}의 ${selectedCycle.relation} 관계를 참고해, `
+    : "";
   return {
-    topic: extraTitle ? `${input.baseTopic} · ${extraTitle}` : input.baseTopic,
-    action: prompt ? `${actionSubject}에서 ${prompt}` : input.baseAction,
+    topic: headline,
+    action: prompt ? `${cycleContext}${actionSubject}에서 ${prompt}` : input.baseAction,
     note: notes.join(" "),
     hiddenStemTenGod,
     cycleFocus: selectedCycle?.type ?? null,

@@ -255,7 +255,6 @@ export default function MyPage() {
   const [accountStatus, setAccountStatus] = useState<AccountStatus | null>(null);
   const [pendingDeleteProfileId, setPendingDeleteProfileId] = useState<string | null>(null);
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
-  const [isClearingActiveProfile, setIsClearingActiveProfile] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
   const [formInput, setFormInput] = useState<ProfileInput>(emptyProfileInput);
@@ -589,30 +588,6 @@ export default function MyPage() {
   function getDeleteBlockMessage(profileId: string): string | null {
     const state = deletabilityById[profileId];
     return state && !state.deletable && state.reason ? profileDeleteBlockMessages[state.reason] : null;
-  }
-
-  async function clearActiveSelection() {
-    if (isClearingActiveProfile) return;
-    setIsClearingActiveProfile(true);
-    setMessage(null);
-
-    try {
-      const response = await fetch("/api/profiles/active", { method: "DELETE" });
-
-      if (response.status !== 204) {
-        setMessage("분석 대상 선택을 해제하지 못했습니다.");
-        return;
-      }
-
-      setActiveProfileId(null);
-      confirmedActiveProfileIdRef.current = null;
-      pendingActiveProfileIdRef.current = null;
-      await reloadMypageData();
-    } catch {
-      setMessage("분석 대상 선택을 해제하지 못했습니다.");
-    } finally {
-      setIsClearingActiveProfile(false);
-    }
   }
 
   function openCreateForm() {
@@ -1074,16 +1049,6 @@ export default function MyPage() {
                 ? "mt-3 flex flex-wrap gap-2 border-t border-slate-200 pt-3"
                 : "mt-3 flex flex-wrap gap-2 border-t border-slate-200 pt-3"}
               >
-                {profile.id === activeProfileId ? (
-                  <button
-                    type="button"
-                    onClick={() => void clearActiveSelection()}
-                    disabled={isClearingActiveProfile}
-                    className={cardActionClass(true)}
-                  >
-                    {isClearingActiveProfile ? "해제 중..." : "분석 대상 선택 해제"}
-                  </button>
-                ) : null}
                 <button
                   type="button"
                   onClick={() => openEditForm(profile)}

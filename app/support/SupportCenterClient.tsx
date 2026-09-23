@@ -44,7 +44,6 @@ const guides: Record<SupportRequestCategory, Guide> = {
     description: "결제·환불 현황은 마이페이지에서 확인하고, 환불·취소 문의는 이곳에서 해당 주문과 연결해 접수할 수 있습니다.",
     actionLabel: "마이페이지 결제 이력 확인",
     href: "/mypage",
-    needsOrderId: true,
   },
   PAID_ANALYSIS: {
     title: "유료 분석 결과",

@@ -107,13 +107,31 @@ export async function createSupportRequest(input: {
     if (!order) throw new SupportRequestError("ORDER_NOT_FOUND");
   }
 
+  // An unresolved refund inquiry for the same owned order is one case.
+  // Reuse it rather than creating duplicate records or hitting the ordinary
+  // support quota for each distinct payment needing review.
+  if (input.category === "PAYMENT_REFUND" && orderId) {
+    const { data: existing, error: existingError } = await supabase
+      .from("support_requests")
+      .select("id,category,message,order_id,status,operator_response,responded_at,resolved_at,created_at,updated_at")
+      .eq("user_id", user.id)
+      .eq("category", "PAYMENT_REFUND")
+      .eq("order_id", orderId)
+      .in("status", ACTIVE_STATUSES)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle<SupportRequestRow>();
+    if (existingError) throw new SupportRequestError("LOOKUP_FAILED");
+    if (existing) return toDto(existing);
+  }
+
   const { count, error: countError } = await supabase
     .from("support_requests")
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
     .in("status", ACTIVE_STATUSES);
   if (countError) throw new SupportRequestError("LOOKUP_FAILED");
-  if ((count ?? 0) >= MAX_ACTIVE_REQUESTS) throw new SupportRequestError("TOO_MANY_ACTIVE");
+  if ((count ?? 0) >= MAX_ACTIVE_REQUESTS && !(input.category === "PAYMENT_REFUND" && orderId)) throw new SupportRequestError("TOO_MANY_ACTIVE");
 
   const { data, error } = await supabase
     .from("support_requests")

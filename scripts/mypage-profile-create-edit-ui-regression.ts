@@ -18,7 +18,7 @@ assert(source.includes('method: editingProfileId ? "PATCH" : "POST"'), "form sub
 assert(source.includes('fetch("/api/mypage/summary")'), "creating or editing a profile must re-fetch the free analysis summary");
 assert(source.includes("reloadMypageData"), "create/edit success must trigger a shared profiles+active+summary reload");
 
-assert(source.includes('onClick={() => void activate(profile.id)}'), "existing profile activation must remain unchanged");
+assert(source.includes('onClick={() => requestProfileSwitch(profile.id)}'), "profile selection must require confirmation before activation");
 assert(source.includes('fetch("/api/profiles/active"') && source.includes('method: "PUT"'), "existing active-profile PUT contract must remain unchanged");
 assert(!source.includes("router.push(`/result?profileId=${profile.id}`)"), "the per-card free analysis result button must stay removed");
 assert(source.includes("router.push(`/result?profileId=${activeProfileId}`)"), "the bottom CTA must remain the sole navigation to the completed free analysis result");

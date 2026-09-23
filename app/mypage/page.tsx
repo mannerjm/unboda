@@ -239,6 +239,7 @@ export default function MyPage() {
   const [profiles, setProfiles] = useState<ProfileDto[]>([]);
   const [isProfilesLoaded, setIsProfilesLoaded] = useState(false);
   const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
+  const [pendingProfileSwitchId, setPendingProfileSwitchId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [freeAnalysisStatusById, setFreeAnalysisStatusById] = useState<Record<string, FreeAnalysisResultStatus>>({});
@@ -345,6 +346,20 @@ export default function MyPage() {
     return `${amount.toLocaleString("ko-KR")} ${currency}`;
   }
 
+  // Profile-card clicks only open confirmation; no UI selection or PUT occurs
+  // until the member explicitly accepts the new analysis target.
+  function requestProfileSwitch(profileId: string) {
+    if (profileId === activeProfileId) return;
+    setPendingProfileSwitchId(profileId);
+  }
+
+  function confirmProfileSwitch() {
+    const profileId = pendingProfileSwitchId;
+    if (!profileId) return;
+    setPendingProfileSwitchId(null);
+    activate(profileId);
+  }
+
   function activate(profileId: string) {
     if (profileId === activeProfileId) return;
 
@@ -360,7 +375,7 @@ export default function MyPage() {
   function selectFromCardClick(event: MouseEvent<HTMLDivElement>, profileId: string) {
     if (!(event.target instanceof HTMLElement)) return;
     if (event.target.closest("button, a, input, select, textarea")) return;
-    activate(profileId);
+    requestProfileSwitch(profileId);
   }
 
   // Serializes PUT /api/profiles/active: only one request runs at a time. Clicks that
@@ -880,6 +895,44 @@ export default function MyPage() {
             </section>
           </div>
         ) : null}
+
+        {pendingProfileSwitchId ? (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#0b1025]/60 px-5 py-8 backdrop-blur-sm" role="presentation">
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="profile-switch-confirmation-title"
+              aria-describedby="profile-switch-confirmation-description"
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  event.stopPropagation();
+                  setPendingProfileSwitchId(null);
+                }
+              }}
+              className="w-full max-w-md rounded-[1.75rem] border border-[#d8d3ff] bg-white p-6 shadow-[0_28px_80px_rgba(15,20,50,0.28)] sm:p-7"
+            >
+              <p className="text-xs font-black tracking-[0.14em] text-[#6f5ce7]">분석 대상 변경</p>
+              <h2 id="profile-switch-confirmation-title" className="mt-2 text-xl font-black text-[#11162d]">프로필을 변경하시겠습니까?</h2>
+              <p id="profile-switch-confirmation-description" className="mt-4 text-sm leading-7 text-slate-700">
+                {profiles.find((profile) => profile.id === pendingProfileSwitchId)?.label ?? "선택한 프로필"}(으)로 분석 대상을 변경합니다.
+                변경하면 무료 사주와 오늘의 운보다에서 해당 대상의 분석을 확인할 수 있습니다.
+              </p>
+              <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  autoFocus
+                  onClick={() => setPendingProfileSwitchId(null)}
+                  className={`rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 ${restingFocusRing}`}
+                >아니오</button>
+                <button
+                  type="button"
+                  onClick={confirmProfileSwitch}
+                  className={`rounded-xl bg-[#6f5ce7] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] ${restingFocusRing}`}
+                >예, 변경하기</button>
+              </div>
+            </section>
+          </div>
+        ) : null}
         {birthChangeNotice ? (
           <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-[#d8d3ff] bg-[#f7f5ff] px-5 py-4 text-sm leading-6 text-[#40359a] sm:flex-row sm:items-center sm:justify-between">
             <p>{birthChangeNotice}</p>
@@ -918,7 +971,7 @@ export default function MyPage() {
             >
               <button
                 type="button"
-                onClick={() => void activate(profile.id)}
+                onClick={() => requestProfileSwitch(profile.id)}
                 className={profile.id === activeProfileId
                   ? `block w-full rounded-2xl text-left ${activeFocusRing}`
                   : `block w-full rounded-2xl text-left ${restingFocusRing}`}

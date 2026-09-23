@@ -3,6 +3,10 @@ import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
+import {
+  getProfileFreeAnalysisFoundationStatus,
+  isFreeAnalysisFoundationReady,
+} from "@/app/lib/freeAnalysisEligibility";
 import { getKoreaEvaluationDate } from "@/app/lib/evaluationContext";
 import type { TodayReading } from "@/app/lib/dailyUnboda";
 import { getCachedTodayReading } from "@/app/lib/dailyUnboda/server";
@@ -31,6 +35,40 @@ export default async function TodayPage() {
             <h1 className="mt-3 text-3xl font-black tracking-tight text-[#11162d]">오늘의 운보다</h1>
             <p className="mt-4 text-sm leading-7 text-[#59647c]">마이페이지에서 분석 대상을 선택하면 해당 대상의 오늘의 흐름을 무료로 확인할 수 있어요. 다른 대상을 선택하면 그 대상의 오늘의 운보다로 변경됩니다.</p>
             <Link href="/mypage" className="mt-7 inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#6755d2] px-5 py-3 text-sm font-black text-white hover:bg-[#5543c0]">마이페이지에서 분석 대상 선택하기</Link>
+          </section>
+        </main>
+      </AppShell>
+    );
+  }
+
+  // A birth profile alone is not sufficient: the member must complete the
+  // EXISTING free-saju journey for this exact active profile/birth fingerprint.
+  // Do not invoke free-analysis generation here or reuse another profile's result.
+  const freeAnalysisStatus = await getProfileFreeAnalysisFoundationStatus(user.id, activeProfile);
+  if (!isFreeAnalysisFoundationReady(freeAnalysisStatus)) {
+    const isGenerating = freeAnalysisStatus === "generating";
+    const entryHref = isGenerating
+      ? `/loading?profileId=${encodeURIComponent(activeProfile.id)}`
+      : "/saju";
+    return (
+      <AppShell>
+        <main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10 sm:px-8">
+          <section className="w-full rounded-[2rem] border border-[#dfe3ef] bg-white p-7 shadow-[0_16px_44px_rgba(32,38,72,.06)] sm:p-10">
+            <p className="text-xs font-black tracking-[.16em] text-[#7866d8]">DAILY UNBODA · 매일 무료</p>
+            <h1 className="mt-3 text-3xl font-black tracking-tight text-[#11162d]">오늘의 운보다</h1>
+            <p className="mt-4 text-sm leading-7 text-[#59647c]">
+              {activeProfile.label}님의 오늘의 운보다를 보려면 먼저 해당 프로필의 무료 사주 분석을 완료하고 결과를 확인해 주세요.
+            </p>
+            <p className="mt-2 text-sm leading-7 text-[#59647c]">
+              {isGenerating
+                ? "현재 무료 사주를 분석하고 있어요. 분석이 완료되면 결과를 확인한 뒤 오늘의 운보다를 이용할 수 있습니다."
+                : freeAnalysisStatus === "stale"
+                  ? "출생정보가 변경되어 현재 정보로 무료 사주를 다시 확인해야 합니다."
+                  : "무료 사주 조회에서 해당 대상의 사주정보를 먼저 확인할 수 있습니다."}
+            </p>
+            <Link href={entryHref} className="mt-7 inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#6755d2] px-5 py-3 text-sm font-black text-white hover:bg-[#5543c0]">
+              {isGenerating ? "무료 사주 분석 진행 상황 보기" : freeAnalysisStatus === "stale" ? "무료 사주 다시 조회하기" : "무료 사주 먼저 조회하기"}
+            </Link>
           </section>
         </main>
       </AppShell>

@@ -13,9 +13,15 @@ const source = read("app/mypage/page.tsx");
 
 // --- Static structural checks -------------------------------------------------
 
-assert(!source.includes("isActivating"), "activate() must not gate concurrent clicks behind an in-flight boolean");
+assert(!source.includes("isActivating"), "confirmed activation keeps the existing serialized persistence");
+assert(source.includes("const [pendingProfileSwitchId, setPendingProfileSwitchId] = useState<string | null>(null)"), "profile switch must have a distinct unconfirmed candidate");
+const requestSection = source.slice(source.indexOf("function requestProfileSwitch("), source.indexOf("function confirmProfileSwitch("));
+assert(requestSection.includes("setPendingProfileSwitchId(profileId)") && !requestSection.includes("setActiveProfileId(") && !requestSection.includes("persistPendingActiveProfile("), "clicking must only open confirmation, not switch profile");
+assert(source.includes("onClick={confirmProfileSwitch}") && source.includes("프로필을 변경하시겠습니까?"), "confirmation dialog and accept action required");
+assert(source.includes("onClick={() => setPendingProfileSwitchId(null)}") && source.includes("아니오"), "No must dismiss without persisting");
+assert(source.includes("activate(profileId);"), "explicit acceptance triggers the existing activation");
 assert(source.includes("if (profileId === activeProfileId) return;"), "activate() must only skip a click that repeats the currently displayed selection");
-assert(source.includes("setActiveProfileId(profileId);") && source.includes("pendingActiveProfileIdRef.current = profileId;"), "every click must update the UI immediately and record the latest pending selection");
+assert(source.includes("setActiveProfileId(profileId);") && source.includes("pendingActiveProfileIdRef.current = profileId;"), "only accepted selection updates the UI and queue");
 assert(source.includes("isPersistingActiveProfileRef"), "PUT /api/profiles/active must be serialized behind an in-flight guard so only one request runs at a time");
 assert(source.includes("if (isPersistingActiveProfileRef.current) return;"), "a new persist attempt must no-op while one is already in flight, instead of firing a second PUT");
 assert(source.includes("if (pendingActiveProfileIdRef.current !== confirmedActiveProfileIdRef.current)") && source.includes("void persistPendingActiveProfile();"), "finishing a PUT must re-check for a newer pending selection and persist only the latest one");
@@ -57,6 +63,15 @@ async function simulate() {
   }
 
   let activeProfileId = confirmed;
+  let pendingConfirmation: string | null = null;
+  function requestSwitch(profileId: string) { if (profileId !== activeProfileId) pendingConfirmation = profileId; }
+  function cancelSwitch() { pendingConfirmation = null; }
+  function confirmSwitch() {
+    const profileId = pendingConfirmation;
+    if (!profileId) return;
+    pendingConfirmation = null;
+    activate(profileId);
+  }
   function activate(profileId: string): void {
     if (profileId === activeProfileId) return;
     activeProfileId = profileId;
@@ -65,14 +80,19 @@ async function simulate() {
     void persistPending();
   }
 
-  activate("A");
-  activate("B");
-  activate("C");
-  activate("A");
+  requestSwitch("A");
+  assert(activeProfileId === "init" && persistedCalls.length === 0, "click alone must not change profile");
+  cancelSwitch();
+  assert(activeProfileId === "init" && persistedCalls.length === 0, "No must leave profile unchanged");
+  requestSwitch("A"); confirmSwitch();
+  requestSwitch("B"); cancelSwitch();
+  requestSwitch("B"); confirmSwitch();
+  requestSwitch("C"); cancelSwitch();
+  requestSwitch("A"); confirmSwitch();
 
   await new Promise((resolve) => setTimeout(resolve, 100));
 
-  assert(JSON.stringify(uiHistory) === JSON.stringify(["A", "B", "C", "A"]), `every rapid click must update the UI immediately, got ${JSON.stringify(uiHistory)}`);
+  assert(JSON.stringify(uiHistory) === JSON.stringify(["A", "B", "A"]), `only confirmed selections may update the UI, got ${JSON.stringify(uiHistory)}`);
   assert(activeProfileId === "A", `final UI selection must be the user's last click (A), got ${activeProfileId}`);
   assert(confirmed === "A", `final server-persisted value must be A, got ${confirmed}`);
   assert(!persistedCalls.includes("B") && !persistedCalls.includes("C"), `intermediate selections must never be sent to the server, got ${JSON.stringify(persistedCalls)}`);
@@ -86,12 +106,12 @@ assert(cardSection.includes("onClick={(event) => selectFromCardClick(event, prof
 assert(cardSection.includes("구매한 심층 분석") && cardSection.includes("formatFreeAnalysisStatusLabel(freeAnalysisStatusById[profile.id])"), "the free analysis and paid analysis blocks must live inside that same clickable card");
 assert(source.includes('event.target.closest("button, a, input, select, textarea")'), "clicks originating from an interactive element must not reach the card handler");
 assert(source.includes("if (!(event.target instanceof HTMLElement)) return;"), "the card handler must guard against non-element click targets");
-assert(source.includes('onClick={() => void activate(profile.id)}') && /block w-full rounded-2xl text-left/.test(source), "the header button must remain as the keyboard-accessible selection control");
-assert(/onClick={\(\) => void activate\(profile\.id\)}[\s\S]{0,300}?FocusRing}/.test(source), "the header selection button must keep a visible keyboard focus style");
+assert(source.includes('onClick={() => requestProfileSwitch(profile.id)}') && /block w-full rounded-2xl text-left/.test(source), "the header button must remain as the keyboard-accessible selection control");
+assert(/onClick={\(\) => requestProfileSwitch\(profile\.id\)}[\s\S]{0,300}?FocusRing}/.test(source), "the header selection button must keep a visible keyboard focus style");
 assert(source.includes('const focusRing = "focus-visible:outline-none focus-visible:ring-2'), "the shared focus ring must stay visible for keyboard users");
 assert(/^profiles\.map\(\(profile\) => \(\s*<div/.test(cardSection), "the clickable card container must be a div, never a button wrapping other controls");
 const headerButton = cardSection.slice(
-  cardSection.indexOf("onClick={() => void activate(profile.id)}"),
+  cardSection.indexOf("onClick={() => requestProfileSwitch(profile.id)}"),
   cardSection.indexOf("</button>"),
 );
 assert(headerButton.length > 0 && !/<(button|Link|a\s)/.test(headerButton), "the header selection button must not contain another interactive element");
@@ -100,7 +120,7 @@ for (const action of ["openEditForm(profile)", "clearActiveSelection()", "setPen
   assert(cardSection.includes(action), `${action} must stay on its own button`);
   assert(!cardSection.includes(`${action}; void activate(`), `${action} must not also trigger selection`);
 }
-console.log("3. the whole card selects the profile while every button and link keeps its own action ✓");
+console.log("3. the whole card requests confirmation while every button and link keeps its own action ✓");
 
 // Mirrors selectFromCardClick's guard against the tags a card can contain.
 function reachesCardSelection(tagName: string): boolean {

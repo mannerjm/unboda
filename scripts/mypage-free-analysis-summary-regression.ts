@@ -33,7 +33,7 @@ assert(myPage.includes('fetch("/api/profiles")') && myPage.includes('fetch("/api
 assert(myPage.includes("무료 분석 완료") && myPage.includes("분석 생성 중") && myPage.includes("분석 실패") && myPage.includes("무료 분석 없음"), "mypage must render all four free analysis status labels");
 assert(!myPage.includes("router.push(`/result?profileId=${profile.id}`)"), "the per-card free analysis result button must be removed in favor of the single bottom CTA");
 assert(myPage.includes('freeAnalysisStatusById[activeProfileId] === "completed"') && myPage.includes("router.push(`/result?profileId=${activeProfileId}`)"), "the bottom CTA must be the sole navigation to the completed free analysis result");
-assert(myPage.includes('onClick={() => void activate(profile.id)}'), "profile activation must remain unchanged");
+assert(myPage.includes('onClick={() => requestProfileSwitch(profile.id)}'), "profile selection must require explicit confirmation");
 console.log("3. mypage renders free analysis status and the completed-result CTA without disturbing profile selection ✓");
 
 console.log("\nmypage-free-analysis-summary-regression passed ✓");

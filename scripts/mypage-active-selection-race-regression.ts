@@ -116,10 +116,15 @@ const headerButton = cardSection.slice(
 );
 assert(headerButton.length > 0 && !/<(button|Link|a\s)/.test(headerButton), "the header selection button must not contain another interactive element");
 assert(!/href={`\/paid-analysis\/\$\{item\.productId\}\/report\?profileId=\$\{profile\.id\}`}[\s\S]{0,200}?activate\(/.test(cardSection), "the report link must navigate only, never change the active profile");
-for (const action of ["openEditForm(profile)", "clearActiveSelection()", "setPendingDeleteProfileId(profile.id)", "deleteProfile(profile.id)", "setPendingDeleteProfileId(null)"]) {
+for (const action of ["openEditForm(profile)", "setPendingDeleteProfileId(profile.id)", "deleteProfile(profile.id)", "setPendingDeleteProfileId(null)"]) {
   assert(cardSection.includes(action), `${action} must stay on its own button`);
   assert(!cardSection.includes(`${action}; void activate(`), `${action} must not also trigger selection`);
 }
+assert(!cardSection.includes("분석 대상 선택 해제") && !cardSection.includes("clearActiveSelection()") && !cardSection.includes("해제 중..."), "mypage must not expose the clear-selection control");
+assert(cardSection.includes("수정") && cardSection.includes("삭제"), "profile edit and delete actions must remain available");
+const activeProfileRoute = read("app/api/profiles/active/route.ts");
+const activeProfileServer = read("app/lib/profiles/activeServer.ts");
+assert(activeProfileRoute.includes("export async function DELETE()") && activeProfileServer.includes("export async function clearActiveProfile("), "existing internal active-profile clear endpoint must remain unchanged");
 console.log("3. the whole card requests confirmation while every button and link keeps its own action ✓");
 
 // Mirrors selectFromCardClick's guard against the tags a card can contain.

@@ -330,7 +330,8 @@ export default function MyPage() {
 
     // A stale summary must never restore permissions from a prior selection.
     // Missing or invalid eligibility remains unknown rather than deletable.
-    if (eligibilityEpoch === deleteEligibilityEpochRef.current) {
+    if (eligibilityEpoch === deleteEligibilityEpochRef.current &&
+        pendingActiveProfileIdRef.current === confirmedActiveProfileIdRef.current) {
       const deletableById: Record<string, ProfileDeletabilityState> = {};
       if (Array.isArray(body.profileDeletability)) {
         for (const item of body.profileDeletability) {
@@ -637,7 +638,10 @@ export default function MyPage() {
 
   // The summary flag is only a hint; the server re-checks every rule on DELETE.
   async function deleteProfile(profileId: string) {
-    if (isDeletingProfile) return;
+    // The server independently rechecks all deletion blockers; this client
+    // guard also prevents a stale confirmation from initiating a DELETE.
+    if (isDeletingProfile || isDeleteEligibilityLoading || profileId === activeProfileId ||
+        deletabilityById[profileId]?.deletable !== true) return;
     setIsDeletingProfile(true);
     setMessage(null);
 

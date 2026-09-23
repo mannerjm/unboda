@@ -39,7 +39,8 @@ assert.throws(() => buildTodayReading({ date, ...natalA, personMonthPillarHanja:
 const noVerifiedHour = buildTodayReading({ date, ...natalA, dayPillarHanja: todaysPillar });
 const verifiedHour = buildTodayReading({ date, ...natalA, verifiedHourPillarHanja: "甲申", dayPillarHanja: todaysPillar });
 assert.equal(noVerifiedHour.focusPillar, "day");
-assert(verifiedHour.flow.length >= noVerifiedHour.flow.length, "explicit verified hour may only add truthful optional context");
+assert.equal(verifiedHour.tenGod, noVerifiedHour.tenGod, "optional verified hour must not change the day-stem ten-god basis");
+assert.equal(verifiedHour.branchRelation, noVerifiedHour.branchRelation, "optional verified hour must not alter the actual day-branch relation");
 
 // Follow actual 60 consecutive KST civil dates for several real natal pillar
 // combinations; do not claim an arbitrary 450 unique results or force novelty.

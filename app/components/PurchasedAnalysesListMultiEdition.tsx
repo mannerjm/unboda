@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { PurchasedAnalysisProductGroup } from "@/app/lib/purchasedAnalysesGrouping";
-import { purchasedLibraryHref, type PurchasedLibraryPage } from "@/app/lib/purchasedAnalysesLibrary";
+import { purchasedLibraryHref, type PurchasedLibraryPage, type PurchasedLibraryOverview } from "@/app/lib/purchasedAnalysesLibrary";
 import Phase9NextAnalysisCards from "@/app/components/Phase9NextAnalysisCards";
 import type { Phase9NextAnalysisRecommendation } from "@/app/lib/phase9NextAnalysis";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
@@ -31,6 +31,7 @@ type PurchasedAnalysesListProps = {
   groups: readonly PurchasedAnalysisProductGroup[];
   profileId: string;
   libraryPage?: PurchasedLibraryPage;
+  libraryOverview?: PurchasedLibraryOverview;
   previewMode?: boolean;
   phase9Recommendations?: readonly Phase9NextAnalysisRecommendation[];
 };
@@ -120,6 +121,7 @@ export default function PurchasedAnalysesList({
   groups,
   profileId,
   libraryPage,
+  libraryOverview,
   previewMode = false,
   phase9Recommendations = [],
 }: PurchasedAnalysesListProps) {
@@ -148,8 +150,11 @@ export default function PurchasedAnalysesList({
   const recent = allEditions[0]!;
   const visibleGroups = libraryPage?.groups ?? groups;
   const fullEditionCounts = new Map(groups.map((group) => [group.productId, group.editions.length]));
-  const completedCount = allEditions.filter(({ edition }) => edition.reportStatus === "completed").length;
-  const preparingCount = allEditions.filter(({ edition }) =>
+  if (libraryOverview) {
+    for (const [productId, count] of Object.entries(libraryOverview.editionCounts)) fullEditionCounts.set(productId, count);
+  }
+  const completedCount = libraryOverview?.completedCount ?? allEditions.filter(({ edition }) => edition.reportStatus === "completed").length;
+  const preparingCount = libraryOverview?.preparingCount ?? allEditions.filter(({ edition }) =>
     edition.reportStatus === "none" || edition.reportStatus === "generating",
   ).length;
   const recentReportHref = reportHref(recent.group, profileId, recent.edition.analysisEditionKey, previewMode);
@@ -219,7 +224,7 @@ export default function PurchasedAnalysesList({
             <p className="mt-2 text-sm leading-6 text-slate-600">연도판과 분석 상태를 확인하고, 완료된 리포트는 언제든 다시 열 수 있습니다.</p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-semibold">
-            <span className="rounded-full bg-[#eef0f6] px-3 py-2 text-slate-600">보관 {allEditions.length}개</span>
+            <span className="rounded-full bg-[#eef0f6] px-3 py-2 text-slate-600">보관 {libraryOverview?.total ?? allEditions.length}개</span>
             <span className="rounded-full bg-emerald-50 px-3 py-2 text-emerald-800">완료 {completedCount}개</span>
             {preparingCount > 0 ? (
               <span className="rounded-full bg-slate-100 px-3 py-2 text-slate-600">준비 중 {preparingCount}개</span>

@@ -228,10 +228,10 @@ function expandedTodayCopy(input: {
 
   const notes: string[] = [];
   if (focus && focusCopy && focusName) {
-    notes.push(\`\${focusName.subject}의 지지와 오늘의 지지는 \${focus.relation} 관계로 분류됩니다. \${focusCopy.note}\`);
+    notes.push(`${focusName.subject}의 지지와 오늘의 지지는 ${focus.relation} 관계로 분류됩니다. ${focusCopy.note}`);
   }
   if (supplementary) {
-    notes.push(\`\${PILLAR_LANGUAGE[supplementary.pillar].subject}의 지지에서도 \${supplementary.relation} 관계를 확인할 수 있습니다.\`);
+    notes.push(`${PILLAR_LANGUAGE[supplementary.pillar].subject}의 지지에서도 ${supplementary.relation} 관계를 확인할 수 있습니다.`);
   }
 
   // Use the EXISTING weighted five-element implementation, restricted to the
@@ -247,20 +247,20 @@ function expandedTodayCopy(input: {
   const low = elements.weakest.length === 1 ? elements.weakest[0] : null;
   const elementNote =
     todayStemElement && high === todayStemElement
-      ? \`연·월·일주에 나타난 오행 중 \${todayStemElement}의 상대 비중이 높고 오늘의 천간도 같은 오행입니다.\`
+      ? `연·월·일주에 나타난 오행 중 ${todayStemElement}의 상대 비중이 높고 오늘의 천간도 같은 오행입니다.`
       : todayStemElement && low === todayStemElement
-        ? \`연·월·일주에 나타난 오행 중 \${todayStemElement}의 상대 비중이 낮고 오늘의 천간은 해당 오행입니다.\`
+        ? `연·월·일주에 나타난 오행 중 ${todayStemElement}의 상대 비중이 낮고 오늘의 천간은 해당 오행입니다.`
         : todayBranchElement && high === todayBranchElement
-          ? \`연·월·일주에 나타난 오행 중 \${todayBranchElement}의 상대 비중이 높고 오늘의 지지도 같은 오행입니다.\`
+          ? `연·월·일주에 나타난 오행 중 ${todayBranchElement}의 상대 비중이 높고 오늘의 지지도 같은 오행입니다.`
           : todayBranchElement && low === todayBranchElement
-            ? \`연·월·일주에 나타난 오행 중 \${todayBranchElement}의 상대 비중이 낮고 오늘의 지지는 해당 오행입니다.\`
+            ? `연·월·일주에 나타난 오행 중 ${todayBranchElement}의 상대 비중이 낮고 오늘의 지지는 해당 오행입니다.`
             : null;
   if (elementNote) notes.push(elementNote);
   return {
-    topic: focus ? \`\${original.topic} · \${focusName!.title} \${focusCopy!.title}\` : original.topic,
+    topic: focus ? `${original.topic} · ${focusName!.title} ${focusCopy!.title}` : original.topic,
     flowNote: notes.join(" "),
     action: focusCopy
-      ? \`\${ACTION_CONTEXT[tenGod]}에서 \${focusCopy.action}\`
+      ? `${ACTION_CONTEXT[tenGod]}에서 ${focusCopy.action}`
       : original.action,
     focusPillar: focus?.pillar ?? null,
     focusRelation: focus?.relation ?? null,

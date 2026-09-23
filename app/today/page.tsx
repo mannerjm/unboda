@@ -17,7 +17,7 @@ export const metadata = {
   description: "매일 무료로 확인하는 나의 짧은 일일 명리 흐름",
 };
 
-// Pure presentation: no streak counters, artificial rewards, extra AI calls,
+// Pure presentation: no fabricated visit incentives, extra AI calls,
 // commercial prompts or changes to the date/profile-specific reading engine.
 function TodayEventShell({
   date,

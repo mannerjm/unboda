@@ -99,21 +99,6 @@ type PurchaseHistoryItem = {
   refund: RefundSummary | null;
 };
 
-type RefundReasonCategory = "CHANGE_OF_MIND" | "CONTENT_NOT_PROVIDED" | "MATERIAL_DEFECT" | "MATERIALLY_DIFFERENT";
-
-const refundReasonOptions: Array<{ value: RefundReasonCategory; label: string }> = [
-  { value: "CHANGE_OF_MIND", label: "변심 또는 취소 요청" },
-  { value: "CONTENT_NOT_PROVIDED", label: "분석이 제공되지 않음" },
-  { value: "MATERIAL_DEFECT", label: "내용 또는 서비스에 결함이 있음" },
-  { value: "MATERIALLY_DIFFERENT", label: "상품 설명·주문 내용과 다름" },
-];
-
-type RefundRequestFeedback = {
-  status?: RefundSummary["status"];
-  message: string;
-  kind: "success" | "error";
-};
-
 const paidReportStatusLabels: Record<PaidReportStatus, string> = {
   none: "분석 준비 중",
   generating: "분석 준비 중",
@@ -247,12 +232,6 @@ export default function MyPage() {
   const [isDeleteEligibilityLoading, setIsDeleteEligibilityLoading] = useState(true);
   const [paidAnalysisByProfileId, setPaidAnalysisByProfileId] = useState<Record<string, PaidAnalysisSummary[]>>({});
   const [purchaseHistory, setPurchaseHistory] = useState<PurchaseHistoryItem[]>([]);
-  const [refundFormOrderId, setRefundFormOrderId] = useState<string | null>(null);
-  const [refundReasonCategory, setRefundReasonCategory] = useState<RefundReasonCategory | "">("");
-  const [refundReasonText, setRefundReasonText] = useState("");
-  const [refundConfirmation, setRefundConfirmation] = useState(false);
-  const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
-  const [refundRequestFeedback, setRefundRequestFeedback] = useState<Record<string, RefundRequestFeedback>>({});
   const [accountStatus, setAccountStatus] = useState<AccountStatus | null>(null);
   const [pendingDeleteProfileId, setPendingDeleteProfileId] = useState<string | null>(null);
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
@@ -516,123 +495,6 @@ export default function MyPage() {
     else if (eligibilityEpoch === deleteEligibilityEpochRef.current) {
       setIsDeleteEligibilityLoading(false);
       setMessage("삭제 가능 여부를 확인하지 못했습니다. 마이페이지를 새로고침해 주세요.");
-    }
-  }
-
-  function openRefundForm(orderId: string) {
-    setRefundFormOrderId(orderId);
-    setRefundReasonCategory("");
-    setRefundReasonText("");
-    setRefundConfirmation(false);
-    setMessage(null);
-  }
-
-  function closeRefundForm() {
-    if (isSubmittingRefund) return;
-    setRefundFormOrderId(null);
-    setRefundReasonCategory("");
-    setRefundReasonText("");
-    setRefundConfirmation(false);
-  }
-
-  async function submitRefundRequest(item: PurchaseHistoryItem) {
-    if (isSubmittingRefund || refundFormOrderId !== item.orderId) return;
-    if (!refundReasonCategory) {
-      setRefundRequestFeedback((current) => ({
-        ...current,
-        [item.orderId]: { message: "환불·취소 사유를 선택해 주세요.", kind: "error" },
-      }));
-      return;
-    }
-    if (!refundConfirmation) return;
-
-    setIsSubmittingRefund(true);
-    setRefundRequestFeedback((current) => {
-      const next = { ...current };
-      delete next[item.orderId];
-      return next;
-    });
-
-    try {
-      const response = await fetch(`/api/orders/${encodeURIComponent(item.orderId)}/refund`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reasonCategory: refundReasonCategory,
-          ...(refundReasonText ? { reasonText: refundReasonText } : {}),
-        }),
-      });
-      const body = await response.json().catch(() => null) as {
-        code?: string;
-        message?: string;
-        status?: RefundSummary["status"];
-      } | null;
-
-      if (response.status === 401) {
-        router.replace("/auth/login?returnTo=/mypage");
-        return;
-      }
-      if (response.status === 400 && body?.code === "INVALID_REFUND_REASON") {
-        setRefundRequestFeedback((current) => ({
-          ...current,
-          [item.orderId]: { message: body.message ?? "환불·취소 사유를 확인해 주세요.", kind: "error" },
-        }));
-        return;
-      }
-      if (response.status === 400 && body?.code === "PARTIAL_REFUND_UNSUPPORTED") {
-        setRefundRequestFeedback((current) => ({
-          ...current,
-          [item.orderId]: { message: body.message ?? "요청을 처리하지 못했습니다.", kind: "error" },
-        }));
-        return;
-      }
-      if (response.status === 404 && body?.code === "ORDER_NOT_FOUND") {
-        setRefundRequestFeedback((current) => ({
-          ...current,
-          [item.orderId]: { message: "해당 결제 건을 확인할 수 없습니다.", kind: "error" },
-        }));
-        return;
-      }
-      if (response.status === 409 && body?.code === "REFUND_OWNER_REVIEW_REQUIRED") {
-        setRefundRequestFeedback((current) => ({
-          ...current,
-          [item.orderId]: {
-            status: "OWNER_REVIEW_REQUIRED",
-            message: body.message ?? "담당자가 환불 요청을 확인하고 있습니다.",
-            kind: "error",
-          },
-        }));
-        setRefundFormOrderId(null);
-        return;
-      }
-      if (!response.ok || !body?.message || !body.status) {
-        throw new Error("refund-request-failed");
-      }
-
-      setRefundRequestFeedback((current) => ({
-        ...current,
-        [item.orderId]: {
-          status: body.status,
-          message: body.message ?? "환불·취소 요청 상태를 확인해 주세요.",
-          kind: "success",
-        },
-      }));
-      setRefundFormOrderId(null);
-      await reloadMypageData();
-    } catch {
-      setRefundRequestFeedback((current) => ({
-        ...current,
-        [item.orderId]: {
-          message: "요청 상태를 확인하지 못했습니다. 마이페이지를 새로고침한 뒤 다시 확인해 주세요.",
-          kind: "error",
-        },
-      }));
-      try {
-        await reloadMypageData();
-      } catch {
-      }
-    } finally {
-      setIsSubmittingRefund(false);
     }
   }
 
@@ -1232,13 +1094,12 @@ export default function MyPage() {
         <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7" aria-labelledby="payment-history-heading">
             <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">PAYMENT HISTORY</p>
             <h2 id="payment-history-heading" className="mt-2 text-2xl font-bold text-slate-900">결제 내역</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">구매한 분석은 보관함에서, 결제와 환불 기록은 여기에서 확인합니다.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">구매한 분석은 보관함에서, 결제와 환불 기록은 여기에서 확인합니다. 환불·취소 문의는 해당 주문에서 고객지원센터로 연결됩니다.</p>
             {purchaseHistory.length > 0 ? (
             <ul className="mt-5 divide-y divide-stone-200">
               {purchaseHistory.map((item) => {
                 const profile = profiles.find((candidate) => candidate.id === item.profileId);
-                const feedback = refundRequestFeedback[item.orderId];
-                const canRequestRefund = item.paymentStatus === "paid" && !item.refund && !feedback;
+                const canAskAboutRefund = item.paymentStatus === "paid" && item.refund?.status !== "REFUND_COMPLETED";
                 return (
                   <li key={item.purchaseId} className="py-4 first:pt-0 last:pb-0">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -1253,70 +1114,13 @@ export default function MyPage() {
                       </div>
                     </div>
                     {item.refund ? <p className="mt-2 text-xs leading-5 text-slate-500">{item.refund.customerMessage}</p> : null}
-                    {feedback ? <p className={`mt-2 text-xs leading-5 ${feedback.kind === "success" ? "text-emerald-700" : "text-amber-700"}`}>{feedback.status ? refundStatusLabels[feedback.status] : null}{feedback.status ? " · " : ""}{feedback.message}</p> : null}
-                    {canRequestRefund && refundFormOrderId !== item.orderId ? (
-                      <button
-                        type="button"
-                        onClick={() => openRefundForm(item.orderId)}
-                        className={`mt-3 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 ${restingFocusRing}`}
+                    {canAskAboutRefund ? (
+                      <Link
+                        href={`/support?category=PAYMENT_REFUND&orderId=${encodeURIComponent(item.orderId)}`}
+                        className={`mt-3 inline-flex rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 ${restingFocusRing}`}
                       >
-                        환불·취소 요청
-                      </button>
-                    ) : null}
-                    {refundFormOrderId === item.orderId ? (
-                      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-sm font-semibold text-slate-900">환불·취소 요청</p>
-                        <dl className="mt-3 space-y-1 text-xs leading-5 text-slate-600">
-                          <div className="flex justify-between gap-3"><dt>상품</dt><dd className="text-right font-semibold text-slate-900">{item.productName}</dd></div>
-                          <div className="flex justify-between gap-3"><dt>결제 금액</dt><dd className="text-right font-semibold text-slate-900">{formatPurchaseAmount(item.amount, item.currency)}</dd></div>
-                          <div className="flex justify-between gap-3"><dt>결제일</dt><dd className="text-right font-semibold text-slate-900">{formatPurchaseDate(item.purchasedAt)}</dd></div>
-                          <div className="flex justify-between gap-3"><dt>분석 대상</dt><dd className="text-right font-semibold text-slate-900">{profile?.label ?? "등록된 프로필"}</dd></div>
-                        </dl>
-                        <label htmlFor={`refund-reason-${item.orderId}`} className="mt-4 block text-xs font-semibold text-slate-700">환불·취소 사유</label>
-                        <select
-                          id={`refund-reason-${item.orderId}`}
-                          value={refundReasonCategory}
-                          onChange={(event) => setRefundReasonCategory(event.target.value as RefundReasonCategory | "")}
-                          disabled={isSubmittingRefund}
-                          className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-900"
-                        >
-                          <option value="">사유를 선택해 주세요</option>
-                          {refundReasonOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                        </select>
-                        <label htmlFor={`refund-text-${item.orderId}`} className="mt-3 block text-xs font-semibold text-slate-700">추가 설명 (선택)</label>
-                        <textarea
-                          id={`refund-text-${item.orderId}`}
-                          value={refundReasonText}
-                          onChange={(event) => setRefundReasonText(event.target.value.slice(0, 200))}
-                          maxLength={200}
-                          disabled={isSubmittingRefund}
-                          rows={3}
-                          className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-900"
-                        />
-                        <p className="mt-1 text-right text-[11px] text-slate-500">{refundReasonText.length}/200</p>
-                        <label className="mt-3 flex items-start gap-2 text-xs leading-5 text-slate-700">
-                          <input
-                            type="checkbox"
-                            checked={refundConfirmation}
-                            onChange={(event) => setRefundConfirmation(event.target.checked)}
-                            disabled={isSubmittingRefund}
-                            className="mt-0.5 h-4 w-4 shrink-0 accent-stone-900"
-                          />
-                          <span>선택한 결제 건에 대한 환불·취소 요청을 제출합니다. 실제 처리 여부와 상태는 서버 환불 정책 및 처리 결과에 따라 결정됩니다.</span>
-                        </label>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={() => void submitRefundRequest(item)}
-                            disabled={isSubmittingRefund || !refundReasonCategory || !refundConfirmation}
-                            className={`rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-400 ${restingFocusRing}`}
-                          >
-                            {isSubmittingRefund ? "요청 처리 중..." : "환불·취소 요청 제출"}
-                          </button>
-                          <button type="button" onClick={closeRefundForm} disabled={isSubmittingRefund} className={`rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:text-slate-400 ${restingFocusRing}`}>취소</button>
-                        </div>
-                        {feedback && !feedback.status ? <p className="mt-3 text-xs leading-5 text-red-600">{feedback.message}</p> : null}
-                      </div>
+                        환불·취소 문의 →
+                      </Link>
                     ) : null}
                   </li>
                 );

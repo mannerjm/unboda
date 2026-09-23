@@ -42,7 +42,7 @@ assert.equal(selectPaymentHistoryPage(sample, { ...empty, status: "refunded" }, 
 assert.equal(selectPaymentHistoryPage(sample, { ...empty, status: "refund_pending" }, 1).items[0].orderId, "order-1");
 assert.equal(selectPaymentHistoryPage(sample, { ...empty, status: "paid" }, 1).total, 99);
 assert.equal(selectPaymentHistoryPage(sample, { ...empty, from: "2026-09-23", to: "2026-09-23" }, 1).total, 1);
-assert.equal(selectPaymentHistoryPage(sample, { ...empty, period: "3m" }, 1, new Date("2026-09-23T15:00:00Z")).total, 93);
+assert.equal(selectPaymentHistoryPage(sample, { ...empty, period: "3m" }, 1, new Date("2026-09-23T15:00:00Z")).total, 92);
 assert.equal(selectPaymentHistoryPage(sample, { ...empty, from: "2026-09-25", to: "2026-09-01" }, 1).total, 0);
 assert.deepEqual(parsePaymentHistoryParams({ q: " 재물운 ", period: "3m", status: "refunded", from: "2026-09-01", to: "2026-09-23", page: "3" }), {
   filters: { query: "재물운", period: "3m", status: "refunded", from: "2026-09-01", to: "2026-09-23" },

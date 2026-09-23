@@ -98,6 +98,16 @@ for (const scope of ["DAILY_COPY_VERSION", "userId", "profile.id", "fingerprint"
 assert(server.includes("revalidate: 86400"));
 assert(!server.includes("listUserProfiles(") && !server.includes("getCurrentUser("), "auth and profile checks must remain outside cache");
 assert(home.includes("<DailyVisitEntry state={state}/>") && home.includes("매일 무료"));
+const homeDailyEntry = home.slice(home.indexOf("function DailyVisitEntry("), home.indexOf("function QuickRoutes("));
+const homeQuickRoutes = home.slice(home.indexOf("function QuickRoutes("), home.indexOf("function CardScene("));
+assert(homeDailyEntry.includes("선택한 분석 대상의 사주를 바탕으로"), "home daily copy must match the currently selected profile");
+assert(homeQuickRoutes.includes('className="mx-auto mt-5 grid w-full max-w-6xl'), "home shortcut cards need a visible 20px gap below the daily card");
+const todayTopic = page.indexOf('id="today-topic"');
+const todayFlow = page.indexOf("{reading.flow}");
+const todayAction = page.indexOf("{reading.action}");
+assert(todayTopic > 0 && todayFlow > todayTopic && todayAction > todayFlow, "daily result must show the topic first, then short flow, then one practical suggestion");
+assert(page.includes('aria-labelledby="today-action"') && page.includes("오늘의 한 가지 제안"), "daily suggestion remains in a readable, accessible separate card");
+assert(page.includes("선택한 분석 대상의 사주와 오늘의 일진을 참고한 내용입니다."), "daily result must explain its basis in plain Korean");
 assert(shell.includes('{ href: "/today", label: "오늘의 운보다"'));
 assert(!page.includes("buildFreeAnalysisResponse") && !page.includes("/api/analyze"));
 for (const source of [page, daily, server]) {

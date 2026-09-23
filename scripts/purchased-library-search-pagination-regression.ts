@@ -87,7 +87,11 @@ assert(page.includes("analysis.profileId === activeProfile.id"), "selected profi
 assert(page.includes("selectPurchasedLibraryPage(groups, filters, requestedPage)"));
 assert(page.includes("getActiveProfile(user.id)") && page.includes("listUserPaidAnalysisSummaries(user.id)"));
 assert(refresh.includes("router.refresh()") && refresh.includes("hasPreparingEdition"), "auto-refresh must still use all report editions");
-assert(refresh.includes("libraryPage={libraryPage}"));
+assert(refresh.includes("libraryPage={libraryPage}") && refresh.includes("libraryOverview={libraryOverview}"));
+assert(page.includes("groups.find((full) => full.productId === visible.productId)"), "visible group badges must use the complete original edition count");
+assert(page.includes("groups={recentGroups}") && page.includes("libraryOverview={libraryOverview}"), "send only the recent report and 20 visible records to the client");
+assert(refresh.includes("libraryOverview.preparingCount > 0"), "preparing reports outside the visible page must still auto-refresh");
+assert(list.includes("libraryOverview?.total ?? allEditions.length") && list.includes("libraryOverview?.completedCount") && list.includes("libraryOverview?.preparingCount"), "overall counters must remain accurate across pages");
 assert(list.includes("최근 이어보기") && list.includes("통합 AI 상담 바로가기") && list.includes("data-next-question-slot=\"phase9\""));
 assert(list.includes("const recent = allEditions[0]!") && list.includes("const visibleGroups = libraryPage?.groups ?? groups"),
   "recent and AI cards must remain based on the full library rather than the current filter");

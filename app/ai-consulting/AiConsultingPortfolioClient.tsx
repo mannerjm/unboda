@@ -97,16 +97,28 @@ function ConsultingAnswer({ content }: { content: string }) {
   if (!main || !action || !report || userFacts === undefined) {
     return <div className="whitespace-pre-wrap">{content}</div>;
   }
+  // Older paid replies can be long: show the first complete sentence without
+  // cutting a thought in half. The remaining original answer stays available.
+  const firstSentenceEnd = main.search(/[.!?](?:\s|$)/u);
+  const hasLongAnswer = main.length > 190 && firstSentenceEnd >= 0 && firstSentenceEnd < 185;
+  const shortAnswer = hasLongAnswer ? main.slice(0, firstSentenceEnd + 1) : main;
+  const extraAnswer = hasLongAnswer ? main.slice(firstSentenceEnd + 1).trim() : "";
 
   return (
     <div className="space-y-4">
       <div>
         <p className="mb-1 text-xs font-bold text-[#5e4bd1]">핵심 답변</p>
-        <p className="whitespace-pre-wrap">{main}</p>
+        <p className="whitespace-pre-wrap text-base font-semibold leading-7">{shortAnswer}</p>
+        {extraAnswer ? (
+          <details className="mt-2 text-sm leading-6">
+            <summary className="cursor-pointer font-semibold text-[#5e4bd1]">답변 더 읽기</summary>
+            <p className="mt-2 whitespace-pre-wrap">{extraAnswer}</p>
+          </details>
+        ) : null}
       </div>
       <div className="rounded-2xl bg-[#f3f1ff] px-4 py-3">
         <p className="mb-1 text-xs font-bold text-[#5e4bd1]">지금 해볼 일</p>
-        <p className="whitespace-pre-wrap">{action}</p>
+        <p className="whitespace-pre-wrap leading-7">{action}</p>
       </div>
       <details className="rounded-xl border border-[#e4e7f0] px-4 py-3 text-sm">
         <summary className="cursor-pointer font-semibold text-[#5e4bd1]">왜 이렇게 보나요? · 구매 분석 근거</summary>

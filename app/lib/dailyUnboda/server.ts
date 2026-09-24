@@ -27,6 +27,7 @@ export async function getCachedTodayReading(
     .update(JSON.stringify({
       birthDate: profile.birthDate,
       birthTime: profile.birthTime,
+      birthTimeKnown: profile.birthTimeKnown ?? null,
       calendarType: profile.calendarType,
       isLeapMonth: profile.isLeapMonth,
       gender: profile.gender,
@@ -42,6 +43,7 @@ export async function getCachedTodayReading(
         profile.isLeapMonth ? "윤달" : "평달",
         profile.gender,
         date,
+        profile.birthTimeKnown,
       );
       return buildTodayReading({
         date,

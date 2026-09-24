@@ -535,7 +535,7 @@ export default function AiConsultingPortfolioClient({
               <p className="mt-1 text-sm leading-6 text-slate-300">
                 {focusAnalysis?.profileInputVersion !== "current" && focusAnalysis
                   ? `구매한 분석 총 ${ownedAnalyses.length}개 · 현재는 같은 구매 당시 출생 정보 기준으로 상담합니다.`
-                  : `구매한 분석 총 ${ownedAnalyses.length}개 · 출생 정보가 다른 시기의 해석은 섞지 않습니다.`
+                  : `구매한 분석 총 ${ownedAnalyses.length}개 · 출생 정보가 다른 시기의 해석은 섞지 않습니다.`}
               </p>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/[0.11] px-5 py-4 sm:min-w-56">

@@ -18,6 +18,7 @@ export type AnalyzeProfileMetadata = {
   label?: string;
   birthDate: string;
   birthTime: string;
+  birthTimeKnown?: boolean | null;
   gender: "남성" | "여성";
   calendarType: "양력" | "음력";
   isLeapMonth: boolean;

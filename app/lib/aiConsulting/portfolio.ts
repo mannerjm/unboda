@@ -3,10 +3,10 @@ import { getAiConsultingPresentation } from "../aiConsultingPresentation";
 import { listUserPaidAnalysisSummaries } from "../paidReports/server";
 import {
   resolveAnalysisInputProfileVersion,
+  AnalysisInputSnapshotSchema,
   type AnalysisInputProfileVersion,
 } from "../analysisInputSnapshot";
 import { getCanonicalPremiumProductId } from "../premiumProductRegistry";
-import { AnalysisInputSnapshotSchema } from "../analysisInputSnapshot";
 import { canonicalAnalysisInputMatches } from "../analysisInputIdentity";
 import type { ProfileDto } from "../profiles/types";
 import { createAdminClient } from "../supabase/admin";
@@ -156,7 +156,7 @@ async function listPortfolioAnalyses(input: {
     productId: string;
     analysisEditionKey: string;
   } | null;
- }): Promise<{
+}): Promise<{
   analyses: AiConsultingPortfolioAnalysis[];
   ownedAnalyses: AiConsultingPortfolioAnalysis[];
   previousAnalysesExcluded: number;

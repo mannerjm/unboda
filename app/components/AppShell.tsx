@@ -165,6 +165,9 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
       if (item.href === "/saju") return hasGuestResult ? "/guest-result" : "/guest-saju";
       if (item.href === "/recommendations") return "/recommendations";
       if (item.href === "/deep-analysis") return "/deep-analysis";
+      // A guest may browse professional products before choosing an analysis.
+      // Product start, login, profile ownership and checkout remain server-gated.
+      if (item.href === "/special-analysis") return "/special-analysis";
       return `/auth/login?returnTo=${encodeURIComponent(item.href)}&origin=${guestOrigin}`;
     }
 
@@ -226,7 +229,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                         : "text-[#aeb6cf] hover:bg-white/[0.06] hover:text-white"
                   }`}
                 >
-                  <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" ? <LockIcon /> : null}<span>{item.label}</span>
+                  <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.label}</span>
                   {item.activeHref === "/ai-consulting" ? <span className="ml-auto rounded-full border border-[#8f7cff]/30 bg-[#6f5ce7]/15 px-2 py-0.5 text-[9px] font-black tracking-[0.08em] text-[#c8beff]">이어가기</span> : null}
                 </Link>
                 </div>
@@ -308,7 +311,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                       : "text-[#929bb8] hover:bg-white/[0.07] hover:text-white"
                 }`}
               >
-                    <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" ? <LockIcon /> : null}<span>{item.shortLabel ?? item.label}</span>
+                    <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.shortLabel ?? item.label}</span>
               </Link>
             );
           })}

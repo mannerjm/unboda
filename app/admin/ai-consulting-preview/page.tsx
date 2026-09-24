@@ -12,6 +12,7 @@ const PREVIEW_DATA: AiConsultingPortfolioPreviewData = {
     profileId: "00000000-0000-4000-8000-000000000001",
     questionsRemaining: 4,
     previousAnalysesExcluded: 0,
+    ownedAnalyses: [], // linked to preview reports below
     analyses: [
       {
         productId: "wealth",
@@ -149,6 +150,9 @@ const PREVIEW_DATA: AiConsultingPortfolioPreviewData = {
     },
   ],
 };
+
+// The preview's purchased list contains its full sample report portfolio.
+PREVIEW_DATA.state.ownedAnalyses = PREVIEW_DATA.state.analyses;
 
 export default async function AdminAiConsultingPreviewPage() {
   try {

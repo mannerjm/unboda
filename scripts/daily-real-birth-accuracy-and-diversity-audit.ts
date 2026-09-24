@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { calculateSaju } from "@fullstackfamily/manseryeok";
 import { buildTodayReading, DAILY_COPY_VERSION, getTodayDayPillar, getTodayYearPillar } from "../app/lib/dailyUnboda";
 
-assert.equal(DAILY_COPY_VERSION, "daily-v5");
+assert.equal(DAILY_COPY_VERSION, "daily-v6");
 
 // Audit the two critical time boundaries against the SAME calendar library as
 // the natal chart: annual pillar must not jump on Gregorian January 1.

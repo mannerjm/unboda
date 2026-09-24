@@ -19,7 +19,7 @@ const activeGrant = {
 };
 
 assert.equal(AI_CONSULTING_MAX_QUESTION_CHARS, 300);
-assert.deepEqual(AI_CONSULTING_TARGET_ANSWER_CHARS, { min: 500, max: 800 });
+assert.deepEqual(AI_CONSULTING_TARGET_ANSWER_CHARS, { min: 250, max: 500 });
 assert.deepEqual(AI_CONSULTING_CONTEXT_LIMITS, {
   recentMessages: 6,
   longTermMemories: 8,

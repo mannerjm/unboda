@@ -378,10 +378,11 @@ export async function runPaidReportGeneration(
     let generationProfile: ProfileDto = profile;
 
     if (purchase.analysisInputSnapshot) {
+      const frozenBirthData = parseAnalysisInputSnapshot(purchase.analysisInputSnapshot).birthData;
       generationProfile = {
         ...profile,
-        ...parseAnalysisInputSnapshot(purchase.analysisInputSnapshot).birthData,
-        birthTimeKnown: parseAnalysisInputSnapshot(purchase.analysisInputSnapshot).birthData.birthTimeKnown ?? null,
+        ...frozenBirthData,
+        birthTimeKnown: frozenBirthData.birthTimeKnown ?? null,
       };
     }
 

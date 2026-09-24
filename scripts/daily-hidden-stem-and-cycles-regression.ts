@@ -29,7 +29,11 @@ assert.equal(annual.hiddenStemTenGod, getTenGod("甲", "丁"), "午 must use its
 assert.equal(annual.cycleFocus, "seun");
 assert(annual.topic.includes("새로운 표현"), "primary hidden ten-god must refine visible headline");
 assert(annual.topic.includes("올해 조율"), "computed annual cycle must refine visible headline");
-assert(annual.action.includes("맞춰 볼 기준 한 가지"), "cycle must refine a single meaningful daily action");
+assert(annual.action.includes("올해의 합 관계") && annual.action.includes("달라진 조건 한 가지"), "cycle must contextualize, not erase, the natal practical suggestion");
+assert(annual.topic.length < 45, "daily event headline must remain glanceable on mobile");
+const neutralNatal = { date, personDayStem: "甲", personDayBranch: "寅", personMonthPillarHanja: "丙辰", personYearPillarHanja: "庚寅", dayPillarHanja: "庚午" };
+const neutralWithCycle = buildTodayReading({ ...neutralNatal, currentSeunGanji: "기미" });
+assert(neutralWithCycle.action.includes("맞춰 볼 기준 한 가지"), "when there is no significant natal relation the annual cycle can select a grounded practical action");
 assert(annual.flow.includes("본기(주된 지장간) 丁") && annual.flow.includes("올해 세운의 지지와 오늘 지지는 합"), "daily copy must attribute concrete hidden and cycle grounds");
 assert.notEqual(annual.topic, base.topic, "actual seun relation may change the title");
 assert.notEqual(annual.action, base.action, "actual seun relation may change the one action");

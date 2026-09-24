@@ -18,6 +18,7 @@ type ProfileRow = {
   relationship_type: ProfileDto["relationshipType"];
   birth_date: string;
   birth_time: string;
+  birth_time_known: boolean | null;
   gender: "male" | "female";
   calendar_type: "solar" | "lunar";
   is_leap_month: boolean;
@@ -32,6 +33,7 @@ function toProfileDto(row: ProfileRow): ProfileDto {
     relationshipType: row.relationship_type,
     birthDate: row.birth_date,
     birthTime: row.birth_time.slice(0, 5),
+    birthTimeKnown: row.birth_time_known ?? null,
     gender: fromProfileDbGender(row.gender),
     calendarType: fromProfileDbCalendarType(row.calendar_type),
     isLeapMonth: row.is_leap_month,
@@ -60,6 +62,7 @@ function toProfileInsert(input: ProfileInput, userId: string) {
     relationship_type: input.relationshipType,
     birth_date: input.birthDate,
     birth_time: input.birthTime,
+    birth_time_known: input.birthTimeKnown ?? null,
     gender: toProfileDbGender(input.gender),
     calendar_type: toProfileDbCalendarType(input.calendarType),
     is_leap_month: input.isLeapMonth,
@@ -72,6 +75,7 @@ function toProfileUpdate(input: ProfileInput) {
     relationship_type: input.relationshipType,
     birth_date: input.birthDate,
     birth_time: input.birthTime,
+    birth_time_known: input.birthTimeKnown ?? null,
     gender: toProfileDbGender(input.gender),
     calendar_type: toProfileDbCalendarType(input.calendarType),
     is_leap_month: input.isLeapMonth,

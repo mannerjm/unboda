@@ -381,6 +381,7 @@ export async function runPaidReportGeneration(
       generationProfile = {
         ...profile,
         ...parseAnalysisInputSnapshot(purchase.analysisInputSnapshot).birthData,
+        birthTimeKnown: parseAnalysisInputSnapshot(purchase.analysisInputSnapshot).birthData.birthTimeKnown ?? null,
       };
     }
 

@@ -6,6 +6,8 @@ import {
   type AnalysisInputProfileVersion,
 } from "../analysisInputSnapshot";
 import { getCanonicalPremiumProductId } from "../premiumProductRegistry";
+import { AnalysisInputSnapshotSchema } from "../analysisInputSnapshot";
+import { canonicalAnalysisInputMatches } from "../analysisInputIdentity";
 import type { ProfileDto } from "../profiles/types";
 import { createAdminClient } from "../supabase/admin";
 import { answerAiConsultingQuestion } from "./answerPipeline";
@@ -45,6 +47,8 @@ export type AiConsultingPortfolioState = {
   profileId: string;
   questionsRemaining: number;
   analyses: AiConsultingPortfolioAnalysis[];
+  /** Every completed, owned report for this profile, independent of birth-data edits. */
+  ownedAnalyses: AiConsultingPortfolioAnalysis[];
   messages: AiConsultingPortfolioMessage[];
   hasOlderMessages?: boolean;
   previousAnalysesExcluded: number;
@@ -152,8 +156,9 @@ async function listPortfolioAnalyses(input: {
     productId: string;
     analysisEditionKey: string;
   } | null;
-}): Promise<{
+ }): Promise<{
   analyses: AiConsultingPortfolioAnalysis[];
+  ownedAnalyses: AiConsultingPortfolioAnalysis[];
   previousAnalysesExcluded: number;
 }> {
   const summaries = await listUserPaidAnalysisSummaries(input.userId);
@@ -181,8 +186,7 @@ async function listPortfolioAnalyses(input: {
   }
 
   const seen = new Set<string>();
-  const analyses: AiConsultingPortfolioAnalysis[] = [];
-  let previousAnalysesExcluded = 0;
+  const ownedAnalyses: AiConsultingPortfolioAnalysis[] = [];
 
   for (const summary of summaries
     .filter((summary) =>
@@ -200,22 +204,8 @@ async function listPortfolioAnalyses(input: {
       purchaseInputByKey.get(key),
       input.profile,
     );
-    const explicitPreviousProductId = input.includePreviousSource
-      ? getCanonicalPremiumProductId(input.includePreviousSource.productId)
-      : null;
-    const explicitPreviousSource = Boolean(
-      input.includePreviousSource
-      && explicitPreviousProductId === summary.productId
-      && input.includePreviousSource.analysisEditionKey === editionKey,
-    );
-
-    if (profileInputVersion !== "current" && !explicitPreviousSource) {
-      previousAnalysesExcluded += 1;
-      continue;
-    }
-
     const presentation = getAiConsultingPresentation(summary.productId, editionKey);
-    analyses.push({
+    ownedAnalyses.push({
       productId: summary.productId,
       analysisEditionKey: editionKey,
       productTitle: presentation.productTitle,
@@ -227,25 +217,45 @@ async function listPortfolioAnalyses(input: {
     });
   }
 
-  const explicitPrevious = input.includePreviousSource
-    ? analyses.find((analysis) =>
+  // The visible purchase library must not shrink when a customer updates the
+  // birth time. Only the separate answer-routing set enforces birth-data
+  // boundaries; another profile's purchases never enter either set.
+  const previousAnalysesExcluded = ownedAnalyses.filter(
+    (analysis) => analysis.profileInputVersion !== "current",
+  ).length;
+  const currentAnalyses = ownedAnalyses.filter(
+    (analysis) => analysis.profileInputVersion === "current",
+  );
+  const requested = input.includePreviousSource
+    ? ownedAnalyses.find((analysis) =>
         analysis.productId === getCanonicalPremiumProductId(input.includePreviousSource!.productId)
-        && analysis.analysisEditionKey === input.includePreviousSource!.analysisEditionKey
-        && analysis.profileInputVersion !== "current",
+        && analysis.analysisEditionKey === input.includePreviousSource!.analysisEditionKey,
       )
     : null;
 
-  // A historical report continuation is intentionally isolated: once the user
-  // enters from a report purchased with previous/unknown birth inputs, that
-  // consultation cannot silently jump to a current-input report.
-  if (explicitPrevious) {
-    return {
-      analyses: [explicitPrevious],
-      previousAnalysesExcluded,
-    };
+  if (requested && requested.profileInputVersion !== "current") {
+    const requestedSnapshot = AnalysisInputSnapshotSchema.safeParse(
+      purchaseInputByKey.get(analysisKey(requested.productId, requested.analysisEditionKey)),
+    );
+    // Historical continuation may combine different purchased products ONLY
+    // when their immutable purchase-time birth inputs match exactly. Unknown or
+    // malformed legacy snapshots remain isolated to the requested report.
+    const historicalCohort = requestedSnapshot.success
+      ? ownedAnalyses.filter((analysis) => {
+          if (analysis.profileInputVersion === "current") return false;
+          const candidate = AnalysisInputSnapshotSchema.safeParse(
+            purchaseInputByKey.get(analysisKey(analysis.productId, analysis.analysisEditionKey)),
+          );
+          return candidate.success && canonicalAnalysisInputMatches(
+            candidate.data.birthData,
+            requestedSnapshot.data.birthData,
+          );
+        })
+      : [requested];
+    return { analyses: historicalCohort, ownedAnalyses, previousAnalysesExcluded };
   }
 
-  return { analyses, previousAnalysesExcluded };
+  return { analyses: currentAnalyses, ownedAnalyses, previousAnalysesExcluded };
 }
 
 async function listPortfolioMessages(input: {
@@ -340,7 +350,7 @@ export async function getAiConsultingPortfolioState(input: {
   messageBeforeId?: string;
   messageSource?: { productId: string; analysisEditionKey: string } | null;
 }): Promise<AiConsultingPortfolioState> {
-  const { analyses, previousAnalysesExcluded } = await listPortfolioAnalyses(input);
+  const { analyses, ownedAnalyses, previousAnalysesExcluded } = await listPortfolioAnalyses(input);
   const messageAnalyses = input.messageSource
     ? analyses.filter((analysis) =>
         analysis.productId === getCanonicalPremiumProductId(input.messageSource!.productId)
@@ -362,6 +372,7 @@ export async function getAiConsultingPortfolioState(input: {
     profileId: input.profileId,
     questionsRemaining,
     analyses,
+    ownedAnalyses,
     messages: messagePage.messages,
     hasOlderMessages: messagePage.hasOlderMessages,
     previousAnalysesExcluded,

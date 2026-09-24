@@ -7,6 +7,9 @@ type DaeunFlowCardProps = {
 export default function DaeunFlowCard({
   daeunAnalysis,
 }: DaeunFlowCardProps) {
+  if (!daeunAnalysis) {
+    return <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-6 text-sm text-stone-600">출생 시간 미상으로 대운 시작 시점을 계산하지 않았습니다.</div>;
+  }
   return (
     <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-6">
   <p className="text-xs font-semibold tracking-[0.2em] text-stone-500">

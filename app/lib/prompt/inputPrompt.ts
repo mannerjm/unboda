@@ -18,7 +18,7 @@ export function buildInputPrompt(
 ${birthDate}
 
 출생시간:
-${birthTime}
+${saju.birthTimeKnown === false ? "미상 (임시 12:00 입력값은 실제 출생시각이 아님)" : birthTime}
 
 성별:
 ${gender}
@@ -38,7 +38,7 @@ ${saju.monthPillarHanja}
 ${saju.dayPillarHanja}
 
 시주:
-${saju.hourPillarHanja}
+${saju.birthTimeKnown === false ? "시간 미상 — 시주와 시각 기반 예측을 생성하지 마세요." : saju.hourPillarHanja}
 
 용신 분석:
 주 용신 후보: ${saju.yongshinAnalysis.primary}
@@ -46,15 +46,12 @@ ${saju.hourPillarHanja}
 판단 근거: ${saju.yongshinAnalysis.reason}
 
 대운 분석:
-대운 방향: ${saju.daeunAnalysis.direction}
-대운 시작 나이: ${saju.daeunAnalysis.startAge}세
-대운 목록:
-${saju.daeunAnalysis.daeuns
-  .map(
-    (daeun) =>
-     `${daeun.order}대운: ${daeun.ganji} (${saju.daeunAnalysis.startAge + (daeun.order - 1) * 10}세 시작) / 분석: ${JSON.stringify(daeun.analysis)}`
-  )
-  .join("\n")}
+대운 정보:
+${saju.daeunAnalysis ? [
+  `대운 방향: ${saju.daeunAnalysis.direction}`,
+  `대운 시작 나이: ${saju.daeunAnalysis.startAge}세`,
+  ...saju.daeunAnalysis.daeuns.map((daeun) => `${daeun.order}대운: ${daeun.ganji} (${saju.daeunAnalysis!.startAge + (daeun.order - 1) * 10}세 시작) / 분석: ${JSON.stringify(daeun.analysis)}`),
+].join("\n") : "출생 시간 미상: 대운 시작 시점과 현재 대운을 확정하지 마세요."}
 
 현재 기준 세운 분석:
 ${saju.seunAnalysis.items

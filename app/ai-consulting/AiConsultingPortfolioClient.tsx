@@ -14,6 +14,7 @@ import type { ProfileFreeAnalysisStatus } from "@/app/lib/freeAnalysisResults/se
 type AiConsultingUserMemory = {
   id: string;
   content: string;
+  kind?: "user_fact" | "life_event" | "goal" | "preference";
   sourceMessageId: string | null;
   createdAt: string;
   updatedAt: string;
@@ -164,6 +165,9 @@ export default function AiConsultingPortfolioClient({
   const [error, setError] = useState<string | null>(null);
   const [memoryError, setMemoryError] = useState<string | null>(null);
   const [savingMemoryMessageId, setSavingMemoryMessageId] = useState<string | null>(null);
+  const [memoryDraftMessageId, setMemoryDraftMessageId] = useState<string | null>(null);
+  const [memoryDraftKind, setMemoryDraftKind] = useState<"user_fact" | "goal">("user_fact");
+  const [memoryDraftContent, setMemoryDraftContent] = useState("");
   const [deletingMemoryId, setDeletingMemoryId] = useState<string | null>(null);
   const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
   const [editingMemoryContent, setEditingMemoryContent] = useState("");
@@ -432,8 +436,11 @@ export default function AiConsultingPortfolioClient({
   }
 
   async function saveMemory(message: AiConsultingPortfolioMessage) {
-    if (isPreview || message.role !== "user") return;
-    const content = message.content.trim();
+    if (isPreview || message.role !== "user" || memoryDraftMessageId !== message.id) return;
+    // The customer explicitly selects what kind of self-stated information
+    // should be remembered and writes the actual memory. A question, model
+    // interpretation or presumed medical/financial state is never auto-saved.
+    const content = memoryDraftContent.trim();
     if (!content || content.length > 300) return;
 
     setSavingMemoryMessageId(message.id);
@@ -447,13 +454,15 @@ export default function AiConsultingPortfolioClient({
           threadId: message.threadId,
           sourceMessageId: message.id,
           writeRequestId: crypto.randomUUID(),
-          kind: "user_fact",
+          kind: memoryDraftKind,
           content,
         }),
       });
       const body = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(body.error ?? "AI 기억을 저장하지 못했습니다.");
       await loadMemories();
+      setMemoryDraftMessageId(null);
+      setMemoryDraftContent("");
     } catch (reason) {
       setMemoryError(reason instanceof Error ? reason.message : "AI 기억을 저장하지 못했습니다.");
     } finally {

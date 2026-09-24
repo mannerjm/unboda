@@ -30,7 +30,7 @@ const relationshipLabels: Record<ProfileDto["relationshipType"], string> = {
 
 function formatProfileDetails(profile: ProfileDto): string {
   const leapMonthSuffix = profile.calendarType === "음력" && profile.isLeapMonth ? " · 윤달" : "";
-  return `${formatProfileBirthDate(profile.birthDate)} · ${profile.birthTime} · ${profile.gender} · ${profile.calendarType}${leapMonthSuffix}`;
+  return `${formatProfileBirthDate(profile.birthDate)} · ${profile.birthTimeKnown === false ? "출생 시간 모름" : profile.birthTimeKnown == null ? `${profile.birthTime} (시간 확인 필요)` : profile.birthTime} · ${profile.gender} · ${profile.calendarType}${leapMonthSuffix}`;
 }
 
 type FreeAnalysisResultStatus = "none" | "generating" | "completed" | "failed" | "stale" | "needs_retry";
@@ -61,7 +61,8 @@ const emptyProfileInput: ProfileInput = {
   label: "",
   relationshipType: "other",
   birthDate: "",
-  birthTime: "12:00",
+  birthTime: "",
+  birthTimeKnown: true,
   gender: "남성",
   calendarType: "양력",
   isLeapMonth: false,
@@ -555,6 +556,7 @@ export default function MyPage() {
       relationshipType: profile.relationshipType,
       birthDate: profile.birthDate,
       birthTime: profile.birthTime,
+      birthTimeKnown: profile.birthTimeKnown ?? true,
       gender: profile.gender,
       calendarType: profile.calendarType,
       isLeapMonth: profile.isLeapMonth,
@@ -732,9 +734,16 @@ export default function MyPage() {
               <label className="block text-sm font-semibold">생년월일
                 <input type="date" min={GUEST_BIRTH_DATE_MIN} max={getGuestBirthDateMax()} value={formInput.birthDate} onChange={(event) => setFormInput({ ...formInput, birthDate: event.target.value })} className={`mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal ${restingFocusRing}`} required />
               </label>
-              <label className="block text-sm font-semibold">태어난 시간
-                <input type="time" value={formInput.birthTime} onChange={(event) => setFormInput({ ...formInput, birthTime: event.target.value })} className={`mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal ${restingFocusRing}`} required />
-              </label>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold" htmlFor="profile-birth-time">태어난 시간</label>
+                <input id="profile-birth-time" type="time" value={formInput.birthTimeKnown === false ? "" : formInput.birthTime} onChange={(event) => setFormInput({ ...formInput, birthTime: event.target.value })} disabled={formInput.birthTimeKnown === false} className={`w-full rounded-xl border border-slate-300 px-4 py-3 font-normal ${restingFocusRing} disabled:bg-slate-100`} required={formInput.birthTimeKnown !== false} />
+                <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
+                  <input type="checkbox" checked={formInput.birthTimeKnown === false} onChange={(event) => setFormInput({ ...formInput, birthTimeKnown: !event.target.checked, birthTime: event.target.checked ? "12:00" : "" })} className="h-4 w-4 accent-[#6f5ce7]" />
+                  출생 시간 모름
+                </label>
+                {formInput.birthTimeKnown === false ? <p className="text-xs leading-5 text-slate-600">시주는 시간 미상으로 표시하며 시각을 이용한 세부 분석은 제외합니다.</p> : null}
+                {editingProfileId && profiles.find((p) => p.id === editingProfileId)?.birthTimeKnown == null ? <p className="text-xs leading-5 text-amber-700">기존 프로필의 출생 시간 확인 여부가 저장되지 않았습니다. 입력된 시각을 확인하거나 ‘출생 시간 모름’을 체크해 주세요.</p> : null}
+              </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-semibold">성별

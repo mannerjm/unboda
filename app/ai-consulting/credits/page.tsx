@@ -139,12 +139,14 @@ export default async function AiConsultingCreditsPage({
   }
 
   let providerReady = false;
+  let reviewCheckout = false;
   if (isAiConsultingCreditCheckoutEnabled()) {
     try {
-      getTossConfig();
+      const tossConfig = getTossConfig();
       // A production-hosted Toss TEST checkout is restricted to review accounts.
       // Display purchase as available only when the authenticated user can use it.
       providerReady = isTossCheckoutUserAllowed(user.id);
+      reviewCheckout = providerReady && tossConfig.environment === "sandbox";
     } catch {
       providerReady = false;
     }
@@ -180,6 +182,7 @@ export default async function AiConsultingCreditsPage({
           currentBalance={session.questionsRemaining}
           bundles={AI_CONSULTING_CREDIT_BUNDLES}
           checkoutEnabled={providerReady}
+          reviewCheckout={reviewCheckout}
         />
 
         <section className="mt-6 rounded-[1.75rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-7">

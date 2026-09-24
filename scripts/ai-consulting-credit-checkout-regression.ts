@@ -18,6 +18,8 @@ assert(bundleMap.get("ai-consulting-10")?.questions === 10 && bundleMap.get("ai-
 const service = read("app/lib/aiConsulting/creditCheckout.ts");
 assert(service.includes('AI_CONSULTING_CREDIT_PAYMENT_PROVIDER = "toss_ai_credit"'), "credit orders must stay isolated from paid-analysis Toss reconciliation");
 assert(service.includes("assertPaidPurchaseEligibility"), "credit checkout must preserve paid-purchase account eligibility");
+assert(service.includes('process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true"') && service.includes('process.env.TOSS_REVIEW_MODE !== "enabled"') && service.includes('process.env.TOSS_ENVIRONMENT !== "sandbox"') && service.includes('process.env.TOSS_ALLOW_LIVE === "true"'), "credit checkout must allow review-only TEST mode without opening the commercial live gate");
+assert(service.includes('config.environment === "sandbox" && !config.isProduction') && service.includes('getTossConfig();') && service.includes("isTossCheckoutUserAllowed(input.userId)"), "Toss credentials and allowlist must fail closed in the credit order service");
 assert(service.includes("getActiveEntitlementForProfileEdition"), "credit checkout must require exact paid-analysis entitlement");
 assert(service.includes("getPaidReport"), "credit checkout must require a completed paid report");
 assert(service.includes("amount: bundle.priceKrw"), "credit order amount must come from server commercial policy");

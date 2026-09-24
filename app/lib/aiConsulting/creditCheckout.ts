@@ -12,6 +12,7 @@ import {
 import type { OrderRecord, PurchaseRecord } from "../purchases/types";
 import { createAdminClient } from "../supabase/admin";
 import { getPaymentByOrderIdFromToss } from "../toss/server";
+import { getTossConfig, isTossCheckoutUserAllowed } from "../toss/config";
 import {
   getAiConsultingCreditBundle,
   type AiConsultingCreditBundleId,
@@ -21,7 +22,25 @@ import { getAiConsultingCreditBalance } from "./server";
 export const AI_CONSULTING_CREDIT_PAYMENT_PROVIDER = "toss_ai_credit";
 
 export function isAiConsultingCreditCheckoutEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true";
+  if (process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true") return true;
+
+  // Permit the same already-configured, production-hosted Toss TEST review mode
+  // used for paid analyses. The customer-facing commercial launch flag remains
+  // off, and every checkout route separately enforces the reviewer allowlist.
+  if (
+    process.env.NODE_ENV !== "production"
+    || process.env.TOSS_ENVIRONMENT !== "sandbox"
+    || process.env.TOSS_REVIEW_MODE !== "enabled"
+    || process.env.TOSS_ALLOW_LIVE === "true"
+  ) return false;
+
+  try {
+    const config = getTossConfig();
+    return config.environment === "sandbox" && !config.isProduction;
+  } catch {
+    // Invalid/missing TEST key pair or reviewer allowlist must fail closed.
+    return false;
+  }
 }
 
 type OrderRow = {
@@ -133,6 +152,12 @@ export async function createPendingAiConsultingCreditOrder(input: {
 }): Promise<OrderRecord> {
   if (!isAiConsultingCreditCheckoutEnabled()) {
     throw new Error("AI_CONSULTING_CREDIT_CHECKOUT_DISABLED");
+  }
+  // Defense in depth: no internal caller may mint an order on a public
+  // customer account while the site uses TEST keys for approval review.
+  getTossConfig();
+  if (!isTossCheckoutUserAllowed(input.userId)) {
+    throw new Error("TOSS_REVIEW_ACCOUNT_REQUIRED");
   }
 
   await assertPaidPurchaseEligibility(input.userId);

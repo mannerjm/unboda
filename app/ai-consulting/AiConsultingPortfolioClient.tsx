@@ -596,7 +596,7 @@ export default function AiConsultingPortfolioClient({
                 </form>
               ) : visibleChatMessages.length > 0 || hasOlderMessages ? (
                 <p className="mt-3 text-sm leading-6 text-slate-600">지난 상담은 그대로 볼 수 있어요. 새 답변은 질문권을 구매한 뒤 받을 수 있습니다.</p>
-              )}
+              ) : null}
 
               {routingNotice ? (
                 <div className={routingNotice.kind === "outside"

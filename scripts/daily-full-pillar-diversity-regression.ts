@@ -4,7 +4,7 @@ import { calculateSaju } from "@fullstackfamily/manseryeok";
 import { buildTodayReading, getTodayBranchRelation, getTodayDayPillar, DAILY_COPY_VERSION } from "../app/lib/dailyUnboda";
 
 const date = "2026-09-24";
-assert.equal(DAILY_COPY_VERSION, "daily-v5", "solar-term cycle accuracy must not reuse cached daily-v4 copy");
+assert.equal(DAILY_COPY_VERSION, "daily-v6", "new customer-facing copy must not reuse cached daily-v5 copy");
 assert.equal(getTodayBranchRelation("子", "午"), "충");
 assert.equal(getTodayBranchRelation("子", "丑"), "합");
 assert.equal(getTodayBranchRelation("子", "卯"), "형");
@@ -27,10 +27,10 @@ assert.notEqual(readingA.flow, readingB.flow, "different natal month/year must m
 assert.deepEqual(readingA, buildTodayReading({ date, ...natalA, dayPillarHanja: todaysPillar }), "no randomness between repeat reads");
 assert.equal(readingA.focusPillar, "day");
 assert.equal(readingA.focusRelation, "충");
-assert(readingA.topic.includes("조건 점검"), "day stem theme must be refined by daily branch relationship");
-assert(readingA.action.includes("달라진 조건 한 가지"), "a single contextual action must match the selected focus");
-assert(readingA.flow.includes("태어난 날") && readingB.flow.includes("태어난 해"), "selected and supporting natal pillars must be attributed precisely");
-assert(readingA.flow.includes("오행"), "weighted natal three-pillar element comparison must appear when meaningful");
+assert(readingA.topic.includes("계획을 다시 확인해요"), "personal branch relationship must refine the plain-language daily theme");
+assert(readingA.action.includes("예상과 달라진 점"), "one practical plain-language action must match the selected focus");
+assert(readingA.flow.includes("내가 직접 할 일") && readingB.flow.includes("내가 직접 할 일"), "selected personal context must be explained without pillar jargon");
+assert(!/천간|지지|지장간|십성|오행|세운|대운|합 관계|충 관계|형 관계|파 관계|해 관계/.test(readingA.topic + readingA.flow + readingA.action), "full personal saju can be calculated without displaying jargon");
 
 const monthFocus = buildTodayReading({ date, personDayStem: "甲", personDayBranch: "寅", personMonthPillarHanja: "丙子", personYearPillarHanja: "甲辰", dayPillarHanja: "庚午" });
 assert.equal(monthFocus.focusPillar, "month", "notable month relationship may refine otherwise neutral day branch");
@@ -61,7 +61,7 @@ const statistics = births.map(([y, m, d]) => {
       dayPillarHanja: getTodayDayPillar(next),
     });
   });
-  assert(readings.every(reading => reading.flow.length > 60 && reading.action.length > 12));
+  assert(readings.every(reading => reading.flow.length >= 55 && reading.flow.length <= 185 && reading.topic.length <= 32 && reading.action.length > 12 && reading.action.length <= 85));
   const uniqueTopics = new Set(readings.map(reading => reading.topic));
   const uniqueFlows = new Set(readings.map(reading => reading.flow));
   const uniqueActions = new Set(readings.map(reading => reading.action));

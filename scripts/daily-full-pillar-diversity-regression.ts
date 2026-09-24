@@ -78,7 +78,7 @@ assert(page.includes("getProfileFreeAnalysisFoundationStatus(user.id, activeProf
 assert(page.includes("getCachedTodayReading(user.id, activeProfile, date)"));
 assert(server.includes("personYearPillarHanja: saju.yearPillarHanja"));
 assert(server.includes("personMonthPillarHanja: saju.monthPillarHanja"));
-assert(!server.includes("verifiedHourPillarHanja:"), "default 12:00 is not an explicitly verified birth hour");
+assert(server.includes("profile.birthTimeKnown === true && saju.hourPillarHanja"), "hour pillar requires explicitly known time, never default noon alone");
 assert(server.includes("fingerprint") && server.includes("DAILY_COPY_VERSION") && server.includes("profile.id") && server.includes("date"), "cache scope must protect personal readings and new copy version");
 assert(daily.includes("calculateWeightedElements(") && daily.includes("findBranchPunishment(") && daily.includes("findBranchBreak(") && daily.includes("findBranchHarm("));
 assert(daily.includes("getTenGod(monthPillar[0], todayPillar[0])") && daily.includes("getTenGod(yearPillar[0], todayPillar[0])"), "both month and year heavenly stems must be compared to the current day stem");

@@ -47,7 +47,7 @@ for (const copy of [
   "새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다.",
   "공용 질문권",
   "모든 보유 분석에서 함께 사용",
-  "질문마다 관련 리포트 자동 선택",
+  "새 주제로 질문하기 · 자동 선택",
   "보유 범위 밖 질문은 답변하지 않아요",
 ]) {
   assert(client.includes(copy), `unified AI consulting UX must expose: ${copy}`);
@@ -63,11 +63,11 @@ assert(client.includes("setChosenSource(analysis)") && client.includes('document
 assert(client.includes('href="#owned-analysis-selector"') && client.includes('id="owned-analysis-selector"'), "customers must reach the report chooser directly without scrolling past long conversations");
 assert(client.includes("전체 보기 · +") && client.includes("접기"), "owned analysis display must support expand/collapse for the full portfolio");
 assert(client.includes("최근 구매한 분석 ${Math.min(3, portfolio.analyses.length)}개") && client.includes("전체 보유 분석 ${filteredAnalyses.length}개"), "owned-analysis labels must show actual counts, not a fixed three when only two exist");
-assert(client.includes("상담 이용 안내") && client.includes('border-t border-[#e4e7f0]'), "consulting guidance must be visually separated from the owned-analysis list");
+assert(client.includes("답변 완료 시 질문권 1회 차감 · 답할 수 없는 질문은 차감하지 않아요.") && !client.includes("상담 이용 안내"), "consulting guidance must be one readable line without repetitive policy chips");
 assert(!client.includes("dangerouslySetInnerHTML"), "unified consultation must render model output as plain text");
 
 assert(entry.includes("질문권은 보유 분석에서 함께 사용해요."), "paid-report entry must explain shared credits in customer language");
-assert(entry.includes("presentation.productTitle") && client.includes("질문권은 상품별로 나뉘지 않습니다."), "report entry must identify its purchased analysis; full portfolio scope policy remains in the unified consulting hub");
+assert(entry.includes("presentation.productTitle") && client.includes("질문권은 모든 보유 분석에서 함께 사용해요."), "report entry must identify its purchased analysis; shared-credit scope must stay clear in simple Korean");
 assert(entry.includes("const href = `/ai-consulting?") && entry.includes("지난 상담 이어가기"), "report entry must preserve report-scoped routing and concise continuation copy into the shared hub");
 assert(entry.includes("이 리포트로 AI에게 질문하기") && entry.includes("AI 상담 화면 보기") && entry.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyer must see a clear report-scoped action without claiming zero-credit consultations are free");
 
@@ -89,12 +89,16 @@ assert((client.match(/질문권 구매하기 →/g) ?? []).length === 2, "purcha
 assert((client.match(/질문권 상품 보기 →/g) ?? []).length === 2, "disabled-checkout product browse CTA must remain in top balance and bottom conversation without enabling purchase");
 assert(!client.includes("credit-recharge-title") && !client.includes("질문권이 0회예요. 이어서 질문해 보세요!"), "zero-credit state must not repeat a full-width purchase banner");
 assert(!client.includes("AI_CONSULTING_CREDIT_BUNDLES"), "bundle prices belong on the credit purchase page, not in a duplicate consultation banner");
-assert(client.includes("질문권 0회 · 새 답변에는 질문권이 필요해요.") && client.includes("지난 상담 기록은 그대로 볼 수 있어요.") && client.indexOf('data-ai-composer="portfolio-sticky"') < client.indexOf("OWNED ANALYSES"), "depleted state and active composer must appear before the report library");
+assert(client.includes("질문권 0회 · 새 답변에는 질문권이 필요해요.") && client.includes("지난 상담 기록은 그대로 볼 수 있어요.") && client.indexOf('data-ai-composer="portfolio-sticky"') < client.indexOf('id="owned-analysis-selector"'), "depleted state and active composer must appear before the report library");
 assert((client.match(/href=\{creditPurchaseHref\}/g) ?? []).length === 2 && client.includes('data-ai-composer="portfolio-sticky"'), "top and conversation purchase actions must remain present");
 assert(portfolio.includes('order("created_at", { ascending: false })') && portfolio.includes(".limit(41)") && !portfolio.includes(".limit(200)"), "conversation must load the latest page rather than the first 200 oldest messages");
 assert(client.includes("loadOlderMessages") && client.includes("이전 상담 더 보기") && portfolioApi.includes("messageBefore"), "older conversations must have an authenticated cursor-based retrieval path");
 assert(client.includes("preferContinuation") && portfolio.includes("input.preferContinuation") && portfolioQuestionApi.includes("input.preferContinuation === true"), "follow-up context must be validated by the server without pinning unrelated new questions");
 assert(client.includes("showMemories") && client.includes("내 기억 보기"), "saved memories must remain editable but folded until requested");
+assert(client.includes("portfolio.questionsRemaining > 0 ? <div>") && client.includes("추천 질문"), "suggested question buttons must not appear when no question can be submitted");
+assert(client.includes("첫 상담 기록이 아직 없어요. 위에서 질문권 상품과 이용 방법을 확인해 주세요.") && client.includes("portfolio.questionsRemaining === 0") && client.includes("지난 상담 기록은 그대로 볼 수 있어요."), "zero-credit new visitors need a clear first-step message while existing customers keep their past history");
+assert(client.includes("질문권 결제는 현재 준비 중이며, 지금은 상품 안내만 볼 수 있어요."), "review-only checkout must never imply customers can immediately buy credits");
+assert(!client.includes("OWNED ANALYSES") && !client.includes("LONG-TERM MEMORY") && client.includes("내 보유 분석") && client.includes("내 기억"), "customer-facing card headings must use simple Korean");
 assert(portfolio.includes("id.lt.${input.beforeId}") && portfolioApi.includes("messageBeforeId") && client.includes("beforeId: oldest.id"), "history pagination must use timestamp plus message ID to avoid dropping messages sharing a timestamp");
 assert(portfolio.includes("messageSource?: { productId: string; analysisEditionKey: string } | null") && portfolio.includes("analyses: messageAnalyses"), "large multi-report portfolios must retrieve selected report history without paging unrelated conversations");
 assert(portfolioApi.includes("messageProductId") && portfolioApi.includes("messageEdition") && portfolioApi.includes("messageSource:"), "report-scoped history must pass through the existing authenticated portfolio API");

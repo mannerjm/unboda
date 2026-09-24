@@ -712,32 +712,17 @@ export default function AiConsultingPortfolioClient({
               </div>
             </section>
 
-            <section className="mt-4 rounded-2xl border border-[#dce1ef] bg-white px-5 py-4 shadow-sm">
-              <div>
-                <p className="text-sm font-bold">{portfolio.messages.length > 0 ? "통합 상담 이어보기" : "새 통합 상담"}</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">
-                  {portfolio.messages.length > 0
-                    ? `보유 분석별 상담 기록 ${portfolio.messages.length}개를 시간순으로 모았습니다${latestActivity ? ` · 최근 ${latestActivity}` : ""}.`
-                    : "질문하면 관련 보유 분석을 자동으로 연결해 첫 상담을 시작합니다."}
-                </p>
-              </div>
-            </section>
-
             <section className="mt-4 rounded-[1.75rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-6">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">LONG-TERM MEMORY</p>
                   <h2 className="mt-2 text-base font-bold">AI가 기억하는 내 상황</h2>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">
-                    내가 직접 저장한 사실·목표는 같은 프로필의 상담에서 공용으로 참고합니다. 리포트에서 파생된 해석·요약은 선택된 상담 스레드 밖으로 자동 혼합하지 않습니다.
-                  </p>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">상담 중 직접 저장한 내 상황과 목표를 확인하고 관리할 수 있어요.</p>
                 </div>
-                <span className="shrink-0 rounded-full bg-[#eef0f6] px-3 py-1.5 text-xs font-semibold text-slate-700">
-                  {memories.length}개 저장됨
-                </span>
+                <button type="button" onClick={() => setShowMemories((value) => !value)} aria-expanded={showMemories} className="shrink-0 rounded-full bg-[#eef0f6] px-4 py-2 text-xs font-semibold text-[#5e4bd1]">{memories.length}개 저장됨 · {showMemories ? "접기" : "내 기억 보기"}</button>
               </div>
 
-              {memories.length === 0 ? (
+              {showMemories ? (memories.length === 0 ? (
                 <div className="mt-4 rounded-2xl bg-[#f7f8fc] px-4 py-4 text-sm leading-6 text-slate-600">
                   아직 기억한 내용이 없습니다. 상담 중 내가 작성한 메시지에서 <strong className="font-semibold text-slate-800">이 내용 기억하기</strong>를 눌러 저장할 수 있습니다.
                 </div>
@@ -761,7 +746,7 @@ export default function AiConsultingPortfolioClient({
                     </div>
                   ))}
                 </div>
-              )}
+              )) : null}
             </section>
 
           </>

@@ -556,7 +556,7 @@ export default function MyPage() {
       relationshipType: profile.relationshipType,
       birthDate: profile.birthDate,
       birthTime: profile.birthTime,
-      birthTimeKnown: profile.birthTimeKnown ?? true,
+      birthTimeKnown: profile.birthTimeKnown ?? null,
       gender: profile.gender,
       calendarType: profile.calendarType,
       isLeapMonth: profile.isLeapMonth,
@@ -736,7 +736,7 @@ export default function MyPage() {
               </label>
               <div className="space-y-2">
                 <label className="block text-sm font-semibold" htmlFor="profile-birth-time">태어난 시간</label>
-                <input id="profile-birth-time" type="time" value={formInput.birthTimeKnown === false ? "" : formInput.birthTime} onChange={(event) => setFormInput({ ...formInput, birthTime: event.target.value })} disabled={formInput.birthTimeKnown === false} className={`w-full rounded-xl border border-slate-300 px-4 py-3 font-normal ${restingFocusRing} disabled:bg-slate-100`} required={formInput.birthTimeKnown !== false} />
+                <input id="profile-birth-time" type="time" value={formInput.birthTimeKnown === false ? "" : formInput.birthTime} onChange={(event) => setFormInput({ ...formInput, birthTime: event.target.value, birthTimeKnown: formInput.birthTimeKnown == null ? true : formInput.birthTimeKnown })} disabled={formInput.birthTimeKnown === false} className={`w-full rounded-xl border border-slate-300 px-4 py-3 font-normal ${restingFocusRing} disabled:bg-slate-100`} required={formInput.birthTimeKnown !== false} />
                 <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
                   <input type="checkbox" checked={formInput.birthTimeKnown === false} onChange={(event) => setFormInput({ ...formInput, birthTimeKnown: !event.target.checked, birthTime: event.target.checked ? "12:00" : "" })} className="h-4 w-4 accent-[#6f5ce7]" />
                   출생 시간 모름

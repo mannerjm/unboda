@@ -43,6 +43,34 @@ function formatRecentActivity(value: string | undefined): string | null {
   }).format(date);
 }
 
+/**
+ * The shared AI hub has no selected report. Suggestions must name an actual
+ * topic and never depend on the deictic "this report" wording from individual
+ * paid-report continuation cards. The server still chooses and validates the
+ * purchased report independently for each submitted question.
+ */
+function unifiedSuggestedQuestion(analysis: AiConsultingPortfolioAnalysis): string {
+  if (analysis.productId === "wealth") {
+    return "재물운과 관련해 수입과 지출에서 지금 가장 먼저 점검할 점은 뭐야?";
+  }
+  if (analysis.productId === "health-sleep-rhythm") {
+    return "수면 리듬을 지키려면 취침 전 생활 습관 중 무엇부터 점검해야 할까?";
+  }
+
+  const topic = analysis.productTitle
+    .replace(/(?:[· ]?(?:심층|전문|종합|맞춤|정밀))?\s*(?:점검\s*)?분석$/u, "")
+    .trim() || analysis.productTitle;
+  // Product-specific follow-ups are useful only when they do not refer to a
+  // selected report/period whose context the unified chat does not have.
+  const topical = analysis.suggestedQuestions.find((question) =>
+    !/(?:이\s*리포트|이\s*분석|이\s*기간|해당\s*리포트|이\s*결과)/u.test(question)
+    && !/^다음(?:에|\s*점검)/u.test(question),
+  );
+  return topical
+    ? `${topic}에 관해 ${topical}`
+    : `${topic}에 관해 지금 가장 먼저 확인할 점은 뭐야?`;
+}
+
 export type AiConsultingPortfolioPreviewData = {
   state: AiConsultingPortfolioState;
   memories: AiConsultingUserMemory[];
@@ -202,9 +230,9 @@ export default function AiConsultingPortfolioClient({
   const suggestedQuestions = useMemo(() => {
     if (!portfolio) return [];
     const suggestions: string[] = [];
-    for (const analysis of portfolio.analyses.slice(0, 4)) {
-      const first = analysis.suggestedQuestions[0];
-      if (first && !suggestions.includes(first)) suggestions.push(first);
+    for (const analysis of portfolio.analyses.slice(0, 8)) {
+      const question = unifiedSuggestedQuestion(analysis);
+      if (!suggestions.includes(question)) suggestions.push(question);
       if (suggestions.length >= 3) break;
     }
     return suggestions;
@@ -469,7 +497,7 @@ export default function AiConsultingPortfolioClient({
                 </div>
 
                 {portfolio.questionsRemaining > 0 ? <div>
-                  <p className="text-xs font-bold tracking-[0.14em] text-slate-500">추천 질문</p>
+                  <p className="text-xs font-bold tracking-[0.14em] text-slate-500">추천 질문 · 자동 연결</p>
                   <div className="mt-3 space-y-2">
                     {suggestedQuestions.map((suggestion) => (
                       <button

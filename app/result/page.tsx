@@ -691,7 +691,7 @@ async function retryMainAnalysis() {
       <h2 className="text-2xl font-bold text-stone-900">
         사주팔자
       </h2>
-      {profile?.birthTimeKnown === false ? <p className="mt-2 text-xs leading-5 text-amber-700">출생 시간 미상: 시주는 계산 결과로 표시하지 않습니다. 자시(23시 전후) 출생 여부에 따라 일주는 달라질 수 있습니다.</p> : null}
+      {profile?.birthTimeKnown === false ? <p className="mt-2 text-xs leading-5 text-stone-500">출생 시간이 확인되지 않아 시주를 표시하지 않습니다.</p> : null}
       {profile?.birthTimeKnown == null ? <p className="mt-2 text-xs leading-5 text-amber-700">기존 프로필의 출생 시간 확인 여부가 저장되지 않았습니다. 마이페이지에서 확인해 주세요.</p> : null}
     </div>
 
@@ -703,7 +703,7 @@ async function retryMainAnalysis() {
   <div className="grid grid-cols-4 gap-2 sm:gap-4">
     {[
       {
-        label: profile?.birthTimeKnown === false ? "시주 · 시간 미상" : "시주",
+        label: "시주",
        stem: profile?.birthTimeKnown === false ? "" : freeAnalysis?.hourStem ?? sajuData.hourStem,
 branch: profile?.birthTimeKnown === false ? "" : freeAnalysis?.hourBranch ?? sajuData.hourBranch,
 tenGod: profile?.birthTimeKnown === false ? "" : freeAnalysis?.hourTenGod ?? sajuData.hourTenGod,
@@ -763,6 +763,21 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
   nobles: freeAnalysis?.yearNobles ?? sajuData.yearNobles,
       },
     ].map((pillar) => {
+  if (pillar.label === "시주" && profile?.birthTimeKnown === false) {
+    return (
+      <div key="시주" className="flex h-full min-h-[330px] flex-col overflow-hidden rounded-2xl border border-stone-200 bg-stone-50 text-center text-stone-900">
+        <div className="border-b border-stone-200 bg-white px-2 py-3">
+          <p className="text-sm font-semibold">시주</p>
+        </div>
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 px-3 py-8">
+          <span aria-hidden="true" className="flex h-12 w-12 items-center justify-center rounded-full border border-stone-200 bg-white text-xl font-light text-stone-400">?</span>
+          <p className="text-sm font-semibold text-stone-600">출생 시간 미상</p>
+          <p className="break-keep text-xs leading-5 text-stone-400">시주 정보 없음</p>
+        </div>
+      </div>
+    );
+  }
+
   const stemStyle = getFiveElementStyle(
     pillar.stem,
     pillar.highlighted

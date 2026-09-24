@@ -54,6 +54,8 @@ export default function AiConsultingPortfolioClient({
   focusProductId,
   focusEdition,
   previewData,
+  initialPortfolioState,
+  reportEntryUnavailable = false,
   freeAnalysisStatus,
   creditCheckoutAvailable = false,
 }: {
@@ -61,15 +63,18 @@ export default function AiConsultingPortfolioClient({
   focusProductId?: string | null;
   focusEdition?: string | null;
   previewData?: AiConsultingPortfolioPreviewData;
+  /** A server-verified, profile-scoped report entry; does not enable preview mode. */
+  initialPortfolioState?: AiConsultingPortfolioState | null;
+  reportEntryUnavailable?: boolean;
   freeAnalysisStatus?: ProfileFreeAnalysisStatus | null;
   /** Server-confirmed availability for this user, including Toss TEST allowlist. */
   creditCheckoutAvailable?: boolean;
 }) {
-  const [portfolio, setPortfolio] = useState<AiConsultingPortfolioState | null>(previewData?.state ?? null);
+  const [portfolio, setPortfolio] = useState<AiConsultingPortfolioState | null>(previewData?.state ?? initialPortfolioState ?? null);
   const [memories, setMemories] = useState<AiConsultingUserMemory[]>(previewData?.memories ?? []);
   const [question, setQuestion] = useState("");
   const [routingNotice, setRoutingNotice] = useState<RoutingNotice | null>(null);
-  const [isLoading, setIsLoading] = useState(!previewData);
+  const [isLoading, setIsLoading] = useState(!previewData && !initialPortfolioState);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [memoryError, setMemoryError] = useState<string | null>(null);
@@ -87,7 +92,7 @@ export default function AiConsultingPortfolioClient({
   const [chosenSource, setChosenSource] = useState<AiConsultingPortfolioSource | null>(null);
   const [latestAnswerSource, setLatestAnswerSource] = useState<AiConsultingPortfolioSource | null>(null);
   const [olderMessages, setOlderMessages] = useState<AiConsultingPortfolioMessage[]>([]);
-  const [hasOlderMessages, setHasOlderMessages] = useState(previewData?.state.hasOlderMessages ?? false);
+  const [hasOlderMessages, setHasOlderMessages] = useState(previewData?.state.hasOlderMessages ?? initialPortfolioState?.hasOlderMessages ?? false);
   const [isLoadingOlder, setIsLoadingOlder] = useState(false);
   const [isLoadingSource, setIsLoadingSource] = useState(false);
   const portfolioRequestSeq = useRef(0);
@@ -152,6 +157,15 @@ export default function AiConsultingPortfolioClient({
     }
 
     let cancelled = false;
+    if (initialPortfolioState) {
+      setPortfolio(initialPortfolioState);
+      setHasOlderMessages(initialPortfolioState.hasOlderMessages ?? false);
+      setIsLoading(false);
+      void loadMemories().catch((reason) => {
+        if (!cancelled) setMemoryError(reason instanceof Error ? reason.message : "AI 기억을 불러오지 못했습니다.");
+      });
+      return () => { cancelled = true; };
+    }
     setIsLoading(true);
     Promise.all([loadPortfolio(), loadMemories()])
       .catch((reason) => {
@@ -164,7 +178,7 @@ export default function AiConsultingPortfolioClient({
     return () => {
       cancelled = true;
     };
-  }, [loadMemories, loadPortfolio, previewData]);
+  }, [initialPortfolioState, loadMemories, loadPortfolio, previewData]);
 
   const focusAnalysis = useMemo(() => {
     if (!portfolio || !focusProductId || !focusEdition) return null;
@@ -474,7 +488,7 @@ export default function AiConsultingPortfolioClient({
               <p className="mt-1 text-xs text-slate-300">모든 보유 분석에서 함께 사용</p>
               {creditPurchaseHref && !isPreview && portfolio?.analyses.length ? (
                 <Link href={creditPurchaseHref} className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-black text-[#211b52] transition hover:bg-[#eeeaff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-                  {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 보기 →"}
+                  {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 안내 보기 →"}
                 </Link>
               ) : null}
               {!creditCheckoutEnabled && !isPreview ? <p className="mt-2 text-xs text-slate-300">현재 질문권 결제 준비 중</p> : null}
@@ -536,13 +550,13 @@ export default function AiConsultingPortfolioClient({
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">AI 상담</p>
-                  <h2 className="mt-1 text-lg font-black">{activeAnalysis ? `${activeAnalysis.productTitle} 상담` : "새 상담 시작"}</h2>
+                  <h2 className="mt-1 text-lg font-black">{activeAnalysis ? `${activeAnalysis.productTitle} 상담` : reportEntryUnavailable ? "선택한 분석을 확인해 주세요" : "내 분석으로 상담하기"}</h2>
                 </div>
                 {portfolio.messages.length > 0 && !historySource ? (
                   <button type="button" onClick={() => setShowAllConversation((value) => !value)} className="text-xs font-semibold text-[#5e4bd1] underline underline-offset-4">{showAllConversation ? "이 분석의 상담만 보기" : "전체 상담 보기"}</button>
                 ) : null}
               </div>
-              <p className="text-sm leading-6 text-slate-600">{activeAnalysis ? `${activeAnalysis.productTitle} · ${activeAnalysis.editionLabel}${sourceMode === "chosen" ? " · 선택한 분석 기준" : " · 이전 상담 이어가기"}` : portfolio.questionsRemaining > 0 ? "질문하면 구매한 분석에서 알맞은 리포트를 찾아드려요." : "구매한 분석이 준비돼 있어요. 질문권이 있으면 상담을 시작할 수 있습니다."}</p>
+              <p className="text-sm leading-6 text-slate-600">{activeAnalysis ? `${activeAnalysis.productTitle} · ${activeAnalysis.editionLabel}${sourceMode === "chosen" ? " · 선택한 분석 기준" : " · 이전 상담 이어가기"}` : reportEntryUnavailable ? "선택하신 리포트가 현재 상담 대상에 없습니다. 아래에서 보유 분석을 다시 선택해 주세요." : portfolio.questionsRemaining > 0 ? "질문하면 구매한 분석에서 알맞은 리포트를 찾아드려요." : "구매한 분석을 선택하면 해당 리포트의 상담 기록을 볼 수 있어요."}</p>
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
                 {activeAnalysis ? <button type="button" onClick={() => { setSourceMode("automatic"); setChosenSource(null); setLatestAnswerSource(null); setShowAllConversation(false); setIsLoadingSource(true); void loadPortfolio(null).catch((reason) => setError(reason instanceof Error ? reason.message : "상담을 불러오지 못했습니다.")).finally(() => setIsLoadingSource(false)); }} className="text-sm font-semibold text-[#5e4bd1] underline underline-offset-4">새 주제로 질문하기 · 자동 선택</button> : null}
                 <a href="#owned-analysis-selector" className="text-sm font-semibold text-[#5e4bd1] underline underline-offset-4">다른 분석으로 상담하기 ↓</a>
@@ -580,24 +594,9 @@ export default function AiConsultingPortfolioClient({
                     </button>
                   </div>
                 </form>
-              ) : (
-                <div role="status" className="mt-4 rounded-[1.5rem] border border-[#d8d3ff] bg-white p-4 shadow-[0_12px_35px_rgba(33,40,83,0.10)]">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-base font-black text-[#11162d]">질문권 0회 · 새 답변에는 질문권이 필요해요.</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">{portfolio.messages.length > 0 || hasOlderMessages ? "지난 상담 기록은 그대로 볼 수 있어요." : "질문권이 생기면 구매한 분석으로 첫 상담을 시작할 수 있어요."}</p>
-                    </div>
-                    {creditPurchaseHref && !isPreview ? (
-                      <Link href={creditPurchaseHref} className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#6f5ce7] px-5 py-3 text-sm font-black text-white transition hover:bg-[#5f4fd2]">
-                        {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 보기 →"}
-                      </Link>
-                    ) : null}
-                  </div>
-                  {!creditCheckoutEnabled && !isPreview ? (
-                    <p className="mt-2 text-xs text-slate-500">질문권 결제는 현재 준비 중이며, 지금은 상품 안내만 볼 수 있어요.</p>
-                  ) : null}
-                </div>
-              )}
+              ) : visibleChatMessages.length > 0 || hasOlderMessages ? (
+                <p className="mt-3 text-sm leading-6 text-slate-600">지난 상담은 그대로 볼 수 있어요. 새 답변은 질문권을 구매한 뒤 받을 수 있습니다.</p>
+              ) : null}
 
               {routingNotice ? (
                 <div className={routingNotice.kind === "outside"
@@ -629,15 +628,13 @@ export default function AiConsultingPortfolioClient({
 
               <div className="mt-5 space-y-4 pb-4">
                 {hasOlderMessages ? <button type="button" onClick={() => void loadOlderMessages()} disabled={isLoadingOlder} className="w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm font-semibold text-[#5e4bd1] disabled:opacity-50">{isLoadingOlder ? "이전 상담 불러오는 중..." : "이전 상담 더 보기"}</button> : null}
-                {visibleChatMessages.length === 0 ? (
-                  <div className={portfolio.questionsRemaining === 0 ? "rounded-xl bg-[#f0efff] px-4 py-3 text-center text-sm leading-6 text-[#40359a]" : "rounded-[1.5rem] border border-dashed border-[#cfd5e6] bg-white p-7 text-center text-sm leading-7 text-slate-600"}>
+                {visibleChatMessages.length === 0 && (portfolio.questionsRemaining > 0 || hasOlderMessages) ? (
+                  <div className="rounded-[1.5rem] border border-dashed border-[#cfd5e6] bg-white p-7 text-center text-sm leading-7 text-slate-600">
                     {hasOlderMessages
                       ? "이전 상담 더 보기에서 오래된 대화를 확인할 수 있어요."
-                      : portfolio.questionsRemaining === 0
-                        ? "첫 상담 기록이 아직 없어요. 위에서 질문권 상품과 이용 방법을 확인해 주세요."
-                        : activeAnalysis
-                          ? "이 분석의 첫 상담이에요. 위에서 궁금한 내용을 질문해 보세요."
-                          : "궁금한 내용을 질문하면 관련 구매 분석을 찾아 상담을 시작합니다."}
+                      : activeAnalysis
+                        ? "이 분석의 첫 상담이에요. 위에서 궁금한 내용을 질문해 보세요."
+                        : "궁금한 내용을 질문하면 관련 구매 분석을 찾아 상담을 시작합니다."}
                   </div>
                 ) : null}
 

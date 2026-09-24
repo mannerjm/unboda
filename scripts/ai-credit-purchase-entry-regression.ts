@@ -15,11 +15,11 @@ assert(page.includes("isAiConsultingCreditCheckoutEnabled()") && page.includes("
 assert(creditsPage.includes("isTossCheckoutUserAllowed(user.id)") && creditsPage.includes("checkoutEnabled={providerReady}"), "credit checkout must stay disabled for users blocked by the TEST allowlist");
 assert(orders.includes("isAiConsultingCreditCheckoutEnabled()") && orders.includes("isTossCheckoutUserAllowed(user.id)"), "purchase server must preserve authoritative feature and review-account checks");
 assert(main.includes('href={creditPurchaseHref}') && main.includes("#question-bundles"), "main CTA must jump directly to purchase options");
-assert(main.includes("공용 질문권") && main.includes("질문권 구매하기 →") && main.includes("질문권 상품 보기 →"), "top balance card and bottom conversation state must preserve prominent purchase or product-browse actions");
+assert(main.includes("공용 질문권") && main.includes("질문권 구매하기 →") && main.includes("질문권 상품 안내 보기 →"), "top balance card must expose exactly one purchase or informational product-browse action");
 assert(main.includes("portfolio.questionsRemaining > 0") && main.includes("현재 질문권 결제 준비 중") && !main.includes("credit-recharge-title"), "zero balance must preserve honest disabled-checkout copy without duplicating a large recharge banner");
-assert(main.includes("!isPreview") && main.includes("질문권 0회 · 새 답변에는 질문권이 필요해요.") && main.includes("지난 상담 기록은 그대로 볼 수 있어요."), "bottom conversation state must honestly explain zero credits and preserve history");
-assert(main.includes('data-ai-composer="portfolio-sticky"') && main.includes("질문권 결제는 현재 준비 중이며") && main.indexOf("질문권 0회 · 새 답변에는 질문권이 필요해요.") < main.indexOf('id="owned-analysis-selector"'), "conversation purchase action and unavailable-payment note must stay visible near the top without enabling checkout");
-assert((main.match(/href=\{creditPurchaseHref\}/g) ?? []).length === 2, "top balance and bottom conversation must each have a direct credit product link without duplicating a third sales banner");
+assert(main.includes("!isPreview") && main.includes("지난 상담은 그대로 볼 수 있어요. 새 답변은 질문권을 구매한 뒤 받을 수 있습니다."), "existing conversations must remain readable without repeating zero-credit notices");
+assert(main.includes('data-ai-composer="portfolio-sticky"') && main.includes("현재 질문권 결제 준비 중") && main.includes("질문권 상품 안내 보기 →") && main.indexOf('data-section="portfolio-conversation"') < main.indexOf('id="owned-analysis-selector"'), "one authorized header CTA must explain payment availability before the report selector");
+assert((main.match(/href=\{creditPurchaseHref\}/g) ?? []).length === 1, "zero-credit page must not repeat the credit product action");
 assert(main.includes("creditPurchaseHref && !isPreview"), "no clickable purchase action in preview");
 assert(checkout.includes('id="question-bundles"') && checkout.includes("몇 번 더 물어보고 싶으세요?"), "purchase cards must appear near top and support deep link");
 assert(checkout.includes("!checkoutEnabled") && checkout.includes("disabled={!checkoutEnabled || activeBundleId !== null}"), "disabled checkout must never create an order");

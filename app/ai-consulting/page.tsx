@@ -7,6 +7,8 @@ import AiConsultingPortfolioClient from "./AiConsultingPortfolioClient";
 import { getProfileFreeAnalysisFoundationStatus } from "@/app/lib/freeAnalysisEligibility";
 import { isAiConsultingCreditCheckoutEnabled } from "@/app/lib/aiConsulting/creditCheckout";
 import { isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
+import { getAiConsultingPortfolioState } from "@/app/lib/aiConsulting/portfolio";
+import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 
 export default async function AiConsultingPage({
   searchParams,
@@ -44,6 +46,26 @@ export default async function AiConsultingPage({
   }
 
   const freeAnalysisStatus = await getProfileFreeAnalysisFoundationStatus(user.id, activeProfile);
+  // A report entry must start from the exact purchased report, never infer it
+  // from a URL alone or silently switch to another active profile.
+  const reportEntryRequested = Boolean(params.productId && params.edition);
+  const reportEntryMatchesProfile = !params.profileId || params.profileId === activeProfile.id;
+  const requestedReport = reportEntryRequested && reportEntryMatchesProfile
+    ? { productId: getCanonicalPremiumProductId(params.productId!), analysisEditionKey: params.edition! }
+    : null;
+  const initialPortfolioState = requestedReport
+    ? await getAiConsultingPortfolioState({
+        userId: user.id,
+        profileId: activeProfile.id,
+        profile: activeProfile,
+        includePreviousSource: requestedReport,
+        messageSource: requestedReport,
+      })
+    : null;
+  const verifiedReport = initialPortfolioState?.analyses.find((analysis) =>
+    analysis.productId === requestedReport?.productId
+    && analysis.analysisEditionKey === requestedReport.analysisEditionKey,
+  ) ?? null;
   // No misleading "buy now" call to action for customers blocked by the
   // production-hosted TEST allowlist or the disabled credit checkout feature.
   let creditCheckoutAvailable = false;
@@ -58,8 +80,10 @@ export default async function AiConsultingPage({
   return (
     <AiConsultingPortfolioClient
       profileId={activeProfile.id}
-      focusProductId={params.productId ?? null}
-      focusEdition={params.edition ?? null}
+      focusProductId={verifiedReport?.productId ?? null}
+      focusEdition={verifiedReport?.analysisEditionKey ?? null}
+      initialPortfolioState={initialPortfolioState}
+      reportEntryUnavailable={reportEntryRequested && !verifiedReport}
       freeAnalysisStatus={freeAnalysisStatus}
       creditCheckoutAvailable={creditCheckoutAvailable}
     />

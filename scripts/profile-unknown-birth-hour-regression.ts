@@ -25,7 +25,7 @@ const hourUnknown = getSaju("1990-05-15", "12:00", "양력", "평달", "여성",
 const hourKnown = getSaju("1990-05-15", "12:00", "양력", "평달", "여성", "2026-09-24", true);
 assert(hourKnown.hourPillarHanja && hourKnown.hourStem && hourKnown.hourBranch, "a real noon birth must retain its actual hour pillar");
 for (const key of ["hourPillar", "hourPillarHanja", "hourStem", "hourBranch", "hourTenGod", "hourBranchTenGod", "hourStage", "hourSpirit"] as const) {
-  assert(!hourUnknown[key], \`unknown time must not display or export a fabricated \${key}\`);
+  assert(!hourUnknown[key], `unknown time must not display or export a fabricated ${key}`);
 }
 assert.deepEqual(hourUnknown.hourHiddenStems, []);
 assert.equal(hourUnknown.daeunAnalysis, null, "decade-cycle start age must not be invented when birth time is unknown");
@@ -75,8 +75,8 @@ const pipeline = path("app/lib/freeAnalysisPipeline/server.ts");
 const profiles = path("app/lib/profiles/server.ts");
 const transferMigration = path("supabase/migrations/20260924010000_profiles_birth_time_known.sql");
 for (const [label, ui] of [["guest", guest], ["mypage", mypage]] as const) {
-  assert(ui.includes("출생 시간 모름") && ui.includes("birthTimeKnown") && ui.includes('type="checkbox"'), \`\${label} must offer a real, controlled unknown-time checkbox\`);
-  assert(ui.includes('birthTime: event.target.checked ? "12:00" : ""'), \`\${label} checkbox must only use a noon sentinel when time is unknown\`);
+  assert(ui.includes("출생 시간 모름") && ui.includes("birthTimeKnown") && ui.includes('type="checkbox"'), `${label} must offer a real, controlled unknown-time checkbox`);
+  assert(ui.includes('birthTime: event.target.checked ? "12:00" : ""'), `${label} checkbox must only use a noon sentinel when time is unknown`);
 }
 assert(result.includes('profile?.birthTimeKnown === false ? "출생 시간 모름"'));
 assert(result.includes('label: profile?.birthTimeKnown === false ? "시주 · 시간 미상" : "시주"'));

@@ -18,7 +18,7 @@ import {
  * The service publication date is a KST civil day. At 12:00 of that day the
  * library's day pillar is unambiguous, including around the 子時 boundary.
  */
-export const DAILY_COPY_VERSION = "daily-v4" as const;
+export const DAILY_COPY_VERSION = "daily-v5" as const;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 // Only the new daily presentation adapts Hanja branches to the existing Hangul
@@ -129,6 +129,21 @@ export type TodayReading = {
   flow: string;
   action: string;
 };
+
+/** Annual ganji must use the same solar-term calendar convention as the
+ * established four-pillar library, NOT January 1 from calculateSeun().
+ * This is local to free daily copy; it does not change paid fortune cycles.
+ */
+export function getTodayYearPillar(date: string): string {
+  // Use the same strict KST civil date validation as the day pillar.
+  getTodayDayPillar(date);
+  const [year, month, day] = date.split("-").map(Number);
+  const pillar = calculateSaju(year, month, day, 12, 0).yearPillarHanja;
+  if (typeof pillar !== "string" || !VALID_PILLAR.test(pillar)) {
+    throw new Error("Unrecognized annual pillar");
+  }
+  return pillar;
+}
 
 /** Called with the canonical KST date; never accept a birth date from the browser. */
 export function getTodayDayPillar(date: string): string {

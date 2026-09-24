@@ -5,7 +5,7 @@ import { buildTodayReading, getTodayDayPillar, getTodayYearPillar, normalizeDail
 import { BRANCH_HIDDEN_STEMS } from "../app/lib/weights";
 import { getTenGod } from "../app/lib/tenGod";
 
-assert.equal(DAILY_COPY_VERSION, "daily-v5", "daily-v5 must invalidate older cached copy");
+assert.equal(DAILY_COPY_VERSION, "daily-v6", "daily-v6 must invalidate older cached copy");
 assert.equal(normalizeDailyCyclePillar("병자"), "丙子");
 assert.equal(normalizeDailyCyclePillar("辛未"), "辛未");
 assert.equal(normalizeDailyCyclePillar("갑"), null);
@@ -26,30 +26,31 @@ const annualRepeat = buildTodayReading({ date, ...natal, currentSeunGanji: "기�
 assert.deepEqual(annualRepeat, annual, "same person/date/cycle always returns identical copy");
 assert.equal(annual.hiddenStemTenGod, getTenGod("甲", "丁"), "午 must use its actual primary hidden stem");
 assert.equal(annual.cycleFocus, "seun");
-assert(annual.topic.includes("새로운 표현"), "primary hidden ten-god must refine visible headline");
-assert(annual.topic.includes("올해 조율"), "computed annual cycle must refine visible headline");
-assert(annual.action.includes("올해의 합 관계") && annual.action.includes("달라진 조건 한 가지"), "cycle must contextualize, not erase, the natal practical suggestion");
-assert(annual.topic.length < 45, "daily event headline must remain glanceable on mobile");
+assert(annual.topic.includes("내 기준을 세워보세요"), "visible headline must be understandable without ten-god jargon");
+assert(annual.topic.includes("계획을 다시 확인해요"), "the natal focus should remain visible and understandable");
+assert(annual.action.includes("예상과 달라진 점"), "daily action must be one understandable suggestion tied to selected focus");
+assert(annual.topic.length <= 32, "daily event headline must remain glanceable on mobile");
 const neutralNatal = { date, personDayStem: "甲", personDayBranch: "寅", personMonthPillarHanja: "丙辰", personYearPillarHanja: "庚寅", dayPillarHanja: "庚午" };
 const neutralWithCycle = buildTodayReading({ ...neutralNatal, currentSeunGanji: "기미" });
-assert(neutralWithCycle.action.includes("맞춰 볼 기준 한 가지"), "when there is no significant natal relation the annual cycle can select a grounded practical action");
-assert(annual.flow.includes("본기(주된 지장간) 丁") && annual.flow.includes("올해 세운의 지지와 오늘 지지는 합"), "daily copy must attribute concrete hidden and cycle grounds");
-assert.notEqual(annual.topic, base.topic, "actual seun relation may change the title");
-assert.notEqual(annual.action, base.action, "actual seun relation may change the one action");
+assert(neutralWithCycle.action.includes("함께할 사람과 생각을 맞춰 보세요"), "when there is no notable natal relation the annual cycle can select a grounded practical action");
+assert(!/천간|지지|지장간|십성|오행|세운|대운|합 관계|충 관계|형 관계|파 관계|해 관계/.test(annual.topic + annual.flow + annual.action), "customer-facing copy must not expose the internal saju terminology");
+assert(annual.flow.split(/[.!?] /).length <= 3 && annual.flow.length <= 185, "today note must read in at most three short sentences");
+assert.equal(annual.topic, base.topic, "the most relevant personal focus stays primary when an annual cycle is added");
+assert.equal(annual.action, base.action, "the personal focus must not be overwritten by a secondary annual cycle");
 assert.equal(base.cycleFocus, null);
 assert.equal(base.hiddenStemTenGod, annual.hiddenStemTenGod);
 
 const decade = buildTodayReading({ date, ...natal, currentDaeunGanji: "계축" });
 assert.equal(decade.cycleFocus, "daeun");
-assert(decade.topic.includes("대운 기대 확인") && decade.flow.includes("현재 대운의 지지"), "existing available decade cycle can be selected");
+assert(decade.topic.length <= 32 && !decade.flow.includes("대운"), "available decade cycle can be selected without exposing jargon");
 const both = buildTodayReading({ date, ...natal, currentSeunGanji: "기미", currentDaeunGanji: "계축" });
 assert.equal(both.cycleFocus, "seun", "concrete non-neutral annual branch relation wins by documented priority");
-assert(both.flow.includes("현재 대운의 지지에서도 해 관계"), "other concurrent real cycle is identified without overriding the focus");
+assert.equal(both.action, annual.action, "second cycle must not crowd out the single personal action");
 
 const withoutFullNatal = buildTodayReading({ date, personDayStem: "甲", personDayBranch: "子", dayPillarHanja: "庚午", currentSeunGanji: "기미" });
 assert.equal(withoutFullNatal.hiddenStemTenGod, undefined, "incomplete natal pillars may not claim full personal interpretation");
 assert.equal(withoutFullNatal.cycleFocus, undefined, "incomplete natal pillars fall back to earlier safe reading");
-assert.equal(withoutFullNatal.topic, "책임과 대응");
+assert.equal(withoutFullNatal.topic, "해야 할 일부터 정리해요");
 
 const stems = [..."甲乙丙丁戊己庚辛壬癸"];
 const branches = [..."子丑寅卯辰巳午未申酉戌亥"];
@@ -88,7 +89,7 @@ const measurements = births.map(([year, month, day]) => {
   const topics = new Set(results.map(row => row.topic));
   const flows = new Set(results.map(row => row.flow));
   const actions = new Set(results.map(row => row.action));
-  assert(topics.size >= 10 && flows.size >= 20 && actions.size >= 10, "60-day results must retain meaningful variety");
+  assert(topics.size >= 8 && flows.size >= 16 && actions.size >= 10, "60-day plain-language results must retain meaningful variety");
   assert(results.every(row => row.hiddenStemTenGod && row.action.length > 12 && row.topic.length > 8));
   return { birth: `${year}-${month}-${day}`, topics: topics.size, flows: flows.size, actions: actions.size, maxTopicLength: Math.max(...results.map(row => row.topic.length)) };
 });

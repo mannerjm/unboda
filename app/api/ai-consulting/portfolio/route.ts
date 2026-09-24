@@ -40,6 +40,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "상담 기록 조회 기준이 올바르지 않습니다." }, { status: 400 });
   }
 
+  const messageProductId = url.searchParams.get("messageProductId");
+  const messageEdition = url.searchParams.get("messageEdition");
+  if ((messageProductId === null) !== (messageEdition === null) || (messageProductId !== null && (!messageProductId.trim() || !messageEdition?.trim() || messageProductId.length > 128 || messageEdition.length > 256))) {
+    return NextResponse.json({ error: "상담할 분석 정보를 다시 선택해 주세요." }, { status: 400 });
+  }
+
   const includeProductId = url.searchParams.get("includeProductId");
   const includeEdition = url.searchParams.get("includeEdition");
   const includePreviousSource = includeProductId && includeEdition
@@ -54,6 +60,7 @@ export async function GET(request: Request) {
       includePreviousSource,
       messageBefore: messageBefore ?? undefined,
       messageBeforeId: messageBeforeId ?? undefined,
+      messageSource: messageProductId && messageEdition ? { productId: messageProductId, analysisEditionKey: messageEdition } : null,
     });
     return NextResponse.json(state);
   } catch (error) {

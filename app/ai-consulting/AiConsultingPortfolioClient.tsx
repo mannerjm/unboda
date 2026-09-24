@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   AiConsultingPortfolioAnalysis,
   AiConsultingPortfolioMessage,
@@ -89,11 +89,15 @@ export default function AiConsultingPortfolioClient({
   const [olderMessages, setOlderMessages] = useState<AiConsultingPortfolioMessage[]>([]);
   const [hasOlderMessages, setHasOlderMessages] = useState(previewData?.state.hasOlderMessages ?? false);
   const [isLoadingOlder, setIsLoadingOlder] = useState(false);
+  const [isLoadingSource, setIsLoadingSource] = useState(false);
+  const portfolioRequestSeq = useRef(0);
+  const [historySource, setHistorySource] = useState<Pick<AiConsultingPortfolioSource, "productId" | "analysisEditionKey"> | null>(focusProductId && focusEdition ? { productId: focusProductId, analysisEditionKey: focusEdition } : null);
   const isPreview = Boolean(previewData);
   const creditCheckoutEnabled = creditCheckoutAvailable;
   const freeAnalysisReady = freeAnalysisStatus === "completed" || freeAnalysisStatus === "needs_retry";
 
-  const loadPortfolio = useCallback(async () => {
+  const loadPortfolio = useCallback(async (requestedHistorySource?: Pick<AiConsultingPortfolioSource, "productId" | "analysisEditionKey"> | null) => {
+    const requestSeq = ++portfolioRequestSeq.current;
     if (previewData) {
       setPortfolio(previewData.state);
       setHasOlderMessages(previewData.state.hasOlderMessages ?? false);
@@ -104,13 +108,22 @@ export default function AiConsultingPortfolioClient({
       portfolioParams.set("includeProductId", focusProductId);
       portfolioParams.set("includeEdition", focusEdition);
     }
+    const targetHistory = requestedHistorySource === undefined && focusProductId && focusEdition
+      ? { productId: focusProductId, analysisEditionKey: focusEdition }
+      : requestedHistorySource ?? null;
+    if (targetHistory) {
+      portfolioParams.set("messageProductId", targetHistory.productId);
+      portfolioParams.set("messageEdition", targetHistory.analysisEditionKey);
+    }
     const response = await fetch(
       `/api/ai-consulting/portfolio?${portfolioParams.toString()}`,
       { cache: "no-store" },
     );
     const body = (await response.json()) as AiConsultingPortfolioState & { error?: string };
     if (!response.ok) throw new Error(body.error ?? "통합 AI 상담을 불러오지 못했습니다.");
+    if (requestSeq !== portfolioRequestSeq.current) return;
     setPortfolio(body);
+    setHistorySource(targetHistory);
     setOlderMessages([]);
     setHasOlderMessages(body.hasOlderMessages ?? false);
   }, [focusEdition, focusProductId, previewData, profileId]);
@@ -226,18 +239,24 @@ export default function AiConsultingPortfolioClient({
 
   async function loadOlderMessages() {
     const oldest = allLoadedMessages[0];
-    if (isPreview || !oldest || !hasOlderMessages || isLoadingOlder) return;
+    if (isPreview || !oldest || !hasOlderMessages || isLoadingOlder || isLoadingSource) return;
     setIsLoadingOlder(true);
     setError(null);
+    const requestSeq = portfolioRequestSeq.current;
     try {
       const params = new URLSearchParams({ profileId, before: oldest.createdAt, beforeId: oldest.id });
       if (focusProductId && focusEdition) {
         params.set("includeProductId", focusProductId);
         params.set("includeEdition", focusEdition);
       }
+      if (historySource) {
+        params.set("messageProductId", historySource.productId);
+        params.set("messageEdition", historySource.analysisEditionKey);
+      }
       const response = await fetch(`/api/ai-consulting/portfolio?${params.toString()}`, { cache: "no-store" });
       const body = await response.json() as AiConsultingPortfolioState & { error?: string };
       if (!response.ok) throw new Error(body.error ?? "이전 상담을 불러오지 못했습니다.");
+      if (requestSeq !== portfolioRequestSeq.current) return;
       setOlderMessages((existing) => {
         const known = new Set([...existing, ...(portfolio?.messages ?? [])].map((message) => message.id));
         return [...body.messages.filter((message) => !known.has(message.id)), ...existing];
@@ -281,7 +300,7 @@ export default function AiConsultingPortfolioClient({
         setQuestion("");
         setLatestAnswerSource(body.source);
         if (preferred) { setChosenSource(preferred); setSourceMode("chosen"); }
-        await loadPortfolio();
+        await loadPortfolio(preferred ?? (sourceMode === "chosen" ? chosenSource ?? focusAnalysis : null));
         return;
       }
 
@@ -307,7 +326,7 @@ export default function AiConsultingPortfolioClient({
 
       if (body.state === "credit_required") {
         setRoutingNotice({ kind: "info", message: "남은 AI 질문권이 없습니다. 질문권을 추가하면 보유 분석 범위에서 상담을 계속할 수 있습니다." });
-        await loadPortfolio();
+        await loadPortfolio(sourceMode === "chosen" ? chosenSource ?? focusAnalysis : null);
       }
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "AI 상담 답변을 완료하지 못했습니다.");
@@ -519,16 +538,17 @@ export default function AiConsultingPortfolioClient({
                   <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">CONVERSATION</p>
                   <h2 className="mt-1 text-lg font-black">{activeAnalysis ? `${activeAnalysis.productTitle} 상담` : "새 상담 시작"}</h2>
                 </div>
-                {portfolio.messages.length > 0 ? (
+                {portfolio.messages.length > 0 && !historySource ? (
                   <button type="button" onClick={() => setShowAllConversation((value) => !value)} className="text-xs font-semibold text-[#5e4bd1] underline underline-offset-4">{showAllConversation ? "이 분석의 상담만 보기" : "전체 상담 보기"}</button>
                 ) : null}
               </div>
               <p className="text-sm leading-6 text-slate-600">{activeAnalysis ? `${activeAnalysis.productTitle} · ${activeAnalysis.editionLabel}${sourceMode === "chosen" ? " · 선택한 분석 기준" : " · 이전 상담 이어가기"}` : "질문하면 구매한 분석에서 관련 리포트를 찾아 상담을 시작합니다."}</p>
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
-                {activeAnalysis ? <button type="button" onClick={() => { setSourceMode("automatic"); setChosenSource(null); setShowAllConversation(false); }} className="text-sm font-semibold text-[#5e4bd1] underline underline-offset-4">새 주제로 질문하기 · 자동 선택</button> : null}
+                {activeAnalysis ? <button type="button" onClick={() => { setSourceMode("automatic"); setChosenSource(null); setLatestAnswerSource(null); setShowAllConversation(false); setIsLoadingSource(true); void loadPortfolio(null).catch((reason) => setError(reason instanceof Error ? reason.message : "상담을 불러오지 못했습니다.")).finally(() => setIsLoadingSource(false)); }} className="text-sm font-semibold text-[#5e4bd1] underline underline-offset-4">새 주제로 질문하기 · 자동 선택</button> : null}
                 <a href="#owned-analysis-selector" className="text-sm font-semibold text-[#5e4bd1] underline underline-offset-4">다른 분석으로 상담하기 ↓</a>
               </div>
 
+              {isLoadingSource ? <p role="status" className="mt-3 text-sm text-slate-600">선택한 상담을 불러오는 중...</p> : null}
               {portfolio.questionsRemaining > 0 ? (
                 <form
                   data-ai-composer="portfolio-sticky"
@@ -697,7 +717,7 @@ export default function AiConsultingPortfolioClient({
                           <button
                             key={`${analysis.productId}|${analysis.analysisEditionKey}`}
                             type="button"
-                            onClick={() => { setChosenSource(analysis); setSourceMode("chosen"); setShowAllConversation(false); document.getElementById("portfolio-question")?.focus(); }}
+                            onClick={() => { setChosenSource(analysis); setSourceMode("chosen"); setShowAllConversation(false); setIsLoadingSource(true); void loadPortfolio(analysis).catch((reason) => setError(reason instanceof Error ? reason.message : "이 분석의 상담을 불러오지 못했습니다.")).finally(() => setIsLoadingSource(false)); document.getElementById("portfolio-question")?.focus(); }}
                             className={focused
                               ? "rounded-full border border-[#aaa0f4] bg-[#f3f1ff] px-3 py-2 text-xs font-bold text-[#5e4bd1]"
                               : "rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-xs font-semibold text-slate-600"}

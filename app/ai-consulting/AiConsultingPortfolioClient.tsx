@@ -75,6 +75,9 @@ export default function AiConsultingPortfolioClient({
   const [memoryError, setMemoryError] = useState<string | null>(null);
   const [savingMemoryMessageId, setSavingMemoryMessageId] = useState<string | null>(null);
   const [deletingMemoryId, setDeletingMemoryId] = useState<string | null>(null);
+  const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
+  const [editingMemoryContent, setEditingMemoryContent] = useState("");
+  const [isSavingMemoryEdit, setIsSavingMemoryEdit] = useState(false);
   const [showAllAnalyses, setShowAllAnalyses] = useState(false);
   const [analysisSearch, setAnalysisSearch] = useState("");
   const [visibleAnalysisLimit, setVisibleAnalysisLimit] = useState(8);
@@ -345,6 +348,28 @@ export default function AiConsultingPortfolioClient({
       setMemoryError(reason instanceof Error ? reason.message : "AI 기억을 저장하지 못했습니다.");
     } finally {
       setSavingMemoryMessageId(null);
+    }
+  }
+
+  async function saveEditedMemory() {
+    if (isPreview || !editingMemoryId || !editingMemoryContent.trim() || isSavingMemoryEdit) return;
+    setIsSavingMemoryEdit(true);
+    setMemoryError(null);
+    try {
+      const response = await fetch("/api/ai-consulting/memories", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profileId, memoryId: editingMemoryId, content: editingMemoryContent.trim() }),
+      });
+      const body = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(body.error ?? "AI 기억을 수정하지 못했습니다.");
+      setEditingMemoryId(null);
+      setEditingMemoryContent("");
+      await loadMemories();
+    } catch (reason) {
+      setMemoryError(reason instanceof Error ? reason.message : "AI 기억을 수정하지 못했습니다.");
+    } finally {
+      setIsSavingMemoryEdit(false);
     }
   }
 
@@ -730,18 +755,26 @@ export default function AiConsultingPortfolioClient({
                 <div className="mt-4 space-y-2">
                   {memories.map((memory) => (
                     <div key={memory.id} className="flex flex-col gap-3 rounded-2xl bg-[#f7f8fc] px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
-                      <p className="min-w-0 whitespace-pre-wrap text-sm leading-6 text-slate-800">{memory.content}</p>
-                      {!isPreview ? (
-                        <button
-                          type="button"
-                          onClick={() => void deleteMemory(memory)}
-                          disabled={deletingMemoryId === memory.id}
-                          className="shrink-0 self-start text-xs font-semibold text-slate-500 underline underline-offset-4 disabled:opacity-50"
-                        >
-                          {deletingMemoryId === memory.id ? "삭제 중" : "기억에서 삭제"}
-                        </button>
+                      {editingMemoryId === memory.id ? (
+                        <div className="w-full space-y-2">
+                          <label className="block text-sm font-bold text-slate-700">기억 수정
+                            <textarea value={editingMemoryContent} onChange={(event) => setEditingMemoryContent(event.target.value.slice(0, 300))} rows={3} maxLength={300} className="mt-2 w-full rounded-xl border border-[#d8d3ff] bg-white px-3 py-2 text-sm font-normal leading-6 outline-none focus:border-[#6f5ce7]" />
+                          </label>
+                          <div className="flex gap-2">
+                            <button type="button" onClick={() => void saveEditedMemory()} disabled={isSavingMemoryEdit || !editingMemoryContent.trim()} className="rounded-xl bg-[#6f5ce7] px-4 py-2 text-xs font-bold text-white disabled:opacity-50">{isSavingMemoryEdit ? "저장 중..." : "수정 저장"}</button>
+                            <button type="button" onClick={() => { setEditingMemoryId(null); setEditingMemoryContent(""); }} disabled={isSavingMemoryEdit} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600">취소</button>
+                          </div>
+                        </div>
                       ) : (
-                        <span className="shrink-0 text-xs font-semibold text-slate-500">미리보기</span>
+                        <>
+                          <p className="min-w-0 whitespace-pre-wrap text-sm leading-6 text-slate-800">{memory.content}</p>
+                          {!isPreview ? (
+                            <div className="flex shrink-0 items-center gap-3 self-start">
+                              <button type="button" onClick={() => { setEditingMemoryId(memory.id); setEditingMemoryContent(memory.content); }} className="text-xs font-semibold text-[#5e4bd1] underline underline-offset-4">수정</button>
+                              <button type="button" onClick={() => void deleteMemory(memory)} disabled={deletingMemoryId === memory.id} className="text-xs font-semibold text-slate-500 underline underline-offset-4 disabled:opacity-50">{deletingMemoryId === memory.id ? "삭제 중" : "기억에서 삭제"}</button>
+                            </div>
+                          ) : <span className="shrink-0 text-xs font-semibold text-slate-500">미리보기</span>}
+                        </>
                       )}
                     </div>
                   ))}

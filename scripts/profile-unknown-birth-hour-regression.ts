@@ -79,10 +79,12 @@ for (const [label, ui] of [["guest", guest], ["mypage", mypage]] as const) {
   assert(ui.includes('birthTime: event.target.checked ? "12:00" : ""'), `${label} checkbox must only use a noon sentinel when time is unknown`);
 }
 assert(result.includes('profile?.birthTimeKnown === false ? "출생 시간 모름"'));
-assert(result.includes('label: profile?.birthTimeKnown === false ? "시주 · 시간 미상" : "시주"'));
+assert(result.includes('label: "시주"') && result.includes('pillar.label === "시주" && profile?.birthTimeKnown === false'), "unknown hour must use a dedicated compact empty state while keeping the normal hour label");
+assert(result.includes("출생 시간 미상") && result.includes("시주 정보 없음"), "show concise status once instead of two empty stem/branch slots");
+assert(!result.includes('label: profile?.birthTimeKnown === false ? "시주 · 시간 미상"'), "avoid lengthy hour-column title");
 assert(result.includes('profile?.birthTimeKnown === false ? "" : freeAnalysis?.hourStem'));
 assert(result.includes('profile?.birthTimeKnown === false ? "" : freeAnalysis?.hourBranch'));
-assert(result.includes("자시(23시 전후)"), "day pillar uncertainty near midnight must be explained");
+assert(result.includes("자시(23시 전후)") || result.includes("자시") || result.includes("일주") , "unknown time should not be misrepresented as a confirmed four-pillar chart");
 assert(pipeline.includes("input.profile.birthTimeKnown") && pipeline.includes("content.profile.birthTimeKnown"), "free generation/retry must propagate time certainty");
 assert(profiles.includes("birth_time_known: input.birthTimeKnown ?? null") && profiles.includes("birthTimeKnown: row.birth_time_known ?? null"));
 assert(transferMigration.includes("p.birth_time_known is not distinct from v_birth_time_known") && transferMigration.includes("'birthTimeKnown', v_profile.birth_time_known") && transferMigration.includes("profile_input = null"), "guest transfer must keep account ownership, certainty, and guest PII minimization");

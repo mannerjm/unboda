@@ -13,6 +13,7 @@ type PortfolioQuestionInput = {
   question?: unknown;
   preferredProductId?: unknown;
   preferredEditionKey?: unknown;
+  preferContinuation?: unknown;
 };
 
 export async function POST(request: Request) {
@@ -61,6 +62,7 @@ export async function POST(request: Request) {
       question: input.question.trim(),
       preferredProductId,
       preferredEditionKey,
+      preferContinuation: input.preferContinuation === true,
       profile,
     });
 

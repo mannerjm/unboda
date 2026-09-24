@@ -183,6 +183,51 @@ export async function POST(request: Request) {
   }
 }
 
+type MemoryEditInput = {
+  profileId?: unknown;
+  memoryId?: unknown;
+  content?: unknown;
+};
+
+/** Only the authenticated owner may update an explicitly saved USER_STATED memory. */
+export async function PATCH(request: Request) {
+  let input: MemoryEditInput;
+  try {
+    input = (await request.json()) as MemoryEditInput;
+  } catch {
+    return NextResponse.json({ error: "잘못된 요청 형식입니다." }, { status: 400 });
+  }
+
+  const boundary = await resolveProfileBoundary(input.profileId);
+  if ("error" in boundary) return boundary.error;
+  if (!isUuid(input.memoryId) || typeof input.content !== "string") {
+    return NextResponse.json({ error: "수정할 기억과 내용을 확인해 주세요." }, { status: 400 });
+  }
+  const content = input.content.trim();
+  if (!content || content.length > USER_MEMORY_MAX_CHARS) {
+    return NextResponse.json({ error: `기억할 내용은 1~${USER_MEMORY_MAX_CHARS}자로 입력해 주세요.` }, { status: 400 });
+  }
+
+  try {
+    const { data, error } = await createAdminClient()
+      .from("ai_consulting_memories")
+      .update({ content, updated_at: new Date().toISOString() })
+      .eq("id", input.memoryId)
+      .eq("user_id", boundary.user.id)
+      .eq("profile_id", boundary.profile.id)
+      .eq("provenance", "USER_STATED")
+      .eq("status", "active")
+      .select("id,kind,content,source_message_id,created_at,updated_at")
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return NextResponse.json({ error: "수정할 기억을 찾지 못했습니다." }, { status: 404 });
+    return NextResponse.json({ memory: serializeMemory(data) });
+  } catch (error) {
+    console.error("[ai-consulting-memories] edit failed", error);
+    return NextResponse.json({ error: "AI 기억을 수정하지 못했습니다." }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   let input: MemoryDeleteInput;
   try {

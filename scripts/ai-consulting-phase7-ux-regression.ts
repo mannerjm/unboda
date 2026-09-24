@@ -101,7 +101,7 @@ for (const forbidden of ["/api/ai-consulting/question", "/api/orders", "requestP
   assert(!preview.includes(forbidden), `operator preview must not invoke commercial/runtime action: ${forbidden}`);
 }
 assert(reportPreview.includes('href="/admin/ai-consulting-preview"'), "Phase 6 report preview must link directly to the Phase 7 follow-up screen");
-assert(portfolioChat.includes("내 구매 분석을 연결하는 AI 상담"), "unified consultation must explain the portfolio model");
+assert(portfolioChat.includes("나를 기억하는 AI 운세 상담") && portfolioChat.includes("새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다."), "unified consultation must explain the memory-first portfolio model");
 assert(portfolioChat.includes("공용 질문권") && portfolioChat.includes("모든 보유 분석에서 함께 사용"), "unified consultation must make the shared balance explicit");
 assert(portfolioChat.includes("질문마다 관련 리포트 자동 선택"), "unified consultation must explain automatic report routing");
 assert(portfolioChat.includes('fetch("/api/ai-consulting/portfolio/question"'), "unified consultation must submit through the portfolio router");

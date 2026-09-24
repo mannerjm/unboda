@@ -32,6 +32,14 @@ export async function GET(request: Request) {
   const boundary = await resolvePortfolioBoundary(url.searchParams.get("profileId"));
   if ("error" in boundary) return boundary.error;
 
+  const messageBefore = url.searchParams.get("before");
+  const messageBeforeId = url.searchParams.get("beforeId");
+  const validTime = Boolean(messageBefore && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/.test(messageBefore) && !Number.isNaN(Date.parse(messageBefore)));
+  const validId = Boolean(messageBeforeId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(messageBeforeId));
+  if ((messageBefore !== null || messageBeforeId !== null) && !(validTime && validId)) {
+    return NextResponse.json({ error: "상담 기록 조회 기준이 올바르지 않습니다." }, { status: 400 });
+  }
+
   const includeProductId = url.searchParams.get("includeProductId");
   const includeEdition = url.searchParams.get("includeEdition");
   const includePreviousSource = includeProductId && includeEdition
@@ -44,6 +52,8 @@ export async function GET(request: Request) {
       profileId: boundary.profile.id,
       profile: boundary.profile,
       includePreviousSource,
+      messageBefore: messageBefore ?? undefined,
+      messageBeforeId: messageBeforeId ?? undefined,
     });
     return NextResponse.json(state);
   } catch (error) {

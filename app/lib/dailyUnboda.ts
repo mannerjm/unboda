@@ -1,4 +1,5 @@
 import { calculateSaju } from "@fullstackfamily/manseryeok";
+import { BRANCH_HIDDEN_STEMS } from "./weights";
 import { getTenGod } from "./tenGod";
 import { branchElementMap, stemElementMap, calculateWeightedElements, type Element } from "./elements";
 import {
@@ -17,7 +18,7 @@ import {
  * The service publication date is a KST civil day. At 12:00 of that day the
  * library's day pillar is unambiguous, including around the 子時 boundary.
  */
-export const DAILY_COPY_VERSION = "daily-v3" as const;
+export const DAILY_COPY_VERSION = "daily-v4" as const;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 // Only the new daily presentation adapts Hanja branches to the existing Hangul
@@ -120,6 +121,10 @@ export type TodayReading = {
   /** One selected context; never a fabricated claim of a predicted event. */
   focusPillar?: "day" | "month" | "year" | "hour" | null;
   focusRelation?: TodayBranchRelation;
+  /** The primary hidden-stem ten-god, when all three natal pillars are available. */
+  hiddenStemTenGod?: string;
+  /** Only a current, available cycle may be selected; never invent one. */
+  cycleFocus?: "seun" | "daeun" | null;
   topic: string;
   flow: string;
   action: string;
@@ -283,6 +288,105 @@ function expandedTodayCopy(input: {
   };
 }
 
+/** The existing fortune-cycle engine uses Hangul ganji; daily pillars are Hanja. */
+const CYCLE_STEMS: Record<string, string> = { 갑: "甲", 을: "乙", 병: "丙", 정: "丁", 무: "戊", 기: "己", 경: "庚", 신: "辛", 임: "壬", 계: "癸" };
+const CYCLE_BRANCHES: Record<string, string> = { 자: "子", 축: "丑", 인: "寅", 묘: "卯", 진: "辰", 사: "巳", 오: "午", 미: "未", 신: "申", 유: "酉", 술: "戌", 해: "亥" };
+export function normalizeDailyCyclePillar(value: string | null | undefined): string | null {
+  if (!value) return null;
+  if (VALID_PILLAR.test(value)) return value;
+  if (value.length !== 2) return null;
+  const hanja = `${CYCLE_STEMS[value[0]] ?? ""}${CYCLE_BRANCHES[value[1]] ?? ""}`;
+  return VALID_PILLAR.test(hanja) ? hanja : null;
+}
+
+type DailyCycleFocus = { type: "seun" | "daeun"; label: string; pillar: string; relation: NonNullRelation };
+const DAILY_TEN_GOD_CUES: Record<string, { title: string; subject: string }> = {
+  "비견": { title: "내 기준", subject: "내가 직접 결정할 일" },
+  "겁재": { title: "함께 쓰는 자원", subject: "함께 사용하는 시간과 자원" },
+  "식신": { title: "차근차근 실행", subject: "준비해 둔 작은 일" },
+  "상관": { title: "새로운 표현", subject: "새로운 생각을 전할 일" },
+  "편재": { title: "새로운 선택", subject: "새로 살펴볼 선택지" },
+  "정재": { title: "계획과 관리", subject: "오늘 쓸 시간과 예산" },
+  "편관": { title: "과제에 대응", subject: "지금 맡은 과제" },
+  "정관": { title: "역할과 기준", subject: "지켜야 할 역할과 기준" },
+  "편인": { title: "다른 시선", subject: "다른 시선으로 볼 고민" },
+  "정인": { title: "정보와 준비", subject: "오늘 필요한 정보와 준비" },
+};
+
+/** Uses only verified underlying computation inputs. No random text rotation,
+ * forced day-to-day novelty, invented birth hour, or luck scoring. */
+function buildSupplementalDailyFocus(input: {
+  personDayStem: string;
+  todayPillar: string;
+  tenGod: string;
+  baseTopic: string;
+  baseAction: string;
+  baseRelation: TodayBranchRelation;
+  seunGanji?: string | null;
+  daeunGanji?: string | null;
+}): { topic: string; action: string; note: string; hiddenStemTenGod: string | undefined; cycleFocus: "seun" | "daeun" | null } {
+  const hiddenStem = BRANCH_HIDDEN_STEMS[input.todayPillar[1]]?.find((item) => item.position === "primary")?.stem;
+  const hiddenStemTenGod = hiddenStem ? getTenGod(input.personDayStem, hiddenStem) : undefined;
+  const hiddenCue = hiddenStemTenGod && hiddenStemTenGod !== input.tenGod ? DAILY_TEN_GOD_CUES[hiddenStemTenGod] : null;
+
+  const cycleCandidates: DailyCycleFocus[] = [
+    { type: "seun" as const, label: "올해 세운", pillar: normalizeDailyCyclePillar(input.seunGanji) },
+    { type: "daeun" as const, label: "현재 대운", pillar: normalizeDailyCyclePillar(input.daeunGanji) },
+  ].filter((item): item is { type: "seun" | "daeun"; label: string; pillar: string } => Boolean(item.pillar))
+    .map((item) => ({ ...item, relation: getTodayBranchRelation(item.pillar[1], input.todayPillar[1]) }))
+    .filter((item): item is DailyCycleFocus => Boolean(item.relation));
+  // Non-neutral annual relation first; otherwise non-neutral decade relation.
+  // Same-element is descriptive, never arbitrarily treated as an event forecast.
+  const selectedCycle = cycleCandidates.find((item) => item.relation !== "같은 오행") ?? cycleCandidates[0] ?? null;
+  const notes: string[] = [];
+  if (hiddenStemTenGod && hiddenStem) {
+    notes.push(`오늘 지지의 본기(주된 지장간) ${hiddenStem}은 개인 일간 기준 ${hiddenStemTenGod}으로 분류됩니다.`);
+  }
+  if (selectedCycle) {
+    notes.push(`${selectedCycle.label}의 지지와 오늘 지지는 ${selectedCycle.relation} 관계로 분류됩니다.`);
+    const otherCycle = cycleCandidates.find((item) => item !== selectedCycle && item.relation !== "같은 오행");
+    if (otherCycle) notes.push(`${otherCycle.label}의 지지에서도 ${otherCycle.relation} 관계를 확인할 수 있습니다.`);
+  }
+  const cycleCue = selectedCycle ? `${selectedCycle.type === "seun" ? "올해" : "대운"} ${RELATION_LANGUAGE[selectedCycle.relation].title}` : null;
+  const hiddenTitle = hiddenCue?.title ?? null;
+  // The existing day/month/year headline remains primary when no cycle is
+  // available. With a cycle, use the shorter ten-god theme followed by its
+  // computed hidden/cycle cues; the natal focus remains described in flow.
+  const originalTheme = copyByTenGod[input.tenGod]!.topic;
+  const cycleHeadline = [hiddenTitle ?? input.baseTopic.split(" · ")[1], cycleCue].filter(Boolean).join(" · ");
+  const headline = selectedCycle && cycleHeadline
+    ? `${originalTheme} · ${cycleHeadline}`
+    : hiddenTitle ? `${input.baseTopic} · ${hiddenTitle}` : input.baseTopic;
+
+  // Keep the natal day/month/year practical action as the primary instruction.
+  // Previously overwriting it with the selected cycle collapsed 60-day action
+  // variety. A cycle may supply a short context, not erase the actual natal
+  // comparison or turn one suggestion into several unrelated tasks.
+  // Preserve the day-stem's personally distinctive action subject whenever a
+  // meaningful natal day/month/year relation already exists. The hidden stem
+  // supplies the subject when those primary relations are neutral or absent;
+  // the year/decade relation then refines its practical verb if appropriate.
+  const strongNatalFocus = input.baseRelation && input.baseRelation !== "같은 오행";
+  const actionSubject = strongNatalFocus
+    ? ACTION_CONTEXT[input.tenGod]
+    : hiddenCue?.subject ?? ACTION_CONTEXT[input.tenGod];
+  const natalAction = strongNatalFocus ? RELATION_LANGUAGE[input.baseRelation!].action : null;
+  const cycleAction = selectedCycle && selectedCycle.relation !== "같은 오행"
+    ? RELATION_LANGUAGE[selectedCycle.relation].action
+    : null;
+  const prompt = natalAction ?? cycleAction
+    ?? (input.baseRelation ? RELATION_LANGUAGE[input.baseRelation].action : null);
+  const cycleContext = selectedCycle
+    ? `${selectedCycle.type === "seun" ? "올해" : "대운"}의 ${selectedCycle.relation} 관계를 참고해, `
+    : "";
+  return {
+    topic: headline,
+    action: prompt ? `${cycleContext}${actionSubject}에서 ${prompt}` : input.baseAction,
+    note: notes.join(" "),
+    hiddenStemTenGod,
+    cycleFocus: selectedCycle?.type ?? null,
+  };
+}
 /** Pure, deterministic presentation: no OpenAI call, randomness, billing or persistence. */
 export function buildTodayReading(input: {
   date: string;
@@ -293,6 +397,9 @@ export function buildTodayReading(input: {
   personMonthPillarHanja?: string;
   /** Do not set unless actual time was explicitly verified by the user. */
   verifiedHourPillarHanja?: string;
+  /** Existing annual and decade-cycle ganji (Hangul or Hanja). */
+  currentSeunGanji?: string | null;
+  currentDaeunGanji?: string | null;
 }): TodayReading {
   const { date, personDayStem, personDayBranch, dayPillarHanja } = input;
   if (!/^[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]$/.test(dayPillarHanja)) {
@@ -319,6 +426,16 @@ export function buildTodayReading(input: {
       todayPillar: dayPillarHanja,
     })
     : null;
+  const supplemental = expanded ? buildSupplementalDailyFocus({
+    personDayStem,
+    todayPillar: dayPillarHanja,
+    tenGod,
+    baseTopic: expanded.topic,
+    baseAction: expanded.action,
+    baseRelation: expanded.focusRelation,
+    seunGanji: input.currentSeunGanji,
+    daeunGanji: input.currentDaeunGanji,
+  }) : null;
   return {
     date,
     version: DAILY_COPY_VERSION,
@@ -326,10 +443,11 @@ export function buildTodayReading(input: {
     tenGod,
     branchRelation,
     ...(expanded ? { focusPillar: expanded.focusPillar, focusRelation: expanded.focusRelation } : {}),
+    ...(supplemental ? { hiddenStemTenGod: supplemental.hiddenStemTenGod, cycleFocus: supplemental.cycleFocus } : {}),
     ...copy,
-    topic: expanded?.topic ?? copy.topic,
-    action: expanded?.action ?? copy.action,
-    flow: expanded ? `${copy.flow} ${expanded.flowNote}`.trim()
+    topic: supplemental?.topic ?? expanded?.topic ?? copy.topic,
+    action: supplemental?.action ?? expanded?.action ?? copy.action,
+    flow: expanded ? [copy.flow, expanded.flowNote, supplemental?.note].filter(Boolean).join(" ")
       : branchRelation ? `${copy.flow} ${branchNoteByRelation[branchRelation]}` : copy.flow,
   };
 }

@@ -50,6 +50,13 @@ export async function getCachedTodayReading(
         personMonthPillarHanja: saju.monthPillarHanja,
         // The saved profile has a default 12:00 time but no verified-time flag.
         // Never pass saju.hourPillarHanja as a confirmed birth-hour signal.
+        // The current annual cycle requires no assumed birth hour. The decade
+        // cycle's start age does: skip it when the profile still has the
+        // unconfirmed 12:00 form default. Neither cycle changes paid reports.
+        currentSeunGanji: saju.currentSeun?.ganji ?? null,
+        currentDaeunGanji: profile.birthTime !== "12:00"
+          ? saju.currentDaeun?.ganji ?? null
+          : null,
         dayPillarHanja: getTodayDayPillar(date),
       });
     },

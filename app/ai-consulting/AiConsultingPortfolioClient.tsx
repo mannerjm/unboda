@@ -404,23 +404,21 @@ export default function AiConsultingPortfolioClient({
 
         <header className="relative mt-5 overflow-hidden rounded-[2rem] border border-[#35375f] bg-[radial-gradient(circle_at_82%_20%,rgba(113,89,233,0.26),transparent_28%),radial-gradient(circle_at_18%_85%,rgba(79,146,224,0.14),transparent_30%),linear-gradient(145deg,#0b1025_0%,#171a3d_58%,#24204d_100%)] p-6 text-white shadow-[0_22px_60px_rgba(24,29,67,0.14)] sm:p-8">
           <p className="text-xs font-black tracking-[0.16em] text-[#b9b2f6]">UNBODA AI CONSULTING</p>
-          <h1 className="mt-3 text-2xl font-black tracking-[-0.035em] sm:text-3xl">내 구매 분석을 연결하는 AI 상담</h1>
+          <h1 className="mt-3 text-2xl font-black tracking-[-0.035em] sm:text-3xl">나를 기억하는 AI 운세 상담</h1>
           <p className="mt-3 max-w-3xl text-[15px] leading-7 text-slate-200">
-            질문마다 현재 프로필이 보유한 완료 리포트 중 가장 관련 있는 분석을 자동으로 선택합니다. 새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다.
+            지난 상담을 이어가거나 새로운 고민을 편하게 질문해 보세요. 새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다.
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
             <div className="rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-4">
-              <p className="text-xs font-bold tracking-[0.12em] text-[#c9c3ff]">현재 보유 상담 범위</p>
+              <p className="text-xs font-bold tracking-[0.12em] text-[#c9c3ff]">상담 가능한 분석</p>
               <p className="mt-2 text-xl font-black">
                 {portfolio ? `${portfolio.analyses.length}개 분석` : "확인 중"}
               </p>
               <p className="mt-1 text-sm leading-6 text-slate-300">
-                {focusAnalysis
-                  ? focusAnalysis.profileInputVersion === "current"
-                    ? `이 화면은 ${focusAnalysis.productTitle}에서 시작했지만, 현재 출생정보 기준의 다른 보유 분석도 질문에 따라 자동 연결됩니다.`
-                    : `이 화면은 ${focusAnalysis.productTitle}의 구매 당시 출생정보 기준 상담입니다. 현재 출생정보 기준 분석과 자동으로 섞지 않습니다.`
-                  : "현재 출생정보와 일치하는 완료 리포트만 자동 상담 범위에 포함됩니다."}
+                {focusAnalysis?.profileInputVersion !== "current" && focusAnalysis
+                  ? "이전 출생정보로 구매한 리포트이며, 다른 시기의 분석과 섞지 않습니다."
+                  : "현재 출생정보에 맞는 완료 리포트만 상담에 연결됩니다."}
               </p>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/[0.11] px-5 py-4 sm:min-w-56">
@@ -494,12 +492,14 @@ export default function AiConsultingPortfolioClient({
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">CONVERSATION</p>
-                  <h2 className="mt-1 text-lg font-black">내 구매 분석을 연결한 대화</h2>
+                  <h2 className="mt-1 text-lg font-black">{activeAnalysis ? `${activeAnalysis.productTitle} 상담` : "새 상담 시작"}</h2>
                 </div>
                 {portfolio.messages.length > 0 ? (
-                  <span className="text-xs font-semibold text-slate-500">{portfolio.messages.length}개 메시지</span>
+                  <button type="button" onClick={() => setShowAllConversation((value) => !value)} className="text-xs font-semibold text-[#5e4bd1] underline underline-offset-4">{showAllConversation ? "이 분석의 상담만 보기" : "전체 상담 보기"}</button>
                 ) : null}
               </div>
+              <p className="text-sm leading-6 text-slate-600">{activeAnalysis ? `${activeAnalysis.productTitle} · ${activeAnalysis.editionLabel}${sourceMode === "chosen" ? " · 선택한 분석 기준" : " · 이전 상담 이어가기"}` : "질문하면 구매한 분석에서 관련 리포트를 찾아 상담을 시작합니다."}</p>
+              {activeAnalysis ? <button type="button" onClick={() => { setSourceMode("automatic"); setChosenSource(null); setShowAllConversation(false); }} className="mt-2 text-xs font-semibold text-[#5e4bd1] underline underline-offset-4">새 주제로 질문하기 · 자동 선택</button> : null}
 
               {portfolio.questionsRemaining > 0 ? (
                 <form
@@ -507,10 +507,12 @@ export default function AiConsultingPortfolioClient({
                   onSubmit={submitQuestion}
                   className="mt-4 rounded-[1.5rem] border border-[#d8d3ff] bg-white p-4 shadow-[0_12px_36px_rgba(33,40,83,0.09)]"
                 >
+                  <label htmlFor="portfolio-question" className="mb-2 block text-sm font-bold text-[#11162d]">무엇이 궁금하세요?</label>
                   <textarea
+                    id="portfolio-question"
                     value={question}
                     onChange={(event) => setQuestion(event.target.value.slice(0, 300))}
-                    placeholder="재물, 직업, 학업, 관계처럼 보유한 분석에서 이어서 궁금한 점을 질문해 주세요."
+                    placeholder="지난 이야기나 지금 궁금한 내용을 편하게 입력해 주세요."
                     rows={3}
                     disabled={isSending}
                     className="w-full resize-none rounded-2xl bg-[#f3f4f9] px-4 py-3 text-[15px] leading-7 text-slate-800 outline-none ring-[#6f5ce7] focus:ring-1 disabled:opacity-60"
@@ -578,13 +580,14 @@ export default function AiConsultingPortfolioClient({
               ) : null}
 
               <div className="mt-5 space-y-4 pb-4">
-                {portfolio.messages.length === 0 ? (
+                {hasOlderMessages ? <button type="button" onClick={() => void loadOlderMessages()} disabled={isLoadingOlder} className="w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm font-semibold text-[#5e4bd1] disabled:opacity-50">{isLoadingOlder ? "이전 상담 불러오는 중..." : "이전 상담 더 보기"}</button> : null}
+                {visibleChatMessages.length === 0 ? (
                   <div className="rounded-[1.5rem] border border-dashed border-[#cfd5e6] bg-white p-7 text-center text-sm leading-7 text-slate-600">
-                    보유한 분석에 대해 궁금한 점을 질문해 주세요. 어떤 리포트를 사용할지는 자동으로 판단합니다.
+                    {activeAnalysis ? "이 분석의 이전 상담이 없거나 더 이전에 있습니다. 질문을 시작하거나 이전 상담을 불러오세요." : "궁금한 내용을 질문하면 관련 구매 분석을 찾아 상담을 시작합니다."}
                   </div>
                 ) : null}
 
-                {portfolio.messages.map((message) => {
+                {visibleChatMessages.map((message) => {
                   const policy = message.role === "user" ? policyMessage(message.scopeDecision) : null;
                   const remembered = message.role === "user" && rememberedSourceMessageIds.has(message.id);
                   const savingMemory = message.role === "user" && savingMemoryMessageId === message.id;
@@ -637,14 +640,14 @@ export default function AiConsultingPortfolioClient({
               <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
                 <div>
                   <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">OWNED ANALYSES</p>
-                  <h2 className="mt-2 text-xl font-black">구매한 분석이 상담 범위가 됩니다</h2>
+                  <h2 className="mt-2 text-xl font-black">내 분석 찾아보기</h2>
                   <p className="mt-3 text-[15px] leading-7 text-slate-700">
-                    질문권은 상품별로 나뉘지 않습니다. 남은 횟수를 공용으로 사용하고, 질문 내용에 맞는 보유 리포트를 서버에서 자동 선택합니다.
+                    구매한 분석이 상담 범위가 됩니다. 질문권은 상품별로 나뉘지 않습니다. 남은 횟수를 공용으로 사용하고, 질문 내용에 맞는 보유 리포트를 서버에서 자동 선택합니다.
                   </p>
                   <div className="mt-4">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-xs font-bold tracking-[0.1em] text-slate-500">
-                        {showAllAnalyses ? "전체 보유 분석" : "최근 보유 분석 3개"}
+                        {showAllAnalyses ? `전체 보유 분석 ${filteredAnalyses.length}개` : `최근 구매한 분석 ${Math.min(3, portfolio.analyses.length)}개`}
                       </p>
                       {hiddenAnalysisCount > 0 ? (
                         <button
@@ -657,23 +660,28 @@ export default function AiConsultingPortfolioClient({
                         </button>
                       ) : null}
                     </div>
+                    {showAllAnalyses ? <label className="mt-3 block text-sm font-semibold text-slate-700">분석 검색<input type="search" value={analysisSearch} onChange={(event) => { setAnalysisSearch(event.target.value); setVisibleAnalysisLimit(8); }} placeholder="리포트 이름이나 연도 검색" className="mt-2 w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm outline-none focus:border-[#7866de]" /></label> : null}
                     <div className="mt-3 flex flex-wrap gap-2">
                       {visibleAnalyses.map((analysis) => {
-                        const focused = focusAnalysis?.productId === analysis.productId
-                          && focusAnalysis.analysisEditionKey === analysis.analysisEditionKey;
+                        const focused = activeAnalysis?.productId === analysis.productId
+                          && activeAnalysis.analysisEditionKey === analysis.analysisEditionKey;
                         return (
-                          <span
+                          <button
                             key={`${analysis.productId}|${analysis.analysisEditionKey}`}
+                            type="button"
+                            onClick={() => { setChosenSource(analysis); setSourceMode("chosen"); setShowAllConversation(false); document.getElementById("portfolio-question")?.focus(); }}
                             className={focused
                               ? "rounded-full border border-[#aaa0f4] bg-[#f3f1ff] px-3 py-2 text-xs font-bold text-[#5e4bd1]"
                               : "rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-xs font-semibold text-slate-600"}
                           >
                             {analysis.productTitle} · {analysis.editionLabel}
                             {analysis.profileInputVersion !== "current" ? " · 이전 정보 기준" : focused ? " · 시작 기준" : ""}
-                          </span>
+                          </button>
                         );
                       })}
                     </div>
+                    {showAllAnalyses && filteredAnalyses.length === 0 ? <p className="mt-3 text-sm text-slate-500">해당하는 분석이 없습니다.</p> : null}
+                    {showAllAnalyses && visibleAnalysisLimit < filteredAnalyses.length ? <button type="button" onClick={() => setVisibleAnalysisLimit((value) => value + 8)} className="mt-3 w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm font-bold text-[#5e4bd1]">분석 8개 더 보기</button> : null}
                   </div>
 
                   <div className="mt-5 border-t border-[#e4e7f0] pt-4">

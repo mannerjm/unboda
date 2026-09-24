@@ -450,7 +450,7 @@ export default function AiConsultingPortfolioClient({
           <p className="text-xs font-black tracking-[0.16em] text-[#b9b2f6]">UNBODA AI CONSULTING</p>
           <h1 className="mt-3 text-2xl font-black tracking-[-0.035em] sm:text-3xl">나를 기억하는 AI 운세 상담</h1>
           <p className="mt-3 max-w-3xl text-[15px] leading-7 text-slate-200">
-            지난 상담을 이어가거나 새로운 고민을 편하게 질문해 보세요. 새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다.
+            지난 상담을 이어가거나 새로운 고민을 질문해 보세요. 새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다.
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
@@ -535,14 +535,14 @@ export default function AiConsultingPortfolioClient({
             <section data-section="portfolio-conversation" className="relative mt-4 rounded-[1.75rem] border border-[#dce1ef] bg-[#f9faff] p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">CONVERSATION</p>
+                  <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">AI 상담</p>
                   <h2 className="mt-1 text-lg font-black">{activeAnalysis ? `${activeAnalysis.productTitle} 상담` : "새 상담 시작"}</h2>
                 </div>
                 {portfolio.messages.length > 0 && !historySource ? (
                   <button type="button" onClick={() => setShowAllConversation((value) => !value)} className="text-xs font-semibold text-[#5e4bd1] underline underline-offset-4">{showAllConversation ? "이 분석의 상담만 보기" : "전체 상담 보기"}</button>
                 ) : null}
               </div>
-              <p className="text-sm leading-6 text-slate-600">{activeAnalysis ? `${activeAnalysis.productTitle} · ${activeAnalysis.editionLabel}${sourceMode === "chosen" ? " · 선택한 분석 기준" : " · 이전 상담 이어가기"}` : "질문하면 구매한 분석에서 관련 리포트를 찾아 상담을 시작합니다."}</p>
+              <p className="text-sm leading-6 text-slate-600">{activeAnalysis ? `${activeAnalysis.productTitle} · ${activeAnalysis.editionLabel}${sourceMode === "chosen" ? " · 선택한 분석 기준" : " · 이전 상담 이어가기"}` : portfolio.questionsRemaining > 0 ? "질문하면 구매한 분석에서 알맞은 리포트를 찾아드려요." : "구매한 분석이 준비돼 있어요. 질문권이 있으면 상담을 시작할 수 있습니다."}</p>
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
                 {activeAnalysis ? <button type="button" onClick={() => { setSourceMode("automatic"); setChosenSource(null); setLatestAnswerSource(null); setShowAllConversation(false); setIsLoadingSource(true); void loadPortfolio(null).catch((reason) => setError(reason instanceof Error ? reason.message : "상담을 불러오지 못했습니다.")).finally(() => setIsLoadingSource(false)); }} className="text-sm font-semibold text-[#5e4bd1] underline underline-offset-4">새 주제로 질문하기 · 자동 선택</button> : null}
                 <a href="#owned-analysis-selector" className="text-sm font-semibold text-[#5e4bd1] underline underline-offset-4">다른 분석으로 상담하기 ↓</a>
@@ -585,7 +585,7 @@ export default function AiConsultingPortfolioClient({
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-base font-black text-[#11162d]">질문권 0회 · 새 답변에는 질문권이 필요해요.</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">지난 상담 기록은 그대로 볼 수 있어요.</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">{portfolio.messages.length > 0 || hasOlderMessages ? "지난 상담 기록은 그대로 볼 수 있어요." : "질문권이 생기면 구매한 분석으로 첫 상담을 시작할 수 있어요."}</p>
                     </div>
                     {creditPurchaseHref && !isPreview ? (
                       <Link href={creditPurchaseHref} className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#6f5ce7] px-5 py-3 text-sm font-black text-white transition hover:bg-[#5f4fd2]">
@@ -594,7 +594,7 @@ export default function AiConsultingPortfolioClient({
                     ) : null}
                   </div>
                   {!creditCheckoutEnabled && !isPreview ? (
-                    <p className="mt-2 text-xs text-slate-500">질문권 결제는 현재 준비 중이며, 구매 가능해지면 이 화면에서 바로 이동할 수 있어요.</p>
+                    <p className="mt-2 text-xs text-slate-500">질문권 결제는 현재 준비 중이며, 지금은 상품 안내만 볼 수 있어요.</p>
                   ) : null}
                 </div>
               )}
@@ -630,8 +630,14 @@ export default function AiConsultingPortfolioClient({
               <div className="mt-5 space-y-4 pb-4">
                 {hasOlderMessages ? <button type="button" onClick={() => void loadOlderMessages()} disabled={isLoadingOlder} className="w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm font-semibold text-[#5e4bd1] disabled:opacity-50">{isLoadingOlder ? "이전 상담 불러오는 중..." : "이전 상담 더 보기"}</button> : null}
                 {visibleChatMessages.length === 0 ? (
-                  <div className="rounded-[1.5rem] border border-dashed border-[#cfd5e6] bg-white p-7 text-center text-sm leading-7 text-slate-600">
-                    {activeAnalysis ? "이 분석의 이전 상담이 없거나 더 이전에 있습니다. 질문을 시작하거나 이전 상담을 불러오세요." : "궁금한 내용을 질문하면 관련 구매 분석을 찾아 상담을 시작합니다."}
+                  <div className={portfolio.questionsRemaining === 0 ? "rounded-xl bg-[#f0efff] px-4 py-3 text-center text-sm leading-6 text-[#40359a]" : "rounded-[1.5rem] border border-dashed border-[#cfd5e6] bg-white p-7 text-center text-sm leading-7 text-slate-600"}>
+                    {hasOlderMessages
+                      ? "이전 상담 더 보기에서 오래된 대화를 확인할 수 있어요."
+                      : portfolio.questionsRemaining === 0
+                        ? "첫 상담 기록이 아직 없어요. 위에서 질문권 상품과 이용 방법을 확인해 주세요."
+                        : activeAnalysis
+                          ? "이 분석의 첫 상담이에요. 위에서 궁금한 내용을 질문해 보세요."
+                          : "궁금한 내용을 질문하면 관련 구매 분석을 찾아 상담을 시작합니다."}
                   </div>
                 ) : null}
 
@@ -685,12 +691,12 @@ export default function AiConsultingPortfolioClient({
             </section>
 
             <section id="owned-analysis-selector" className="mt-5 scroll-mt-6 rounded-[1.75rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#ffffff_0%,#f8f7ff_100%)] p-5 shadow-sm sm:p-6">
-              <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+              <div className={portfolio.questionsRemaining > 0 ? "grid gap-5 lg:grid-cols-[1.05fr_0.95fr]" : "grid gap-5"}>
                 <div>
-                  <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">OWNED ANALYSES</p>
+                  <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">내 보유 분석</p>
                   <h2 className="mt-2 text-xl font-black">내 분석 찾아보기</h2>
                   <p className="mt-3 text-[15px] leading-7 text-slate-700">
-                    구매한 분석이 상담 범위가 됩니다. 질문권은 상품별로 나뉘지 않습니다. 남은 횟수를 공용으로 사용하고, 질문 내용에 맞는 보유 리포트를 서버에서 자동 선택합니다.
+                    구매한 분석을 골라 이전 상담을 보거나 새 질문을 준비하세요. 질문권은 모든 보유 분석에서 함께 사용해요.
                   </p>
                   <div className="mt-4">
                     <div className="flex items-center justify-between gap-3">
@@ -732,17 +738,10 @@ export default function AiConsultingPortfolioClient({
                     {showAllAnalyses && visibleAnalysisLimit < filteredAnalyses.length ? <button type="button" onClick={() => setVisibleAnalysisLimit((value) => value + 8)} className="mt-3 w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm font-bold text-[#5e4bd1]">분석 8개 더 보기</button> : null}
                   </div>
 
-                  <div className="mt-5 border-t border-[#e4e7f0] pt-4">
-                    <p className="text-xs font-bold tracking-[0.1em] text-slate-500">상담 이용 안내</p>
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
-                      <span className="rounded-full border border-[#d8d3ff] bg-white px-3 py-2 text-[#5e4bd1]">질문마다 관련 리포트 자동 선택</span>
-                      <span className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-slate-600">정상 답변 완료 시 공용 질문권 1회 차감</span>
-                      <span className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-slate-600">보유 범위 밖 질문은 답변하지 않아요</span>
-                    </div>
-                  </div>
+                  <p className="mt-4 border-t border-[#e4e7f0] pt-3 text-xs leading-5 text-slate-500">답변 완료 시 질문권 1회 차감 · 답할 수 없는 질문은 차감하지 않아요.</p>
                 </div>
 
-                <div>
+                {portfolio.questionsRemaining > 0 ? <div>
                   <p className="text-xs font-bold tracking-[0.14em] text-slate-500">추천 질문</p>
                   <div className="mt-3 space-y-2">
                     {suggestedQuestions.map((suggestion) => (
@@ -756,14 +755,14 @@ export default function AiConsultingPortfolioClient({
                       </button>
                     ))}
                   </div>
-                </div>
+                </div> : null}
               </div>
             </section>
 
             <section className="mt-4 rounded-[1.75rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-6">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">LONG-TERM MEMORY</p>
+                  <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">내 기억</p>
                   <h2 className="mt-2 text-base font-bold">AI가 기억하는 내 상황</h2>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">상담 중 직접 저장한 내 상황과 목표를 확인하고 관리할 수 있어요.</p>
                 </div>

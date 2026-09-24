@@ -59,12 +59,15 @@ assert(client.includes("preferredProductId") && client.includes("preferredEditio
 assert(client.includes('data-section="portfolio-conversation"') && client.includes('data-ai-composer="portfolio-sticky"'), "unified composer must stay inside the conversation section");
 assert(client.includes("sourceTitle") && client.includes("sourceEditionLabel"), "each aggregated message must show which report/edition grounded it");
 assert(client.includes("threadId: message.threadId"), "memory writes must preserve the originating internal thread");
-assert(client.includes("showAllAnalyses") && client.includes("portfolio?.analyses.slice(0, 3)"), "owned analysis display must default to the three most recent analyses");
+assert(client.includes("showAllAnalyses") && client.includes("ownedAnalyses.slice(0, 3)"), "the purchase library must use all completed owned reports, not the birth-time-filtered consultation scope");
 assert(client.includes("filteredAnalyses.slice(0, visibleAnalysisLimit)") && client.includes("분석 8개 더 보기"), "expanded analyses must remain bounded and searchable, never render hundreds of chips at once");
 assert(client.includes("visibleAnalyses.map((analysis) => (") && !client.includes("setChosenSource") && !client.includes("loadPortfolio(analysis)") && !client.includes("시작 기준"), "purchased report chips must remain read-only and must not set the consultation basis");
+assert(portfolio.includes("ownedAnalyses: AiConsultingPortfolioAnalysis[]") && portfolio.includes("ownedAnalyses.push(") && portfolio.includes("analyses: currentAnalyses, ownedAnalyses"), "all completed owned reports must be returned separately from the automatic routing set");
+assert(portfolio.includes("AnalysisInputSnapshotSchema.safeParse(") && portfolio.includes("canonicalAnalysisInputMatches(") && portfolio.includes("historicalCohort"), "previous-input report entry must route across every matching purchase-time snapshot, without mixing changed birth times");
+assert(client.includes("portfolio?.ownedAnalyses ?? []") && client.includes("ownedAnalysisLibrary") && client.includes("portfolio?.analyses.length === 0 ? ownedAnalysisLibrary : null"), "owned reports must be discoverable even when no current-input reports can answer new questions");
 assert(client.includes('href="#owned-analysis-selector"') && client.includes('id="owned-analysis-selector"') && client.includes("내가 구매한 분석 보기 ↓"), "customers can inspect owned analyses without choosing the active consultation basis");
 assert(client.includes("전체 보기 · +") && client.includes("접기"), "owned analysis display must support expand/collapse for the full portfolio");
-assert(client.includes("최근 구매한 분석 ${Math.min(3, portfolio.analyses.length)}개") && client.includes("전체 보유 분석 ${filteredAnalyses.length}개"), "owned-analysis labels must show actual counts, not a fixed three when only two exist");
+assert(client.includes("최근 구매한 분석 ${Math.min(3, ownedAnalyses.length)}개") && client.includes("전체 보유 분석 ${filteredAnalyses.length}개"), "owned-analysis labels must show the full purchased count even when eligible consultation scope differs");
 assert(client.includes("답변 완료 시 질문권 1회 차감 · 답할 수 없는 질문은 차감하지 않아요.") && !client.includes("상담 이용 안내"), "consulting guidance must be one readable line without repetitive policy chips");
 assert(!client.includes("dangerouslySetInnerHTML"), "unified consultation must render model output as plain text");
 

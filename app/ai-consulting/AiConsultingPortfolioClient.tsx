@@ -792,20 +792,50 @@ export default function AiConsultingPortfolioClient({
                           : message.content}
                       </div>
                       {message.role === "user" ? (
-                        <div className="ml-auto flex max-w-[88%] justify-end">
+                        <div className="ml-auto w-full max-w-[88%]">
                           {remembered ? (
-                            <span className="text-xs font-semibold text-slate-500">✓ AI가 기억 중</span>
+                            <p className="text-right text-xs font-semibold text-slate-500">✓ 내가 저장한 기억</p>
                           ) : isPreview ? (
-                            <span className="text-xs font-semibold text-slate-400">기억 저장 미리보기</span>
+                            <p className="text-right text-xs font-semibold text-slate-400">기억 저장 미리보기</p>
+                          ) : memoryDraftMessageId === message.id ? (
+                            <div className="space-y-3 rounded-2xl border border-[#d8d3ff] bg-white p-4">
+                              <p className="text-sm font-bold text-slate-800">AI가 기억할 내용 직접 저장</p>
+                              <p className="text-xs leading-5 text-slate-600">질문 전체가 아닌, 직접 알려준 상황이나 목표만 적어 주세요. AI의 해석은 사실로 저장하지 않아요.</p>
+                              <label className="block text-xs font-bold text-slate-700">기억 종류
+                                <select
+                                  value={memoryDraftKind}
+                                  onChange={(event) => setMemoryDraftKind(event.target.value as "user_fact" | "goal")}
+                                  className="mt-1 block w-full rounded-xl border border-[#d8d3ff] bg-white px-3 py-2 text-sm font-normal"
+                                >
+                                  <option value="user_fact">현재 상황 · 바뀌면 수정할 내용</option>
+                                  <option value="goal">내 목표</option>
+                                </select>
+                              </label>
+                              <label className="block text-xs font-bold text-slate-700">기억할 내용
+                                <textarea
+                                  value={memoryDraftContent}
+                                  onChange={(event) => setMemoryDraftContent(event.target.value.slice(0, 300))}
+                                  maxLength={300}
+                                  rows={2}
+                                  placeholder={memoryDraftKind === "goal" ? "예: 올해 매달 저축액을 늘리는 것이 내 목표예요." : "예: 요즘 잠드는 시간이 매일 달라요."}
+                                  className="mt-1 block w-full rounded-xl border border-[#d8d3ff] bg-white px-3 py-2 text-sm font-normal leading-6"
+                                />
+                              </label>
+                              <div className="flex flex-wrap justify-end gap-2">
+                                <button type="button" onClick={() => { setMemoryDraftMessageId(null); setMemoryDraftContent(""); }} disabled={savingMemory} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600">취소</button>
+                                <button type="button" onClick={() => void saveMemory(message)} disabled={savingMemory || !memoryDraftContent.trim()} className="rounded-xl bg-[#6f5ce7] px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{savingMemory ? "저장 중..." : "내 기억에 저장"}</button>
+                              </div>
+                            </div>
                           ) : (
-                            <button
-                              type="button"
-                              onClick={() => void saveMemory(message)}
-                              disabled={savingMemory}
-                              className="text-xs font-semibold text-slate-600 underline underline-offset-4 disabled:opacity-50"
-                            >
-                              {savingMemory ? "저장 중" : "이 내용 기억하기"}
-                            </button>
+                            <div className="text-right">
+                              <button
+                                type="button"
+                                onClick={() => { setMemoryDraftMessageId(message.id); setMemoryDraftKind("user_fact"); setMemoryDraftContent(""); }}
+                                className="text-xs font-semibold text-slate-600 underline underline-offset-4"
+                              >
+                                내 상황·목표 기억하기
+                              </button>
+                            </div>
                           )}
                         </div>
                       ) : null}
@@ -835,7 +865,7 @@ export default function AiConsultingPortfolioClient({
 
               {showMemories ? (memories.length === 0 ? (
                 <div className="mt-4 rounded-2xl bg-[#f7f8fc] px-4 py-4 text-sm leading-6 text-slate-600">
-                  아직 기억한 내용이 없습니다. 상담 중 내가 작성한 메시지에서 <strong className="font-semibold text-slate-800">이 내용 기억하기</strong>를 눌러 저장할 수 있습니다.
+                  아직 저장된 기억이 없어요. 상담에서 <strong className="font-semibold text-slate-800">내 상황·목표 기억하기</strong>를 누르고 기억할 내용을 직접 적어 주세요.
                 </div>
               ) : (
                 <div className="mt-4 space-y-2">
@@ -853,7 +883,10 @@ export default function AiConsultingPortfolioClient({
                         </div>
                       ) : (
                         <>
-                          <p className="min-w-0 whitespace-pre-wrap text-sm leading-6 text-slate-800">{memory.content}</p>
+                          <div className="min-w-0">
+                            <p className="mb-1 text-xs font-bold text-[#5e4bd1]">{memory.kind === "goal" ? "내 목표" : "내가 알려준 상황"}</p>
+                            <p className="whitespace-pre-wrap text-sm leading-6 text-slate-800">{memory.content}</p>
+                          </div>
                           {!isPreview ? (
                             <div className="flex shrink-0 items-center gap-3 self-start">
                               <button type="button" onClick={() => { setEditingMemoryId(memory.id); setEditingMemoryContent(memory.content); }} className="text-xs font-semibold text-[#5e4bd1] underline underline-offset-4">수정</button>

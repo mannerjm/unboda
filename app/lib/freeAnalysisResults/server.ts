@@ -46,6 +46,7 @@ export function toAnalyzeProfileMetadata(profile: ProfileDto): AnalyzeProfileMet
     label: profile.label,
     birthDate: profile.birthDate,
     birthTime: profile.birthTime,
+    ...(profile.birthTimeKnown != null ? { birthTimeKnown: profile.birthTimeKnown } : {}),
     gender: profile.gender,
     calendarType: profile.calendarType,
     isLeapMonth: profile.isLeapMonth,
@@ -58,6 +59,7 @@ export function getProfileFingerprint(profile: ProfileDto): string {
   const birthInputs = {
     birthDate: snapshot.birthDate,
     birthTime: snapshot.birthTime,
+    ...(snapshot.birthTimeKnown != null ? { birthTimeKnown: snapshot.birthTimeKnown } : {}),
     gender: snapshot.gender,
     calendarType: snapshot.calendarType,
     isLeapMonth: snapshot.isLeapMonth,

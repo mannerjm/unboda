@@ -16,6 +16,7 @@ const preview = read("app/admin/ai-consulting-preview/page.tsx");
 const creditMigration = read("supabase/migrations/043_ai_consulting_profile_credit_ledger.sql");
 const runtimeMigration = read("supabase/migrations/044_ai_consulting_credit_runtime.sql");
 const memoryApi = read("app/api/ai-consulting/memories/route.ts");
+const answerPipeline = read("app/lib/aiConsulting/answerPipeline.ts");
 
 assert(portfolio.includes("listUserPaidAnalysisSummaries"), "portfolio must derive owned scope from active paid-analysis summaries");
 assert(portfolio.includes('summary.profileId === input.profileId'), "portfolio owned scope must stay profile-scoped");
@@ -126,6 +127,14 @@ for (const boundary of ['export async function PATCH(request: Request)', 'resolv
   assert(memoryApi.includes(boundary), `saved-memory edit must preserve owner, profile, provenance and active-state boundary: ${boundary}`);
 }
 assert(!memoryApi.includes("grantEntitlement") && !memoryApi.includes("reserveAiConsultingQuestion"), "updating a remembered fact must never change purchases or question credits");
+assert(answerPipeline.includes("질문에 직접 대답하는 핵심 답변") && answerPipeline.includes("실제 구매 분석 본문에서 이번 질문과 직접 연결되는 구체적인 결과") && answerPipeline.includes("일반 생활 조언을 마치 유료 리포트의 고유 결과처럼 표현하지 않는다"), "new AI replies should lead with an easy direct answer grounded in an actual paid-report detail rather than generic advice");
+assert(answerPipeline.includes("질문을 반복해서 쓰거나") && answerPipeline.includes("작은 행동 1~2개만 쓴다"), "replies must avoid repeating customer questions and provide only a short actionable follow-up");
+assert(client.includes("function ConsultingAnswer({ content }") && client.includes('<ConsultingAnswer content={message.content} />') && client.includes("핵심 답변") && client.includes("지금 해볼 일") && client.includes("왜 이렇게 보나요? · 구매 분석 근거"), "answer layout should show the answer and action first and let customers expand the underlying report evidence");
+assert(client.includes('if (!main || !action || !report || userFacts === undefined)') && client.includes('return <div className="whitespace-pre-wrap">{content}</div>'), "unknown older answer formats must remain readable without losing content");
+assert(client.includes('memoryDraftKind') && client.includes('memoryDraftContent') && client.includes('<option value="goal">내 목표</option>') && client.includes('<option value="user_fact">현재 상황 · 바뀌면 수정할 내용</option>'), "customers choose goal versus current situation and explicitly write the memory, rather than automatically saving their whole question as fact");
+assert(client.includes('kind: memoryDraftKind') && client.includes('const content = memoryDraftContent.trim()') && !client.includes('const content = message.content.trim()'), "memory POST must use the customer-confirmed text and kind, never auto-promote a question or generated interpretation");
+assert(memoryApi.includes('isUserMemoryKind(input.kind)') && memoryApi.includes('.eq("role", "user")') && memoryApi.includes('provenance: "USER_STATED"'), "existing server authorization and provenance checks must protect explicitly saved goal or situation");
+
 
 
 assert(creditMigration.includes("unused paid questions can be used later against any separately purchased"), "profile credit ledger must remain explicitly cross-product");

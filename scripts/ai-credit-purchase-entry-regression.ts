@@ -12,7 +12,7 @@ const orders = read("app/api/ai-consulting/credits/orders/route.ts");
 
 assert(main.includes("creditCheckoutAvailable = false") && main.includes("const creditCheckoutEnabled = creditCheckoutAvailable;"), "client must receive server-validated purchase eligibility instead of trusting public config alone");
 assert(page.includes("isAiConsultingCreditCheckoutEnabled()") && page.includes("isTossCheckoutUserAllowed(user.id)") && page.includes("creditCheckoutAvailable={creditCheckoutAvailable}"), "purchase CTA must respect both feature switch and production review-user allowlist");
-assert(creditsPage.includes("isTossCheckoutUserAllowed(user.id)") && creditsPage.includes("checkoutEnabled={providerReady}"), "credit checkout must stay disabled for users blocked by the TEST allowlist");
+assert(creditsPage.includes("isTossCheckoutUserAllowed(user.id)") && creditsPage.includes("checkoutEnabled={providerReady}") && creditsPage.includes("reviewCheckout={reviewCheckout}"), "credit checkout must stay disabled for users blocked by the TEST allowlist and clearly label allowed sandbox purchases");
 assert(orders.includes("isAiConsultingCreditCheckoutEnabled()") && orders.includes("isTossCheckoutUserAllowed(user.id)"), "purchase server must preserve authoritative feature and review-account checks");
 assert(main.includes('href={creditPurchaseHref}') && main.includes("#question-bundles"), "main CTA must jump directly to purchase options");
 assert(main.includes("공용 질문권") && main.includes("질문권 구매하기 →") && main.includes("질문권 상품 안내 보기 →"), "top balance card must expose exactly one purchase or informational product-browse action");
@@ -25,6 +25,7 @@ assert(main.includes("if (!portfolio || portfolio.questionsRemaining <= 0) retur
 assert(main.includes("window.sessionStorage.getItem(draftKey)") && main.includes("window.sessionStorage.setItem(draftKey, question)") && main.includes("window.sessionStorage.removeItem(draftKey)"), "draft must survive checkout and clear only after a completed answer");
 assert(checkout.includes('id="question-bundles"') && checkout.includes("몇 번 더 물어보고 싶으세요?"), "purchase cards must appear near top and support deep link");
 assert(checkout.includes("!checkoutEnabled") && checkout.includes("disabled={!checkoutEnabled || activeBundleId !== null}"), "disabled checkout must never create an order");
+assert(checkout.includes("reviewCheckout ? (") && checkout.includes("토스 심사용 테스트 결제입니다.") && checkout.includes("실제 돈은 출금되지 않으며"), "test-account checkout must clearly identify virtual payment instead of presenting it as a live purchase");
 assert(checkout.includes("bundle.priceKrw.toLocaleString") && checkout.includes("bundle.questions}회 구매하기"), "each bundle must show its own server-defined price and clear purchase CTA");
 for (const { questions, priceKrw } of AI_CONSULTING_CREDIT_BUNDLES) {
   assert(questions > 0 && priceKrw > 0, "bundles must have a positive count and price");

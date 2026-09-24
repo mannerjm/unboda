@@ -362,9 +362,20 @@ function buildSupplementalDailyFocus(input: {
   // Previously overwriting it with the selected cycle collapsed 60-day action
   // variety. A cycle may supply a short context, not erase the actual natal
   // comparison or turn one suggestion into several unrelated tasks.
-  const actionSubject = hiddenCue?.subject ?? ACTION_CONTEXT[input.tenGod];
-  const natalAction = input.baseRelation ? RELATION_LANGUAGE[input.baseRelation].action : null;
-  const prompt = natalAction ?? (selectedCycle ? RELATION_LANGUAGE[selectedCycle.relation].action : null);
+  // Preserve the day-stem's personally distinctive action subject whenever a
+  // meaningful natal day/month/year relation already exists. The hidden stem
+  // supplies the subject when those primary relations are neutral or absent;
+  // the year/decade relation then refines its practical verb if appropriate.
+  const strongNatalFocus = input.baseRelation && input.baseRelation !== "같은 오행";
+  const actionSubject = strongNatalFocus
+    ? ACTION_CONTEXT[input.tenGod]
+    : hiddenCue?.subject ?? ACTION_CONTEXT[input.tenGod];
+  const natalAction = strongNatalFocus ? RELATION_LANGUAGE[input.baseRelation!].action : null;
+  const cycleAction = selectedCycle && selectedCycle.relation !== "같은 오행"
+    ? RELATION_LANGUAGE[selectedCycle.relation].action
+    : null;
+  const prompt = natalAction ?? cycleAction
+    ?? (input.baseRelation ? RELATION_LANGUAGE[input.baseRelation].action : null);
   const cycleContext = selectedCycle
     ? `${selectedCycle.type === "seun" ? "올해" : "대운"}의 ${selectedCycle.relation} 관계를 참고해, `
     : "";

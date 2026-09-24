@@ -490,6 +490,149 @@ export default function AiConsultingPortfolioClient({
 
         {!isLoading && portfolio && portfolio.analyses.length > 0 ? (
           <>
+            <section data-section="portfolio-conversation" className="relative mt-4 rounded-[1.75rem] border border-[#dce1ef] bg-[#f9faff] p-4 sm:p-5">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">CONVERSATION</p>
+                  <h2 className="mt-1 text-lg font-black">내 구매 분석을 연결한 대화</h2>
+                </div>
+                {portfolio.messages.length > 0 ? (
+                  <span className="text-xs font-semibold text-slate-500">{portfolio.messages.length}개 메시지</span>
+                ) : null}
+              </div>
+
+              {portfolio.questionsRemaining > 0 ? (
+                <form
+                  data-ai-composer="portfolio-sticky"
+                  onSubmit={submitQuestion}
+                  className="mt-4 rounded-[1.5rem] border border-[#d8d3ff] bg-white p-4 shadow-[0_12px_36px_rgba(33,40,83,0.09)]"
+                >
+                  <textarea
+                    value={question}
+                    onChange={(event) => setQuestion(event.target.value.slice(0, 300))}
+                    placeholder="재물, 직업, 학업, 관계처럼 보유한 분석에서 이어서 궁금한 점을 질문해 주세요."
+                    rows={3}
+                    disabled={isSending}
+                    className="w-full resize-none rounded-2xl bg-[#f3f4f9] px-4 py-3 text-[15px] leading-7 text-slate-800 outline-none ring-[#6f5ce7] focus:ring-1 disabled:opacity-60"
+                  />
+                  <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-xs leading-5 text-slate-500">
+                      {isPreview
+                        ? "미리보기에서는 질문이 전송되지 않습니다."
+                        : `${question.length}/300 · 보유 분석 범위 밖 질문은 AI 답변을 생성하지 않으며 질문권도 차감되지 않습니다.`}
+                    </span>
+                    <button
+                      type="submit"
+                      disabled={isPreview || isSending || question.trim().length < 2}
+                      className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {isPreview ? "미리보기" : isSending ? "관련 리포트 확인 중..." : "질문하기"}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div role="status" className="mt-4 rounded-[1.5rem] border border-[#d8d3ff] bg-white p-4 shadow-[0_12px_35px_rgba(33,40,83,0.10)]">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-base font-black text-[#11162d]">질문권 0회 · 새 답변에는 질문권이 필요해요.</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">지난 상담 기록은 그대로 볼 수 있어요.</p>
+                    </div>
+                    {creditPurchaseHref && !isPreview ? (
+                      <Link href={creditPurchaseHref} className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#6f5ce7] px-5 py-3 text-sm font-black text-white transition hover:bg-[#5f4fd2]">
+                        {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 보기 →"}
+                      </Link>
+                    ) : null}
+                  </div>
+                  {!creditCheckoutEnabled && !isPreview ? (
+                    <p className="mt-2 text-xs text-slate-500">질문권 결제는 현재 준비 중이며, 구매 가능해지면 이 화면에서 바로 이동할 수 있어요.</p>
+                  ) : null}
+                </div>
+              )}
+
+              {routingNotice ? (
+                <div className={routingNotice.kind === "outside"
+                  ? "mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-6 text-amber-900"
+                  : "mb-4 rounded-2xl border border-[#d8d3ff] bg-[#f3f1ff] px-4 py-4 text-sm leading-6 text-[#40359a]"}>
+                  <p>{routingNotice.message}</p>
+                  {routingNotice.kind === "outside" ? (
+                    <Link href="/deep-analysis" className="mt-3 inline-flex font-bold underline underline-offset-4">
+                      관련 심층 분석 둘러보기
+                    </Link>
+                  ) : null}
+                  {routingNotice.kind === "select" ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {routingNotice.candidates.map((candidate) => (
+                        <button
+                          key={`${candidate.productId}|${candidate.analysisEditionKey}`}
+                          type="button"
+                          disabled={isSending}
+                          onClick={() => void sendQuestion(routingNotice.question, candidate)}
+                          className="rounded-xl border border-[#bdb5fb] bg-white px-3 py-2 text-xs font-bold text-[#5e4bd1]"
+                        >
+                          {candidate.productTitle} · {candidate.editionLabel}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+
+              <div className="mt-5 space-y-4 pb-4">
+                {portfolio.messages.length === 0 ? (
+                  <div className="rounded-[1.5rem] border border-dashed border-[#cfd5e6] bg-white p-7 text-center text-sm leading-7 text-slate-600">
+                    보유한 분석에 대해 궁금한 점을 질문해 주세요. 어떤 리포트를 사용할지는 자동으로 판단합니다.
+                  </div>
+                ) : null}
+
+                {portfolio.messages.map((message) => {
+                  const policy = message.role === "user" ? policyMessage(message.scopeDecision) : null;
+                  const remembered = message.role === "user" && rememberedSourceMessageIds.has(message.id);
+                  const savingMemory = message.role === "user" && savingMemoryMessageId === message.id;
+
+                  return (
+                    <div key={message.id} className="space-y-2">
+                      <div className={message.role === "user" ? "flex justify-end" : "flex justify-start"}>
+                        <span className="rounded-full bg-[#eef0f6] px-2.5 py-1 text-[11px] font-semibold text-slate-500">
+                          {message.sourceTitle} · {message.sourceEditionLabel}
+                        </span>
+                      </div>
+                      <div
+                        className={message.role === "user"
+                          ? "ml-auto max-w-[88%] rounded-3xl rounded-br-lg bg-[#171a3d] px-5 py-4 text-[15px] leading-7 text-white"
+                          : "max-w-[94%] whitespace-pre-wrap rounded-3xl rounded-bl-lg border border-[#dce1ef] bg-white px-5 py-4 text-[15px] leading-7 text-slate-800 shadow-sm"}
+                      >
+                        {message.content}
+                      </div>
+                      {message.role === "user" ? (
+                        <div className="ml-auto flex max-w-[88%] justify-end">
+                          {remembered ? (
+                            <span className="text-xs font-semibold text-slate-500">✓ AI가 기억 중</span>
+                          ) : isPreview ? (
+                            <span className="text-xs font-semibold text-slate-400">기억 저장 미리보기</span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => void saveMemory(message)}
+                              disabled={savingMemory}
+                              className="text-xs font-semibold text-slate-600 underline underline-offset-4 disabled:opacity-50"
+                            >
+                              {savingMemory ? "저장 중" : "이 내용 기억하기"}
+                            </button>
+                          )}
+                        </div>
+                      ) : null}
+                      {policy ? (
+                        <div className="max-w-[94%] rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+                          {policy}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+
+            </section>
+
             <section className="mt-5 rounded-[1.75rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#ffffff_0%,#f8f7ff_100%)] p-5 shadow-sm sm:p-6">
               <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
                 <div>
@@ -613,147 +756,6 @@ export default function AiConsultingPortfolioClient({
               )}
             </section>
 
-            <section data-section="portfolio-conversation" className="relative mt-4 rounded-[1.75rem] border border-[#dce1ef] bg-[#f9faff] p-4 sm:p-5">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">CONVERSATION</p>
-                  <h2 className="mt-1 text-lg font-black">내 구매 분석을 연결한 대화</h2>
-                </div>
-                {portfolio.messages.length > 0 ? (
-                  <span className="text-xs font-semibold text-slate-500">{portfolio.messages.length}개 메시지</span>
-                ) : null}
-              </div>
-
-              {routingNotice ? (
-                <div className={routingNotice.kind === "outside"
-                  ? "mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-6 text-amber-900"
-                  : "mb-4 rounded-2xl border border-[#d8d3ff] bg-[#f3f1ff] px-4 py-4 text-sm leading-6 text-[#40359a]"}>
-                  <p>{routingNotice.message}</p>
-                  {routingNotice.kind === "outside" ? (
-                    <Link href="/deep-analysis" className="mt-3 inline-flex font-bold underline underline-offset-4">
-                      관련 심층 분석 둘러보기
-                    </Link>
-                  ) : null}
-                  {routingNotice.kind === "select" ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {routingNotice.candidates.map((candidate) => (
-                        <button
-                          key={`${candidate.productId}|${candidate.analysisEditionKey}`}
-                          type="button"
-                          disabled={isSending}
-                          onClick={() => void sendQuestion(routingNotice.question, candidate)}
-                          className="rounded-xl border border-[#bdb5fb] bg-white px-3 py-2 text-xs font-bold text-[#5e4bd1]"
-                        >
-                          {candidate.productTitle} · {candidate.editionLabel}
-                        </button>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-
-              <div className="space-y-4 pb-44 sm:pb-40">
-                {portfolio.messages.length === 0 ? (
-                  <div className="rounded-[1.5rem] border border-dashed border-[#cfd5e6] bg-white p-7 text-center text-sm leading-7 text-slate-600">
-                    보유한 분석에 대해 궁금한 점을 질문해 주세요. 어떤 리포트를 사용할지는 자동으로 판단합니다.
-                  </div>
-                ) : null}
-
-                {portfolio.messages.map((message) => {
-                  const policy = message.role === "user" ? policyMessage(message.scopeDecision) : null;
-                  const remembered = message.role === "user" && rememberedSourceMessageIds.has(message.id);
-                  const savingMemory = message.role === "user" && savingMemoryMessageId === message.id;
-
-                  return (
-                    <div key={message.id} className="space-y-2">
-                      <div className={message.role === "user" ? "flex justify-end" : "flex justify-start"}>
-                        <span className="rounded-full bg-[#eef0f6] px-2.5 py-1 text-[11px] font-semibold text-slate-500">
-                          {message.sourceTitle} · {message.sourceEditionLabel}
-                        </span>
-                      </div>
-                      <div
-                        className={message.role === "user"
-                          ? "ml-auto max-w-[88%] rounded-3xl rounded-br-lg bg-[#171a3d] px-5 py-4 text-[15px] leading-7 text-white"
-                          : "max-w-[94%] whitespace-pre-wrap rounded-3xl rounded-bl-lg border border-[#dce1ef] bg-white px-5 py-4 text-[15px] leading-7 text-slate-800 shadow-sm"}
-                      >
-                        {message.content}
-                      </div>
-                      {message.role === "user" ? (
-                        <div className="ml-auto flex max-w-[88%] justify-end">
-                          {remembered ? (
-                            <span className="text-xs font-semibold text-slate-500">✓ AI가 기억 중</span>
-                          ) : isPreview ? (
-                            <span className="text-xs font-semibold text-slate-400">기억 저장 미리보기</span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => void saveMemory(message)}
-                              disabled={savingMemory}
-                              className="text-xs font-semibold text-slate-600 underline underline-offset-4 disabled:opacity-50"
-                            >
-                              {savingMemory ? "저장 중" : "이 내용 기억하기"}
-                            </button>
-                          )}
-                        </div>
-                      ) : null}
-                      {policy ? (
-                        <div className="max-w-[94%] rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
-                          {policy}
-                        </div>
-                      ) : null}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {portfolio.questionsRemaining > 0 ? (
-                <form
-                  data-ai-composer="portfolio-sticky"
-                  onSubmit={submitQuestion}
-                  className="sticky bottom-4 z-10 -mt-36 rounded-[1.75rem] border border-[#d8d3ff] bg-white/95 p-4 shadow-[0_18px_50px_rgba(33,40,83,0.14)] backdrop-blur"
-                >
-                  <textarea
-                    value={question}
-                    onChange={(event) => setQuestion(event.target.value.slice(0, 300))}
-                    placeholder="재물, 직업, 학업, 관계처럼 보유한 분석에서 이어서 궁금한 점을 질문해 주세요."
-                    rows={3}
-                    disabled={isSending}
-                    className="w-full resize-none rounded-2xl bg-[#f3f4f9] px-4 py-3 text-[15px] leading-7 text-slate-800 outline-none ring-[#6f5ce7] focus:ring-1 disabled:opacity-60"
-                  />
-                  <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-xs leading-5 text-slate-500">
-                      {isPreview
-                        ? "미리보기에서는 질문이 전송되지 않습니다."
-                        : `${question.length}/300 · 보유 분석 범위 밖 질문은 AI 답변을 생성하지 않으며 질문권도 차감되지 않습니다.`}
-                    </span>
-                    <button
-                      type="submit"
-                      disabled={isPreview || isSending || question.trim().length < 2}
-                      className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {isPreview ? "미리보기" : isSending ? "관련 리포트 확인 중..." : "질문하기"}
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <div role="status" className="sticky bottom-4 z-10 -mt-28 rounded-[1.5rem] border border-[#d8d3ff] bg-white/95 p-4 shadow-[0_12px_35px_rgba(33,40,83,0.14)] backdrop-blur">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-base font-black text-[#11162d]">질문권 0회 · 새 답변에는 질문권이 필요해요.</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">지난 상담 기록은 그대로 볼 수 있어요.</p>
-                    </div>
-                    {creditPurchaseHref && !isPreview ? (
-                      <Link href={creditPurchaseHref} className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#6f5ce7] px-5 py-3 text-sm font-black text-white transition hover:bg-[#5f4fd2]">
-                        {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 보기 →"}
-                      </Link>
-                    ) : null}
-                  </div>
-                  {!creditCheckoutEnabled && !isPreview ? (
-                    <p className="mt-2 text-xs text-slate-500">질문권 결제는 현재 준비 중이며, 구매 가능해지면 이 화면에서 바로 이동할 수 있어요.</p>
-                  ) : null}
-                </div>
-              )}
-            </section>
           </>
         ) : null}
 

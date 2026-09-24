@@ -18,7 +18,7 @@ import {
  * The service publication date is a KST civil day. At 12:00 of that day the
  * library's day pillar is unambiguous, including around the 子時 boundary.
  */
-export const DAILY_COPY_VERSION = "daily-v5" as const;
+export const DAILY_COPY_VERSION = "daily-v6" as const;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 // Only the new daily presentation adapts Hanja branches to the existing Hangul
@@ -402,6 +402,101 @@ function buildSupplementalDailyFocus(input: {
     cycleFocus: selectedCycle?.type ?? null,
   };
 }
+
+/**
+ * Customer-facing copy is deliberately separate from the full saju reasoning.
+ * No pillar, ten-god, hidden-stem, branch-relation or elemental jargon belongs
+ * in a short daily reading. These are presentation labels, not new predictions.
+ */
+const DAILY_EASY_THEME: Record<string, {
+  title: string;
+  intro: string;
+  actionSubject: string;
+  supportingCue: string;
+}> = {
+  비견: { title: "내 기준을 세워보세요", intro: "오늘은 내가 정할 일과 상의할 일을 나눠 보세요.", actionSubject: "내가 정할 일 하나를 골라", supportingCue: "내가 직접 정할 일" },
+  겁재: { title: "함께할 일을 나눠보세요", intro: "오늘은 함께하는 일에서 서로의 역할을 살펴보세요.", actionSubject: "함께하는 일 하나를 골라", supportingCue: "서로 나누어 맡을 일" },
+  식신: { title: "작은 일부터 시작해요", intro: "오늘은 생각해 둔 일을 작은 행동으로 옮기는 데 집중해 보세요.", actionSubject: "오늘 하려던 일 하나를 골라", supportingCue: "조금씩 시작할 일" },
+  상관: { title: "생각을 쉽게 전해보세요", intro: "오늘은 떠오른 생각을 상대가 알아듣기 쉽게 전해 보세요.", actionSubject: "전하고 싶은 말 한 가지를 골라", supportingCue: "새롭게 전할 생각" },
+  편재: { title: "선택할 일을 살펴봐요", intro: "오늘은 여러 선택지 중 내게 필요한 것부터 살펴보세요.", actionSubject: "관심 있는 선택지 하나를 골라", supportingCue: "새로 살펴볼 선택" },
+  정재: { title: "시간과 계획을 챙겨요", intro: "오늘은 새로운 일을 늘리기보다 지금의 계획부터 살펴보세요.", actionSubject: "오늘의 계획 하나를 골라", supportingCue: "시간과 비용을 챙길 일" },
+  편관: { title: "해야 할 일부터 정리해요", intro: "오늘은 해야 할 일이 많다면 중요한 것부터 순서를 정해 보세요.", actionSubject: "먼저 해결할 일 하나를 골라", supportingCue: "먼저 해결할 일" },
+  정관: { title: "중요한 약속을 챙겨요", intro: "오늘은 맡은 일과 지켜야 할 약속을 차분히 확인해 보세요.", actionSubject: "지켜야 할 약속 하나를 골라", supportingCue: "지켜야 할 기준" },
+  편인: { title: "다른 방법도 생각해봐요", intro: "오늘은 익숙한 문제를 다른 쪽에서도 바라보세요.", actionSubject: "고민하는 일 하나를 골라", supportingCue: "다르게 바라볼 방법" },
+  정인: { title: "필요한 준비를 챙겨요", intro: "오늘은 필요한 정보를 정리하고 준비할 것을 살펴보세요.", actionSubject: "준비할 일 하나를 골라", supportingCue: "미리 챙길 준비" },
+};
+
+const DAILY_EASY_RELATION: Record<NonNullRelation, {
+  title: string;
+  detail: string;
+  actionEnding: string;
+}> = {
+  합: { title: "함께 맞춰봐요", detail: "서로의 생각을 맞춰 보면 도움이 될 수 있어요.", actionEnding: "함께할 사람과 생각을 맞춰 보세요." },
+  충: { title: "계획을 다시 확인해요", detail: "예상과 다른 점이 없는지 먼저 살펴보세요.", actionEnding: "예상과 달라진 점이 있는지 확인해 보세요." },
+  형: { title: "차례를 정해봐요", detail: "할 일의 순서가 엇갈리지 않도록 정리해 보세요.", actionEnding: "먼저 할 일의 순서를 정해 보세요." },
+  파: { title: "방법을 살펴봐요", detail: "하던 방식에서 바꿀 점이 없는지 생각해 보세요.", actionEnding: "해 오던 방법에서 바꿀 점 하나를 찾아보세요." },
+  해: { title: "서로의 생각을 확인해요", detail: "서로 기대하는 것이 다르지는 않은지 확인해 보세요.", actionEnding: "상대와 기대하는 점이 같은지 확인해 보세요." },
+  "같은 오행": { title: "익숙한 일부터 해봐요", detail: "잘해 오던 일부터 차분히 이어가 보세요.", actionEnding: "이미 익숙한 방식으로 하나씩 해 보세요." },
+};
+
+const DAILY_EASY_AREA: Record<NatalPillar, string> = {
+  day: "내가 직접 할 일",
+  month: "일과 생활",
+  year: "주변 사람과 함께할 일",
+  hour: "개인적인 계획",
+};
+
+function makeCustomerDailyCopy(input: {
+  tenGod: string;
+  branchRelation: TodayBranchRelation;
+  focusPillar: NatalPillar | null;
+  focusRelation: TodayBranchRelation;
+  monthPillar: string | null;
+  yearPillar: string | null;
+  todayStem: string;
+  hiddenStemTenGod?: string;
+  cycleRelation?: TodayBranchRelation;
+  expanded: boolean;
+}): { topic: string; flow: string; action: string } {
+  const theme = DAILY_EASY_THEME[input.tenGod]!;
+  const chosenRelation = input.expanded
+    ? input.focusRelation ?? input.cycleRelation ?? null
+    : input.branchRelation;
+  const relation = chosenRelation ? DAILY_EASY_RELATION[chosenRelation] : null;
+  const area = input.focusPillar ? DAILY_EASY_AREA[input.focusPillar] : "오늘의 일";
+  const topic = input.expanded && relation
+    ? `${theme.title} · ${relation.title}`
+    : theme.title;
+  const sentences = [theme.intro];
+  if (relation) {
+    sentences.push(`${area}에서는 ${relation.detail}`);
+  } else {
+    sentences.push("서두르지 말고 지금 필요한 일부터 살펴보세요.");
+  }
+  // Month/year heavenly stems already participate in the saju computation.
+  // Express their separate ten-god cues as ONE short everyday-language line
+  // instead of exposing the technical stem names or 5-element weights.
+  if (input.expanded && input.monthPillar && input.yearPillar) {
+    const monthGod = getTenGod(input.monthPillar[0], input.todayStem);
+    const yearGod = getTenGod(input.yearPillar[0], input.todayStem);
+    const monthCue = DAILY_EASY_THEME[monthGod]?.supportingCue;
+    const yearCue = DAILY_EASY_THEME[yearGod]?.supportingCue;
+    if (monthCue && yearCue) {
+      sentences.push(monthCue === yearCue
+        ? `${monthCue}도 함께 살펴보세요.`
+        : `${monthCue}과 ${yearCue}도 함께 살펴보세요.`);
+    }
+  }
+  const hiddenCue = input.hiddenStemTenGod && input.hiddenStemTenGod !== input.tenGod
+    ? DAILY_EASY_THEME[input.hiddenStemTenGod] : null;
+  const subject = !input.focusRelation && hiddenCue
+    ? hiddenCue.actionSubject : theme.actionSubject;
+  const action = relation
+    ? `${subject}, ${relation.actionEnding}`
+    : `${subject}, 먼저 할 수 있는 것부터 시작해 보세요.`;
+  return { topic, flow: sentences.join(" "), action };
+}
+
 /** Pure, deterministic presentation: no OpenAI call, randomness, billing or persistence. */
 export function buildTodayReading(input: {
   date: string;
@@ -451,6 +546,25 @@ export function buildTodayReading(input: {
     seunGanji: input.currentSeunGanji,
     daeunGanji: input.currentDaeunGanji,
   }) : null;
+  const selectedCyclePillar = supplemental?.cycleFocus === "seun"
+    ? normalizeDailyCyclePillar(input.currentSeunGanji)
+    : supplemental?.cycleFocus === "daeun"
+      ? normalizeDailyCyclePillar(input.currentDaeunGanji) : null;
+  const cycleRelation = selectedCyclePillar
+    ? getTodayBranchRelation(selectedCyclePillar[1], dayPillarHanja[1])
+    : null;
+  const customerCopy = makeCustomerDailyCopy({
+    tenGod,
+    branchRelation,
+    focusPillar: expanded?.focusPillar ?? null,
+    focusRelation: expanded?.focusRelation ?? null,
+    monthPillar: month,
+    yearPillar: year,
+    todayStem: dayPillarHanja[0],
+    hiddenStemTenGod: supplemental?.hiddenStemTenGod,
+    cycleRelation,
+    expanded: Boolean(expanded),
+  });
   return {
     date,
     version: DAILY_COPY_VERSION,
@@ -459,10 +573,6 @@ export function buildTodayReading(input: {
     branchRelation,
     ...(expanded ? { focusPillar: expanded.focusPillar, focusRelation: expanded.focusRelation } : {}),
     ...(supplemental ? { hiddenStemTenGod: supplemental.hiddenStemTenGod, cycleFocus: supplemental.cycleFocus } : {}),
-    ...copy,
-    topic: supplemental?.topic ?? expanded?.topic ?? copy.topic,
-    action: supplemental?.action ?? expanded?.action ?? copy.action,
-    flow: expanded ? [copy.flow, expanded.flowNote, supplemental?.note].filter(Boolean).join(" ")
-      : branchRelation ? `${copy.flow} ${branchNoteByRelation[branchRelation]}` : copy.flow,
+    ...customerCopy,
   };
 }

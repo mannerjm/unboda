@@ -14,6 +14,7 @@ import type { ProfileFreeAnalysisStatus } from "@/app/lib/freeAnalysisResults/se
 type AiConsultingUserMemory = {
   id: string;
   content: string;
+  kind?: "user_fact" | "life_event" | "goal" | "preference";
   sourceMessageId: string | null;
   createdAt: string;
   updatedAt: string;
@@ -71,6 +72,61 @@ function unifiedSuggestedQuestion(analysis: AiConsultingPortfolioAnalysis): stri
     : `${topic}에 관해 지금 가장 먼저 확인할 점은 뭐야?`;
 }
 
+/**
+ * Preserve the four stored evidence layers for old and new answers. Only the
+ * display order changes: immediate advice first, report evidence on demand.
+ * Unknown legacy formats are shown verbatim rather than dropping any text.
+ */
+function ConsultingAnswer({ content }: { content: string }) {
+  const sections = new Map<string, string>();
+  let heading: string | null = null;
+  for (const line of content.split("\n")) {
+    const match = line.trim().match(/^(?:#{1,4}\s*)?(확인된 사용자 사실|운보다 명리 해석|AI 상담 해석|지금 확인할 점)\s*:?$/u);
+    if (match) {
+      heading = match[1];
+      if (!sections.has(heading)) sections.set(heading, "");
+    } else if (heading) {
+      sections.set(heading, `${sections.get(heading)}\n${line}`.trim());
+    }
+  }
+
+  const main = sections.get("AI 상담 해석");
+  const action = sections.get("지금 확인할 점");
+  const report = sections.get("운보다 명리 해석");
+  const userFacts = sections.get("확인된 사용자 사실");
+  if (!main || !action || !report || userFacts === undefined) {
+    return <div className="whitespace-pre-wrap">{content}</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="mb-1 text-xs font-bold text-[#5e4bd1]">핵심 답변</p>
+        <p className="whitespace-pre-wrap">{main}</p>
+      </div>
+      <div className="rounded-2xl bg-[#f3f1ff] px-4 py-3">
+        <p className="mb-1 text-xs font-bold text-[#5e4bd1]">지금 해볼 일</p>
+        <p className="whitespace-pre-wrap">{action}</p>
+      </div>
+      <details className="rounded-xl border border-[#e4e7f0] px-4 py-3 text-sm">
+        <summary className="cursor-pointer font-semibold text-[#5e4bd1]">왜 이렇게 보나요? · 구매 분석 근거</summary>
+        <div className="mt-3 space-y-3 border-t border-[#e4e7f0] pt-3">
+          <div>
+            <p className="mb-1 text-xs font-bold text-slate-500">구매 리포트에서 확인한 내용</p>
+            <p className="whitespace-pre-wrap">{report}</p>
+          </div>
+          {userFacts && userFacts !== "별도 확인된 사실 없음" ? (
+            <div>
+              <p className="mb-1 text-xs font-bold text-slate-500">직접 알려주신 상황 · 목표</p>
+              <p className="whitespace-pre-wrap">{userFacts}</p>
+            </div>
+          ) : null}
+        </div>
+      </details>
+    </div>
+  );
+}
+
 export type AiConsultingPortfolioPreviewData = {
   state: AiConsultingPortfolioState;
   memories: AiConsultingUserMemory[];
@@ -109,6 +165,9 @@ export default function AiConsultingPortfolioClient({
   const [error, setError] = useState<string | null>(null);
   const [memoryError, setMemoryError] = useState<string | null>(null);
   const [savingMemoryMessageId, setSavingMemoryMessageId] = useState<string | null>(null);
+  const [memoryDraftMessageId, setMemoryDraftMessageId] = useState<string | null>(null);
+  const [memoryDraftKind, setMemoryDraftKind] = useState<"user_fact" | "goal">("user_fact");
+  const [memoryDraftContent, setMemoryDraftContent] = useState("");
   const [deletingMemoryId, setDeletingMemoryId] = useState<string | null>(null);
   const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
   const [editingMemoryContent, setEditingMemoryContent] = useState("");
@@ -377,8 +436,11 @@ export default function AiConsultingPortfolioClient({
   }
 
   async function saveMemory(message: AiConsultingPortfolioMessage) {
-    if (isPreview || message.role !== "user") return;
-    const content = message.content.trim();
+    if (isPreview || message.role !== "user" || memoryDraftMessageId !== message.id) return;
+    // The customer explicitly selects what kind of self-stated information
+    // should be remembered and writes the actual memory. A question, model
+    // interpretation or presumed medical/financial state is never auto-saved.
+    const content = memoryDraftContent.trim();
     if (!content || content.length > 300) return;
 
     setSavingMemoryMessageId(message.id);
@@ -392,13 +454,15 @@ export default function AiConsultingPortfolioClient({
           threadId: message.threadId,
           sourceMessageId: message.id,
           writeRequestId: crypto.randomUUID(),
-          kind: "user_fact",
+          kind: memoryDraftKind,
           content,
         }),
       });
       const body = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(body.error ?? "AI 기억을 저장하지 못했습니다.");
       await loadMemories();
+      setMemoryDraftMessageId(null);
+      setMemoryDraftContent("");
     } catch (reason) {
       setMemoryError(reason instanceof Error ? reason.message : "AI 기억을 저장하지 못했습니다.");
     } finally {
@@ -723,23 +787,55 @@ export default function AiConsultingPortfolioClient({
                           ? "ml-auto max-w-[88%] rounded-3xl rounded-br-lg bg-[#171a3d] px-5 py-4 text-[15px] leading-7 text-white"
                           : "max-w-[94%] whitespace-pre-wrap rounded-3xl rounded-bl-lg border border-[#dce1ef] bg-white px-5 py-4 text-[15px] leading-7 text-slate-800 shadow-sm"}
                       >
-                        {message.content}
+                        {message.role === "assistant"
+                          ? <ConsultingAnswer content={message.content} />
+                          : message.content}
                       </div>
                       {message.role === "user" ? (
-                        <div className="ml-auto flex max-w-[88%] justify-end">
+                        <div className="ml-auto w-full max-w-[88%]">
                           {remembered ? (
-                            <span className="text-xs font-semibold text-slate-500">✓ AI가 기억 중</span>
+                            <p className="text-right text-xs font-semibold text-slate-500">✓ 내가 저장한 기억</p>
                           ) : isPreview ? (
-                            <span className="text-xs font-semibold text-slate-400">기억 저장 미리보기</span>
+                            <p className="text-right text-xs font-semibold text-slate-400">기억 저장 미리보기</p>
+                          ) : memoryDraftMessageId === message.id ? (
+                            <div className="space-y-3 rounded-2xl border border-[#d8d3ff] bg-white p-4">
+                              <p className="text-sm font-bold text-slate-800">AI가 기억할 내용 직접 저장</p>
+                              <p className="text-xs leading-5 text-slate-600">질문 전체가 아닌, 직접 알려준 상황이나 목표만 적어 주세요. AI의 해석은 사실로 저장하지 않아요.</p>
+                              <label className="block text-xs font-bold text-slate-700">기억 종류
+                                <select
+                                  value={memoryDraftKind}
+                                  onChange={(event) => setMemoryDraftKind(event.target.value as "user_fact" | "goal")}
+                                  className="mt-1 block w-full rounded-xl border border-[#d8d3ff] bg-white px-3 py-2 text-sm font-normal"
+                                >
+                                  <option value="user_fact">현재 상황 · 바뀌면 수정할 내용</option>
+                                  <option value="goal">내 목표</option>
+                                </select>
+                              </label>
+                              <label className="block text-xs font-bold text-slate-700">기억할 내용
+                                <textarea
+                                  value={memoryDraftContent}
+                                  onChange={(event) => setMemoryDraftContent(event.target.value.slice(0, 300))}
+                                  maxLength={300}
+                                  rows={2}
+                                  placeholder={memoryDraftKind === "goal" ? "예: 올해 매달 저축액을 늘리는 것이 내 목표예요." : "예: 요즘 잠드는 시간이 매일 달라요."}
+                                  className="mt-1 block w-full rounded-xl border border-[#d8d3ff] bg-white px-3 py-2 text-sm font-normal leading-6"
+                                />
+                              </label>
+                              <div className="flex flex-wrap justify-end gap-2">
+                                <button type="button" onClick={() => { setMemoryDraftMessageId(null); setMemoryDraftContent(""); }} disabled={savingMemory} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600">취소</button>
+                                <button type="button" onClick={() => void saveMemory(message)} disabled={savingMemory || !memoryDraftContent.trim()} className="rounded-xl bg-[#6f5ce7] px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{savingMemory ? "저장 중..." : "내 기억에 저장"}</button>
+                              </div>
+                            </div>
                           ) : (
-                            <button
-                              type="button"
-                              onClick={() => void saveMemory(message)}
-                              disabled={savingMemory}
-                              className="text-xs font-semibold text-slate-600 underline underline-offset-4 disabled:opacity-50"
-                            >
-                              {savingMemory ? "저장 중" : "이 내용 기억하기"}
-                            </button>
+                            <div className="text-right">
+                              <button
+                                type="button"
+                                onClick={() => { setMemoryDraftMessageId(message.id); setMemoryDraftKind("user_fact"); setMemoryDraftContent(""); }}
+                                className="text-xs font-semibold text-slate-600 underline underline-offset-4"
+                              >
+                                내 상황·목표 기억하기
+                              </button>
+                            </div>
                           )}
                         </div>
                       ) : null}
@@ -769,7 +865,7 @@ export default function AiConsultingPortfolioClient({
 
               {showMemories ? (memories.length === 0 ? (
                 <div className="mt-4 rounded-2xl bg-[#f7f8fc] px-4 py-4 text-sm leading-6 text-slate-600">
-                  아직 기억한 내용이 없습니다. 상담 중 내가 작성한 메시지에서 <strong className="font-semibold text-slate-800">이 내용 기억하기</strong>를 눌러 저장할 수 있습니다.
+                  아직 저장된 기억이 없어요. 상담에서 <strong className="font-semibold text-slate-800">내 상황·목표 기억하기</strong>를 누르고 기억할 내용을 직접 적어 주세요.
                 </div>
               ) : (
                 <div className="mt-4 space-y-2">
@@ -787,7 +883,10 @@ export default function AiConsultingPortfolioClient({
                         </div>
                       ) : (
                         <>
-                          <p className="min-w-0 whitespace-pre-wrap text-sm leading-6 text-slate-800">{memory.content}</p>
+                          <div className="min-w-0">
+                            <p className="mb-1 text-xs font-bold text-[#5e4bd1]">{memory.kind === "goal" ? "내 목표" : "내가 알려준 상황"}</p>
+                            <p className="whitespace-pre-wrap text-sm leading-6 text-slate-800">{memory.content}</p>
+                          </div>
                           {!isPreview ? (
                             <div className="flex shrink-0 items-center gap-3 self-start">
                               <button type="button" onClick={() => { setEditingMemoryId(memory.id); setEditingMemoryContent(memory.content); }} className="text-xs font-semibold text-[#5e4bd1] underline underline-offset-4">수정</button>

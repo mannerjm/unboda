@@ -39,6 +39,7 @@ export default function CreditCheckoutClient({
   currentBalance,
   bundles,
   checkoutEnabled,
+  reviewCheckout = false,
 }: {
   customerKey: string;
   profileId: string;
@@ -47,6 +48,7 @@ export default function CreditCheckoutClient({
   currentBalance: number;
   bundles: readonly CreditBundle[];
   checkoutEnabled: boolean;
+  reviewCheckout?: boolean;
 }) {
   const [activeBundleId, setActiveBundleId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -124,6 +126,10 @@ export default function CreditCheckoutClient({
       {!checkoutEnabled ? (
         <p role="status" className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-900">
           현재 이 계정에서는 질문권 결제가 준비 중입니다. 상품 구성과 가격은 확인할 수 있지만 결제는 진행할 수 없습니다.
+        </p>
+      ) : reviewCheckout ? (
+        <p role="status" className="mt-3 rounded-xl border border-[#cbd5f5] bg-[#f3f1ff] px-4 py-3 text-sm font-semibold leading-6 text-[#40359a]">
+          토스 심사용 테스트 결제입니다. 실제 돈은 출금되지 않으며, 결제가 완료되면 이 테스트 프로필에 질문권이 충전됩니다.
         </p>
       ) : null}
 

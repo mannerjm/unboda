@@ -741,8 +741,6 @@ export default function MyPage() {
                   <input type="checkbox" checked={formInput.birthTimeKnown === false} onChange={(event) => setFormInput({ ...formInput, birthTimeKnown: !event.target.checked, birthTime: event.target.checked ? "12:00" : "" })} className="h-4 w-4 accent-[#6f5ce7]" />
                   출생 시간 모름
                 </label>
-                {formInput.birthTimeKnown === false ? <p className="text-xs leading-5 text-slate-600">시주는 시간 미상으로 표시하며 시각을 이용한 세부 분석은 제외합니다.</p> : null}
-                {editingProfileId && profiles.find((p) => p.id === editingProfileId)?.birthTimeKnown == null ? <p className="text-xs leading-5 text-amber-700">기존 프로필의 출생 시간 확인 여부가 저장되지 않았습니다. 입력된 시각을 확인하거나 ‘출생 시간 모름’을 체크해 주세요.</p> : null}
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">

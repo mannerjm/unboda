@@ -15,6 +15,7 @@ const library = read("app/components/PurchasedAnalysesListMultiEdition.tsx");
 const preview = read("app/admin/ai-consulting-preview/page.tsx");
 const creditMigration = read("supabase/migrations/043_ai_consulting_profile_credit_ledger.sql");
 const runtimeMigration = read("supabase/migrations/044_ai_consulting_credit_runtime.sql");
+const memoryApi = read("app/api/ai-consulting/memories/route.ts");
 
 assert(portfolio.includes("listUserPaidAnalysisSummaries"), "portfolio must derive owned scope from active paid-analysis summaries");
 assert(portfolio.includes('summary.profileId === input.profileId'), "portfolio owned scope must stay profile-scoped");
@@ -93,6 +94,11 @@ assert(portfolio.includes('order("created_at", { ascending: false })') && portfo
 assert(client.includes("loadOlderMessages") && client.includes("이전 상담 더 보기") && portfolioApi.includes("messageBefore"), "older conversations must have an authenticated cursor-based retrieval path");
 assert(client.includes("preferContinuation") && portfolio.includes("input.preferContinuation") && portfolioQuestionApi.includes("input.preferContinuation === true"), "follow-up context must be validated by the server without pinning unrelated new questions");
 assert(client.includes("showMemories") && client.includes("내 기억 보기"), "saved memories must remain editable but folded until requested");
+assert(client.includes("saveEditedMemory") && client.includes('method: "PATCH"') && client.includes("기억 수정"), "customers must be able to correct outdated user-stated memories in the folded panel");
+for (const boundary of ['export async function PATCH(request: Request)', 'resolveProfileBoundary(input.profileId)', '.eq("user_id", boundary.user.id)', '.eq("profile_id", boundary.profile.id)', '.eq("provenance", "USER_STATED")', '.eq("status", "active")', '"수정할 기억을 찾지 못했습니다."']) {
+  assert(memoryApi.includes(boundary), `saved-memory edit must preserve owner, profile, provenance and active-state boundary: ${boundary}`);
+}
+assert(!memoryApi.includes("grantEntitlement") && !memoryApi.includes("reserveAiConsultingQuestion"), "updating a remembered fact must never change purchases or question credits");
 
 
 assert(creditMigration.includes("unused paid questions can be used later against any separately purchased"), "profile credit ledger must remain explicitly cross-product");

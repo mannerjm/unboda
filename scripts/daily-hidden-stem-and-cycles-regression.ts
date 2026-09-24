@@ -1,12 +1,11 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { calculateSaju } from "@fullstackfamily/manseryeok";
-import { buildTodayReading, getTodayDayPillar, normalizeDailyCyclePillar, DAILY_COPY_VERSION } from "../app/lib/dailyUnboda";
+import { buildTodayReading, getTodayDayPillar, getTodayYearPillar, normalizeDailyCyclePillar, DAILY_COPY_VERSION } from "../app/lib/dailyUnboda";
 import { BRANCH_HIDDEN_STEMS } from "../app/lib/weights";
 import { getTenGod } from "../app/lib/tenGod";
-import { calculateSeun } from "../app/lib/seun";
 
-assert.equal(DAILY_COPY_VERSION, "daily-v4", "daily-v4 must invalidate older cached copy");
+assert.equal(DAILY_COPY_VERSION, "daily-v5", "daily-v5 must invalidate older cached copy");
 assert.equal(normalizeDailyCyclePillar("병자"), "丙子");
 assert.equal(normalizeDailyCyclePillar("辛未"), "辛未");
 assert.equal(normalizeDailyCyclePillar("갑"), null);
@@ -74,8 +73,7 @@ const measurements = births.map(([year, month, day]) => {
   const person = calculateSaju(year, month, day, 12, 0);
   const results = Array.from({ length: 60 }, (_, index) => {
     const currentDate = new Date(Date.UTC(2026, 8, 24 + index)).toISOString().slice(0, 10);
-    const currentYear = Number(currentDate.slice(0, 4));
-    const seun = calculateSeun(year, currentYear, person.dayPillarHanja[0], 1).items[0]?.ganji;
+    const seun = getTodayYearPillar(currentDate);
     return buildTodayReading({
       date: currentDate,
       personDayStem: person.dayPillarHanja[0],
@@ -97,8 +95,8 @@ const measurements = births.map(([year, month, day]) => {
 const server = readFileSync("app/lib/dailyUnboda/server.ts", "utf8");
 const page = readFileSync("app/today/page.tsx", "utf8");
 const daily = readFileSync("app/lib/dailyUnboda.ts", "utf8");
-assert(server.includes("currentSeunGanji: saju.currentSeun?.ganji ?? null"), "annual period must come from actual existing saju engine");
-assert(server.includes('profile.birthTime !== "12:00"') && server.includes("saju.currentDaeun?.ganji ?? null"), "unconfirmed default noon cannot be treated as a trustworthy decade start age");
+assert(server.includes("currentSeunGanji: getTodayYearPillar(date)"), "daily annual context must use the existing solar-term year pillar");
+assert(server.includes("currentDaeunGanji: null") && !server.includes("saju.currentDaeun?.ganji"), "any unverified birth hour must omit the decade basis");
 assert(!server.includes("verifiedHourPillarHanja:"), "saved default noon is not a confirmed hour pillar");
 assert(page.includes("getProfileFreeAnalysisFoundationStatus(user.id, activeProfile)"));
 assert(page.includes("getCachedTodayReading(user.id, activeProfile, date)"));

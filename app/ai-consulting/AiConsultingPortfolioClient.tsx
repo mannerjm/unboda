@@ -225,12 +225,12 @@ export default function AiConsultingPortfolioClient({
   const hiddenAnalysisCount = Math.max((portfolio?.analyses.length ?? 0) - 3, 0);
   const allLoadedMessages = useMemo(() => [...olderMessages, ...(portfolio?.messages ?? [])], [olderMessages, portfolio]);
   const previousAnswer = useMemo(() => [...(portfolio?.messages ?? [])].reverse().find((message) => message.role === "assistant") ?? null, [portfolio]);
-  const automaticSource = latestAnswerSource ?? focusAnalysis ?? (previousAnswer ? {
+  const automaticSource = latestAnswerSource ?? (previousAnswer ? {
     productId: previousAnswer.sourceProductId,
     analysisEditionKey: previousAnswer.sourceEditionKey,
     productTitle: previousAnswer.sourceTitle,
     editionLabel: previousAnswer.sourceEditionLabel,
-  } : null);
+  } : focusAnalysis);
   // The report list is informational only. Chat history is always unified;
   // each answer still names its actual owned source below the message.
   const visibleChatMessages = allLoadedMessages;

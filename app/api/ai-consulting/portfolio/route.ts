@@ -33,7 +33,10 @@ export async function GET(request: Request) {
   if ("error" in boundary) return boundary.error;
 
   const messageBefore = url.searchParams.get("before");
-  if (messageBefore && (messageBefore.length > 48 || !/^\d{4}-\d{2}-\d{2}T/.test(messageBefore) || Number.isNaN(Date.parse(messageBefore)))) {
+  const messageBeforeId = url.searchParams.get("beforeId");
+  const validTime = Boolean(messageBefore && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/.test(messageBefore) && !Number.isNaN(Date.parse(messageBefore)));
+  const validId = Boolean(messageBeforeId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(messageBeforeId));
+  if ((messageBefore !== null || messageBeforeId !== null) && !(validTime && validId)) {
     return NextResponse.json({ error: "상담 기록 조회 기준이 올바르지 않습니다." }, { status: 400 });
   }
 
@@ -50,6 +53,7 @@ export async function GET(request: Request) {
       profile: boundary.profile,
       includePreviousSource,
       messageBefore: messageBefore ?? undefined,
+      messageBeforeId: messageBeforeId ?? undefined,
     });
     return NextResponse.json(state);
   } catch (error) {

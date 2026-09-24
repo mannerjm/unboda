@@ -387,15 +387,11 @@ const defaultDaeunOrder = sajuData?.daeunAnalysis
     )
   : null;
 const effectiveDaeunOrder = selectedDaeunOrder ?? defaultDaeunOrder;
-const selectedDaeunStartYear =
-  (freeAnalysis?.daeunAnalysis ?? sajuData?.daeunAnalysis) &&
-  effectiveDaeunOrder
-    ? Number(birthDate.slice(0, 4)) +
-      (freeAnalysis?.daeunAnalysis.startAge ??
-        sajuData!.daeunAnalysis.startAge) +
-      (effectiveDaeunOrder - 1) * 10 -
-      1
-    : null;
+const selectedDaeunStartYear = effectiveDaeunOrder && (freeAnalysis?.daeunAnalysis ?? sajuData?.daeunAnalysis)
+  ? Number(birthDate.slice(0, 4)) +
+    (freeAnalysis?.daeunAnalysis?.startAge ?? sajuData?.daeunAnalysis?.startAge ?? 0) +
+    (effectiveDaeunOrder - 1) * 10 - 1
+  : null;
 
 const displayedSeun =
   selectedDaeunStartYear !== null

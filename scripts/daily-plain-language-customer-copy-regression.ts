@@ -34,7 +34,7 @@ for (const [year, month, day] of births) {
 const page = readFileSync("app/today/page.tsx", "utf8");
 const server = readFileSync("app/lib/dailyUnboda/server.ts", "utf8");
 assert(page.indexOf("{reading.topic}") < page.indexOf("{reading.flow}") && page.indexOf("{reading.flow}") < page.indexOf("{reading.action}"));
-assert(server.includes("getProfileFingerprint(profile)") && server.includes("DAILY_COPY_VERSION"));
+assert(server.includes("birthTimeKnown: profile.birthTimeKnown ?? null") && server.includes("DAILY_COPY_VERSION") && server.includes("profile.id") && server.includes("userId") && server.includes("date"), "daily cache must remain scoped to verified profile and date");
 assert(!server.includes("new OpenAI(") && !server.includes("requestPayment("));
 console.log("daily-plain-language-customer-copy-regression: PASS", JSON.stringify({ checked, example: buildTodayReading({
   date:"2026-09-24", personDayStem:"甲", personDayBranch:"子",

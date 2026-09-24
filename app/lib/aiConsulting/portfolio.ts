@@ -67,12 +67,6 @@ export type AiConsultingPortfolioQuestionResult =
       source: AiConsultingPortfolioSource;
     }
   | {
-      state: "clarify_source";
-      message: string;
-      candidates: AiConsultingPortfolioSource[];
-      questionsRemaining: number;
-    }
-  | {
       state: "non_chargeable";
       message: string;
       reason: string;
@@ -496,9 +490,9 @@ export async function answerAiConsultingPortfolioQuestion(input: {
     && next.analysis.productId !== top.analysis.productId
   ) {
     return {
-      state: "clarify_source",
-      message: "이 질문은 보유한 분석 두 개 이상과 연결됩니다. 어떤 리포트를 기준으로 먼저 답할지 선택해 주세요. 선택만으로 질문권은 차감되지 않습니다.",
-      candidates: allowed.slice(0, 4).map(({ analysis }) => toSource(analysis)),
+      state: "non_chargeable",
+      message: "질문과 연결되는 구매 분석이 여러 개 있어요. 궁금한 주제나 시기를 조금 더 구체적으로 적어 주세요. 질문권은 차감되지 않습니다.",
+      reason: "AMBIGUOUS_OWNED_ANALYSIS",
       questionsRemaining: state.questionsRemaining,
     };
   }

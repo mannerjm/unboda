@@ -58,8 +58,9 @@ export default async function AiConsultingPage({
         userId: user.id,
         profileId: activeProfile.id,
         profile: activeProfile,
+        // Show unified, profile-scoped history even when arriving from a report.
+        // Historical birth-input reports still remain isolated server-side.
         includePreviousSource: requestedReport,
-        messageSource: requestedReport,
       })
     : null;
   const verifiedReport = initialPortfolioState?.analyses.find((analysis) =>

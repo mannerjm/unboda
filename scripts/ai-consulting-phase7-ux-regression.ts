@@ -103,7 +103,7 @@ for (const forbidden of ["/api/ai-consulting/question", "/api/orders", "requestP
 assert(reportPreview.includes('href="/admin/ai-consulting-preview"'), "Phase 6 report preview must link directly to the Phase 7 follow-up screen");
 assert(portfolioChat.includes("나를 기억하는 AI 운세 상담") && portfolioChat.includes("새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다."), "unified consultation must explain the memory-first portfolio model");
 assert(portfolioChat.includes("공용 질문권") && portfolioChat.includes("모든 보유 분석에서 함께 사용"), "unified consultation must make the shared balance explicit");
-assert(portfolioChat.includes("새 주제로 질문하기 · 자동 선택"), "unified consultation must expose automatic report routing without misleading chosen-report customers");
+assert(portfolioChat.includes("통합 AI 상담") && portfolioChat.includes("주제를 선택할 필요 없이 질문해 주세요.") && !portfolioChat.includes("새 주제로 질문하기 · 자동 선택"), "unified consultation must automatically route topics without forcing customers to switch source modes");
 assert(portfolioChat.includes('fetch("/api/ai-consulting/portfolio/question"'), "unified consultation must submit through the portfolio router");
 assert(portfolioChat.includes('data-ai-composer="portfolio-sticky"'), "unified consultation composer must stay scoped to the conversation");
 assert(!admin.includes('href="/admin/ai-consulting-preview"'), "admin dashboard must not expose the completed Phase 7 design preview");

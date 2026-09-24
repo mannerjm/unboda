@@ -629,14 +629,12 @@ export default function AiConsultingPortfolioClient({
               <div className="mt-5 space-y-4 pb-4">
                 {hasOlderMessages ? <button type="button" onClick={() => void loadOlderMessages()} disabled={isLoadingOlder} className="w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm font-semibold text-[#5e4bd1] disabled:opacity-50">{isLoadingOlder ? "이전 상담 불러오는 중..." : "이전 상담 더 보기"}</button> : null}
                 {visibleChatMessages.length === 0 && (portfolio.questionsRemaining > 0 || hasOlderMessages) ? (
-                  <div className={portfolio.questionsRemaining === 0 ? "rounded-xl bg-[#f0efff] px-4 py-3 text-center text-sm leading-6 text-[#40359a]" : "rounded-[1.5rem] border border-dashed border-[#cfd5e6] bg-white p-7 text-center text-sm leading-7 text-slate-600"}>
+                  <div className="rounded-[1.5rem] border border-dashed border-[#cfd5e6] bg-white p-7 text-center text-sm leading-7 text-slate-600">
                     {hasOlderMessages
                       ? "이전 상담 더 보기에서 오래된 대화를 확인할 수 있어요."
-                      : portfolio.questionsRemaining === 0
-                        ? "첫 상담 기록이 아직 없어요. 위에서 질문권 상품과 이용 방법을 확인해 주세요."
-                        : activeAnalysis
-                          ? "이 분석의 첫 상담이에요. 위에서 궁금한 내용을 질문해 보세요."
-                          : "궁금한 내용을 질문하면 관련 구매 분석을 찾아 상담을 시작합니다."}
+                      : activeAnalysis
+                        ? "이 분석의 첫 상담이에요. 위에서 궁금한 내용을 질문해 보세요."
+                        : "궁금한 내용을 질문하면 관련 구매 분석을 찾아 상담을 시작합니다."}
                   </div>
                 ) : null}
 

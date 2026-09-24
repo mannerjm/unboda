@@ -210,19 +210,19 @@ export default function AiConsultingPortfolioClient({
     return suggestions;
   }, [portfolio]);
 
+  const ownedAnalyses = isPreview ? portfolio?.analyses ?? [] : portfolio?.ownedAnalyses ?? [];
   const filteredAnalyses = useMemo(() => {
-    if (!portfolio) return [];
     const search = analysisSearch.trim().toLocaleLowerCase("ko-KR");
-    if (!search) return portfolio.analyses;
-    return portfolio.analyses.filter((analysis) =>
+    if (!search) return ownedAnalyses;
+    return ownedAnalyses.filter((analysis) =>
       `${analysis.productTitle} ${analysis.editionLabel} ${analysis.scopeLabel}`.toLocaleLowerCase("ko-KR").includes(search),
     );
-  }, [analysisSearch, portfolio]);
+  }, [analysisSearch, ownedAnalyses]);
 
   const visibleAnalyses = useMemo(() => showAllAnalyses
     ? filteredAnalyses.slice(0, visibleAnalysisLimit)
-    : portfolio?.analyses.slice(0, 3) ?? [], [filteredAnalyses, portfolio, showAllAnalyses, visibleAnalysisLimit]);
-  const hiddenAnalysisCount = Math.max((portfolio?.analyses.length ?? 0) - 3, 0);
+    : ownedAnalyses.slice(0, 3), [filteredAnalyses, ownedAnalyses, showAllAnalyses, visibleAnalysisLimit]);
+  const hiddenAnalysisCount = Math.max(ownedAnalyses.length - 3, 0);
   const allLoadedMessages = useMemo(() => [...olderMessages, ...(portfolio?.messages ?? [])], [olderMessages, portfolio]);
   const previousAnswer = useMemo(() => [...(portfolio?.messages ?? [])].reverse().find((message) => message.role === "assistant") ?? null, [portfolio]);
   const automaticSource = latestAnswerSource ?? (previousAnswer ? {
@@ -422,6 +422,71 @@ export default function AiConsultingPortfolioClient({
     }
   }
 
+  // The library is rendered even when there are no current-input reports to
+  // route questions through. It is never used directly as an AI answer source.
+  const ownedAnalysisLibrary = portfolio && ownedAnalyses.length > 0 ? (
+<section id="owned-analysis-selector" className="mt-5 scroll-mt-6 rounded-[1.75rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#ffffff_0%,#f8f7ff_100%)] p-5 shadow-sm sm:p-6">
+              <div className={portfolio.questionsRemaining > 0 ? "grid gap-5 lg:grid-cols-[1.05fr_0.95fr]" : "grid gap-5"}>
+                <div>
+                  <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">내 보유 분석</p>
+                  <h2 className="mt-2 text-xl font-black">구매한 분석 보기</h2>
+                  <p className="mt-3 text-[15px] leading-7 text-slate-700">
+                    이 목록은 구매한 분석을 확인하는 곳이에요. 상담할 분석은 질문 내용에 따라 AI가 자동으로 찾습니다. 질문권은 모든 보유 분석에서 함께 사용해요.
+                  </p>
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-xs font-bold tracking-[0.1em] text-slate-500">
+                        {showAllAnalyses ? `전체 보유 분석 ${filteredAnalyses.length}개` : `최근 구매한 분석 ${Math.min(3, ownedAnalyses.length)}개`}
+                      </p>
+                      {hiddenAnalysisCount > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowAllAnalyses((value) => !value)}
+                          className="shrink-0 text-xs font-bold text-[#5e4bd1] underline decoration-[#c8c0ff] underline-offset-4"
+                          aria-expanded={showAllAnalyses}
+                        >
+                          {showAllAnalyses ? "접기" : `전체 보기 · +${hiddenAnalysisCount}개`}
+                        </button>
+                      ) : null}
+                    </div>
+                    {showAllAnalyses ? <label className="mt-3 block text-sm font-semibold text-slate-700">분석 검색<input type="search" value={analysisSearch} onChange={(event) => { setAnalysisSearch(event.target.value); setVisibleAnalysisLimit(8); }} placeholder="리포트 이름이나 연도 검색" className="mt-2 w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm outline-none focus:border-[#7866de]" /></label> : null}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {visibleAnalyses.map((analysis) => (
+                        <span
+                          key={`${analysis.productId}|${analysis.analysisEditionKey}`}
+                          className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-xs font-semibold text-slate-600"
+                        >
+                          {analysis.productTitle} · {analysis.editionLabel}
+                          {analysis.profileInputVersion !== "current" ? " · 이전 정보 기준" : ""}
+                        </span>
+                      ))}
+                    </div>
+                    {showAllAnalyses && filteredAnalyses.length === 0 ? <p className="mt-3 text-sm text-slate-500">해당하는 분석이 없습니다.</p> : null}
+                    {showAllAnalyses && visibleAnalysisLimit < filteredAnalyses.length ? <button type="button" onClick={() => setVisibleAnalysisLimit((value) => value + 8)} className="mt-3 w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm font-bold text-[#5e4bd1]">분석 8개 더 보기</button> : null}
+                  </div>
+
+                  <p className="mt-4 border-t border-[#e4e7f0] pt-3 text-xs leading-5 text-slate-500">답변 완료 시 질문권 1회 차감 · 답할 수 없는 질문은 차감하지 않아요.</p>
+                </div>
+
+                {portfolio.questionsRemaining > 0 ? <div>
+                  <p className="text-xs font-bold tracking-[0.14em] text-slate-500">추천 질문</p>
+                  <div className="mt-3 space-y-2">
+                    {suggestedQuestions.map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => setQuestion(suggestion)}
+                        className="w-full rounded-2xl border border-[#dce1ef] bg-white px-4 py-3 text-left text-sm font-semibold leading-6 text-slate-700 transition hover:border-[#aaa0f4] hover:bg-[#faf9ff]"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div> : null}
+              </div>
+            </section>
+  ) : null;
+
   return (
     <main className="min-h-screen bg-[#f5f7fc] px-4 py-7 text-[#11162d] sm:px-8 sm:py-10">
       <div className="mx-auto max-w-5xl">
@@ -441,7 +506,7 @@ export default function AiConsultingPortfolioClient({
           <section className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-950">
             <p className="font-black">이전 출생정보 기준 상담</p>
             <p className="mt-1">
-              이 리포트와 기존 상담 기록은 구매 당시 출생 정보 기준으로 보관됩니다. 현재 프로필의 새 출생정보와 자동으로 합치지 않으며, 이 화면에서는 이 리포트 기준으로만 상담을 이어갑니다.
+              구매 당시 출생 정보가 같은 리포트는 함께 상담할 수 있습니다. 출생 정보를 수정한 뒤 새로 구매한 리포트와는 분석 결과를 섞지 않습니다. 보유한 리포트 목록은 모두 볼 수 있습니다.
             </p>
             <p className="mt-2 font-semibold">남아 있는 공용 AI 질문권은 그대로 사용할 수 있습니다.</p>
           </section>
@@ -450,7 +515,7 @@ export default function AiConsultingPortfolioClient({
         {!isLoading && portfolio && (portfolio.previousAnalysesExcluded ?? 0) > 0 && !focusAnalysis ? (
           <section className="mt-4 rounded-2xl border border-[#dce1ef] bg-white px-5 py-4 text-sm leading-6 text-slate-700 shadow-sm">
             <p className="font-bold text-[#11162d]">출생정보 변경 전 리포트 {(portfolio.previousAnalysesExcluded ?? 0)}개는 자동 상담 범위에서 제외되어 있습니다.</p>
-            <p className="mt-1">기존 리포트와 상담 기록은 삭제되지 않습니다. 해당 리포트에서 직접 AI 상담으로 들어오면 구매 당시 정보 기준으로 이어갈 수 있습니다.</p>
+            <p className="mt-1">이전 리포트와 상담 기록은 그대로 보관됩니다. 보유 분석 목록에는 모두 표시하며, 해당 리포트에서 상담으로 들어가면 같은 구매 당시 정보 기준으로 이어갈 수 있습니다.</p>
           </section>
         ) : null}
 
@@ -463,14 +528,14 @@ export default function AiConsultingPortfolioClient({
 
           <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
             <div className="rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-4">
-              <p className="text-xs font-bold tracking-[0.12em] text-[#c9c3ff]">상담 가능한 분석</p>
+              <p className="text-xs font-bold tracking-[0.12em] text-[#c9c3ff]">현재 연결된 상담 분석</p>
               <p className="mt-2 text-xl font-black">
                 {portfolio ? `${portfolio.analyses.length}개 분석` : "확인 중"}
               </p>
               <p className="mt-1 text-sm leading-6 text-slate-300">
                 {focusAnalysis?.profileInputVersion !== "current" && focusAnalysis
-                  ? "이전 출생정보로 구매한 리포트이며, 다른 시기의 분석과 섞지 않습니다."
-                  : "현재 출생정보에 맞는 완료 리포트만 상담에 연결됩니다."}
+                  ? `구매한 분석 총 ${ownedAnalyses.length}개 · 현재는 같은 구매 당시 출생 정보 기준으로 상담합니다.`
+                  : `구매한 분석 총 ${ownedAnalyses.length}개 · 출생 정보가 다른 시기의 해석은 섞지 않습니다.`
               </p>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/[0.11] px-5 py-4 sm:min-w-56">
@@ -662,66 +727,7 @@ export default function AiConsultingPortfolioClient({
 
             </section>
 
-            <section id="owned-analysis-selector" className="mt-5 scroll-mt-6 rounded-[1.75rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#ffffff_0%,#f8f7ff_100%)] p-5 shadow-sm sm:p-6">
-              <div className={portfolio.questionsRemaining > 0 ? "grid gap-5 lg:grid-cols-[1.05fr_0.95fr]" : "grid gap-5"}>
-                <div>
-                  <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">내 보유 분석</p>
-                  <h2 className="mt-2 text-xl font-black">구매한 분석 보기</h2>
-                  <p className="mt-3 text-[15px] leading-7 text-slate-700">
-                    이 목록은 구매한 분석을 확인하는 곳이에요. 상담할 분석은 질문 내용에 따라 AI가 자동으로 찾습니다. 질문권은 모든 보유 분석에서 함께 사용해요.
-                  </p>
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-xs font-bold tracking-[0.1em] text-slate-500">
-                        {showAllAnalyses ? `전체 보유 분석 ${filteredAnalyses.length}개` : `최근 구매한 분석 ${Math.min(3, portfolio.analyses.length)}개`}
-                      </p>
-                      {hiddenAnalysisCount > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => setShowAllAnalyses((value) => !value)}
-                          className="shrink-0 text-xs font-bold text-[#5e4bd1] underline decoration-[#c8c0ff] underline-offset-4"
-                          aria-expanded={showAllAnalyses}
-                        >
-                          {showAllAnalyses ? "접기" : `전체 보기 · +${hiddenAnalysisCount}개`}
-                        </button>
-                      ) : null}
-                    </div>
-                    {showAllAnalyses ? <label className="mt-3 block text-sm font-semibold text-slate-700">분석 검색<input type="search" value={analysisSearch} onChange={(event) => { setAnalysisSearch(event.target.value); setVisibleAnalysisLimit(8); }} placeholder="리포트 이름이나 연도 검색" className="mt-2 w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm outline-none focus:border-[#7866de]" /></label> : null}
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {visibleAnalyses.map((analysis) => (
-                        <span
-                          key={`${analysis.productId}|${analysis.analysisEditionKey}`}
-                          className="rounded-full border border-[#dce1ef] bg-white px-3 py-2 text-xs font-semibold text-slate-600"
-                        >
-                          {analysis.productTitle} · {analysis.editionLabel}
-                          {analysis.profileInputVersion !== "current" ? " · 이전 정보 기준" : ""}
-                        </span>
-                      ))}
-                    </div>
-                    {showAllAnalyses && filteredAnalyses.length === 0 ? <p className="mt-3 text-sm text-slate-500">해당하는 분석이 없습니다.</p> : null}
-                    {showAllAnalyses && visibleAnalysisLimit < filteredAnalyses.length ? <button type="button" onClick={() => setVisibleAnalysisLimit((value) => value + 8)} className="mt-3 w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm font-bold text-[#5e4bd1]">분석 8개 더 보기</button> : null}
-                  </div>
-
-                  <p className="mt-4 border-t border-[#e4e7f0] pt-3 text-xs leading-5 text-slate-500">답변 완료 시 질문권 1회 차감 · 답할 수 없는 질문은 차감하지 않아요.</p>
-                </div>
-
-                {portfolio.questionsRemaining > 0 ? <div>
-                  <p className="text-xs font-bold tracking-[0.14em] text-slate-500">추천 질문</p>
-                  <div className="mt-3 space-y-2">
-                    {suggestedQuestions.map((suggestion) => (
-                      <button
-                        key={suggestion}
-                        type="button"
-                        onClick={() => setQuestion(suggestion)}
-                        className="w-full rounded-2xl border border-[#dce1ef] bg-white px-4 py-3 text-left text-sm font-semibold leading-6 text-slate-700 transition hover:border-[#aaa0f4] hover:bg-[#faf9ff]"
-                      >
-                        {suggestion}
-                      </button>
-                    ))}
-                  </div>
-                </div> : null}
-              </div>
-            </section>
+            {ownedAnalysisLibrary}
 
             <section className="mt-4 rounded-[1.75rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-6">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -770,6 +776,8 @@ export default function AiConsultingPortfolioClient({
 
           </>
         ) : null}
+
+        {!isLoading && portfolio?.analyses.length === 0 ? ownedAnalysisLibrary : null}
 
         {memoryError ? (
           <p className="mt-5 rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">{memoryError}</p>

@@ -178,9 +178,9 @@ export default async function TodayPage() {
               <span className="rounded-full border border-[#e7d099]/25 bg-[#e7d099]/10 px-3 py-1.5 text-xs font-semibold text-[#e8d29e]">오늘의 무료 분석</span>
             </div>
             <p className="mt-6 text-sm font-bold text-[#bfb3f3]">오늘 살펴볼 흐름</p>
-            <h2 className="mt-2 text-[2rem] font-black leading-tight tracking-[-.04em] text-white sm:text-[2.8rem]">{reading.topic}</h2>
+            <h2 className="mt-2 max-w-3xl text-[1.75rem] font-black leading-snug tracking-[-.035em] text-white sm:text-[2.25rem]">{reading.topic}</h2>
             <div className="mt-5 h-px w-20 bg-[linear-gradient(90deg,#f3cf8b,transparent)]" aria-hidden="true" />
-            <p className="mt-5 max-w-3xl text-[15px] font-medium leading-8 text-[#e5e7f2] sm:text-lg sm:leading-9">{reading.flow}</p>
+            <p className="mt-5 max-w-2xl text-[15px] font-medium leading-7 text-[#e5e7f2] sm:text-base sm:leading-8">{reading.flow}</p>
           </section>
 
           <section className="mt-4 rounded-[1.7rem] border border-[#eed6a2]/30 bg-[linear-gradient(115deg,rgba(239,201,136,.17),rgba(255,255,255,.055)_62%,rgba(138,111,223,.13))] px-6 py-7 shadow-[0_16px_60px_rgba(2,8,30,.2)] backdrop-blur-xl sm:rounded-[2rem] sm:px-10 sm:py-9" aria-labelledby="today-action">

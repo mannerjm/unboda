@@ -277,6 +277,7 @@ export function getSaju(
   isLeapMonth: "평달" | "윤달",
   gender: Gender,
   evaluationDate?: string,
+  birthTimeKnown: boolean | null = true,
 ) {
   const evaluationContext = createEvaluationContext(evaluationDate);
   const [year, month, day] = birthDate.split("-").map(Number);
@@ -299,13 +300,19 @@ export function getSaju(
     solarDay = converted.solar.day;
   }
 
-  const saju = calculateSaju(
+  // Unknown time: noon only anchors the date for the calendar library. The
+  // hour pillar MUST NOT be treated as calculated or included in derived
+  // element weights, fortune relations, paid evidence or displayed natal chart.
+  const computedSaju = calculateSaju(
     solarYear,
     solarMonth,
     solarDay,
     hour,
     minute
   );
+  const saju = birthTimeKnown === false
+    ? { ...computedSaju, hourPillarHanja: undefined, hourPillar: "" }
+    : computedSaju;
   const yearStage = getTwelveStage(
   saju.dayPillarHanja[0],
   saju.yearPillarHanja[1]
@@ -482,7 +489,7 @@ const elementRelations =
   relations: elementRelations,
 });
 
-const daeunAnalysis = calculateDaeun(
+const daeunAnalysis = birthTimeKnown === false ? null : calculateDaeun(
   saju.yearPillar,
   saju.monthPillar,
   saju.dayPillar,
@@ -497,7 +504,7 @@ const seunAnalysis = calculateSeun(
   10
 );
 
-const currentDaeun = daeunAnalysis.daeuns.find((daeun) => {
+const currentDaeun = daeunAnalysis?.daeuns.find((daeun) => {
   const start = daeunAnalysis.startAge + (daeun.order - 1) * 10;
   const end = start + 9;
   const currentAge = evaluationContext.evaluationYear - solarYear + 1;
@@ -543,6 +550,7 @@ const fortuneFlowAnalysis =
 ); 
 
   return {
+    birthTimeKnown,
     evaluationContext,
      solarDate: `${solarYear}-${String(solarMonth).padStart(2, "0")}-${String(
     solarDay

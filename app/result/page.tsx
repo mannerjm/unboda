@@ -691,7 +691,6 @@ async function retryMainAnalysis() {
       <h2 className="text-2xl font-bold text-stone-900">
         사주팔자
       </h2>
-      {profile?.birthTimeKnown === false ? <p className="mt-2 text-xs leading-5 text-stone-500">출생 시간이 확인되지 않아 시주를 표시하지 않습니다.</p> : null}
       {profile?.birthTimeKnown == null ? <p className="mt-2 text-xs leading-5 text-amber-700">기존 프로필의 출생 시간 확인 여부가 저장되지 않았습니다. 마이페이지에서 확인해 주세요.</p> : null}
     </div>
 
@@ -966,6 +965,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
 
   <p className="mt-6 text-center text-xs leading-6 text-stone-500">
     일주는 본인을 중심으로 보는 기둥이므로 화면에서 강조해 표시했습니다.
+    {profile?.birthTimeKnown === false ? <span className="mt-1 block text-stone-400">자시(23시 전후) 출생 여부에 따라 일주가 달라질 수 있습니다.</span> : null}
   </p>
 </section>
 <SajuRelationStarsSection relationStars={relationStars} />

@@ -46,6 +46,7 @@ export type AiConsultingPortfolioState = {
   questionsRemaining: number;
   analyses: AiConsultingPortfolioAnalysis[];
   messages: AiConsultingPortfolioMessage[];
+  hasOlderMessages?: boolean;
   previousAnalysesExcluded: number;
 };
 
@@ -257,8 +258,9 @@ async function listPortfolioMessages(input: {
   userId: string;
   profileId: string;
   analyses: readonly AiConsultingPortfolioAnalysis[];
-}): Promise<AiConsultingPortfolioMessage[]> {
-  if (input.analyses.length === 0) return [];
+  before?: string;
+}): Promise<{ messages: AiConsultingPortfolioMessage[]; hasOlderMessages: boolean }> {
+  if (input.analyses.length === 0) return { messages: [], hasOlderMessages: false };
 
   const sourceByKey = new Map(
     input.analyses.map((analysis) => [
@@ -282,23 +284,29 @@ async function listPortfolioMessages(input: {
   const threads = ((threadData ?? []) as ThreadRow[])
     .filter((thread) => sourceByKey.has(analysisKey(thread.base_product_id, thread.analysis_edition_key)));
 
-  if (threads.length === 0) return [];
+  if (threads.length === 0) return { messages: [], hasOlderMessages: false };
 
   const threadById = new Map(threads.map((thread) => [thread.id, thread]));
-  const { data: messageData, error: messageError } = await supabase
+  // Load the latest messages first. An older, long-running thread must never
+  // hide the newest conversation just because the profile has over 200 messages.
+  let messageQuery = supabase
     .from("ai_consulting_messages")
     .select("id,thread_id,role,content,scope_decision,charged,created_at")
     .eq("user_id", input.userId)
     .eq("profile_id", input.profileId)
     .in("thread_id", threads.map((thread) => thread.id))
-    .order("created_at", { ascending: true })
-    .limit(200);
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(41);
+  if (input.before) messageQuery = messageQuery.lt("created_at", input.before);
+  const { data: messageData, error: messageError } = await messageQuery;
 
   if (messageError) {
     throw new Error(`AI_CONSULTING_PORTFOLIO_MESSAGES_FAILED: ${messageError.message}`);
   }
 
-  return ((messageData ?? []) as MessageRow[]).flatMap((message) => {
+  const hasOlderMessages = (messageData ?? []).length > 40;
+  const messages = ((messageData ?? []).slice(0, 40) as MessageRow[]).flatMap((message) => {
     const thread = threadById.get(message.thread_id);
     if (!thread) return [];
     const source = sourceByKey.get(analysisKey(thread.base_product_id, thread.analysis_edition_key));
@@ -317,7 +325,8 @@ async function listPortfolioMessages(input: {
       sourceTitle: source.productTitle,
       sourceEditionLabel: source.editionLabel,
     }];
-  });
+  }).reverse();
+  return { messages, hasOlderMessages };
 }
 
 export async function getAiConsultingPortfolioState(input: {
@@ -328,14 +337,16 @@ export async function getAiConsultingPortfolioState(input: {
     productId: string;
     analysisEditionKey: string;
   } | null;
+  messageBefore?: string;
 }): Promise<AiConsultingPortfolioState> {
   const { analyses, previousAnalysesExcluded } = await listPortfolioAnalyses(input);
-  const [questionsRemaining, messages] = await Promise.all([
+  const [questionsRemaining, messagePage] = await Promise.all([
     getAiConsultingCreditBalance(input),
     listPortfolioMessages({
       userId: input.userId,
       profileId: input.profileId,
       analyses,
+      before: input.messageBefore,
     }),
   ]);
 
@@ -343,7 +354,8 @@ export async function getAiConsultingPortfolioState(input: {
     profileId: input.profileId,
     questionsRemaining,
     analyses,
-    messages,
+    messages: messagePage.messages,
+    hasOlderMessages: messagePage.hasOlderMessages,
     previousAnalysesExcluded,
   };
 }
@@ -364,6 +376,7 @@ export async function answerAiConsultingPortfolioQuestion(input: {
   question: string;
   preferredProductId?: string | null;
   preferredEditionKey?: string | null;
+  preferContinuation?: boolean;
   profile: ProfileDto;
 }): Promise<AiConsultingPortfolioQuestionResult> {
   const includePreviousSource = input.preferredProductId && input.preferredEditionKey
@@ -436,13 +449,19 @@ export async function answerAiConsultingPortfolioQuestion(input: {
     };
   }
 
-  const preferred = input.preferredProductId && input.preferredEditionKey
+  const preferredCandidate = input.preferredProductId && input.preferredEditionKey
     ? allowed.find((candidate) =>
         candidate.analysis.productId === input.preferredProductId
         && candidate.analysis.analysisEditionKey === input.preferredEditionKey,
       )
     : undefined;
-
+  // An explicit report selection stays pinned. An automatic follow-up only
+  // reuses the previous source for conversational wording when another report
+  // is not materially more relevant; clear topic switches still re-route.
+  const followup = /^(그럼|그러면|그렇다면|그래서|이어서|아까|지난번|저번에|방금|그때|그건|그게|그것|그 부분|그 이야기|그 후|그와 관련|이것도|그렇군요|그런데 그)/u.test(input.question.trim());
+  const preferred = input.preferContinuation
+    ? followup && preferredCandidate && allowed[0].score - preferredCandidate.score <= 1 ? preferredCandidate : undefined
+    : preferredCandidate;
   const top = preferred ?? allowed[0];
   const next = preferred ? undefined : allowed[1];
 

@@ -42,7 +42,7 @@ assert(page.includes("getActiveProfile") && page.includes("AiConsultingPortfolio
 assert(page.includes("focusProductId") && page.includes("focusEdition"), "report-originated navigation must keep an optional starting context without restricting the hub");
 
 for (const copy of [
-  "내 구매 분석을 연결하는 AI 상담",
+  "나를 기억하는 AI 운세 상담",
   "새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다.",
   "공용 질문권",
   "모든 보유 분석에서 함께 사용",
@@ -56,9 +56,11 @@ assert(client.includes("preferredProductId") && client.includes("preferredEditio
 assert(client.includes('data-section="portfolio-conversation"') && client.includes('data-ai-composer="portfolio-sticky"'), "unified composer must stay inside the conversation section");
 assert(client.includes("sourceTitle") && client.includes("sourceEditionLabel"), "each aggregated message must show which report/edition grounded it");
 assert(client.includes("threadId: message.threadId"), "memory writes must preserve the originating internal thread");
-assert(client.includes("showAllAnalyses") && client.includes("portfolio.analyses.slice(0, 3)"), "owned analysis display must default to the three most recent analyses");
+assert(client.includes("showAllAnalyses") && client.includes("portfolio?.analyses.slice(0, 3)"), "owned analysis display must default to the three most recent analyses");
+assert(client.includes("filteredAnalyses.slice(0, visibleAnalysisLimit)") && client.includes("분석 8개 더 보기"), "expanded analyses must remain bounded and searchable, never render hundreds of chips at once");
+assert(client.includes("setChosenSource(analysis)") && client.includes('document.getElementById("portfolio-question")?.focus()'), "explicit selection must focus the consultation composer");
 assert(client.includes("전체 보기 · +") && client.includes("접기"), "owned analysis display must support expand/collapse for the full portfolio");
-assert(client.includes("최근 보유 분석 3개") && client.includes("전체 보유 분석"), "owned analysis list must clearly explain collapsed and expanded states");
+assert(client.includes("최근 구매한 분석 ${Math.min(3, portfolio.analyses.length)}개") && client.includes("전체 보유 분석 ${filteredAnalyses.length}개"), "owned-analysis labels must show actual counts, not a fixed three when only two exist");
 assert(client.includes("상담 이용 안내") && client.includes('border-t border-[#e4e7f0]'), "consulting guidance must be visually separated from the owned-analysis list");
 assert(!client.includes("dangerouslySetInnerHTML"), "unified consultation must render model output as plain text");
 
@@ -85,8 +87,12 @@ assert((client.match(/질문권 구매하기 →/g) ?? []).length === 2, "purcha
 assert((client.match(/질문권 상품 보기 →/g) ?? []).length === 2, "disabled-checkout product browse CTA must remain in top balance and bottom conversation without enabling purchase");
 assert(!client.includes("credit-recharge-title") && !client.includes("질문권이 0회예요. 이어서 질문해 보세요!"), "zero-credit state must not repeat a full-width purchase banner");
 assert(!client.includes("AI_CONSULTING_CREDIT_BUNDLES"), "bundle prices belong on the credit purchase page, not in a duplicate consultation banner");
-assert(client.includes("질문권 0회 · 새 답변에는 질문권이 필요해요.") && client.includes("지난 상담 기록은 그대로 볼 수 있어요.") && client.includes("sticky bottom-4 z-10 -mt-28"), "depleted composer must preserve zero-credit notice and the requested bottom credit action");
-assert((client.match(/href=\{creditPurchaseHref\}/g) ?? []).length === 2 && client.includes('data-ai-composer="portfolio-sticky"'), "two authorized purchase links must coexist with the unchanged active conversation composer");
+assert(client.includes("질문권 0회 · 새 답변에는 질문권이 필요해요.") && client.includes("지난 상담 기록은 그대로 볼 수 있어요.") && client.indexOf('data-ai-composer="portfolio-sticky"') < client.indexOf("OWNED ANALYSES"), "depleted state and active composer must appear before the report library");
+assert((client.match(/href=\{creditPurchaseHref\}/g) ?? []).length === 2 && client.includes('data-ai-composer="portfolio-sticky"'), "top and conversation purchase actions must remain present");
+assert(portfolio.includes('order("created_at", { ascending: false })') && portfolio.includes(".limit(41)") && !portfolio.includes(".limit(200)"), "conversation must load the latest page rather than the first 200 oldest messages");
+assert(client.includes("loadOlderMessages") && client.includes("이전 상담 더 보기") && portfolioApi.includes("messageBefore"), "older conversations must have an authenticated cursor-based retrieval path");
+assert(client.includes("preferContinuation") && portfolio.includes("input.preferContinuation") && portfolioQuestionApi.includes("input.preferContinuation === true"), "follow-up context must be validated by the server without pinning unrelated new questions");
+assert(client.includes("showMemories") && client.includes("내 기억 보기"), "saved memories must remain editable but folded until requested");
 
 
 assert(creditMigration.includes("unused paid questions can be used later against any separately purchased"), "profile credit ledger must remain explicitly cross-product");

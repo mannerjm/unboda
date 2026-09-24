@@ -691,7 +691,7 @@ export default function AiConsultingPortfolioClient({
             </section>
 
             <section id="owned-analysis-selector" className="mt-5 scroll-mt-6 rounded-[1.75rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#ffffff_0%,#f8f7ff_100%)] p-5 shadow-sm sm:p-6">
-              <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+              <div className={portfolio.questionsRemaining > 0 ? "grid gap-5 lg:grid-cols-[1.05fr_0.95fr]" : "grid gap-5"}>
                 <div>
                   <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">내 보유 분석</p>
                   <h2 className="mt-2 text-xl font-black">내 분석 찾아보기</h2>

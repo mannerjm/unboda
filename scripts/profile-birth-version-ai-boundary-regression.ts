@@ -33,7 +33,8 @@ assert(!profileRoute.includes('from("entitlements").delete') && !profileRoute.in
 
 assert(portfolio.includes('from("purchases")') && portfolio.includes("analysis_input_snapshot"), "AI portfolio must compare purchase-time frozen birth inputs");
 assert(portfolio.includes("includePreviousSource") && portfolio.includes("profileInputVersion"), "AI portfolio must keep previous-input analyses out of automatic routing while supporting explicit continuation");
-assert(portfolio.includes("analyses: [explicitPrevious]"), "explicit previous-input continuation must isolate the historical report instead of mixing current-input reports");
+assert(portfolio.includes("analyses: historicalCohort") && portfolio.includes("canonicalAnalysisInputMatches(") && portfolio.includes('analysis.profileInputVersion === "current"'), "historical continuation must include matching purchase-time birth inputs only, never mix current-input reports");
+assert(portfolio.includes("ownedAnalyses: AiConsultingPortfolioAnalysis[]") && portfolio.includes("ownedAnalyses.push("), "the owned report list must remain visible after a birth-time edit, independently from safe answer routing");
 assert(portfolioRoute.includes("includeProductId") && portfolioRoute.includes("includeEdition"), "portfolio API must accept only an explicit report source for previous-input continuation");
 assert(questionRoute.includes("preferredProductId") && questionRoute.includes("preferredEditionKey"), "question API must bind previous-input continuation to an exact preferred source");
 

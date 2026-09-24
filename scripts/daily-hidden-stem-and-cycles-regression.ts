@@ -26,7 +26,7 @@ const annualRepeat = buildTodayReading({ date, ...natal, currentSeunGanji: "기�
 assert.deepEqual(annualRepeat, annual, "same person/date/cycle always returns identical copy");
 assert.equal(annual.hiddenStemTenGod, getTenGod("甲", "丁"), "午 must use its actual primary hidden stem");
 assert.equal(annual.cycleFocus, "seun");
-assert(annual.topic.includes("내 기준을 세워보세요"), "visible headline must be understandable without ten-god jargon");
+assert(annual.topic.includes("해야 할 일부터 정리해요"), "visible headline must follow the calculated ten-god in everyday language");
 assert(annual.topic.includes("계획을 다시 확인해요"), "the natal focus should remain visible and understandable");
 assert(annual.action.includes("예상과 달라진 점"), "daily action must be one understandable suggestion tied to selected focus");
 assert(annual.topic.length <= 32, "daily event headline must remain glanceable on mobile");

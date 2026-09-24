@@ -59,7 +59,8 @@ export async function getCachedTodayReading(
         // Use today's solar-term year pillar for the DAILY annual context,
         // rather than calculateSeun's January-1 civil-year boundary.
         currentSeunGanji: getTodayYearPillar(date),
-        currentDaeunGanji: null,
+        currentDaeunGanji: profile.birthTimeKnown === true ? saju.currentDaeun?.ganji ?? null : null,
+        ...(profile.birthTimeKnown === true && saju.hourPillarHanja ? { verifiedHourPillarHanja: saju.hourPillarHanja } : {}),
         dayPillarHanja: getTodayDayPillar(date),
       });
     },

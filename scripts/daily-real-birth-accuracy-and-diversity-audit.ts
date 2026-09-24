@@ -19,9 +19,9 @@ assert.throws(() => getTodayYearPillar("2026-02-29"), "invalid leap date must fa
 const server = readFileSync("app/lib/dailyUnboda/server.ts", "utf8");
 const page = readFileSync("app/today/page.tsx", "utf8");
 assert(server.includes("currentSeunGanji: getTodayYearPillar(date)"), "daily annual context must follow solar-term ganji, not Gregorian year");
-assert(server.includes("currentDaeunGanji: null"), "the current profile has no verified birth-time flag; the daily decade cycle must fail closed");
-assert(!server.includes("saju.currentDaeun?.ganji") && !server.includes('profile.birthTime !== "12:00"'), "a non-noon value is not proof of verified birth hour");
-assert(!server.includes("verifiedHourPillarHanja:"), "the saved noon input must not become a verified hour pillar");
+assert(server.includes("currentDaeunGanji: profile.birthTimeKnown === true"), "only explicitly confirmed birth time may enable daily decade flow");
+assert(!server.includes('profile.birthTime !== "12:00"'), "clock value alone must not establish birth-time certainty");
+assert(server.includes("profile.birthTimeKnown === true && saju.hourPillarHanja"), "hour context may only use confirmed birth time");
 assert(server.includes("DAILY_COPY_VERSION") && server.includes("userId") && server.includes("profile.id") && server.includes("fingerprint") && server.includes("date"), "readings remain keyed per user, exact profile/birth inputs and Korean date");
 assert(page.includes("getProfileFreeAnalysisFoundationStatus(user.id, activeProfile)"));
 assert(page.indexOf("if (!isFreeAnalysisFoundationReady(freeAnalysisStatus))") < page.indexOf("getCachedTodayReading(user.id, activeProfile, date)"), "free-saju foundation cannot be bypassed");

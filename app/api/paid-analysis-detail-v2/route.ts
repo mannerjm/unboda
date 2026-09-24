@@ -198,7 +198,7 @@ export async function POST(request: Request) {
         throw error;
       }
 
-      generationProfile = { ...profile, ...inputSnapshot.birthData };
+      generationProfile = { ...profile, ...inputSnapshot.birthData, birthTimeKnown: inputSnapshot.birthData.birthTimeKnown ?? null };
     }
 
     const paidInput = buildPaidAnalysisInputFromProfile(generationProfile, resolved.productId, referenceSnapshot?.anchorDate);

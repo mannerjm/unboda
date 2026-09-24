@@ -71,6 +71,61 @@ function unifiedSuggestedQuestion(analysis: AiConsultingPortfolioAnalysis): stri
     : `${topic}에 관해 지금 가장 먼저 확인할 점은 뭐야?`;
 }
 
+/**
+ * Preserve the four stored evidence layers for old and new answers. Only the
+ * display order changes: immediate advice first, report evidence on demand.
+ * Unknown legacy formats are shown verbatim rather than dropping any text.
+ */
+function ConsultingAnswer({ content }: { content: string }) {
+  const sections = new Map<string, string>();
+  let heading: string | null = null;
+  for (const line of content.split("\n")) {
+    const match = line.trim().match(/^(?:#{1,4}\s*)?(확인된 사용자 사실|운보다 명리 해석|AI 상담 해석|지금 확인할 점)\s*:?$/u);
+    if (match) {
+      heading = match[1];
+      if (!sections.has(heading)) sections.set(heading, "");
+    } else if (heading) {
+      sections.set(heading, `${sections.get(heading)}\n${line}`.trim());
+    }
+  }
+
+  const main = sections.get("AI 상담 해석");
+  const action = sections.get("지금 확인할 점");
+  const report = sections.get("운보다 명리 해석");
+  const userFacts = sections.get("확인된 사용자 사실");
+  if (!main || !action || !report || userFacts === undefined) {
+    return <div className="whitespace-pre-wrap">{content}</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="mb-1 text-xs font-bold text-[#5e4bd1]">핵심 답변</p>
+        <p className="whitespace-pre-wrap">{main}</p>
+      </div>
+      <div className="rounded-2xl bg-[#f3f1ff] px-4 py-3">
+        <p className="mb-1 text-xs font-bold text-[#5e4bd1]">지금 해볼 일</p>
+        <p className="whitespace-pre-wrap">{action}</p>
+      </div>
+      <details className="rounded-xl border border-[#e4e7f0] px-4 py-3 text-sm">
+        <summary className="cursor-pointer font-semibold text-[#5e4bd1]">왜 이렇게 보나요? · 구매 분석 근거</summary>
+        <div className="mt-3 space-y-3 border-t border-[#e4e7f0] pt-3">
+          <div>
+            <p className="mb-1 text-xs font-bold text-slate-500">구매 리포트에서 확인한 내용</p>
+            <p className="whitespace-pre-wrap">{report}</p>
+          </div>
+          {userFacts && userFacts !== "별도 확인된 사실 없음" ? (
+            <div>
+              <p className="mb-1 text-xs font-bold text-slate-500">직접 알려주신 상황 · 목표</p>
+              <p className="whitespace-pre-wrap">{userFacts}</p>
+            </div>
+          ) : null}
+        </div>
+      </details>
+    </div>
+  );
+}
+
 export type AiConsultingPortfolioPreviewData = {
   state: AiConsultingPortfolioState;
   memories: AiConsultingUserMemory[];
@@ -723,7 +778,9 @@ export default function AiConsultingPortfolioClient({
                           ? "ml-auto max-w-[88%] rounded-3xl rounded-br-lg bg-[#171a3d] px-5 py-4 text-[15px] leading-7 text-white"
                           : "max-w-[94%] whitespace-pre-wrap rounded-3xl rounded-bl-lg border border-[#dce1ef] bg-white px-5 py-4 text-[15px] leading-7 text-slate-800 shadow-sm"}
                       >
-                        {message.content}
+                        {message.role === "assistant"
+                          ? <ConsultingAnswer content={message.content} />
+                          : message.content}
                       </div>
                       {message.role === "user" ? (
                         <div className="ml-auto flex max-w-[88%] justify-end">

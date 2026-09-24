@@ -344,14 +344,21 @@ export async function getAiConsultingPortfolioState(input: {
   } | null;
   messageBefore?: string;
   messageBeforeId?: string;
+  messageSource?: { productId: string; analysisEditionKey: string } | null;
 }): Promise<AiConsultingPortfolioState> {
   const { analyses, previousAnalysesExcluded } = await listPortfolioAnalyses(input);
+  const messageAnalyses = input.messageSource
+    ? analyses.filter((analysis) =>
+        analysis.productId === getCanonicalPremiumProductId(input.messageSource!.productId)
+        && analysis.analysisEditionKey === input.messageSource!.analysisEditionKey,
+      )
+    : analyses;
   const [questionsRemaining, messagePage] = await Promise.all([
     getAiConsultingCreditBalance(input),
     listPortfolioMessages({
       userId: input.userId,
       profileId: input.profileId,
-      analyses,
+      analyses: messageAnalyses,
       before: input.messageBefore,
       beforeId: input.messageBeforeId,
     }),

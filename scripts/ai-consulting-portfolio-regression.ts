@@ -94,6 +94,8 @@ assert(portfolio.includes('order("created_at", { ascending: false })') && portfo
 assert(client.includes("loadOlderMessages") && client.includes("이전 상담 더 보기") && portfolioApi.includes("messageBefore"), "older conversations must have an authenticated cursor-based retrieval path");
 assert(client.includes("preferContinuation") && portfolio.includes("input.preferContinuation") && portfolioQuestionApi.includes("input.preferContinuation === true"), "follow-up context must be validated by the server without pinning unrelated new questions");
 assert(client.includes("showMemories") && client.includes("내 기억 보기"), "saved memories must remain editable but folded until requested");
+assert(portfolio.includes("id.lt.${input.beforeId}") && portfolioApi.includes("messageBeforeId") && client.includes("beforeId: oldest.id"), "history pagination must use timestamp plus message ID to avoid dropping messages sharing a timestamp");
+assert(portfolio.includes("SELECTED_REPORT_OUT_OF_SCOPE") && portfolio.includes("!input.preferContinuation"), "explicitly chosen report must not answer from a different owned report when out of scope");
 assert(client.includes("saveEditedMemory") && client.includes('method: "PATCH"') && client.includes("기억 수정"), "customers must be able to correct outdated user-stated memories in the folded panel");
 for (const boundary of ['export async function PATCH(request: Request)', 'resolveProfileBoundary(input.profileId)', '.eq("user_id", boundary.user.id)', '.eq("profile_id", boundary.profile.id)', '.eq("provenance", "USER_STATED")', '.eq("status", "active")', '"수정할 기억을 찾지 못했습니다."']) {
   assert(memoryApi.includes(boundary), `saved-memory edit must preserve owner, profile, provenance and active-state boundary: ${boundary}`);

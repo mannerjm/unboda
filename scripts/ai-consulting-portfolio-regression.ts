@@ -24,7 +24,7 @@ assert(portfolio.includes("Boolean(summary.analysisEditionKey)"), "portfolio sco
 assert(portfolio.includes("getAiConsultingCreditBalance(input)"), "portfolio must use the existing shared profile credit balance");
 assert(portfolio.includes("evaluateAiConsultingScope"), "portfolio router must reuse existing deterministic product scope evaluation");
 assert(portfolio.includes("routingScore("), "portfolio router must rank eligible owned reports deterministically");
-assert(portfolio.includes('state: "clarify_source"'), "ambiguous cross-report questions must ask for source selection without charging");
+assert(portfolio.includes('reason: "AMBIGUOUS_OWNED_ANALYSIS"') && !portfolio.includes('state: "clarify_source"'), "ambiguous questions must request a clearer topic without requiring report selection or charging");
 assert(portfolio.includes('state: "outside_portfolio"'), "questions outside all owned analyses must fail closed");
 assert(portfolio.includes("preferredProductId") && portfolio.includes("preferredEditionKey"), "a report-originated question must be able to prefer its exact owned report");
 assert(portfolio.includes("ensureAiConsultingThreadForAnalysis"), "portfolio routing must preserve exact report entitlement/thread boundaries");
@@ -41,7 +41,7 @@ assert(portfolioQuestionApi.includes("answerAiConsultingPortfolioQuestion"), "po
 
 assert(page.includes("getActiveProfile") && page.includes("AiConsultingPortfolioClient"), "AI consulting page must be a profile-scoped unified hub");
 assert(page.includes("focusProductId") && page.includes("focusEdition"), "report-originated navigation must keep an optional starting context without restricting the hub");
-assert(page.includes("getAiConsultingPortfolioState") && page.includes("reportEntryMatchesProfile") && page.includes("verifiedReport") && page.includes("initialPortfolioState={initialPortfolioState}"), "report entry must preselect only a completed, owned exact-edition report from the active profile");
+assert(page.includes("getAiConsultingPortfolioState") && page.includes("reportEntryMatchesProfile") && page.includes("verifiedReport") && page.includes("initialPortfolioState={initialPortfolioState}") && !page.includes("messageSource: requestedReport"), "report entry must verify ownership but load unified history instead of fixing the consultation to one report");
 assert(client.includes("initialPortfolioState ?? null") && client.includes("setPortfolio(initialPortfolioState)") && client.includes("reportEntryUnavailable"), "server-verified report context must be available on first render and invalid links must not claim an unrelated report");
 
 for (const copy of [
@@ -49,20 +49,20 @@ for (const copy of [
   "새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다.",
   "공용 질문권",
   "모든 보유 분석에서 함께 사용",
-  "새 주제로 질문하기 · 자동 선택",
+  "주제를 선택할 필요 없이 질문해 주세요.",
   "답할 수 없는 질문은 차감하지 않아요.",
 ]) {
   assert(client.includes(copy), `unified AI consulting UX must expose: ${copy}`);
 }
 assert(client.includes('fetch("/api/ai-consulting/portfolio/question"'), "unified composer must submit through the portfolio router");
-assert(client.includes("preferredProductId") && client.includes("preferredEditionKey"), "source-selection retry must stay explicit and deterministic");
+assert(client.includes("preferredProductId") && client.includes("preferredEditionKey") && client.includes("preferContinuation: true"), "previous conversation can inform automatic routing without customer-selected report restrictions");
 assert(client.includes('data-section="portfolio-conversation"') && client.includes('data-ai-composer="portfolio-sticky"'), "unified composer must stay inside the conversation section");
 assert(client.includes("sourceTitle") && client.includes("sourceEditionLabel"), "each aggregated message must show which report/edition grounded it");
 assert(client.includes("threadId: message.threadId"), "memory writes must preserve the originating internal thread");
 assert(client.includes("showAllAnalyses") && client.includes("portfolio?.analyses.slice(0, 3)"), "owned analysis display must default to the three most recent analyses");
 assert(client.includes("filteredAnalyses.slice(0, visibleAnalysisLimit)") && client.includes("분석 8개 더 보기"), "expanded analyses must remain bounded and searchable, never render hundreds of chips at once");
-assert(client.includes("setChosenSource(analysis)") && client.includes('document.getElementById("portfolio-question")?.focus()'), "explicit selection must focus the consultation composer");
-assert(client.includes('href="#owned-analysis-selector"') && client.includes('id="owned-analysis-selector"'), "customers must reach the report chooser directly without scrolling past long conversations");
+assert(client.includes("visibleAnalyses.map((analysis) => (") && !client.includes("setChosenSource") && !client.includes("loadPortfolio(analysis)") && !client.includes("시작 기준"), "purchased report chips must remain read-only and must not set the consultation basis");
+assert(client.includes('href="#owned-analysis-selector"') && client.includes('id="owned-analysis-selector"') && client.includes("내가 구매한 분석 보기 ↓"), "customers can inspect owned analyses without choosing the active consultation basis");
 assert(client.includes("전체 보기 · +") && client.includes("접기"), "owned analysis display must support expand/collapse for the full portfolio");
 assert(client.includes("최근 구매한 분석 ${Math.min(3, portfolio.analyses.length)}개") && client.includes("전체 보유 분석 ${filteredAnalyses.length}개"), "owned-analysis labels must show actual counts, not a fixed three when only two exist");
 assert(client.includes("답변 완료 시 질문권 1회 차감 · 답할 수 없는 질문은 차감하지 않아요.") && !client.includes("상담 이용 안내"), "consulting guidance must be one readable line without repetitive policy chips");
@@ -108,9 +108,11 @@ assert(!client.includes("OWNED ANALYSES") && !client.includes("LONG-TERM MEMORY"
 assert(portfolio.includes("id.lt.${input.beforeId}") && portfolioApi.includes("messageBeforeId") && client.includes("beforeId: oldest.id"), "history pagination must use timestamp plus message ID to avoid dropping messages sharing a timestamp");
 assert(portfolio.includes("messageSource?: { productId: string; analysisEditionKey: string } | null") && portfolio.includes("analyses: messageAnalyses"), "large multi-report portfolios must retrieve selected report history without paging unrelated conversations");
 assert(portfolioApi.includes("messageProductId") && portfolioApi.includes("messageEdition") && portfolioApi.includes("messageSource:"), "report-scoped history must pass through the existing authenticated portfolio API");
-assert(client.includes("loadPortfolio(analysis)") && client.includes("portfolioParams.set(\"messageProductId\"") && client.includes("params.set(\"messageProductId\""), "switching to a report and loading its older messages must both use the same exact report scope");
-assert(client.includes("portfolioRequestSeq.current"), "slow responses from a previous report must not overwrite the selected consultation");
-assert(portfolio.includes("SELECTED_REPORT_OUT_OF_SCOPE") && portfolio.includes("!input.preferContinuation"), "explicitly chosen report must not answer from a different owned report when out of scope");
+assert(!client.includes('portfolioParams.set("messageProductId"') && !client.includes('params.set("messageProductId"') && client.includes("const visibleChatMessages = allLoadedMessages;"), "unified consultation and paged history must not be filtered to a customer-selected source");
+assert(client.includes("portfolioRequestSeq.current"), "slow asynchronous history responses must not replace a newer consultation");
+assert(client.includes("통합 AI 상담") && !client.includes("activeAnalysis") && !client.includes("sourceMode") && !client.includes("다른 분석으로 상담하기") && !client.includes('kind: "select"'), "unified composer must not present a fixed report title, report-selection controls or source-choice prompts");
+assert(client.includes("message.sourceTitle") && client.includes("message.sourceEditionLabel"), "the report actually used must remain visible on individual messages, not pinned above the composer");
+assert(portfolio.includes("SELECTED_REPORT_OUT_OF_SCOPE") && portfolio.includes("!input.preferContinuation") && client.includes("preferContinuation: true"), "legacy explicit-report API boundary stays safe while unified customer questions automatically route over all owned analyses");
 assert(client.includes("saveEditedMemory") && client.includes('method: "PATCH"') && client.includes("기억 수정"), "customers must be able to correct outdated user-stated memories in the folded panel");
 for (const boundary of ['export async function PATCH(request: Request)', 'resolveProfileBoundary(input.profileId)', '.eq("user_id", boundary.user.id)', '.eq("profile_id", boundary.profile.id)', '.eq("provenance", "USER_STATED")', '.eq("status", "active")', '"수정할 기억을 찾지 못했습니다."']) {
   assert(memoryApi.includes(boundary), `saved-memory edit must preserve owner, profile, provenance and active-state boundary: ${boundary}`);

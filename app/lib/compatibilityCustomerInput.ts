@@ -215,6 +215,18 @@ export function buildProfileCompatibilitySnapshot(
   profile: ProfileDto,
   evaluationDate: string,
 ): CompatibilityCustomerSnapshot {
+  if (profile.birthTimeKnown === false) {
+    const evaluationYear = Number(evaluationDate.slice(0, 4));
+    if (!Number.isInteger(evaluationYear) || evaluationYear < 1) {
+      throw new Error("궁합 분석 기준 연도를 확인하지 못했습니다.");
+    }
+    return buildUnknownTimeSnapshot({
+      birthDate: profile.birthDate,
+      gender: profile.gender,
+      calendarType: profile.calendarType,
+      isLeapMonth: profile.isLeapMonth,
+    }, evaluationYear);
+  }
   return toKnownTimeSnapshot({
     birthDate: profile.birthDate,
     birthTime: profile.birthTime,

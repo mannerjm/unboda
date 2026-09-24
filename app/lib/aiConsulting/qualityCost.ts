@@ -125,7 +125,7 @@ export function evaluateAiConsultingAnswerStructure(content: string): {
   const trimmed = content.trim();
   return {
     formatPass: REQUIRED_ANSWER_HEADINGS.every((heading) => trimmed.includes(heading)),
-    lengthPass: trimmed.length >= 300 && trimmed.length <= 1_800,
+    lengthPass: trimmed.length >= 180 && trimmed.length <= 950,
   };
 }
 

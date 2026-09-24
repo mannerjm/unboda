@@ -259,6 +259,7 @@ async function listPortfolioMessages(input: {
   profileId: string;
   analyses: readonly AiConsultingPortfolioAnalysis[];
   before?: string;
+  beforeId?: string;
 }): Promise<{ messages: AiConsultingPortfolioMessage[]; hasOlderMessages: boolean }> {
   if (input.analyses.length === 0) return { messages: [], hasOlderMessages: false };
 
@@ -298,7 +299,11 @@ async function listPortfolioMessages(input: {
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
     .limit(41);
-  if (input.before) messageQuery = messageQuery.lt("created_at", input.before);
+  if (input.before && input.beforeId) {
+    // Sort by both fields so messages with the same timestamp never disappear
+    // across page boundaries. These cursor parts are validated in the API.
+    messageQuery = messageQuery.or(`created_at.lt.${input.before},and(created_at.eq.${input.before},id.lt.${input.beforeId})`);
+  }
   const { data: messageData, error: messageError } = await messageQuery;
 
   if (messageError) {
@@ -338,6 +343,7 @@ export async function getAiConsultingPortfolioState(input: {
     analysisEditionKey: string;
   } | null;
   messageBefore?: string;
+  messageBeforeId?: string;
 }): Promise<AiConsultingPortfolioState> {
   const { analyses, previousAnalysesExcluded } = await listPortfolioAnalyses(input);
   const [questionsRemaining, messagePage] = await Promise.all([
@@ -347,6 +353,7 @@ export async function getAiConsultingPortfolioState(input: {
       profileId: input.profileId,
       analyses,
       before: input.messageBefore,
+      beforeId: input.messageBeforeId,
     }),
   ]);
 
@@ -455,6 +462,16 @@ export async function answerAiConsultingPortfolioQuestion(input: {
         && candidate.analysis.analysisEditionKey === input.preferredEditionKey,
       )
     : undefined;
+  // An explicitly chosen report must not silently fall back to another report.
+  // Choosing a different report or automatic mode is the customer's decision.
+  if (!input.preferContinuation && input.preferredProductId && input.preferredEditionKey && !preferredCandidate) {
+    return {
+      state: "non_chargeable",
+      message: "선택한 분석에서는 이 질문에 답할 수 없습니다. 다른 분석을 선택하거나 자동 선택으로 바꿔 주세요.",
+      reason: "SELECTED_REPORT_OUT_OF_SCOPE",
+      questionsRemaining: state.questionsRemaining,
+    };
+  }
   // An explicit report selection stays pinned. An automatic follow-up only
   // reuses the previous source for conversational wording when another report
   // is not materially more relevant; clear topic switches still re-route.

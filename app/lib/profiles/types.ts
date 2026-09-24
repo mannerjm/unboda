@@ -17,6 +17,8 @@ export type ProfileInput = {
   relationshipType: ProfileRelationshipType;
   birthDate: string;
   birthTime: string;
+  /** false: the user explicitly selected unknown; null/absent: legacy unverified. */
+  birthTimeKnown?: boolean | null;
   gender: ProfileAppGender;
   calendarType: ProfileAppCalendarType;
   isLeapMonth: boolean;
@@ -129,6 +131,14 @@ export function validateProfileInput(input: unknown): ProfileValidationResult {
     return { valid: false, error: "birthTime은 HH:mm 형식이어야 합니다." };
   }
 
+  if (value.birthTimeKnown !== undefined && value.birthTimeKnown !== null && typeof value.birthTimeKnown !== "boolean") {
+    return { valid: false, error: "출생 시간 확인 여부를 다시 선택해 주세요." };
+  }
+
+  if (value.birthTimeKnown === false && value.birthTime !== "12:00") {
+    return { valid: false, error: "출생 시간을 모르는 경우 임시 계산 시각은 12:00이어야 합니다." };
+  }
+
   if (value.gender !== "남성" && value.gender !== "여성") {
     return { valid: false, error: "gender는 '남성' 또는 '여성'이어야 합니다." };
   }
@@ -152,6 +162,7 @@ export function validateProfileInput(input: unknown): ProfileValidationResult {
       relationshipType: relationshipType as ProfileRelationshipType,
       birthDate: value.birthDate,
       birthTime: value.birthTime,
+      birthTimeKnown: value.birthTimeKnown ?? null,
       gender: value.gender,
       calendarType: value.calendarType,
       isLeapMonth: value.isLeapMonth,
@@ -173,6 +184,7 @@ export function mergeProfileInput(
     "relationshipType",
     "birthDate",
     "birthTime",
+    "birthTimeKnown",
     "gender",
     "calendarType",
     "isLeapMonth",

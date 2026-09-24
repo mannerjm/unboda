@@ -341,7 +341,7 @@ const [profileSelectionProductId, setProfileSelectionProductId] =
 const currentProfileId = searchParams.get("profileId") ?? providedResult?.analysis.profile.id ?? "";
 const profileLabel = profile?.label?.trim() || "분석 대상";
 const birthDate = profile ? formatProfileBirthDate(profile.birthDate) : "입력 없음";
-const birthTime = profile?.birthTime ?? "입력 없음";
+const birthTime = profile?.birthTimeKnown === false ? "출생 시간 모름" : profile?.birthTime ?? "입력 없음";
 const gender = profile?.gender ?? "입력 없음";
 
 const conversionGuidance =
@@ -387,15 +387,11 @@ const defaultDaeunOrder = sajuData?.daeunAnalysis
     )
   : null;
 const effectiveDaeunOrder = selectedDaeunOrder ?? defaultDaeunOrder;
-const selectedDaeunStartYear =
-  (freeAnalysis?.daeunAnalysis ?? sajuData?.daeunAnalysis) &&
-  effectiveDaeunOrder
-    ? Number(birthDate.slice(0, 4)) +
-      (freeAnalysis?.daeunAnalysis.startAge ??
-        sajuData!.daeunAnalysis.startAge) +
-      (effectiveDaeunOrder - 1) * 10 -
-      1
-    : null;
+const selectedDaeunStartYear = effectiveDaeunOrder && (freeAnalysis?.daeunAnalysis ?? sajuData?.daeunAnalysis)
+  ? Number(birthDate.slice(0, 4)) +
+    (freeAnalysis?.daeunAnalysis?.startAge ?? sajuData?.daeunAnalysis?.startAge ?? 0) +
+    (effectiveDaeunOrder - 1) * 10 - 1
+  : null;
 
 const displayedSeun =
   selectedDaeunStartYear !== null
@@ -695,6 +691,8 @@ async function retryMainAnalysis() {
       <h2 className="text-2xl font-bold text-stone-900">
         사주팔자
       </h2>
+      {profile?.birthTimeKnown === false ? <p className="mt-2 text-xs leading-5 text-amber-700">출생 시간 미상: 시주는 계산 결과로 표시하지 않습니다. 자시(23시 전후) 출생 여부에 따라 일주는 달라질 수 있습니다.</p> : null}
+      {profile?.birthTimeKnown == null ? <p className="mt-2 text-xs leading-5 text-amber-700">기존 프로필의 출생 시간 확인 여부가 저장되지 않았습니다. 마이페이지에서 확인해 주세요.</p> : null}
     </div>
 
     <p className="text-sm text-stone-500">
@@ -705,12 +703,12 @@ async function retryMainAnalysis() {
   <div className="grid grid-cols-4 gap-2 sm:gap-4">
     {[
       {
-        label: "시주",
-       stem: freeAnalysis?.hourStem ?? sajuData.hourStem,
-branch: freeAnalysis?.hourBranch ?? sajuData.hourBranch,
-tenGod: freeAnalysis?.hourTenGod ?? sajuData.hourTenGod,
+        label: profile?.birthTimeKnown === false ? "시주 · 시간 미상" : "시주",
+       stem: profile?.birthTimeKnown === false ? "" : freeAnalysis?.hourStem ?? sajuData.hourStem,
+branch: profile?.birthTimeKnown === false ? "" : freeAnalysis?.hourBranch ?? sajuData.hourBranch,
+tenGod: profile?.birthTimeKnown === false ? "" : freeAnalysis?.hourTenGod ?? sajuData.hourTenGod,
 branchTenGod:
-  freeAnalysis?.hourBranchTenGod ?? sajuData.hourBranchTenGod,
+  profile?.birthTimeKnown === false ? "" : freeAnalysis?.hourBranchTenGod ?? sajuData.hourBranchTenGod,
   highlighted: false,
 stage: freeAnalysis?.hourStage ?? sajuData.hourStage,
 hiddenStems:

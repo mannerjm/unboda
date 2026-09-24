@@ -41,6 +41,7 @@ export async function buildFreeAnalysisResponse(input: {
     isLeapMonth,
     input.profile.gender,
     evaluationContext.evaluationDate,
+    input.profile.birthTimeKnown,
   );
   const freeAnalysis = buildFreeAnalysis(saju);
   const compactFacts = buildMainAnalysisCompactFacts({ saju, freeAnalysis });
@@ -103,6 +104,8 @@ export async function regenerateMainAnalysis(
     content.profile.calendarType,
     isLeapMonth,
     content.profile.gender,
+    undefined,
+    content.profile.birthTimeKnown,
   );
   const compactFacts = buildMainAnalysisCompactFacts({ saju, freeAnalysis: content.freeAnalysis });
   const recommendationFocus = content.productRecommendations?.engineResult

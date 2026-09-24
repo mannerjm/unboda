@@ -24,6 +24,7 @@ export function buildPaidAnalysisInputFromProfile(
     profile.isLeapMonth ? "윤달" : "평달",
     profile.gender,
     anchorDate,
+    profile.birthTimeKnown,
   );
   const freeAnalysis = buildFreeAnalysis(saju);
   const referencePeriod = buildReferencePeriodSnapshot({
@@ -39,7 +40,7 @@ export function buildPaidAnalysisInputFromProfile(
   return {
     productId,
     analysisType: product.analysisType,
-    birthData: JSON.stringify(saju),
+    birthData: JSON.stringify({ ...saju, birthTimeKnown: profile.birthTimeKnown ?? null }),
     originalChart: JSON.stringify({
       solarDate: saju.solarDate,
       year: { pillar: saju.yearPillar, stem: saju.yearStem, branch: saju.yearBranch },

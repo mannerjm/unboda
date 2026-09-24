@@ -21,7 +21,8 @@ export default function GuestSajuPage() {
     label: "",
     relationshipType: "self",
     birthDate: "",
-    birthTime: "12:00",
+    birthTime: "",
+    birthTimeKnown: true,
     gender: "남성",
     calendarType: "양력",
     isLeapMonth: false,
@@ -147,9 +148,15 @@ export default function GuestSajuPage() {
             <label className="block text-sm font-bold">생년월일
               <input type="date" min={GUEST_BIRTH_DATE_MIN} max={getGuestBirthDateMax()} value={input.birthDate} onChange={(event) => setInput({ ...input, birthDate: event.target.value })} className="mt-2 w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10" required />
             </label>
-            <label className="block text-sm font-bold">태어난 시간
-              <input type="time" value={input.birthTime} onChange={(event) => setInput({ ...input, birthTime: event.target.value })} className="mt-2 w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10" required />
-            </label>
+            <div className="space-y-2">
+              <label className="block text-sm font-bold" htmlFor="guest-birth-time">태어난 시간</label>
+              <input id="guest-birth-time" type="time" value={input.birthTimeKnown === false ? "" : input.birthTime} disabled={input.birthTimeKnown === false} onChange={(event) => setInput({ ...input, birthTime: event.target.value })} className="w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10 disabled:bg-slate-100" required={input.birthTimeKnown !== false} />
+              <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
+                <input type="checkbox" checked={input.birthTimeKnown === false} onChange={(event) => setInput({ ...input, birthTimeKnown: !event.target.checked, birthTime: event.target.checked ? "12:00" : "" })} className="h-4 w-4 accent-[#6f5ce7]" />
+                출생 시간 모름
+              </label>
+              {input.birthTimeKnown === false ? <p className="text-xs leading-5 text-slate-600">임시 시각은 사주 계산에만 사용하며, 결과의 시주는 ‘시간 미상’으로 표시합니다.</p> : null}
+            </div>
           </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="block text-sm font-bold">성별

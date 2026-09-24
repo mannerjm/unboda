@@ -128,6 +128,7 @@ const responseData: AnalyzeSuccessResponse = await buildFreeAnalysisResponse({
     label: profile.label,
     birthDate: resolvedBirthDate,
     birthTime: resolvedBirthTime,
+    birthTimeKnown: profile.birthTimeKnown ?? null,
     gender: resolvedGender,
     calendarType: resolvedCalendarType,
     isLeapMonth: resolvedIsLeapMonth === "윤달",

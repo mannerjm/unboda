@@ -100,6 +100,7 @@ export async function resolveAnalysisEditionForOrder(
     profile.isLeapMonth ? "윤달" : "평달",
     profile.gender,
     anchorDate,
+    profile.birthTimeKnown,
   );
   const freeAnalysis = buildFreeAnalysis(saju);
   const fortune = {

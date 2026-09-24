@@ -16,6 +16,7 @@ export const AnalysisInputSnapshotSchema = z.object({
   birthData: z.object({
     birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     birthTime: z.string().regex(/^\d{2}:\d{2}$/),
+    birthTimeKnown: z.boolean().nullable().optional(),
     calendarType: z.enum(["양력", "음력"]),
     isLeapMonth: z.boolean(),
     gender: z.enum(["남성", "여성"]),
@@ -39,6 +40,7 @@ export function buildAnalysisInputSnapshot(profile: ProfileDto): AnalysisInputSn
     birthData: {
       birthDate: profile.birthDate,
       birthTime: profile.birthTime,
+      birthTimeKnown: profile.birthTimeKnown ?? null,
       calendarType: profile.calendarType,
       isLeapMonth: profile.isLeapMonth,
       gender: profile.gender,

@@ -73,6 +73,9 @@ export default function AiConsultingPortfolioClient({
   const [portfolio, setPortfolio] = useState<AiConsultingPortfolioState | null>(previewData?.state ?? initialPortfolioState ?? null);
   const [memories, setMemories] = useState<AiConsultingUserMemory[]>(previewData?.memories ?? []);
   const [question, setQuestion] = useState("");
+  const [draftHydratedFor, setDraftHydratedFor] = useState<string | null>(null);
+  // Keep unsent questions only in this browser tab, separate for each profile.
+  const draftKey = `unboda:ai-consulting:draft:${profileId}`;
   const [routingNotice, setRoutingNotice] = useState<RoutingNotice | null>(null);
   const [isLoading, setIsLoading] = useState(!previewData && !initialPortfolioState);
   const [isSending, setIsSending] = useState(false);
@@ -100,6 +103,27 @@ export default function AiConsultingPortfolioClient({
   const isPreview = Boolean(previewData);
   const creditCheckoutEnabled = creditCheckoutAvailable;
   const freeAnalysisReady = freeAnalysisStatus === "completed" || freeAnalysisStatus === "needs_retry";
+
+  useEffect(() => {
+    if (isPreview) return;
+    try {
+      setQuestion((window.sessionStorage.getItem(draftKey) ?? "").slice(0, 300));
+    } catch {
+      // Private browsing and restricted browsers may block session storage.
+      setQuestion("");
+    }
+    setDraftHydratedFor(draftKey);
+  }, [draftKey, isPreview]);
+
+  useEffect(() => {
+    if (isPreview || draftHydratedFor !== draftKey) return;
+    try {
+      if (question) window.sessionStorage.setItem(draftKey, question);
+      else window.sessionStorage.removeItem(draftKey);
+    } catch {
+      // The composer remains usable even if tab-only draft storage is blocked.
+    }
+  }, [draftHydratedFor, draftKey, isPreview, question]);
 
   const loadPortfolio = useCallback(async (requestedHistorySource?: Pick<AiConsultingPortfolioSource, "productId" | "analysisEditionKey"> | null) => {
     const requestSeq = ++portfolioRequestSeq.current;
@@ -284,7 +308,9 @@ export default function AiConsultingPortfolioClient({
   }
 
   async function sendQuestion(content: string, preferred?: AiConsultingPortfolioSource) {
-    if (isPreview || !content.trim() || content.trim().length < 2 || content.trim().length > 300) return;
+    // The client never posts without credits. The server independently verifies
+    // the balance and retains the authoritative charge-safe reservation path.
+    if (isPreview || !portfolio || portfolio.questionsRemaining <= 0 || !content.trim() || content.trim().length < 2 || content.trim().length > 300) return;
 
     setIsSending(true);
     setError(null);
@@ -351,6 +377,7 @@ export default function AiConsultingPortfolioClient({
 
   async function submitQuestion(event: FormEvent) {
     event.preventDefault();
+    if (!portfolio || portfolio.questionsRemaining <= 0) return;
     await sendQuestion(question);
   }
 
@@ -486,7 +513,7 @@ export default function AiConsultingPortfolioClient({
                 <span className="ml-1 text-sm font-semibold text-slate-300">회 남음</span>
               </p>
               <p className="mt-1 text-xs text-slate-300">모든 보유 분석에서 함께 사용</p>
-              {creditPurchaseHref && !isPreview && portfolio?.analyses.length ? (
+              {creditPurchaseHref && !isPreview && portfolio?.analyses.length && portfolio.questionsRemaining > 0 ? (
                 <Link href={creditPurchaseHref} className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-black text-[#211b52] transition hover:bg-[#eeeaff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                   {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 안내 보기 →"}
                 </Link>
@@ -563,8 +590,7 @@ export default function AiConsultingPortfolioClient({
               </div>
 
               {isLoadingSource ? <p role="status" className="mt-3 text-sm text-slate-600">선택한 상담을 불러오는 중...</p> : null}
-              {portfolio.questionsRemaining > 0 ? (
-                <form
+              <form
                   data-ai-composer="portfolio-sticky"
                   onSubmit={submitQuestion}
                   className="mt-4 rounded-[1.5rem] border border-[#d8d3ff] bg-white p-4 shadow-[0_12px_36px_rgba(33,40,83,0.09)]"
@@ -583,20 +609,27 @@ export default function AiConsultingPortfolioClient({
                     <span className="text-xs leading-5 text-slate-500">
                       {isPreview
                         ? "미리보기에서는 질문이 전송되지 않습니다."
-                        : `${question.length}/300 · 보유 분석 범위 밖 질문은 AI 답변을 생성하지 않으며 질문권도 차감되지 않습니다.`}
+                        : portfolio.questionsRemaining > 0
+                          ? `${question.length}/300 · 답변 완료 시 질문권 1회 차감`
+                          : `${question.length}/300 · 질문권 0회 · 질문은 이 탭에 임시 보관되며 지금은 전송되지 않아요.`}
                     </span>
-                    <button
-                      type="submit"
-                      disabled={isPreview || isSending || question.trim().length < 2}
-                      className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {isPreview ? "미리보기" : isSending ? "관련 리포트 확인 중..." : "질문하기"}
-                    </button>
+                    {portfolio.questionsRemaining > 0 ? (
+                      <button
+                        type="submit"
+                        disabled={isPreview || isSending || isLoadingSource || question.trim().length < 2}
+                        className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        {isPreview ? "미리보기" : isSending ? "관련 리포트 확인 중..." : "질문하기"}
+                      </button>
+                    ) : creditPurchaseHref && !isPreview ? (
+                      <Link href={creditPurchaseHref} className="inline-flex shrink-0 items-center justify-center rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]">
+                        {creditCheckoutEnabled ? "질문권 구매 후 상담하기 →" : "질문권 상품 안내 보기 →"}
+                      </Link>
+                    ) : (
+                      <button type="button" disabled className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white opacity-40">미리보기 · 전송 불가</button>
+                    )}
                   </div>
                 </form>
-              ) : visibleChatMessages.length > 0 || hasOlderMessages ? (
-                <p className="mt-3 text-sm leading-6 text-slate-600">지난 상담은 그대로 볼 수 있어요. 새 답변은 질문권을 구매한 뒤 받을 수 있습니다.</p>
-              ) : null}
 
               {routingNotice ? (
                 <div className={routingNotice.kind === "outside"

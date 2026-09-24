@@ -17,10 +17,12 @@ assert(orders.includes("isAiConsultingCreditCheckoutEnabled()") && orders.includ
 assert(main.includes('href={creditPurchaseHref}') && main.includes("#question-bundles"), "main CTA must jump directly to purchase options");
 assert(main.includes("공용 질문권") && main.includes("질문권 구매하기 →") && main.includes("질문권 상품 안내 보기 →"), "top balance card must expose exactly one purchase or informational product-browse action");
 assert(main.includes("portfolio.questionsRemaining > 0") && main.includes("현재 질문권 결제 준비 중") && !main.includes("credit-recharge-title"), "zero balance must preserve honest disabled-checkout copy without duplicating a large recharge banner");
-assert(main.includes("!isPreview") && main.includes("지난 상담은 그대로 볼 수 있어요. 새 답변은 질문권을 구매한 뒤 받을 수 있습니다."), "existing conversations must remain readable without repeating zero-credit notices");
+assert(main.includes("!isPreview") && main.includes("질문은 이 탭에 임시 보관되며 지금은 전송되지 않아요.") && main.includes("visibleChatMessages.map((message)"), "zero-credit customers can type without sending or losing their historical conversations");
 assert(main.includes('data-ai-composer="portfolio-sticky"') && main.includes("현재 질문권 결제 준비 중") && main.includes("질문권 상품 안내 보기 →") && main.indexOf('data-section="portfolio-conversation"') < main.indexOf('id="owned-analysis-selector"'), "one authorized header CTA must explain payment availability before the report selector");
-assert((main.match(/href=\{creditPurchaseHref\}/g) ?? []).length === 1, "zero-credit page must not repeat the credit product action");
+assert((main.match(/href=\{creditPurchaseHref\}/g) ?? []).length === 2 && main.includes("&& portfolio.questionsRemaining > 0 ? ("), "credit purchase action must appear in the header with credits OR beside the zero-credit composer, never twice at once");
 assert(main.includes("creditPurchaseHref && !isPreview"), "no clickable purchase action in preview");
+assert(main.includes("if (!portfolio || portfolio.questionsRemaining <= 0) return;") && main.includes("portfolio.questionsRemaining <= 0 ||"), "zero-credit form submission must not call the chargeable question API");
+assert(main.includes("window.sessionStorage.getItem(draftKey)") && main.includes("window.sessionStorage.setItem(draftKey, question)") && main.includes("window.sessionStorage.removeItem(draftKey)"), "draft must survive checkout and clear only after a completed answer");
 assert(checkout.includes('id="question-bundles"') && checkout.includes("몇 번 더 물어보고 싶으세요?"), "purchase cards must appear near top and support deep link");
 assert(checkout.includes("!checkoutEnabled") && checkout.includes("disabled={!checkoutEnabled || activeBundleId !== null}"), "disabled checkout must never create an order");
 assert(checkout.includes("bundle.priceKrw.toLocaleString") && checkout.includes("bundle.questions}회 구매하기"), "each bundle must show its own server-defined price and clear purchase CTA");

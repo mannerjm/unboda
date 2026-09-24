@@ -41,6 +41,8 @@ assert(portfolioQuestionApi.includes("answerAiConsultingPortfolioQuestion"), "po
 
 assert(page.includes("getActiveProfile") && page.includes("AiConsultingPortfolioClient"), "AI consulting page must be a profile-scoped unified hub");
 assert(page.includes("focusProductId") && page.includes("focusEdition"), "report-originated navigation must keep an optional starting context without restricting the hub");
+assert(page.includes("getAiConsultingPortfolioState") && page.includes("reportEntryMatchesProfile") && page.includes("verifiedReport") && page.includes("initialPortfolioState={initialPortfolioState}"), "report entry must preselect only a completed, owned exact-edition report from the active profile");
+assert(client.includes("initialPortfolioState ?? null") && client.includes("setPortfolio(initialPortfolioState)") && client.includes("reportEntryUnavailable"), "server-verified report context must be available on first render and invalid links must not claim an unrelated report");
 
 for (const copy of [
   "나를 기억하는 AI 운세 상담",
@@ -85,19 +87,19 @@ assert(preview.includes("재물·이직·관계·학업·창업 리포트를 한
 assert(preview.includes("previewData={PREVIEW_DATA}"), "operator preview must remain static and non-mutating");
 assert(preview.includes('productId: "study-learning-strategy"') && preview.includes('productId: "business-startup-readiness"'), "operator preview must include more than three analyses so expand/collapse is visible");
 assert(!client.includes('공용 질문권 {portfolio.questionsRemaining}회'), "shared credit count must not be duplicated in the continuation card");
-assert((client.match(/질문권 구매하기 →/g) ?? []).length === 2, "purchase CTA must remain in both the top balance card and bottom conversation area as requested");
-assert((client.match(/질문권 상품 보기 →/g) ?? []).length === 2, "disabled-checkout product browse CTA must remain in top balance and bottom conversation without enabling purchase");
+assert((client.match(/질문권 구매하기 →/g) ?? []).length === 1, "zero-credit page must show one prominent purchase action, not duplicated CTAs");
+assert((client.match(/질문권 상품 안내 보기 →/g) ?? []).length === 1 && !client.includes("질문권 상품 보기 →"), "review-only credit products must have one clearly labelled informational link");
 assert(!client.includes("credit-recharge-title") && !client.includes("질문권이 0회예요. 이어서 질문해 보세요!"), "zero-credit state must not repeat a full-width purchase banner");
 assert(!client.includes("AI_CONSULTING_CREDIT_BUNDLES"), "bundle prices belong on the credit purchase page, not in a duplicate consultation banner");
-assert(client.includes("질문권 0회 · 새 답변에는 질문권이 필요해요.") && client.includes("지난 상담 기록은 그대로 볼 수 있어요.") && client.indexOf('data-ai-composer="portfolio-sticky"') < client.indexOf('id="owned-analysis-selector"'), "depleted state and active composer must appear before the report library");
-assert((client.match(/href=\{creditPurchaseHref\}/g) ?? []).length === 2 && client.includes('data-ai-composer="portfolio-sticky"'), "top and conversation purchase actions must remain present");
+assert(client.includes("지난 상담은 그대로 볼 수 있어요. 새 답변은 질문권을 구매한 뒤 받을 수 있습니다.") && client.indexOf('data-ai-composer="portfolio-sticky"') < client.indexOf('id="owned-analysis-selector"'), "zero-credit customers must keep past history without duplicated new-customer empty panels");
+assert((client.match(/href=\{creditPurchaseHref\}/g) ?? []).length === 1 && client.includes('data-ai-composer="portfolio-sticky"'), "the header must contain the single visible purchase link while an active consultation composer remains available to credited customers");
 assert(portfolio.includes('order("created_at", { ascending: false })') && portfolio.includes(".limit(41)") && !portfolio.includes(".limit(200)"), "conversation must load the latest page rather than the first 200 oldest messages");
 assert(client.includes("loadOlderMessages") && client.includes("이전 상담 더 보기") && portfolioApi.includes("messageBefore"), "older conversations must have an authenticated cursor-based retrieval path");
 assert(client.includes("preferContinuation") && portfolio.includes("input.preferContinuation") && portfolioQuestionApi.includes("input.preferContinuation === true"), "follow-up context must be validated by the server without pinning unrelated new questions");
 assert(client.includes("showMemories") && client.includes("내 기억 보기"), "saved memories must remain editable but folded until requested");
 assert(client.includes("portfolio.questionsRemaining > 0 ? <div>") && client.includes("추천 질문"), "suggested question buttons must not appear when no question can be submitted");
-assert(client.includes("첫 상담 기록이 아직 없어요. 위에서 질문권 상품과 이용 방법을 확인해 주세요.") && client.includes("portfolio.questionsRemaining === 0") && client.includes("지난 상담 기록은 그대로 볼 수 있어요."), "zero-credit new visitors need a clear first-step message while existing customers keep their past history");
-assert(client.includes("질문권 결제는 현재 준비 중이며, 지금은 상품 안내만 볼 수 있어요."), "review-only checkout must never imply customers can immediately buy credits");
+assert(client.includes("visibleChatMessages.length === 0 && (portfolio.questionsRemaining > 0 || hasOlderMessages)") && !client.includes("첫 상담 기록이 아직 없어요. 위에서 질문권 상품과 이용 방법을 확인해 주세요.") && client.includes("지난 상담은 그대로 볼 수 있어요."), "zero-credit new visitors must not see a repeated empty-history warning; previously saved messages remain readable");
+assert(client.includes("현재 질문권 결제 준비 중") && client.includes("질문권 상품 안내 보기 →"), "review-only checkout must not imply customers can immediately buy credits");
 assert(!client.includes("OWNED ANALYSES") && !client.includes("LONG-TERM MEMORY") && client.includes("내 보유 분석") && client.includes("내 기억"), "customer-facing card headings must use simple Korean");
 assert(portfolio.includes("id.lt.${input.beforeId}") && portfolioApi.includes("messageBeforeId") && client.includes("beforeId: oldest.id"), "history pagination must use timestamp plus message ID to avoid dropping messages sharing a timestamp");
 assert(portfolio.includes("messageSource?: { productId: string; analysisEditionKey: string } | null") && portfolio.includes("analyses: messageAnalyses"), "large multi-report portfolios must retrieve selected report history without paging unrelated conversations");

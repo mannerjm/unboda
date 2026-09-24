@@ -76,6 +76,16 @@ export default function AiConsultingPortfolioClient({
   const [savingMemoryMessageId, setSavingMemoryMessageId] = useState<string | null>(null);
   const [deletingMemoryId, setDeletingMemoryId] = useState<string | null>(null);
   const [showAllAnalyses, setShowAllAnalyses] = useState(false);
+  const [analysisSearch, setAnalysisSearch] = useState("");
+  const [visibleAnalysisLimit, setVisibleAnalysisLimit] = useState(8);
+  const [showMemories, setShowMemories] = useState(false);
+  const [showAllConversation, setShowAllConversation] = useState(false);
+  const [sourceMode, setSourceMode] = useState<"automatic" | "chosen">(focusProductId && focusEdition ? "chosen" : "automatic");
+  const [chosenSource, setChosenSource] = useState<AiConsultingPortfolioSource | null>(null);
+  const [latestAnswerSource, setLatestAnswerSource] = useState<AiConsultingPortfolioSource | null>(null);
+  const [olderMessages, setOlderMessages] = useState<AiConsultingPortfolioMessage[]>([]);
+  const [hasOlderMessages, setHasOlderMessages] = useState(previewData?.state.hasOlderMessages ?? false);
+  const [isLoadingOlder, setIsLoadingOlder] = useState(false);
   const isPreview = Boolean(previewData);
   const creditCheckoutEnabled = creditCheckoutAvailable;
   const freeAnalysisReady = freeAnalysisStatus === "completed" || freeAnalysisStatus === "needs_retry";
@@ -83,6 +93,7 @@ export default function AiConsultingPortfolioClient({
   const loadPortfolio = useCallback(async () => {
     if (previewData) {
       setPortfolio(previewData.state);
+      setHasOlderMessages(previewData.state.hasOlderMessages ?? false);
       return;
     }
     const portfolioParams = new URLSearchParams({ profileId });
@@ -97,6 +108,8 @@ export default function AiConsultingPortfolioClient({
     const body = (await response.json()) as AiConsultingPortfolioState & { error?: string };
     if (!response.ok) throw new Error(body.error ?? "통합 AI 상담을 불러오지 못했습니다.");
     setPortfolio(body);
+    setOlderMessages([]);
+    setHasOlderMessages(body.hasOlderMessages ?? false);
   }, [focusEdition, focusProductId, previewData, profileId]);
 
   const loadMemories = useCallback(async () => {
@@ -116,6 +129,7 @@ export default function AiConsultingPortfolioClient({
   useEffect(() => {
     if (previewData) {
       setPortfolio(previewData.state);
+      setHasOlderMessages(previewData.state.hasOlderMessages ?? false);
       setMemories(previewData.memories);
       setIsLoading(false);
       return;
@@ -158,12 +172,34 @@ export default function AiConsultingPortfolioClient({
     return suggestions;
   }, [focusAnalysis, portfolio]);
 
-  const visibleAnalyses = useMemo(() => {
+  const filteredAnalyses = useMemo(() => {
     if (!portfolio) return [];
-    return showAllAnalyses ? portfolio.analyses : portfolio.analyses.slice(0, 3);
-  }, [portfolio, showAllAnalyses]);
+    const search = analysisSearch.trim().toLocaleLowerCase("ko-KR");
+    if (!search) return portfolio.analyses;
+    return portfolio.analyses.filter((analysis) =>
+      `${analysis.productTitle} ${analysis.editionLabel} ${analysis.scopeLabel}`.toLocaleLowerCase("ko-KR").includes(search),
+    );
+  }, [analysisSearch, portfolio]);
 
+  const visibleAnalyses = useMemo(() => showAllAnalyses
+    ? filteredAnalyses.slice(0, visibleAnalysisLimit)
+    : portfolio?.analyses.slice(0, 3) ?? [], [filteredAnalyses, portfolio, showAllAnalyses, visibleAnalysisLimit]);
   const hiddenAnalysisCount = Math.max((portfolio?.analyses.length ?? 0) - 3, 0);
+  const allLoadedMessages = useMemo(() => [...olderMessages, ...(portfolio?.messages ?? [])], [olderMessages, portfolio]);
+  const previousAnswer = useMemo(() => [...(portfolio?.messages ?? [])].reverse().find((message) => message.role === "assistant") ?? null, [portfolio]);
+  const automaticSource = latestAnswerSource ?? (previousAnswer ? {
+    productId: previousAnswer.sourceProductId,
+    analysisEditionKey: previousAnswer.sourceEditionKey,
+    productTitle: previousAnswer.sourceTitle,
+    editionLabel: previousAnswer.sourceEditionLabel,
+  } : null);
+  const activeSource = sourceMode === "chosen" ? chosenSource ?? focusAnalysis : automaticSource;
+  const activeAnalysis = activeSource && portfolio ? portfolio.analyses.find((analysis) =>
+    analysis.productId === activeSource.productId && analysis.analysisEditionKey === activeSource.analysisEditionKey,
+  ) ?? null : null;
+  const visibleChatMessages = showAllConversation || !activeAnalysis
+    ? allLoadedMessages
+    : allLoadedMessages.filter((message) => message.sourceProductId === activeAnalysis.productId && message.sourceEditionKey === activeAnalysis.analysisEditionKey);
 
   const latestActivity = useMemo(
     () => formatRecentActivity(portfolio?.messages[portfolio.messages.length - 1]?.createdAt),
@@ -175,7 +211,7 @@ export default function AiConsultingPortfolioClient({
     [memories],
   );
 
-  const creditContext = focusAnalysis ?? portfolio?.analyses[0] ?? null;
+  const creditContext = activeAnalysis ?? focusAnalysis ?? portfolio?.analyses[0] ?? null;
   const creditCheckoutHref = creditContext
     ? `/ai-consulting/credits?${new URLSearchParams({
         profileId,
@@ -185,12 +221,39 @@ export default function AiConsultingPortfolioClient({
     : null;
   const creditPurchaseHref = creditCheckoutHref ? `${creditCheckoutHref}#question-bundles` : null;
 
+  async function loadOlderMessages() {
+    const oldest = allLoadedMessages[0];
+    if (isPreview || !oldest || !hasOlderMessages || isLoadingOlder) return;
+    setIsLoadingOlder(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams({ profileId, before: oldest.createdAt });
+      if (focusProductId && focusEdition) {
+        params.set("includeProductId", focusProductId);
+        params.set("includeEdition", focusEdition);
+      }
+      const response = await fetch(`/api/ai-consulting/portfolio?${params.toString()}`, { cache: "no-store" });
+      const body = await response.json() as AiConsultingPortfolioState & { error?: string };
+      if (!response.ok) throw new Error(body.error ?? "이전 상담을 불러오지 못했습니다.");
+      setOlderMessages((existing) => {
+        const known = new Set([...existing, ...(portfolio?.messages ?? [])].map((message) => message.id));
+        return [...body.messages.filter((message) => !known.has(message.id)), ...existing];
+      });
+      setHasOlderMessages(body.hasOlderMessages ?? false);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "이전 상담을 불러오지 못했습니다.");
+    } finally {
+      setIsLoadingOlder(false);
+    }
+  }
+
   async function sendQuestion(content: string, preferred?: AiConsultingPortfolioSource) {
     if (isPreview || !content.trim() || content.trim().length < 2 || content.trim().length > 300) return;
 
     setIsSending(true);
     setError(null);
     setRoutingNotice(null);
+    const sourcePreference = preferred ?? activeSource;
 
     try {
       const response = await fetch("/api/ai-consulting/portfolio/question", {
@@ -200,8 +263,9 @@ export default function AiConsultingPortfolioClient({
           profileId,
           requestId: crypto.randomUUID(),
           question: content.trim(),
-          preferredProductId: preferred?.productId ?? focusAnalysis?.productId ?? null,
-          preferredEditionKey: preferred?.analysisEditionKey ?? focusAnalysis?.analysisEditionKey ?? null,
+          preferredProductId: sourcePreference?.productId ?? null,
+          preferredEditionKey: sourcePreference?.analysisEditionKey ?? null,
+          preferContinuation: !preferred && sourceMode === "automatic",
         }),
       });
 
@@ -212,6 +276,8 @@ export default function AiConsultingPortfolioClient({
 
       if (body.state === "answered") {
         setQuestion("");
+        setLatestAnswerSource(body.source);
+        if (preferred) { setChosenSource(preferred); setSourceMode("chosen"); }
         await loadPortfolio();
         return;
       }

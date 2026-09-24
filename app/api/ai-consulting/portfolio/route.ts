@@ -32,6 +32,11 @@ export async function GET(request: Request) {
   const boundary = await resolvePortfolioBoundary(url.searchParams.get("profileId"));
   if ("error" in boundary) return boundary.error;
 
+  const messageBefore = url.searchParams.get("before");
+  if (messageBefore && (messageBefore.length > 48 || !/^\d{4}-\d{2}-\d{2}T/.test(messageBefore) || Number.isNaN(Date.parse(messageBefore)))) {
+    return NextResponse.json({ error: "상담 기록 조회 기준이 올바르지 않습니다." }, { status: 400 });
+  }
+
   const includeProductId = url.searchParams.get("includeProductId");
   const includeEdition = url.searchParams.get("includeEdition");
   const includePreviousSource = includeProductId && includeEdition
@@ -44,6 +49,7 @@ export async function GET(request: Request) {
       profileId: boundary.profile.id,
       profile: boundary.profile,
       includePreviousSource,
+      messageBefore: messageBefore ?? undefined,
     });
     return NextResponse.json(state);
   } catch (error) {

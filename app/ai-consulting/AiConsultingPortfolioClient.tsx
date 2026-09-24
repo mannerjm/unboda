@@ -230,7 +230,7 @@ export default function AiConsultingPortfolioClient({
     setIsLoadingOlder(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ profileId, before: oldest.createdAt });
+      const params = new URLSearchParams({ profileId, before: oldest.createdAt, beforeId: oldest.id });
       if (focusProductId && focusEdition) {
         params.set("includeProductId", focusProductId);
         params.set("includeEdition", focusEdition);

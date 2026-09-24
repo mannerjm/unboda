@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   AiConsultingPortfolioAnalysis,
   AiConsultingPortfolioMessage,
@@ -90,12 +90,14 @@ export default function AiConsultingPortfolioClient({
   const [hasOlderMessages, setHasOlderMessages] = useState(previewData?.state.hasOlderMessages ?? false);
   const [isLoadingOlder, setIsLoadingOlder] = useState(false);
   const [isLoadingSource, setIsLoadingSource] = useState(false);
+  const portfolioRequestSeq = useRef(0);
   const [historySource, setHistorySource] = useState<Pick<AiConsultingPortfolioSource, "productId" | "analysisEditionKey"> | null>(focusProductId && focusEdition ? { productId: focusProductId, analysisEditionKey: focusEdition } : null);
   const isPreview = Boolean(previewData);
   const creditCheckoutEnabled = creditCheckoutAvailable;
   const freeAnalysisReady = freeAnalysisStatus === "completed" || freeAnalysisStatus === "needs_retry";
 
   const loadPortfolio = useCallback(async (requestedHistorySource?: Pick<AiConsultingPortfolioSource, "productId" | "analysisEditionKey"> | null) => {
+    const requestSeq = ++portfolioRequestSeq.current;
     if (previewData) {
       setPortfolio(previewData.state);
       setHasOlderMessages(previewData.state.hasOlderMessages ?? false);
@@ -119,6 +121,7 @@ export default function AiConsultingPortfolioClient({
     );
     const body = (await response.json()) as AiConsultingPortfolioState & { error?: string };
     if (!response.ok) throw new Error(body.error ?? "통합 AI 상담을 불러오지 못했습니다.");
+    if (requestSeq !== portfolioRequestSeq.current) return;
     setPortfolio(body);
     setHistorySource(targetHistory);
     setOlderMessages([]);
@@ -236,9 +239,10 @@ export default function AiConsultingPortfolioClient({
 
   async function loadOlderMessages() {
     const oldest = allLoadedMessages[0];
-    if (isPreview || !oldest || !hasOlderMessages || isLoadingOlder) return;
+    if (isPreview || !oldest || !hasOlderMessages || isLoadingOlder || isLoadingSource) return;
     setIsLoadingOlder(true);
     setError(null);
+    const requestSeq = portfolioRequestSeq.current;
     try {
       const params = new URLSearchParams({ profileId, before: oldest.createdAt, beforeId: oldest.id });
       if (focusProductId && focusEdition) {
@@ -252,6 +256,7 @@ export default function AiConsultingPortfolioClient({
       const response = await fetch(`/api/ai-consulting/portfolio?${params.toString()}`, { cache: "no-store" });
       const body = await response.json() as AiConsultingPortfolioState & { error?: string };
       if (!response.ok) throw new Error(body.error ?? "이전 상담을 불러오지 못했습니다.");
+      if (requestSeq !== portfolioRequestSeq.current) return;
       setOlderMessages((existing) => {
         const known = new Set([...existing, ...(portfolio?.messages ?? [])].map((message) => message.id));
         return [...body.messages.filter((message) => !known.has(message.id)), ...existing];

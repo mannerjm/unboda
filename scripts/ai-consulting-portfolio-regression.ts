@@ -48,7 +48,7 @@ for (const copy of [
   "공용 질문권",
   "모든 보유 분석에서 함께 사용",
   "새 주제로 질문하기 · 자동 선택",
-  "보유 범위 밖 질문은 답변하지 않아요",
+  "답할 수 없는 질문은 차감하지 않아요.",
 ]) {
   assert(client.includes(copy), `unified AI consulting UX must expose: ${copy}`);
 }

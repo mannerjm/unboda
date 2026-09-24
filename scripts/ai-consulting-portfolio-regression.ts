@@ -60,6 +60,7 @@ assert(client.includes("threadId: message.threadId"), "memory writes must preser
 assert(client.includes("showAllAnalyses") && client.includes("portfolio?.analyses.slice(0, 3)"), "owned analysis display must default to the three most recent analyses");
 assert(client.includes("filteredAnalyses.slice(0, visibleAnalysisLimit)") && client.includes("분석 8개 더 보기"), "expanded analyses must remain bounded and searchable, never render hundreds of chips at once");
 assert(client.includes("setChosenSource(analysis)") && client.includes('document.getElementById("portfolio-question")?.focus()'), "explicit selection must focus the consultation composer");
+assert(client.includes('href="#owned-analysis-selector"') && client.includes('id="owned-analysis-selector"'), "customers must reach the report chooser directly without scrolling past long conversations");
 assert(client.includes("전체 보기 · +") && client.includes("접기"), "owned analysis display must support expand/collapse for the full portfolio");
 assert(client.includes("최근 구매한 분석 ${Math.min(3, portfolio.analyses.length)}개") && client.includes("전체 보유 분석 ${filteredAnalyses.length}개"), "owned-analysis labels must show actual counts, not a fixed three when only two exist");
 assert(client.includes("상담 이용 안내") && client.includes('border-t border-[#e4e7f0]'), "consulting guidance must be visually separated from the owned-analysis list");

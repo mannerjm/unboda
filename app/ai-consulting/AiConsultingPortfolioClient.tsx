@@ -524,7 +524,10 @@ export default function AiConsultingPortfolioClient({
                 ) : null}
               </div>
               <p className="text-sm leading-6 text-slate-600">{activeAnalysis ? `${activeAnalysis.productTitle} · ${activeAnalysis.editionLabel}${sourceMode === "chosen" ? " · 선택한 분석 기준" : " · 이전 상담 이어가기"}` : "질문하면 구매한 분석에서 관련 리포트를 찾아 상담을 시작합니다."}</p>
-              {activeAnalysis ? <button type="button" onClick={() => { setSourceMode("automatic"); setChosenSource(null); setShowAllConversation(false); }} className="mt-2 text-xs font-semibold text-[#5e4bd1] underline underline-offset-4">새 주제로 질문하기 · 자동 선택</button> : null}
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
+                {activeAnalysis ? <button type="button" onClick={() => { setSourceMode("automatic"); setChosenSource(null); setShowAllConversation(false); }} className="text-sm font-semibold text-[#5e4bd1] underline underline-offset-4">새 주제로 질문하기 · 자동 선택</button> : null}
+                <a href="#owned-analysis-selector" className="text-sm font-semibold text-[#5e4bd1] underline underline-offset-4">다른 분석으로 상담하기 ↓</a>
+              </div>
 
               {portfolio.questionsRemaining > 0 ? (
                 <form
@@ -661,7 +664,7 @@ export default function AiConsultingPortfolioClient({
 
             </section>
 
-            <section className="mt-5 rounded-[1.75rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#ffffff_0%,#f8f7ff_100%)] p-5 shadow-sm sm:p-6">
+            <section id="owned-analysis-selector" className="mt-5 scroll-mt-6 rounded-[1.75rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#ffffff_0%,#f8f7ff_100%)] p-5 shadow-sm sm:p-6">
               <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
                 <div>
                   <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">OWNED ANALYSES</p>

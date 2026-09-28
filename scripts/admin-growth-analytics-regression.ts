@@ -31,9 +31,11 @@ assert(migration.includes("grant select, insert on public.service_analytics_even
 assert(migration.includes("security invoker"), "admin reporting function must not be security definer");
 assert(migration.includes("revoke all on function public.get_admin_growth_dashboard(integer) from public, anon, authenticated"), "admin report RPC must not be callable by browser roles");
 
-assert(visitRoute.includes("UUID_PATTERN") && visitRoute.includes("recordDailyVisitor(visitorId)"), "public visit endpoint must only accept a validated random visitor id");
+assert(visitRoute.includes("UUID_PATTERN") && visitRoute.includes("recordDailyVisitor({ visitorId, acquisitionChannel, acquisitionSource })"), "public visit endpoint must only accept a validated random visitor id with allowlisted coarse attribution");
 assert(!visitRoute.includes("eventName") && !visitRoute.includes("actorKind"), "public visit endpoint must not accept arbitrary analytics events");
 assert(tracker.includes("localStorage") && tracker.includes("crypto.randomUUID()"), "visitor identity must be first-party random browser state");
+assert(tracker.includes("ACQUISITION_KEY") && tracker.includes("inferAcquisition()") && tracker.includes("Existing browsers predate first-touch tracking"), "first-touch attribution must be browser-local, coarse, and must not relabel existing browsers");
+assert(visitRoute.includes("ACQUISITION_CHANNELS") && visitRoute.includes("ACQUISITION_SOURCES") && !visitRoute.includes("utm_") && !visitRoute.includes("referrer"), "server must accept only allowlisted attribution enums, never raw referrers or campaign strings");
 assert(tracker.includes('startsWith("/admin")'), "operator admin pages must not inflate customer visitor counts");
 assert(
   tracker.includes('window.location.pathname !== "/auth/login"')

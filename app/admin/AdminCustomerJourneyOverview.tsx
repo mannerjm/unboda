@@ -27,18 +27,26 @@ export default function AdminCustomerJourneyOverview({ report }: { report: Custo
         <Link href="/admin/customer-journey" className="rounded-lg border border-slate-900 bg-[#171a3d] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#242957]">고객 행동 상세 분석 →</Link>
       </div>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Metric title="다음날 재방문율" value={report ? rate(report.visitor1Returned,report.visitor1Eligible) : "—"}
+          note={report ? "첫 방문 다음날까지 관측 완료 " + report.visitor1Eligible + "개 브라우저" : pending}/>
         <Metric title="7일 재방문율" value={report ? rate(report.visitor7Returned,report.visitor7Eligible) : "—"}
           note={report ? "처음 방문한 브라우저 " + report.visitor7Eligible + "개 중 " + report.visitor7Returned + "개가 1~7일 내 재방문" : pending}/>
-        <Metric title="30일 재방문율" value={report ? rate(report.visitor30Returned,report.visitor30Eligible) : "—"}
-          note={report ? "처음 방문한 브라우저 " + report.visitor30Eligible + "개 중 " + report.visitor30Returned + "개가 1~30일 내 재방문" : pending}/>
-        <Metric title="상품 선택 → 구매율" value={report ? rate(report.selected7Purchased,report.selected7Eligible) : "—"}
-          note={report ? "최근 30일 내 로그인 고객·상품 기준, 선택 7일 후 관측 완료 " + report.selected7Eligible + "건" : pending}/>
-        <Metric title="구매 후 AI 상담 이용률" value={report ? rate(report.consultingBuyers,report.paidBuyers) : "—"}
-          note={report ? "구매 고객 " + report.paidBuyers + "명 중 이후 질문권을 사용한 고객 " + report.consultingBuyers + "명" : pending}/>
+        <Metric title="무료 분석 → 첫 구매" value={report ? rate(report.freeToFirstPurchase7,report.freeToFirstPurchaseEligible) : "—"}
+          note={report ? "무료 분석 완료 후 7일 관측 완료 " + report.freeToFirstPurchaseEligible + "명" : pending}/>
+        <Metric title="첫 구매 → 30일 내 두 번째 결제" value={report ? rate(report.secondPaid30Repeated,report.secondPaid30Eligible) : "—"}
+          note={report ? "첫 구매 후 30일 관측 완료 " + report.secondPaid30Eligible + "명 · 리포트/질문권 포함" : pending}/>
+        <Metric title="리포트 구매 → AI 상담" value={report ? rate(report.reportConsultingBuyers,report.reportBuyers) : "—"}
+          note={report ? "리포트 구매 고객 " + report.reportBuyers + "명 중 실제 유료 질문 이용" : pending}/>
+        <Metric title="리포트 구매 → 질문권 구매" value={report ? rate(report.aiCreditBuyers,report.reportBuyers) : "—"}
+          note={report ? "질문권 구매 고객 " + report.aiCreditBuyers + "명 · 재구매 " + report.aiCreditRepeatBuyers + "명" : pending}/>
+        <Metric title="30일 고객당 순매출" value={report && report.revenue30Eligible > 0 ? report.averageNetRevenue30Krw.toLocaleString("ko-KR") + "원" : "—"}
+          note={report ? "첫 구매 후 30일 관측 완료 " + report.revenue30Eligible + "명 기준" : pending}/>
+        <Metric title="90일 고객당 순매출" value={report && report.revenue90Eligible > 0 ? report.averageNetRevenue90Krw.toLocaleString("ko-KR") + "원" : "—"}
+          note={report ? "첫 구매 후 90일 관측 완료 " + report.revenue90Eligible + "명 기준" : pending}/>
       </div>
       <p className="mt-3 text-xs leading-5 text-slate-500">
-        재방문은 동일 브라우저 기준이며 사람 수와 다를 수 있습니다. 7일·30일은 관측 기간이 완료된 집단만 계산합니다.
-        새 고객 행동 지표는 수집 시작 이후부터 유효하며, 표본이 없으면 0% 대신 ‘—’로 표시합니다.
+        재방문·전환·고객당 매출은 필요한 관측 기간이 끝난 집단만 계산합니다. 외부 유입 출처는 이번 보강 이후 새 브라우저부터 수집되며 원본 URL·검색어·IP는 저장하지 않습니다.
+        표본이 없으면 0% 대신 ‘—’로 표시합니다.
       </p>
     </section>
   );

@@ -11,17 +11,45 @@ export type CustomerJourneyEventName =
 
 export type CustomerJourneySource = "recommendations" | "deep-analysis" | "compatibility" | "other";
 
+export type AcquisitionSourceMetric = {
+  channel: string;
+  source: string;
+  visitors: number;
+  linkedAccounts: number;
+  buyers: number;
+  netRevenueKrw: number;
+};
+
+export type AiConsultingBuyerComparison = {
+  aiUsers: number;
+  aiReturned30: number;
+  aiSecondReportBuyers30: number;
+  aiAverageNetRevenue30Krw: number;
+  nonAiUsers: number;
+  nonAiReturned30: number;
+  nonAiSecondReportBuyers30: number;
+  nonAiAverageNetRevenue30Krw: number;
+};
+
 export type CustomerJourneyDashboard = {
   visitorSince: string | null;
   journeySince: string | null;
+  visitor1Eligible: number;
+  visitor1Returned: number;
   visitor7Eligible: number;
   visitor7Returned: number;
   visitor30Eligible: number;
   visitor30Returned: number;
+  buyer1Eligible: number;
+  buyer1Returned: number;
   buyer7Eligible: number;
   buyer7Returned: number;
   buyer30Eligible: number;
   buyer30Returned: number;
+  freeToFirstPurchaseEligible: number;
+  freeToFirstPurchase7: number;
+  secondPaid30Eligible: number;
+  secondPaid30Repeated: number;
   selected7Eligible: number;
   selected7Purchased: number;
   productSelected: number;
@@ -31,6 +59,16 @@ export type CustomerJourneyDashboard = {
   paidOrders30: number;
   paidBuyers: number;
   consultingBuyers: number;
+  reportBuyers: number;
+  reportConsultingBuyers: number;
+  aiCreditBuyers: number;
+  aiCreditRepeatBuyers: number;
+  revenue30Eligible: number;
+  averageNetRevenue30Krw: number;
+  revenue90Eligible: number;
+  averageNetRevenue90Krw: number;
+  aiComparison: AiConsultingBuyerComparison;
+  acquisitionSources: AcquisitionSourceMetric[];
   reportsCompleted30: number;
   reportsFailed30: number;
   reportAverageSeconds30: number | null;

@@ -6,6 +6,7 @@ import { OperatorAuthorizationError, requireOperator } from "@/app/lib/operators
 export const dynamic = "force-dynamic";
 
 function fmt(n: number): string { return n.toLocaleString("ko-KR"); }
+function won(n: number): string { return n.toLocaleString("ko-KR") + "원"; }
 function rate(a: number,b: number): string { return b > 0 ? (100*a/b).toFixed(1)+"%" : "—"; }
 function Card({ title, value, note }: { title: string; value: string; note: string }) {
   return <div className="rounded-2xl border border-[#dce1ef] bg-white p-5 shadow-sm">
@@ -19,39 +20,67 @@ function Row({ label, value }: { label: string; value: string }) {
     <span className="text-slate-600">{label}</span><strong className="text-slate-900">{value}</strong>
   </div>;
 }
+function acquisitionLabel(channel: string, source: string): string {
+  const channels: Record<string,string> = {
+    direct:"직접 방문", organic_search:"검색", paid_campaign:"유료 캠페인",
+    social:"SNS", shared_link:"공유 링크", referral:"외부 추천", other:"기타",
+  };
+  const sources: Record<string,string> = {
+    direct:"직접", naver:"네이버", google:"Google", daum:"다음", bing:"Bing",
+    kakao:"카카오", instagram:"Instagram", facebook:"Facebook", youtube:"YouTube", x:"X", other:"기타",
+  };
+  return `${channels[channel] ?? channel} · ${sources[source] ?? source}`;
+}
+
 function Dashboard({ report: r }: { report: CustomerJourneyDashboard }) {
   const determinedReports = r.reportsCompleted30 + r.reportsFailed30;
+  const ai = r.aiComparison;
   return <>
     <section className="mt-8">
-      <h2 className="text-xl font-bold">1. 고객 재방문 분석</h2>
-      <p className="mt-2 text-sm leading-6 text-slate-600">최초 방문 또는 최초 구매가 7일·30일 전에 완료된 고객 집단만 집계합니다. 첫 방문은 브라우저 기준이며, 구매 고객은 로그인 계정 기준입니다.</p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Card title="첫 방문 후 7일 이내" value={rate(r.visitor7Returned,r.visitor7Eligible)}
-          note={fmt(r.visitor7Eligible)+"개 브라우저 중 "+fmt(r.visitor7Returned)+"개가 다음 7일 내 재방문"}/>
-        <Card title="첫 방문 후 30일 이내" value={rate(r.visitor30Returned,r.visitor30Eligible)}
-          note={fmt(r.visitor30Eligible)+"개 브라우저 중 "+fmt(r.visitor30Returned)+"개가 다음 30일 내 재방문"}/>
-        <Card title="첫 구매 후 7일 이내" value={rate(r.buyer7Returned,r.buyer7Eligible)}
-          note={fmt(r.buyer7Eligible)+"개 계정 중 "+fmt(r.buyer7Returned)+"개가 1~7일 뒤 로그인 방문"}/>
-        <Card title="첫 구매 후 30일 이내" value={rate(r.buyer30Returned,r.buyer30Eligible)}
-          note={fmt(r.buyer30Eligible)+"개 계정 중 "+fmt(r.buyer30Returned)+"개가 1~30일 뒤 로그인 방문"}/>
+      <h2 className="text-xl font-bold">1. 재방문·장기 고객가치</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-600">최초 방문·최초 구매 뒤 실제 동일 고객이 다시 오는지와, 관측 기간 동안 고객당 순매출이 얼마나 쌓이는지 봅니다.</p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Card title="첫 방문 다음날" value={rate(r.visitor1Returned,r.visitor1Eligible)}
+          note={fmt(r.visitor1Eligible)+"개 브라우저 중 "+fmt(r.visitor1Returned)+"개가 정확히 다음날 재방문"}/>
+        <Card title="첫 방문 후 7일" value={rate(r.visitor7Returned,r.visitor7Eligible)}
+          note={fmt(r.visitor7Eligible)+"개 브라우저 중 "+fmt(r.visitor7Returned)+"개가 1~7일 내 재방문"}/>
+        <Card title="첫 방문 후 30일" value={rate(r.visitor30Returned,r.visitor30Eligible)}
+          note={fmt(r.visitor30Eligible)+"개 브라우저 중 "+fmt(r.visitor30Returned)+"개가 1~30일 내 재방문"}/>
+        <Card title="첫 구매 다음날" value={rate(r.buyer1Returned,r.buyer1Eligible)}
+          note={fmt(r.buyer1Eligible)+"개 계정 중 "+fmt(r.buyer1Returned)+"개가 정확히 다음날 로그인 방문"}/>
+        <Card title="첫 구매 후 7일" value={rate(r.buyer7Returned,r.buyer7Eligible)}
+          note={fmt(r.buyer7Eligible)+"개 계정 중 "+fmt(r.buyer7Returned)+"개가 1~7일 내 로그인 방문"}/>
+        <Card title="첫 구매 후 30일" value={rate(r.buyer30Returned,r.buyer30Eligible)}
+          note={fmt(r.buyer30Eligible)+"개 계정 중 "+fmt(r.buyer30Returned)+"개가 1~30일 내 로그인 방문"}/>
+        <Card title="30일 고객당 순매출" value={r.revenue30Eligible ? won(r.averageNetRevenue30Krw) : "—"}
+          note={"첫 구매 후 30일 관측 완료 "+fmt(r.revenue30Eligible)+"명 · 완료 환불 차감"}/>
+        <Card title="90일 고객당 순매출" value={r.revenue90Eligible ? won(r.averageNetRevenue90Krw) : "—"}
+          note={"첫 구매 후 90일 관측 완료 "+fmt(r.revenue90Eligible)+"명 · 완료 환불 차감"}/>
       </div>
-      <p className="mt-3 text-xs text-slate-500">방문 수집 시작: {r.visitorSince ?? "기록 없음"} · 고객 행동 수집 시작: {r.journeySince ? new Date(r.journeySince).toLocaleString("ko-KR",{timeZone:"Asia/Seoul"}) : "아직 기록 없음"}. 새 기능 이전의 로그인 방문은 소급 계산하지 않습니다. 표본이 없으면 — 로 표시합니다.</p>
+      <p className="mt-3 text-xs text-slate-500">방문 수집 시작: {r.visitorSince ?? "기록 없음"} · 고객 행동 수집 시작: {r.journeySince ? new Date(r.journeySince).toLocaleString("ko-KR",{timeZone:"Asia/Seoul"}) : "아직 기록 없음"}. 표본이 없으면 — 로 표시합니다.</p>
     </section>
+
     <section className="mt-10">
-      <h2 className="text-xl font-bold">2. 상품 선택부터 구매까지</h2>
-      <p className="mt-2 text-sm leading-6 text-slate-600">최근 30일간의 단계별 활동 횟수입니다. 서로 다른 고객이 포함될 수 있으므로 아래 건수를 그대로 나눠 구매율로 표시하지 않습니다.</p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Card title="상품 링크 선택" value={fmt(r.productSelected)+"건"} note="상품 페이지 또는 결제 페이지 링크 선택"/>
-        <Card title="상품 상세 진입" value={fmt(r.productDetailViewed)+"건"} note="유료 분석 상세 페이지 진입"/>
-        <Card title="결제 화면 진입" value={fmt(r.checkoutViewed)+"건"} note="체크아웃 페이지 진입(결제 승인과 다름)"/>
-        <Card title="실제 결제 완료" value={fmt(r.paidOrders30)+"건"} note="DB의 결제 완료 주문 기준(최근 30일)"/>
+      <h2 className="text-xl font-bold">2. 무료 분석 → 첫 결제 → 두 번째 결제</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-600">당일 건수를 단순히 나누지 않고, 같은 회원의 실제 다음 행동을 코호트로 계산합니다.</p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Card title="무료 분석 → 7일 내 첫 구매" value={rate(r.freeToFirstPurchase7,r.freeToFirstPurchaseEligible)}
+          note={"무료 분석 완료 후 7일 관측 완료 "+fmt(r.freeToFirstPurchaseEligible)+"명 중 "+fmt(r.freeToFirstPurchase7)+"명"}/>
+        <Card title="첫 구매 → 30일 내 두 번째 결제" value={rate(r.secondPaid30Repeated,r.secondPaid30Eligible)}
+          note={"30일 관측 완료 "+fmt(r.secondPaid30Eligible)+"명 중 "+fmt(r.secondPaid30Repeated)+"명 · 추가 리포트 또는 질문권"}/>
+        <Card title="상품 선택 → 7일 내 구매" value={rate(r.selected7Purchased,r.selected7Eligible)}
+          note={"로그인 고객·상품 "+fmt(r.selected7Eligible)+"건 중 "+fmt(r.selected7Purchased)+"건"}/>
       </div>
-      <div className="mt-4 rounded-2xl border border-[#dce1ef] bg-white p-5">
-        <h3 className="font-bold">로그인 고객의 상품 선택 → 7일 내 구매 전환</h3>
-        <p className="mt-2 text-2xl font-bold">{rate(r.selected7Purchased,r.selected7Eligible)}</p>
-        <p className="mt-1 text-sm text-slate-600">선택 후 7일이 지난 동일 계정·동일 상품 {fmt(r.selected7Eligible)}건 중 {fmt(r.selected7Purchased)}건이 7일 이내 구매했습니다. 로그인 전 선택은 포함하지 않습니다.</p>
-        <div className="mt-4 border-t border-slate-100 pt-3">
-          <p className="mb-1 text-xs font-semibold text-slate-500">상품 링크 선택 위치 · 최근 30일</p>
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-[#dce1ef] bg-white p-5">
+          <h3 className="font-bold">최근 30일 구매 진입량</h3>
+          <Row label="상품 링크 선택" value={fmt(r.productSelected)+"건"}/>
+          <Row label="상품 상세 진입" value={fmt(r.productDetailViewed)+"건"}/>
+          <Row label="결제 화면 진입" value={fmt(r.checkoutViewed)+"건"}/>
+          <Row label="실제 결제 완료" value={fmt(r.paidOrders30)+"건"}/>
+        </div>
+        <div className="rounded-2xl border border-[#dce1ef] bg-white p-5">
+          <h3 className="font-bold">상품 링크 선택 위치 · 최근 30일</h3>
           <Row label="추천 분석" value={fmt(r.bySource.recommendations ?? 0)+"건"}/>
           <Row label="심층분석" value={fmt(r.bySource["deep-analysis"] ?? 0)+"건"}/>
           <Row label="궁합" value={fmt(r.bySource.compatibility ?? 0)+"건"}/>
@@ -59,22 +88,85 @@ function Dashboard({ report: r }: { report: CustomerJourneyDashboard }) {
         </div>
       </div>
     </section>
+
     <section className="mt-10">
-      <h2 className="text-xl font-bold">3. 결제 이후 리포트·AI 상담</h2>
-      <p className="mt-2 text-sm leading-6 text-slate-600">유료 구매 고객의 AI 상담 이용을 계정 단위로 계산합니다. AI 상담은 실제 질문권이 차감된 사용자 질문 기준이며, 화면 열람과 구분합니다.</p>
+      <h2 className="text-xl font-bold">3. 신규 유입 출처 → 구매 → 순매출</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-600">이번 보강 이후 처음 방문한 새 브라우저부터 첫 유입을 거친 채널만 기록합니다. 원본 URL·검색어·UTM 문자열·IP는 저장하지 않고 네이버/Google/SNS/직접 방문 같은 제한된 분류만 저장합니다.</p>
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dce1ef] bg-white p-5">
+        {r.acquisitionSources.length === 0 ? <p className="text-sm text-slate-500">아직 새 유입 출처 표본이 없습니다.</p> :
+          <table className="min-w-full text-sm">
+            <thead><tr className="border-b border-slate-200 text-left text-xs text-slate-500">
+              <th className="py-2 pr-4">첫 유입</th><th className="py-2 pr-4 text-right">방문 브라우저</th>
+              <th className="py-2 pr-4 text-right">계정 연결</th><th className="py-2 pr-4 text-right">신규 구매 고객</th>
+              <th className="py-2 text-right">추적 순매출</th>
+            </tr></thead>
+            <tbody>{r.acquisitionSources.map((item) => <tr key={item.channel+":"+item.source} className="border-b border-slate-100 last:border-0">
+              <td className="py-3 pr-4 font-semibold">{acquisitionLabel(item.channel,item.source)}</td>
+              <td className="py-3 pr-4 text-right">{fmt(item.visitors)}</td>
+              <td className="py-3 pr-4 text-right">{fmt(item.linkedAccounts)}</td>
+              <td className="py-3 pr-4 text-right">{fmt(item.buyers)}</td>
+              <td className="py-3 text-right font-semibold">{won(item.netRevenueKrw)}</td>
+            </tr>)}</tbody>
+          </table>}
+      </div>
+      <p className="mt-3 text-xs leading-5 text-slate-500">기존 브라우저를 나중 방문 기준으로 잘못 재분류하지 않습니다. 첫 유입 수집 이후 계정이 같은 브라우저에서 로그인했을 때만 매출과 연결합니다.</p>
+    </section>
+
+    <section className="mt-10">
+      <h2 className="text-xl font-bold">4. 리포트 구매 → AI 상담 → 질문권</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-600">운보다의 핵심 차별점인 구매 리포트 이후 AI 상담이 실제로 사용되고 추가 매출로 이어지는지 확인합니다.</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Card title="구매 후 AI 상담 이용률" value={rate(r.consultingBuyers,r.paidBuyers)}
-          note={fmt(r.paidBuyers)+"명 중 구매 후 실제 유료 질문을 이용한 고객 "+fmt(r.consultingBuyers)+"명"}/>
-        <Card title="리포트 화면 진입" value={fmt(r.reportPageOpened)+"건"} note="최근 30일 페이지 진입 수 · 실제 정독 여부는 측정하지 않음"/>
+        <Card title="리포트 구매 고객" value={fmt(r.reportBuyers)+"명"} note="질문권 상품을 제외한 실제 분석 구매 고객"/>
+        <Card title="리포트 구매 → AI 상담" value={rate(r.reportConsultingBuyers,r.reportBuyers)}
+          note={fmt(r.reportConsultingBuyers)+"명이 구매 뒤 실제 차감되는 AI 질문 이용"}/>
+        <Card title="리포트 구매 → 질문권 구매" value={rate(r.aiCreditBuyers,r.reportBuyers)}
+          note={fmt(r.aiCreditBuyers)+"명이 질문권을 한 번 이상 구매"}/>
+        <Card title="질문권 재구매 고객" value={fmt(r.aiCreditRepeatBuyers)+"명"}
+          note="리포트 구매 뒤 질문권 결제를 2회 이상 완료한 고객"/>
+      </div>
+    </section>
+
+    <section className="mt-10">
+      <h2 className="text-xl font-bold">5. AI 상담 사용 고객 vs 미사용 고객</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-600">첫 리포트 구매 후 30일 관측이 끝난 고객만 비교합니다. 아래 차이는 상관관계를 보는 운영 지표이며 AI 상담이 원인이라고 단정하지 않습니다.</p>
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dce1ef] bg-white p-5">
+        <table className="min-w-full text-sm">
+          <thead><tr className="border-b border-slate-200 text-left text-xs text-slate-500">
+            <th className="py-2 pr-4">고객군</th><th className="py-2 pr-4 text-right">표본</th>
+            <th className="py-2 pr-4 text-right">30일 재방문</th><th className="py-2 pr-4 text-right">두 번째 리포트 구매</th>
+            <th className="py-2 text-right">30일 평균 순매출</th>
+          </tr></thead>
+          <tbody>
+            <tr className="border-b border-slate-100">
+              <td className="py-3 pr-4 font-semibold">AI 상담 사용</td><td className="py-3 pr-4 text-right">{fmt(ai.aiUsers)}</td>
+              <td className="py-3 pr-4 text-right">{rate(ai.aiReturned30,ai.aiUsers)}</td>
+              <td className="py-3 pr-4 text-right">{rate(ai.aiSecondReportBuyers30,ai.aiUsers)}</td>
+              <td className="py-3 text-right font-semibold">{ai.aiUsers ? won(ai.aiAverageNetRevenue30Krw) : "—"}</td>
+            </tr>
+            <tr>
+              <td className="py-3 pr-4 font-semibold">AI 상담 미사용</td><td className="py-3 pr-4 text-right">{fmt(ai.nonAiUsers)}</td>
+              <td className="py-3 pr-4 text-right">{rate(ai.nonAiReturned30,ai.nonAiUsers)}</td>
+              <td className="py-3 pr-4 text-right">{rate(ai.nonAiSecondReportBuyers30,ai.nonAiUsers)}</td>
+              <td className="py-3 text-right font-semibold">{ai.nonAiUsers ? won(ai.nonAiAverageNetRevenue30Krw) : "—"}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section className="mt-10">
+      <h2 className="text-xl font-bold">6. 리포트 생성 운영 품질</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-600">기존 운영 안전 지표는 그대로 유지합니다. 개별 오류·환불·질문권 무결성 조치는 기존 운영 대시보드에서 처리합니다.</p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Card title="리포트 화면 진입" value={fmt(r.reportPageOpened)+"건"} note="최근 30일 페이지 진입 수 · 정독 여부와 다름"/>
         <Card title="리포트 생성 성공률" value={rate(r.reportsCompleted30,determinedReports)}
-          note={"최근 30일에 생성 시작한 구매 리포트의 완료 "+fmt(r.reportsCompleted30)+"건 / 실패 "+fmt(r.reportsFailed30)+"건 (생성 중 제외)"}/>
+          note={"완료 "+fmt(r.reportsCompleted30)+"건 / 실패 "+fmt(r.reportsFailed30)+"건 · 생성 중 제외"}/>
         <Card title="평균 생성 완료 시간" value={r.reportAverageSeconds30 === null ? "—" : fmt(r.reportAverageSeconds30)+"초"}
-          note="최근 30일 완료된 구매 리포트의 등록부터 완료까지 · 지연·재시도 시간 포함"/>
+          note="최근 30일 완료된 구매 리포트 · 지연·재시도 포함"/>
       </div>
       <div className="mt-4 rounded-2xl border border-[#dce1ef] bg-white p-5">
         <Row label="최근 30일 분석 생성 재시도" value={fmt(r.generationRetries30)+"회"}/>
         <Row label="최근 30일 분석 생성 실패 시도" value={fmt(r.generationFailedAttempts30)+"회"}/>
-        <p className="mt-3 text-xs text-slate-500">재시도·실패 시도는 생성 작업 단위이며, 최종 리포트 실패 건수와 다릅니다. 실제 과금·권한과 관련된 개별 오류는 기존 운영 대시보드에서 확인하세요.</p>
       </div>
     </section>
   </>;
@@ -96,7 +188,7 @@ export default async function AdminCustomerJourneyPage() {
       <Link href="/admin" className="text-sm font-semibold text-slate-600 underline underline-offset-4">← 관리자 현황으로</Link>
       <p className="mt-7 text-xs font-semibold tracking-[0.2em] text-slate-500">CUSTOMER JOURNEY</p>
       <h1 className="mt-2 text-3xl font-bold">고객 행동 상세 분석</h1>
-      <p className="mt-3 text-sm leading-6 text-slate-600">재방문·구매 전환·구매 이후 AI 상담과 리포트 처리 성능을 집계합니다. 고객의 사주 정보나 상담 원문은 이 화면에 표시하지 않습니다.</p>
+      <p className="mt-3 text-sm leading-6 text-slate-600">유입 출처·무료 분석 전환·재방문·두 번째 결제·AI 상담 효과·고객당 순매출을 한 화면에서 봅니다. 고객의 사주 정보나 상담 원문은 표시하지 않습니다.</p>
       {report ? <Dashboard report={report}/> :
         <p className="mt-7 rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
           고객 행동 집계를 불러오지 못했습니다. 신규 통계의 데이터베이스 적용 상태를 확인하세요. 기존 관리자 운영 기능은 계속 사용할 수 있습니다.

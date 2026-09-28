@@ -10,6 +10,8 @@ export type ServiceAnalyticsEventName =
   | "ACCOUNT_CLOSURE_CANCELED";
 
 export type ServiceAnalyticsActorKind = "guest" | "member";
+export type AcquisitionChannel = "direct" | "organic_search" | "paid_campaign" | "social" | "shared_link" | "referral" | "other";
+export type AcquisitionSource = "direct" | "naver" | "google" | "daum" | "bing" | "kakao" | "instagram" | "facebook" | "youtube" | "x" | "other";
 
 export async function recordServiceAnalyticsEvent(input: {
   eventName: Exclude<ServiceAnalyticsEventName, "VISITOR_DAY">;
@@ -32,14 +34,20 @@ export async function recordServiceAnalyticsEvent(input: {
   }
 }
 
-export async function recordDailyVisitor(visitorId: string): Promise<void> {
+export async function recordDailyVisitor(input: {
+  visitorId: string;
+  acquisitionChannel?: AcquisitionChannel | null;
+  acquisitionSource?: AcquisitionSource | null;
+}): Promise<void> {
   const { error } = await createAdminClient()
     .from("service_analytics_events")
     .upsert(
       {
         event_name: "VISITOR_DAY" satisfies ServiceAnalyticsEventName,
-        visitor_id: visitorId,
+        visitor_id: input.visitorId,
         actor_kind: null,
+        acquisition_channel: input.acquisitionChannel ?? null,
+        acquisition_source: input.acquisitionSource ?? null,
       },
       {
         onConflict: "event_name,visitor_id,event_date_kst",

@@ -85,10 +85,19 @@ browser_cohort as (
       ))::integer returned30
   from first_browser f
 ),
+order_net as (
+  select o.id,o.user_id,o.product_id,o.payment_provider,o.paid_at,o.amount,
+    (o.amount - coalesce((
+      select sum(r.requested_amount)
+      from public.refund_workflows r
+      where r.order_id=o.id and r.status='REFUND_COMPLETED'
+    ),0))::bigint as net_amount
+  from public.orders o
+  where o.status='paid' and o.paid_at is not null
+),
 first_buy as (
   select user_id,min(paid_at) as first_paid
-  from public.orders
-  where status='paid' and paid_at is not null
+  from order_net
   group by user_id
 ),
 buyer_cohort as (
@@ -142,17 +151,16 @@ second_paid_30 as (
   select
     count(*) filter (where first_paid <= now()-interval '30 days')::integer eligible,
     count(*) filter (where first_paid <= now()-interval '30 days' and exists (
-      select 1 from public.orders o
-      where o.user_id=b.user_id and o.status='paid' and o.paid_at is not null
+      select 1 from order_net o
+      where o.user_id=b.user_id
         and o.paid_at>b.first_paid and o.paid_at<=b.first_paid+interval '30 days'
     ))::integer repeated
   from first_buy b
 ),
 first_report_buy as (
   select user_id,min(paid_at) as first_report_paid
-  from public.orders
-  where status='paid' and paid_at is not null
-    and coalesce(payment_provider,'') <> 'toss_ai_credit'
+  from order_net
+  where coalesce(payment_provider,'') <> 'toss_ai_credit'
   group by user_id
 ),
 report_funnel as (
@@ -164,13 +172,13 @@ report_funnel as (
         and m.created_at>=r.first_report_paid
     ))::integer consulting_buyers,
     count(*) filter (where exists (
-      select 1 from public.orders o
-      where o.user_id=r.user_id and o.status='paid' and o.paid_at>=r.first_report_paid
+      select 1 from order_net o
+      where o.user_id=r.user_id and o.paid_at>=r.first_report_paid
         and o.payment_provider='toss_ai_credit'
     ))::integer credit_buyers,
     count(*) filter (where (
-      select count(*) from public.orders o
-      where o.user_id=r.user_id and o.status='paid' and o.paid_at>=r.first_report_paid
+      select count(*) from order_net o
+      where o.user_id=r.user_id and o.paid_at>=r.first_report_paid
         and o.payment_provider='toss_ai_credit'
     ) >= 2)::integer repeat_credit_buyers
   from first_report_buy r
@@ -208,50 +216,46 @@ account_attribution as (
   join first_acquisition a on a.visitor_id=l.visitor_id
   order by l.account_id,l.linked_at,a.acquired_at
 ),
-acquisition_rollup as (
-  select a.acquisition_channel,a.acquisition_source,
-    count(*)::integer visitors,
-    count(distinct aa.account_id)::integer linked_accounts,
+acquisition_visitors as (
+  select acquisition_channel,acquisition_source,count(*)::integer visitors
+  from first_acquisition
+  group by acquisition_channel,acquisition_source
+),
+acquisition_accounts as (
+  select acquisition_channel,acquisition_source,count(distinct account_id)::integer linked_accounts
+  from account_attribution
+  group by acquisition_channel,acquisition_source
+),
+acquisition_value as (
+  select aa.acquisition_channel,aa.acquisition_source,
     count(distinct aa.account_id) filter (
       where fb.first_paid is not null and fb.first_paid>=aa.linked_at
     )::integer acquired_buyers,
-    coalesce(sum(o.amount) filter (
-      where o.status='paid' and o.paid_at is not null and o.paid_at>=aa.linked_at
-    ),0)::bigint
-    - coalesce(sum(rf.requested_amount) filter (
-      where rf.status='REFUND_COMPLETED' and o.paid_at is not null and o.paid_at>=aa.linked_at
-    ),0)::bigint as net_revenue_krw
-  from first_acquisition a
-  left join account_attribution aa
-    on aa.visitor_id=a.visitor_id
-    and aa.acquisition_channel=a.acquisition_channel
-    and aa.acquisition_source=a.acquisition_source
+    coalesce(sum(o.net_amount) filter (where o.paid_at>=aa.linked_at),0)::bigint as net_revenue_krw
+  from account_attribution aa
   left join first_buy fb on fb.user_id=aa.account_id
-  left join public.orders o on o.user_id=aa.account_id
-  left join public.refund_workflows rf on rf.order_id=o.id
-  group by a.acquisition_channel,a.acquisition_source
+  left join order_net o on o.user_id=aa.account_id
+  group by aa.acquisition_channel,aa.acquisition_source
+),
+acquisition_rollup as (
+  select v.acquisition_channel,v.acquisition_source,v.visitors,
+    coalesce(a.linked_accounts,0)::integer as linked_accounts,
+    coalesce(x.acquired_buyers,0)::integer as acquired_buyers,
+    coalesce(x.net_revenue_krw,0)::bigint as net_revenue_krw
+  from acquisition_visitors v
+  left join acquisition_accounts a using(acquisition_channel,acquisition_source)
+  left join acquisition_value x using(acquisition_channel,acquisition_source)
 ),
 buyer_window_revenue as (
   select b.user_id,b.first_paid,
-    coalesce(sum(o.amount) filter (
-      where o.status='paid' and o.paid_at>=b.first_paid
-        and o.paid_at<=b.first_paid+interval '30 days'
-    ),0)::bigint
-    - coalesce(sum(rf.requested_amount) filter (
-      where rf.status='REFUND_COMPLETED' and o.paid_at>=b.first_paid
-        and o.paid_at<=b.first_paid+interval '30 days'
+    coalesce(sum(o.net_amount) filter (
+      where o.paid_at>=b.first_paid and o.paid_at<=b.first_paid+interval '30 days'
     ),0)::bigint as net30,
-    coalesce(sum(o.amount) filter (
-      where o.status='paid' and o.paid_at>=b.first_paid
-        and o.paid_at<=b.first_paid+interval '90 days'
-    ),0)::bigint
-    - coalesce(sum(rf.requested_amount) filter (
-      where rf.status='REFUND_COMPLETED' and o.paid_at>=b.first_paid
-        and o.paid_at<=b.first_paid+interval '90 days'
+    coalesce(sum(o.net_amount) filter (
+      where o.paid_at>=b.first_paid and o.paid_at<=b.first_paid+interval '90 days'
     ),0)::bigint as net90
   from first_buy b
-  left join public.orders o on o.user_id=b.user_id and o.status='paid' and o.paid_at is not null
-  left join public.refund_workflows rf on rf.order_id=o.id
+  left join order_net o on o.user_id=b.user_id
   group by b.user_id,b.first_paid
 ),
 revenue_windows as (
@@ -277,22 +281,14 @@ ai_segment_rows as (
         and v.occurred_at<=r.first_report_paid+interval '30 days'
     ) as returned30,
     exists (
-      select 1 from public.orders o
-      where o.user_id=r.user_id and o.status='paid' and o.paid_at>r.first_report_paid
+      select 1 from order_net o
+      where o.user_id=r.user_id and o.paid_at>r.first_report_paid
         and o.paid_at<=r.first_report_paid+interval '30 days'
         and coalesce(o.payment_provider,'') <> 'toss_ai_credit'
     ) as bought_second_report,
     coalesce((
-      select sum(o.amount) from public.orders o
-      where o.user_id=r.user_id and o.status='paid'
-        and o.paid_at>=r.first_report_paid
-        and o.paid_at<=r.first_report_paid+interval '30 days'
-    ),0)::bigint
-    - coalesce((
-      select sum(rf.requested_amount)
-      from public.refund_workflows rf
-      join public.orders o on o.id=rf.order_id
-      where o.user_id=r.user_id and rf.status='REFUND_COMPLETED'
+      select sum(o.net_amount) from order_net o
+      where o.user_id=r.user_id
         and o.paid_at>=r.first_report_paid
         and o.paid_at<=r.first_report_paid+interval '30 days'
     ),0)::bigint as net30
@@ -366,8 +362,8 @@ select jsonb_build_object(
     where event_name='CHECKOUT_VIEWED' and occurred_at >= (select since30 from bounds)),
   'reportPageOpened',(select count(*) from public.customer_journey_events
     where event_name='REPORT_PAGE_OPENED' and occurred_at >= (select since30 from bounds)),
-  'paidOrders30',(select count(*) from public.orders
-    where status='paid' and paid_at >= (select since30 from bounds)),
+  'paidOrders30',(select count(*) from order_net
+    where paid_at >= (select since30 from bounds)),
   'paidBuyers',(select buyers from paid_buyers),
   'consultingBuyers',(select consulted from consulting_buyers),
   'reportBuyers',(select report_buyers from report_funnel),

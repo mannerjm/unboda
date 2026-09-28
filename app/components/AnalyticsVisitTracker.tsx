@@ -25,15 +25,15 @@ function getOrCreateVisitor(): VisitorState | null {
 
 function sourceFromHost(host: string): AcquisitionSource {
   const value = host.toLowerCase().replace(/^www\./, "");
-  if (value === "naver.com" || value.endsWith(".naver.com")) return "naver";
-  if (value === "google.com" || value.startsWith("google.") || value.includes(".google.")) return "google";
-  if (value === "daum.net" || value.endsWith(".daum.net")) return "daum";
-  if (value === "bing.com" || value.endsWith(".bing.com")) return "bing";
-  if (value === "kakao.com" || value.endsWith(".kakao.com") || value === "kakaotalk.com") return "kakao";
-  if (value === "instagram.com" || value.endsWith(".instagram.com")) return "instagram";
-  if (value === "facebook.com" || value.endsWith(".facebook.com")) return "facebook";
-  if (value === "youtube.com" || value.endsWith(".youtube.com") || value === "youtu.be") return "youtube";
-  if (value === "x.com" || value.endsWith(".x.com") || value === "twitter.com" || value.endsWith(".twitter.com") || value === "t.co") return "x";
+  if (value === "naver" || value === "naver.com" || value.endsWith(".naver.com")) return "naver";
+  if (value === "google" || value === "google.com" || value.startsWith("google.") || value.includes(".google.")) return "google";
+  if (value === "daum" || value === "daum.net" || value.endsWith(".daum.net")) return "daum";
+  if (value === "bing" || value === "bing.com" || value.endsWith(".bing.com")) return "bing";
+  if (value === "kakao" || value === "kakaotalk" || value === "kakao.com" || value.endsWith(".kakao.com") || value === "kakaotalk.com") return "kakao";
+  if (value === "instagram" || value === "instagram.com" || value.endsWith(".instagram.com")) return "instagram";
+  if (value === "facebook" || value === "facebook.com" || value.endsWith(".facebook.com")) return "facebook";
+  if (value === "youtube" || value === "youtube.com" || value.endsWith(".youtube.com") || value === "youtu.be") return "youtube";
+  if (value === "x" || value === "twitter" || value === "x.com" || value.endsWith(".x.com") || value === "twitter.com" || value.endsWith(".twitter.com") || value === "t.co") return "x";
   return "other";
 }
 

@@ -130,6 +130,9 @@ assert(!memoryApi.includes("grantEntitlement") && !memoryApi.includes("reserveAi
 assert(answerPipeline.includes("질문에 바로 답하는 핵심 결론") && answerPipeline.includes("구매 분석에 실제로 있는 이번 질문과 관련된 결과") && answerPipeline.includes("일반 생활 조언을 마치 유료 리포트의 고유 결과처럼 표현하지 않는다"), "new AI replies should lead with an easy direct answer grounded in an actual paid-report detail rather than generic advice");
 assert(answerPipeline.includes("질문을 다시 설명하지 말고") && answerPipeline.includes("작은 행동 최대 2개"), "replies must avoid repeating customer questions and provide only a short actionable follow-up");
 assert(answerPipeline.includes("전체 220~420자 내외") && answerPipeline.includes("합계 최대 120자") && answerPipeline.includes("최대 2개") && answerPipeline.includes("AI_CONSULTING_MAX_ACCEPTED_ANSWER_CHARS = 950"), "new paid consulting answers must be brief and have a readable core before the optional report evidence");
+assert(answerPipeline.includes("중학생도 한 번에 이해할 수 있는 쉬운 한국어") && answerPipeline.includes("한 문장에는 한 가지 뜻만 담고") && answerPipeline.includes("'검증', '재정 소모', '유지 비용', '책임 범위', '회복감', '변동 폭'"), "customer-facing consultation text must prefer plain everyday Korean over abstract or expert wording");
+assert(answerPipeline.includes("'적절합니다', '우선됩니다', '검토하세요', '구조인지', '관점에서는'") && answerPipeline.includes("'먼저 ~해보세요', '~부터 확인해보세요'"), "the direct answer should sound like an understandable conversation rather than a report");
+
 assert(client.includes("const firstSentenceEnd = main.search(") && client.includes("답변 더 읽기") && client.includes("const shortAnswer = hasLongAnswer"), "long older paid answers must retain their full text while starting with a complete short sentence");
 assert(client.includes("AI가 기억하면 좋을 내용을 적어주세요") && !client.includes("기억 종류") && client.includes("내 상황이나 목표를 직접 적고 저장해 주세요."), "customer memory UX should ask only for their own notes and keep direct confirmation before save");
 

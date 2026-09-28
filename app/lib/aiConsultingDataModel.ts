@@ -1,5 +1,5 @@
 export const AI_CONSULTING_MAX_QUESTION_CHARS = 300;
-export const AI_CONSULTING_TARGET_ANSWER_CHARS = { min: 250, max: 500 } as const;
+export const AI_CONSULTING_TARGET_ANSWER_CHARS = { min: 220, max: 420 } as const;
 export const AI_CONSULTING_CONTEXT_LIMITS = {
   recentMessages: 6,
   longTermMemories: 8,

@@ -141,7 +141,8 @@ first_free as (
 ),
 free_to_first_purchase as (
   select
-    count(*) filter (where first_free_completed <= now()-interval '7 days')::integer eligible,
+    count(*) filter (where first_free_completed <= now()-interval '7 days'
+      and (b.first_paid is null or b.first_paid>=f.first_free_completed))::integer eligible,
     count(*) filter (where first_free_completed <= now()-interval '7 days'
       and b.first_paid >= f.first_free_completed
       and b.first_paid <= f.first_free_completed+interval '7 days')::integer purchased
@@ -231,7 +232,9 @@ acquisition_value as (
     count(distinct aa.account_id) filter (
       where fb.first_paid is not null and fb.first_paid>=aa.linked_at
     )::integer acquired_buyers,
-    coalesce(sum(o.net_amount) filter (where o.paid_at>=aa.linked_at),0)::bigint as net_revenue_krw
+    coalesce(sum(o.net_amount) filter (
+      where fb.first_paid is not null and fb.first_paid>=aa.linked_at and o.paid_at>=aa.linked_at
+    ),0)::bigint as net_revenue_krw
   from account_attribution aa
   left join first_buy fb on fb.user_id=aa.account_id
   left join order_net o on o.user_id=aa.account_id
@@ -277,8 +280,8 @@ ai_segment_rows as (
     exists (
       select 1 from public.customer_journey_events v
       where v.event_name='PAGE_VISIT' and v.account_id=r.user_id
-        and v.occurred_at>r.first_report_paid
-        and v.occurred_at<=r.first_report_paid+interval '30 days'
+        and v.event_date_kst>timezone('Asia/Seoul',r.first_report_paid)::date
+        and v.event_date_kst<=timezone('Asia/Seoul',r.first_report_paid)::date+30
     ) as returned30,
     exists (
       select 1 from order_net o

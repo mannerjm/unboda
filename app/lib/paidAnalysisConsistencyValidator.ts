@@ -183,10 +183,59 @@ function validateDirectionV4(
   return issues;
 }
 
+function validateCompleteCustomerCopyV4(
+  output: PaidAnalysisDetailOutputV4,
+): PaidAnalysisConsistencyIssue[] {
+  const fields: Array<[string, string]> = [
+    ["conclusion.headline", output.conclusion.headline],
+    ["conclusion.rationale", output.conclusion.rationale],
+    ["conclusion.immediateAction", output.conclusion.immediateAction],
+    ["coreProblem.description", output.coreProblem.description],
+    ["coreProblem.whyItMatters", output.coreProblem.whyItMatters],
+    ["cause.summary", output.cause.summary],
+    ...output.cause.reasons.flatMap((item, index) => [
+      [`cause.reasons[${index}].realWorldPattern`, item.realWorldPattern] as [string, string],
+      [`cause.reasons[${index}].problemLinkage`, item.problemLinkage] as [string, string],
+    ]),
+    ...output.evidence.flatMap((item, index) => [
+      [`evidence[${index}].meaning`, item.meaning] as [string, string],
+      [`evidence[${index}].linkage`, item.linkage] as [string, string],
+    ]),
+    ["current.summary", output.current.summary],
+    ...[...output.current.opportunities, ...output.current.cautions].flatMap((item, index) => [
+      [`current.items[${index}].implication`, item.implication] as [string, string],
+      [`current.items[${index}].observableSignal`, item.observableSignal] as [string, string],
+    ]),
+    ...output.timeline.flatMap((item, index) => [
+      [`timeline[${index}].changeSignal`, item.changeSignal] as [string, string],
+      [`timeline[${index}].preparation`, item.preparation] as [string, string],
+    ]),
+    ...output.action.flatMap((item, index) => [
+      [`action[${index}].action`, item.action] as [string, string],
+      [`action[${index}].condition`, item.condition] as [string, string],
+      [`action[${index}].completionCriteria`, item.completionCriteria] as [string, string],
+    ]),
+    ...output.avoid.map((item, index) => [
+      `avoid[${index}].reason`,
+      item.reason,
+    ] as [string, string]),
+  ];
+
+  return fields
+    .filter(([, text]) => /(?:\.\.\.|…+)\s*$/.test(text.trim()))
+    .map(([field]) => ({
+      field,
+      message: "고객에게 보여주는 문장이 말줄임표로 끝나 완결되지 않았습니다.",
+    }));
+}
+
 export function validatePaidAnalysisConsistencyV4(
   output: PaidAnalysisDetailOutputV4,
 ): PaidAnalysisConsistencyResult {
-  const issues = [...validateDirectionV4(output)];
+  const issues = [
+    ...validateDirectionV4(output),
+    ...validateCompleteCustomerCopyV4(output),
+  ];
 
   return {
     ok: issues.length === 0,

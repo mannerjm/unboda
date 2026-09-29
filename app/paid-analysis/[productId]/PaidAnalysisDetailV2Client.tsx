@@ -33,7 +33,7 @@ function getLegacyTimelineDescription(title: string, description: string): strin
   // Older V2/V3 reports could be hard-truncated before persistence. The lost
   // suffix cannot be reconstructed safely, so show a neutral, title-grounded
   // guidance sentence instead of a blank card or visibly cut copy.
-  return `${title}을(를) 기준으로 실제 생활에서 달라지는 신호가 있는지 확인해 보세요.`;
+  return `이 단계에서는 "${title}" 관련 변화가 실제 생활에서 나타나는지 확인해 보세요.`;
 }
 
 function getAnalysisType(productId: string): string {

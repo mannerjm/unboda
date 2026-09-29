@@ -23,6 +23,20 @@ type PaidAnalysisDetailV2ClientProps = {
   initialDetail?: StoredPaidAnalysisDetail | null;
 };
 
+function simplifyLegacyTimelineLanguage(value: string): string {
+  return value
+    .replace(/[가-힣]{2}\s*대운과\s*[가-힣]{2}\s*세운이\s*함께\s*/g, "당분간 ")
+    .replace(/현재 운의\s*[목화토금수]\s*기운이\s*유지되는 동안/g, "당분간")
+    .replace(/다음 세운은\s*[목화토금수]\s*와\s*[목화토금수]\s*의 작용이 이어져/g, "앞으로는")
+    .replace(/활동성과 변동성을 높이는/g, "활동량과 생활 변화가 커지는")
+    .replace(/일정 밀도/g, "하루 일정의 빡빡한 정도")
+    .replace(/수면 전환/g, "잠드는 과정")
+    .replace(/같은 기상 기준/g, "비슷한 시간에 일어나는 생활 리듬")
+    .replace(/기상 기준/g, "일어나는 시간")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function getLegacyTimelineDescription(
   period: string,
   description: string,
@@ -30,7 +44,7 @@ function getLegacyTimelineDescription(
   const normalized = description.trim();
 
   if (!/(?:\.\.\.|…+)\s*$/.test(normalized)) {
-    return normalized;
+    return simplifyLegacyTimelineLanguage(normalized);
   }
 
   const withoutEllipsis = normalized.replace(/(?:\.\.\.|…+)\s*$/, "").trim();
@@ -41,7 +55,9 @@ function getLegacyTimelineDescription(
     lastCompleteSentence?.index !== undefined
     && lastCompleteSentence.index + 1 >= 24
   ) {
-    return withoutEllipsis.slice(0, lastCompleteSentence.index + 1).trim();
+    return simplifyLegacyTimelineLanguage(
+      withoutEllipsis.slice(0, lastCompleteSentence.index + 1).trim(),
+    );
   }
 
   if (period.includes("현재")) {

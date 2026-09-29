@@ -23,17 +23,44 @@ type PaidAnalysisDetailV2ClientProps = {
   initialDetail?: StoredPaidAnalysisDetail | null;
 };
 
-function getLegacyTimelineDescription(title: string, description: string): string {
+function getLegacyTimelineDescription(
+  period: string,
+  description: string,
+): string {
   const normalized = description.trim();
 
   if (!/(?:\.\.\.|…+)\s*$/.test(normalized)) {
     return normalized;
   }
 
-  // Older V2/V3 reports could be hard-truncated before persistence. The lost
-  // suffix cannot be reconstructed safely, so show a neutral, title-grounded
-  // guidance sentence instead of a blank card or visibly cut copy.
-  return `이 단계에서는 "${title}" 관련 변화가 실제 생활에서 나타나는지 확인해 보세요.`;
+  const withoutEllipsis = normalized.replace(/(?:\.\.\.|…+)\s*$/, "").trim();
+  const completeSentenceMatches = [...withoutEllipsis.matchAll(/[.!?。！？](?=\s|$)/g)];
+  const lastCompleteSentence = completeSentenceMatches.at(-1);
+
+  if (
+    lastCompleteSentence?.index !== undefined
+    && lastCompleteSentence.index + 1 >= 24
+  ) {
+    return withoutEllipsis.slice(0, lastCompleteSentence.index + 1).trim();
+  }
+
+  if (period.includes("현재")) {
+    return "지금은 실제 상황에서 같은 방향의 변화가 반복되는지 먼저 확인해 보세요.";
+  }
+
+  if (period.includes("3개월")) {
+    return "앞으로 몇 달 동안 일시적인 변화인지 계속 이어지는 흐름인지 비교해 보세요.";
+  }
+
+  if (period.includes("6개월")) {
+    return "중간 시점에는 변화가 생활과 선택 기준에 자리 잡았는지 점검해 보세요.";
+  }
+
+  if (period.includes("1년")) {
+    return "장기적으로는 새 기준이 안정적으로 유지되는지 확인한 뒤 다음 선택을 판단해 보세요.";
+  }
+
+  return "이 시점에는 실제 상황에서 같은 방향의 변화가 이어지는지 확인해 보세요.";
 }
 
 function getAnalysisType(productId: string): string {
@@ -452,7 +479,7 @@ void detail;
               </h4>
 
               <p className="mt-2 text-[15px] leading-7 text-slate-700">
-                {getLegacyTimelineDescription(item.title, item.description)}
+                {getLegacyTimelineDescription(item.period, item.description)}
               </p>
             </div>
           </article>

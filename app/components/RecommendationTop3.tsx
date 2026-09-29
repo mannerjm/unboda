@@ -31,7 +31,7 @@ function getReadableRecommendationReason(
     && !/(fortuneFlowAnalysis|elementAnalysis|elementRelations|health_stress|wealth_risk|relationship_conflict)/.test(reason),
   );
 
-  return readableReason ?? "현재 무료 분석에서 확인된 흐름과 연결되는 주제라 우선 추천했어요.";
+  return readableReason ?? "무료 결과에서 이 주제와 연결되는 흐름이 확인돼 가장 먼저 살펴볼 질문으로 추천했어요.";
 }
 
 function getRecommendationQuestion(productId: string, fallback: string): string {
@@ -81,8 +81,9 @@ export default function RecommendationTop3({
         <span className="text-xs font-medium text-slate-500">무료 분석과 같은 계산 근거로 선정</span>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
-        {validRecommendations.map(({ recommendation, product }, index) => {
+      <div className="mt-5 grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
+        {validRecommendations[0] ? (() => {
+          const { recommendation, product } = validRecommendations[0];
           const summary = paidSummaries.find(
             (item) => item.profileId === profileId && item.productId === product.id,
           );
@@ -94,32 +95,77 @@ export default function RecommendationTop3({
 
           if (!href) {
             return (
-              <div key={product.id} className="rounded-[1.5rem] border border-[#dce1ef] bg-[#f7f8fc] p-5 text-slate-500">
-                <p className="text-xs font-black tracking-[0.12em]">0{index + 1} · {displayTitle}</p>
-                <p className="mt-3 text-base font-bold leading-7">{question}</p>
-                <p className="mt-4 text-xs">분석 생성 중</p>
+              <div className="rounded-[1.6rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#f8f5ff,#f9faff)] p-6 text-slate-600">
+                <p className="text-xs font-black tracking-[0.12em] text-[#6f5ce7]">지금 가장 먼저 볼 질문 · {displayTitle}</p>
+                <p className="mt-4 text-xl font-black leading-8 text-[#11162d]">{question}</p>
+                <p className="mt-4 text-sm">분석 생성 중</p>
               </div>
             );
           }
 
           return (
             <button
-              key={product.id}
               type="button"
               aria-pressed={selected}
               onClick={() => setSelectedProductId(product.id)}
-              className={`group min-h-56 rounded-[1.55rem] border p-5 text-left transition hover:-translate-y-0.5 hover:border-[#9282df] hover:shadow-[0_16px_34px_rgba(54,45,93,0.08)] ${selected ? "border-[#9282df] bg-[linear-gradient(145deg,#f8f5ff,#f9faff)] shadow-[0_16px_36px_rgba(78,63,137,0.10)]" : "border-[#dce1ef] bg-white"}`}
+              className={`group min-h-64 rounded-[1.6rem] border p-6 text-left transition hover:-translate-y-0.5 hover:border-[#8069ec] hover:shadow-[0_18px_38px_rgba(54,45,93,0.10)] ${selected ? "border-[#8069ec] bg-[linear-gradient(145deg,#f8f5ff,#f9faff)] shadow-[0_18px_40px_rgba(78,63,137,0.12)]" : "border-[#d8d3ff] bg-white"}`}
             >
-              <div className="flex items-start justify-between gap-3">
-                <p className="text-xs font-black tracking-[0.1em] text-[#6f5ce7]">0{index + 1} · {displayTitle}</p>
-                <span className="shrink-0 text-xs font-semibold text-slate-600">{getProductPricing(product.id).amount.toLocaleString("ko-KR")}원</span>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-black tracking-[0.12em] text-[#6f5ce7]">지금 가장 먼저 볼 질문</p>
+                  <p className="mt-2 text-xs font-bold text-slate-500">{displayTitle}</p>
+                </div>
+                <span className="shrink-0 text-sm font-black text-[#11162d]">{getProductPricing(product.id).amount.toLocaleString("ko-KR")}원</span>
               </div>
-              <p className="mt-5 text-lg font-black leading-7 tracking-[-0.02em] text-[#11162d]">{question}</p>
-              <p className="mt-4 line-clamp-2 text-[15px] leading-7 text-slate-700">{getReadableRecommendationReason(recommendation)}</p>
-              <p className="mt-5 text-xs font-bold text-[#7667bc]">{selected ? "아래에서 이 질문을 자세히 보고 있어요" : "이 질문 살펴보기 →"}</p>
+              <p className="mt-6 max-w-2xl text-2xl font-black leading-9 tracking-[-0.03em] text-[#11162d]">{question}</p>
+              <p className="mt-5 max-w-2xl text-[15px] leading-7 text-slate-700">{getReadableRecommendationReason(recommendation)}</p>
+              <p className="mt-6 text-sm font-black text-[#6f5ce7]">{selected ? "아래에서 이 질문을 자세히 보고 있어요" : "이 질문 자세히 보기 →"}</p>
             </button>
           );
-        })}
+        })() : null}
+
+        <div className="rounded-[1.6rem] border border-[#dfe3ef] bg-white p-4 sm:p-5">
+          <p className="text-xs font-black tracking-[0.12em] text-slate-500">다른 방향으로 궁금하다면</p>
+          <div className="mt-3 space-y-3">
+            {validRecommendations.slice(1).map(({ recommendation, product }, offset) => {
+              const index = offset + 1;
+              const summary = paidSummaries.find(
+                (item) => item.profileId === profileId && item.productId === product.id,
+              );
+              const state = toPremiumAnalysisProductState(summary?.reportStatus);
+              const href = getPremiumAnalysisHref(product.id, state, profileId);
+              const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
+              const question = getRecommendationQuestion(product.id, product.description);
+              const selected = effectiveSelectedProductId === product.id;
+
+              if (!href) {
+                return (
+                  <div key={product.id} className="rounded-[1.25rem] border border-[#dce1ef] bg-[#f7f8fc] p-4 text-slate-500">
+                    <p className="text-xs font-black">0{index + 1} · {displayTitle}</p>
+                    <p className="mt-2 text-sm font-bold leading-6">{question}</p>
+                  </div>
+                );
+              }
+
+              return (
+                <button
+                  key={product.id}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => setSelectedProductId(product.id)}
+                  className={`w-full rounded-[1.25rem] border p-4 text-left transition hover:border-[#9282df] hover:bg-[#faf9ff] ${selected ? "border-[#9282df] bg-[#f8f5ff]" : "border-[#dce1ef] bg-white"}`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-xs font-black text-[#6f5ce7]">0{index + 1} · {displayTitle}</p>
+                    <span className="shrink-0 text-xs font-bold text-slate-600">{getProductPricing(product.id).amount.toLocaleString("ko-KR")}원</span>
+                  </div>
+                  <p className="mt-3 text-base font-black leading-7 text-[#11162d]">{question}</p>
+                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{getReadableRecommendationReason(recommendation)}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {effectiveSelectedProductId ? (
@@ -210,6 +256,22 @@ function RecommendationDetail({
         </div>
 
         {state === "not_purchased" ? <PremiumReportValuePreview product={product} /> : null}
+
+        {state === "not_purchased" ? (
+          <div className="mt-5 rounded-[1.5rem] border border-[#d8d3ff] bg-[linear-gradient(135deg,#f9f8ff_0%,#ffffff_100%)] p-5 sm:p-6">
+            <p className="text-xs font-black tracking-[0.12em] text-[#6f5ce7]">이 질문을 구매하면</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {[
+                "내 결과를 바탕으로 개인화 심층 리포트가 생성됩니다.",
+                "완성된 결과는 구매한 분석에 계속 보관됩니다.",
+                "리포트가 완성되면 AI 상담에서 이 주제를 이어서 물어볼 수 있습니다.",
+                "리포트를 읽고 남은 질문도 같은 상담에서 계속 이어갈 수 있습니다.",
+              ].map((item) => (
+                <div key={item} className="rounded-xl border border-[#e1e5f0] bg-white px-4 py-3 text-sm leading-6 text-slate-700">{item}</div>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-5 flex flex-col gap-3 border-t border-[#dce1ef] pt-4 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-base font-black text-[#11162d]">{getProductPricing(productId).amount.toLocaleString("ko-KR")}원</span>

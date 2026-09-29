@@ -20,7 +20,7 @@ type PremiumProductDetailProps = {
 };
 
 const ACTION_LABELS: Record<PremiumAnalysisProductState, string> = {
-  not_purchased: "이 분석 시작하기",
+  not_purchased: "이 질문 더 깊게 보기",
   none: "리포트 준비 화면 보기",
   generating: "리포트 준비 화면 보기",
   completed: "리포트 보기",
@@ -148,6 +148,7 @@ export default function PremiumProductDetail({
   const recommendedFor = getRecommendedFor(product);
   const quickOverviewItems = getQuickOverviewItems(product);
   const expectedUnderstanding = getExpectedUnderstanding(product);
+  const outcomeItems = Array.from(new Set([...expectedUnderstanding, ...quickOverviewItems])).slice(0, 4);
   const href = getPremiumAnalysisHref(product.id, state, profileId);
 
   return (
@@ -203,13 +204,29 @@ export default function PremiumProductDetail({
       </div>
 
       <div className="bg-[#f7f8fc] px-4 py-5 sm:px-7 sm:py-7">
-        <div className="grid gap-4 lg:grid-cols-3">
-          <DetailList title={isPeriod ? "이런 때 살펴보세요" : "이런 고민이 있다면"} items={recommendedFor} />
-          <DetailList title="이 분석에서 보는 것" items={quickOverviewItems} />
-          <DetailList title="분석 후 알 수 있는 것" items={expectedUnderstanding} />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <DetailList title={isPeriod ? "이런 때 살펴보세요" : "이 분석이 필요한 경우"} items={recommendedFor} />
+          <DetailList title="이 분석을 보고 나면" items={outcomeItems} />
         </div>
 
         {state === "not_purchased" ? <PremiumReportValuePreview product={product} /> : null}
+
+        {state === "not_purchased" ? (
+          <section className="mt-5 rounded-[1.5rem] border border-[#d8d3ff] bg-[linear-gradient(135deg,#ffffff_0%,#f4f2ff_100%)] p-5 shadow-sm sm:p-6" aria-label="구매 후 이어지는 가치">
+            <p className="text-xs font-bold tracking-[0.13em] text-[#6f5ce7]">리포트에서 끝나지 않습니다</p>
+            <h3 className="mt-2 text-lg font-black text-[#11162d]">구매한 분석은 이후 AI 상담에서도 이어집니다.</h3>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {[
+                "내 결과를 바탕으로 개인화 심층 리포트가 생성됩니다.",
+                "완성된 결과는 구매한 분석에 계속 보관됩니다.",
+                "리포트가 완성되면 AI 상담에서 이 주제를 이어서 물어볼 수 있습니다.",
+                "리포트를 읽고 남은 질문도 같은 상담에서 계속 이어갈 수 있습니다.",
+              ].map((item) => (
+                <div key={item} className="rounded-xl border border-[#e1e5f0] bg-white px-4 py-3 text-sm leading-6 text-slate-700">{item}</div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <div className="mt-5 rounded-[1.5rem] border border-[#d8d3ff] bg-[linear-gradient(135deg,#ffffff_0%,#f3f1ff_100%)] p-5 shadow-sm sm:p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">

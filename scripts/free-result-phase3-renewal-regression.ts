@@ -40,6 +40,10 @@ assert(
 );
 assert(!result.includes("<RecommendationTop3"), "free result must stay concise and not embed the full recommendation experience");
 assert(!result.includes("buildAnalysisProductRecommendations"), "free result must not recompute recommendations");
+assert(
+  recommendationCards.includes("validRecommendations[0]") && recommendationCards.includes("validRecommendations.slice(1)"),
+  "recommendation presentation must keep the same top-three ranking while visually emphasizing the first recommendation",
+);
 
 for (const pageCopy of [
   "무료 결과에서 이어보기",
@@ -67,6 +71,10 @@ for (const cardCopy of [
   "내 결과에서 이어지는 질문 3가지",
   "이번 결과에서 이어지는 질문",
   "왜 지금 이 질문이 이어졌나요?",
+  "지금 가장 먼저 볼 질문",
+  "다른 방향으로 궁금하다면",
+  "이 질문을 구매하면",
+  "AI 상담에서 이 주제를 이어서 물어볼 수 있습니다.",
   "이 질문 더 깊게 보기",
 ]) {
   assert(recommendationCards.includes(cardCopy), `phase 3 question-first recommendation UI missing: ${cardCopy}`);

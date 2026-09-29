@@ -222,7 +222,20 @@ function compactText(value: string, maxLength: number | null): string {
     return normalizedValue;
   }
 
-  return `${normalizedValue.slice(0, maxLength).trimEnd()}…`;
+  const prefix = normalizedValue.slice(0, maxLength + 1);
+  const sentenceEnds = [...prefix.matchAll(/[.!?。！？](?=\s|$)/g)];
+  const lastCompleteSentence = sentenceEnds.at(-1);
+
+  if (
+    lastCompleteSentence?.index !== undefined
+    && lastCompleteSentence.index + 1 >= Math.floor(maxLength * 0.55)
+  ) {
+    return normalizedValue.slice(0, lastCompleteSentence.index + 1).trimEnd();
+  }
+
+  // Never persist visibly cut customer copy. If there is no safe sentence
+  // boundary near the limit, keep the generated sentence intact.
+  return normalizedValue;
 }
 
 export function compressCareerDetailStructure(

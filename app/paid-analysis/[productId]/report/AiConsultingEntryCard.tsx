@@ -141,12 +141,12 @@ export default function AiConsultingEntryCard({
   return (
     <section aria-labelledby="report-ai-consulting-title" className="mx-auto mb-8 mt-5 max-w-4xl px-4 sm:px-8">
       <div className="rounded-[1.75rem] border border-[#d8d3ff] bg-white p-5 shadow-[0_12px_36px_rgba(54,45,112,0.06)] sm:p-7">
-        <p className="text-xs font-bold tracking-[0.08em] text-[#5e4bd1]">리포트 다음 단계 · AI 상담</p>
+        <p className="text-xs font-bold tracking-[0.08em] text-[#5e4bd1]">리포트에서 끝나지 않습니다 · AI 상담</p>
         <h2 id="report-ai-consulting-title" className="mt-2 text-xl font-black leading-snug text-[#11162d] sm:text-2xl">
           이 분석, 궁금한 점을 바로 물어보세요
         </h2>
         <p className="mt-2 text-[15px] leading-7 text-slate-700">
-          <strong className="font-bold text-[#11162d]">{presentation.productTitle}</strong> 내용을 바탕으로 어려운 부분을 쉽게 풀어 설명해 드려요.
+          <strong className="font-bold text-[#11162d]">{presentation.productTitle}</strong> 내용을 바탕으로 어려운 부분을 쉽게 풀어 설명해 드려요. 리포트를 읽고 남은 질문도 같은 상담에서 이어갈 수 있어요.
         </p>
 
         <div className="mt-4 rounded-2xl bg-[#f7f8ff] px-4 py-4 sm:px-5">
@@ -166,7 +166,7 @@ export default function AiConsultingEntryCard({
               {balanceLabel}
             </span>
             {depleted ? (
-              <span className="text-sm leading-6 text-slate-600">새 답변을 받으려면 질문권이 필요해요.</span>
+              <span className="text-sm leading-6 text-slate-600">새 답변을 받으려면 질문권이 필요해요. AI 상담 화면에서 질문권 상태를 확인할 수 있어요.</span>
             ) : consultationStatusStale ? (
               <span className="text-sm leading-6 text-slate-600">상담 연결 상태를 다시 확인하고 있어요.</span>
             ) : null}

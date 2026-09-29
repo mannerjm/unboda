@@ -11,6 +11,8 @@ for (const required of [
   "listUserFreeAnalysisResults",
   "resolveProfileFreeAnalysisStatus",
   "createEvaluationContext",
+  "listUserPaidAnalysisSummaries",
+  "createAdminClient",
 ]) {
   assert(page.includes(required), `home renewal must preserve landing-state dependency: ${required}`);
 }
@@ -29,8 +31,14 @@ for (const state of [
 
 assert(page.includes('primaryHref: "/guest-saju"'), "guest primary entry must remain the free guest analysis");
 assert(page.includes('primaryHref: "/saju"'), "member free-analysis entry must remain available");
-assert(page.includes('primaryHref: `/result?profileId=${state.profileId}`'), "completed analysis must still continue to the exact profile result");
-assert(page.includes('secondaryHref: `/recommendations?profileId=${state.profileId}`'), "completed analysis must still expose profile-scoped recommendations");
+assert(page.includes('primaryHref: `/recommendations?profileId=${state.profileId}`'), "free-only completed analysis must lead with profile-scoped recommendations");
+assert(page.includes('secondaryHref: `/result?profileId=${state.profileId}`'), "completed analysis must preserve the exact profile result as a secondary action");
+for (const stage of ["free_only", "paid_preparing", "paid_failed", "paid_ready", "consulting_active"]) {
+  assert(page.includes(`"${stage}"`), `home must distinguish customer stage: ${stage}`);
+}
+assert(page.includes('"AI 상담 시작하기"') && page.includes('"상담 이어가기"'), "paid customers must get stage-aware AI hero actions");
+assert(page.includes('"준비 상태 확인하기"') && page.includes('"구매한 분석 확인하기"'), "preparing/failed paid reports must not be pushed into AI chat");
+assert(page.includes('.eq("role", "assistant")'), "consulting-active hero must require persisted assistant history, not guess from browser state");
 
 for (const route of [
   "/deep-analysis",
@@ -87,8 +95,13 @@ assert(home.includes("function CompatibilityVisual"), "compatibility section mus
 assert(home.includes("bg-[linear-gradient(135deg,#1b1d3b_0%,#25172f_45%,#171d3b_100%)]"), "compatibility section must introduce a warmer violet-rose temperature shift");
 assert(home.includes("linear-gradient(135deg,#0c1330_0%,#17163b_48%,#21184a_100%)"), "AI consulting section must retain a distinct cooler blue-violet temperature with stronger violet emphasis");
 assert(home.includes("bg-[linear-gradient(90deg,transparent,#8f7cff55,#ff9db555,#8f7cff55,transparent)]"), "journey section must render as a connected flow rather than a plain table");
-assert(home.includes("<TrustSection copy={copy}/>"), "closing journey CTA must preserve the current landing-state primary destination");
+assert(home.includes("<TrustSection state={state} copy={copy}/>"), "closing journey CTA must preserve the current landing-state primary destination and stage-aware message");
 assert(home.includes("무료 분석") && home.includes("심층 분석") && home.includes("두 사람 궁합"), "home must keep the free-first path while exposing direct exploration");
+assert(home.includes('"추천 분석"') && home.includes('"내 분석"') && home.includes('"구매한 분석"'), "four shortcuts must evolve from free/member analysis to purchased library without duplicating daily or AI entries");
+const quickRoutes = home.slice(home.indexOf("function QuickRoutes("), home.indexOf("function CardScene("));
+assert(!quickRoutes.includes('"AI 상담"') && !quickRoutes.includes('"오늘의 운보다"'), "quick routes must not duplicate the fixed header AI entry or daily card");
+assert(quickRoutes.includes('title: "추천 분석"') && quickRoutes.includes('title: "심층 분석"') && quickRoutes.includes('title: "두 사람 궁합"'), "three discovery shortcuts remain stable across member stages");
+assert(home.includes('"무료로 확인"') && home.includes('"필요한 분석만 깊게"') && home.includes('"AI 상담으로 계속"'), "closing flow must explain the same three-step product model in plain language");
 assert(home.includes("운보다 · 참고용 명리 분석 서비스"), "legal footer identity must remain on the renewed home");
 assert(home.includes("사업자등록번호 201-28-96364"), "business registration footer must remain on the renewed home");
 assert(home.includes("support@unboda.kr"), "support contact must remain on the renewed home");

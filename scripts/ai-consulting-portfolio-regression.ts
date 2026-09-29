@@ -75,7 +75,7 @@ assert(!client.includes("dangerouslySetInnerHTML"), "unified consultation must r
 assert(entry.includes("질문권은 보유 분석에서 함께 사용해요."), "paid-report entry must explain shared credits in customer language");
 assert(entry.includes("presentation.productTitle") && client.includes("질문권은 모든 보유 분석에서 함께 사용해요."), "report entry must identify its purchased analysis; shared-credit scope must stay clear in simple Korean");
 assert(entry.includes("const href = `/ai-consulting?") && entry.includes("지난 상담 이어가기"), "report entry must preserve report-scoped routing and concise continuation copy into the shared hub");
-assert(entry.includes("이 리포트로 AI에게 질문하기") && entry.includes("AI 상담 보기 · 질문권 확인") && entry.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyer must see a clear report-scoped action without claiming zero-credit consultations are free");
+assert(entry.includes("이 리포트로 AI에게 질문하기") && entry.includes("AI 상담 화면 보기 · 질문권 확인") && entry.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyer must see a clear report-scoped action without claiming zero-credit consultations are free");
 
 assert(library.includes("AI 상담 · 구매한 분석 이어보기") && library.includes("리포트 읽고 끝내지 말고, AI에게 바로 물어보세요"), "purchased library must foreground a concise report-to-AI action");
 assert(library.includes("새 답변에는 질문권이 필요해요."), "library must not imply AI answers are free without question credits");

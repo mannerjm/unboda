@@ -23,6 +23,10 @@ type PaidAnalysisDetailV2ClientProps = {
   initialDetail?: StoredPaidAnalysisDetail | null;
 };
 
+function isTruncatedLegacyCopy(value: string): boolean {
+  return /(?:\.\.\.|…+)\s*$/.test(value.trim());
+}
+
 function getAnalysisType(productId: string): string {
   console.log("PRODUCT ID =", productId);
 
@@ -438,9 +442,11 @@ void detail;
                 {item.title}
               </h4>
 
-              <p className="mt-2 text-[15px] leading-7 text-slate-700">
-                {item.description}
-              </p>
+              {!isTruncatedLegacyCopy(item.description) ? (
+                <p className="mt-2 text-[15px] leading-7 text-slate-700">
+                  {item.description}
+                </p>
+              ) : null}
             </div>
           </article>
         ))}

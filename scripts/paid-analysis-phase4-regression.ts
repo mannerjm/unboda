@@ -40,6 +40,11 @@ assert(detail.includes("1. 분석 대상 확인"), "premium detail must explain 
 assert(detail.includes("2. 개인화 리포트 생성"), "premium detail must explain personalized generation");
 assert(detail.includes("3. 구매한 분석에 보관"), "premium detail must explain report storage");
 assert(detail.includes("구매 전 확인"), "premium detail must surface a pre-checkout confirmation block");
+assert(detail.includes("이 분석이 필요한 경우") && detail.includes("이 분석을 보고 나면"), "premium detail must lead with customer need and concrete outcomes");
+assert(detail.includes("리포트에서 끝나지 않습니다"), "premium detail must explain that a purchase continues beyond the report");
+assert(detail.includes("AI 상담에서 이 주제를 이어서 물어볼 수 있습니다."), "premium detail must explain the real post-report AI consultation value");
+assert(detail.includes('not_purchased: "이 질문 더 깊게 보기"'), "first-purchase CTA must continue the question-first journey");
+assert(!detail.includes("본인·성인 인증"), "generic product detail must not claim every purchase requires adult verification");
 assert(detail.includes("결제가 승인되면 개인화 분석 생성이 바로 시작됩니다."), "premium detail must explain immediate generation before checkout");
 assert(detail.includes("PremiumReportValuePreview"), "premium detail must keep the report-structure preview");
 assert(preview.includes("리포트 구성 미리보기"), "report preview must retain its customer-facing purpose");
@@ -58,6 +63,8 @@ assert(accessPanel.includes('<PremiumProductDetail product={product} state={stat
 assert(catalog.includes("PremiumProductDetail"), "deep-analysis discovery must keep using the shared premium detail");
 assert(recommendations.includes('import PremiumReportValuePreview from "@/app/components/PremiumReportValuePreview"'), "recommendation detail must reuse the shared report preview");
 assert(recommendations.includes('state === "not_purchased" ? <PremiumReportValuePreview product={product} /> : null'), "recommendation detail must show the report preview before purchase");
+assert(recommendations.includes("지금 가장 먼저 볼 질문") && recommendations.includes("다른 방향으로 궁금하다면"), "recommendations must visually prioritize one primary question over two alternatives without changing ranking");
+assert(recommendations.includes("이 질문을 구매하면") && recommendations.includes("AI 상담에서 이 주제를 이어서 물어볼 수 있습니다."), "recommendation detail must explain report storage and continuing AI consultation value");
 assert(catalog.includes('bg-[#f7f8fc]'), "selected catalog detail must sit on the cool Phase 4 surface");
 
 assert(checkoutPage.includes('bg-[#f5f7fc]'), "checkout must keep the cool canvas");
@@ -76,6 +83,7 @@ assert(checkoutPanel.includes("requestPayment"), "checkout must preserve Toss pa
 assert(checkoutPanel.includes("/checkout/success?productId="), "checkout must preserve success routing");
 assert(checkoutPanel.includes("/checkout/fail?productId="), "checkout must preserve failure routing");
 assert(checkoutPanel.includes("결제 준비 상태"), "checkout must expose readable readiness state");
+assert(checkoutPanel.includes('paidEligibilityStatus !== "VERIFIED_ADULT"'), "adult verification must remain conditional on account state at checkout");
 assert(checkoutPanel.includes("계정 인증 확인") && checkoutPanel.includes("분석 대상") && checkoutPanel.includes("결제 후 즉시 생성"), "checkout readiness must cover account, subject, and generation");
 
 console.log("Paid-analysis Phase 4 purchase UX regression passed ✓");

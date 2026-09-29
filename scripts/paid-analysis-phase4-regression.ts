@@ -90,7 +90,7 @@ assert(checkoutPanel.includes("계정 인증 확인") && checkoutPanel.includes(
 
 assert(reportAiEntry.includes("리포트에서 끝나지 않습니다 · AI 상담"), "completed paid reports must present AI consulting as the report's clear next step");
 assert(reportAiEntry.includes("이 분석 내용을 바탕으로 바로 이어서 물어보세요"), "report AI entry must explain continuation from the purchased report");
-assert(reportAiEntry.includes("지난 상담 보기 · 질문권 확인") && reportAiEntry.includes("AI 상담 보기 · 질문권 확인"), "depleted-credit report CTA must make the next action explicit without adding checkout logic to the report");
+assert(reportAiEntry.includes("지난 상담 보기 · 질문권 확인") && reportAiEntry.includes("AI 상담 화면 보기 · 질문권 확인"), "depleted-credit report CTA must make the next action explicit without adding checkout logic to the report");
 assert(reportAiEntry.includes("새 답변을 받으려면 질문권이 필요해요."), "depleted-credit report state must explain why a new answer is unavailable");
 assert(purchasedLibrary.includes("PurchasedAnalysesAutoRefresh") && !purchasedLibrary.includes("AiConsultingEntryCard"), "purchased library must keep one unified AI consulting entry instead of adding per-report AI CTAs");
 

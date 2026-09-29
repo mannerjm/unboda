@@ -34,7 +34,7 @@ export default async function Phase9NextAnalysisSection({
         <p className="text-xs font-black tracking-[0.15em] text-[#6f5ce7]">NEXT ANALYSIS</p>
         <h2 className="mt-2 text-xl font-black text-[#11162d]">이 리포트 다음에 이어볼 분석</h2>
         <p className="mt-2 text-sm leading-7 text-slate-700">
-          이미 보유한 동일 exact edition은 제외하고, 지금 이어서 볼 수 있는 다음 분석만 최대 2개 보여드립니다.
+          지금 리포트에서 이어지는 고민을 더 깊게 볼 수 있는 분석이에요.
         </p>
         <Phase9NextAnalysisCards recommendations={recommendations} />
       </div>

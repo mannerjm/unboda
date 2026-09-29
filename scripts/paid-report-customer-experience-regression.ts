@@ -13,6 +13,7 @@ const freeLoading = read("app/components/MysticLoadingScreen.tsx");
 const report = read("app/paid-analysis/[productId]/report/page.tsx");
 
 assert(language.includes("쉬운 결론") && language.includes("숫자를 생활 행동이나 의학적 사실로 바로 환산하지 않는다"), "plain-language rules must preserve evidence and customer comprehension");
+assert(language.includes("timeline/futureTimeline/changeSignal/preparation") && language.includes("대운·세운·간지 이름") && language.includes("실제 생활에서 확인할 수 있는 말로 번역한다"), "timeline copy must translate fortune jargon into everyday observable language");
 assert(prompt.includes('import { PAID_REPORT_CUSTOMER_LANGUAGE_RULES }') && (prompt.match(/\$\{PAID_REPORT_CUSTOMER_LANGUAGE_RULES\}/g) ?? []).length >= 2, "V2 and V4 paid report prompts must use shared plain-language rules");
 const launchedProducts = getLaunchProductIds();
 assert.equal(launchedProducts.length, 57, "all launched paid-analysis products should be included");

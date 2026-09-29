@@ -4,6 +4,7 @@ import {
   PAID_ANALYSIS_V4_CONSISTENCY_RETRY_LIMIT,
 } from "../app/lib/paidAnalysisV4ConsistencyRetry";
 import { getPaidAnalysisEngineRules } from "../app/lib/paidAnalysisEngine";
+import { validatePaidAnalysisConsistencyV4 } from "../app/lib/paidAnalysisConsistencyValidator";
 import type { ResolvedPaidAnalysisDetailV4 } from "../app/lib/paidAnalysisDetailOutput";
 import type { PaidAnalysisDetailPromptInput } from "../app/lib/paidAnalysisDetailPrompt";
 import type { PaidAnalysisResponseTelemetry } from "../app/lib/ai/generateAnalysisText";
@@ -70,6 +71,45 @@ async function main(): Promise<void> {
       new Error("건강운 V4 심층 분석 결과의 안전 검증에 실패했습니다."),
     ),
     "health-safety failures must never trigger consistency regeneration",
+  );
+
+  const truncatedCopyResult = validatePaidAnalysisConsistencyV4({
+    conclusion: {
+      headline: "완결된 결론입니다.",
+      direction: "유지",
+      focus: "현재 기준",
+      rationale: "현재 기준을 유지해야 하는 이유를 설명합니다.",
+      immediateAction: "기준을 먼저 확인합니다.",
+    },
+    coreProblem: {
+      title: "핵심 문제",
+      description: "현재 확인할 문제를 설명합니다.",
+      whyItMatters: "판단 기준에 영향을 주기 때문입니다.",
+    },
+    cause: { summary: "원인을 설명합니다.", reasons: [] },
+    evidence: [],
+    current: { summary: "현재 흐름을 설명합니다.", opportunities: [], cautions: [] },
+    timeline: [
+      {
+        label: "다음 단계",
+        changeSignal: "생활 흐름이 달라지는 신호를 확인하다가…",
+        preparation: "기준을 정리합니다.",
+      },
+    ],
+    action: [],
+    avoid: [],
+    confidence: {
+      level: "중간",
+      strongestEvidence: [],
+      uncertaintyFactors: [],
+      limitations: "해석의 한계를 설명합니다.",
+    },
+    schemaVersion: "v4",
+  });
+  assert(
+    !truncatedCopyResult.ok
+      && truncatedCopyResult.issues.some((issue) => issue.field === "timeline[0].changeSignal"),
+    "V4 ellipsis-ended customer copy must fail consistency validation and enter the bounded retry path",
   );
 
   for (const engine of [

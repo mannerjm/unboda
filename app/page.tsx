@@ -180,9 +180,9 @@ function getLandingCopy(state: LandingState) {
       };
     case "guest":
       return {
-        eyebrow: "무료 분석부터 시작",
+        eyebrow: "나를 기억하는 AI 운세 상담",
         title: "지금 내 운, 어디로 가고 있을까?",
-        description: "먼저 무료 분석으로 지금의 흐름을 보고, 궁금한 부분이 생기면 나에게 맞는 심층 분석으로 이어가세요.",
+        description: "먼저 무료로 현재 흐름을 확인해 보세요. 더 깊은 분석을 구매하면 그 결과를 바탕으로 AI 상담까지 이어집니다.",
         primary: "무료로 내 운 보기",
         primaryHref: "/guest-saju",
         secondary: "로그인 / 기존 사용자",

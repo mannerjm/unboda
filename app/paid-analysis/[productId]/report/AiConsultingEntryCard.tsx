@@ -131,7 +131,7 @@ export default function AiConsultingEntryCard({
   const actionLabel = depleted
     ? hasPreviousConversation
       ? "지난 상담 보기 · 질문권 확인"
-      : "AI 상담 보기 · 질문권 확인"
+      : "AI 상담 화면 보기 · 질문권 확인"
     : hasPreviousConversation
       ? "지난 상담 이어가기"
       : session?.state === "ready"

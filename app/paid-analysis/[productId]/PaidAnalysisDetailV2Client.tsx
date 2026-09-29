@@ -23,8 +23,17 @@ type PaidAnalysisDetailV2ClientProps = {
   initialDetail?: StoredPaidAnalysisDetail | null;
 };
 
-function isTruncatedLegacyCopy(value: string): boolean {
-  return /(?:\.\.\.|…+)\s*$/.test(value.trim());
+function getLegacyTimelineDescription(title: string, description: string): string {
+  const normalized = description.trim();
+
+  if (!/(?:\.\.\.|…+)\s*$/.test(normalized)) {
+    return normalized;
+  }
+
+  // Older V2/V3 reports could be hard-truncated before persistence. The lost
+  // suffix cannot be reconstructed safely, so show a neutral, title-grounded
+  // guidance sentence instead of a blank card or visibly cut copy.
+  return `이 단계에서는 "${title}" 관련 변화가 실제 생활에서 나타나는지 확인해 보세요.`;
 }
 
 function getAnalysisType(productId: string): string {
@@ -442,11 +451,9 @@ void detail;
                 {item.title}
               </h4>
 
-              {!isTruncatedLegacyCopy(item.description) ? (
-                <p className="mt-2 text-[15px] leading-7 text-slate-700">
-                  {item.description}
-                </p>
-              ) : null}
+              <p className="mt-2 text-[15px] leading-7 text-slate-700">
+                {getLegacyTimelineDescription(item.title, item.description)}
+              </p>
             </div>
           </article>
         ))}

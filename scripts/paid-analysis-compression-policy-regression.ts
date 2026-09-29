@@ -151,18 +151,11 @@ for (const item of periodCompressed.futureTimeline) {
   assert(!item.description.includes("…"), "2: PERIOD description must not gain a truncation ellipsis");
 }
 
-// 3. default path keeps the 92-char truncation
+// 3. default path may compress only at a complete sentence boundary.
 const defaultCompressed = compressCareerDetailStructure(buildDetail(), "MONEY", "TOPIC");
 for (const item of defaultCompressed.futureTimeline) {
-  assert(item.description.endsWith("…"), "3: default path must still truncate");
-  assert(
-    item.description.length === 93,
-    `3: default truncation must stay at 92 chars + ellipsis, got ${item.description.length}`,
-  );
-  assert(
-    item.description.slice(0, 92) === LONG_DESCRIPTION.slice(0, 92),
-    "3: default truncation must keep the original prefix",
-  );
+  assert(item.description === LONG_DESCRIPTION, "3: a long single sentence must stay intact instead of being cut");
+  assert(!item.description.endsWith("…"), "3: default path must never persist a cut-off ellipsis");
 }
 
 // 4 & 7. PERIOD keeps exactly the model's two actions
@@ -248,9 +241,9 @@ assert(
   "8: PERIOD must keep the existing checklist/avoidGuide caps",
 );
 assert(
-  periodLimits.checklist.every((item) => item.length === 113)
-    && periodLimits.avoidGuide.every((item) => item.length === 113),
-  "8: PERIOD checklist/avoidGuide must keep the 112-char truncation",
+  periodLimits.checklist.every((item) => !item.endsWith("…"))
+    && periodLimits.avoidGuide.every((item) => !item.endsWith("…")),
+  "8: checklist/avoidGuide must never be cut mid-sentence with an ellipsis",
 );
 
 // 9 & 10. period blocks survive byte-equivalent
@@ -277,8 +270,8 @@ for (const plugin of ["HEALTH", "MONEY", "COMMON", "CAREER", undefined]) {
     `11: plugin "${plugin ?? "undefined"}" must keep the default fallback`,
   );
   assert(
-    compressed.futureTimeline.every((item) => item.description.endsWith("…")),
-    `11: plugin "${plugin ?? "undefined"}" must keep the default truncation`,
+    compressed.futureTimeline.every((item) => item.description === LONG_DESCRIPTION),
+    `11: plugin "${plugin ?? "undefined"}" must keep complete timeline sentences`,
   );
 }
 

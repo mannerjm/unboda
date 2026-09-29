@@ -41,7 +41,7 @@ assert(premium.includes("이 리포트는 이렇게 읽어 주세요") && premiu
 assert(premium.indexOf("{reason.realWorldPattern}") < premium.indexOf("{reason.observedStructure}"), "customer meaning must precede technical cause details");
 assert(premium.indexOf("{item.meaning}") < premium.indexOf("{item.fact}"), "customer meaning must precede server-calculated evidence");
 assert(premium.includes("계산 근거 펼쳐보기") && premium.includes("{item.fact}"), "technical evidence must be inspectable, not deleted");
-assert(consulting.includes("AI 상담 보기 · 질문권 확인") && consulting.includes("남은 질문 0회") && consulting.includes("이 리포트로 AI에게 질문하기") && consulting.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyers must see a concise truthful consultation entry for both zero-credit and ready states");
+assert(consulting.includes("AI 상담 화면 보기 · 질문권 확인") && consulting.includes("남은 질문 0회") && consulting.includes("이 리포트로 AI에게 질문하기") && consulting.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyers must see a concise truthful consultation entry for both zero-credit and ready states");
 assert(consulting.includes("리포트에서 끝나지 않습니다 · AI 상담") && consulting.includes("이 분석 내용을 바탕으로 바로 이어서 물어보세요"), "completed reports must make AI consulting the clear next step without adding another purchase-library entry");
 assert(!consulting.includes('(session.state === "credit_required" && !hasPreviousConversation)'), "no-credit state must never hide the consulting entry");
 assert(report.indexOf("<AiConsultingEntryCard") < report.indexOf("<Phase9NextAnalysisSection"), "report-based consultation appears before upsell recommendations");

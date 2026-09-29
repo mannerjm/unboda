@@ -691,7 +691,6 @@ async function retryMainAnalysis() {
       <h2 className="text-2xl font-bold text-stone-900">
         사주팔자
       </h2>
-      {profile?.birthTimeKnown == null ? <p className="mt-2 text-xs leading-5 text-amber-700">기존 프로필의 출생 시간 확인 여부가 저장되지 않았습니다. 마이페이지에서 확인해 주세요.</p> : null}
     </div>
 
     <p className="text-sm text-stone-500">

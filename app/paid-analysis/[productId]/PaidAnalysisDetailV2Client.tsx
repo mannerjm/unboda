@@ -270,10 +270,6 @@ void detail;
   <section className="rounded-[2rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-8">
     <div className="border-b border-[#dce1ef] pb-6">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-[#171a3d] px-3 py-1 text-xs font-semibold text-white">
-          AI 심층 분석 V2
-        </span>
-
         <span className="text-xs font-medium text-slate-500">
           개인 맞춤형 프리미엄 리포트
         </span>

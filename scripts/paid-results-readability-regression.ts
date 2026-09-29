@@ -55,6 +55,8 @@ assert(v4.includes("detail.evidence.map") && v4.includes("detail.action.map") &&
 
 assert(legacy.includes('text-[15px] leading-7 text-slate-700'), "legacy paid reports must receive the same readable body scale");
 assert(legacy.includes("isPaidAnalysisDetailV4") && legacy.includes("<PaidAnalysisV4Report"), "legacy/V4 dispatch must remain intact");
+assert(legacy.includes("getLegacyTimelineDescription(item.period, item.description)"), "legacy timeline fallback must use period-aware guidance instead of repeating the title");
+assert(!legacy.includes('이 단계에서는 "${title}" 관련 변화가 실제 생활에서 나타나는지 확인해 보세요.'), "legacy timeline fallback must never repeat the title as body copy");
 
 assert(timeline.includes('text-[15px] leading-7 text-slate-700'), "period timeline must use the shared readable body scale");
 assert(timeline.includes("periodAnalysis.timelineItems.map") && timeline.includes("periodAnalysis.keyPoints"), "period timeline data contract must remain intact");

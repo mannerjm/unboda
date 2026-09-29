@@ -26,7 +26,8 @@ assert(resolver.includes('"TOPIC"') && resolver.includes('"PERIOD"') && resolver
 assert(!resolver.includes("OpenAI") && !resolver.includes("analysisRecommendationBuilder") && !resolver.includes("recommendationSignals"), "Phase 9 must remain deterministic and independent from the Phase 3 recommender/LLM");
 
 assert(cards.includes("이 분석 살펴보기") && cards.includes("analysisEditionKey"), "recommendation cards must surface a concrete next-analysis CTA and exact-edition context");
-assert(section.includes("이미 보유한 동일 exact edition은 제외") && section.includes("getPhase9NextAnalysisRecommendations"), "paid report section must explain and use the exact-edition-aware resolver");
+assert(section.includes("지금 리포트에서 이어지는 고민을 더 깊게 볼 수 있는 분석이에요.") && section.includes("getPhase9NextAnalysisRecommendations"), "paid report section must use customer-facing continuation copy while keeping the exact-edition-aware resolver");
+assert(!section.includes("exact edition"), "customer-facing paid report recommendations must never expose internal edition terminology");
 
 assert(libraryPage.includes("getPhase9NextAnalysisRecommendations") && libraryPage.includes("recentSource"), "purchased library must resolve Phase 9 from a deterministic recent source");
 assert(libraryList.includes('data-next-question-slot="phase9"') && libraryList.includes("Phase9NextAnalysisCards"), "reserved Phase 9 library slot must now render recommendations");

@@ -27,6 +27,10 @@ export default function AdminCustomerJourneyOverview({ report }: { report: Custo
         <Link href="/admin/customer-journey" className="rounded-lg border border-slate-900 bg-[#171a3d] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#242957]">고객 행동 상세 분석 →</Link>
       </div>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Metric title="오늘의 운보다 · 오늘 이용자" value={report ? report.todayViewedToday.toLocaleString("ko-KR") + "명" : "—"}
+          note={report ? "오늘 실제 결과를 연 계정 수 · 같은 프로필 새로고침은 중복 제외" : pending}/>
+        <Metric title="오늘의 운보다 · D1 재방문" value={report ? rate(report.todayD1Returned,report.todayD1Eligible) : "—"}
+          note={report ? "첫 이용 다음날까지 관측 완료 " + report.todayD1Eligible + "명 중 " + report.todayD1Returned + "명" : pending}/>
         <Metric title="다음날 재방문율" value={report ? rate(report.visitor1Returned,report.visitor1Eligible) : "—"}
           note={report ? "첫 방문 다음날까지 관측 완료 " + report.visitor1Eligible + "개 브라우저" : pending}/>
         <Metric title="7일 재방문율" value={report ? rate(report.visitor7Returned,report.visitor7Eligible) : "—"}

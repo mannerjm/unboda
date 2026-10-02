@@ -261,11 +261,13 @@ export async function answerAiConsultingQuestion(input: {
   threadId: string;
   requestId: string;
   question: string;
+  continuation?: boolean;
 }): Promise<AiConsultingAnswerResult> {
   const { thread } = await loadThreadBoundary(input);
   const scope = evaluateAiConsultingScope({
     productId: thread.base_product_id,
     question: input.question,
+    continuation: input.continuation === true,
   });
 
   const reservation = await reserveAiConsultingQuestion({

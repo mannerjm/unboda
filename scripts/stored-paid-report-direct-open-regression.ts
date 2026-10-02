@@ -16,8 +16,8 @@ assert(page.includes('stored?.status === "completed" && stored.content'), "prefe
 assert(page.includes("initialDetail={initialDetail}") && page.includes("key={"), "render the exact stored report snapshot without stale client state between editions");
 assert(!page.includes("claimPaidReport(") && !page.includes("generatePaidAnalysisDetailForPurchasedRuntime("), "server revisit path must never start generation");
 assert(client.includes("if (initialDetail) return;") && client.includes("initialDetail && isPaidAnalysisDetailV4(initialDetail)"), "a completed persisted report must render without a generation request");
-assert(client.includes("if (isGeneratingElsewhere)") && client.includes('<PaidReportPreparing kind="premium" />'), "show the actual generation animation only after an in-progress response");
-assert(client.includes("저장된 리포트를 열고 있습니다.") && !client.includes("if (isGeneratingElsewhere || isLoading || !detail)"), "initial network loading must never masquerade as paid generation");
+assert(client.includes("if (isGeneratingElsewhere || isLoading || !detail)") && client.includes('<PaidReportPreparing kind="premium" />'), "first-purchase report loading must stay on the single paid preparation surface from the first render");
+assert(!client.includes("저장된 리포트를 열고 있습니다."), "first-purchase flow must not flash a separate stored-report loading message before generation");
 assert(status.includes('"Cache-Control": "private, no-store"'), "status polling must remain private");
 assert(generation.includes('claimPaidReport({') && generation.includes('if (claim.state === "completed" && claim.report.content)'), "unfinished first-time purchases and idempotent completed-report fallback must remain intact");
 console.log("stored paid report direct-open regression: PASS");

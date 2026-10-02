@@ -162,10 +162,10 @@ export default async function AiConsultingCreditsPage({
 
         <header className="mt-4 flex flex-col gap-3 rounded-[1.75rem] border border-[#35375f] bg-[linear-gradient(135deg,#111734,#282052)] p-5 text-white shadow-[0_12px_30px_rgba(24,29,67,0.12)] sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
-            <p className="text-xs font-bold tracking-[0.12em] text-[#c9c3ff]">AI 상담 이어가기</p>
-            <h1 className="mt-1 text-2xl font-black">AI 질문권 구매</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-200">
-              원하는 횟수 선택 → 결제 → AI 상담으로 돌아가 질문하기
+            <p className="text-xs font-bold tracking-[0.12em] text-[#c9c3ff]">AI 질문권 · 상담 이어가기</p>
+            <h1 className="mt-1 text-2xl font-black">리포트를 읽고 남은 궁금증을 이어서 물어보세요</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-200">
+              질문권은 현재 프로필의 보유 분석에서 함께 사용하고, 지난 상담과 직접 저장한 내 상황을 이어서 질문할 수 있어요.
             </p>
           </div>
           <div className="self-start rounded-2xl border border-white/20 bg-white/10 px-4 py-3 sm:self-center">

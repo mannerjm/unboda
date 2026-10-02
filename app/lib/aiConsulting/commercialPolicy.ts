@@ -8,8 +8,8 @@
 
 export const AI_CONSULTING_CREDIT_BUNDLES = [
   { id: "ai-consulting-3", questions: 3, priceKrw: 2900 },
-  { id: "ai-consulting-5", questions: 5, priceKrw: 4900, recommended: true },
-  { id: "ai-consulting-10", questions: 10, priceKrw: 8900 },
+  { id: "ai-consulting-5", questions: 5, priceKrw: 4500, recommended: true },
+  { id: "ai-consulting-10", questions: 10, priceKrw: 8500 },
 ] as const;
 
 export type AiConsultingCreditBundleId =

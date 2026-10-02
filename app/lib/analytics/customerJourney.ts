@@ -66,6 +66,13 @@ export type CustomerJourneyDashboard = {
   todayD1Returned: number;
   todayD7Eligible: number;
   todayD7Returned: number;
+  memoryActiveCount: number;
+  memoryUsersWithActive: number;
+  memoryProfilesWithActive: number;
+  memorySaved30: number;
+  memoryChanged30: number;
+  memoryD7Eligible: number;
+  memoryD7Reconsulted: number;
   paidOrders30: number;
   paidBuyers: number;
   consultingBuyers: number;
@@ -137,11 +144,12 @@ export async function hasTodayUnbodaViewed(
 
 export async function getAdminCustomerJourneyDashboard(): Promise<CustomerJourneyDashboard> {
   const client = createAdminClient();
-  const [journeyResult, dailyResult] = await Promise.all([
+  const [journeyResult, dailyResult, memoryResult] = await Promise.all([
     client.rpc("get_admin_customer_journey_dashboard"),
     client.rpc("get_admin_daily_unboda_retention"),
+    client.rpc("get_admin_memory_asset_metrics"),
   ]);
-  if (journeyResult.error || !journeyResult.data || dailyResult.error || !dailyResult.data) {
+  if (journeyResult.error || !journeyResult.data || dailyResult.error || !dailyResult.data || memoryResult.error || !memoryResult.data) {
     throw new Error("고객 행동 지표를 조회하지 못했습니다.");
   }
   return {
@@ -151,6 +159,9 @@ export async function getAdminCustomerJourneyDashboard(): Promise<CustomerJourne
     ...(dailyResult.data as Pick<CustomerJourneyDashboard,
       "todaySince" | "todayViewedToday" | "todayViewedYesterday" | "todayReturnedFromYesterday"
       | "todayActive2Days7" | "todayD1Eligible" | "todayD1Returned" | "todayD7Eligible" | "todayD7Returned">),
+    ...(memoryResult.data as Pick<CustomerJourneyDashboard,
+      "memoryActiveCount" | "memoryUsersWithActive" | "memoryProfilesWithActive"
+      | "memorySaved30" | "memoryChanged30" | "memoryD7Eligible" | "memoryD7Reconsulted">),
   };
 }
 

@@ -39,6 +39,25 @@ function Dashboard({ report: r }: { report: CustomerJourneyDashboard }) {
     <section className="mt-8">
       <h2 className="text-xl font-bold">1. 재방문·장기 고객가치</h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">최초 방문·최초 구매 뒤 실제 동일 고객이 다시 오는지와, 관측 기간 동안 고객당 순매출이 얼마나 쌓이는지 봅니다.</p>
+      <div className="mt-4 rounded-2xl border border-[#dce1ef] bg-[#fafbff] p-5">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.14em] text-[#6f5ce7]">DAILY UNBODA RETENTION</p>
+            <h3 className="mt-2 font-bold">오늘의 운보다 재방문</h3>
+          </div>
+          <p className="text-xs text-slate-500">수집 시작 · {r.todaySince ?? "아직 기록 없음"}</p>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Card title="오늘 이용자" value={fmt(r.todayViewedToday)+"명"}
+            note={"어제 "+fmt(r.todayViewedYesterday)+"명 이용 · 계정 기준"}/>
+          <Card title="어제 → 오늘 재방문" value={rate(r.todayReturnedFromYesterday,r.todayViewedYesterday)}
+            note={fmt(r.todayViewedYesterday)+"명 중 "+fmt(r.todayReturnedFromYesterday)+"명이 오늘 다시 확인"}/>
+          <Card title="최근 7일 2일 이상 이용" value={fmt(r.todayActive2Days7)+"명"}
+            note="최근 7일 중 서로 다른 날짜에 2회 이상 오늘의 운보다 확인"/>
+          <Card title="첫 이용 D1 / D7" value={rate(r.todayD1Returned,r.todayD1Eligible)+" / "+rate(r.todayD7Returned,r.todayD7Eligible)}
+            note={"D1 표본 "+fmt(r.todayD1Eligible)+"명 · D7 표본 "+fmt(r.todayD7Eligible)+"명"}/>
+        </div>
+      </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Card title="첫 방문 다음날" value={rate(r.visitor1Returned,r.visitor1Eligible)}
           note={fmt(r.visitor1Eligible)+"개 브라우저 중 "+fmt(r.visitor1Returned)+"개가 정확히 다음날 재방문"}/>
@@ -188,7 +207,7 @@ export default async function AdminCustomerJourneyPage() {
       <Link href="/admin" className="text-sm font-semibold text-slate-600 underline underline-offset-4">← 관리자 현황으로</Link>
       <p className="mt-7 text-xs font-semibold tracking-[0.2em] text-slate-500">CUSTOMER JOURNEY</p>
       <h1 className="mt-2 text-3xl font-bold">고객 행동 상세 분석</h1>
-      <p className="mt-3 text-sm leading-6 text-slate-600">유입 출처·무료 분석 전환·재방문·두 번째 결제·AI 상담 효과·고객당 순매출을 한 화면에서 봅니다. 고객의 사주 정보나 상담 원문은 표시하지 않습니다.</p>
+      <p className="mt-3 text-sm leading-6 text-slate-600">유입 출처·오늘의 운보다 재방문·무료 분석 전환·두 번째 결제·AI 상담 효과·고객당 순매출을 한 화면에서 봅니다. 고객의 사주 정보나 상담 원문은 표시하지 않습니다.</p>
       {report ? <Dashboard report={report}/> :
         <p className="mt-7 rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
           고객 행동 집계를 불러오지 못했습니다. 신규 통계의 데이터베이스 적용 상태를 확인하세요. 기존 관리자 운영 기능은 계속 사용할 수 있습니다.

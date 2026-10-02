@@ -136,11 +136,22 @@ export async function hasTodayUnbodaViewed(
 }
 
 export async function getAdminCustomerJourneyDashboard(): Promise<CustomerJourneyDashboard> {
-  const { data, error } = await createAdminClient().rpc("get_admin_customer_journey_dashboard");
-  if (error || !data) {
+  const client = createAdminClient();
+  const [journeyResult, dailyResult] = await Promise.all([
+    client.rpc("get_admin_customer_journey_dashboard"),
+    client.rpc("get_admin_daily_unboda_retention"),
+  ]);
+  if (journeyResult.error || !journeyResult.data || dailyResult.error || !dailyResult.data) {
     throw new Error("고객 행동 지표를 조회하지 못했습니다.");
   }
-  return data as CustomerJourneyDashboard;
+  return {
+    ...(journeyResult.data as Omit<CustomerJourneyDashboard,
+      "todaySince" | "todayViewedToday" | "todayViewedYesterday" | "todayReturnedFromYesterday"
+      | "todayActive2Days7" | "todayD1Eligible" | "todayD1Returned" | "todayD7Eligible" | "todayD7Returned">),
+    ...(dailyResult.data as Pick<CustomerJourneyDashboard,
+      "todaySince" | "todayViewedToday" | "todayViewedYesterday" | "todayReturnedFromYesterday"
+      | "todayActive2Days7" | "todayD1Eligible" | "todayD1Returned" | "todayD7Eligible" | "todayD7Returned">),
+  };
 }
 
 /** Bounded cleanup; invoked only by the existing authenticated reconciliation scheduler. */

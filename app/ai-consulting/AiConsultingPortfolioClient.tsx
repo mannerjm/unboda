@@ -906,7 +906,7 @@ export default function AiConsultingPortfolioClient({
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">내가 직접 허용해 저장한 내용만 다음 상담에서 참고합니다. AI가 상담 내용을 마음대로 장기 기억으로 만들지 않아요.</p>
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">
-                  <Link href="/my-unboda" className="rounded-full border border-[#d8d3ff] bg-white px-4 py-2 text-xs font-semibold text-[#5e4bd1]">나의 운보다 기록</Link>
+                  <Link href="/my-unboda" aria-label="나의 운보다 기록 보기" className="rounded-full border border-[#d8d3ff] bg-white px-4 py-2 text-xs font-semibold text-[#5e4bd1]">나의 운보다 기록</Link>
                   <button type="button" onClick={() => setShowMemories((value) => !value)} aria-expanded={showMemories} className="rounded-full bg-[#eef0f6] px-4 py-2 text-xs font-semibold text-[#5e4bd1]">{memories.length}개 저장됨 · {showMemories ? "접기" : "관리하기"}</button>
                 </div>
               </div>

@@ -1,4 +1,8 @@
-import { evaluateAiConsultingScope, type AiConsultingScopeResult } from "../aiConsultingScope";
+import {
+  evaluateAiConsultingScope,
+  isAiConsultingContinuationQuestion,
+  type AiConsultingScopeResult,
+} from "../aiConsultingScope";
 import { getAiConsultingPresentation } from "../aiConsultingPresentation";
 import { listUserPaidAnalysisSummaries } from "../paidReports/server";
 import {
@@ -130,7 +134,10 @@ function routingScore(
     analysis.scopeLabel,
     ...analysis.suggestedQuestions,
   ].join(" "));
-  let score = scope.kind === "period" || scope.kind === "compatibility" ? 2 : 1;
+  // A separately purchased report that owns the question must beat an
+  // adjacent BRIDGE answer from a broader report.
+  let score = scope.scopeTier === "CORE" ? 20 : scope.scopeTier === "BRIDGE" ? 5 : 0;
+  score += scope.kind === "period" || scope.kind === "compatibility" ? 2 : 1;
 
   for (const token of tokens(question)) {
     if (sourceText.includes(token)) {
@@ -421,10 +428,20 @@ export async function answerAiConsultingPortfolioQuestion(input: {
     };
   }
 
+  const continuationFollowup =
+    input.preferContinuation === true
+    && isAiConsultingContinuationQuestion(input.question);
   const evaluated = state.analyses.map((analysis) => {
+    const isPreferredSource = Boolean(
+      input.preferredProductId
+      && input.preferredEditionKey
+      && analysis.productId === input.preferredProductId
+      && analysis.analysisEditionKey === input.preferredEditionKey
+    );
     const scope = evaluateAiConsultingScope({
       productId: analysis.productId,
       question: input.question,
+      continuation: continuationFollowup && isPreferredSource,
     });
     return {
       analysis,
@@ -487,9 +504,12 @@ export async function answerAiConsultingPortfolioQuestion(input: {
   // An explicit report selection stays pinned. An automatic follow-up only
   // reuses the previous source for conversational wording when another report
   // is not materially more relevant; clear topic switches still re-route.
-  const followup = /^(그럼|그러면|그렇다면|그래서|이어서|아까|지난번|저번에|방금|그때|그건|그게|그것|그 부분|그 이야기|그 후|그와 관련|이것도|그렇군요|그런데 그)/u.test(input.question.trim());
   const preferred = input.preferContinuation
-    ? followup && preferredCandidate && allowed[0].score - preferredCandidate.score <= 1 ? preferredCandidate : undefined
+    ? continuationFollowup
+      && preferredCandidate
+      && allowed[0].score - preferredCandidate.score <= 1
+      ? preferredCandidate
+      : undefined
     : preferredCandidate;
   const top = preferred ?? allowed[0];
   const next = preferred ? undefined : allowed[1];
@@ -531,6 +551,13 @@ export async function answerAiConsultingPortfolioQuestion(input: {
       threadId,
       requestId: input.requestId,
       question: input.question,
+      continuation: Boolean(
+        continuationFollowup
+        && input.preferredProductId
+        && input.preferredEditionKey
+        && top.analysis.productId === input.preferredProductId
+        && top.analysis.analysisEditionKey === input.preferredEditionKey
+      ),
     });
 
     if (result.state !== "answered") {

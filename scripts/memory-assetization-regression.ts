@@ -15,6 +15,7 @@ const mypage = read("app/mypage/page.tsx");
 const adminServer = read("app/lib/analytics/customerJourney.ts");
 const adminSummary = read("app/admin/AdminCustomerJourneyOverview.tsx");
 const migration = read("supabase/migrations/20261002113000_memory_asset_metrics.sql");
+const deletedMetricFix = read("supabase/migrations/20261002114500_memory_asset_metrics_exclude_deleted.sql");
 
 for (const copy of [
   "다음 상담에서도 기억할까요?",
@@ -51,6 +52,7 @@ for (const metric of [
 ]) {
   assert(adminServer.includes(metric) && migration.includes(metric), `missing memory asset metric: ${metric}`);
 }
+assert(deletedMetricFix.includes("status in ('active','superseded')"), "deleted customer memories must not remain in operator adoption metrics");
 assert(adminSummary.includes("기억 보유 고객") && adminSummary.includes("기억 저장 후 D7 재상담"), "admin summary must surface memory adoption/retention");
 
 console.log("memory-assetization-regression: OK");

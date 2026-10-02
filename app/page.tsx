@@ -6,10 +6,11 @@ import {
   resolveProfileFreeAnalysisStatus,
   type ProfileFreeAnalysisStatus,
 } from "@/app/lib/freeAnalysisResults/server";
-import { createEvaluationContext } from "@/app/lib/evaluationContext";
+import { createEvaluationContext, getKoreaEvaluationDate } from "@/app/lib/evaluationContext";
 import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
 import { createAdminClient } from "@/app/lib/supabase/admin";
 import HomeExperience from "@/app/components/HomeExperience";
+import { hasTodayUnbodaViewed } from "@/app/lib/analytics/customerJourney";
 
 type HomeCustomerStage = "free_only" | "paid_preparing" | "paid_failed" | "paid_ready" | "consulting_active";
 
@@ -20,7 +21,7 @@ type LandingState =
   | { kind: "analysis_ready"; profileId: string }
   | { kind: "analysis_in_progress"; profileId: string; profileLabel: string }
   | { kind: "analysis_stale"; profileId: string; profileLabel: string }
-  | { kind: "analysis_complete"; profileId: string; profileLabel: string; status: Extract<ProfileFreeAnalysisStatus, "completed" | "needs_retry">; customerStage: HomeCustomerStage };
+  | { kind: "analysis_complete"; profileId: string; profileLabel: string; status: Extract<ProfileFreeAnalysisStatus, "completed" | "needs_retry">; customerStage: HomeCustomerStage; userId: string };
 
 async function hasAiConsultingHistory(userId: string, profileId: string): Promise<boolean> {
   const { count, error } = await createAdminClient()
@@ -63,7 +64,7 @@ async function getLandingState(): Promise<LandingState> {
 
   if (status === "completed" || status === "needs_retry") {
     const customerStage = await resolveCustomerStage(user.id, activeProfile.id);
-    return { kind: "analysis_complete", profileId: activeProfile.id, profileLabel: activeProfile.label, status, customerStage };
+    return { kind: "analysis_complete", profileId: activeProfile.id, profileLabel: activeProfile.label, status, customerStage, userId: user.id };
   }
   if (status === "generating") return { kind: "analysis_in_progress", profileId: activeProfile.id, profileLabel: activeProfile.label };
   if (status === "stale") return { kind: "analysis_stale", profileId: activeProfile.id, profileLabel: activeProfile.label };
@@ -193,5 +194,8 @@ function getLandingCopy(state: LandingState) {
 
 export default async function Home() {
   const state = await getLandingState();
-  return <HomeExperience state={state} copy={getLandingCopy(state)} />;
+  const todayViewed = state.kind === "analysis_complete"
+    ? await hasTodayUnbodaViewed(state.userId, state.profileId, getKoreaEvaluationDate())
+    : false;
+  return <HomeExperience state={state} copy={getLandingCopy(state)} todayViewed={todayViewed} />;
 }

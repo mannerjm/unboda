@@ -44,6 +44,7 @@ assert(eventRoute.includes("getCurrentUser()") && !eventRoute.includes("body.use
 assert(visitRoute.includes('eventName: "PAGE_VISIT"') && visitRoute.includes("visitorId, accountId: user.id"),
   "authenticated account visit must securely link server session account to the random browser id");
 assert(server.includes('import "server-only"') && server.includes('rpc("get_admin_customer_journey_dashboard")')
+  && server.includes('rpc("get_admin_daily_unboda_retention")')
   && server.includes('"TODAY_VIEWED"') && server.includes("hasTodayUnbodaViewed"),
   "dashboard must be service role server-only read");
 assert(admin.includes("journey={journey}") && admin.includes("reportPerformance={journey}") && growth.includes("<AdminCustomerJourneyOverview report={journey} />"),"dashboard should reuse existing admin sections with summary directly below growth cards");

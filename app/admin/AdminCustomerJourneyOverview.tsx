@@ -39,6 +39,10 @@ export default function AdminCustomerJourneyOverview({ report }: { report: Custo
           note={report ? "무료 분석 완료 후 7일 관측 완료 " + report.freeToFirstPurchaseEligible + "명" : pending}/>
         <Metric title="첫 구매 → 30일 내 두 번째 결제" value={report ? rate(report.secondPaid30Repeated,report.secondPaid30Eligible) : "—"}
           note={report ? "첫 구매 후 30일 관측 완료 " + report.secondPaid30Eligible + "명 · 리포트/질문권 포함" : pending}/>
+        <Metric title="기억 보유 고객" value={report ? report.memoryUsersWithActive.toLocaleString("ko-KR") + "명" : "—"}
+          note={report ? "활성 기억 " + report.memoryActiveCount + "개 · 프로필 " + report.memoryProfilesWithActive + "개" : pending}/>
+        <Metric title="기억 저장 후 D7 재상담" value={report ? rate(report.memoryD7Reconsulted,report.memoryD7Eligible) : "—"}
+          note={report ? "첫 기억 저장 후 7일 관측 완료 " + report.memoryD7Eligible + "명" : pending}/>
         <Metric title="리포트 구매 → AI 상담" value={report ? rate(report.reportConsultingBuyers,report.reportBuyers) : "—"}
           note={report ? "리포트 구매 고객 " + report.reportBuyers + "명 중 실제 유료 질문 이용" : pending}/>
         <Metric title="리포트 구매 → 질문권 구매" value={report ? rate(report.aiCreditBuyers,report.reportBuyers) : "—"}

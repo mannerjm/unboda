@@ -186,6 +186,7 @@ export async function POST(request: Request) {
 type MemoryEditInput = {
   profileId?: unknown;
   memoryId?: unknown;
+  writeRequestId?: unknown;
   content?: unknown;
 };
 
@@ -200,7 +201,7 @@ export async function PATCH(request: Request) {
 
   const boundary = await resolveProfileBoundary(input.profileId);
   if ("error" in boundary) return boundary.error;
-  if (!isUuid(input.memoryId) || typeof input.content !== "string") {
+  if (!isUuid(input.memoryId) || !isUuid(input.writeRequestId) || typeof input.content !== "string") {
     return NextResponse.json({ error: "수정할 기억과 내용을 확인해 주세요." }, { status: 400 });
   }
   const content = input.content.trim();
@@ -209,22 +210,48 @@ export async function PATCH(request: Request) {
   }
 
   try {
-    const { data, error } = await createAdminClient()
+    const { data: existing, error: existingError } = await createAdminClient()
       .from("ai_consulting_memories")
-      .update({ content, updated_at: new Date().toISOString() })
+      .select("id,kind,content,tags,source_thread_id,source_message_id,created_at,updated_at")
       .eq("id", input.memoryId)
       .eq("user_id", boundary.user.id)
       .eq("profile_id", boundary.profile.id)
       .eq("provenance", "USER_STATED")
       .eq("status", "active")
-      .select("id,kind,content,source_message_id,created_at,updated_at")
-      .maybeSingle();
-    if (error) throw error;
-    if (!data) return NextResponse.json({ error: "수정할 기억을 찾지 못했습니다." }, { status: 404 });
-    return NextResponse.json({ memory: serializeMemory(data) });
+      .maybeSingle<{
+        id: string;
+        kind: AiConsultingMemoryKind;
+        content: string;
+        tags: string[];
+        source_thread_id: string | null;
+        source_message_id: string | null;
+        created_at: string;
+        updated_at: string;
+      }>();
+    if (existingError) throw existingError;
+    if (!existing) return NextResponse.json({ error: "수정할 기억을 찾지 못했습니다." }, { status: 404 });
+
+    if (existing.content === content) {
+      return NextResponse.json({ memory: serializeMemory(existing) });
+    }
+
+    const memory = await saveAiConsultingMemory({
+      userId: boundary.user.id,
+      profileId: boundary.profile.id,
+      writeRequestId: input.writeRequestId,
+      kind: existing.kind,
+      provenance: "USER_STATED",
+      content,
+      tags: existing.tags,
+      sourceThreadId: existing.source_thread_id,
+      sourceMessageId: existing.source_message_id,
+      supersedesMemoryId: existing.id,
+    });
+
+    return NextResponse.json({ memory: serializeMemory(memory) });
   } catch (error) {
     console.error("[ai-consulting-memories] edit failed", error);
-    return NextResponse.json({ error: "AI 기억을 수정하지 못했습니다." }, { status: 500 });
+    return NextResponse.json({ error: "상황 변화를 저장하지 못했습니다." }, { status: 500 });
   }
 }
 

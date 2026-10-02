@@ -139,11 +139,30 @@ function ConsultingAnswer({ content }: { content: string }) {
   );
 }
 
-/** Categorize only an explicitly phrased goal; ambiguous notes stay neutral. */
-function inferCustomerMemoryKind(content: string): "user_fact" | "goal" {
-  return /(?:목표|(?:하고|되고|늘리고|시작하고|바꾸고|이루고)\s*싶|(?:하려고|할\s*계획|할\s*예정|하고자))/u.test(content)
-    ? "goal"
-    : "user_fact";
+const MEMORY_KIND_LABELS = {
+  user_fact: "현재 상황",
+  life_event: "최근 변화",
+  goal: "목표",
+  preference: "내 기준",
+} as const;
+
+type CustomerMemoryKind = keyof typeof MEMORY_KIND_LABELS;
+
+/**
+ * Conservative suggestion only. The customer can change the category before
+ * saving, and nothing becomes long-term memory until the customer confirms it.
+ */
+function inferCustomerMemoryKind(content: string): CustomerMemoryKind {
+  if (/(?:입사|퇴사|이직했|이사했|결혼했|헤어졌|시작했|끝났|바뀌었|생겼|발생했)/u.test(content)) {
+    return "life_event";
+  }
+  if (/(?:더\s*중요|중요하게|선호|좋아하는|싫어하는|우선으로|기준은)/u.test(content)) {
+    return "preference";
+  }
+  if (/(?:목표|(?:하고|되고|늘리고|시작하고|바꾸고|이루고)\s*싶|(?:하려고|할\s*계획|할\s*예정|하고자))/u.test(content)) {
+    return "goal";
+  }
+  return "user_fact";
 }
 
 export type AiConsultingPortfolioPreviewData = {
@@ -186,6 +205,7 @@ export default function AiConsultingPortfolioClient({
   const [savingMemoryMessageId, setSavingMemoryMessageId] = useState<string | null>(null);
   const [memoryDraftMessageId, setMemoryDraftMessageId] = useState<string | null>(null);
   const [memoryDraftContent, setMemoryDraftContent] = useState("");
+  const [memoryDraftKind, setMemoryDraftKind] = useState<CustomerMemoryKind>("user_fact");
   const [deletingMemoryId, setDeletingMemoryId] = useState<string | null>(null);
   const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
   const [editingMemoryContent, setEditingMemoryContent] = useState("");
@@ -471,7 +491,7 @@ export default function AiConsultingPortfolioClient({
           threadId: message.threadId,
           sourceMessageId: message.id,
           writeRequestId: crypto.randomUUID(),
-          kind: inferCustomerMemoryKind(content),
+          kind: memoryDraftKind,
           content,
         }),
       });
@@ -480,6 +500,7 @@ export default function AiConsultingPortfolioClient({
       await loadMemories();
       setMemoryDraftMessageId(null);
       setMemoryDraftContent("");
+      setMemoryDraftKind("user_fact");
     } catch (reason) {
       setMemoryError(reason instanceof Error ? reason.message : "AI 기억을 저장하지 못했습니다.");
     } finally {
@@ -495,7 +516,12 @@ export default function AiConsultingPortfolioClient({
       const response = await fetch("/api/ai-consulting/memories", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ profileId, memoryId: editingMemoryId, content: editingMemoryContent.trim() }),
+        body: JSON.stringify({
+          profileId,
+          memoryId: editingMemoryId,
+          writeRequestId: crypto.randomUUID(),
+          content: editingMemoryContent.trim(),
+        }),
       });
       const body = await response.json() as { error?: string };
       if (!response.ok) throw new Error(body.error ?? "AI 기억을 수정하지 못했습니다.");
@@ -816,31 +842,43 @@ export default function AiConsultingPortfolioClient({
                             <p className="text-right text-xs font-semibold text-slate-400">기억 저장 미리보기</p>
                           ) : memoryDraftMessageId === message.id ? (
                             <div className="space-y-3 rounded-2xl border border-[#d8d3ff] bg-white p-4">
-                              <p className="text-sm font-bold text-slate-800">AI가 기억하면 좋을 내용을 적어주세요</p>
-                              <p className="text-xs leading-5 text-slate-600">내 상황이나 목표를 직접 적고 저장해 주세요. AI의 해석과 질문 전체는 자동 저장하지 않아요.</p>
+                              <div>
+                                <p className="text-sm font-bold text-slate-800">다음 상담에서도 기억할까요?</p>
+                                <p className="mt-1 text-xs leading-5 text-slate-600">내가 허용한 내용만 장기 기억으로 남습니다. 아래 문장과 분류를 직접 바꾼 뒤 저장할 수 있어요.</p>
+                              </div>
+                              <div className="flex flex-wrap gap-2" aria-label="기억 분류">
+                                {(Object.entries(MEMORY_KIND_LABELS) as Array<[CustomerMemoryKind, string]>).map(([kind, label]) => (
+                                  <button key={kind} type="button" onClick={() => setMemoryDraftKind(kind)} className={memoryDraftKind === kind ? "rounded-full bg-[#6f5ce7] px-3 py-1.5 text-xs font-bold text-white" : "rounded-full border border-[#dce1ef] bg-[#f7f8fc] px-3 py-1.5 text-xs font-semibold text-slate-600"}>
+                                    {label}
+                                  </button>
+                                ))}
+                              </div>
                               <label className="block text-xs font-bold text-slate-700">기억할 내용
                                 <textarea
                                   value={memoryDraftContent}
                                   onChange={(event) => setMemoryDraftContent(event.target.value.slice(0, 300))}
                                   maxLength={300}
                                   rows={2}
-                                  placeholder="예: 올해 저축액을 늘리고 싶어요. / 요즘 잠드는 시간이 달라요."
                                   className="mt-1 block w-full rounded-xl border border-[#d8d3ff] bg-white px-3 py-2 text-sm font-normal leading-6"
                                 />
                               </label>
                               <div className="flex flex-wrap justify-end gap-2">
-                                <button type="button" onClick={() => { setMemoryDraftMessageId(null); setMemoryDraftContent(""); }} disabled={savingMemory} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600">취소</button>
-                                <button type="button" onClick={() => void saveMemory(message)} disabled={savingMemory || !memoryDraftContent.trim()} className="rounded-xl bg-[#6f5ce7] px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{savingMemory ? "저장 중..." : "내 기억에 저장"}</button>
+                                <button type="button" onClick={() => { setMemoryDraftMessageId(null); setMemoryDraftContent(""); setMemoryDraftKind("user_fact"); }} disabled={savingMemory} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600">이번만 사용</button>
+                                <button type="button" onClick={() => void saveMemory(message)} disabled={savingMemory || !memoryDraftContent.trim()} className="rounded-xl bg-[#6f5ce7] px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{savingMemory ? "저장 중..." : "기억하기"}</button>
                               </div>
                             </div>
                           ) : (
                             <div className="text-right">
                               <button
                                 type="button"
-                                onClick={() => { setMemoryDraftMessageId(message.id); setMemoryDraftContent(""); }}
+                                onClick={() => {
+                                  setMemoryDraftMessageId(message.id);
+                                  setMemoryDraftContent(message.content.slice(0, 300));
+                                  setMemoryDraftKind(inferCustomerMemoryKind(message.content));
+                                }}
                                 className="text-xs font-semibold text-slate-600 underline underline-offset-4"
                               >
-                                AI가 기억할 내용 저장하기
+                                다음 상담에서도 기억하기
                               </button>
                             </div>
                           )}
@@ -861,43 +899,60 @@ export default function AiConsultingPortfolioClient({
             {ownedAnalysisLibrary}
 
             <section className="mt-4 rounded-[1.75rem] border border-[#dce1ef] bg-white p-5 shadow-sm sm:p-6">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">내 기억</p>
-                  <h2 className="mt-2 text-base font-bold">AI가 기억하는 내 상황</h2>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">상담 중 직접 저장한 내 상황과 목표를 확인하고 관리할 수 있어요.</p>
+                  <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">내 상황 · 목표</p>
+                  <h2 className="mt-2 text-base font-bold">AI가 이어서 참고하는 내 현재 상황</h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">내가 직접 허용해 저장한 내용만 다음 상담에서 참고합니다. AI가 상담 내용을 마음대로 장기 기억으로 만들지 않아요.</p>
                 </div>
-                <button type="button" onClick={() => setShowMemories((value) => !value)} aria-expanded={showMemories} className="shrink-0 rounded-full bg-[#eef0f6] px-4 py-2 text-xs font-semibold text-[#5e4bd1]">{memories.length}개 저장됨 · {showMemories ? "접기" : "내 기억 보기"}</button>
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  <Link href="/my-unboda" aria-label="나의 운보다 기록 보기" className="rounded-full border border-[#d8d3ff] bg-white px-4 py-2 text-xs font-semibold text-[#5e4bd1]">나의 운보다 기록</Link>
+                  <button type="button" onClick={() => setShowMemories((value) => !value)} aria-expanded={showMemories} className="rounded-full bg-[#eef0f6] px-4 py-2 text-xs font-semibold text-[#5e4bd1]">{memories.length}개 저장됨 · {showMemories ? "접기" : "관리하기"}</button>
+                </div>
               </div>
 
-              {showMemories ? (memories.length === 0 ? (
-                <div className="mt-4 rounded-2xl bg-[#f7f8fc] px-4 py-4 text-sm leading-6 text-slate-600">
-                  아직 저장된 기억이 없어요. 상담에서 <strong className="font-semibold text-slate-800">AI가 기억할 내용 저장하기</strong>를 눌러 직접 적어 주세요.
+              {memories.length > 0 ? (
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  {memories.slice(0, 4).map((memory) => (
+                    <div key={`snapshot-${memory.id}`} className="rounded-2xl bg-[#f7f8fc] px-4 py-3">
+                      <p className="text-xs font-bold text-[#5e4bd1]">{MEMORY_KIND_LABELS[memory.kind ?? "user_fact"]}</p>
+                      <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-800">{memory.content}</p>
+                    </div>
+                  ))}
                 </div>
               ) : (
-                <div className="mt-4 space-y-2">
+                <div className="mt-4 rounded-2xl bg-[#f7f8fc] px-4 py-4 text-sm leading-6 text-slate-600">
+                  아직 저장된 내 상황이 없어요. 상담에서 <strong className="font-semibold text-slate-800">다음 상담에서도 기억하기</strong>를 눌러 직접 선택해 주세요.
+                </div>
+              )}
+
+              {showMemories && memories.length > 0 ? (
+                <div className="mt-4 space-y-2 border-t border-[#e4e7f0] pt-4">
                   {memories.map((memory) => (
                     <div key={memory.id} className="flex flex-col gap-3 rounded-2xl bg-[#f7f8fc] px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
                       {editingMemoryId === memory.id ? (
                         <div className="w-full space-y-2">
-                          <label className="block text-sm font-bold text-slate-700">기억 수정
+                          <p className="text-xs font-bold text-[#5e4bd1]">{MEMORY_KIND_LABELS[memory.kind ?? "user_fact"]} 업데이트</p>
+                          <label className="block text-sm font-bold text-slate-700">지금 상황으로 바꿔 적어주세요
                             <textarea value={editingMemoryContent} onChange={(event) => setEditingMemoryContent(event.target.value.slice(0, 300))} rows={3} maxLength={300} className="mt-2 w-full rounded-xl border border-[#d8d3ff] bg-white px-3 py-2 text-sm font-normal leading-6 outline-none focus:border-[#6f5ce7]" />
                           </label>
+                          <p className="text-xs leading-5 text-slate-500">기존 내용은 지워지지 않고 이전 상황으로 보관됩니다.</p>
                           <div className="flex gap-2">
-                            <button type="button" onClick={() => void saveEditedMemory()} disabled={isSavingMemoryEdit || !editingMemoryContent.trim()} className="rounded-xl bg-[#6f5ce7] px-4 py-2 text-xs font-bold text-white disabled:opacity-50">{isSavingMemoryEdit ? "저장 중..." : "수정 저장"}</button>
+                            <button type="button" onClick={() => void saveEditedMemory()} disabled={isSavingMemoryEdit || !editingMemoryContent.trim()} className="rounded-xl bg-[#6f5ce7] px-4 py-2 text-xs font-bold text-white disabled:opacity-50">{isSavingMemoryEdit ? "저장 중..." : "변화 저장"}</button>
                             <button type="button" onClick={() => { setEditingMemoryId(null); setEditingMemoryContent(""); }} disabled={isSavingMemoryEdit} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-600">취소</button>
                           </div>
                         </div>
                       ) : (
                         <>
                           <div className="min-w-0">
-                            <p className="mb-1 text-xs font-bold text-[#5e4bd1]">내가 저장한 기억</p>
+                            <p className="mb-1 text-xs font-bold text-[#5e4bd1]">{MEMORY_KIND_LABELS[memory.kind ?? "user_fact"]}</p>
                             <p className="whitespace-pre-wrap text-sm leading-6 text-slate-800">{memory.content}</p>
+                            <p className="mt-1 text-[11px] text-slate-400">마지막 업데이트 {formatRecentActivity(memory.updatedAt) ?? "기록됨"}</p>
                           </div>
                           {!isPreview ? (
                             <div className="flex shrink-0 items-center gap-3 self-start">
-                              <button type="button" onClick={() => { setEditingMemoryId(memory.id); setEditingMemoryContent(memory.content); }} className="text-xs font-semibold text-[#5e4bd1] underline underline-offset-4">수정</button>
-                              <button type="button" onClick={() => void deleteMemory(memory)} disabled={deletingMemoryId === memory.id} className="text-xs font-semibold text-slate-500 underline underline-offset-4 disabled:opacity-50">{deletingMemoryId === memory.id ? "삭제 중" : "기억에서 삭제"}</button>
+                              <button type="button" onClick={() => { setEditingMemoryId(memory.id); setEditingMemoryContent(memory.content); }} className="text-xs font-semibold text-[#5e4bd1] underline underline-offset-4">상황이 바뀌었어요</button>
+                              <button type="button" onClick={() => void deleteMemory(memory)} disabled={deletingMemoryId === memory.id} className="text-xs font-semibold text-slate-500 underline underline-offset-4 disabled:opacity-50">{deletingMemoryId === memory.id ? "삭제 중" : "삭제"}</button>
                             </div>
                           ) : <span className="shrink-0 text-xs font-semibold text-slate-500">미리보기</span>}
                         </>
@@ -905,7 +960,7 @@ export default function AiConsultingPortfolioClient({
                     </div>
                   ))}
                 </div>
-              )) : null}
+              ) : null}
             </section>
 
           </>

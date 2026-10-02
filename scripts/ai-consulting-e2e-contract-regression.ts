@@ -31,8 +31,8 @@ assert.deepEqual(
     bundles.get("ai-consulting-5")?.priceKrw,
     bundles.get("ai-consulting-10")?.priceKrw,
   ],
-  [2900, 4900, 8900],
-  "launch prices must remain 2,900/4,900/8,900 KRW",
+  [2900, 4500, 8500],
+  "launch prices must remain 2,900/4,500/8,500 KRW",
 );
 
 const checkout = read("app/lib/aiConsulting/creditCheckout.ts");

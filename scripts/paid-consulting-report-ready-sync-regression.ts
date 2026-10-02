@@ -5,6 +5,7 @@ const read = (path: string): string => readFileSync(path, "utf8");
 const report = read("app/paid-analysis/[productId]/PaidAnalysisDetailV2Client.tsx");
 const page = read("app/paid-analysis/[productId]/report/page.tsx");
 const card = read("app/paid-analysis/[productId]/report/AiConsultingEntryCard.tsx");
+const completionGate = read("app/paid-analysis/[productId]/report/ReportCompletionGate.tsx");
 const session = read("app/lib/aiConsulting/session.ts");
 const banner = read("app/components/PurchasedAnalysesListMultiEdition.tsx");
 
@@ -12,6 +13,8 @@ assert(report.includes('window.dispatchEvent(new CustomEvent("unboda:paid-report
 assert(report.indexOf('window.dispatchEvent(new CustomEvent("unboda:paid-report-ready"') > report.indexOf('const generatedDetail ='), "completion signal must follow successful result retrieval, never the request start");
 assert(page.includes('reportCompleted={Boolean(initialDetail)}'), "stored completed reports must enter with verified completion state");
 assert(page.includes('key={`${profileId}:${productId}:${exactEdition}`}') && page.includes("<AiConsultingEntryCard"), "consulting status must reset for every exact purchased edition");
+assert(page.includes("<ReportCompletionGate") && page.includes('initialCompleted={Boolean(initialDetail)}'), "post-report actions must start from the server-verified completion state");
+assert(completionGate.includes("detail?.productId !== productId") && completionGate.includes("detail.profileId !== profileId") && completionGate.includes("detail.edition !== edition"), "completion gate must unlock only for the exact local report identity");
 assert(card.includes('window.addEventListener("unboda:paid-report-ready"') && card.includes('window.removeEventListener("unboda:paid-report-ready"'), "consultation status must refresh on report completion without leaking listeners");
 assert(card.includes("detail?.profileId !== profileId") && card.includes("detail.productId !== productId") && card.includes("detail.edition !== edition"), "another user's local tab, profile, report or edition cannot trigger this report card");
 assert(card.includes('lastState === "report_required"') && card.includes('void refreshSession()') && card.includes('cache: "no-store"'), "stale generating session must be rechecked without generating another report");

@@ -11,6 +11,7 @@ const consulting = read("app/paid-analysis/[productId]/report/AiConsultingEntryC
 const paidLoading = read("app/components/PaidReportPreparing.tsx");
 const freeLoading = read("app/components/MysticLoadingScreen.tsx");
 const report = read("app/paid-analysis/[productId]/report/page.tsx");
+const completionGate = read("app/paid-analysis/[productId]/report/ReportCompletionGate.tsx");
 
 assert(language.includes("쉬운 결론") && language.includes("숫자를 생활 행동이나 의학적 사실로 바로 환산하지 않는다"), "plain-language rules must preserve evidence and customer comprehension");
 assert(language.includes("timeline/futureTimeline/changeSignal/preparation") && language.includes("대운·세운·간지 이름") && language.includes("실제 생활에서 확인할 수 있는 말로 번역한다"), "timeline copy must translate fortune jargon into everyday observable language");
@@ -45,6 +46,8 @@ assert(premium.includes("계산 근거 펼쳐보기") && premium.includes("{item
 assert(consulting.includes("AI 상담 화면 보기") && consulting.includes("남은 질문 0회") && consulting.includes("이 리포트로 AI에게 질문하기") && consulting.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyers must see a concise truthful consultation entry for both zero-credit and ready states");
 assert(!consulting.includes('(session.state === "credit_required" && !hasPreviousConversation)'), "no-credit state must never hide the consulting entry");
 assert(report.indexOf("<AiConsultingEntryCard") < report.indexOf("<Phase9NextAnalysisSection"), "report-based consultation appears before upsell recommendations");
+assert(report.includes("<ReportCompletionGate") && report.indexOf("<ReportCompletionGate") < report.indexOf("<AiConsultingEntryCard"), "consultation and upsell must stay behind verified report completion");
+assert(completionGate.includes('window.addEventListener("unboda:paid-report-ready"') && completionGate.includes("if (!completed) return null"), "first-purchase follow-up content must remain invisible until the exact report-ready event");
 assert(paidLoading.includes("MysticLoadingScreen") && paidLoading.includes('href="/purchased-analyses"'), "paid loading reuses free visual and preserves purchase recovery");
 assert(freeLoading.includes("asSection") && freeLoading.includes("children"), "shared loading surface supports embedded paid report content");
 console.log("paid-report-customer-experience regression: PASS (57/57 V4 prompts + compatibility + UI)");

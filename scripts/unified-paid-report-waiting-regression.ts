@@ -29,6 +29,12 @@ assert(
   checkoutSuccess.includes('router.replace(`/paid-analysis/${encodeURIComponent(productId)}/report?profileId=${encodeURIComponent(profileId)}${editionQuery}`)'),
   "ordinary and recommended premium purchases must open the exact-edition report, not the product description",
 );
+assert(
+  checkoutSuccess.includes("PaidReportPreparing")
+    && checkoutSuccess.includes('stage="confirming"')
+    && checkoutSuccess.includes('kind="generic"'),
+  "payment confirmation must use the same full-screen preparation visual instead of a separate white status page",
+);
 for (const familyRoute of [
   "getCompatibilityPairReportPath(productId)",
   "/special-analysis/compatibility/family/parent-child/report",
@@ -91,6 +97,7 @@ for (const copy of [
   "구매 내역은 보존됩니다",
   "리포트를 준비하는 중 문제가 생겼어요",
   "구매한 분석으로 이동",
+  "결제 확인이 끝나면 별도 버튼 없이 리포트 준비 화면으로 이어집니다",
 ]) {
   assert(commonWaiting.includes(copy), `shared waiting UI must explain: ${copy}`);
 }

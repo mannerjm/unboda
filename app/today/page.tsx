@@ -11,6 +11,7 @@ import {
 import { getKoreaEvaluationDate } from "@/app/lib/evaluationContext";
 import type { TodayReading } from "@/app/lib/dailyUnboda";
 import { getCachedTodayReading } from "@/app/lib/dailyUnboda/server";
+import { recordCustomerJourneyEvent } from "@/app/lib/analytics/customerJourney";
 
 export const metadata = {
   title: "오늘의 운보다 | 운보다",
@@ -168,6 +169,15 @@ export default async function TodayPage() {
     console.error("[today] Daily reading calculation failed", error instanceof Error ? error.message : "unknown");
   }
 
+  if (reading) {
+    await recordCustomerJourneyEvent({
+      eventName: "TODAY_VIEWED",
+      accountId: user.id,
+      profileId: activeProfile.id,
+      eventDateKst: date,
+    });
+  }
+
   return (
     <TodayEventShell date={date} profileLabel={activeProfile.label} ready={Boolean(reading)}>
       {reading ? (
@@ -194,8 +204,8 @@ export default async function TodayPage() {
           </section>
           <div className="mt-4 rounded-[1.4rem] border border-white/10 bg-white/[0.035] px-5 py-5 text-sm leading-7 text-[#b4bcd2] sm:flex sm:items-center sm:justify-between sm:gap-5 sm:px-7">
             <div>
-              <p className="font-black text-white">내일도, 새로운 오늘이 열려요.</p>
-              <p className="mt-1 text-xs leading-6 text-[#a7afc9]">매일 날짜가 바뀌면 새로운 일일 흐름을 확인할 수 있습니다.</p>
+              <p className="font-black text-white">오늘 한 가지만 기억하세요.</p>
+              <p className="mt-1 text-xs leading-6 text-[#a7afc9]">위의 한 가지 제안만 기억해도 충분해요. 내일 날짜가 바뀌면 새로운 흐름이 열립니다.</p>
             </div>
             <Link href="/" className="mt-4 inline-flex min-h-11 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/[0.065] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 sm:mt-0">운보다 홈으로 →</Link>
           </div>

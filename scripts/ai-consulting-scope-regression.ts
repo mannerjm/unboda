@@ -26,6 +26,9 @@ for (const productId of topicIds) {
   const own = evaluateAiConsultingScope({ productId, question: config.userQuestion });
   assert(own.decision === "ALLOW", `${productId}: own userQuestion must ALLOW, got ${own.decision}/${own.reason}`);
   assert(own.chargeable, `${productId}: ALLOW must be chargeable`);
+  assert(own.scopeTier === "CORE", `${productId}: canonical topic question must be CORE`);
+  const followup = evaluateAiConsultingScope({ productId, question: "그건 왜 그래?", continuation: true });
+  assert(followup.decision === "ALLOW" && followup.scopeTier === "CORE", `${productId}: validated conversational follow-up must continue without re-explaining the topic`);
   assert(own.kind === "topic", `${productId}: must resolve as topic`);
   assert(own.answerGuardrails.length >= config.prohibitedClaims.length, `${productId}: response guardrails must preserve prohibited claims`);
 
@@ -34,8 +37,14 @@ for (const productId of topicIds) {
       productId,
       question: config.excludedFocus[0].prompt,
     });
-    assert(excluded.decision !== "ALLOW", `${productId}: first excludedFocus must never ALLOW`);
-    assert(!excluded.chargeable, `${productId}: excluded question must not consume a turn`);
+    if (excluded.decision === "SAFETY_REDIRECT") {
+      assert(!excluded.chargeable, `${productId}: safety-sensitive adjacent question must not consume a turn`);
+    } else {
+      assert(excluded.decision === "ALLOW", `${productId}: adjacent excludedFocus should now receive a limited BRIDGE answer`);
+      assert(excluded.scopeTier === "BRIDGE", `${productId}: adjacent excludedFocus must be BRIDGE, not CORE`);
+      assert(excluded.chargeable, `${productId}: a delivered BRIDGE answer consumes one question just like a CORE answer`);
+      assert(excluded.answerGuardrails.some((item) => item.includes("독자적인 결론")), `${productId}: BRIDGE must not replace the sibling paid analysis`);
+    }
   }
 }
 
@@ -45,6 +54,9 @@ for (const productId of periodIds) {
   const own = evaluateAiConsultingScope({ productId, question: strategy.coreQuestion });
   assert(own.decision === "ALLOW", `${productId}: own coreQuestion must ALLOW, got ${own.decision}/${own.reason}`);
   assert(own.chargeable, `${productId}: period ALLOW must be chargeable`);
+  assert(own.scopeTier === "CORE", `${productId}: canonical period question must be CORE`);
+  const followup = evaluateAiConsultingScope({ productId, question: "그럼 나는 뭘 하면 돼?", continuation: true });
+  assert(followup.decision === "ALLOW" && followup.scopeTier === "CORE", `${productId}: validated period follow-up must continue in the purchased period`);
   assert(own.kind === "period", `${productId}: must resolve as period`);
   assert(own.answerGuardrails.some((item) => item.includes("별도 주제형 상품")), `${productId}: period scope must not replace topic products`);
 }
@@ -64,6 +76,17 @@ for (const [productId, question] of mismatchedPeriodCases) {
   assert(scope.decision === "DENY", `${productId}: mismatched period must DENY, got ${scope.decision}/${scope.reason}`);
   assert(scope.reason === "period_mismatch", `${productId}: mismatched period must return period_mismatch`);
   assert(!scope.chargeable, `${productId}: denied period question must not consume a turn`);
+}
+
+for (const [productId, question] of [
+  ["monthly-next", "이번 달과 비교해서 다음 달은 뭐가 달라?"],
+  ["annual-next", "올해와 비교하면 내년은 뭐가 달라?"],
+  ["annual-3years", "앞으로 3년 중 내년은 어떤 역할이야?"],
+] as const) {
+  const comparison = evaluateAiConsultingScope({ productId, question });
+  assert(comparison.decision === "ALLOW", `${productId}: promised comparison must ALLOW`);
+  assert(comparison.reason === "within_period_comparison_scope", `${productId}: promised comparison must use comparison scope`);
+  assert(comparison.scopeTier === "CORE", `${productId}: promised comparison is part of the purchased report, not BRIDGE`);
 }
 
 const unlaunched = evaluateAiConsultingScope({

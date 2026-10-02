@@ -63,12 +63,12 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
       "장기 관계 기준과 갈등 뒤 회복 방식",
       "구매 연도의 관계 흐름과 행동 가이드",
     ],
-    ownRelationshipPatterns: [/연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친|파트너|상대/u],
+    ownRelationshipPatterns: [/연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친|남편|아내|와이프|신랑|신부|부부|파트너|상대/u],
     conflictingRelationshipPatterns: [
-      /직장|회사|상사|동료|팀원|팀장|부하|협업|업무/u,
+      /직장|회사|상사|직속\s*상사|사수|선배|후배|동료|팀원|팀장|부하|협업|업무/u,
       /친구\s*관계|친구와|친구랑|지인|우정/u,
-      /동업|공동창업|공동대표|사업\s*파트너|동업자/u,
-      /부모|아버지|어머니|엄마|아빠|자녀|아들|딸/u,
+      /동업|공동\s*사업|공동창업|공동대표|사업\s*파트너|동업자/u,
+      /부모|아버지|어머니|엄마|아빠|자녀|아이|자식|우리\s*애|아들|딸/u,
       /형제|자매|오빠|언니|누나|형|동생/u,
       /조부모|할머니|할아버지|손주|사촌|조카|삼촌|이모|고모|인척|시댁|처가/u,
     ],
@@ -86,12 +86,12 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
       "압박 상황의 업무 갈등과 협업 회복",
       "구매 연도의 업무 관계 흐름",
     ],
-    ownRelationshipPatterns: [/직장|회사|상사|동료|팀원|팀장|부하|협업|업무|프로젝트/u],
+    ownRelationshipPatterns: [/직장|회사|상사|직속\s*상사|사수|선배|후배|동료|팀원|팀장|부하|협업|업무|프로젝트/u],
     conflictingRelationshipPatterns: [
-      /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친/u,
+      /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친|남편|아내|와이프|신랑|신부|부부/u,
       /부모|아버지|어머니|엄마|아빠|자녀|아들|딸|형제|자매/u,
       /친구\s*관계|친구와|친구랑|지인|우정/u,
-      /동업|공동창업|공동대표|사업\s*파트너/u,
+      /동업|공동\s*사업|공동창업|공동대표|사업\s*파트너/u,
     ],
     answerGuardrails: [
       ...COMMON_GUARDRAILS,
@@ -110,10 +110,10 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
     ],
     ownRelationshipPatterns: [/친구|지인|친분|동호회|모임|우정/u],
     conflictingRelationshipPatterns: [
-      /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친/u,
+      /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친|남편|아내|와이프|신랑|신부|부부/u,
       /부모|아버지|어머니|엄마|아빠|자녀|아들|딸|형제|자매/u,
-      /직장|회사|상사|동료|팀원|팀장|부하|협업|업무/u,
-      /동업|공동창업|공동대표|사업\s*파트너/u,
+      /직장|회사|상사|직속\s*상사|사수|선배|후배|동료|팀원|팀장|부하|협업|업무/u,
+      /동업|공동\s*사업|공동창업|공동대표|사업\s*파트너/u,
     ],
     answerGuardrails: [
       ...COMMON_GUARDRAILS,
@@ -130,11 +130,11 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
       "의견 충돌 뒤 합의를 복구하는 방식",
       "장기 동업의 역할 책임 경계와 구매 연도 흐름",
     ],
-    ownRelationshipPatterns: [/사업|동업|공동창업|창업|사업\s*파트너|공동대표|동업자/u],
+    ownRelationshipPatterns: [/사업|동업|공동\s*사업|공동창업|창업|사업\s*파트너|공동대표|동업자/u],
     conflictingRelationshipPatterns: [
-      /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친/u,
+      /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친|남편|아내|와이프|신랑|신부|부부/u,
       /부모|아버지|어머니|엄마|아빠|자녀|아들|딸|형제|자매/u,
-      /직장|회사|상사|동료|팀원|팀장|부하|협업|업무/u,
+      /직장|회사|상사|직속\s*상사|사수|선배|후배|동료|팀원|팀장|부하|협업|업무/u,
       /친구\s*관계|친구와|친구랑|지인|우정/u,
     ],
     answerGuardrails: [
@@ -153,12 +153,12 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
       "보호와 경계의 기준",
       "갈등 뒤 회복과 구매 연도의 관계 흐름",
     ],
-    ownRelationshipPatterns: [/부모|아버지|어머니|엄마|아빠|자녀|아들|딸/u],
+    ownRelationshipPatterns: [/부모|아버지|어머니|엄마|아빠|자녀|아이|자식|우리\s*애|아들|딸/u],
     conflictingRelationshipPatterns: [
-      /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친/u,
-      /직장|회사|상사|동료|팀원|팀장|부하|협업|업무/u,
+      /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친|남편|아내|와이프|신랑|신부|부부/u,
+      /직장|회사|상사|직속\s*상사|사수|선배|후배|동료|팀원|팀장|부하|협업|업무/u,
       /친구\s*관계|친구와|친구랑|지인|우정/u,
-      /동업|공동창업|공동대표|사업\s*파트너|동업자/u,
+      /동업|공동\s*사업|공동창업|공동대표|사업\s*파트너|동업자/u,
       /형제|자매|오빠|언니|누나|형|동생/u,
       /조부모|할머니|할아버지|손주|사촌|조카|삼촌|이모|고모|인척|시댁|처가/u,
     ],
@@ -179,11 +179,11 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
     ],
     ownRelationshipPatterns: [/형제|자매|오빠|언니|누나|형|동생/u],
     conflictingRelationshipPatterns: [
-      /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친/u,
-      /직장|회사|상사|동료|팀원|팀장|부하|협업|업무/u,
+      /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친|남편|아내|와이프|신랑|신부|부부/u,
+      /직장|회사|상사|직속\s*상사|사수|선배|후배|동료|팀원|팀장|부하|협업|업무/u,
       /친구\s*관계|친구와|친구랑|지인|우정/u,
-      /동업|공동창업|공동대표|사업\s*파트너|동업자/u,
-      /부모|아버지|어머니|엄마|아빠|자녀|아들|딸/u,
+      /동업|공동\s*사업|공동창업|공동대표|사업\s*파트너|동업자/u,
+      /부모|아버지|어머니|엄마|아빠|자녀|아이|자식|우리\s*애|아들|딸/u,
       /조부모|할머니|할아버지|손주|사촌|조카|삼촌|이모|고모|인척|시댁|처가/u,
     ],
     answerGuardrails: [
@@ -201,13 +201,13 @@ const COMPATIBILITY_SCOPE_CONFIG: Readonly<Record<string, CompatibilityScopeConf
       "갈등 뒤 회복과 구매 연도의 관계 흐름",
       "조부모 손주 조카 사촌 인척 친족 관계",
     ],
-    ownRelationshipPatterns: [/조부모|할머니|할아버지|손주|사촌|조카|삼촌|이모|고모|인척|시댁|처가|장인|장모|며느리|사위|친척|친족/u],
+    ownRelationshipPatterns: [/조부모|할머니|할아버지|손주|사촌|조카|삼촌|이모|고모|인척|시댁|처가|시아버지|시어머니|장인|장모|처남|처제|며느리|사위|친척|친족/u],
     conflictingRelationshipPatterns: [
-      /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친/u,
-      /직장|회사|상사|동료|팀원|팀장|부하|협업|업무/u,
+      /연인|배우자|애인|남자\s*친구|여자\s*친구|남친|여친|남편|아내|와이프|신랑|신부|부부/u,
+      /직장|회사|상사|직속\s*상사|사수|선배|후배|동료|팀원|팀장|부하|협업|업무/u,
       /친구\s*관계|친구와|친구랑|지인|우정/u,
-      /동업|공동창업|공동대표|사업\s*파트너|동업자/u,
-      /부모|아버지|어머니|엄마|아빠|자녀|아들|딸/u,
+      /동업|공동\s*사업|공동창업|공동대표|사업\s*파트너|동업자/u,
+      /부모|아버지|어머니|엄마|아빠|자녀|아이|자식|우리\s*애|아들|딸/u,
       /형제|자매|오빠|언니|누나|형|동생/u,
     ],
     answerGuardrails: [
@@ -244,8 +244,24 @@ function includesOneOf(question: string, patterns: readonly RegExp[]): boolean {
   return patterns.some((pattern) => pattern.test(question));
 }
 
-function compatibilityResult(input: Omit<AiConsultingScopeResult, "chargeable">): AiConsultingScopeResult {
-  return { ...input, chargeable: input.decision === "ALLOW" };
+function compatibilityResult(
+  input: Omit<AiConsultingScopeResult, "chargeable" | "scopeTier"> & {
+    scopeTier?: AiConsultingScopeResult["scopeTier"];
+  },
+): AiConsultingScopeResult {
+  const scopeTier = input.scopeTier
+    ?? (input.decision === "ALLOW"
+      ? "CORE"
+      : input.decision === "DENY"
+        ? "OUTSIDE"
+        : "NONE");
+  return { ...input, scopeTier, chargeable: input.decision === "ALLOW" };
+}
+
+function isContinuationQuestion(question: string): boolean {
+  return /^(?:그럼|그러면|그렇다면|그래서|이어서|아까|지난번|저번에|방금|그때|그건|그게|그것|그 부분|그 이야기|그 후|그와 관련|이것도|왜(?:\s|[?？]|$)|좀 더|조금 더|더 자세히|자세히|쉽게 설명|그래서 나는|그러면 나는)/u.test(
+    normalize(question),
+  );
 }
 
 export function isAiConsultingCompatibilityProductId(productId: string): boolean {
@@ -255,6 +271,7 @@ export function isAiConsultingCompatibilityProductId(productId: string): boolean
 export function evaluateCompatibilityAiConsultingScope(input: {
   productId: string;
   question: string;
+  continuation?: boolean;
 }): AiConsultingScopeResult {
   const question = normalize(input.question);
   const config = COMPATIBILITY_SCOPE_CONFIG[input.productId];
@@ -310,6 +327,20 @@ export function evaluateCompatibilityAiConsultingScope(input: {
   }
 
   const semanticScore = overlapScore(question, config.positiveSources);
+  const continuationFollowup = input.continuation === true && isContinuationQuestion(question);
+  if (!hasOwnRelationship && !hasRelationshipDomain && semanticScore === 0 && continuationFollowup) {
+    return compatibilityResult({
+      decision: "ALLOW",
+      reason: "within_continuation_scope",
+      scopeTier: "CORE",
+      productId: input.productId,
+      kind: "compatibility",
+      normalizedQuestion: question,
+      answerGuardrails: config.answerGuardrails,
+      userMessage: "",
+    });
+  }
+
   if (!hasOwnRelationship && !hasRelationshipDomain && semanticScore === 0) {
     return compatibilityResult({
       decision: "CLARIFY",
@@ -325,6 +356,7 @@ export function evaluateCompatibilityAiConsultingScope(input: {
   return compatibilityResult({
     decision: "ALLOW",
     reason: "within_compatibility_scope",
+    scopeTier: "CORE",
     productId: input.productId,
     kind: "compatibility",
     normalizedQuestion: question,

@@ -27,6 +27,7 @@ for (const [productId, question] of representativeCases) {
   assert.equal(scope.reason, "within_compatibility_scope", `${productId} must use compatibility scope reason`);
   assert.equal(scope.kind, "compatibility", `${productId} must resolve as compatibility kind`);
   assert.equal(scope.chargeable, true, `${productId} ALLOW question must be chargeable`);
+  assert.equal(scope.scopeTier, "CORE", `${productId} own compatibility question must be CORE`);
   assert(scope.answerGuardrails.some((item) => item.includes("감정·의도·생각")), `${productId} must block mind-reading claims`);
   assert(scope.answerGuardrails.some((item) => item.includes("구매 에디션")), `${productId} must keep yearly edition boundary`);
 }
@@ -72,8 +73,36 @@ const unclear = evaluateAiConsultingScope({
   productId: COMPATIBILITY_ROMANTIC_PRODUCT_ID,
   question: "이건 왜 그래?",
 });
-assert.equal(unclear.decision, "CLARIFY", "unclear compatibility follow-up must clarify without charging");
+assert.equal(unclear.decision, "CLARIFY", "context-free compatibility shorthand must still clarify without charging");
 assert.equal(unclear.chargeable, false);
+
+const contextualFollowup = evaluateAiConsultingScope({
+  productId: COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  question: "그건 왜 그래?",
+  continuation: true,
+});
+assert.equal(contextualFollowup.decision, "ALLOW", "validated compatibility continuation must stay conversational");
+assert.equal(contextualFollowup.reason, "within_continuation_scope");
+assert.equal(contextualFollowup.scopeTier, "CORE");
+
+for (const question of [
+  "남편이랑 대화가 자꾸 꼬이는데 어떻게 풀면 좋아?",
+  "아내와 갈등 뒤 화해할 때 뭘 조심해야 해?",
+]) {
+  const everydaySpouse = evaluateAiConsultingScope({ productId: COMPATIBILITY_ROMANTIC_PRODUCT_ID, question });
+  assert.equal(everydaySpouse.decision, "ALLOW", `everyday spouse wording must work: ${question}`);
+}
+const everydayChild = evaluateAiConsultingScope({
+  productId: COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
+  question: "아이와 대화할 때 기대와 독립의 경계를 어떻게 잡아야 해?",
+});
+assert.equal(everydayChild.decision, "ALLOW", "아이 must resolve as parent-child relationship wording");
+
+const wrongEverydayRelation = evaluateAiConsultingScope({
+  productId: COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  question: "아이와 관계도 같이 봐줘",
+});
+assert.equal(wrongEverydayRelation.decision, "DENY", "everyday family aliases must not leak into romantic compatibility");
 
 const safety = evaluateAiConsultingScope({
   productId: COMPATIBILITY_ROMANTIC_PRODUCT_ID,

@@ -12,9 +12,11 @@ function read(relativePath: string): string {
 
 const bundleMap = new Map(AI_CONSULTING_CREDIT_BUNDLES.map((bundle) => [bundle.id, bundle]));
 assert(bundleMap.get("ai-consulting-3")?.questions === 3 && bundleMap.get("ai-consulting-3")?.priceKrw === 2900, "3-credit bundle contract must remain 2,900 KRW");
-assert(bundleMap.get("ai-consulting-5")?.questions === 5 && bundleMap.get("ai-consulting-5")?.priceKrw === 4900, "5-credit bundle contract must remain 4,900 KRW");
-assert(bundleMap.get("ai-consulting-10")?.questions === 10 && bundleMap.get("ai-consulting-10")?.priceKrw === 8900, "10-credit bundle contract must remain 8,900 KRW");
+assert(bundleMap.get("ai-consulting-5")?.questions === 5 && bundleMap.get("ai-consulting-5")?.priceKrw === 4500, "5-credit bundle contract must remain 4,500 KRW");
+assert(bundleMap.get("ai-consulting-10")?.questions === 10 && bundleMap.get("ai-consulting-10")?.priceKrw === 8500, "10-credit bundle contract must remain 8,500 KRW");
 
+const pricingMigration = read("supabase/migrations/20261002195500_ai_credit_price_update.sql");
+assert(pricingMigration.includes("v_order.amount in (4500, 4900)") && pricingMigration.includes("v_order.amount in (8500, 8900)"), "ledger must accept only current prices plus the immediately previous in-flight prices");
 const service = read("app/lib/aiConsulting/creditCheckout.ts");
 assert(service.includes('AI_CONSULTING_CREDIT_PAYMENT_PROVIDER = "toss_ai_credit"'), "credit orders must stay isolated from paid-analysis Toss reconciliation");
 assert(service.includes("assertPaidPurchaseEligibility"), "credit checkout must preserve paid-purchase account eligibility");

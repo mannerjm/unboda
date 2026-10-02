@@ -94,6 +94,7 @@ export async function recordCustomerJourneyEvent(input: {
   accountId?: string | null;
   productId?: string | null;
   profileId?: string | null;
+  eventDateKst?: string | null;
   source?: CustomerJourneySource | null;
 }): Promise<void> {
   if (!input.accountId && !input.visitorId) return;
@@ -103,6 +104,7 @@ export async function recordCustomerJourneyEvent(input: {
     account_id: input.accountId ?? null,
     product_id: input.productId ?? null,
     profile_id: input.profileId ?? null,
+    ...(input.eventDateKst ? { event_date_kst: input.eventDateKst } : {}),
     source: input.source ?? null,
   });
   // Duplicate daily account visits are expected when navigating multiple pages.

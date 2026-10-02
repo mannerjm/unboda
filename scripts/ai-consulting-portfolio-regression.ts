@@ -25,6 +25,9 @@ assert(portfolio.includes("Boolean(summary.analysisEditionKey)"), "portfolio sco
 assert(portfolio.includes("getAiConsultingCreditBalance(input)"), "portfolio must use the existing shared profile credit balance");
 assert(portfolio.includes("evaluateAiConsultingScope"), "portfolio router must reuse existing deterministic product scope evaluation");
 assert(portfolio.includes("routingScore("), "portfolio router must rank eligible owned reports deterministically");
+assert(portfolio.includes('scope.scopeTier === "CORE" ? 20') && portfolio.includes('scope.scopeTier === "BRIDGE" ? 5'), "owned CORE reports must outrank broader BRIDGE answers");
+assert(portfolio.includes("isAiConsultingContinuationQuestion") && portfolio.includes("continuationFollowup") && portfolio.includes("continuation: continuationFollowup && isPreferredSource"), "validated short follow-ups must inherit only the previous owned source, not every report");
+assert(answerPipeline.includes("continuation: input.continuation === true"), "answer pipeline must reproduce the server-validated continuation scope before charging");
 assert(portfolio.includes('reason: "AMBIGUOUS_OWNED_ANALYSIS"') && !portfolio.includes('state: "clarify_source"'), "ambiguous questions must request a clearer topic without requiring report selection or charging");
 assert(portfolio.includes('state: "outside_portfolio"'), "questions outside all owned analyses must fail closed");
 assert(portfolio.includes("preferredProductId") && portfolio.includes("preferredEditionKey"), "a report-originated question must be able to prefer its exact owned report");

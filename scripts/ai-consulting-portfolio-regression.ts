@@ -100,7 +100,7 @@ assert((client.match(/href=\{creditPurchaseHref\}/g) ?? []).length === 2 && clie
 assert(portfolio.includes('order("created_at", { ascending: false })') && portfolio.includes(".limit(41)") && !portfolio.includes(".limit(200)"), "conversation must load the latest page rather than the first 200 oldest messages");
 assert(client.includes("loadOlderMessages") && client.includes("이전 상담 더 보기") && portfolioApi.includes("messageBefore"), "older conversations must have an authenticated cursor-based retrieval path");
 assert(client.includes("preferContinuation") && portfolio.includes("input.preferContinuation") && portfolioQuestionApi.includes("input.preferContinuation === true"), "follow-up context must be validated by the server without pinning unrelated new questions");
-assert(client.includes("showMemories") && client.includes("내 기억 보기"), "saved memories must remain editable but folded until requested");
+assert(client.includes("showMemories") && client.includes("관리하기"), "saved memories must remain editable while current situations stay visible");
 assert(client.includes("portfolio.questionsRemaining > 0 ? <div>") && client.includes("추천 질문"), "suggested question buttons must not appear when no question can be submitted");
 assert(client.includes("function unifiedSuggestedQuestion(analysis: AiConsultingPortfolioAnalysis)") && client.includes("for (const analysis of portfolio.analyses.slice(0, 8))"), "unified question examples must use the currently eligible purchased analyses, not the unfiltered historical library or the report-entry source");
 assert(client.includes("재물운과 관련해 수입과 지출에서 지금 가장 먼저 점검할 점은 뭐야?") && client.includes("수면 리듬을 지키려면 취침 전 생활 습관 중 무엇부터 점검해야 할까?"), "money and sleep reports must produce distinguishable topic-first questions");

@@ -146,7 +146,19 @@ function Dashboard({ report: r }: { report: CustomerJourneyDashboard }) {
     </section>
 
     <section className="mt-10">
-      <h2 className="text-xl font-bold">5. AI 상담 사용 고객 vs 미사용 고객</h2>
+      <h2 className="text-xl font-bold">5. 기억 자산화</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-600">고객이 직접 허용한 상황·목표가 실제로 쌓이고, 이후 상담으로 다시 이어지는지 확인합니다. 기억 원문은 관리자 화면에 표시하지 않습니다.</p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Card title="활성 기억" value={fmt(r.memoryActiveCount)+"개"} note={fmt(r.memoryProfilesWithActive)+"개 프로필에 저장"}/>
+        <Card title="기억 보유 고객" value={fmt(r.memoryUsersWithActive)+"명"} note={"최근 30일 새 저장 "+fmt(r.memorySaved30)+"건"}/>
+        <Card title="최근 30일 상황 변화" value={fmt(r.memoryChanged30)+"건"} note="기존 기억을 지우지 않고 새 현재 상황으로 갱신한 건수"/>
+        <Card title="첫 기억 저장 후 D7 재상담" value={rate(r.memoryD7Reconsulted,r.memoryD7Eligible)}
+          note={fmt(r.memoryD7Eligible)+"명 중 "+fmt(r.memoryD7Reconsulted)+"명이 7일 안에 다시 유료 질문"}/>
+      </div>
+    </section>
+
+    <section className="mt-10">
+      <h2 className="text-xl font-bold">6. AI 상담 사용 고객 vs 미사용 고객</h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">첫 리포트 구매 후 30일 관측이 끝난 고객만 비교합니다. 아래 차이는 상관관계를 보는 운영 지표이며 AI 상담이 원인이라고 단정하지 않습니다.</p>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-[#dce1ef] bg-white p-5">
         <table className="min-w-full text-sm">
@@ -174,7 +186,7 @@ function Dashboard({ report: r }: { report: CustomerJourneyDashboard }) {
     </section>
 
     <section className="mt-10">
-      <h2 className="text-xl font-bold">6. 리포트 생성 운영 품질</h2>
+      <h2 className="text-xl font-bold">7. 리포트 생성 운영 품질</h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">기존 운영 안전 지표는 그대로 유지합니다. 개별 오류·환불·질문권 무결성 조치는 기존 운영 대시보드에서 처리합니다.</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Card title="리포트 화면 진입" value={fmt(r.reportPageOpened)+"건"} note="최근 30일 페이지 진입 수 · 정독 여부와 다름"/>

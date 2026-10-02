@@ -7,7 +7,8 @@ export type CustomerJourneyEventName =
   | "PRODUCT_DETAIL_VIEWED"
   | "CHECKOUT_VIEWED"
   | "REPORT_PAGE_OPENED"
-  | "AI_CHAT_PAGE_OPENED";
+  | "AI_CHAT_PAGE_OPENED"
+  | "TODAY_VIEWED";
 
 export type CustomerJourneySource = "recommendations" | "deep-analysis" | "compatibility" | "other";
 
@@ -56,6 +57,15 @@ export type CustomerJourneyDashboard = {
   productDetailViewed: number;
   checkoutViewed: number;
   reportPageOpened: number;
+  todaySince: string | null;
+  todayViewedToday: number;
+  todayViewedYesterday: number;
+  todayReturnedFromYesterday: number;
+  todayActive2Days7: number;
+  todayD1Eligible: number;
+  todayD1Returned: number;
+  todayD7Eligible: number;
+  todayD7Returned: number;
   paidOrders30: number;
   paidBuyers: number;
   consultingBuyers: number;
@@ -83,6 +93,7 @@ export async function recordCustomerJourneyEvent(input: {
   visitorId?: string | null;
   accountId?: string | null;
   productId?: string | null;
+  profileId?: string | null;
   source?: CustomerJourneySource | null;
 }): Promise<void> {
   if (!input.accountId && !input.visitorId) return;
@@ -91,12 +102,35 @@ export async function recordCustomerJourneyEvent(input: {
     visitor_id: input.visitorId ?? null,
     account_id: input.accountId ?? null,
     product_id: input.productId ?? null,
+    profile_id: input.profileId ?? null,
     source: input.source ?? null,
   });
   // Duplicate daily account visits are expected when navigating multiple pages.
-  if (error && !(input.eventName === "PAGE_VISIT" && error.code === "23505")) {
+  const expectedDuplicate = error?.code === "23505"
+    && (input.eventName === "PAGE_VISIT" || input.eventName === "TODAY_VIEWED");
+  if (error && !expectedDuplicate) {
     console.warn("[customer-journey] telemetry unavailable", { event: input.eventName, code: error.code });
   }
+}
+
+export async function hasTodayUnbodaViewed(
+  userId: string,
+  profileId: string,
+  dateKst: string,
+): Promise<boolean> {
+  const { count, error } = await createAdminClient()
+    .from("customer_journey_events")
+    .select("id", { count: "exact", head: true })
+    .eq("event_name", "TODAY_VIEWED")
+    .eq("account_id", userId)
+    .eq("profile_id", profileId)
+    .eq("event_date_kst", dateKst);
+
+  if (error) {
+    console.warn("[customer-journey] today-view lookup unavailable", { code: error.code });
+    return false;
+  }
+  return (count ?? 0) > 0;
 }
 
 export async function getAdminCustomerJourneyDashboard(): Promise<CustomerJourneyDashboard> {

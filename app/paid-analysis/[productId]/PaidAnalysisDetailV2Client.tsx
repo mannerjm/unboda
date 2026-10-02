@@ -257,20 +257,13 @@ void detail;
     );
   }
 
-  // The full-screen Mystic generation animation is reserved for a real
-  // 202/generating response. Initial read-only loading never implies regeneration.
-  if (isGeneratingElsewhere) {
+  // First-purchase requests keep one continuous customer-facing state from
+  // payment confirmation through generation. Completed revisits bypass this
+  // path because their stored snapshot is injected as initialDetail.
+  if (isGeneratingElsewhere || isLoading || !detail) {
     return (
       <section className="min-h-screen bg-[#f5f7fc] px-5 py-8">
         <PaidReportPreparing kind="premium" />
-      </section>
-    );
-  }
-
-  if (isLoading || !detail) {
-    return (
-      <section role="status" aria-live="polite" className="mx-auto max-w-3xl px-5 py-10 text-center text-sm text-slate-600">
-        저장된 리포트를 열고 있습니다.
       </section>
     );
   }

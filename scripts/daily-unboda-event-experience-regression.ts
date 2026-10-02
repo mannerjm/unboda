@@ -12,7 +12,7 @@ for (const cue of [
   "오늘의 흐름 확인하기",
   "TODAY'S NOTE · 오늘의 흐름",
   "오늘의 한 가지 제안",
-  "내일도, 새로운 오늘이 열려요.",
+  "오늘 한 가지만 기억하세요.",
 ]) assert(today.includes(cue), `missing daily visit experience element: ${cue}`);
 
 assert(today.includes("bg-[linear-gradient(180deg,#070d20_0%,#0b1330_48%,#090f24_100%)]"));
@@ -31,6 +31,7 @@ assert(today.includes('href="#today-topic"') && today.includes('id="today-topic"
 assert(!today.includes('aria-label="오늘의 운보다 이동"') && !today.includes("← 운보다 홈"), "daily detail must not show redundant top home navigation");
 assert(!today.includes("<footer className="), "daily detail must not show redundant footer home navigation");
 assert(today.includes('sm:mt-0">운보다 홈으로 →</Link>'), "single return action after the daily reading must stay available");
+assert(today.includes("위의 한 가지 제안만 기억해도 충분해요.") && today.includes("내일 날짜가 바뀌면 새로운 흐름이 열립니다."), "daily closing must reinforce one practical action and tomorrow's return cue");
 
 assert(!today.includes("requestPayment(") && !today.includes("/ai-consulting") && !today.includes("/checkout/") && !today.includes("/deep-analysis"), "free daily visit must not become paid funnel");
 assert(!today.includes("localStorage") && !today.includes("streak") && !today.includes("출석 보상") && !today.includes("알림 신청") && !today.includes("내일 알림"), "do not invent retention rewards or persistence");

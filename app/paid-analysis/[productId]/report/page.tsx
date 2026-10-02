@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import ReportAccessGate from "./ReportAccessGate";
 import AiConsultingEntryCard from "./AiConsultingEntryCard";
 import Phase9NextAnalysisSection from "@/app/components/Phase9NextAnalysisSection";
+import ReportCompletionGate from "./ReportCompletionGate";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import {
@@ -84,18 +85,26 @@ async function PaidReportBody({
         edition={exactEdition}
         initialDetail={initialDetail}
       />
-      <AiConsultingEntryCard
-        key={`${profileId}:${productId}:${exactEdition}`}
+      <ReportCompletionGate
+        key={`post-report:${profileId}:${productId}:${exactEdition}`}
         productId={productId}
         profileId={profileId}
         edition={exactEdition}
-        reportCompleted={Boolean(initialDetail)}
-      />
-      <Phase9NextAnalysisSection
-        profileId={profileId}
-        sourceProductId={productId}
-        sourceEditionKey={exactEdition}
-      />
+        initialCompleted={Boolean(initialDetail)}
+      >
+        <AiConsultingEntryCard
+          key={`${profileId}:${productId}:${exactEdition}`}
+          productId={productId}
+          profileId={profileId}
+          edition={exactEdition}
+          reportCompleted={Boolean(initialDetail)}
+        />
+        <Phase9NextAnalysisSection
+          profileId={profileId}
+          sourceProductId={productId}
+          sourceEditionKey={exactEdition}
+        />
+      </ReportCompletionGate>
     </>
   );
 }

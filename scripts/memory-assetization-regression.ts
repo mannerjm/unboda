@@ -8,6 +8,7 @@ function read(path: string): string {
 const client = read("app/ai-consulting/AiConsultingPortfolioClient.tsx");
 const memoryRoute = read("app/api/ai-consulting/memories/route.ts");
 const memoryService = read("app/lib/aiConsulting/memory.ts");
+const longTermMemoryMigration = read("supabase/migrations/041_ai_consulting_long_term_memory.sql");
 const journey = read("app/lib/aiConsulting/journey.ts");
 const journeyPage = read("app/my-unboda/page.tsx");
 const mypage = read("app/mypage/page.tsx");
@@ -32,7 +33,7 @@ assert(!client.includes("saveAiConsultingMemory("), "client must never directly 
 
 assert(memoryRoute.includes("supersedesMemoryId: existing.id"), "memory edits must create a new version linked to the previous active memory");
 assert(memoryRoute.includes('provenance: "USER_STATED"'), "only explicitly user-stated memory may be versioned by customer edit");
-assert(memoryService.includes('set status = \'superseded\''), "database memory RPC must preserve previous versions instead of deleting them");
+assert(longTermMemoryMigration.includes("set status = 'superseded'"), "database memory RPC must preserve previous versions instead of deleting them");
 
 assert(journey.includes('.eq("profile_id", input.profileId)') && journey.includes('.eq("user_id", input.userId)'), "My Unboda timeline must remain user/profile scoped");
 assert(journey.includes('"memory_update"') && journey.includes('"report"') && journey.includes('"consultation"'), "timeline must join situation changes, reports and consultations");

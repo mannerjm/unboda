@@ -10,6 +10,7 @@ import type {
   AiConsultingPortfolioState,
 } from "@/app/lib/aiConsulting/portfolio";
 import type { ProfileFreeAnalysisStatus } from "@/app/lib/freeAnalysisResults/server";
+import TrustPrinciplesCard from "@/app/components/TrustPrinciplesCard";
 
 type AiConsultingUserMemory = {
   id: string;
@@ -689,6 +690,7 @@ export default function AiConsultingPortfolioClient({
             </div>
           </div>
         </header>
+        <TrustPrinciplesCard compact />
 
         {isLoading ? (
           <section className="mt-5 rounded-[1.75rem] border border-[#dce1ef] bg-white p-7 text-center shadow-sm">

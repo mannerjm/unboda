@@ -71,6 +71,10 @@ for (const copy of ["이번 분석은 어떠셨나요?","후기 수정","후기 
 }
 assert(!editor.includes("리뷰 작성 시") && !editor.includes("질문권 지급") && !editor.includes("보상"), "launch reviews must not be incentivized");
 assert(editor.includes('status: "PENDING" | "PUBLISHED" | "HIDDEN"'), "customer must see truthful moderation state");
+assert(
+  editor.includes('className="mx-auto mb-8 mt-5 w-full max-w-4xl px-4 sm:px-8"'),
+  "verified review panel must align to the same centered report width as AI consulting and next-analysis cards",
+);
 
 assert(productDetail.includes("<ProductReviewSummary") && productDetail.includes("<TrustPrinciplesCard"), "premium product details must show verified proof and trust principles before purchase");
 for (const id of [

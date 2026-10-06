@@ -46,7 +46,7 @@ export default function TrustPage() {
             {principles.map((item) => (
               <article key={item.title} className="rounded-[1.5rem] border border-[#dce1ef] bg-white p-5 shadow-sm">
                 <h2 className="text-base font-black">{item.title}</h2>
-                <p className="mt-2 text-sm leading-7 text-slate-650">{item.body}</p>
+                <p className="mt-2 text-sm leading-7 text-slate-700">{item.body}</p>
               </article>
             ))}
           </section>

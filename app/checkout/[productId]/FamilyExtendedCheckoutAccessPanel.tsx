@@ -4,6 +4,7 @@ import { getTossCheckoutClientKey } from "@/app/lib/toss/checkoutClient";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import NiceAdultVerificationButton from "@/app/account/NiceAdultVerificationButton";
+import TrustPrinciplesCard from "@/app/components/TrustPrinciplesCard";
 import { isFreeAnalysisFoundationReady } from "@/app/lib/freeAnalysisEligibility";
 import type { ProfileFreeAnalysisStatus } from "@/app/lib/freeAnalysisResults/server";
 import type { AccountLifecycleStatus, PaidEligibilityStatus } from "@/app/lib/accounts/server";
@@ -243,6 +244,7 @@ export default function FamilyExtendedCheckoutAccessPanel({
                 {editionLabel ? <div className="flex justify-between gap-4"><dt className="text-slate-500">분석 기준</dt><dd className="text-right font-semibold">{editionLabel}</dd></div> : null}
               </dl>
               <p className="mt-5 text-sm font-semibold leading-6">결제가 승인되면 개인화 분석 생성이 즉시 시작되고 구매한 분석에 보관됩니다.</p>
+              <TrustPrinciplesCard compact />
               <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-[#d8d3ff] bg-[#f7f6ff] p-4 text-sm leading-6 text-slate-700">
                 <input ref={acknowledgementRef} type="checkbox" checked={acknowledged} onChange={(event) => { setAcknowledged(event.target.checked); setErrorMessage(null); }} className="mt-1" />
                 <span>결제 승인 직후 선택한 가족 정보를 기준으로 개인화 분석 생성이 시작되는 점을 확인했습니다.</span>

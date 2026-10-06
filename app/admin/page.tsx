@@ -8,10 +8,12 @@ import { getOperationalFailureSummary } from "@/app/lib/operators/failureVisibil
 import { OperatorAuthorizationError, requireOperator } from "@/app/lib/operators/server";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getActiveSupportRequestCount } from "@/app/lib/support/operatorServer";
+import { getAdminReviewDashboard } from "@/app/lib/reviews/server";
 import AdminGrowthOverview from "./AdminGrowthOverview";
 import AdminRefundClosureOverview from "./AdminRefundClosureOverview";
 import AdminLookupConsole from "./AdminLookupConsole";
 import AdminOperationsOverview from "./AdminOperationsOverview";
+import AdminReviewOverview from "./AdminReviewOverview";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +36,7 @@ export default async function AdminPage() {
     );
   }
 
-  const [growthResult, refundClosureResult, failureResult, operationsResult, qualityResult, supportResult, journeyResult] = await Promise.allSettled([
+  const [growthResult, refundClosureResult, failureResult, operationsResult, qualityResult, supportResult, journeyResult, reviewResult] = await Promise.allSettled([
     getAdminGrowthDashboard(30),
     getAdminRefundClosureDashboard(20),
     getOperationalFailureSummary(),
@@ -42,6 +44,7 @@ export default async function AdminPage() {
     getAiConsultingQualityCostReport(100),
     getActiveSupportRequestCount(),
     getAdminCustomerJourneyDashboard(),
+    getAdminReviewDashboard(),
   ]);
 
   const growth = growthResult.status === "fulfilled" ? growthResult.value : null;
@@ -51,6 +54,7 @@ export default async function AdminPage() {
   const operations = operationsResult.status === "fulfilled" ? operationsResult.value : null;
   const quality = qualityResult.status === "fulfilled" ? qualityResult.value : null;
   const supportQueueCount = supportResult.status === "fulfilled" ? supportResult.value : null;
+  const reviewDashboard = reviewResult.status === "fulfilled" ? reviewResult.value : null;
 
   const chargeIntegrityIssueCount = operations
     ? operations.chargeIntegrity.chargedWithoutAssistant
@@ -104,6 +108,8 @@ export default async function AdminPage() {
             </div>
           </section>
         )}
+
+        <AdminReviewOverview report={reviewDashboard} />
 
         {refundClosure ? (
           <AdminRefundClosureOverview report={refundClosure} productLabels={productLabels} />

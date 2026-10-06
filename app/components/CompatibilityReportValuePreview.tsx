@@ -1,3 +1,14 @@
+import ProductReviewSummary from "@/app/components/ProductReviewSummary";
+import {
+  COMPATIBILITY_BUSINESS_PRODUCT_ID,
+  COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID,
+  COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
+  COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID,
+  COMPATIBILITY_FRIEND_PRODUCT_ID,
+  COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  COMPATIBILITY_WORKPLACE_PRODUCT_ID,
+} from "@/app/lib/specialAnalysisProducts";
+
 type CompatibilityPreviewMode = "romantic" | "workplace" | "friend" | "business" | "parent_child" | "siblings" | "other_family";
 
 type PreviewConfig = Readonly<{
@@ -6,6 +17,16 @@ type PreviewConfig = Readonly<{
   directionDescription: string;
   domains: readonly string[];
 }>;
+
+const REVIEW_PRODUCT_BY_MODE: Record<CompatibilityPreviewMode, string> = {
+  romantic: COMPATIBILITY_ROMANTIC_PRODUCT_ID,
+  workplace: COMPATIBILITY_WORKPLACE_PRODUCT_ID,
+  friend: COMPATIBILITY_FRIEND_PRODUCT_ID,
+  business: COMPATIBILITY_BUSINESS_PRODUCT_ID,
+  parent_child: COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
+  siblings: COMPATIBILITY_FAMILY_SIBLING_PRODUCT_ID,
+  other_family: COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID,
+};
 
 const PREVIEW_CONFIG: Record<CompatibilityPreviewMode, PreviewConfig> = {
   romantic: {
@@ -67,6 +88,7 @@ export default function CompatibilityReportValuePreview({
     : null;
 
   return (
+    <>
     <section
       data-compatibility-report-preview={mode}
       className="mt-7 overflow-hidden rounded-[28px] border border-[#dfe3ef] bg-[#f9faff] shadow-[0_12px_36px_rgba(32,38,72,0.06)]"
@@ -131,5 +153,7 @@ export default function CompatibilityReportValuePreview({
         </p>
       </div>
     </section>
+    <ProductReviewSummary productId={REVIEW_PRODUCT_BY_MODE[mode]} />
+    </>
   );
 }

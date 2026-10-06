@@ -10,6 +10,7 @@ import type { AccountLifecycleStatus, PaidEligibilityStatus } from "@/app/lib/ac
 import { createClient } from "@/app/lib/supabase/client";
 import { getCanonicalPremiumProductId } from "@/app/lib/premiumProductRegistry";
 import NiceAdultVerificationButton from "@/app/account/NiceAdultVerificationButton";
+import TrustPrinciplesCard from "@/app/components/TrustPrinciplesCard";
 import { isFreeAnalysisFoundationReady } from "@/app/lib/freeAnalysisEligibility";
 import type { ProfileFreeAnalysisStatus } from "@/app/lib/freeAnalysisResults/server";
 import {
@@ -323,6 +324,7 @@ export default function CheckoutAccessPanel({
                   <p className="mt-1 text-sm leading-6 text-slate-700">결제 후 개인화 리포트 생성이 시작됩니다. 콘텐츠 제공이 시작된 뒤에는 법정 요건에 따라 단순 변심에 따른 청약철회가 제한될 수 있습니다.</p>
                   <Link href="/refund" className="mt-2 inline-flex text-sm font-semibold text-[#5e4bd1] underline underline-offset-4">환불·취소·청약철회 정책 자세히 보기 →</Link>
                 </div>
+                <TrustPrinciplesCard compact />
                 <label className="mt-5 flex items-start gap-3 text-sm leading-6 text-slate-700">
                   <input ref={acknowledgementRef} type="checkbox" checked={immediateGenerationAcknowledged} onChange={(event) => setImmediateGenerationAcknowledged(event.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[#6f5ce7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]" />
                   <span>결제 승인 후 개인화 분석 생성이 즉시 시작된다는 내용과 콘텐츠 제공 개시 후 청약철회가 관련 법령에 따라 제한될 수 있음을 확인했습니다.</span>

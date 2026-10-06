@@ -10,6 +10,8 @@ import { getProductPricing } from "@/app/lib/productPricing";
 import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
 import { formatTopicExpectedUnderstanding } from "@/app/lib/purchaseDecisionCopy";
 import PremiumReportValuePreview from "@/app/components/PremiumReportValuePreview";
+import ProductReviewSummary from "@/app/components/ProductReviewSummary";
+import TrustPrinciplesCard from "@/app/components/TrustPrinciplesCard";
 
 type PremiumProductDetailProps = {
   product: PremiumProductDefinition;
@@ -210,6 +212,8 @@ export default function PremiumProductDetail({
         </div>
 
         {state === "not_purchased" ? <PremiumReportValuePreview product={product} /> : null}
+        {state === "not_purchased" ? <ProductReviewSummary productId={product.id} /> : null}
+        {state === "not_purchased" ? <TrustPrinciplesCard /> : null}
 
         {state === "not_purchased" ? (
           <section className="mt-5 rounded-[1.5rem] border border-[#d8d3ff] bg-[linear-gradient(135deg,#ffffff_0%,#f4f2ff_100%)] p-5 shadow-sm sm:p-6" aria-label="구매 후 이어지는 가치">

@@ -13,10 +13,11 @@ export const OPERATOR_AUDIT_ACTIONS = [
   "FAILURE_QUEUE_VIEW",
   "SUPPORT_REQUEST_VIEW",
   "SUPPORT_REQUEST_UPDATE",
+  "REVIEW_MODERATE",
 ] as const;
 export type OperatorAuditAction = (typeof OPERATOR_AUDIT_ACTIONS)[number];
 
-export const OPERATOR_AUDIT_TARGET_TYPES = ["ACCOUNT", "ORDER", "FAILURE_QUEUE", "SUPPORT_REQUEST"] as const;
+export const OPERATOR_AUDIT_TARGET_TYPES = ["ACCOUNT", "ORDER", "FAILURE_QUEUE", "SUPPORT_REQUEST", "REVIEW"] as const;
 export type OperatorAuditTargetType = (typeof OPERATOR_AUDIT_TARGET_TYPES)[number];
 
 export const OPERATOR_AUDIT_OUTCOMES = ["SUCCESS", "NOT_FOUND", "INVALID_INPUT", "ERROR"] as const;

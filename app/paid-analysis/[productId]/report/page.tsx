@@ -5,6 +5,7 @@ import ReportAccessGate from "./ReportAccessGate";
 import AiConsultingEntryCard from "./AiConsultingEntryCard";
 import Phase9NextAnalysisSection from "@/app/components/Phase9NextAnalysisSection";
 import ReportCompletionGate from "./ReportCompletionGate";
+import VerifiedReviewPanel from "@/app/components/VerifiedReviewPanel";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import {
@@ -98,6 +99,11 @@ async function PaidReportBody({
           profileId={profileId}
           edition={exactEdition}
           reportCompleted={Boolean(initialDetail)}
+        />
+        <VerifiedReviewPanel
+          productId={productId}
+          profileId={profileId}
+          edition={exactEdition}
         />
         <Phase9NextAnalysisSection
           profileId={profileId}

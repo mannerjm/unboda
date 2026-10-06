@@ -9,7 +9,7 @@ const CUSTOMER_JARGON_PATTERNS: readonly { pattern: RegExp; label: string }[] = 
   { pattern: /월령/u, label: "월령" },
   { pattern: /일간/u, label: "일간" },
   { pattern: /천간/u, label: "천간" },
-  { pattern: /지지/u, label: "지지" },
+  { pattern: /지지\s*[자축인묘진사오미신유술해](?:\s|와|과|의|가|는|를|을|$)/u, label: "지지 글자" },
   { pattern: /지장간/u, label: "지장간" },
   { pattern: /통근/u, label: "통근" },
   { pattern: /투간/u, label: "투간" },
@@ -27,7 +27,10 @@ const CUSTOMER_JARGON_PATTERNS: readonly { pattern: RegExp; label: string }[] = 
   { pattern: /(?:목|화|토|금|수)\s*기운/u, label: "오행 기운" },
   { pattern: /합[·ㆍ\-/ ]*충|충[·ㆍ\-/ ]*형|형[·ㆍ\-/ ]*해/u, label: "합충형해" },
   { pattern: /[자축인묘진사오미신유술해]{2}(?:합|충|형|해|파)/u, label: "지지 관계 용어" },
-  { pattern: /[갑을병정무기경신임계][자축인묘진사오미신유술해]/u, label: "간지 이름" },
+  {
+    pattern: /(?:원국|대운|세운|간지|연주|월주|일주|시주)\s*[갑을병정무기경신임계][자축인묘진사오미신유술해]|[갑을병정무기경신임계][자축인묘진사오미신유술해]\s*(?:대운|세운|간지|연주|월주|일주|시주)/u,
+    label: "간지 이름",
+  },
 ];
 
 const GENERIC_CUSTOMER_VALUE_PATTERNS: readonly { pattern: RegExp; label: string }[] = [

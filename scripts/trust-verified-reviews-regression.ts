@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 const read = (path: string): string => readFileSync(path, "utf8");
 
 const migration = read("supabase/migrations/20261006193000_trust_verified_reviews.sql");
+const moderationIndexMigration = read("supabase/migrations/20261006194500_review_moderation_fk_index.sql");
 const service = read("app/lib/reviews/server.ts");
 const api = read("app/api/reviews/route.ts");
 const moderationApi = read("app/api/admin/reviews/[reviewId]/route.ts");
@@ -37,6 +38,7 @@ assert(migration.includes("revoke all on table public.paid_product_reviews from 
 assert(migration.includes("grant select, insert, update, delete on table public.paid_product_reviews to service_role"), "server role must mediate review access");
 assert(migration.includes("status in ('PENDING','PUBLISHED','HIDDEN')"), "review states must remain bounded");
 assert(migration.includes("operator_moderate_paid_product_review") && migration.includes("'REVIEW_MODERATE'") && migration.includes("'REVIEW'"), "review moderation must be audited atomically");
+assert(moderationIndexMigration.includes("paid_product_reviews_moderated_operator_idx"), "review moderation FK must have a covering index");
 
 assert(service.includes('import "server-only"'), "review service must remain server-only");
 for (const boundary of [
@@ -88,8 +90,8 @@ assert(ai.includes("<TrustPrinciplesCard compact"), "AI consulting must disclose
 
 for (const report of [standardReport, pairReport, parentReport, siblingReport, otherReport]) {
   assert(report.includes("VerifiedReviewPanel"), "every paid report family must support verified review creation");
-  assert(report.indexOf("AiConsultingEntryCard") < report.indexOf("VerifiedReviewPanel"), "review request must follow the AI continuation entry");
-  assert(report.indexOf("VerifiedReviewPanel") < report.indexOf("Phase9NextAnalysisSection"), "review request must appear before next-purchase upsell");
+  assert(report.indexOf("<AiConsultingEntryCard") < report.indexOf("<VerifiedReviewPanel"), "review request must follow the AI continuation entry");
+  assert(report.indexOf("<VerifiedReviewPanel") < report.indexOf("<Phase9NextAnalysisSection"), "review request must appear before next-purchase upsell");
 }
 
 for (const copy of [

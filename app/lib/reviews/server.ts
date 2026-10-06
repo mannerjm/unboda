@@ -247,6 +247,13 @@ export async function getVerifiedReviewContext(input: {
   productId: string;
   analysisEditionKey: string;
 }): Promise<VerifiedReviewContext> {
+  if (
+    !UUID_PATTERN.test(input.profileId)
+    || !isReviewableProduct(input.productId)
+    || !normalizeEdition(input.analysisEditionKey)
+  ) {
+    return { eligible: false, aiConsultingUsed: false, ownReview: null };
+  }
   const purchaseId = await getCompletedPurchase(input);
   if (!purchaseId) return { eligible: false, aiConsultingUsed: false, ownReview: null };
 

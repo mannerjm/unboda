@@ -5,6 +5,7 @@ import CompatibilityPaidReportPreparing from "@/app/components/CompatibilityPaid
 import CompatibilityPaidReportView from "@/app/components/CompatibilityPaidReportView";
 import AiConsultingEntryCard from "@/app/paid-analysis/[productId]/report/AiConsultingEntryCard";
 import Phase9NextAnalysisSection from "@/app/components/Phase9NextAnalysisSection";
+import VerifiedReviewPanel from "@/app/components/VerifiedReviewPanel";
 import { isStoredCompatibilityReport } from "@/app/lib/compatibilityPaidAnalysis";
 import { getPaidReport } from "@/app/lib/paidReports/server";
 import { getUserProfile } from "@/app/lib/profiles/server";
@@ -74,6 +75,7 @@ export default async function PairCompatibilityReportPage({
                 profileId={profileId}
                 edition={entitlement.analysisEditionKey}
               />
+              <VerifiedReviewPanel productId={productId} profileId={profileId} edition={entitlement.analysisEditionKey} />
               <Phase9NextAnalysisSection
                 profileId={profileId}
                 sourceProductId={productId}

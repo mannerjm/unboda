@@ -356,36 +356,62 @@ export async function getAdminReviewDashboard(): Promise<AdminReviewDashboard> {
   const client = createAdminClient();
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
-  const [reviewsResult, completedResult] = await Promise.all([
+  const [
+    itemsResult,
+    totalResult,
+    pendingResult,
+    publishedResult,
+    hiddenResult,
+    publishedRatingsResult,
+    completedResult,
+    aiReviewResult,
+    recentResult,
+  ] = await Promise.all([
     client
       .from("paid_product_reviews")
       .select("id,product_id,analysis_edition_key,rating,easy_to_understand,helpfulness,ai_consulting_used,ai_consulting_helpfulness,body,status,moderation_reason,created_at,updated_at")
       .order("created_at", { ascending: false })
       .limit(100),
-    client
-      .from("paid_reports")
-      .select("purchase_id", { count: "exact", head: true })
-      .eq("status", "completed")
-      .not("purchase_id", "is", null),
+    client.from("paid_product_reviews").select("id", { count: "exact", head: true }),
+    client.from("paid_product_reviews").select("id", { count: "exact", head: true }).eq("status", "PENDING"),
+    client.from("paid_product_reviews").select("id", { count: "exact", head: true }).eq("status", "PUBLISHED"),
+    client.from("paid_product_reviews").select("id", { count: "exact", head: true }).eq("status", "HIDDEN"),
+    client.from("paid_product_reviews").select("rating").eq("status", "PUBLISHED").limit(5000),
+    client.from("paid_reports").select("purchase_id", { count: "exact", head: true }).eq("status", "completed").not("purchase_id", "is", null),
+    client.from("paid_product_reviews").select("id", { count: "exact", head: true }).eq("ai_consulting_used", true),
+    client.from("paid_product_reviews").select("id", { count: "exact", head: true }).gte("created_at", thirtyDaysAgo),
   ]);
-  if (reviewsResult.error || completedResult.error) throw new Error("REVIEW_ADMIN_LOOKUP_FAILED");
 
-  const rows = (reviewsResult.data ?? []) as ReviewRow[];
-  const total = rows.length;
-  const publishedRows = rows.filter((row) => row.status === "PUBLISHED");
+  const results = [
+    itemsResult.error,
+    totalResult.error,
+    pendingResult.error,
+    publishedResult.error,
+    hiddenResult.error,
+    publishedRatingsResult.error,
+    completedResult.error,
+    aiReviewResult.error,
+    recentResult.error,
+  ];
+  if (results.some(Boolean)) throw new Error("REVIEW_ADMIN_LOOKUP_FAILED");
+
+  const rows = (itemsResult.data ?? []) as ReviewRow[];
+  const publishedRatings = (publishedRatingsResult.data ?? []) as Array<{ rating: number }>;
+  const total = totalResult.count ?? 0;
   const completedPurchases = completedResult.count ?? 0;
+
   return {
     total,
-    pending: rows.filter((row) => row.status === "PENDING").length,
-    published: publishedRows.length,
-    hidden: rows.filter((row) => row.status === "HIDDEN").length,
-    averagePublishedRating: publishedRows.length
-      ? publishedRows.reduce((sum, row) => sum + row.rating, 0) / publishedRows.length
+    pending: pendingResult.count ?? 0,
+    published: publishedResult.count ?? 0,
+    hidden: hiddenResult.count ?? 0,
+    averagePublishedRating: publishedRatings.length
+      ? publishedRatings.reduce((sum, row) => sum + row.rating, 0) / publishedRatings.length
       : null,
     completedPurchases,
     reviewWriteRate: completedPurchases > 0 ? total / completedPurchases : null,
-    aiConsultingReviewCount: rows.filter((row) => row.ai_consulting_used).length,
-    recent30: rows.filter((row) => row.created_at >= thirtyDaysAgo).length,
+    aiConsultingReviewCount: aiReviewResult.count ?? 0,
+    recent30: recentResult.count ?? 0,
     items: rows.map((row) => ({
       id: row.id,
       productId: row.product_id,
@@ -419,7 +445,9 @@ export async function moderateReview(input: {
     throw new Error("REVIEW_MODERATION_INVALID");
   }
   const reason = typeof input.reason === "string" ? input.reason.trim() : "";
-  if (reason.length > 240) throw new Error("REVIEW_MODERATION_INVALID");
+  if (reason.length > 240 || (input.status === "HIDDEN" && reason.length < 3)) {
+    throw new Error("REVIEW_MODERATION_INVALID");
+  }
 
   const targetHash = createHash("sha256").update(input.reviewId).digest("hex");
   const { error } = await createAdminClient().rpc("operator_moderate_paid_product_review", {

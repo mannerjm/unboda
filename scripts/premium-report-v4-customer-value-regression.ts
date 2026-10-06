@@ -172,7 +172,8 @@ function makePlainOutput(): PaidAnalysisDetailOutputV4 {
 }
 
 const plain = makePlainOutput();
-assert.equal(validateCustomerFacingLanguage(plain).ok, true, "plain customer copy should pass");
+const plainLanguage = validateCustomerFacingLanguage(plain);
+assert.equal(plainLanguage.ok, true, "plain customer copy should pass: " + JSON.stringify(plainLanguage.issues));
 assert.equal(validateCustomerFacingDistinctness(plain).ok, true, "distinct report sections should pass");
 assert.equal(validatePremiumCustomerValue(plain).ok, true, "specific decision support should pass");
 

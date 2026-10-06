@@ -158,7 +158,8 @@ export default function VerifiedReviewPanel({
   }
 
   return (
-    <section className="mt-5 rounded-[1.75rem] border border-[#d8d3ff] bg-white p-5 shadow-sm sm:p-6" aria-label="구매 인증 후기 작성">
+    <section className="mx-auto mb-8 mt-5 w-full max-w-4xl px-4 sm:px-8" aria-label="구매 인증 후기 작성">
+      <div className="rounded-[1.75rem] border border-[#d8d3ff] bg-white p-5 shadow-sm sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-bold tracking-[0.13em] text-[#6f5ce7]">구매 인증 후기</p>
@@ -247,6 +248,7 @@ export default function VerifiedReviewPanel({
       ) : null}
 
       {message ? <p className="mt-3 text-sm leading-6 text-slate-600">{message}</p> : null}
+      </div>
     </section>
   );
 }

@@ -35,6 +35,12 @@ import {
   validateTopicTimelineDates,
   type PaidAnalysisQualityIssue,
 } from "./paidAnalysisV4QualityValidators";
+import {
+  validateCustomerFacingDistinctness,
+  validateCustomerFacingLanguage,
+  validatePremiumCustomerValue,
+} from "./paidAnalysisV4CustomerValueValidator";
+import { auditPaidAnalysisV4ActualOutputTier } from "./paidAnalysisV4ActualOutputTierQuality";
 import { getPaidAnalysisEngine } from "./paidAnalysisEngine";
 import { resolvePaidAnalysisLaunchSpecialization } from "./paidAnalysisTopicConfig";
 import {
@@ -692,6 +698,9 @@ export async function generatePaidAnalysisDetailV4(
   const qualityIssues: PaidAnalysisQualityIssue[] = [
     ...validateTopicTimelineDates(detail, input.productId).issues,
     ...validateActionStructure(detail).issues,
+    ...validateCustomerFacingLanguage(detail).issues,
+    ...validateCustomerFacingDistinctness(detail).issues,
+    ...validatePremiumCustomerValue(detail).issues,
     ...(getPaidAnalysisEngine(input.productId) === "MONEY"
       ? validateMoneySafety(detail).issues
       : []),
@@ -726,5 +735,30 @@ export async function generatePaidAnalysisDetailV4(
   const result = input.referencePeriod
     ? { ...resolvedDetail, referencePeriod: input.referencePeriod }
     : resolvedDetail;
+
+  if (!input.productId) {
+    throw new Error("V4 유료 분석 상품 ID를 확인하지 못했습니다.");
+  }
+
+  const tierAudit = auditPaidAnalysisV4ActualOutputTier(input.productId, result);
+  if (!tierAudit.ok) {
+    const issueMessage = tierAudit.issues
+      .filter((issue) => issue.severity === "error")
+      .map((issue) => issue.field + ": " + issue.message)
+      .join(" | ");
+
+    console.error("[paid-analysis-detail-v4] paid-tier-quality-failed", {
+      productId: input.productId,
+      family: tierAudit.family,
+      depthUnits: tierAudit.metrics.depthUnits,
+      issueCount: tierAudit.issues.filter((issue) => issue.severity === "error").length,
+    });
+
+    throw new Error(
+      "심층 분석 결과가 가격 단계 품질 기준을 충족하지 못했습니다. " +
+        issueMessage,
+    );
+  }
+
   return result;
 }

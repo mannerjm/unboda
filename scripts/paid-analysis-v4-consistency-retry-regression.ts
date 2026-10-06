@@ -53,18 +53,30 @@ const consistencyError = () =>
 
 async function main(): Promise<void> {
   assert(
-    PAID_ANALYSIS_V4_CONSISTENCY_RETRY_LIMIT === 1,
-    "V4 consistency regeneration must remain capped at one retry",
+    PAID_ANALYSIS_V4_CONSISTENCY_RETRY_LIMIT === 2,
+    "V4 premium quality regeneration must remain capped at two retries",
   );
   assert(
     isRetryablePaidAnalysisV4ConsistencyError(consistencyError()),
     "the exact V4 consistency failure must be retryable",
   );
   assert(
-    !isRetryablePaidAnalysisV4ConsistencyError(
+    isRetryablePaidAnalysisV4ConsistencyError(
       new Error("심층 분석 결과의 Self Review에 실패했습니다."),
     ),
-    "self-review failures must never trigger consistency regeneration",
+    "self-review failures must trigger bounded premium quality regeneration",
+  );
+  assert(
+    isRetryablePaidAnalysisV4ConsistencyError(
+      new Error("심층 분석 결과가 품질 기준을 충족하지 못했습니다. customer language"),
+    ),
+    "customer-language quality failures must trigger bounded regeneration",
+  );
+  assert(
+    isRetryablePaidAnalysisV4ConsistencyError(
+      new Error("심층 분석 결과가 가격 단계 품질 기준을 충족하지 못했습니다. depth"),
+    ),
+    "paid-tier depth failures must trigger bounded regeneration",
   );
   assert(
     !isRetryablePaidAnalysisV4ConsistencyError(
@@ -174,14 +186,14 @@ async function main(): Promise<void> {
       generator: async (_input, options) => {
         nonConsistencyCalls += 1;
         options?.onResponseTelemetry?.(firstTelemetry);
-        throw new Error("심층 분석 결과의 Self Review에 실패했습니다.");
+        throw new Error("건강운 V4 심층 분석 결과의 안전 검증에 실패했습니다.");
       },
     });
   } catch {
     nonConsistencyThrown = true;
   }
-  assert(nonConsistencyThrown, "non-consistency failures must still be surfaced");
-  assert(nonConsistencyCalls === 1, "non-consistency failures must not be regenerated");
+  assert(nonConsistencyThrown, "non-retryable category safety failures must still be surfaced");
+  assert(nonConsistencyCalls === 1, "category safety failures must not be regenerated");
 
   let repeatedConsistencyCalls = 0;
   let repeatedConsistencyThrown = false;
@@ -198,10 +210,10 @@ async function main(): Promise<void> {
   } catch {
     repeatedConsistencyThrown = true;
   }
-  assert(repeatedConsistencyThrown, "a second consistency failure must be surfaced");
-  assert(repeatedConsistencyCalls === 2, "consistency regeneration must stop after one retry");
+  assert(repeatedConsistencyThrown, "a third quality failure must be surfaced");
+  assert(repeatedConsistencyCalls === 3, "premium quality regeneration must stop after two retries");
 
-  console.log("PASS: V4 consistency regeneration is bounded, selective, and telemetry-safe");
+  console.log("PASS: V4 premium quality regeneration is bounded, selective, and telemetry-safe");
 }
 
 main().catch((error) => {

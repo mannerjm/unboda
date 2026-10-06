@@ -25,6 +25,7 @@ import {
   getPremiumProduct,
   type PremiumProductPlugin,
 } from "./premiumProductRegistry";
+import { getProductPricing } from "./productPricing";
 import type { PaidAnalysisEvidenceFacts } from "./paidAnalysisEvidenceFacts";
 import {
   getPaidAnalysisEngine,
@@ -1342,6 +1343,41 @@ export function buildPaidAnalysisDetailPromptV4(
   const engineRulesBlock = engine
     ? `\n${getPaidAnalysisEngineRules(engine)}\n`
     : "";
+  const pricing = input.productId ? getProductPricing(input.productId) : undefined;
+  const paidTierRulesBlock = pricing
+    ? pricing.family === "DEEP"
+      ? `
+[가격 단계 가치 계약 · DEEP]
+- evidence는 서로 다른 실제 근거 key로 정확히 4개 작성한다.
+- action은 서로 다른 대상과 완료 기준을 가진 정확히 3개를 작성한다.
+- 상품 analysisFocus 중 최소 2개와 actionFocus 중 최소 2개가 실제 결론·원인·행동에 직접 드러나야 한다.
+- 쉬운 말로 줄이더라도 근거 축이나 행동 책임을 CORE 수준으로 축소하지 않는다.
+`
+      : pricing.family === "LONG_RANGE"
+        ? `
+[가격 단계 가치 계약 · LONG_RANGE]
+- evidence는 서로 다른 실제 근거 key로 정확히 4개 작성한다.
+- action은 서로 다른 대상과 완료 기준을 가진 정확히 3개를 작성한다.
+- periodAnalysis.keyPoints는 최소 3개 작성한다.
+- periodAnalysis의 최소 3개 구간에 각각 구간 전용 actions와 cautions를 연결한다.
+- 단순히 글자 수를 늘리지 말고, 서로 다른 기간 구간의 판단 책임을 분리한다.
+`
+        : pricing.family === "SIGNATURE"
+          ? `
+[가격 단계 가치 계약 · SIGNATURE]
+- evidence는 서로 다른 실제 근거 key로 정확히 4개 작성한다.
+- action은 서로 다른 대상과 완료 기준을 가진 정확히 3개를 작성한다.
+- periodAnalysis.keyPoints는 최소 4개 작성한다.
+- 모든 생애 구간에 구간별 actions와 cautions를 각각 연결한다.
+- 생애 구간을 나열하는 데 그치지 말고, 구간을 가로질러 반복되는 기준과 전환 조건을 종합한다.
+`
+          : `
+[가격 단계 가치 계약 · CORE]
+- evidence는 서로 다른 실제 근거 key로 최소 3개 작성한다.
+- action은 서로 다른 대상과 완료 기준을 가진 최소 2개 작성한다.
+- 짧게 쓰더라도 상품의 핵심 질문, 관찰 신호, 판단 조건, 행동 기준을 빠뜨리지 않는다.
+`
+    : "";
   const topicConfigBlock =
     specialization.kind === "topic"
       ? `\n${formatTopicConfigForPrompt(specialization.config)}\n`
@@ -1439,7 +1475,7 @@ ${formatReferencePeriodForPrompt(input.referencePeriod)}
 [기간별 분석 전략]
 ${formatPeriodStrategyForPrompt(periodStrategy)}
 ${formatPeriodOwnershipContractForPrompt(periodStrategy)}
-` : ""}${evidenceFactsBlock}${engineRulesBlock}${topicConfigBlock}${topicNarrativeBlock}
+` : ""}${evidenceFactsBlock}${engineRulesBlock}${paidTierRulesBlock}${topicConfigBlock}${topicNarrativeBlock}
 출력은 반드시 유효한 JSON 하나만 반환하세요.
 마크다운, 코드 블록, 설명 문장, JSON 앞뒤의 부가 문구는 절대 포함하지 마세요.
 

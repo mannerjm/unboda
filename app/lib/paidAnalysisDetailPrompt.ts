@@ -1468,6 +1468,13 @@ ${input.currentFortuneFlow}
 
 사용자 고민:
 ${input.userConcern ?? "없음"}
+
+[고객용 본문과 전문 계산 근거 분리]
+- conclusion, coreProblem, cause.summary, cause.reasons[].title/realWorldPattern/problemLinkage, evidence meaning/linkage, current, timeline, action, avoid, decisionCheck, confidence 설명, periodAnalysis의 생성 문장은 초보자가 바로 이해하는 생활 언어로만 작성한다.
+- cause.reasons[].observedStructure만 "계산 근거 펼쳐보기" 안에서 보이므로 필요한 명리 전문용어를 사용할 수 있다.
+- evidence의 실제 계산 fact/label은 서버가 붙인다. meaning/linkage에서 전문용어를 반복하지 않는다.
+- 고객용 본문에 전문용어를 괄호로 설명하는 방식도 사용하지 않는다. 전문용어 자체를 계산 근거 영역으로 분리한다.
+- 고객용 본문이 쉬워졌다는 이유로 근거 수, 관찰 신호, 행동 조건, 완료 기준을 줄이면 실패한 리포트다.
 ${input.referencePeriod ? `
 [기간 기준 고정]
 ${formatReferencePeriodForPrompt(input.referencePeriod)}

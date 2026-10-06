@@ -5,7 +5,7 @@ import type { ResolvedPaidAnalysisDetailV4 } from "./paidAnalysisDetailOutput";
 import type { PaidAnalysisDetailPromptInput } from "./paidAnalysisDetailPrompt";
 import type { PaidAnalysisResponseTelemetry } from "./ai/generateAnalysisText";
 
-export const PAID_ANALYSIS_V4_CONSISTENCY_RETRY_LIMIT = 1;
+export const PAID_ANALYSIS_V4_CONSISTENCY_RETRY_LIMIT = 2;
 
 const CONSISTENCY_ERROR_PREFIX =
   "심층 분석 결과의 섹션 간 일관성 검증에 실패했습니다.";
@@ -22,7 +22,12 @@ export function isRetryablePaidAnalysisV4ConsistencyError(
 ): boolean {
   return (
     error instanceof Error &&
-    error.message.startsWith(CONSISTENCY_ERROR_PREFIX)
+    (
+      error.message.startsWith(CONSISTENCY_ERROR_PREFIX) ||
+      error.message.startsWith("심층 분석 결과의 Self Review에 실패했습니다.") ||
+      error.message.startsWith("심층 분석 결과가 품질 기준을 충족하지 못했습니다.") ||
+      error.message.startsWith("심층 분석 결과가 가격 단계 품질 기준을 충족하지 못했습니다.")
+    )
   );
 }
 
@@ -97,7 +102,7 @@ export async function generatePaidAnalysisDetailV4WithConsistencyRetry(
       }
 
       consistencyRetryCount += 1;
-      console.warn("[paid-analysis-v4] consistency-regeneration", {
+      console.warn("[paid-analysis-v4] quality-regeneration", {
         productId: input.productId,
         retryAttempt: consistencyRetryCount,
         retryLimit: PAID_ANALYSIS_V4_CONSISTENCY_RETRY_LIMIT,

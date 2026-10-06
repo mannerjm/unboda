@@ -53,6 +53,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: validation.error }, { status: 400 });
   }
 
+  // All newly created profiles must explicitly record whether the clock time is
+  // known. null is reserved only for historical profiles created before the
+  // unknown-birth-time control existed.
+  if (validation.value.birthTimeKnown == null) {
+    return NextResponse.json(
+      { error: "출생 시간을 알고 있는지 선택해 주세요." },
+      { status: 400 },
+    );
+  }
+
   try {
     const profile = await createUserProfile(validation.value, user.id);
     return NextResponse.json({ profile }, { status: 201 });

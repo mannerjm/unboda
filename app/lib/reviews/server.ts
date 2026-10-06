@@ -27,6 +27,11 @@ export type PublicProductReviewSummary = {
   reviews: PublicProductReview[];
 };
 
+export type PublicVerifiedReviewFeedItem = PublicProductReview & {
+  productId: string;
+  productTitle: string;
+};
+
 export type OwnVerifiedReview = PublicProductReview & {
   status: ReviewStatus;
   moderationReason: string | null;
@@ -214,6 +219,26 @@ export async function getPublicProductReviewSummary(
     averageRating,
     reviews: rows.slice(0, Math.max(1, Math.min(limit, 12))).map(toPublicReview),
   };
+}
+
+export async function getPublicVerifiedReviewFeed(limit = 40): Promise<PublicVerifiedReviewFeedItem[]> {
+  const { data, error } = await createAdminClient()
+    .from("paid_product_reviews")
+    .select("id,product_id,analysis_edition_key,rating,easy_to_understand,helpfulness,ai_consulting_used,ai_consulting_helpfulness,body,status,moderation_reason,created_at,updated_at")
+    .eq("status", "PUBLISHED")
+    .order("created_at", { ascending: false })
+    .limit(Math.max(1, Math.min(limit, 100)));
+  if (error) throw new Error("REVIEW_PUBLIC_FEED_FAILED");
+
+  return ((data ?? []) as ReviewRow[]).flatMap((row) => {
+    const title = productTitle(row.product_id);
+    if (!title) return [];
+    return [{
+      ...toPublicReview(row),
+      productId: row.product_id,
+      productTitle: title,
+    }];
+  });
 }
 
 export async function getVerifiedReviewContext(input: {

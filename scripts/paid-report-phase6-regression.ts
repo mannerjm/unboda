@@ -71,11 +71,20 @@ for (const [name, source] of reportSurfaces) {
 assert(v4.includes('bg-[#f5f7fc]'), "V4 report must use the cool reading canvas");
 assert(v4.includes("결론 먼저"), "V4 report must lead with the conclusion");
 assert(v4.includes("KEY POINTS") && v4.includes("핵심 포인트"), "V4 report must surface quick key points before details");
-assert(v4.includes("01 · 문제 정의") && v4.includes("02 · 원인") && v4.includes("03 · 근거"), "V4 report must keep an explicit detailed-analysis sequence");
+assert(
+  v4.includes("01 · 문제 정의")
+    && v4.includes("02 · 원인")
+    && v4.includes("03 · 판단 근거")
+    && v4.includes("04 · 현재 흐름")
+    && v4.includes("05 · 변화 신호"),
+  "V4 report must keep an explicit customer-friendly detailed-analysis sequence",
+);
 assert(v4.includes("ACTION GUIDE") && v4.includes("행동 제안"), "V4 report must collect actionable guidance after detailed analysis");
 assert(v4.indexOf("결론 먼저") < v4.indexOf("KEY POINTS"), "V4 conclusion must precede key points");
 assert(v4.indexOf("KEY POINTS") < v4.indexOf("01 · 문제 정의"), "V4 key points must precede detailed analysis");
-assert(v4.indexOf("03 · 근거") < v4.indexOf("ACTION GUIDE"), "V4 detailed evidence must precede action guidance");
+assert(v4.indexOf("03 · 판단 근거") < v4.indexOf("ACTION GUIDE"), "V4 detailed evidence must precede action guidance");
+assert(v4.indexOf("05 · 변화 신호") < v4.indexOf("ACTION GUIDE"), "V4 change signals must precede action guidance");
+assert(v4.indexOf("ACTION GUIDE") < v4.indexOf("마지막 확인"), "V4 action guidance must precede the final reality-boundary check");
 
 for (const contract of [
   "detail.conclusion.headline",

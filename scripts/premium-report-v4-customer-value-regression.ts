@@ -284,6 +284,16 @@ assert(
   "customer value failures must receive bounded automatic regeneration",
 );
 
+const purchasedGeneration = read("app/lib/paidReports/generation.ts");
+assert(
+  purchasedGeneration.includes("generatePaidAnalysisDetailForPurchasedRuntime"),
+  "newly purchased paid reports must route through the V4 runtime switch",
+);
+assert(
+  !purchasedGeneration.includes("generatePaidAnalysisDetailV2"),
+  "purchased paid-report generation must not bypass the V4 runtime switch with a direct V2 call",
+);
+
 const report = read("app/paid-analysis/[productId]/PaidAnalysisV4Report.tsx");
 assert(!report.includes("자주 나오는 사주 용어 쉽게 보기"), "primary report flow must not teach jargon");
 assert(!report.includes("신뢰도 {detail.confidence.level}"), "internal confidence level must not look like a product score");

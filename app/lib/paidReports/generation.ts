@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { getAccountLifecycle } from "../accounts/server";
-import { generatePaidAnalysisDetailV2 } from "../paidAnalysisDetailService";
+import { generatePaidAnalysisDetailForPurchasedRuntime } from "../paidAnalysisV4Runtime";
 import { buildPaidAnalysisInputFromProfile } from "../paidAnalysisProfileInput";
 import { parseAnalysisInputSnapshot, InvalidAnalysisInputSnapshotError } from "../analysisInputSnapshot";
 import { getActiveEntitlementForProfileEdition, getPurchaseById } from "../purchases/server";
@@ -391,7 +391,7 @@ export async function runPaidReportGeneration(
       input.productId,
       referenceSnapshot?.anchorDate,
     );
-    const detail = await generatePaidAnalysisDetailV2(paidInput, {
+    const detail = await generatePaidAnalysisDetailForPurchasedRuntime(paidInput, {
       attemptId: telemetryAttemptId,
       reportId: claim.report.id,
       generationId: claim.report.id,

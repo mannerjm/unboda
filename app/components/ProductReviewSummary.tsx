@@ -65,6 +65,9 @@ export default function ProductReviewSummary({ productId }: { productId: string 
           </div>
         ) : null}
       </div>
+      <div className="mt-3">
+        <a href="/reviews" className="text-xs font-bold text-[#5e4bd1] underline underline-offset-4">전체 구매 인증 후기 보기 →</a>
+      </div>
 
       {summary.count === 0 ? (
         <div className="mt-4 rounded-2xl bg-[#f7f8fc] px-4 py-4 text-sm leading-6 text-slate-600">

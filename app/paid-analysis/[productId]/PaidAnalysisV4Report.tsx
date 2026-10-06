@@ -146,16 +146,7 @@ export default function PaidAnalysisV4Report({
 
         <div className="mt-5 rounded-[1.65rem] border border-[#d8d3ff] bg-white p-5 sm:p-6">
           <p className="text-base font-black text-[#11162d]">이 리포트는 이렇게 읽어 주세요</p>
-          <p className="mt-2 text-[15px] leading-7 text-slate-700">먼저 위의 결론과 ‘지금 바로 할 것’을 확인하세요. 아래에는 그 판단이 나온 이유와 실제로 살펴볼 조건이 나옵니다. 사주 용어나 계산 숫자가 어려우면 ‘계산 근거 펼쳐보기’에서 확인할 수 있어요.</p>
-          <details className="mt-3 rounded-xl border border-[#dce1ef] bg-[#f9faff] px-4 py-3">
-            <summary className="cursor-pointer text-sm font-bold text-[#5e4bd1]">자주 나오는 사주 용어 쉽게 보기</summary>
-            <dl className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
-              <div><dt className="inline font-bold">원국 · </dt><dd className="inline">태어난 날짜와 시간으로 계산한 사주의 기본 구조입니다.</dd></div>
-              <div><dt className="inline font-bold">오행 · </dt><dd className="inline">목·화·토·금·수라는 다섯 가지 명리 해석 요소입니다. 숫자가 실제 건강이나 성격을 측정한 값은 아닙니다.</dd></div>
-              <div><dt className="inline font-bold">대운·세운 · </dt><dd className="inline">명리에서 긴 기간의 흐름과 한 해의 흐름을 살펴보는 기준입니다. 실제 사건의 발생을 확정하는 예측은 아닙니다.</dd></div>
-              <div><dt className="inline font-bold">합·충 · </dt><dd className="inline">사주 요소 사이의 상호작용을 읽는 용어입니다. 좋거나 나쁜 사건을 확정한다는 뜻은 아닙니다.</dd></div>
-            </dl>
-          </details>
+          <p className="mt-2 text-[15px] leading-7 text-slate-700">먼저 위의 결론과 ‘지금 바로 할 것’을 확인하세요. 아래에는 왜 이런 판단이 나왔는지, 현실에서 무엇을 확인해야 하는지, 어떤 조건이면 판단을 바꿔야 하는지가 이어집니다. 전문 계산 내용은 필요한 경우에만 ‘계산 근거 펼쳐보기’에서 확인할 수 있어요.</p>
         </div>
 
         <div className="mt-5 space-y-4">
@@ -170,8 +161,8 @@ export default function PaidAnalysisV4Report({
 
           <DetailSection
             eyebrow="02 · 원인"
-            title="왜 이런 결과가 나오는가"
-            description="관찰된 구조와 현실 패턴이 결론으로 이어지는 과정을 나눠 봅니다."
+            title="왜 이런 판단이 나왔을까"
+            description="계산 결과를 생활 속 조건으로 번역해, 현재 판단과 어떻게 연결되는지 설명합니다."
           >
             <p className="text-[15px] leading-8 text-slate-700">{detail.cause.summary}</p>
             <div className="mt-4 grid gap-3">
@@ -193,9 +184,9 @@ export default function PaidAnalysisV4Report({
           </DetailSection>
 
           <DetailSection
-            eyebrow="03 · 근거"
-            title="명리 근거"
-            description="결론을 뒷받침한 계산 사실과 그 의미를 분리해 보여줍니다."
+            eyebrow="03 · 판단 근거"
+            title="이 판단을 뒷받침하는 근거"
+            description="먼저 생활 속 의미를 보여드리고, 전문 계산 내용은 원하는 경우에만 펼쳐볼 수 있습니다."
           >
             <div className="grid gap-4 lg:grid-cols-2">
               {detail.evidence.map((item) => (
@@ -313,14 +304,13 @@ export default function PaidAnalysisV4Report({
           ) : null}
 
           <DetailSection
-            eyebrow="CONFIDENCE & LIMITS"
-            title="분석 신뢰도와 한계"
-            description="계산 근거가 강한 부분과 해석이 개입한 부분을 구분합니다."
+            eyebrow="마지막 확인"
+            title="이 분석에서 참고할 범위"
+            description="비교적 분명하게 볼 수 있는 부분과 현실에서 추가로 확인해야 할 부분을 나눠 보여드립니다."
           >
-            <span className="inline-flex rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-1.5 text-sm font-bold text-[#5e4bd1]">신뢰도 {detail.confidence.level}</span>
-            <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            <div className="grid gap-3 lg:grid-cols-2">
               <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/60 p-5">
-                <p className="text-sm font-bold text-emerald-800">계산 근거가 뒷받침하는 부분</p>
+                <p className="text-sm font-bold text-emerald-800">비교적 분명하게 볼 수 있는 부분</p>
                 <ul className="mt-3 space-y-2">
                   {detail.confidence.strongestEvidence.map((item) => (
                     <li key={item} className="text-[15px] leading-7 text-slate-700">· {item}</li>
@@ -328,7 +318,7 @@ export default function PaidAnalysisV4Report({
                 </ul>
               </div>
               <div className="rounded-[1.5rem] border border-[#dce1ef] bg-[#f7f8fc] p-5">
-                <p className="text-sm font-bold text-slate-700">해석이 개입한 부분</p>
+                <p className="text-sm font-bold text-slate-700">현실에서 추가로 확인해야 할 부분</p>
                 <ul className="mt-3 space-y-2">
                   {detail.confidence.uncertaintyFactors.map((item) => (
                     <li key={item} className="text-[15px] leading-7 text-slate-700">· {item}</li>
@@ -336,7 +326,10 @@ export default function PaidAnalysisV4Report({
                 </ul>
               </div>
             </div>
-            <p className="mt-5 text-[15px] leading-7 text-slate-600">{detail.confidence.limitations}</p>
+            <div className="mt-4 rounded-2xl border border-[#dce1ef] bg-white px-4 py-4">
+              <p className="text-sm font-bold text-[#11162d]">이 분석만으로 정할 수 없는 것</p>
+              <p className="mt-2 text-[15px] leading-7 text-slate-600">{detail.confidence.limitations}</p>
+            </div>
           </DetailSection>
         </div>
       </div>

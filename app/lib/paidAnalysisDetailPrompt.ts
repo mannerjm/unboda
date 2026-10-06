@@ -592,6 +592,13 @@ ${input.currentFortuneFlow}
 
 사용자 고민:
 ${input.userConcern ?? "없음"}
+
+[고객용 본문과 전문 계산 근거 분리]
+- conclusion, coreProblem, cause.summary, cause.reasons[].title/realWorldPattern/problemLinkage, evidence meaning/linkage, current, timeline, action, avoid, decisionCheck, confidence 설명, periodAnalysis의 생성 문장은 초보자가 바로 이해하는 생활 언어로만 작성한다.
+- cause.reasons[].observedStructure만 "계산 근거 펼쳐보기" 안에서 보이므로 필요한 명리 전문용어를 사용할 수 있다.
+- evidence의 실제 계산 fact/label은 서버가 붙인다. meaning/linkage에서 전문용어를 반복하지 않는다.
+- 고객용 본문에 전문용어를 괄호로 설명하는 방식도 사용하지 않는다. 전문용어 자체를 계산 근거 영역으로 분리한다.
+- 고객용 본문이 쉬워졌다는 이유로 근거 수, 관찰 신호, 행동 조건, 완료 기준을 줄이면 실패한 리포트다.
 ${input.referencePeriod ? `
 [기간 기준 고정]
 ${formatReferencePeriodForPrompt(input.referencePeriod)}
@@ -1457,7 +1464,7 @@ ${formatPeriodOwnershipContractForPrompt(periodStrategy)}
     "reasons": [
       {
         "title": "원인 패턴의 이름",
-        "observedStructure": "전달된 계산 데이터에서 관찰되는 구조",
+        "observedStructure": "계산 근거 펼쳐보기 안에 표시할 전문 계산 구조. 이 필드에서만 필요한 명리 용어 사용 가능",
         "realWorldPattern": "그 구조가 현실에서 나타나는 행동 패턴",
         "problemLinkage": "그 패턴이 coreProblem으로 이어지는 경로"
       }
@@ -1466,8 +1473,8 @@ ${formatPeriodOwnershipContractForPrompt(periodStrategy)}
   "evidence": [
     {
       "evidenceKey": "strength | yongshin | gyeokguk | element_balance | fortune_flow | daeun | seun 중 하나",
-      "meaning": "그 근거가 이 분석 주제에서 무엇을 뜻하는지 한 문장",
-      "linkage": "이 근거가 현재 conclusion의 direction과 focus를 왜 지지하는지, 그리고 어떤 현실 조건이나 검토 기준으로 이어지는지 설명하는 한 문장"
+      "meaning": "전문용어 없이, 그 근거가 이 분석 주제에서 고객의 현실 판단에 무엇을 뜻하는지 한 문장",
+      "linkage": "전문용어 없이, 이 근거가 현재 conclusion의 direction과 focus를 왜 지지하는지 현실 조건이나 검토 기준으로 연결하는 한 문장"
     }
   ],
   "current": {
@@ -1550,7 +1557,7 @@ coreProblem 작성 규칙:
 cause 작성 규칙:
 
 - 각 reason은 관찰된 구조 → 현실 패턴 → 문제 연결의 세 단계를 모두 채운다.
-- observedStructure는 단독 명리 용어·키워드·짧은 명사구가 아니라, 제공된 계산 구조와 그 구조가 의미하는 현실적 조건을 함께 설명하는 완결된 문장으로 작성한다.
+- observedStructure는 "계산 근거 펼쳐보기" 전용이다. 제공된 계산 구조를 정확히 설명하고 필요한 명리 용어를 사용할 수 있지만, 키워드만 나열하지 말고 왜 이 상품 판단에 쓰였는지 한 문장으로 작성한다.
 - realWorldPattern은 입력에 없는 직업·관계·재무 사실을 만들지 말고, 제공된 구조가 나타날 수 있는 조건을 설명한다.
 - problemLinkage는 해당 reason이 coreProblem으로 이어지는 연결을 구체적으로 설명한다.
 - 명리 용어만 나열하고 현실 패턴을 생략하면 실패한 것으로 간주한다.
@@ -1562,7 +1569,7 @@ evidence 작성 규칙:
 ${V4_EVIDENCE_KEY_GUIDE}
 - 위 [선택 가능한 결정론 근거 요약]에 나타난 항목을 우선 선택한다.
 - 수치, 퍼센트, 점수, 간지, 관계 기호를 직접 만들어 쓰지 않는다. 실제 계산 값은 서버가 붙인다.
-- meaning과 linkage에는 명리 용어를 최소화하고 현실 언어를 사용한다.
+- meaning과 linkage에는 명리 용어를 한 개도 쓰지 않는다. 계산 사실을 고객이 확인할 수 있는 현실 조건과 판단 기준으로 번역한다.
 - 같은 evidenceKey를 두 번 사용하지 않는다.
 - linkage는 evidence 내용을 그대로 반복하지 말고, 그 근거가 현재 conclusion의 direction과 focus를 왜 지지하는지 명확히 설명한다.
 - linkage에는 direction 또는 focus의 핵심 표현이 자연스럽게 드러나되, conclusion 전체 문장을 기계적으로 복사하지 않는다.
@@ -1613,7 +1620,9 @@ avoid 작성 규칙:
 
 confidence 작성 규칙:
 
-- "참고용입니다" 같은 일반 면책문만 쓰지 않는다.
+- level은 내부 품질 메타데이터다. 고객 화면의 점수처럼 설명하지 않는다.
+- strongestEvidence와 uncertaintyFactors는 명리 전문용어가 아니라 고객이 이해할 수 있는 판단 기준과 현실 변수로 작성한다.
+- limitations는 "참고용입니다" 같은 일반 면책문으로 끝내지 않고, 이 상품만으로 확정할 수 없는 현실 변수를 구체적으로 구분한다.
 - 확률이나 퍼센트 숫자를 쓰지 않는다.
 - 기간 계산 근거가 전달되지 않은 상품이라면 limitations에 시점을 확정할 수 없다는 점을 포함한다.
 

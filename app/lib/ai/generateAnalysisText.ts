@@ -17,6 +17,7 @@ export type AnalysisTextCallType =
 export type PaidAnalysisResponseTelemetry = {
   status: string;
   incompleteReason: string | null;
+  serviceTier: string | null;
   inputTokens: number | null;
   outputTokens: number | null;
   reasoningTokens: number | null;
@@ -113,6 +114,16 @@ export function resolveReasoningEffort(
   return callType === "main-analysis" ? "none" : "low";
 }
 
+/**
+ * V4 paid reports keep the exact same model, prompt, reasoning and output budget,
+ * but use OpenAI Fast mode to reduce customer-facing latency.
+ */
+export function resolveServiceTier(
+  callType?: AnalysisTextCallType,
+): "fast" | undefined {
+  return callType === "paid-analysis-detail-v4" ? "fast" : undefined;
+}
+
 export function resolveModel(callType?: AnalysisTextCallType): string {
   if (callType === "main-analysis" || callType === "recommendation-analysis") {
     return "gpt-5.6-luna";
@@ -171,6 +182,7 @@ export async function generateAnalysisText(
 
   const model = resolveModel(callType);
   const reasoningEffort = resolveReasoningEffort(callType);
+  const serviceTier = resolveServiceTier(callType);
   const promptLength = prompt.length;
   const startedAt = Date.now();
   const controller = new AbortController();
@@ -195,6 +207,7 @@ export async function generateAnalysisText(
             reasoning: {
               effort: reasoningEffort,
             },
+            ...(serviceTier ? { service_tier: serviceTier } : {}),
           },
           {
             signal: controller.signal,
@@ -234,6 +247,7 @@ export async function generateAnalysisText(
       options.onResponseTelemetry({
         status: response.status ?? "unknown",
         incompleteReason: response.incomplete_details?.reason ?? null,
+        serviceTier: response.service_tier ?? serviceTier ?? null,
         inputTokens: response.usage?.input_tokens ?? null,
         outputTokens: response.usage?.output_tokens ?? null,
         reasoningTokens: response.usage?.output_tokens_details?.reasoning_tokens ?? null,
@@ -256,6 +270,7 @@ export async function generateAnalysisText(
       callType,
       model,
       reasoningEffort,
+      serviceTier: response.service_tier ?? serviceTier ?? null,
       promptLength,
       maxOutputTokens,
       timeoutMs,
@@ -275,6 +290,7 @@ export async function generateAnalysisText(
       callType,
       model,
       reasoningEffort,
+      serviceTier,
       promptLength,
       maxOutputTokens,
       timeoutMs,

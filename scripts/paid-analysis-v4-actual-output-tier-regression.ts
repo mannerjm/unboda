@@ -224,6 +224,17 @@ const stressPrompt = buildPaidAnalysisDetailPromptV4({
       strengths: ["조절"],
       weaknesses: ["과부하"],
     },
+    monthlyCycle: {
+      year: 2026,
+      month: 10,
+      startPillar: "을유",
+      representativePillar: "병술",
+      endPillar: "병술",
+      stemTenGod: "정재",
+      stemElement: "화",
+      branchElement: "토",
+      relations: [{ target: "day", type: "충" }],
+    },
   },
 });
 assert(

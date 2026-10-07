@@ -279,7 +279,10 @@ export async function runPaidAnalysisV4DiagnosticCapture(
       try {
         const consistency = validatePaidAnalysisConsistencyV4(detail);
         const review = reviewPaidAnalysisDetailV4(detail);
-        const timeline = validateTopicTimelineDates(detail, productId);
+        const timeline = validateTopicTimelineDates(detail, productId, {
+          year: input.evidenceFacts?.monthlyCycle?.year ?? input.evidenceFacts?.seun?.year,
+          month: input.evidenceFacts?.monthlyCycle?.month,
+        });
         const action = validateActionStructure(detail);
         const money = getPaidAnalysisEngine(productId) === "MONEY"
           ? validateMoneySafety(detail)

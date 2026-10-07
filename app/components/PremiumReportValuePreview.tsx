@@ -19,10 +19,7 @@ export default function PremiumReportValuePreview({
           실제 분석 결과를 미리 보여주는 화면이 아니라, 현재 리포트 생성 기준에서 어떤 순서·깊이·시기 근거로 분석되는지 안내합니다.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="rounded-full border border-[#d8d3ff] bg-white/80 px-3 py-1.5 text-xs font-bold text-[#5e4bd1]">
-            {preview.tier.badge}
-          </span>
-          <span className="rounded-full border border-[#dce1ef] bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600">
+          <span className="rounded-full border border-[#d8d3ff] bg-white/80 px-3 py-1.5 text-xs font-semibold text-[#5e4bd1]">
             {preview.timeValue.badge}
           </span>
         </div>
@@ -34,12 +31,7 @@ export default function PremiumReportValuePreview({
           <p className="mt-2 text-sm font-semibold leading-6">{preview.question}</p>
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <article className="rounded-2xl border border-[#d8d3ff] bg-[#f8f7ff] p-4">
-            <p className="text-xs font-bold tracking-[0.08em] text-[#6f5ce7]">분석 깊이</p>
-            <p className="mt-2 text-sm font-bold leading-6 text-[#11162d]">{preview.tier.title}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{preview.tier.description}</p>
-          </article>
+        <div className="mt-4">
           <article className="rounded-2xl border border-[#dce1ef] bg-[#f7f8fc] p-4">
             <p className="text-xs font-bold tracking-[0.08em] text-slate-500">시기 반영 방식</p>
             <p className="mt-2 text-sm font-bold leading-6 text-[#11162d]">{preview.timeValue.title}</p>

@@ -257,7 +257,7 @@ function buildPeriodPreview(product: PremiumProductDefinition): PaidAnalysisV4Pr
       {
         step: "01",
         eyebrow: "결론 먼저",
-        title: "기간 전체 핵심 흐름과 우선 판단",
+        title: "기간 전체 핵심 결론과 우선 판단",
         description: `${normalizePaidAnalysisPreviewSentence(strategy.coreQuestion)}를 기준으로 이 기간을 관통하는 결론과 먼저 볼 기준을 정리합니다.`,
       },
       {

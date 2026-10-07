@@ -132,7 +132,8 @@ export type PaidAnalysisEvidenceKey =
   | "daeun"
   | "seun"
   | "element_relations"
-  | "fortune_brain";
+  | "fortune_brain"
+  | "monthly_cycle";
 
 /** The model supplies interpretation only; the server resolves the observed fact. */
 export type PaidAnalysisEvidenceItemV4 = {

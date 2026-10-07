@@ -55,7 +55,7 @@ export default function PremiumReportValuePreview({
                   {card.step}
                 </span>
                 <div>
-                  <p className="text-[11px] font-bold tracking-[0.08em] text-[#6f5ce7]">{card.eyebrow}</p>
+                  <p className="text-xs font-bold tracking-[0.08em] text-[#6f5ce7]">{card.eyebrow}</p>
                   <p className="mt-1 text-sm font-bold leading-6 text-[#11162d]">{card.title}</p>
                 </div>
               </div>

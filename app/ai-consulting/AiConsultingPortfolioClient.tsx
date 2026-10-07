@@ -778,9 +778,18 @@ export default function AiConsultingPortfolioClient({
                       <button
                         type="submit"
                         disabled={isPreview || isSending || question.trim().length < 2}
-                        className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:opacity-40"
+                        aria-busy={isSending}
+                        className="inline-flex min-w-36 items-center justify-center gap-2 rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {isPreview ? "미리보기" : isSending ? "관련 리포트 확인 중..." : "질문하기"}
+                        {isSending ? (
+                          <>
+                            <span
+                              aria-hidden="true"
+                              className="h-4 w-4 animate-spin rounded-full border-2 border-white/35 border-t-white"
+                            />
+                            <span>답변 준비 중...</span>
+                          </>
+                        ) : isPreview ? "미리보기" : "질문하기"}
                       </button>
                     ) : creditPurchaseHref && !isPreview ? (
                       <Link href={creditPurchaseHref} className="inline-flex shrink-0 items-center justify-center rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]">
@@ -807,7 +816,7 @@ export default function AiConsultingPortfolioClient({
 
               <div className="mt-5 space-y-4 pb-4">
                 {hasOlderMessages ? <button type="button" onClick={() => void loadOlderMessages()} disabled={isLoadingOlder} className="w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm font-semibold text-[#5e4bd1] disabled:opacity-50">{isLoadingOlder ? "이전 상담 불러오는 중..." : "이전 상담 더 보기"}</button> : null}
-                {visibleChatMessages.length === 0 && (portfolio.questionsRemaining > 0 || hasOlderMessages) ? (
+                {!isSending && visibleChatMessages.length === 0 && (portfolio.questionsRemaining > 0 || hasOlderMessages) ? (
                   <div className="rounded-[1.5rem] border border-dashed border-[#cfd5e6] bg-white p-7 text-center text-sm leading-7 text-slate-600">
                     {hasOlderMessages
                       ? "이전 상담 더 보기에서 오래된 대화를 확인할 수 있어요."
@@ -894,6 +903,21 @@ export default function AiConsultingPortfolioClient({
                     </div>
                   );
                 })}
+
+                {isSending ? (
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    aria-label="AI 답변 준비 중"
+                    className="flex max-w-[94%] items-center gap-3 rounded-3xl rounded-bl-lg border border-[#d8d3ff] bg-white px-5 py-4 text-[15px] font-semibold text-slate-700 shadow-sm"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-[#d7d1fb] border-t-[#6f5ce7]"
+                    />
+                    <span>운보다 AI가 답변을 정리하고 있어요</span>
+                  </div>
+                ) : null}
               </div>
 
             </section>

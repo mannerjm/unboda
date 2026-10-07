@@ -106,6 +106,22 @@ assert(portfolioChat.includes("공용 질문권") && portfolioChat.includes("모
 assert(portfolioChat.includes("통합 AI 상담") && portfolioChat.includes("주제를 선택할 필요 없이 질문해 주세요.") && !portfolioChat.includes("새 주제로 질문하기 · 자동 선택"), "unified consultation must automatically route topics without forcing customers to switch source modes");
 assert(portfolioChat.includes('fetch("/api/ai-consulting/portfolio/question"'), "unified consultation must submit through the portfolio router");
 assert(portfolioChat.includes('data-ai-composer="portfolio-sticky"'), "unified consultation composer must stay scoped to the conversation");
+assert(
+  portfolioChat.includes('aria-busy={isSending}')
+    && portfolioChat.includes('animate-spin')
+    && portfolioChat.includes('답변 준비 중...'),
+  "question submit button must show an immediate spinner while the answer is pending",
+);
+assert(
+  portfolioChat.includes('aria-label="AI 답변 준비 중"')
+    && portfolioChat.includes('운보다 AI가 답변을 정리하고 있어요')
+    && portfolioChat.includes('{isSending ? ('),
+  "conversation area must show a separate accessible loading indicator until the answer arrives",
+);
+assert(
+  portfolioChat.includes('!isSending && visibleChatMessages.length === 0'),
+  "empty-conversation placeholder must not compete with the pending-answer loader",
+);
 assert(!admin.includes('href="/admin/ai-consulting-preview"'), "admin dashboard must not expose the completed Phase 7 design preview");
 
 console.log("AI consulting Phase 7 UX regression passed ✓");

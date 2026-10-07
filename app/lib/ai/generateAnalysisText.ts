@@ -138,8 +138,8 @@ export function resolveReasoningEffort(
  */
 export function resolveServiceTier(
   callType?: AnalysisTextCallType,
-): "fast" | undefined {
-  return callType === "paid-analysis-detail-v4" ? "fast" : undefined;
+): "priority" | undefined {
+  return callType === "paid-analysis-detail-v4" ? "priority" : undefined;
 }
 
 export function resolveModel(callType?: AnalysisTextCallType): string {
@@ -236,7 +236,7 @@ export async function generateAnalysisText(
         break;
       } catch (error) {
         if (
-          activeServiceTier === "fast" &&
+          activeServiceTier === "priority" &&
           fastModeFallbackCount === 0 &&
           shouldFallbackPaidAnalysisV4FastMode(error)
         ) {

@@ -4,6 +4,7 @@ import type {
   ResolvedPaidAnalysisDetailV4,
 } from "./paidAnalysisDetailOutput";
 import { getPeriodAnalysisStrategy } from "./analysisPeriodStrategy";
+import { getAnalysisEditionPolicy } from "./analysisEditionPolicy";
 
 export type PaidAnalysisQualityIssue = {
   field: string;
@@ -158,33 +159,96 @@ export function validatePremiumDepthSiblingDistinction(
   return { ok: true, issues: [] };
 }
 
-/** Explicit calendar references. TOPIC products have no period data to back them. */
-const CONCRETE_DATE_PATTERNS: RegExp[] = [
-  /\d{4}\s*년/,
-  /\d{4}[-.]\d{1,2}/,
-  /\d{1,2}\s*월/,
-  /\d{1,2}\s*일(?![상하])/,
-];
+/** Explicit calendar references in TOPIC timelines. */
+type TimelineTemporalContext = {
+  year?: number;
+  month?: number;
+};
 
-function findDateMatch(text: string): string | null {
-  for (const pattern of CONCRETE_DATE_PATTERNS) {
-    const match = text.match(pattern);
+type TimelineTemporalReference =
+  | { kind: "year"; raw: string; year: number }
+  | { kind: "yearMonth"; raw: string; year: number; month: number }
+  | { kind: "month"; raw: string; month: number }
+  | { kind: "day"; raw: string; day: number };
 
-    if (match) {
-      return match[0];
+function findTimelineTemporalReferences(text: string): TimelineTemporalReference[] {
+  const refs: TimelineTemporalReference[] = [];
+
+  for (const match of text.matchAll(/(\d{4})[-.](\d{1,2})/gu)) {
+    refs.push({
+      kind: "yearMonth",
+      raw: match[0],
+      year: Number(match[1]),
+      month: Number(match[2]),
+    });
+  }
+
+  for (const match of text.matchAll(/(\d{4})\s*년/gu)) {
+    refs.push({ kind: "year", raw: match[0], year: Number(match[1]) });
+  }
+
+  for (const match of text.matchAll(/(\d{1,2})\s*월/gu)) {
+    refs.push({ kind: "month", raw: match[0], month: Number(match[1]) });
+  }
+
+  for (const match of text.matchAll(/(\d{1,3})\s*일(?![상하])/gu)) {
+    refs.push({ kind: "day", raw: match[0], day: Number(match[1]) });
+  }
+
+  return refs;
+}
+
+function isAllowedTopicTemporalReference(
+  reference: TimelineTemporalReference,
+  productId: string | undefined,
+  context: TimelineTemporalContext | undefined,
+): boolean {
+  if (!productId) return false;
+
+  const policy = getAnalysisEditionPolicy(productId);
+
+  if (policy === "YEARLY") {
+    return (
+      reference.kind === "year"
+      && typeof context?.year === "number"
+      && reference.year === context.year
+    );
+  }
+
+  if (policy === "MONTHLY") {
+    if (typeof context?.year !== "number" || typeof context?.month !== "number") {
+      return false;
+    }
+
+    if (reference.kind === "year") {
+      return reference.year === context.year;
+    }
+
+    if (reference.kind === "month") {
+      return reference.month === context.month;
+    }
+
+    if (reference.kind === "yearMonth") {
+      return reference.year === context.year && reference.month === context.month;
     }
   }
 
-  return null;
+  return false;
 }
 
 /**
- * PERIOD products are allowed to name real years because analysisPeriodStrategy
- * supplies the reference period; TOPIC products are not.
+ * PERIOD products carry their own explicit period strategy and are exempt here.
+ * TOPIC products are edition-aware:
+ * - YEARLY may name only its calculated edition year.
+ * - MONTHLY may name only its calculated edition year/month.
+ * - LIFETIME (and unknown policy/context) may not invent concrete dates.
+ * Numeric day spans remain rejected for TOPIC products because they are not
+ * supported by the monthly/yearly edition contract.
  */
 export function validateTopicTimelineDates(
   output: PaidAnalysisDetailOutputV4,
   productId?: string,
+  temporalContext?: TimelineTemporalContext,
 ): PaidAnalysisQualityResult {
   if (productId && getPeriodAnalysisStrategy(productId)) {
     return { ok: true, issues: [] };
@@ -200,13 +264,19 @@ export function validateTopicTimelineDates(
     ];
 
     for (const [fieldName, value] of fields) {
-      const match = findDateMatch(value);
+      const references = findTimelineTemporalReferences(value);
 
-      if (match) {
+      for (const reference of references) {
+        if (isAllowedTopicTemporalReference(reference, productId, temporalContext)) {
+          continue;
+        }
+
         issues.push({
           field: `timeline[${index}].${fieldName}`,
-          message: `기간 계산 근거가 없는 상품에서 구체적인 시점 표현(${match})을 사용했습니다.`,
+          message:
+            `상품의 실제 에디션 계산 근거와 맞지 않는 시점 표현(${reference.raw})을 사용했습니다.`,
         });
+        break;
       }
     }
   });

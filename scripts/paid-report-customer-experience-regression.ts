@@ -42,7 +42,8 @@ for (const path of [
 assert(premium.includes("이 리포트는 이렇게 읽어 주세요") && !premium.includes("자주 나오는 사주 용어 쉽게 보기"), "V4 must keep jargon out of the primary reading path instead of teaching it before the customer needs it");
 assert(premium.indexOf("{reason.realWorldPattern}") < premium.indexOf("{reason.observedStructure}"), "customer meaning must precede technical cause details");
 assert(
-  premium.indexOf("{item.meaning}") < premium.indexOf("formatPaidAnalysisEvidenceFactForCustomer"),
+  premium.indexOf("{item.meaning}") <
+    premium.indexOf("formatPaidAnalysisEvidenceFactForCustomer(item.evidenceKey, item.fact)"),
   "customer meaning must precede customer-safe server-calculated evidence",
 );
 assert(

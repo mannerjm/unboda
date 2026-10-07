@@ -165,6 +165,7 @@ const PaidAnalysisEvidenceKeySchema = z.enum([
   "seun",
   "element_relations",
   "fortune_brain",
+  "monthly_cycle",
 ]);
 
 const PaidAnalysisSituationItemV4Schema = z.object({

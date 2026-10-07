@@ -3,6 +3,7 @@ import type {
   ResolvedPaidAnalysisDetailV4,
 } from "../app/lib/paidAnalysisDetailOutput";
 import { buildPaidAnalysisDetailPromptV4 } from "../app/lib/paidAnalysisDetailPrompt";
+import { getAnalysisEditionPolicy } from "../app/lib/analysisEditionPolicy";
 import {
   auditPaidAnalysisV4ActualOutputTier,
   auditPaidAnalysisV4ActualTierSample,
@@ -25,10 +26,21 @@ function makeTopicOutput(
   }
 
   const config = specialization.config;
-  const evidenceKeys = [...new Set(config.evidenceFocus)].slice(
-    0,
-    evidenceCount,
-  ) as PaidAnalysisEvidenceKey[];
+  const policy = getAnalysisEditionPolicy(productId);
+  const temporalEvidenceKey =
+    policy === "MONTHLY"
+      ? "monthly_cycle"
+      : policy === "YEARLY"
+        ? "seun"
+        : undefined;
+  const evidenceKeys = [
+    ...(temporalEvidenceKey ? [temporalEvidenceKey] : []),
+    ...[...new Set(config.evidenceFocus)].filter(
+      (key) => key !== temporalEvidenceKey,
+    ),
+  ].slice(0, evidenceCount) as PaidAnalysisEvidenceKey[];
+  const temporalLabel =
+    policy === "MONTHLY" ? "2026년 10월" : policy === "YEARLY" ? "2026년" : "";
   const focus = config.analysisFocus[0] ?? config.userQuestion;
   const secondaryFocus = config.analysisFocus[1] ?? focus;
   const thirdFocus = config.analysisFocus[2] ?? secondaryFocus;
@@ -38,10 +50,10 @@ function makeTopicOutput(
   return {
     schemaVersion: "v4",
     conclusion: {
-      headline: `${focus}를 먼저 판단합니다`,
+      headline: `${temporalLabel ? `${temporalLabel} ` : ""}${focus}를 먼저 판단합니다`,
       direction: "조정",
       focus,
-      rationale: `${focus}와 ${secondaryFocus}를 함께 비교해 현재 선택 범위를 좁힙니다.`,
+      rationale: `${temporalLabel ? `${temporalLabel} 기준으로 ` : ""}${focus}와 ${secondaryFocus}를 함께 비교해 현재 선택 범위를 좁힙니다.`,
       immediateAction: `${actionFocus[0] ?? focus}을 먼저 확인하고 완료 기준을 기록합니다.`,
     },
     coreProblem: {
@@ -61,7 +73,12 @@ function makeTopicOutput(
     evidence: evidenceKeys.map((evidenceKey, index) => ({
       evidenceKey,
       label: `근거 ${index + 1}`,
-      fact: `서버 계산 사실 ${index + 1}`,
+      fact:
+        evidenceKey === "monthly_cycle"
+          ? "2026년 10월 절기 월 흐름 · 월주 병술"
+          : evidenceKey === "seun"
+            ? "2026년 세운 병오 · 만 32세"
+            : `서버 계산 사실 ${index + 1}`,
       meaning: `${insightPrompts[index] ?? focus}를 판단하는 명리 근거입니다.`,
       linkage: `조정 방향에서 ${focus}를 확인하는 근거 ${index + 1}입니다.`,
     })),
@@ -207,6 +224,17 @@ const stressPrompt = buildPaidAnalysisDetailPromptV4({
       strengths: ["조절"],
       weaknesses: ["과부하"],
     },
+    monthlyCycle: {
+      year: 2026,
+      month: 10,
+      startPillar: "을유",
+      representativePillar: "병술",
+      endPillar: "병술",
+      stemTenGod: "정재",
+      stemElement: "화",
+      branchElement: "토",
+      relations: [{ target: "day", type: "충" }],
+    },
   },
 });
 assert(
@@ -220,12 +248,17 @@ assert(
   "topic V4 prompt must require four available contract evidence keys",
 );
 assert(
-  stressPrompt.includes("element_relations와 fortune_brain도"),
-  "topic V4 prompt must explicitly recognize the newer evidence keys",
+  stressPrompt.includes("element_relations, fortune_brain, monthly_cycle도"),
+  "topic V4 prompt must explicitly recognize every newer evidence key",
 );
 assert(
   stressPrompt.includes("strength, element_relations, fortune_brain, fortune_flow"),
   "health stress prompt must expose its four product-contract evidence keys",
+);
+assert(
+  stressPrompt.includes("[월간 TOPIC 시기 가치 계약]") &&
+    stressPrompt.includes("monthly_cycle"),
+  "monthly DEEP prompt must require real month-cycle evidence",
 );
 
 console.log(

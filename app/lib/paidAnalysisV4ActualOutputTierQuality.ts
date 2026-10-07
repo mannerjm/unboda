@@ -1,4 +1,5 @@
 import { getPeriodAnalysisStrategy } from "./analysisPeriodStrategy";
+import { getAnalysisEditionPolicy } from "./analysisEditionPolicy";
 import type { ResolvedPaidAnalysisDetailV4 } from "./paidAnalysisDetailOutput";
 import {
   getPaidAnalysisPremiumDepthContract,
@@ -227,6 +228,7 @@ export function auditPaidAnalysisV4ActualOutputTier(
 ): PaidAnalysisV4ActualTierAuditResult {
   const pricing = getProductPricing(productId);
   const specialization = resolvePaidAnalysisLaunchSpecialization(productId);
+  const editionPolicy = getAnalysisEditionPolicy(productId);
   const issues: PaidAnalysisV4ActualTierIssue[] = [];
   const minimums = familyMinimums(pricing.family);
 
@@ -407,6 +409,8 @@ export function auditPaidAnalysisV4ActualOutputTier(
     const config = specialization.config;
     const depthContract = getPaidAnalysisPremiumDepthContract(config);
     const requiredEvidenceKeys = new Set(depthContract.evidenceFocus);
+    if (editionPolicy === "MONTHLY") requiredEvidenceKeys.add("monthly_cycle");
+    if (editionPolicy === "YEARLY") requiredEvidenceKeys.add("seun");
     const realizedRequiredEvidence = output.evidence.filter((item) =>
       requiredEvidenceKeys.has(item.evidenceKey),
     ).length;
@@ -421,6 +425,50 @@ export function auditPaidAnalysisV4ActualOutputTier(
       "evidence",
       `상품 계약이 요구한 근거 축 중 최소 ${minimumRequiredEvidence}개가 실제 출력에 반영되어야 합니다.`,
     );
+
+    if (editionPolicy === "MONTHLY") {
+      const monthlyEvidence = output.evidence.find(
+        (item) => item.evidenceKey === "monthly_cycle",
+      );
+      pushIssue(
+        issues,
+        !monthlyEvidence,
+        "evidence.monthly_cycle",
+        "월간 TOPIC은 실제 월별 차이를 만들기 위해 monthly_cycle 근거를 반드시 사용해야 합니다.",
+      );
+      if (monthlyEvidence) {
+        const match = monthlyEvidence.fact.match(/(\d{4})년\s+(\d{1,2})월/);
+        const expectedLabel = match ? `${match[1]}년 ${Number(match[2])}월` : "";
+        pushIssue(
+          issues,
+          !expectedLabel || !ownershipText.includes(expectedLabel),
+          "temporal.monthLabel",
+          "월간 TOPIC 고객 본문에는 서버 계산 근거와 같은 실제 기준 연·월이 보여야 합니다.",
+        );
+      }
+    }
+
+    if (editionPolicy === "YEARLY") {
+      const seunEvidence = output.evidence.find(
+        (item) => item.evidenceKey === "seun",
+      );
+      pushIssue(
+        issues,
+        !seunEvidence,
+        "evidence.seun",
+        "연간 TOPIC은 해당 연도 차이를 만들기 위해 seun 근거를 반드시 사용해야 합니다.",
+      );
+      if (seunEvidence) {
+        const match = seunEvidence.fact.match(/(\d{4})년/);
+        const expectedLabel = match ? `${match[1]}년` : "";
+        pushIssue(
+          issues,
+          !expectedLabel || !ownershipText.includes(expectedLabel),
+          "temporal.yearLabel",
+          "연간 TOPIC 고객 본문에는 서버 계산 근거와 같은 실제 기준 연도가 보여야 합니다.",
+        );
+      }
+    }
 
     if (config.decisionType === "decision") {
       pushIssue(

@@ -41,6 +41,7 @@ const promptInput = buildPaidAnalysisInputFromProfile(
     updatedAt: "2026-01-01T00:00:00.000Z",
   },
   "career",
+  "2026-10-07",
 );
 
 const facts = promptInput.evidenceFacts;
@@ -57,6 +58,7 @@ const resolvableKeys: PaidAnalysisEvidenceKey[] = [
   "seun",
   "element_relations",
   "fortune_brain",
+  "monthly_cycle",
 ];
 
 // 1~6 + new keys: each key resolves to a non-empty deterministic fact.
@@ -93,6 +95,17 @@ const daeunResolved = resolvePaidAnalysisEvidence(
 assert(
   daeunResolved.fact.includes(facts!.daeun!.ganji),
   "daeun fact must contain the computed ganji",
+);
+
+const monthlyResolved = resolvePaidAnalysisEvidence(
+  [{ evidenceKey: "monthly_cycle", meaning: sentence("의미"), linkage: sentence("연결") }],
+  facts as PaidAnalysisEvidenceFacts,
+).resolved[0];
+
+assert(
+  monthlyResolved.fact.includes("2026년 10월") &&
+    monthlyResolved.fact.includes(facts!.monthlyCycle!.representativePillar),
+  "monthly cycle fact must contain the frozen calendar month and computed representative pillar",
 );
 
 // 7. missing source data is skipped, never faked.
@@ -246,8 +259,9 @@ assert(
 );
 assert(
   promptSource.includes("element_relations") &&
-    promptSource.includes("fortune_brain"),
-  "prompt allowlist must include the new evidence keys",
+    promptSource.includes("fortune_brain") &&
+    promptSource.includes("monthly_cycle"),
+  "prompt allowlist must include every deterministic evidence key",
 );
 
 // 11. V3 reports never go through the resolver.

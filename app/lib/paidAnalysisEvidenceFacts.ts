@@ -1,5 +1,15 @@
+import { calculateSaju } from "@fullstackfamily/manseryeok";
 import type { FreeAnalysisResponse } from "./buildFreeAnalysis";
+import { branchElementMap, stemElementMap } from "./elements";
+import {
+  findBranchBreak,
+  findBranchClash,
+  findBranchCombination,
+  findBranchHarm,
+  findBranchPunishment,
+} from "./fortuneRelations";
 import type { getSaju } from "./manse";
+import { getTenGod } from "./tenGod";
 
 type SajuResult = ReturnType<typeof getSaju>;
 
@@ -68,7 +78,105 @@ export type PaidAnalysisEvidenceFacts = {
     strengths: string[];
     weaknesses: string[];
   };
+
+  /**
+   * Calendar-month context backed by the same solar-term calendar library used
+   * by the natal chart. A civil month can straddle two solar-term month pillars,
+   * so start/middle/end are preserved instead of pretending there is one exact
+   * pillar for every day in the month.
+   */
+  monthlyCycle?: {
+    year: number;
+    month: number;
+    startPillar: string;
+    representativePillar: string;
+    endPillar: string;
+    stemTenGod: string;
+    stemElement: string;
+    branchElement: string;
+    relations: {
+      target: "year" | "month" | "day" | "hour";
+      type: "합" | "충" | "형" | "파" | "해";
+    }[];
+  };
 };
+
+const MONTHLY_BRANCH_HANGUL: Record<string, string> = {
+  子: "자",
+  丑: "축",
+  寅: "인",
+  卯: "묘",
+  辰: "진",
+  巳: "사",
+  午: "오",
+  未: "미",
+  申: "신",
+  酉: "유",
+  戌: "술",
+  亥: "해",
+};
+
+function lastDayOfMonth(year: number, month: number): number {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+function monthPillarAt(year: number, month: number, day: number): string {
+  return calculateSaju(year, month, day, 12, 0).monthPillarHanja;
+}
+
+function getMonthlyBranchRelation(
+  natalBranch: string,
+  monthlyBranch: string,
+): "합" | "충" | "형" | "파" | "해" | null {
+  const natal = MONTHLY_BRANCH_HANGUL[natalBranch];
+  const current = MONTHLY_BRANCH_HANGUL[monthlyBranch];
+
+  if (!natal || !current) return null;
+  if (findBranchClash(natal, current)) return "충";
+  if (findBranchCombination(natal, current)) return "합";
+  if (findBranchPunishment(natal, current)) return "형";
+  if (findBranchBreak(natal, current)) return "파";
+  if (findBranchHarm(natal, current)) return "해";
+  return null;
+}
+
+function buildMonthlyCycleFacts(saju: SajuResult): PaidAnalysisEvidenceFacts["monthlyCycle"] {
+  const context = saju.evaluationContext;
+  if (!context) return undefined;
+
+  const { evaluationYear: year, evaluationMonth: month } = context;
+  const startPillar = monthPillarAt(year, month, 1);
+  const representativePillar = monthPillarAt(year, month, 15);
+  const endPillar = monthPillarAt(year, month, lastDayOfMonth(year, month));
+  const monthlyStem = representativePillar[0];
+  const monthlyBranch = representativePillar[1];
+
+  if (!monthlyStem || !monthlyBranch) return undefined;
+
+  const relations = (
+    [
+      ["year", saju.yearBranch],
+      ["month", saju.monthBranch],
+      ["day", saju.dayBranch],
+      ["hour", saju.birthTimeKnown === false ? "" : saju.hourBranch],
+    ] as const
+  ).flatMap(([target, natalBranch]) => {
+    const type = getMonthlyBranchRelation(natalBranch, monthlyBranch);
+    return type ? [{ target, type }] : [];
+  });
+
+  return {
+    year,
+    month,
+    startPillar,
+    representativePillar,
+    endPillar,
+    stemTenGod: getTenGod(saju.dayStem, monthlyStem),
+    stemElement: stemElementMap[monthlyStem] ?? "",
+    branchElement: branchElementMap[monthlyBranch] ?? "",
+    relations,
+  };
+}
 
 /** Keeps prompt input and resolver payload small; relations are long-tailed. */
 const MAX_RELATION_ITEMS = 4;
@@ -197,6 +305,11 @@ export function buildPaidAnalysisEvidenceFacts(input: {
       strengths: fortuneBrain.strengths.slice(0, MAX_BRAIN_ITEMS),
       weaknesses: fortuneBrain.weaknesses.slice(0, MAX_BRAIN_ITEMS),
     };
+  }
+
+  const monthlyCycle = buildMonthlyCycleFacts(saju);
+  if (monthlyCycle) {
+    facts.monthlyCycle = monthlyCycle;
   }
 
   return facts;

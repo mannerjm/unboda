@@ -3,6 +3,7 @@ import { startTransition, useEffect, useState } from "react";
 import type {
   PaidAnalysisDetailOutputV3,
   ResolvedPaidAnalysisDetailV4,
+  ResolvedPaidAnalysisEvidence,
   StoredPaidAnalysisDetail,
 } from "@/app/lib/paidAnalysisDetailOutput";
 import { isPaidAnalysisDetailV4 } from "@/app/lib/paidAnalysisDetailOutput";
@@ -21,6 +22,8 @@ type PaidAnalysisDetailV2ClientProps = {
   edition?: string;
   /** Verified, persisted, entitlement-scoped report loaded by the server. */
   initialDetail?: StoredPaidAnalysisDetail | null;
+  /** Rebuilt from the immutable purchase snapshot for customer-facing evidence display. */
+  evidenceOverride?: ResolvedPaidAnalysisEvidence[];
 };
 
 function simplifyLegacyTimelineLanguage(value: string): string {
@@ -95,6 +98,7 @@ export default function PaidAnalysisDetailV2Client({
   profileId,
   edition,
   initialDetail = null,
+  evidenceOverride,
 }: PaidAnalysisDetailV2ClientProps) {
   const [detail, setDetail] =
   useState<PaidAnalysisDetailOutputV3 | null>(
@@ -239,7 +243,11 @@ void detail;
 
   if (v4Detail) {
     return (
-      <PaidAnalysisV4Report detail={v4Detail} analysisType={analysisType} />
+      <PaidAnalysisV4Report
+        detail={v4Detail}
+        analysisType={analysisType}
+        evidenceOverride={evidenceOverride}
+      />
     );
   }
 

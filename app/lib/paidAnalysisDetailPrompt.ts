@@ -25,6 +25,7 @@ import {
   getPremiumProduct,
   type PremiumProductPlugin,
 } from "./premiumProductRegistry";
+import { getAnalysisEditionPolicy } from "./analysisEditionPolicy";
 import { getProductPricing } from "./productPricing";
 import type { PaidAnalysisEvidenceFacts } from "./paidAnalysisEvidenceFacts";
 import {
@@ -1270,7 +1271,8 @@ const V4_EVIDENCE_KEY_GUIDE = `- strength: 신강·신약 판단 (coreInterpreta
 - daeun: 현재 대운 (fortuneTiming의 currentDaeun)
 - seun: 현재 세운 (fortuneTiming의 currentSeun)
 - element_relations: 오행 사이의 생조·설기·극 관계
-- fortune_brain: 계산된 강점 축과 취약 축`;
+- fortune_brain: 계산된 강점 축과 취약 축
+- monthly_cycle: 기준 월의 절기 월 흐름과 원국 관계`;
 
 /** Compact, so the resolver's source data does not blow up the input tokens. */
 function formatEvidenceFactsForPrompt(
@@ -1305,7 +1307,17 @@ function formatEvidenceFactsForPrompt(
   }
 
   if (facts.seun) {
-    lines.push(`- seun: ${facts.seun.ganji}`);
+    lines.push(`- seun: ${facts.seun.year}년 ${facts.seun.ganji}`);
+  }
+
+  if (facts.monthlyCycle) {
+    const monthly = facts.monthlyCycle;
+    const relations = monthly.relations
+      .map((item) => `${item.target}:${item.type}`)
+      .join(", ");
+    lines.push(
+      `- monthly_cycle: ${monthly.year}년 ${monthly.month}월 / 초입 ${monthly.startPillar} / 중심 ${monthly.representativePillar} / 말미 ${monthly.endPillar} / 일간 기준 ${monthly.stemTenGod}${relations ? ` / 관계 ${relations}` : ""}`,
+    );
   }
 
   if (facts.elementRelations && facts.elementRelations.items.length > 0) {
@@ -1344,6 +1356,34 @@ export function buildPaidAnalysisDetailPromptV4(
     ? `\n${getPaidAnalysisEngineRules(engine)}\n`
     : "";
   const pricing = input.productId ? getProductPricing(input.productId) : undefined;
+  const editionPolicy = input.productId
+    ? getAnalysisEditionPolicy(getCanonicalPremiumProductId(input.productId))
+    : null;
+  const isMonthlyTopic =
+    specialization.kind === "topic" && editionPolicy === "MONTHLY";
+  const isYearlyTopic =
+    specialization.kind === "topic" && editionPolicy === "YEARLY";
+  const monthlyCycle = input.evidenceFacts?.monthlyCycle;
+  const seunYear = input.evidenceFacts?.seun?.year;
+  const topicTemporalRulesBlock = isMonthlyTopic && monthlyCycle
+    ? `
+[월간 TOPIC 시기 가치 계약]
+- 이 상품은 ${monthlyCycle.year}년 ${monthlyCycle.month}월 에디션이다. 고객이 지난달과 다른 이유를 읽을 수 있어야 한다.
+- evidence에는 monthly_cycle을 반드시 정확히 1개 포함한다. DEEP 상품도 총 4개 evidence 중 하나는 monthly_cycle이어야 한다.
+- 고객용 본문에서는 간지·십성·합충형파해를 그대로 설명하지 말고, 이번 달에 확인할 현실 조건·관찰 신호·판단 기준으로 번역한다.
+- conclusion.rationale, current.summary, timeline 중 최소 한 곳에 "${monthlyCycle.year}년 ${monthlyCycle.month}월"을 실제 문구로 명시한다.
+- 월 초·중·말의 계산값은 월 내부 절기 변화의 근거일 뿐, 특정 날짜 사건이나 초·중·후반 사건을 예언하는 데 사용하지 않는다.
+- 지난달 문장을 월 이름만 바꿔 재사용하지 않는다. monthly_cycle과 상품 질문을 연결해 이번 달의 판단 초점을 다시 구성한다.
+`
+    : isYearlyTopic && seunYear
+      ? `
+[연간 TOPIC 시기 가치 계약]
+- 이 상품은 ${seunYear}년 세운을 사용하는 연간 에디션이다.
+- evidence에는 seun을 반드시 정확히 1개 포함한다. DEEP 상품도 총 4개 evidence 중 하나는 seun이어야 한다.
+- conclusion.rationale, current.summary, timeline 중 최소 한 곳에 "${seunYear}년"을 실제 문구로 명시한다.
+- 특정 월·날짜 사건을 만들지 말고, 해당 연도의 역할·자원·관계·생활 조건이 상품 질문에 어떤 판단 기준을 더하는지 설명한다.
+`
+      : "";
   const paidTierRulesBlock = pricing
     ? pricing.family === "DEEP"
       ? `
@@ -1408,7 +1448,19 @@ export function buildPaidAnalysisDetailPromptV4(
   const timelineRules = periodStrategy
     ? `${buildPeriodTimelineSectionRules(periodStrategy)}
 ${buildPeriodTimelineConsistencyRule(periodStrategy)}`
-    : `- 이 상품에는 기간 계산 근거가 전달되지 않았다. 따라서 label에 연도, 월, 날짜를 절대 쓰지 않는다.
+    : isMonthlyTopic && monthlyCycle
+      ? `- timeline은 예언형 월 초·중·후반 사건표가 아니다.
+- 정확히 4개 항목을 "이번 달 기준선 → 관찰할 변화 신호 → 판단을 바꿀 조건 → 다음 에디션 전 재검토"의 순서로 조직한다.
+- label 또는 changeSignal 중 최소 한 곳에 "${monthlyCycle.year}년 ${monthlyCycle.month}월"을 사용해 이 에디션의 기준 월을 분명히 한다.
+- 계산되지 않은 특정 날짜·몇 주 후·월말 사건을 만들지 않는다.
+- 각 항목은 monthly_cycle을 상품 질문의 현실 조건으로 번역하고, 무엇이 달라지면 판단을 조정할지와 무엇을 준비할지 모두 포함한다.`
+      : isYearlyTopic && seunYear
+        ? `- timeline은 월별 사건 예측표가 아니다.
+- 정확히 4개 항목을 "${seunYear}년 기준선 → 연중 관찰 신호 → 판단 전환 조건 → 다음 검토 기준"의 순서로 조직한다.
+- label 또는 changeSignal 중 최소 한 곳에 "${seunYear}년"을 명시한다.
+- 제공되지 않은 월·날짜를 만들어내지 않는다.
+- 각 항목은 현재 세운을 상품 질문의 현실 조건으로 번역하고, 판단 기준과 준비 행동을 함께 제시한다.`
+        : `- 이 상품에는 구체 기간 계산 근거가 전달되지 않았다. 따라서 label에 연도, 월, 날짜를 절대 쓰지 않는다.
   - TOPIC 상품의 timeline label, changeSignal, preparation에는 기간 계산 근거 없이 숫자로 된 일·주·개월·년 기간을 쓰지 않는다. 예: "30일", "60일", "90일", "3개월", "6개월", "1년" 금지.
   - TOPIC 상품은 "초기 단계", "준비 단계", "다음 단계", "단기적으로", "점검 시점", "조건이 충족되면"처럼 관찰 순서와 조건을 표현하고, 구체적인 날짜·기간을 예측하거나 약속하지 않는다.
   - label은 [필수 통찰 기반 검토 순서]의 제품별 메커니즘을 드러낸다. 모든 상품에 같은 시간 구간 이름을 기계적으로 반복하지 않는다.
@@ -1482,7 +1534,7 @@ ${formatReferencePeriodForPrompt(input.referencePeriod)}
 [기간별 분석 전략]
 ${formatPeriodStrategyForPrompt(periodStrategy)}
 ${formatPeriodOwnershipContractForPrompt(periodStrategy)}
-` : ""}${evidenceFactsBlock}${engineRulesBlock}${paidTierRulesBlock}${topicConfigBlock}${topicNarrativeBlock}
+` : ""}${evidenceFactsBlock}${topicTemporalRulesBlock}${engineRulesBlock}${paidTierRulesBlock}${topicConfigBlock}${topicNarrativeBlock}
 출력은 반드시 유효한 JSON 하나만 반환하세요.
 마크다운, 코드 블록, 설명 문장, JSON 앞뒤의 부가 문구는 절대 포함하지 마세요.
 
@@ -1515,7 +1567,7 @@ ${formatPeriodOwnershipContractForPrompt(periodStrategy)}
   },
   "evidence": [
     {
-      "evidenceKey": "strength | yongshin | gyeokguk | element_balance | fortune_flow | daeun | seun 중 하나",
+      "evidenceKey": "strength | yongshin | gyeokguk | element_balance | fortune_flow | daeun | seun | element_relations | fortune_brain | monthly_cycle 중 하나",
       "meaning": "전문용어 없이, 그 근거가 이 분석 주제에서 고객의 현실 판단에 무엇을 뜻하는지 한 문장",
       "linkage": "전문용어 없이, 이 근거가 현재 conclusion의 direction과 focus를 왜 지지하는지 현실 조건이나 검토 기준으로 연결하는 한 문장"
     }

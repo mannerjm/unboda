@@ -2,6 +2,7 @@ import type {
   PaidAnalysisAvoidType,
   PaidAnalysisDecisionDirection,
   ResolvedPaidAnalysisDetailV4,
+  ResolvedPaidAnalysisEvidence,
 } from "@/app/lib/paidAnalysisDetailOutput";
 import {
   formatPaidAnalysisEvidenceFactForCustomer,
@@ -12,6 +13,7 @@ import PeriodTimelineSection from "./PeriodTimelineSection";
 type PaidAnalysisV4ReportProps = {
   detail: ResolvedPaidAnalysisDetailV4;
   analysisType: string;
+  evidenceOverride?: ResolvedPaidAnalysisEvidence[];
 };
 
 const DIRECTION_BADGE_CLASS: Record<PaidAnalysisDecisionDirection, string> = {
@@ -96,7 +98,9 @@ function DetailSection({
 export default function PaidAnalysisV4Report({
   detail,
   analysisType,
+  evidenceOverride,
 }: PaidAnalysisV4ReportProps) {
+  const evidenceItems = evidenceOverride?.length ? evidenceOverride : detail.evidence;
   const firstOpportunity = detail.current.opportunities[0];
   const firstCaution = detail.current.cautions[0];
   const firstAction = detail.action[0];
@@ -224,7 +228,7 @@ export default function PaidAnalysisV4Report({
             description="먼저 생활 속 의미를 보여드리고, 전문 계산 내용은 원하는 경우에만 펼쳐볼 수 있습니다."
           >
             <div className="grid gap-4 lg:grid-cols-2">
-              {detail.evidence.map((item) => (
+              {evidenceItems.map((item) => (
                 <article key={item.evidenceKey} className="relative overflow-hidden rounded-[1.6rem] border border-[#e1e2ed] bg-[linear-gradient(145deg,#ffffff_0%,#f8f8fc_100%)] p-5 shadow-[0_12px_28px_rgba(35,39,78,0.045)]">
                   <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-[3rem] bg-[#7c68ea]/[0.055]" />
                   <p className="relative text-xs font-bold tracking-[0.12em] text-[#6f5ce7]">이 결과가 뜻하는 것</p>

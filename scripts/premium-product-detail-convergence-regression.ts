@@ -10,6 +10,7 @@ function assert(condition: boolean, message: string): void {
 
 const sharedDetail = readFileSync("app/components/PremiumProductDetail.tsx", "utf8");
 const reportPreview = readFileSync("app/components/PremiumReportValuePreview.tsx", "utf8");
+const reportPreviewModel = readFileSync("app/lib/paidAnalysisV4PreviewModel.ts", "utf8");
 const catalog = readFileSync("app/components/PremiumCatalogSection.tsx", "utf8");
 const standalonePage = readFileSync("app/paid-analysis/[productId]/page.tsx", "utf8");
 const accessPanel = readFileSync("app/paid-analysis/[productId]/PaidAnalysisAccessPanel.tsx", "utf8");
@@ -39,8 +40,24 @@ for (const required of [
 }
 
 for (const required of [
+  "buildPaidAnalysisV4PreviewModel",
+  "리포트 구성 미리보기",
+  "현재 리포트 생성 기준",
+  "분석 깊이",
+  "시기 반영 방식",
+  "preview.cards.map",
+  "preview.topics.map",
+  "실제 분석 결과를 미리 보여주는 화면이 아니라",
+  "실제 문장과 판단 기준은 선택한 프로필의 계산 결과와 분석 시점에 따라 달라집니다.",
+]) {
+  assert(reportPreview.includes(required), `report value preview missing ${required}`);
+}
+
+for (const required of [
   "getPaidAnalysisTopicConfig",
   "getPeriodAnalysisStrategy",
+  "getAnalysisEditionPolicy",
+  "getProductPricing",
   "config.userQuestion",
   "config.analysisFocus",
   "config.actionFocus",
@@ -49,13 +66,18 @@ for (const required of [
   "strategy.timelineSpec.labels",
   "strategy.reviewArtifact",
   '.replace(/노력কে/g, "노력을")',
-  "리포트 구성 미리보기",
+  "현재 V4 결과 구조에 맞춘 리포트 구성",
   "이 상품의 실제 생성 주제",
   "이 기간 상품의 실제 생성 주제",
-  "실제 분석 결과를 미리 보여주는 화면이 아니라",
-  "실제 문장과 판단 기준은 선택한 프로필의 계산 결과와 분석 시점에 따라 달라집니다.",
+  "월간 에디션",
+  "연간 에디션",
+  "절기 월 흐름",
+  "세운",
+  "DEEP",
+  "LONG RANGE",
+  "SIGNATURE",
 ]) {
-  assert(reportPreview.includes(required), `report value preview missing ${required}`);
+  assert(reportPreviewModel.includes(required), `V4 preview model missing ${required}`);
 }
 
 for (const removedCustomerCopy of [

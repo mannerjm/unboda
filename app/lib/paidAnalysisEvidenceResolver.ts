@@ -25,6 +25,7 @@ const EVIDENCE_LABELS: Record<PaidAnalysisEvidenceKey, string> = {
   seun: "현재 세운",
   element_relations: "오행 사이의 관계",
   fortune_brain: "강점과 취약 축",
+  monthly_cycle: "이번 달 절기 월 흐름",
 };
 
 function formatStrength(facts: PaidAnalysisEvidenceFacts): string | null {
@@ -157,6 +158,32 @@ function formatFortuneBrain(
   return `구조 ${brain.structure} · 강점 축 ${strengths} · 취약 축 ${weaknesses}`;
 }
 
+function formatMonthlyCycle(
+  facts: PaidAnalysisEvidenceFacts,
+): string | null {
+  const monthly = facts.monthlyCycle;
+  if (!monthly || !monthly.representativePillar) return null;
+
+  const pillars = [monthly.startPillar, monthly.representativePillar, monthly.endPillar]
+    .filter((value, index, values) => value && values.indexOf(value) === index);
+  const transition =
+    pillars.length === 1 ? pillars[0] : pillars.join(" → ");
+  const targetLabels = {
+    year: "연지",
+    month: "월지",
+    day: "일지",
+    hour: "시지",
+  } as const;
+  const relationText =
+    monthly.relations.length > 0
+      ? ` · 원국 관계 ${monthly.relations
+          .map((item) => `${targetLabels[item.target]} ${item.type}`)
+          .join(", ")}`
+      : "";
+
+  return `${monthly.year}년 ${monthly.month}월 절기 월 흐름 · 월주 ${transition} · 일간 기준 ${monthly.stemTenGod}${relationText}`;
+}
+
 const EVIDENCE_FORMATTERS: Record<
   PaidAnalysisEvidenceKey,
   (facts: PaidAnalysisEvidenceFacts) => string | null
@@ -170,6 +197,7 @@ const EVIDENCE_FORMATTERS: Record<
   seun: formatSeun,
   element_relations: formatElementRelations,
   fortune_brain: formatFortuneBrain,
+  monthly_cycle: formatMonthlyCycle,
 };
 
 /** Returns null when the saju engine produced no usable value for that key. */

@@ -696,7 +696,10 @@ export async function generatePaidAnalysisDetailV4(
   );
 
   const qualityIssues: PaidAnalysisQualityIssue[] = [
-    ...validateTopicTimelineDates(detail, input.productId).issues,
+    ...validateTopicTimelineDates(detail, input.productId, {
+      year: input.evidenceFacts?.monthlyCycle?.year ?? input.evidenceFacts?.seun?.year,
+      month: input.evidenceFacts?.monthlyCycle?.month,
+    }).issues,
     ...validateActionStructure(detail).issues,
     ...validateCustomerFacingLanguage(detail).issues,
     ...validateCustomerFacingDistinctness(detail).issues,

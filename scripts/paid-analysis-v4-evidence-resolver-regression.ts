@@ -83,10 +83,11 @@ const strengthResolved = resolvePaidAnalysisEvidence(
 ).resolved[0];
 
 assert(
-  !/\d+(?:\.\d+)?\s*\/\s*\d+(?:\.\d+)?/u.test(strengthResolved.fact) &&
-    !strengthResolved.fact.includes("돕는 힘") &&
-    !strengthResolved.fact.includes("누르는 힘"),
-  "strength fact must hide unexplained internal scores from customers",
+  strengthResolved.fact.includes(facts!.strength!.level) &&
+    strengthResolved.fact.includes("일간") &&
+    !/\d+(?:\.\d+)?\s*\/\s*\d+(?:\.\d+)?/u.test(strengthResolved.fact) &&
+    !/(?:돕는 힘|누르는 힘)\s*\d/u.test(strengthResolved.fact),
+  "strength fact must keep the real 신강·신약 basis while hiding only unexplained scores",
 );
 
 const daeunResolved = resolvePaidAnalysisEvidence(
@@ -95,10 +96,9 @@ const daeunResolved = resolvePaidAnalysisEvidence(
 ).resolved[0];
 
 assert(
-  daeunResolved.fact.includes("긴 흐름") &&
-    !daeunResolved.fact.includes("시작 나이") &&
-    !/\d+번째/u.test(daeunResolved.fact),
-  "daeun fact must present the long-term flow without internal indices",
+  daeunResolved.fact.includes(facts!.daeun!.ganji) &&
+    daeunResolved.fact.includes("대운"),
+  "daeun fact must keep the actual 대운 간지 as professional evidence",
 );
 
 const monthlyResolved = resolvePaidAnalysisEvidence(
@@ -108,8 +108,9 @@ const monthlyResolved = resolvePaidAnalysisEvidence(
 
 assert(
   monthlyResolved.fact.includes("2026년 10월") &&
-    !monthlyResolved.fact.includes(facts!.monthlyCycle!.representativePillar),
-  "monthly cycle fact must keep the understandable month while hiding raw pillar notation",
+    monthlyResolved.fact.includes(facts!.monthlyCycle!.representativePillar) &&
+    monthlyResolved.fact.includes("월주"),
+  "monthly cycle fact must keep the actual 월주 and frozen calendar month",
 );
 
 // 7. missing source data is skipped, never faked.

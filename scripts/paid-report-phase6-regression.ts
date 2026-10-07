@@ -96,7 +96,7 @@ for (const contract of [
   "detail.conclusion.immediateAction",
   "detail.coreProblem.title",
   "detail.cause.reasons",
-  "detail.evidence.map",
+  "evidenceItems.map",
   "detail.current.opportunities",
   "detail.current.cautions",
   "detail.timeline.map",
@@ -109,6 +109,10 @@ for (const contract of [
 ]) {
   assert(v4.includes(contract), `V4 report data contract missing: ${contract}`);
 }
+assert(
+  v4.includes("const evidenceItems = evidenceOverride?.length ? evidenceOverride : detail.evidence"),
+  "V4 report must prefer rebuilt professional evidence while retaining the stored fallback",
+);
 assert(v4.includes("<PeriodTimelineSection periodAnalysis={detail.periodAnalysis} />"), "V4 report must preserve period analysis");
 assert(legacy.includes("isPaidAnalysisDetailV4") && legacy.includes("<PaidAnalysisV4Report"), "legacy client must keep V4 dispatch");
 assert(legacy.includes("detail.heroSummary") && legacy.includes("detail.confidence"), "legacy stored report rendering must remain available");

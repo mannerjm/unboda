@@ -51,7 +51,13 @@ assert(v4.includes('text-[15px] leading-7 text-slate-700'), "V4 report must keep
 assert(v4.includes('className="mx-auto max-w-5xl px-4 py-7 sm:px-8 sm:py-9"'), "V4 report must keep mobile-aware outer padding");
 assert(v4.includes('className="mt-5 space-y-4"'), "V4 report must keep the tightened section rhythm");
 assert(v4.includes("결론 먼저") && v4.includes("KEY POINTS") && v4.includes("ACTION GUIDE"), "V4 hierarchy must remain conclusion → key points → action");
-assert(v4.includes("detail.evidence.map") && v4.includes("detail.action.map") && v4.includes("detail.confidence"), "V4 data contracts must remain intact");
+assert(
+  v4.includes("evidenceItems.map")
+    && v4.includes("const evidenceItems = evidenceOverride?.length ? evidenceOverride : detail.evidence")
+    && v4.includes("detail.action.map")
+    && v4.includes("detail.confidence"),
+  "V4 data contracts must remain intact while supporting rebuilt professional evidence",
+);
 
 assert(legacy.includes('text-[15px] leading-7 text-slate-700'), "legacy paid reports must receive the same readable body scale");
 assert(legacy.includes("isPaidAnalysisDetailV4") && legacy.includes("<PaidAnalysisV4Report"), "legacy/V4 dispatch must remain intact");

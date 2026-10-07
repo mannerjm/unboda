@@ -55,6 +55,7 @@ export function mergePaidAnalysisV4ResponseTelemetry(
   return {
     status: last.status,
     incompleteReason: last.incompleteReason,
+    serviceTier: last.serviceTier,
     inputTokens: sumTelemetryField(telemetry, "inputTokens"),
     outputTokens: sumTelemetryField(telemetry, "outputTokens"),
     reasoningTokens: sumTelemetryField(telemetry, "reasoningTokens"),

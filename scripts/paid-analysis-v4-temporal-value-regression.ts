@@ -1,6 +1,7 @@
 import { buildPaidAnalysisDetailPromptV4 } from "../app/lib/paidAnalysisDetailPrompt";
 import { buildPaidAnalysisInputFromProfile } from "../app/lib/paidAnalysisProfileInput";
 import { getAnalysisEditionPolicy } from "../app/lib/analysisEditionPolicy";
+import type { ProfileDto } from "../app/lib/profiles/types";
 import {
   getLaunchProductIds,
   resolvePaidAnalysisLaunchSpecialization,
@@ -10,7 +11,7 @@ function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error("FAIL: " + message);
 }
 
-const profile = {
+const profile: ProfileDto = {
   id: "00000000-0000-0000-0000-000000000000",
   label: "테스트",
   relationshipType: "self",

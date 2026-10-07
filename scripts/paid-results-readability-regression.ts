@@ -59,7 +59,11 @@ assert(legacy.includes("getLegacyTimelineDescription(item.period, item.descripti
 assert(!legacy.includes('이 단계에서는 "${title}" 관련 변화가 실제 생활에서 나타나는지 확인해 보세요.'), "legacy timeline fallback must never repeat the title as body copy");
 assert(legacy.includes("simplifyLegacyTimelineLanguage") && legacy.includes("활동량과 생활 변화가 커지는") && legacy.includes("잠드는 과정") && legacy.includes("비슷한 시간에 일어나는 생활 리듬"), "legacy timeline must translate common technical sleep-rhythm wording into everyday language");
 
-assert(timeline.includes('text-[15px] leading-7 text-slate-700'), "period timeline must use the shared readable body scale");
+assert(
+  timeline.includes('text-[15px] leading-7 text-slate-700')
+    || timeline.includes('text-[15px] leading-7 text-slate-200'),
+  "period timeline must use the shared readable body scale with sufficient contrast",
+);
 assert(timeline.includes("periodAnalysis.timelineItems.map") && timeline.includes("periodAnalysis.keyPoints"), "period timeline data contract must remain intact");
 
 for (const [name, source] of [

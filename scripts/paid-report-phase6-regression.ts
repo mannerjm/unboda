@@ -68,7 +68,11 @@ for (const [name, source] of reportSurfaces) {
   );
 }
 
-assert(v4.includes('bg-[#f5f7fc]'), "V4 report must use the cool reading canvas");
+assert(
+  v4.includes("bg-[linear-gradient(180deg,#f7f7fb_0%,#f1f2f7_42%,#f6f7fb_100%)]")
+    && v4.includes("bg-[radial-gradient(circle_at_82%_14%"),
+  "V4 report must use the premium cool reading canvas and hero treatment",
+);
 assert(v4.includes("결론 먼저"), "V4 report must lead with the conclusion");
 assert(v4.includes("KEY POINTS") && v4.includes("핵심 포인트"), "V4 report must surface quick key points before details");
 assert(

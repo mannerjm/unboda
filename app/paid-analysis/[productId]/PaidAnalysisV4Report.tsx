@@ -3,6 +3,10 @@ import type {
   PaidAnalysisDecisionDirection,
   ResolvedPaidAnalysisDetailV4,
 } from "@/app/lib/paidAnalysisDetailOutput";
+import {
+  formatPaidAnalysisEvidenceFactForCustomer,
+  getPaidAnalysisEvidenceCustomerLabel,
+} from "@/app/lib/paidAnalysisV4CustomerPresentation";
 import PeriodTimelineSection from "./PeriodTimelineSection";
 
 type PaidAnalysisV4ReportProps = {
@@ -227,8 +231,12 @@ export default function PaidAnalysisV4Report({
                   <p className="relative mt-3 text-[15px] font-medium leading-7 text-slate-700">{item.meaning}</p>
                   <p className="relative mt-2 text-sm leading-6 text-slate-600">{item.linkage}</p>
                   <details className="relative mt-4 rounded-[1.1rem] border border-[#ddd9ef] bg-white/90 px-4 py-3.5">
-                    <summary className="cursor-pointer text-sm font-bold text-[#5e4bd1]">계산 근거 펼쳐보기 · {item.label}</summary>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">{item.fact}</p>
+                    <summary className="cursor-pointer text-sm font-bold text-[#5e4bd1]">
+                      계산 근거 펼쳐보기 · {getPaidAnalysisEvidenceCustomerLabel(item.evidenceKey)}
+                    </summary>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">
+                      {formatPaidAnalysisEvidenceFactForCustomer(item.evidenceKey, item.fact)}
+                    </p>
                   </details>
                 </article>
               ))}
@@ -252,7 +260,7 @@ export default function PaidAnalysisV4Report({
                     <article key={item.situation} className="rounded-[1.25rem] border border-emerald-100 bg-white/90 p-4 shadow-sm">
                       <p className="text-sm font-extrabold text-[#11162d]">{item.situation}</p>
                       <p className="mt-2 text-[15px] leading-7 text-slate-700">{item.implication}</p>
-                      <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-sm leading-6 text-slate-600">관찰 신호 · {item.observableSignal}</p>
+                      <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-sm leading-6 text-slate-600">확인할 신호 · {item.observableSignal}</p>
                     </article>
                   ))}
                 </div>
@@ -267,7 +275,7 @@ export default function PaidAnalysisV4Report({
                     <article key={item.situation} className="rounded-[1.25rem] border border-rose-100 bg-white/90 p-4 shadow-sm">
                       <p className="text-sm font-extrabold text-[#11162d]">{item.situation}</p>
                       <p className="mt-2 text-[15px] leading-7 text-slate-700">{item.implication}</p>
-                      <p className="mt-3 rounded-xl bg-rose-50 px-3 py-2 text-sm leading-6 text-slate-600">관찰 신호 · {item.observableSignal}</p>
+                      <p className="mt-3 rounded-xl bg-rose-50 px-3 py-2 text-sm leading-6 text-slate-600">확인할 신호 · {item.observableSignal}</p>
                     </article>
                   ))}
                 </div>

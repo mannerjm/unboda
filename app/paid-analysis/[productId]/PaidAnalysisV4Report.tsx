@@ -27,19 +27,21 @@ function SectionHeader({
   eyebrow,
   title,
   description,
+  tone = "default",
 }: {
   eyebrow: string;
   title: string;
   description?: string;
+  tone?: "default" | "inverse";
 }) {
   return (
     <div className="max-w-3xl">
       <div className="flex items-center gap-2.5">
-        <span className="h-1.5 w-1.5 rounded-full bg-[#7c68ea] shadow-[0_0_0_5px_rgba(124,104,234,0.08)]" />
-        <p className="text-xs font-bold tracking-[0.16em] text-[#6f5ce7]">{eyebrow}</p>
+        <span className={`h-1.5 w-1.5 rounded-full ${tone === "inverse" ? "bg-[#c9c2ff] shadow-[0_0_0_5px_rgba(201,194,255,0.10)]" : "bg-[#7c68ea] shadow-[0_0_0_5px_rgba(124,104,234,0.08)]"}`} />
+        <p className={`text-xs font-bold tracking-[0.16em] ${tone === "inverse" ? "text-[#c9c2ff]" : "text-[#6f5ce7]"}`}>{eyebrow}</p>
       </div>
-      <h2 className="mt-3 text-xl font-black tracking-[-0.025em] text-[#11162d] sm:text-2xl">{title}</h2>
-      {description ? <p className="mt-2 max-w-2xl text-[15px] leading-7 text-slate-600">{description}</p> : null}
+      <h2 className={`mt-3 text-xl font-black tracking-[-0.025em] sm:text-2xl ${tone === "inverse" ? "text-white" : "text-[#11162d]"}`}>{title}</h2>
+      {description ? <p className={`mt-2 max-w-2xl text-[15px] leading-7 ${tone === "inverse" ? "text-slate-300" : "text-slate-600"}`}>{description}</p> : null}
     </div>
   );
 }
@@ -297,15 +299,10 @@ export default function PaidAnalysisV4Report({
                 eyebrow="ACTION GUIDE"
                 title="행동 제안"
                 description="읽고 끝나지 않도록 바로 실행할 행동과 피할 행동을 마지막에 모았습니다."
+                tone="inverse"
               />
-              <style>{`
-                .premium-action-guide h2 { color: white; }
-                .premium-action-guide > div > div > p { color: rgb(203 213 225); }
-                .premium-action-guide > div > div > div > p { color: rgb(196 181 253); }
-              `}</style>
-              <div className="premium-action-guide absolute inset-0 pointer-events-none" aria-hidden="true" />
               <div className="mt-6 grid gap-5 lg:grid-cols-2">
-                <div className="rounded-[1.65rem] border border-white/12 bg-white/[0.08] p-5 backdrop-bl">
+                <div className="rounded-[1.65rem] border border-white/12 bg-white/[0.08] p-5 backdrop-blur-sm">
                   <p className="text-xs font-bold tracking-[0.1em] text-[#c9c2ff]">무엇을 할 것인가</p>
                   <div className="mt-4 space-y-3">
                     {detail.action.map((item, index) => (

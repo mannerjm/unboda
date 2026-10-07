@@ -7,10 +7,7 @@ import {
   getLaunchProductIds,
   getPaidAnalysisTopicConfig,
 } from "./paidAnalysisTopicConfig";
-import {
-  getProductPricing,
-  type PricingFamily,
-} from "./productPricing";
+import { getProductPricing } from "./productPricing";
 import type { PremiumProductDefinition } from "./premiumProductRegistry";
 
 export type PaidAnalysisV4PreviewCard = {
@@ -30,7 +27,6 @@ export type PaidAnalysisV4PreviewModel = {
   kind: "topic" | "period";
   eyebrow: string;
   question: string;
-  tier: PaidAnalysisV4PreviewValueNote & { family: PricingFamily };
   timeValue: PaidAnalysisV4PreviewValueNote;
   cards: readonly PaidAnalysisV4PreviewCard[];
   topicLabel: string;
@@ -43,41 +39,6 @@ export function normalizePaidAnalysisPreviewSentence(value: string): string {
     .trim()
     .replace(/노력কে/g, "노력을")
     .replace(/[?？.。]+$/, "");
-}
-
-const TIER_COPY: Readonly<Record<PricingFamily, PaidAnalysisV4PreviewValueNote>> = {
-  CORE: {
-    badge: "CORE",
-    title: "핵심 판단에 필요한 구조를 끝까지 연결",
-    description:
-      "상품의 핵심 질문을 결론·원인·근거·현실 신호·행동 기준으로 이어서 실제 판단에 쓰기 쉽게 구성합니다.",
-  },
-  DEEP: {
-    badge: "DEEP",
-    title: "더 넓은 범위와 서로 다른 근거 축을 교차 확인",
-    description:
-      "핵심 통찰을 서로 다른 계산 근거와 연결하고, 인접한 다른 주제와의 경계까지 분리해 더 깊게 검토합니다.",
-  },
-  LONG_RANGE: {
-    badge: "LONG RANGE",
-    title: "긴 기간을 여러 전략 구간으로 나누어 비교",
-    description:
-      "연간·다년·대운 범위를 여러 변화 구간과 전략 책임으로 나누고, 다음 검토 시점까지 이어지는 기준을 만듭니다.",
-  },
-  SIGNATURE: {
-    badge: "SIGNATURE",
-    title: "생애 구간을 가로질러 반복 구조와 전환을 종합",
-    description:
-      "한 시점의 운세가 아니라 생애 전반의 반복 구조와 전환 구간을 함께 비교해 장기적인 판단 기준으로 정리합니다.",
-  },
-};
-
-function buildTierValue(productId: string): PaidAnalysisV4PreviewModel["tier"] {
-  const pricing = getProductPricing(productId);
-  return {
-    family: pricing.family,
-    ...TIER_COPY[pricing.family],
-  };
 }
 
 function buildTopicTimeValue(policy: AnalysisEditionPolicy | null): PaidAnalysisV4PreviewValueNote {
@@ -100,7 +61,7 @@ function buildTopicTimeValue(policy: AnalysisEditionPolicy | null): PaidAnalysis
   }
 
   return {
-    badge: "장기 기준",
+    badge: "평생 에디션",
     title: "특정 월·연도보다 반복되는 구조와 선택 기준에 집중",
     description:
       "평생형 주제는 억지로 현재 월이나 연도를 붙이지 않고, 반복되는 성향·조건·관찰 신호와 장기적인 재검토 기준을 중심으로 구성합니다.",
@@ -113,7 +74,7 @@ function buildPeriodTimeValue(
 ): PaidAnalysisV4PreviewValueNote {
   if (policy === "TARGET_MONTH" || timeGranularity === "month") {
     return {
-      badge: "월 기준 기간형",
+      badge: "월간 에디션",
       title: "결제 시점에 고정된 실제 기준 월을 따라 분석",
       description:
         "이번 달·다음 달처럼 선택한 기준 월을 고정하고, 월 안의 변화 구간과 실행·재검토 기준을 기간 전용 구조로 보여줍니다.",
@@ -122,7 +83,7 @@ function buildPeriodTimeValue(
 
   if (policy === "TARGET_YEAR" || timeGranularity === "year") {
     return {
-      badge: "연 기준 기간형",
+      badge: "연간 에디션",
       title: "결제 시점에 고정된 실제 기준 연도를 따라 분석",
       description:
         "올해·내년의 연도 흐름을 고정해 연간 압력·자원·우선순위 변화와 다음 검토 기준을 기간 전용 구조로 나눕니다.",
@@ -131,7 +92,7 @@ function buildPeriodTimeValue(
 
   if (policy === "ROLLING_MULTIYEAR" || timeGranularity === "multi-year") {
     return {
-      badge: "다년 기간형",
+      badge: "다년 에디션",
       title: "연속된 여러 해의 차이와 전환 순서를 비교",
       description:
         "3년처럼 이어지는 기간을 연도별 역할과 변화 구간으로 나누고, 앞선 해의 조건이 다음 해의 준비와 선택에 어떻게 이어지는지 비교합니다.",
@@ -140,7 +101,7 @@ function buildPeriodTimeValue(
 
   if (policy === "DAEUN" || timeGranularity === "daeun") {
     return {
-      badge: "대운 기간형",
+      badge: "대운 에디션",
       title: "현재 대운 구간의 장기 역할과 전환을 분석",
       description:
         "현재 대운의 큰 조건을 여러 전략 구간으로 나누어, 유지할 구조·바꿀 조건·다음 전환 전에 준비할 기준을 정리합니다.",
@@ -148,7 +109,7 @@ function buildPeriodTimeValue(
   }
 
   return {
-    badge: "생애 종합형",
+    badge: "평생 에디션",
     title: "생애 전체의 반복 구조와 전환 구간을 종합",
     description:
       "특정 한 해의 좋고 나쁨보다 생애 구간을 가로지르는 반복 패턴과 전환 조건을 비교해 장기 재검토 기준으로 정리합니다.",
@@ -177,9 +138,8 @@ function buildTopicPreview(product: PremiumProductDefinition): PaidAnalysisV4Pre
 
   return {
     kind: "topic",
-    eyebrow: "현재 V4 결과 구조에 맞춘 리포트 구성",
+    eyebrow: "실제 리포트 결과 구조에 맞춘 구성",
     question: normalizePaidAnalysisPreviewSentence(config.userQuestion),
-    tier: buildTierValue(product.id),
     timeValue: buildTopicTimeValue(policy),
     cards: [
       {
@@ -226,15 +186,12 @@ function buildTopicPreview(product: PremiumProductDefinition): PaidAnalysisV4Pre
           "비교적 분명하게 볼 수 있는 부분, 현실에서 추가로 확인해야 할 부분, 이 분석만으로 정할 수 없는 것을 나누어 보여드립니다.",
       },
     ],
-    topicLabel:
-      pricing.family === "DEEP"
-        ? "이 DEEP 상품이 실제로 깊게 보는 범위"
-        : "이 상품의 실제 생성 주제",
+    topicLabel: "이 상품의 실제 생성 주제",
     topics: scopeItems,
     footer:
       config.decisionType === "decision"
-        ? "실제 V4 결과는 결론만 밀어붙이지 않고, 판단 근거·현실 조건·결정 체크·행동 완료 기준까지 연결합니다."
-        : "실제 V4 결과는 한 가지 결론으로 몰아가지 않고, 반복 구조·현재 신호·행동 기준·재검토 조건을 함께 정리합니다.",
+        ? "실제 결과는 결론만 밀어붙이지 않고, 판단 근거·현실 조건·결정 체크·행동 완료 기준까지 연결합니다."
+        : "실제 결과는 한 가지 결론으로 몰아가지 않고, 반복 구조·현재 신호·행동 기준·재검토 조건을 함께 정리합니다.",
   };
 }
 
@@ -249,9 +206,8 @@ function buildPeriodPreview(product: PremiumProductDefinition): PaidAnalysisV4Pr
 
   return {
     kind: "period",
-    eyebrow: "현재 V4 기간형 결과 구조에 맞춘 리포트 구성",
+    eyebrow: "실제 기간형 리포트 결과 구조에 맞춘 구성",
     question: normalizePaidAnalysisPreviewSentence(strategy.coreQuestion),
-    tier: buildTierValue(product.id),
     timeValue: buildPeriodTimeValue(policy, strategy.timeGranularity),
     cards: [
       {
@@ -298,7 +254,7 @@ function buildPeriodPreview(product: PremiumProductDefinition): PaidAnalysisV4Pr
     ],
     topicLabel: "이 기간 상품의 실제 생성 주제",
     topics: responsibilities.slice(0, 4),
-    footer: `실제 V4 결과는 ${timelineLabels.join(" · ")} 흐름을 기준으로 나누며, 결제 시점에 고정된 기준 기간에 맞춰 판단 근거와 재검토 기준을 생성합니다.`,
+    footer: `실제 결과는 ${timelineLabels.join(" · ")} 흐름을 기준으로 나누며, 결제 시점에 고정된 기준 기간에 맞춰 판단 근거와 재검토 기준을 생성합니다.`,
   };
 }
 

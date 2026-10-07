@@ -163,7 +163,92 @@ const withDateInBody = buildV4({
 
 assert(
   !validateTopicTimelineDates(withDateInBody, "career").ok,
-  "concrete years inside changeSignal must fail for TOPIC products",
+  "concrete years inside changeSignal must fail for TOPIC products without edition facts",
+);
+
+const yearlyExact = buildV4({
+  timeline: [
+    {
+      label: "2026년 기준",
+      changeSignal: sentence("2026년에 확인할 변화 신호."),
+      preparation: sentence("올해 준비."),
+    },
+    ...buildV4().timeline.slice(1),
+  ],
+});
+
+assert(
+  validateTopicTimelineDates(yearlyExact, "money-income-stability", { year: 2026 }).ok,
+  "YEARLY TOPIC must allow its exact purchased edition year",
+);
+
+const yearlyWrong = buildV4({
+  timeline: [
+    {
+      label: "2027년 기준",
+      changeSignal: sentence("변화 신호."),
+      preparation: sentence("준비."),
+    },
+    ...buildV4().timeline.slice(1),
+  ],
+});
+
+assert(
+  !validateTopicTimelineDates(yearlyWrong, "money-income-stability", { year: 2026 }).ok,
+  "YEARLY TOPIC must reject a different year",
+);
+
+assert(
+  !validateTopicTimelineDates(withYear, "money-income-stability", { year: 2026 }).ok,
+  "YEARLY TOPIC must still reject a month-level claim such as 2026년 10월",
+);
+
+const monthlyExact = buildV4({
+  timeline: [
+    {
+      label: "2026년 10월 기준",
+      changeSignal: sentence("10월에 확인할 변화 신호."),
+      preparation: sentence("2026년 기준으로 준비."),
+    },
+    ...buildV4().timeline.slice(1),
+  ],
+});
+
+assert(
+  validateTopicTimelineDates(monthlyExact, "career-job-change", { year: 2026, month: 10 }).ok,
+  "MONTHLY TOPIC must allow its exact purchased edition year/month",
+);
+
+const monthlyWrong = buildV4({
+  timeline: [
+    {
+      label: "2026년 11월 기준",
+      changeSignal: sentence("변화 신호."),
+      preparation: sentence("준비."),
+    },
+    ...buildV4().timeline.slice(1),
+  ],
+});
+
+assert(
+  !validateTopicTimelineDates(monthlyWrong, "career-job-change", { year: 2026, month: 10 }).ok,
+  "MONTHLY TOPIC must reject a different month",
+);
+
+const lifetimeDated = buildV4({
+  timeline: [
+    {
+      label: "2026년 기준",
+      changeSignal: sentence("변화 신호."),
+      preparation: sentence("준비."),
+    },
+    ...buildV4().timeline.slice(1),
+  ],
+});
+
+assert(
+  !validateTopicTimelineDates(lifetimeDated, "career-job-fit", { year: 2026 }).ok,
+  "LIFETIME TOPIC must remain free of artificial calendar claims",
 );
 
 // PERIOD products may name real periods.

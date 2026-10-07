@@ -46,7 +46,7 @@ function makePlainOutput(): PaidAnalysisDetailOutputV4 {
           title: "변화의 속도보다 선택의 품질이 중요합니다",
           observedStructure: "올해 계산 흐름에는 변화 자극과 실행 부담이 동시에 나타납니다.",
           realWorldPattern: "기회가 여러 개 보일수록 빠르게 고르기보다 조건을 나눠 비교할 때 선택 실수가 줄어들 수 있습니다.",
-          problemLinkage: "한 번에 여러 선택지를 추진하기보다 우선순위를 정해 가장 중요한 조건부터 확인해야 합니다.",
+          problemLinkage: "한 번에 여러 선택지를 추진하기보다 먼저 볼 조건을 정해 가장 중요한 조건부터 확인해야 합니다.",
         },
       ],
     },
@@ -64,7 +64,7 @@ function makePlainOutput(): PaidAnalysisDetailOutputV4 {
       {
         evidenceKey: "element_balance",
         meaning: "성과를 내는 속도와 장기적으로 버틸 수 있는 업무 방식의 균형을 함께 봐야 한다는 뜻입니다.",
-        linkage: "보상만 좋아진 선택보다 업무 방식과 지속 가능성까지 나아지는지를 확인해야 합니다.",
+        linkage: "보상만 좋아진 선택보다 업무 방식이 좋아지고 오래 이어갈 수 있는지를 확인해야 합니다.",
       },
     ],
     current: {
@@ -100,7 +100,7 @@ function makePlainOutput(): PaidAnalysisDetailOutputV4 {
         {
           situation: "여러 제안을 동시에 비교하면서 핵심 기준이 자주 바뀌는 경우",
           implication: "무엇이 중요한지 흐려져 조건이 비슷한 선택지 사이에서 피로가 커질 수 있습니다.",
-          observableSignal: "보상·업무·성장 중 우선순위가 대화할 때마다 달라집니다.",
+          observableSignal: "보상·업무·성장 중 먼저 보는 기준이 대화할 때마다 달라집니다.",
         },
       ],
     },
@@ -108,7 +108,7 @@ function makePlainOutput(): PaidAnalysisDetailOutputV4 {
       {
         label: "조건을 분리하는 단계",
         changeSignal: "현재 자리의 불만과 새 자리의 실제 조건을 서로 다른 항목으로 적을 수 있게 됩니다.",
-        preparation: "업무 범위·보상·성장·지속 가능성을 각각 비교할 기준을 정합니다.",
+        preparation: "업무 범위·보상·성장·오래 이어갈 수 있는지를 각각 비교할 기준을 정합니다.",
       },
       {
         label: "제안의 구체성을 확인하는 단계",
@@ -128,7 +128,7 @@ function makePlainOutput(): PaidAnalysisDetailOutputV4 {
     ],
     action: [
       {
-        action: "현재 자리와 새 제안의 조건을 업무 범위·보상·성장·지속 가능성 네 항목으로 비교하세요.",
+        action: "현재 자리와 새 제안의 조건을 업무 범위·보상·성장·오래 이어갈 수 있는지 네 항목으로 비교하세요.",
         target: "현재 자리와 새 제안의 실제 조건",
         condition: "새 제안의 담당 업무와 보상 조건을 구체적으로 확인할 수 있을 때 비교합니다.",
         completionCriteria: "네 항목에서 현재보다 좋아지는 부분과 나빠지는 부분을 각각 설명할 수 있으면 완료입니다.",
@@ -148,7 +148,7 @@ function makePlainOutput(): PaidAnalysisDetailOutputV4 {
       },
       {
         type: "bad_condition",
-        behavior: "직함이나 연봉 하나만 좋아졌다는 이유로 역할 범위와 지속 가능성을 생략하기",
+        behavior: "직함이나 연봉 하나만 좋아졌다는 이유로 역할 범위와 오래 이어갈 수 있는지를 확인하지 않기",
         reason: "이동 후 만족도는 보상뿐 아니라 실제 책임과 업무 방식이 함께 달라질 때 높아질 수 있습니다.",
       },
     ],

@@ -43,7 +43,6 @@ for (const required of [
   "buildPaidAnalysisV4PreviewModel",
   "리포트 구성 미리보기",
   "현재 리포트 생성 기준",
-  "분석 깊이",
   "시기 반영 방식",
   "preview.cards.map",
   "preview.topics.map",
@@ -52,6 +51,20 @@ for (const required of [
 ]) {
   assert(reportPreview.includes(required), `report value preview missing ${required}`);
 }
+
+for (const forbidden of [
+  '"현재 V4 결과 구조에 맞춘 리포트 구성"',
+  '"현재 V4 기간형 결과 구조에 맞춘 리포트 구성"',
+  '"실제 V4 결과는',
+]) {
+  assert(!reportPreviewModel.includes(forbidden), `customer preview leaked internal version copy: ${forbidden}`);
+}
+
+assert(
+  !reportPreview.includes("preview.tier") &&
+    !reportPreview.includes("분석 깊이"),
+  "customer preview must not render internal depth tiers",
+);
 
 for (const required of [
   "getPaidAnalysisTopicConfig",
@@ -66,16 +79,12 @@ for (const required of [
   "strategy.timelineSpec.labels",
   "strategy.reviewArtifact",
   '.replace(/노력কে/g, "노력을")',
-  "현재 V4 결과 구조에 맞춘 리포트 구성",
   "이 상품의 실제 생성 주제",
   "이 기간 상품의 실제 생성 주제",
   "월간 에디션",
   "연간 에디션",
   "절기 월 흐름",
   "세운",
-  "DEEP",
-  "LONG RANGE",
-  "SIGNATURE",
 ]) {
   assert(reportPreviewModel.includes(required), `V4 preview model missing ${required}`);
 }

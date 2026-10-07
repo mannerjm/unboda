@@ -40,7 +40,6 @@ for (const productId of launchIds) {
   const pricing = getProductPricing(productId);
   familyCounts[pricing.family] += 1;
 
-  assert(model.tier.family === pricing.family, productId + " preview must use the live price family");
   assert(model.cards.length === 6, productId + " preview must mirror the six V4 customer-facing stages");
   assert(model.cards[0]?.title.includes("결론"), productId + " preview must lead with the conclusion");
   assert(model.cards[2]?.title.includes("근거"), productId + " preview must explain evidence separation");
@@ -86,7 +85,7 @@ for (const productId of launchIds) {
     } else if (policy === "LIFETIME") {
       topicPolicyCounts.LIFETIME += 1;
       assert(
-        model.timeValue.badge === "장기 기준" &&
+        model.timeValue.badge === "평생 에디션" &&
           model.timeValue.description.includes("억지로 현재 월이나 연도를 붙이지 않고"),
         productId + " lifetime topic preview must avoid fake time personalization",
       );
@@ -97,11 +96,7 @@ for (const productId of launchIds) {
     if (pricing.family === "DEEP") {
       assert(
         model.topics.length >= 5,
-        productId + " DEEP preview must show the broader five-item analysis scope",
-      );
-      assert(
-        model.tier.description.includes("서로 다른 계산 근거"),
-        productId + " DEEP preview must explain deeper evidence ownership",
+        productId + " DEEP products may retain broader internal scope without exposing the tier label",
       );
     }
   }
@@ -126,6 +121,32 @@ assert(
   !previewSource.includes("CompatibilityReportValuePreview") &&
     !previewSource.includes("specialAnalysisProducts"),
   "paid-analysis V4 preview must not absorb professional compatibility previews",
+);
+assert(
+  !previewSource.includes("preview.tier") &&
+    !previewSource.includes("분석 깊이") &&
+    !previewSource.includes("CORE") &&
+    !previewSource.includes("DEEP") &&
+    !previewSource.includes("LONG RANGE") &&
+    !previewSource.includes("SIGNATURE"),
+  "customer preview must not expose internal price/depth tier labels",
+);
+
+const previewModelSource = readFileSync(
+  "app/lib/paidAnalysisV4PreviewModel.ts",
+  "utf8",
+);
+assert(
+  !previewModelSource.includes('"현재 V4 결과 구조에 맞춘 리포트 구성"') &&
+    !previewModelSource.includes('"현재 V4 기간형 결과 구조에 맞춘 리포트 구성"') &&
+    !previewModelSource.includes('"실제 V4 결과는'),
+  "customer-facing preview copy must not expose the internal V4 version name",
+);
+assert(
+  previewModelSource.includes('"월간 에디션"') &&
+    previewModelSource.includes('"연간 에디션"') &&
+    previewModelSource.includes('"평생 에디션"'),
+  "customer preview must keep edition information visible",
 );
 
 const compatibilitySource = readFileSync(

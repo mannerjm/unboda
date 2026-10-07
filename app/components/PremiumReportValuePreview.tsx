@@ -1,114 +1,12 @@
-import { getPeriodAnalysisStrategy } from "@/app/lib/analysisPeriodStrategy";
-import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
+import { buildPaidAnalysisV4PreviewModel } from "@/app/lib/paidAnalysisV4PreviewModel";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 
-type PreviewCard = {
-  step: string;
-  title: string;
-  description: string;
-};
-
-type PreviewModel = {
-  eyebrow: string;
-  question: string;
-  cards: readonly PreviewCard[];
-  topicLabel: string;
-  topics: readonly string[];
-  footer: string;
-};
-
-function normalizeSentence(value: string): string {
-  return value
-    .trim()
-    .replace(/노력কে/g, "노력을")
-    .replace(/[?？.。]+$/, "");
-}
-
-function buildTopicPreview(product: PremiumProductDefinition): PreviewModel | null {
-  const config = getPaidAnalysisTopicConfig(product.id);
-  if (!config) return null;
-
-  const analysisFocus = config.analysisFocus.filter(Boolean);
-  const actionFocus = config.actionFocus.filter(Boolean);
-  const firstFocus = analysisFocus[0] ?? product.description;
-  const secondFocus = analysisFocus[1] ?? analysisFocus[0] ?? product.description;
-  const firstAction = actionFocus[0] ?? "현재 상황에서 먼저 실행할 행동과 다시 점검할 기준";
-
-  return {
-    eyebrow: "선택한 주제에 맞춘 리포트 구성",
-    question: normalizeSentence(config.userQuestion),
-    cards: [
-      {
-        step: "01",
-        title: "핵심 결론과 우선 초점",
-        description: `“${normalizeSentence(config.userQuestion)}”라는 질문을 기준으로 현재 방향과 먼저 볼 초점을 정리합니다.`,
-      },
-      {
-        step: "02",
-        title: "원인과 반복 구조",
-        description: firstFocus,
-      },
-      {
-        step: "03",
-        title: "현실에서 확인할 신호",
-        description: secondFocus,
-      },
-      {
-        step: "04",
-        title: config.decisionType === "decision" ? "결정 체크와 행동 기준" : "행동과 재검토 기준",
-        description: firstAction,
-      },
-    ],
-    topicLabel: "이 상품의 실제 생성 주제",
-    topics: analysisFocus.slice(0, 4),
-    footer: config.decisionType === "decision"
-      ? "결정형 분석은 결론만 제시하지 않고, 실제 조건을 다시 확인할 결정 체크와 실행 기준까지 함께 구성합니다."
-      : "탐색형 분석은 한 가지 결론으로 몰아가지 않고, 반복 구조와 현재 신호를 바탕으로 유지·조정할 기준을 정리합니다.",
-  };
-}
-
-function buildPeriodPreview(product: PremiumProductDefinition): PreviewModel | null {
-  const strategy = getPeriodAnalysisStrategy(product.id);
-  if (!strategy) return null;
-
-  const responsibilities = strategy.requiredInsights.map((insight) => insight.title);
-  const timelineLabels = strategy.timelineSpec.labels;
-
-  return {
-    eyebrow: "선택한 기간에 맞춘 리포트 구성",
-    question: normalizeSentence(strategy.coreQuestion),
-    cards: [
-      {
-        step: "01",
-        title: "기간 전체 핵심 흐름",
-        description: `${normalizeSentence(strategy.coreQuestion)}를 기준으로 이 기간 전체를 관통하는 흐름을 먼저 정리합니다.`,
-      },
-      {
-        step: "02",
-        title: responsibilities[0] ?? "기간 고유 분석",
-        description: strategy.focus[0] ?? product.description,
-      },
-      {
-        step: "03",
-        title: "기간별 변화 구간",
-        description: timelineLabels.slice(0, 3).join(" · "),
-      },
-      {
-        step: "04",
-        title: "실행·재검토 기준",
-        description: strategy.reviewArtifact,
-      },
-    ],
-    topicLabel: "이 기간 상품의 실제 생성 주제",
-    topics: responsibilities.slice(0, 4),
-    footer: `시간 흐름은 ${timelineLabels.join(" · ")} 기준으로 나누어 보며, 실제 연·월·기간 표시는 결제 시점에 고정된 기준 기간에 맞춰 생성됩니다.`,
-  };
-}
-
-export default function PremiumReportValuePreview({ product }: { product: PremiumProductDefinition }) {
-  const preview = product.kind === "PERIOD"
-    ? buildPeriodPreview(product)
-    : buildTopicPreview(product);
+export default function PremiumReportValuePreview({
+  product,
+}: {
+  product: PremiumProductDefinition;
+}) {
+  const preview = buildPaidAnalysisV4PreviewModel(product);
 
   if (!preview) return null;
 
@@ -118,39 +16,73 @@ export default function PremiumReportValuePreview({ product }: { product: Premiu
         <p className="text-xs font-bold tracking-[0.14em] text-slate-500">리포트 구성 미리보기</p>
         <p className="mt-2 text-base font-bold text-[#11162d]">{preview.eyebrow}</p>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          실제 분석 결과를 미리 보여주는 화면이 아니라, 선택한 상품의 실제 생성 주제와 결과 구성 방식을 안내합니다.
+          실제 분석 결과를 미리 보여주는 화면이 아니라, 현재 리포트 생성 기준에서 어떤 순서·깊이·시기 근거로 분석되는지 안내합니다.
         </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="rounded-full border border-[#d8d3ff] bg-white/80 px-3 py-1.5 text-xs font-bold text-[#5e4bd1]">
+            {preview.tier.badge}
+          </span>
+          <span className="rounded-full border border-[#dce1ef] bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600">
+            {preview.timeValue.badge}
+          </span>
+        </div>
       </div>
 
       <div className="p-5 sm:p-6">
         <div className="rounded-2xl bg-[#171a3d] px-4 py-4 text-white">
-          <p className="text-xs font-bold tracking-[0.12em] text-slate-500">이 리포트가 답하는 핵심 질문</p>
+          <p className="text-xs font-bold tracking-[0.12em] text-[#aaa2f2]">이 리포트가 답하는 핵심 질문</p>
           <p className="mt-2 text-sm font-semibold leading-6">{preview.question}</p>
         </div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <article className="rounded-2xl border border-[#d8d3ff] bg-[#f8f7ff] p-4">
+            <p className="text-xs font-bold tracking-[0.08em] text-[#6f5ce7]">분석 깊이</p>
+            <p className="mt-2 text-sm font-bold leading-6 text-[#11162d]">{preview.tier.title}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{preview.tier.description}</p>
+          </article>
+          <article className="rounded-2xl border border-[#dce1ef] bg-[#f7f8fc] p-4">
+            <p className="text-xs font-bold tracking-[0.08em] text-slate-500">시기 반영 방식</p>
+            <p className="mt-2 text-sm font-bold leading-6 text-[#11162d]">{preview.timeValue.title}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{preview.timeValue.description}</p>
+          </article>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {preview.cards.map((card) => (
-            <div key={card.step} className="rounded-2xl border border-[#dce1ef] bg-[#f7f8fc] p-4">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#6f5ce7] text-xs font-bold text-white">{card.step}</span>
-                <p className="text-sm font-bold text-[#11162d]">{card.title}</p>
+            <article key={card.step} className="rounded-2xl border border-[#dce1ef] bg-white p-4 shadow-[0_4px_14px_rgba(33,40,83,0.04)]">
+              <div className="flex items-start gap-3">
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#6f5ce7] text-xs font-bold text-white">
+                  {card.step}
+                </span>
+                <div>
+                  <p className="text-[11px] font-bold tracking-[0.08em] text-[#6f5ce7]">{card.eyebrow}</p>
+                  <p className="mt-1 text-sm font-bold leading-6 text-[#11162d]">{card.title}</p>
+                </div>
               </div>
               <p className="mt-3 text-sm leading-6 text-slate-700">{card.description}</p>
-            </div>
+            </article>
           ))}
         </div>
 
-        <div className="mt-4 border-t border-[#dce1ef] pt-4">
+        <div className="mt-5 border-t border-[#dce1ef] pt-5">
           <p className="text-xs font-bold text-slate-800">{preview.topicLabel}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {preview.topics.map((topic) => (
-              <span key={topic} className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-1.5 text-xs font-semibold leading-5 text-slate-700">
+              <span
+                key={topic}
+                className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-1.5 text-xs font-semibold leading-5 text-slate-700"
+              >
                 {topic}
               </span>
             ))}
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-700">{preview.footer}</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">실제 문장과 판단 기준은 선택한 프로필의 계산 결과와 분석 시점에 따라 달라집니다.</p>
+
+          <div className="mt-4 rounded-2xl bg-[#f7f8fc] px-4 py-4">
+            <p className="text-sm font-semibold leading-6 text-slate-700">{preview.footer}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              실제 문장과 판단 기준은 선택한 프로필의 계산 결과와 분석 시점에 따라 달라집니다.
+            </p>
+          </div>
         </div>
       </div>
     </div>

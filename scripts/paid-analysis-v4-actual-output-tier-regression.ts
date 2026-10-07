@@ -237,8 +237,8 @@ assert(
   "topic V4 prompt must require four available contract evidence keys",
 );
 assert(
-  stressPrompt.includes("element_relations와 fortune_brain도"),
-  "topic V4 prompt must explicitly recognize the newer evidence keys",
+  stressPrompt.includes("element_relations, fortune_brain, monthly_cycle도"),
+  "topic V4 prompt must explicitly recognize every newer evidence key",
 );
 assert(
   stressPrompt.includes("strength, element_relations, fortune_brain, fortune_flow"),

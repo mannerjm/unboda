@@ -190,10 +190,35 @@ for (const item of resolved) {
   assert(!/(?:돕는 힘|누르는 힘)\s*\d/u.test(item.fact), `${item.evidenceKey} leaked an internal strength score`);
 }
 
+const resolvedByKey = new Map(resolved.map((item) => [item.evidenceKey, item]));
+assert(resolvedByKey.get("strength")?.label === "신강·신약");
+assert(resolvedByKey.get("strength")?.fact.includes(promptInput.evidenceFacts!.strength!.level));
+assert(resolvedByKey.get("yongshin")?.label === "용신");
+assert(resolvedByKey.get("yongshin")?.fact.includes("용신"));
+assert(resolvedByKey.get("gyeokguk")?.label === "격국");
+assert(resolvedByKey.get("daeun")?.fact.includes("대운"));
+assert(resolvedByKey.get("seun")?.fact.includes("세운"));
+assert(resolvedByKey.get("monthly_cycle")?.fact.includes("월주"));
+assert(
+  resolvedByKey.get("monthly_cycle")?.fact.includes(
+    promptInput.evidenceFacts!.monthlyCycle!.representativePillar,
+  ),
+  "monthly evidence must retain the actual pillar",
+);
+
 const sharedLanguage = readFileSync("app/lib/paidReportCustomerLanguage.ts", "utf8");
 assert(
   !sharedLanguage.includes("[누가 읽어도 바로 이해하는 문장 기준]"),
   "compatibility/shared paid-report language rules must remain unchanged",
+);
+
+const reportPage = readFileSync("app/paid-analysis/[productId]/report/page.tsx", "utf8");
+assert(
+  reportPage.includes("parseAnalysisInputSnapshot") &&
+    reportPage.includes("buildPaidAnalysisInputFromProfile") &&
+    reportPage.includes("resolvePaidAnalysisEvidence") &&
+    reportPage.includes("evidenceOverride={evidenceOverride}"),
+  "stored V4 reports must rebuild professional evidence from frozen purchase inputs",
 );
 
 const report = readFileSync("app/paid-analysis/[productId]/PaidAnalysisV4Report.tsx", "utf8");

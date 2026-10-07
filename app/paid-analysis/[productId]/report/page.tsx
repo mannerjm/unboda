@@ -13,6 +13,12 @@ import {
   getActiveEntitlementForProfileEdition,
 } from "@/app/lib/purchases/server";
 import { getPaidReport } from "@/app/lib/paidReports/server";
+import { getPurchaseById } from "@/app/lib/purchases/server";
+import { parseAnalysisInputSnapshot } from "@/app/lib/analysisInputSnapshot";
+import { buildPaidAnalysisInputFromProfile } from "@/app/lib/paidAnalysisProfileInput";
+import { resolvePaidAnalysisEvidence } from "@/app/lib/paidAnalysisEvidenceResolver";
+import { isPaidAnalysisDetailV4 } from "@/app/lib/paidAnalysisDetailOutput";
+import type { ProfileDto } from "@/app/lib/profiles/types";
 import {
   getCompatibilityPairReportPath,
   isCompatibilityFamilyOtherProductId,
@@ -77,6 +83,63 @@ async function PaidReportBody({
     ? stored.content
     : null;
 
+  let evidenceOverride = undefined;
+
+  if (
+    initialDetail
+    && isPaidAnalysisDetailV4(initialDetail)
+    && entitlement.purchaseId
+  ) {
+    const purchase = await getPurchaseById(entitlement.purchaseId);
+
+    if (purchase?.analysisInputSnapshot) {
+      try {
+        const snapshot = parseAnalysisInputSnapshot(purchase.analysisInputSnapshot);
+        const reference = purchase.analysisReferenceSnapshot;
+        const anchorDate =
+          reference
+          && typeof reference === "object"
+          && "anchorDate" in reference
+          && typeof reference.anchorDate === "string"
+            ? reference.anchorDate
+            : purchase.purchasedAt.slice(0, 10);
+
+        const frozenProfile: ProfileDto = {
+          id: profileId,
+          label: "구매 시점 분석",
+          relationshipType: "self",
+          birthDate: snapshot.birthData.birthDate,
+          birthTime: snapshot.birthData.birthTime,
+          birthTimeKnown: snapshot.birthData.birthTimeKnown ?? null,
+          calendarType: snapshot.birthData.calendarType,
+          isLeapMonth: snapshot.birthData.isLeapMonth,
+          gender: snapshot.birthData.gender,
+          createdAt: purchase.purchasedAt,
+          updatedAt: purchase.purchasedAt,
+        };
+
+        const facts = buildPaidAnalysisInputFromProfile(
+          frozenProfile,
+          productId,
+          anchorDate,
+        ).evidenceFacts;
+
+        if (facts) {
+          evidenceOverride = resolvePaidAnalysisEvidence(
+            initialDetail.evidence.map((item) => ({
+              evidenceKey: item.evidenceKey,
+              meaning: item.meaning,
+              linkage: item.linkage,
+            })),
+            facts,
+          ).resolved;
+        }
+      } catch {
+        evidenceOverride = undefined;
+      }
+    }
+  }
+
   return (
     <>
       <PaidAnalysisDetailV2Client
@@ -85,6 +148,7 @@ async function PaidReportBody({
         profileId={profileId}
         edition={exactEdition}
         initialDetail={initialDetail}
+        evidenceOverride={evidenceOverride}
       />
       <ReportCompletionGate
         key={`post-report:${profileId}:${productId}:${exactEdition}`}

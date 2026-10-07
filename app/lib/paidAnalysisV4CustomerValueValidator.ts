@@ -42,6 +42,33 @@ const GENERIC_CUSTOMER_VALUE_PATTERNS: readonly { pattern: RegExp; label: string
   { pattern: /상황에 따라 다(?:릅니다|를 수 있습니다)/u, label: "상황에 따라 다름" },
 ];
 
+const DIFFICULT_CUSTOMER_LANGUAGE_PATTERNS: readonly { pattern: RegExp; label: string; replacement: string }[] = [
+  { pattern: /메커니즘/u, label: "메커니즘", replacement: "왜 이런 일이 생기는지" },
+  { pattern: /상호성/u, label: "상호성", replacement: "서로 주고받는 정도" },
+  { pattern: /완수력/u, label: "완수력", replacement: "끝까지 해내는 힘" },
+  { pattern: /지원 장치/u, label: "지원 장치", replacement: "도움받을 방법" },
+  { pattern: /평가 공백/u, label: "평가 공백", replacement: "평가할 근거가 부족한 부분" },
+  { pattern: /지속 가능성/u, label: "지속 가능성", replacement: "오래 이어갈 수 있는지" },
+  { pattern: /변동성/u, label: "변동성", replacement: "변화가 큰 정도" },
+  { pattern: /책임 압력/u, label: "책임 압력", replacement: "책임 부담" },
+  { pattern: /관찰 창/u, label: "관찰 창", replacement: "확인할 기간" },
+  { pattern: /후속 이행/u, label: "후속 이행", replacement: "약속한 일을 실제로 하는지" },
+  { pattern: /책임 소재/u, label: "책임 소재", replacement: "누가 책임지는지" },
+  { pattern: /판단 권한/u, label: "판단 권한", replacement: "스스로 결정할 수 있는 범위" },
+  { pattern: /관찰 신호/u, label: "관찰 신호", replacement: "확인할 신호" },
+  { pattern: /우선순위/u, label: "우선순위", replacement: "먼저 할 일" },
+  { pattern: /위임/u, label: "위임", replacement: "일을 맡기는 것" },
+  { pattern: /조율/u, label: "조율", replacement: "서로 맞추기" },
+];
+
+const UNEXPLAINED_CALCULATION_NUMBER_PATTERNS: readonly { pattern: RegExp; label: string }[] = [
+  { pattern: /\d+(?:\.\d+)?\s*%/u, label: "퍼센트" },
+  { pattern: /(?:점수|비율|수치|강도)\s*[:：]?\s*\d+(?:\.\d+)?/u, label: "점수·비율 수치" },
+  { pattern: /\d+(?:\.\d+)?\s*\/\s*\d+(?:\.\d+)?/u, label: "기준 없는 숫자 비율" },
+  { pattern: /(?:돕는 힘|누르는 힘)\s*\d+(?:\.\d+)?/u, label: "내부 힘 점수" },
+  { pattern: /\d+(?:\.\d+)?\s*점/u, label: "점수" },
+];
+
 function collectCustomerFacingV4Texts(
   output: PaidAnalysisDetailOutputV4,
 ): [string, string][] {
@@ -159,12 +186,42 @@ export function validateCustomerFacingLanguage(
           message:
             "가격 대비 가치가 낮은 추상 표현(" +
             label +
-            ")이 남아 있습니다. 실제 판단 기준이나 관찰 조건으로 다시 작성해야 합니다.",
+            ")이 남아 있습니다. 실제 판단 기준이나 확인 조건으로 다시 작성해야 합니다.",
+        });
+        break;
+      }
+    }
+
+    for (const { pattern, label, replacement } of DIFFICULT_CUSTOMER_LANGUAGE_PATTERNS) {
+      if (pattern.test(value)) {
+        issues.push({
+          field,
+          message:
+            "고객이 빠르게 이해하기 어려운 표현(" +
+            label +
+            ")이 남아 있습니다. ‘" +
+            replacement +
+            "’처럼 쉬운 말로 다시 작성해야 합니다.",
         });
         break;
       }
     }
   }
+
+  output.cause.reasons.forEach((reason, index) => {
+    for (const { pattern, label } of UNEXPLAINED_CALCULATION_NUMBER_PATTERNS) {
+      if (pattern.test(reason.observedStructure)) {
+        issues.push({
+          field: "cause.reasons[" + index + "].observedStructure",
+          message:
+            "계산 근거에 기준을 모르면 해석할 수 없는 숫자(" +
+            label +
+            ")가 노출되어 있습니다. 숫자 없이 계산 결과의 뜻만 설명해야 합니다.",
+        });
+        break;
+      }
+    }
+  });
 
   return { ok: issues.length === 0, issues };
 }

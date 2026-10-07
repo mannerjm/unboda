@@ -41,8 +41,17 @@ for (const path of [
 }
 assert(premium.includes("이 리포트는 이렇게 읽어 주세요") && !premium.includes("자주 나오는 사주 용어 쉽게 보기"), "V4 must keep jargon out of the primary reading path instead of teaching it before the customer needs it");
 assert(premium.indexOf("{reason.realWorldPattern}") < premium.indexOf("{reason.observedStructure}"), "customer meaning must precede technical cause details");
-assert(premium.indexOf("{item.meaning}") < premium.indexOf("{item.fact}"), "customer meaning must precede server-calculated evidence");
-assert(premium.includes("계산 근거 펼쳐보기") && premium.includes("{item.fact}"), "technical evidence must be inspectable, not deleted");
+assert(
+  premium.indexOf("{item.meaning}") <
+    premium.indexOf("formatPaidAnalysisEvidenceFactForCustomer(item.evidenceKey, item.fact)"),
+  "customer meaning must precede customer-safe server-calculated evidence",
+);
+assert(
+  premium.includes("계산 근거 펼쳐보기") &&
+    premium.includes("formatPaidAnalysisEvidenceFactForCustomer") &&
+    premium.includes("getPaidAnalysisEvidenceCustomerLabel"),
+  "technical evidence must remain inspectable while raw internal scores stay hidden",
+);
 assert(premium.includes("이 판단을 뒷받침하는 근거") && premium.includes("비교적 분명하게 볼 수 있는 부분") && premium.includes("현실에서 추가로 확인해야 할 부분") && premium.includes("이 분석만으로 정할 수 없는 것"), "V4 confidence and evidence UI must read as customer decision support, not an internal model score");
 assert(!premium.includes("신뢰도 {detail.confidence.level}") && !premium.includes("Confidence & Limits"), "customer UI must not expose internal confidence labels as product quality scores");
 assert(consulting.includes("AI 상담 화면 보기") && consulting.includes("남은 질문 0회") && consulting.includes("이 리포트로 AI에게 질문하기") && consulting.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyers must see a concise truthful consultation entry for both zero-credit and ready states");

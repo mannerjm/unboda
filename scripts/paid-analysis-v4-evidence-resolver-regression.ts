@@ -83,8 +83,10 @@ const strengthResolved = resolvePaidAnalysisEvidence(
 ).resolved[0];
 
 assert(
-  strengthResolved.fact.includes(facts!.strength!.level),
-  "strength fact must contain the computed strength level",
+  !/\d+(?:\.\d+)?\s*\/\s*\d+(?:\.\d+)?/u.test(strengthResolved.fact) &&
+    !strengthResolved.fact.includes("돕는 힘") &&
+    !strengthResolved.fact.includes("누르는 힘"),
+  "strength fact must hide unexplained internal scores from customers",
 );
 
 const daeunResolved = resolvePaidAnalysisEvidence(
@@ -93,8 +95,10 @@ const daeunResolved = resolvePaidAnalysisEvidence(
 ).resolved[0];
 
 assert(
-  daeunResolved.fact.includes(facts!.daeun!.ganji),
-  "daeun fact must contain the computed ganji",
+  daeunResolved.fact.includes("긴 흐름") &&
+    !daeunResolved.fact.includes("시작 나이") &&
+    !/\d+번째/u.test(daeunResolved.fact),
+  "daeun fact must present the long-term flow without internal indices",
 );
 
 const monthlyResolved = resolvePaidAnalysisEvidence(
@@ -104,8 +108,8 @@ const monthlyResolved = resolvePaidAnalysisEvidence(
 
 assert(
   monthlyResolved.fact.includes("2026년 10월") &&
-    monthlyResolved.fact.includes(facts!.monthlyCycle!.representativePillar),
-  "monthly cycle fact must contain the frozen calendar month and computed representative pillar",
+    !monthlyResolved.fact.includes(facts!.monthlyCycle!.representativePillar),
+  "monthly cycle fact must keep the understandable month while hiding raw pillar notation",
 );
 
 // 7. missing source data is skipped, never faked.

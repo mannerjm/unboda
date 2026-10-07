@@ -1,4 +1,8 @@
 import type { PaidAnalysisEvidenceFacts } from "./paidAnalysisEvidenceFacts";
+import {
+  formatPaidAnalysisEvidenceFactForCustomer,
+  getPaidAnalysisEvidenceCustomerLabel,
+} from "./paidAnalysisV4CustomerPresentation";
 import type {
   PaidAnalysisDetailOutputV4,
   PaidAnalysisEvidenceItemV4,
@@ -13,19 +17,6 @@ export const MIN_RESOLVED_EVIDENCE_COUNT = 3;
 export type PaidAnalysisEvidenceResolution = {
   resolved: ResolvedPaidAnalysisEvidence[];
   unresolvedKeys: PaidAnalysisEvidenceKey[];
-};
-
-const EVIDENCE_LABELS: Record<PaidAnalysisEvidenceKey, string> = {
-  strength: "일간의 강약",
-  yongshin: "보완이 필요한 기운",
-  gyeokguk: "격국 구조",
-  element_balance: "오행 분포",
-  fortune_flow: "현재 운의 흐름",
-  daeun: "현재 대운",
-  seun: "현재 세운",
-  element_relations: "오행 사이의 관계",
-  fortune_brain: "강점과 취약 축",
-  monthly_cycle: "이번 달 절기 월 흐름",
 };
 
 function formatStrength(facts: PaidAnalysisEvidenceFacts): string | null {
@@ -205,16 +196,16 @@ export function resolvePaidAnalysisEvidenceItem(
   item: PaidAnalysisEvidenceItemV4,
   facts: PaidAnalysisEvidenceFacts,
 ): ResolvedPaidAnalysisEvidence | null {
-  const fact = EVIDENCE_FORMATTERS[item.evidenceKey](facts);
+  const rawFact = EVIDENCE_FORMATTERS[item.evidenceKey](facts);
 
-  if (!fact) {
+  if (!rawFact) {
     return null;
   }
 
   return {
     evidenceKey: item.evidenceKey,
-    label: EVIDENCE_LABELS[item.evidenceKey],
-    fact,
+    label: getPaidAnalysisEvidenceCustomerLabel(item.evidenceKey),
+    fact: formatPaidAnalysisEvidenceFactForCustomer(item.evidenceKey, rawFact),
     meaning: item.meaning,
     linkage: item.linkage,
   };

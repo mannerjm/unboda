@@ -90,6 +90,24 @@ export function shouldRetryPaidAnalysisV4TransientError(error: unknown): boolean
   return status !== null && PAID_ANALYSIS_V4_TRANSIENT_RETRY_STATUSES.has(status);
 }
 
+export function shouldFallbackPaidAnalysisV4FastMode(error: unknown): boolean {
+  const status = resolveOpenAIErrorStatus(error);
+  if (status !== 400 && status !== 403) {
+    return false;
+  }
+
+  const message = error instanceof Error
+    ? error.message.toLowerCase()
+    : String((error as { message?: unknown } | null)?.message ?? "").toLowerCase();
+
+  return (
+    message.includes("service_tier") ||
+    message.includes("service tier") ||
+    message.includes("fast mode") ||
+    message.includes("priority")
+  );
+}
+
 export function resolveMaxOutputTokens(
   callType?: AnalysisTextCallType,
 ): number {
@@ -183,6 +201,8 @@ export async function generateAnalysisText(
   const model = resolveModel(callType);
   const reasoningEffort = resolveReasoningEffort(callType);
   const serviceTier = resolveServiceTier(callType);
+  let activeServiceTier = serviceTier;
+  let fastModeFallbackCount = 0;
   const promptLength = prompt.length;
   const startedAt = Date.now();
   const controller = new AbortController();
@@ -207,7 +227,7 @@ export async function generateAnalysisText(
             reasoning: {
               effort: reasoningEffort,
             },
-            ...(serviceTier ? { service_tier: serviceTier } : {}),
+            ...(activeServiceTier ? { service_tier: activeServiceTier } : {}),
           },
           {
             signal: controller.signal,
@@ -215,6 +235,25 @@ export async function generateAnalysisText(
         );
         break;
       } catch (error) {
+        if (
+          activeServiceTier === "fast" &&
+          fastModeFallbackCount === 0 &&
+          shouldFallbackPaidAnalysisV4FastMode(error)
+        ) {
+          fastModeFallbackCount += 1;
+          activeServiceTier = undefined;
+          const errorMeta = extractOpenAIErrorMeta(error);
+
+          console.warn("[generateAnalysisText] fast-mode-fallback", {
+            callType,
+            model,
+            errorStatus: errorMeta.status,
+            errorCode: errorMeta.code,
+            errorType: errorMeta.type,
+          });
+          continue;
+        }
+
         if (
           transientRetryCount >= transientRetryLimit ||
           !shouldRetryPaidAnalysisV4TransientError(error)
@@ -247,7 +286,7 @@ export async function generateAnalysisText(
       options.onResponseTelemetry({
         status: response.status ?? "unknown",
         incompleteReason: response.incomplete_details?.reason ?? null,
-        serviceTier: response.service_tier ?? serviceTier ?? null,
+        serviceTier: response.service_tier ?? activeServiceTier ?? null,
         inputTokens: response.usage?.input_tokens ?? null,
         outputTokens: response.usage?.output_tokens ?? null,
         reasoningTokens: response.usage?.output_tokens_details?.reasoning_tokens ?? null,
@@ -270,7 +309,7 @@ export async function generateAnalysisText(
       callType,
       model,
       reasoningEffort,
-      serviceTier: response.service_tier ?? serviceTier ?? null,
+      serviceTier: response.service_tier ?? activeServiceTier ?? null,
       promptLength,
       maxOutputTokens,
       timeoutMs,
@@ -290,7 +329,9 @@ export async function generateAnalysisText(
       callType,
       model,
       reasoningEffort,
-      serviceTier,
+      requestedServiceTier: serviceTier,
+      activeServiceTier,
+      fastModeFallbackCount,
       promptLength,
       maxOutputTokens,
       timeoutMs,

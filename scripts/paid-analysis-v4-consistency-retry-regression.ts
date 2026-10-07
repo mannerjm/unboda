@@ -29,6 +29,7 @@ const input: PaidAnalysisDetailPromptInput = {
 const firstTelemetry: PaidAnalysisResponseTelemetry = {
   status: "completed",
   incompleteReason: null,
+  serviceTier: "priority",
   inputTokens: 100,
   outputTokens: 40,
   reasoningTokens: 5,
@@ -39,6 +40,7 @@ const firstTelemetry: PaidAnalysisResponseTelemetry = {
 const secondTelemetry: PaidAnalysisResponseTelemetry = {
   status: "completed",
   incompleteReason: null,
+  serviceTier: "priority",
   inputTokens: 110,
   outputTokens: 50,
   reasoningTokens: 6,
@@ -178,6 +180,7 @@ async function main(): Promise<void> {
   assert(successfulTelemetry.outputTokens === 90, "output token usage must include both model calls");
   assert(successfulTelemetry.reasoningTokens === 11, "reasoning token usage must include both model calls");
   assert(successfulTelemetry.durationMs === 2200, "duration telemetry must include both model calls");
+  assert(successfulTelemetry.serviceTier === "priority", "merged telemetry must preserve the actual Fast mode tier");
 
   let nonConsistencyCalls = 0;
   let nonConsistencyThrown = false;

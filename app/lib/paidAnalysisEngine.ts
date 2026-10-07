@@ -151,7 +151,7 @@ const TOPIC_EVIDENCE_REALIZATION_RULES = `[상품 evidence 실현 규칙]
 - TopicConfig의 evidenceFocus는 단순 추천 목록이 아니라 이 상품이 실제 출력에서 우선 실현해야 하는 근거 계약이다.
 - [선택 가능한 결정론 근거 요약]에 evidenceFocus의 서로 다른 key가 4개 이상 실제 존재하면 evidence는 정확히 4개를 작성하고, 그 4개를 모두 evidenceFocus에서 선택한다.
 - evidenceFocus에서 실제 사용 가능한 key가 4개 미만일 때만 부족한 수만큼 허용된 다른 실제 key로 보완하며, 입력에 없는 근거는 만들지 않는다.
-- element_relations와 fortune_brain도 strength, yongshin, gyeokguk, element_balance, fortune_flow, daeun, seun과 동일하게 유효한 evidenceKey다.
+- element_relations, fortune_brain, monthly_cycle도 strength, yongshin, gyeokguk, element_balance, fortune_flow, daeun, seun과 동일하게 유효한 evidenceKey다.
 - 같은 evidenceKey를 반복해서 개수만 채우지 않는다.`;
 
 const DIRECTION_ACTION_CONSISTENCY_RULES = `[결론-행동 일관성 규칙]

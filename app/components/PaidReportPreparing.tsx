@@ -64,7 +64,7 @@ export default function PaidReportPreparing({
       <div className="rounded-2xl border border-white/15 bg-white/[0.07] px-4 py-4 text-sm leading-7 text-[#d9ddef]">
         {!failed ? (
           <>
-            <p className="font-bold text-white">예상 소요 시간: 약 1~3분</p>
+            <p className="font-bold text-white">예상 소요 시간: 약 30초~1분</p>
             <p>실제 생성 시간은 분석 내용과 시스템 상황에 따라 달라질 수 있습니다.</p>
             {delayed ? (
               <p className="mt-2 font-semibold text-[#d8ccff]">예상보다 오래 걸리고 있어요. 구매 내역에서 상태를 다시 확인할 수 있습니다.</p>

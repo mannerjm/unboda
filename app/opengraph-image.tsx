@@ -73,7 +73,6 @@ export default function OpenGraphImage() {
             flexDirection: "column",
             justifyContent: "center",
             maxWidth: 760,
-            zIndex: 2,
           }}
         >
           <div

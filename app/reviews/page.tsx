@@ -1,6 +1,13 @@
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
 import { getPublicVerifiedReviewFeed } from "@/app/lib/reviews/server";
+import { buildPublicMetadata } from "@/app/lib/seo";
+
+export const metadata = buildPublicMetadata({
+  title: "구매 인증 후기",
+  description: "운보다 유료 리포트를 실제 구매한 이용자의 검수된 구매 인증 후기를 확인하세요.",
+  path: "/reviews",
+});
 
 export const dynamic = "force-dynamic";
 

@@ -149,6 +149,18 @@ assert(
 );
 assert(!ogImageSource.includes("zIndex:"), "Open Graph image must avoid unsupported ImageResponse z-index styling");
 
+// AppShell uses client-side search params. Public static policy content must not disappear
+// behind its empty Suspense fallback in the initial HTML sent to crawlers.
+const appShellSource = readFileSync("app/components/AppShell.tsx", "utf8");
+const trustSource = readFileSync("app/trust/page.tsx", "utf8");
+assert(appShellSource.includes("seoFallback?: ReactNode"), "AppShell must accept an opt-in public SSR fallback");
+assert(appShellSource.includes('fallback={seoFallback ?? <div className="min-h-screen bg-[#f5f7fc]" />}'),
+  "Other AppShell pages must keep their existing fallback unchanged");
+assert(trustSource.includes("const publicContent = (") && trustSource.includes("seoFallback={publicContent}"),
+  "Public trust page must render its actual policy content while AppShell suspends");
+assert(trustSource.includes("<h1") && trustSource.includes('href="/privacy"') && trustSource.includes('href="/terms"'),
+  "Trust fallback must include the heading and useful internal links");
+
 const originalPhaseOneUrls = entries.filter((entry) => !new URL(entry.url).pathname.startsWith("/special-analysis/compatibility/guide/"));
 assert.equal(originalPhaseOneUrls.length, 67, "original phase 1 sitemap routes must remain intact");
 for (const slug of COMPATIBILITY_GUIDE_SLUGS) {

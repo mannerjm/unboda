@@ -1,4 +1,11 @@
 import LegalDocumentPage from "@/app/components/LegalDocumentPage";
+import { buildPublicMetadata } from "@/app/lib/seo";
+
+export const metadata = buildPublicMetadata({
+  title: "환불·취소·청약철회 정책",
+  description: "운보다 맞춤 분석의 결제, 공급, 취소와 환불 처리 원칙을 안내합니다.",
+  path: "/refund",
+});
 
 export default function RefundPage() {
   return (

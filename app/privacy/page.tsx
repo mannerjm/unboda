@@ -1,4 +1,11 @@
 import LegalDocumentPage from "@/app/components/LegalDocumentPage";
+import { buildPublicMetadata } from "@/app/lib/seo";
+
+export const metadata = buildPublicMetadata({
+  title: "개인정보처리방침",
+  description: "운보다가 어떤 개인정보를 어떤 목적으로 처리하고 보관하는지 개인정보처리방침을 안내합니다.",
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

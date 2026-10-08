@@ -1,4 +1,11 @@
 import LegalDocumentPage from "@/app/components/LegalDocumentPage";
+import { buildPublicMetadata } from "@/app/lib/seo";
+
+export const metadata = buildPublicMetadata({
+  title: "이용약관",
+  description: "운보다 무료 사주 분석, 회원 기능, 심층 분석, 결제와 서비스 이용 조건을 안내합니다.",
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

@@ -9,6 +9,13 @@ import {
   COMPATIBILITY_ROMANTIC_PRODUCT,
   COMPATIBILITY_WORKPLACE_PRODUCT,
 } from "@/app/lib/specialAnalysisProducts";
+import { buildPublicMetadata } from "@/app/lib/seo";
+
+export const metadata = buildPublicMetadata({
+  title: "궁합 분석",
+  description: "연인·배우자, 가족, 직장·동료, 친구·지인, 사업·동업 관계를 유형별로 살펴보는 운보다 궁합 분석입니다.",
+  path: "/special-analysis/compatibility",
+});
 
 export default async function CompatibilityAnalysisPage() {
   const user = await getCurrentUser();

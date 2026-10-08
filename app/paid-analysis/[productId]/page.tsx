@@ -1,13 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import PaidAnalysisAccessPanel from "./PaidAnalysisAccessPanel";
 import PremiumProductDetail from "@/app/components/PremiumProductDetail";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
+import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { isProductSaved } from "@/app/lib/interestedAnalyses/server";
 import { notFound } from "next/navigation";
+import { buildPublicMetadata, NOINDEX_METADATA } from "@/app/lib/seo";
 
 type PaidAnalysisPageProps = {
   params: Promise<{
@@ -15,6 +18,27 @@ type PaidAnalysisPageProps = {
   }>;
   searchParams: Promise<{ profileId?: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: Pick<PaidAnalysisPageProps, "params">): Promise<Metadata> {
+  const { productId } = await params;
+  const resolved = resolveLaunchPurchasableProduct(productId);
+  const canonicalProductId = resolved.ok ? resolved.productId : null;
+  const product = canonicalProductId ? getPremiumProduct(canonicalProductId) : undefined;
+
+  if (!product) {
+    return NOINDEX_METADATA;
+  }
+
+  const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
+
+  return buildPublicMetadata({
+    title: displayTitle,
+    description: `${displayTitle}: ${product.description}`,
+    path: `/paid-analysis/${product.id}`,
+  });
+}
 
 export default async function PaidAnalysisPage({
   params,

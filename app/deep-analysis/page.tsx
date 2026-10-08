@@ -3,6 +3,13 @@ import AppShell from "@/app/components/AppShell";
 import PremiumCatalogSection from "@/app/components/PremiumCatalogSection";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { buildPublicMetadata } from "@/app/lib/seo";
+
+export const metadata = buildPublicMetadata({
+  title: "심층 사주 분석",
+  description: "이직·재물·연애·건강·학업 등 지금 궁금한 주제를 골라 개인 맞춤 심층 사주 분석을 확인하세요.",
+  path: "/deep-analysis",
+});
 
 type DeepAnalysisSearchParams = Promise<Record<string, string | string[] | undefined>>;
 

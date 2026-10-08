@@ -1,5 +1,12 @@
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
+import { buildPublicMetadata } from "@/app/lib/seo";
+
+export const metadata = buildPublicMetadata({
+  title: "운보다 이용 원칙",
+  description: "구매 리포트, AI 상담, 기억, 프로필, 질문권과 구매 인증 후기가 어떻게 운영되는지 운보다의 이용 원칙을 확인하세요.",
+  path: "/trust",
+});
 
 export default function TrustPage() {
   const principles = [

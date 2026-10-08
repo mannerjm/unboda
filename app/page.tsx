@@ -11,6 +11,14 @@ import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
 import { createAdminClient } from "@/app/lib/supabase/admin";
 import HomeExperience from "@/app/components/HomeExperience";
 import { hasTodayUnbodaViewed } from "@/app/lib/analytics/customerJourney";
+import { buildPublicMetadata, DEFAULT_SITE_DESCRIPTION, DEFAULT_SITE_TITLE } from "@/app/lib/seo";
+
+export const metadata = buildPublicMetadata({
+  title: DEFAULT_SITE_TITLE,
+  description: DEFAULT_SITE_DESCRIPTION,
+  path: "/",
+  absoluteTitle: true,
+});
 
 type HomeCustomerStage = "free_only" | "paid_preparing" | "paid_failed" | "paid_ready" | "consulting_active";
 

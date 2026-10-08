@@ -146,6 +146,22 @@ assert(romanticRoute.includes("PairCompatibilityReportPage"), "romantic report w
 assert(pairReportRoute.includes("getPaidReport") && pairReportRoute.includes("CompatibilityPaidReportView"), "shared pair compatibility route must keep its paid report renderer");
 assert(pairReportRoute.includes("AiConsultingEntryCard"), "shared pair compatibility route must keep AI consulting entry");
 
+for (const [name, source] of [
+  ["pair compatibility route", pairReportRoute],
+  ["parent-child route", parentChildRoute],
+  ["sibling route", siblingRoute],
+  ["other-family route", otherRoute],
+] as const) {
+  const loadingIndex = source.indexOf("if (!completed)");
+  const reportContainerIndex = source.indexOf('className="mx-auto w-full max-w-5xl"');
+  assert(loadingIndex >= 0, `${name} must branch unfinished reports into the dedicated loading surface`);
+  assert(reportContainerIndex > loadingIndex, `${name} loading must render before the constrained report container`);
+  assert(
+    source.slice(loadingIndex, reportContainerIndex).includes("<CompatibilityPaidReportPreparing"),
+    `${name} must render the compatibility loading surface outside the report max-width wrapper`,
+  );
+}
+
 for (const [name, source, marker] of [
   ["parent-child route", parentChildRoute, "FamilyParentChildPaidReportView"],
   ["sibling route", siblingRoute, 'FamilyExtendedPaidReportView mode="siblings"'],

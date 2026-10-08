@@ -49,10 +49,6 @@ export const metadata: Metadata = {
     description: DEFAULT_SITE_DESCRIPTION,
     images: ["/opengraph-image"],
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
 };
 
 export default function RootLayout({

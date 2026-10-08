@@ -16,8 +16,10 @@ const apiNoStoreHeaders = [
 const privateNoIndexSources = [
   "/admin/:path*",
   "/auth/:path*",
+  "/account/:path*",
   "/api/:path*",
   "/mypage/:path*",
+  "/interests/:path*",
   "/my-unboda/:path*",
   "/purchased-analyses/:path*",
   "/ai-consulting/:path*",

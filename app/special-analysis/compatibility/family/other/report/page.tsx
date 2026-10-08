@@ -55,6 +55,19 @@ export default async function FamilyOtherPurchasedReportPage({ searchParams }: P
 
   const completed = report?.status === "completed" && isStoredFamilyOtherReport(report.content as unknown);
 
+  if (!completed) {
+    return (
+      <AppShell activeProfileId={profileId}>
+        <CompatibilityPaidReportPreparing
+          failed={report?.status === "failed"}
+          productId={COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID}
+          profileId={profileId}
+          edition={entitlement.analysisEditionKey}
+        />
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell activeProfileId={profileId}>
       <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
@@ -63,8 +76,7 @@ export default async function FamilyOtherPurchasedReportPage({ searchParams }: P
             <Link href="/purchased-analyses" className="text-sm font-semibold text-slate-600 underline decoration-[#c4c9d9] underline-offset-4">← 구매한 분석</Link>
             <span className="text-xs text-slate-500">{profile.label}님의 구매 리포트</span>
           </div>
-          {completed ? (
-            <>
+          <>
               <FamilyExtendedPaidReportView mode="other_family" content={report!.content as unknown as StoredFamilyOtherReport} />
               <AiConsultingEntryCard
                 productId={COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID}
@@ -78,9 +90,6 @@ export default async function FamilyOtherPurchasedReportPage({ searchParams }: P
                 sourceEditionKey={entitlement.analysisEditionKey}
               />
             </>
-          ) : (
-            <CompatibilityPaidReportPreparing failed={report?.status === "failed"} productId={COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID} profileId={profileId} edition={entitlement.analysisEditionKey} />
-          )}
         </div>
       </main>
     </AppShell>

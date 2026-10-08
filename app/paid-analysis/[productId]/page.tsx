@@ -35,7 +35,7 @@ export async function generateMetadata({
 
   return buildPublicMetadata({
     title: displayTitle,
-    description: product.description,
+    description: `${displayTitle}: ${product.description}`,
     path: `/paid-analysis/${product.id}`,
   });
 }

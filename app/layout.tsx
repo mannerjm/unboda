@@ -27,6 +27,11 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: DEFAULT_SITE_DESCRIPTION,
+  verification: {
+    other: {
+      "naver-site-verification": "9156c4832376625dfc22da771745d88f2612dfbe",
+    },
+  },
   openGraph: {
     type: "website",
     locale: "ko_KR",

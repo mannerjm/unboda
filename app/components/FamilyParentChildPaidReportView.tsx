@@ -103,7 +103,7 @@ export default function FamilyParentChildPaidReportView({ content }: { content: 
           </section>
         ) : null}
 
-        <section className="relative overflow-hidden rounded-[1.75rem] border border-[#e0e1eb] bg-[linear-gradient(145deg,#ffffff_0%,#f8f8fc_100%)] p-6 shadow-[0_14px_34px_rgba(35,39,78,0.05)] sm:p-7">
+        <section className="relative overflow-hidden rounded-[1.95rem] border border-[#2e295c] bg-[radial-gradient(circle_at_top_right,rgba(131,111,239,0.24),transparent_30%),linear-gradient(145deg,#1d1b3d_0%,#292550_100%)] p-6 text-white shadow-[0_24px_60px_rgba(31,28,72,0.18)] sm:p-7">
           <div className="[&_h2]:text-white [&_p:first-child]:text-[#c8c1ff] [&_p:last-child]:text-slate-300"><SectionHeader number="07 · 지금 해볼 것" title="관계를 바꾸는 작은 행동" description="가족 관계에서 바로 시도할 수 있는 행동부터 정리했습니다." /></div>
           <div className="mt-6 grid gap-4 lg:grid-cols-3">
             {report.actionGuide.doNext.map((item, index) => (

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import AppShell from "@/app/components/AppShell";
 import CompatibilityPaidReportPreparing from "@/app/components/CompatibilityPaidReportPreparing";
 import CompatibilityPaidReportView from "@/app/components/CompatibilityPaidReportView";
 import AiConsultingEntryCard from "@/app/paid-analysis/[productId]/report/AiConsultingEntryCard";
@@ -61,20 +60,19 @@ export default async function PairCompatibilityReportPage({
 
   if (!completed) {
     return (
-      <AppShell activeProfileId={profileId}>
+      <main className="min-h-screen bg-[#f5f7fc] text-[#11162d]">
         <CompatibilityPaidReportPreparing
           failed={report?.status === "failed"}
           productId={productId}
           profileId={profileId}
           edition={entitlement.analysisEditionKey}
         />
-      </AppShell>
+      </main>
     );
   }
 
   return (
-    <AppShell activeProfileId={profileId}>
-      <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
+    <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
         <div className="mx-auto w-full max-w-5xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link href="/purchased-analyses" className="text-sm font-semibold text-slate-600 underline decoration-[#c4c9d9] underline-offset-4">← 구매한 분석</Link>
@@ -95,7 +93,6 @@ export default async function PairCompatibilityReportPage({
               />
             </>
         </div>
-      </main>
-    </AppShell>
+    </main>
   );
 }

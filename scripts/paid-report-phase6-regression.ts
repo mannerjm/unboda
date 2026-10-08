@@ -160,6 +160,14 @@ for (const [name, source] of [
     source.slice(loadingIndex, reportContainerIndex).includes("<CompatibilityPaidReportPreparing"),
     `${name} must render the compatibility loading surface outside the report max-width wrapper`,
   );
+  assert(
+    !source.includes("AppShell"),
+    `${name} must stay standalone without the analysis-category sidebar or mobile navigation`,
+  );
+  assert(
+    source.includes('<main className="min-h-screen bg-[#f5f7fc]'),
+    `${name} must keep a standalone full-page report/loading canvas`,
+  );
 }
 
 for (const [name, source, marker] of [

@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 import robots from "../app/robots";
 import sitemap from "../app/sitemap";
 import { getLaunchProductIds } from "../app/lib/paidAnalysisTopicConfig";
+import { getPremiumProduct } from "../app/lib/premiumProductRegistry";
+import { getPremiumProductDisplayTitle } from "../app/lib/premiumPresentation";
 import { SITE_ORIGIN } from "../app/lib/seo";
 
 const entries = sitemap();
@@ -11,6 +13,13 @@ const launchIds = getLaunchProductIds();
 
 assert.equal(launchIds.length, 57, "SEO sitemap must track all 57 launch paid-analysis products");
 assert.equal(new Set(launchIds).size, 57, "launch product IDs must stay unique");
+
+const productTitles = launchIds.map((productId) => {
+  const product = getPremiumProduct(productId);
+  assert(product, `missing premium product: ${productId}`);
+  return getPremiumProductDisplayTitle(product.id, product.title);
+});
+assert.equal(new Set(productTitles).size, 57, "all 57 paid-product SEO titles must stay unique");
 
 for (const productId of launchIds) {
   assert(
@@ -73,6 +82,7 @@ assert(layout.includes('images: ["/opengraph-image"]'), "root metadata must expo
 const productPage = readFileSync("app/paid-analysis/[productId]/page.tsx", "utf8");
 assert(productPage.includes("export async function generateMetadata"), "57 paid products need dynamic metadata");
 assert(productPage.includes("getPremiumProductDisplayTitle"), "product metadata must use customer-facing titles");
+assert(productPage.includes('description: `\${displayTitle}: \${product.description}`'), "product descriptions must stay distinct and topic-specific");
 assert(productPage.includes('path: `/paid-analysis/${product.id}`'), "product canonical must drop profile/query variants");
 
 const nextConfig = readFileSync("next.config.ts", "utf8");

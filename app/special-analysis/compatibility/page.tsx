@@ -9,6 +9,7 @@ import {
   COMPATIBILITY_ROMANTIC_PRODUCT,
   COMPATIBILITY_WORKPLACE_PRODUCT,
 } from "@/app/lib/specialAnalysisProducts";
+import { COMPATIBILITY_GUIDE_SLUGS, getCompatibilityPublicGuide, getCompatibilityPublicGuidePath } from "@/app/lib/compatibilityPublicGuides";
 import { buildPublicMetadata } from "@/app/lib/seo";
 
 export const metadata = buildPublicMetadata({
@@ -148,6 +149,26 @@ export default async function CompatibilityAnalysisPage() {
               </div>
               <span className="mt-auto pt-7 text-sm font-bold text-[#11162d]">사업·동업 궁합 시작하기 →</span>
             </Link>
+          </section>
+
+          <section aria-labelledby="compatibility-public-guides-heading" className="mt-8 rounded-[1.75rem] border border-[#e2e4ee] bg-white p-6 shadow-sm sm:p-8">
+            <p className="text-xs font-bold tracking-[0.12em] text-[#6f5ce7]">궁합 상품 자세히 알아보기</p>
+            <h2 id="compatibility-public-guides-heading" className="mt-2 text-xl font-black text-[#11162d]">로그인 전에 7가지 궁합을 비교해 보세요</h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              아래 공개 소개 페이지에서는 관계별 분석 내용과 이용 방법을 먼저 확인할 수 있습니다. 실제 개인 궁합을 시작할 때만 로그인과 프로필이 필요합니다.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {COMPATIBILITY_GUIDE_SLUGS.map((slug) => {
+                const guide = getCompatibilityPublicGuide(slug);
+                if (!guide) return null;
+                return (
+                  <Link key={slug} href={getCompatibilityPublicGuidePath(slug)} className="group rounded-2xl border border-[#e4e6ef] bg-[#fafbff] px-4 py-4 transition hover:border-[#b5a6ef] hover:bg-[#f8f6ff]">
+                    <p className="text-sm font-bold text-[#11162d]">{guide.product.title}</p>
+                    <p className="mt-2 text-xs font-semibold text-[#6f5ce7]">분석 내용 자세히 보기 →</p>
+                  </Link>
+                );
+              })}
+            </div>
           </section>
         </div>
       </main>

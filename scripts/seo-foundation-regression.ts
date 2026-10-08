@@ -6,6 +6,7 @@ import { getLaunchProductIds } from "../app/lib/paidAnalysisTopicConfig";
 import { getPremiumProduct } from "../app/lib/premiumProductRegistry";
 import { getPremiumProductDisplayTitle } from "../app/lib/premiumPresentation";
 import { SITE_ORIGIN } from "../app/lib/seo";
+import { COMPATIBILITY_GUIDE_SLUGS, getCompatibilityPublicGuidePath } from "../app/lib/compatibilityPublicGuides";
 
 const entries = sitemap();
 const urls = new Set(entries.map((entry) => entry.url));
@@ -142,6 +143,11 @@ assert(
 );
 assert(!ogImageSource.includes("zIndex:"), "Open Graph image must avoid unsupported ImageResponse z-index styling");
 
-assert.equal(entries.length, 67, "phase 1 sitemap must contain 57 paid products + 10 genuinely public static pages");
+const originalPhaseOneUrls = entries.filter((entry) => !new URL(entry.url).pathname.startsWith("/special-analysis/compatibility/guide/"));
+assert.equal(originalPhaseOneUrls.length, 67, "original phase 1 sitemap routes must remain intact");
+for (const slug of COMPATIBILITY_GUIDE_SLUGS) {
+  assert(urls.has(`${SITE_ORIGIN}${getCompatibilityPublicGuidePath(slug)}`), `public compatibility guide missing: ${slug}`);
+}
+assert.equal(entries.length, 74, "sitemap must contain 57 paid products + 10 original public routes + 7 compatibility guides");
 
 console.log(`seo-foundation-regression: PASS (57 paid products, ${entries.length} sitemap URLs)`);

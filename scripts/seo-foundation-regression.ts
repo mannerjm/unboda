@@ -34,10 +34,6 @@ for (const path of [
   "/deep-analysis",
   "/special-analysis",
   "/special-analysis/compatibility",
-  "/special-analysis/compatibility/romantic",
-  "/special-analysis/compatibility/workplace",
-  "/special-analysis/compatibility/friend",
-  "/special-analysis/compatibility/business",
   "/reviews",
   "/trust",
   "/privacy",
@@ -73,6 +69,7 @@ assert(
   "robots must allow public crawling",
 );
 assert.equal(robotsConfig.sitemap, `${SITE_ORIGIN}/sitemap.xml`, "robots must advertise the canonical sitemap");
+assert(!("host" in robotsConfig), "robots should avoid nonstandard Host directives");
 
 const layout = readFileSync("app/layout.tsx", "utf8");
 assert(layout.includes("metadataBase: SITE_URL"), "root metadata must set metadataBase");
@@ -116,14 +113,17 @@ for (const path of [
   assert(source.includes("buildPublicMetadata"), `public metadata missing: ${path}`);
 }
 
-for (const path of [
-  "app/special-analysis/compatibility/romantic/page.tsx",
-  "app/special-analysis/compatibility/workplace/page.tsx",
-  "app/special-analysis/compatibility/friend/page.tsx",
-  "app/special-analysis/compatibility/business/page.tsx",
-]) {
+for (const [route, path] of [
+  ["/special-analysis/compatibility/romantic", "app/special-analysis/compatibility/romantic/page.tsx"],
+  ["/special-analysis/compatibility/workplace", "app/special-analysis/compatibility/workplace/page.tsx"],
+  ["/special-analysis/compatibility/friend", "app/special-analysis/compatibility/friend/page.tsx"],
+  ["/special-analysis/compatibility/business", "app/special-analysis/compatibility/business/page.tsx"],
+] as const) {
+  assert(!urls.has(`${SITE_ORIGIN}${route}`), `auth-gated compatibility route leaked into sitemap: ${route}`);
+  assert(nextConfig.includes(`"${route}"`), `auth-gated compatibility route needs X-Robots noindex: ${route}`);
   const source = readFileSync(path, "utf8");
-  assert(source.includes("buildPublicMetadata"), `compatibility metadata missing: ${path}`);
+  assert(source.includes("NOINDEX_METADATA"), `auth-gated compatibility page must emit noindex metadata: ${path}`);
+  assert(!source.includes("buildPublicMetadata"), `auth-gated compatibility page must not emit public canonical metadata: ${path}`);
 }
 
 assert(
@@ -135,5 +135,7 @@ assert(
     readFileSync("app/opengraph-image.tsx", "utf8").includes("630"),
   "default Open Graph image must remain 1200x630",
 );
+
+assert.equal(entries.length, 67, "phase 1 sitemap must contain 57 paid products + 10 genuinely public static pages");
 
 console.log(`seo-foundation-regression: PASS (57 paid products, ${entries.length} sitemap URLs)`);

@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PaidAnalysisAccessPanel from "./PaidAnalysisAccessPanel";
 import PremiumProductDetail from "@/app/components/PremiumProductDetail";
+import PaidProductSeoIntro from "@/app/components/PaidProductSeoIntro";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
+import { getPaidProductSeoGuide } from "@/app/lib/paidProductSeo";
 import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
@@ -32,9 +34,10 @@ export async function generateMetadata({
   }
 
   const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
+  const seoGuide = getPaidProductSeoGuide(product);
 
   return buildPublicMetadata({
-    title: displayTitle,
+    title: seoGuide.searchTitle,
     description: `${displayTitle}: ${product.description}`,
     path: `/paid-analysis/${product.id}`,
   });
@@ -77,6 +80,8 @@ export default async function PaidAnalysisPage({
         >
           ← 심층 분석으로 돌아가기
         </Link>
+
+        {!profileId ? <PaidProductSeoIntro product={product} /> : null}
 
         {profileId ? (
           <PaidAnalysisAccessPanel productId={product.id} profileId={profileId} />

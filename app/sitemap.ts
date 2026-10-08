@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getLaunchProductIds } from "@/app/lib/paidAnalysisTopicConfig";
+import { COMPATIBILITY_GUIDE_SLUGS, getCompatibilityPublicGuidePath } from "@/app/lib/compatibilityPublicGuides";
 import { SITE_ORIGIN } from "@/app/lib/seo";
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
@@ -34,5 +35,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry(`/paid-analysis/${productId}`, "monthly", 0.8),
   );
 
-  return [...staticPages, ...paidProductPages];
+  const publicCompatibilityGuidePages: MetadataRoute.Sitemap = COMPATIBILITY_GUIDE_SLUGS.map((slug) =>
+    entry(getCompatibilityPublicGuidePath(slug), "monthly", 0.8),
+  );
+
+  return [...staticPages, ...paidProductPages, ...publicCompatibilityGuidePages];
 }

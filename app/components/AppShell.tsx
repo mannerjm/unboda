@@ -321,9 +321,9 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
   );
 }
 
-export default function AppShell({ children, activeProfileId }: { children: ReactNode; activeProfileId?: string | null }) {
+export default function AppShell({ children, activeProfileId, seoFallback }: { children: ReactNode; activeProfileId?: string | null; seoFallback?: ReactNode }) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f5f7fc]" />}>
+    <Suspense fallback={seoFallback ?? <div className="min-h-screen bg-[#f5f7fc]" />}>
       <AppShellContent activeProfileId={activeProfileId}>{children}</AppShellContent>
     </Suspense>
   );

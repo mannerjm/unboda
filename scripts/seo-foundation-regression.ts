@@ -68,6 +68,10 @@ assert(
   rules.some((rule) => rule.userAgent === "*" && rule.allow === "/"),
   "robots must allow public crawling",
 );
+assert(
+  rules.some((rule) => Array.isArray(rule.disallow) && rule.disallow.includes("/admin") && rule.disallow.includes("/api")),
+  "robots must exclude admin and API roots from crawling",
+);
 assert.equal(robotsConfig.sitemap, `${SITE_ORIGIN}/sitemap.xml`, "robots must advertise the canonical sitemap");
 assert(!("host" in robotsConfig), "robots should avoid nonstandard Host directives");
 
@@ -75,6 +79,7 @@ const layout = readFileSync("app/layout.tsx", "utf8");
 assert(layout.includes("metadataBase: SITE_URL"), "root metadata must set metadataBase");
 assert(layout.includes('template: `%s | ${SITE_NAME}`'), "root metadata must keep the title template");
 assert(layout.includes('images: ["/opengraph-image"]'), "root metadata must expose the OG image");
+assert(!layout.includes("robots: {\n    index: true"), "root metadata must not force index on private descendants");
 
 const productPage = readFileSync("app/paid-analysis/[productId]/page.tsx", "utf8");
 assert(productPage.includes("export async function generateMetadata"), "57 paid products need dynamic metadata");
@@ -130,11 +135,12 @@ assert(
   readFileSync("app/guest-saju/layout.tsx", "utf8").includes("buildPublicMetadata"),
   "guest free-analysis page needs public metadata",
 );
+const ogImageSource = readFileSync("app/opengraph-image.tsx", "utf8");
 assert(
-  readFileSync("app/opengraph-image.tsx", "utf8").includes("1200") &&
-    readFileSync("app/opengraph-image.tsx", "utf8").includes("630"),
+  ogImageSource.includes("1200") && ogImageSource.includes("630"),
   "default Open Graph image must remain 1200x630",
 );
+assert(!ogImageSource.includes("zIndex:"), "Open Graph image must avoid unsupported ImageResponse z-index styling");
 
 assert.equal(entries.length, 67, "phase 1 sitemap must contain 57 paid products + 10 genuinely public static pages");
 

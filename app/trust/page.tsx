@@ -36,8 +36,8 @@ export default function TrustPage() {
     },
   ];
 
-  return (
-    <AppShell>
+  // Keep this public copy in the prerendered HTML even if AppShell waits for client search params.
+  const publicContent = (
       <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-[#11162d] sm:px-8 sm:py-14">
         <div className="mx-auto w-full max-w-4xl">
           <header className="rounded-[2rem] border border-[#d8d3ff] bg-[radial-gradient(circle_at_84%_18%,rgba(113,89,233,0.14),transparent_28%),linear-gradient(145deg,#ffffff_0%,#f5f3ff_100%)] p-6 shadow-sm sm:p-8">
@@ -70,6 +70,7 @@ export default function TrustPage() {
           </section>
         </div>
       </main>
-    </AppShell>
   );
+
+  return <AppShell seoFallback={publicContent}>{publicContent}</AppShell>;
 }

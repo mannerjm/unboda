@@ -190,7 +190,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
         {report.currentTiming ? (
           <section className="border-t border-[#dedbf3] bg-[radial-gradient(circle_at_82%_18%,rgba(125,104,234,0.12),transparent_28%),linear-gradient(135deg,#f1efff_0%,#f8f7ff_55%,#f3f4fa_100%)] px-6 py-10 sm:px-10 sm:py-12">
             <ReportSectionHeader eyebrow="06 · 현재 흐름" title={`${meta.evaluationYear}년 ${config.reportTimingTitle}`} />
-            <div className="mt-6 rounded-[1.8rem] border border-[#d8d3ff] bg-white/85 p-6 shadow-[0_18px_42px_rgba(71,58,140,0.08)] backdrop-blur sm:p-8">
+            <div className="mt-6 rounded-[1.8rem] border border-[#d8d3ff] bg-white/[0.85] p-6 shadow-[0_18px_42px_rgba(71,58,140,0.08)] backdrop-blur sm:p-8">
               <p className="text-xl font-bold leading-8 text-[#11162d] sm:text-2xl">{report.currentTiming.headline}</p>
               <p className="mt-4 max-w-3xl text-[15px] leading-8 text-slate-700">{report.currentTiming.summary}</p>
               <div className="mt-6 grid gap-3 sm:grid-cols-3">

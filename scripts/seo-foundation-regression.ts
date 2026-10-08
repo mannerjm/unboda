@@ -81,6 +81,12 @@ assert(layout.includes("metadataBase: SITE_URL"), "root metadata must set metada
 assert(layout.includes('template: `%s | ${SITE_NAME}`'), "root metadata must keep the title template");
 assert(layout.includes('images: ["/opengraph-image"]'), "root metadata must expose the OG image");
 assert(!layout.includes("robots: {\n    index: true"), "root metadata must not force index on private descendants");
+assert(layout.includes('"naver-site-verification": "9156c4832376625dfc22da771745d88f2612dfbe"'),
+  "Naver Search Advisor ownership tag must remain in root HTML head");
+assert(layout.includes("verification: {") && layout.includes("other: {"),
+  "Naver ownership token must be provided through Next.js metadata, not rendered in the page body");
+assert(readFileSync("public/google4255487660cdf7be.html", "utf8").includes("google-site-verification:"),
+  "Existing Google Search Console ownership verification must remain in place");
 
 const productPage = readFileSync("app/paid-analysis/[productId]/page.tsx", "utf8");
 assert(productPage.includes("export async function generateMetadata"), "57 paid products need dynamic metadata");

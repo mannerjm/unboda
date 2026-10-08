@@ -93,7 +93,7 @@ export default function FamilyParentChildPaidReportView({ content }: { content: 
         {report.currentTiming ? (
           <section className="rounded-[1.9rem] border border-[#d8d3ff] bg-[radial-gradient(circle_at_82%_18%,rgba(125,104,234,0.12),transparent_28%),linear-gradient(135deg,#f1efff_0%,#f8f7ff_55%,#f3f4fa_100%)] p-6 shadow-[0_16px_38px_rgba(71,58,140,0.07)] sm:p-7">
             <SectionHeader number="06 · 구매 연도 관계 흐름" title={`${meta.evaluationYear}년 부모·자녀 관계 흐름`} />
-            <div className="mt-5 rounded-[1.6rem] border border-[#d8d3ff] bg-white/88 p-5 shadow-[0_14px_32px_rgba(71,58,140,0.07)] backdrop-blur sm:p-6">
+            <div className="mt-5 rounded-[1.6rem] border border-[#d8d3ff] bg-white/[0.88] p-5 shadow-[0_14px_32px_rgba(71,58,140,0.07)] backdrop-blur sm:p-6">
               <h3 className="text-xl font-bold leading-7 text-[#11162d]">{report.currentTiming.headline}</h3>
               <p className="mt-4 text-[15px] leading-7 text-slate-700">{report.currentTiming.summary}</p>
               <div className="mt-5 grid gap-3 lg:grid-cols-3">

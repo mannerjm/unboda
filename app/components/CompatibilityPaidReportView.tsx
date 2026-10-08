@@ -200,7 +200,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
           </section>
         ) : null}
 
-        <section className="border-t border-[#e4e5ef] bg-white px-6 py-10 sm:px-10 sm:py-12">
+        <section className="relative overflow-hidden border-t border-[#2e295c] bg-[radial-gradient(circle_at_top_right,rgba(131,111,239,0.24),transparent_30%),linear-gradient(145deg,#1d1b3d_0%,#292550_100%)] px-6 py-10 text-white shadow-[0_-10px_40px_rgba(31,28,72,0.08)] sm:px-10 sm:py-12">
           <ReportSectionHeader eyebrow="07 · 행동 가이드" title={config.reportActionTitle} description="큰 결론보다 실제 관계에서 반복 가능한 작은 조정 기준으로 정리합니다." tone="dark" />
           <div className="mt-5 grid gap-3 lg:grid-cols-3">
             {report.actionGuide.doNext.map((item, index) => (

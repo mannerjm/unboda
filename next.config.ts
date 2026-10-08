@@ -13,6 +13,39 @@ const apiNoStoreHeaders = [
   { key: "Cache-Control", value: "private, no-store, max-age=0" },
 ];
 
+const privateNoIndexSources = [
+  "/admin/:path*",
+  "/auth/:path*",
+  "/api/:path*",
+  "/mypage/:path*",
+  "/my-unboda/:path*",
+  "/purchased-analyses/:path*",
+  "/ai-consulting/:path*",
+  "/checkout/:path*",
+  "/loading",
+  "/result",
+  "/recommendations",
+  "/guest-loading",
+  "/guest-result",
+  "/saju",
+  "/today",
+  "/support",
+  "/support/:path*",
+  "/paid-analysis/:productId/report",
+  "/special-analysis/compatibility/report",
+  "/special-analysis/compatibility/workplace/report",
+  "/special-analysis/compatibility/friend/report",
+  "/special-analysis/compatibility/business/report",
+  "/special-analysis/compatibility/family/parent-child",
+  "/special-analysis/compatibility/family/parent-child/report",
+  "/special-analysis/compatibility/family/siblings/report",
+  "/special-analysis/compatibility/family/other/report",
+] as const;
+
+const privateNoIndexHeaders = [
+  { key: "X-Robots-Tag", value: "noindex, nofollow" },
+];
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   async headers() {
@@ -25,6 +58,10 @@ const nextConfig: NextConfig = {
         source: "/api/:path*",
         headers: apiNoStoreHeaders,
       },
+      ...privateNoIndexSources.map((source) => ({
+        source,
+        headers: privateNoIndexHeaders,
+      })),
     ];
   },
 };

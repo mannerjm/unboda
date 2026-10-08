@@ -2,6 +2,13 @@ import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { buildPublicMetadata } from "@/app/lib/seo";
+
+export const metadata = buildPublicMetadata({
+  title: "전문 분석",
+  description: "한 사람의 운세를 넘어 두 사람의 관계와 중요한 시기처럼 더 구체적인 주제를 살펴보는 운보다 전문 분석입니다.",
+  path: "/special-analysis",
+});
 
 export default async function SpecialAnalysisPage() {
   const user = await getCurrentUser();

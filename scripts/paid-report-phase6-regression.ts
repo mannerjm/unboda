@@ -135,6 +135,25 @@ assert(extended.includes("report.roleAndExpectations") && extended.includes("rep
 assert(extended.includes("report.currentTiming") && extended.includes("ActionSection"), "extended family timing and action guide must remain intact");
 assert(!extended.includes('bg-[#171a3d] px-6 py-8 text-white'), "extended-family report must not use a large dark reading section");
 
+for (const [name, source] of [
+  ["pair compatibility report", romantic],
+  ["parent-child compatibility report", parentChild],
+  ["extended-family compatibility report", extended],
+] as const) {
+  assert(
+    source.includes("linear-gradient(145deg,#17172f_0%,#242047_48%,#18192f_100%)"),
+    `${name} must keep the premium dark hero treatment`,
+  );
+  assert(
+    source.includes("linear-gradient(145deg,#1d1b3d_0%,#292550_100%)"),
+    `${name} must keep the premium dark action-guide treatment`,
+  );
+  assert(
+    source.includes("shadow-[0_30px_90px_rgba(31,28,72,0.14)]"),
+    `${name} must keep the elevated premium report surface`,
+  );
+}
+
 assert(timeline.includes("periodAnalysis.timelineItems.map"), "period timeline must preserve every timeline item");
 assert(timeline.includes("item.actions") && timeline.includes("item.cautions") && timeline.includes("periodAnalysis.keyPoints"), "period timeline must preserve actions, cautions, and key points");
 

@@ -59,6 +59,19 @@ export default async function PairCompatibilityReportPage({
     && isStoredCompatibilityReport(report.content as unknown);
   const product = getSpecialAnalysisProduct(productId);
 
+  if (!completed) {
+    return (
+      <AppShell activeProfileId={profileId}>
+        <CompatibilityPaidReportPreparing
+          failed={report?.status === "failed"}
+          productId={productId}
+          profileId={profileId}
+          edition={entitlement.analysisEditionKey}
+        />
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell activeProfileId={profileId}>
       <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
@@ -67,8 +80,7 @@ export default async function PairCompatibilityReportPage({
             <Link href="/purchased-analyses" className="text-sm font-semibold text-slate-600 underline decoration-[#c4c9d9] underline-offset-4">← 구매한 분석</Link>
             <span className="text-xs text-slate-500">{profile.label}님의 {product?.shortTitle ?? "궁합"} 리포트</span>
           </div>
-          {completed ? (
-            <>
+          <>
               <CompatibilityPaidReportView content={report.content as unknown as import("@/app/lib/compatibilityPaidAnalysis").StoredCompatibilityReport} />
               <AiConsultingEntryCard
                 productId={productId}
@@ -82,9 +94,6 @@ export default async function PairCompatibilityReportPage({
                 sourceEditionKey={entitlement.analysisEditionKey}
               />
             </>
-          ) : (
-            <CompatibilityPaidReportPreparing failed={report?.status === "failed"} productId={productId} profileId={profileId} edition={entitlement.analysisEditionKey} />
-          )}
         </div>
       </main>
     </AppShell>

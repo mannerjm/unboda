@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
 import PremiumCatalogSection from "@/app/components/PremiumCatalogSection";
+import PaidProductDiscoveryLinks from "@/app/components/PaidProductDiscoveryLinks";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { buildPublicMetadata } from "@/app/lib/seo";
@@ -62,6 +63,7 @@ export default async function DeepAnalysisPage({ searchParams }: { searchParams?
             initialMode={initialMode}
             initialCategory={initialCategory}
           />
+          {!activeProfile ? <PaidProductDiscoveryLinks /> : null}
         </div>
       </main>
     </AppShell>

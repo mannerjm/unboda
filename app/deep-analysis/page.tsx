@@ -25,7 +25,6 @@ export default async function DeepAnalysisPage({ searchParams }: { searchParams?
   const initialCategory = getSingleParam(params.category);
   const initialMode = getSingleParam(params.mode) === "period" ? "period" : "topic";
 
-  // Keep public catalog links in the first HTML response even when AppShell suspends.
   const catalogContent = (
       <main className="min-h-screen bg-[#f5f7fc] px-5 py-7 text-stone-900 sm:px-8 sm:py-9">
         <div className="mx-auto w-full max-w-6xl">
@@ -69,7 +68,7 @@ export default async function DeepAnalysisPage({ searchParams }: { searchParams?
   );
 
   return (
-    <AppShell activeProfileId={activeProfile?.id} seoFallback={!activeProfile ? catalogContent : undefined}>
+    <AppShell activeProfileId={activeProfile?.id}>
       {catalogContent}
     </AppShell>
   );

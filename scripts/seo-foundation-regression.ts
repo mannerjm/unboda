@@ -190,8 +190,8 @@ assert(!directory.includes("profileId") && !directory.includes("getCurrentUser")
 const deepPage = readFileSync("app/deep-analysis/page.tsx", "utf8");
 assert(deepPage.includes("!activeProfile ? <PaidProductDiscoveryLinks /> : null"),
   "unpersonalized public hub must expose directory without changing signed-in user journey");
-assert(deepPage.includes("seoFallback={!activeProfile ? catalogContent : undefined}"),
-  "public directory must appear even when client-side AppShell waits on search params");
+assert(!deepPage.includes("seoFallback="),
+  "deep-analysis must not duplicate the H1 and public links through a streamed Suspense fallback");
 assert(deepPage.includes("initialMode={initialMode}") && deepPage.includes("initialCategory={initialCategory}"),
   "original interactive discovery flow must remain intact");
 

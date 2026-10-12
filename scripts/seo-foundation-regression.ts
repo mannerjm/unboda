@@ -150,17 +150,22 @@ assert(
 );
 assert(!ogImageSource.includes("zIndex:"), "Open Graph image must avoid unsupported ImageResponse z-index styling");
 
-// AppShell uses client-side search params. Public static policy content must not disappear
-// behind its empty Suspense fallback in the initial HTML sent to crawlers.
-const appShellSource = readFileSync("app/components/AppShell.tsx", "utf8");
+// Public trust and policy documents use the same standalone, crawler-readable
+// legal page layout. The trust page must never inherit the paid-analysis sidebar.
 const trustSource = readFileSync("app/trust/page.tsx", "utf8");
-assert(appShellSource.includes("seoFallback?: ReactNode"), "AppShell must accept an opt-in public SSR fallback");
-assert(appShellSource.includes('fallback={seoFallback ?? <div className="min-h-screen bg-[#f5f7fc]" />}'),
-  "Other AppShell pages must keep their existing fallback unchanged");
-assert(trustSource.includes("const publicContent = (") && trustSource.includes("seoFallback={publicContent}"),
-  "Public trust page must render its actual policy content while AppShell suspends");
-assert(trustSource.includes("<h1") && trustSource.includes('href="/privacy"') && trustSource.includes('href="/terms"'),
-  "Trust fallback must include the heading and useful internal links");
+const legalPageSource = readFileSync("app/components/LegalDocumentPage.tsx", "utf8");
+assert(trustSource.includes('import LegalDocumentPage from "@/app/components/LegalDocumentPage"'),
+  "trust must reuse the same standalone layout as the terms page");
+assert(trustSource.includes("<LegalDocumentPage") && trustSource.includes('title="운보다가 지키는 이용 원칙"'),
+  "trust heading and independent legal page wrapper must remain intact");
+assert(!trustSource.includes("AppShell"), "trust page must not render the analysis sidebar");
+assert(trustSource.includes("{principles.map((item) => ("),
+  "keep all original trust-principle copy through the shared document layout");
+assert(trustSource.includes('href="/privacy"') && trustSource.includes('href="/terms"') &&
+  trustSource.includes('href="/refund"') && trustSource.includes('href="/support"'),
+  "trust policy links and customer support must remain accessible");
+assert(legalPageSource.includes("<h1") && legalPageSource.includes('href="/"'),
+  "shared document wrapper must provide a server-rendered H1 and home navigation");
 
 const originalPhaseOneUrls = entries.filter((entry) => !new URL(entry.url).pathname.startsWith("/special-analysis/compatibility/guide/"));
 assert.equal(originalPhaseOneUrls.length, 67, "original phase 1 sitemap routes must remain intact");

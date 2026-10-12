@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import robots from "../app/robots";
 import sitemap from "../app/sitemap";
 import { getLaunchProductIds } from "../app/lib/paidAnalysisTopicConfig";
+import { groupTopicCatalogProductsByCategory, listPeriodCatalogProducts } from "../app/lib/premiumCatalog";
 import { getPremiumProduct } from "../app/lib/premiumProductRegistry";
 import { getPremiumProductDisplayTitle } from "../app/lib/premiumPresentation";
 import { SITE_ORIGIN } from "../app/lib/seo";
@@ -167,5 +168,31 @@ for (const slug of COMPATIBILITY_GUIDE_SLUGS) {
   assert(urls.has(`${SITE_ORIGIN}${getCompatibilityPublicGuidePath(slug)}`), `public compatibility guide missing: ${slug}`);
 }
 assert.equal(entries.length, 74, "sitemap must contain 57 paid products + 10 original public routes + 7 compatibility guides");
+ 
+// The public entry must provide crawlable product links without clicking client-only
+// category buttons. Keep all 57 links scoped to the existing Launch registry.
+const discoveryTopics = groupTopicCatalogProductsByCategory().flatMap((group) => group.products);
+const discoveryPeriods = listPeriodCatalogProducts();
+const discoveryIds = [...discoveryTopics, ...discoveryPeriods].map((product) => product.id);
+assert.equal(discoveryTopics.length, 50, "public directory must use 50 Launch topic products");
+assert.equal(discoveryPeriods.length, 7, "public directory must use 7 Launch period products");
+assert.equal(discoveryIds.length, 57, "public product discovery links must contain exactly 57 products");
+assert.equal(new Set(discoveryIds).size, 57, "public product discovery links must not repeat a product");
+assert.deepEqual(new Set(discoveryIds), new Set(launchIds),
+  "public product discovery directory and SEO sitemap must link to the same 57 products");
+const directory = readFileSync("app/components/PaidProductDiscoveryLinks.tsx", "utf8");
+assert(directory.includes("<details") && directory.includes("<summary"),
+  "product directory should remain collapsible for customer experience");
+assert(directory.includes('href={`/paid-analysis/${product.id}`}'),
+  "all 57 public product links must use genuine crawlable Next Link hrefs");
+assert(!directory.includes("profileId") && !directory.includes("getCurrentUser"),
+  "public SEO directory must never access personal profiles or session data");
+const deepPage = readFileSync("app/deep-analysis/page.tsx", "utf8");
+assert(deepPage.includes("!activeProfile ? <PaidProductDiscoveryLinks /> : null"),
+  "unpersonalized public hub must expose directory without changing signed-in user journey");
+assert(deepPage.includes("seoFallback={!activeProfile ? catalogContent : undefined}"),
+  "public directory must appear even when client-side AppShell waits on search params");
+assert(deepPage.includes("initialMode={initialMode}") && deepPage.includes("initialCategory={initialCategory}"),
+  "original interactive discovery flow must remain intact");
 
 console.log(`seo-foundation-regression: PASS (57 paid products, ${entries.length} sitemap URLs)`);

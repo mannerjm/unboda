@@ -26,7 +26,7 @@ export default async function AiCreditRefundsPage({searchParams}:{searchParams:P
     <div className="mx-auto max-w-3xl">
       <Link href="/mypage" className="text-sm font-semibold text-slate-600">← 마이페이지</Link>
       <h1 className="mt-5 text-2xl font-black">AI 질문권 구매·환불 관리</h1>
-      <p className="mt-2 text-sm leading-6 text-slate-600">구매한 질문권은 회차별로 관리합니다. 사용하지 않은 질문권은 아래에서 중도해지 및 환불 신청할 수 있습니다.</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">구매한 질문권은 회차별로 관리합니다. {enabled ? "미사용 질문권은 구매 건별로 자동 환불 신청할 수 있습니다." : "자동 카드 환불은 현재 검증 중입니다. 그동안 미사용 질문권의 환불은 고객지원센터에서 신청할 수 있습니다."}</p>
       {lots===null?<p className="mt-6 rounded-xl bg-white p-5">구매내역을 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.</p>
         :lots.length===0?<p className="mt-6 rounded-xl bg-white p-5">AI 질문권 구매 내역이 없습니다.</p>
         :<div className="mt-6 space-y-3">{lots.map(lot=>{

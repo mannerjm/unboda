@@ -234,7 +234,7 @@ export default function PurchasedAnalysesList({
           <div>
             <p className="text-xs font-bold tracking-[0.15em] text-[#6f5ce7]">MY LIBRARY</p>
             <h2 id="purchased-library-heading" className="mt-2 text-2xl font-black text-[#11162d]">전체 보관함</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">연도판·분석 상태와 구매 당시 약속된 열람기간을 확인할 수 있습니다.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">연도판과 분석 상태, 구매 당시 약속된 열람기간을 한눈에 확인할 수 있습니다.</p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-semibold">
             <span className="rounded-full bg-[#eef0f6] px-3 py-2 text-slate-600">보관 {libraryOverview?.total ?? allEditions.length}개</span>

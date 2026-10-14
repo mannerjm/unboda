@@ -8,6 +8,9 @@ import { groupPurchasedAnalysesByProduct } from "@/app/lib/purchasedAnalysesGrou
 import { parseLibraryParams, selectPurchasedLibraryPage } from "@/app/lib/purchasedAnalysesLibrary";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getPhase9NextAnalysisRecommendations } from "@/app/lib/phase9NextAnalysis";
+import { createAdminClient } from "@/app/lib/supabase/admin";
+import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
+import { getSpecialAnalysisProduct } from "@/app/lib/specialAnalysisProducts";
 
 export default async function PurchasedAnalysesPage({ searchParams }: {
   searchParams: Promise<{ q?: string | string[]; kind?: string | string[]; order?: string | string[]; page?: string | string[] }>;
@@ -41,6 +44,13 @@ export default async function PurchasedAnalysesPage({ searchParams }: {
   const analyses = (await listUserPaidAnalysisSummaries(user.id))
     .filter((analysis) => analysis.profileId === activeProfile.id);
   const groups = groupPurchasedAnalysesByProduct(analyses);
+  const { data: expiredReports, error: expiredReportsError } = await createAdminClient().from("entitlements")
+    .select("id,resource_id,service_expires_at")
+    .eq("user_id", user.id).eq("profile_id", activeProfile.id)
+    .eq("resource_type", "paid_analysis").eq("is_active", true)
+    .lte("service_expires_at", new Date().toISOString())
+    .order("service_expires_at", { ascending: false }).limit(50);
+  if (expiredReportsError) throw new Error("EXPIRED_REPORT_LIBRARY_READ_FAILED");
   const { filters, requestedPage } = parseLibraryParams(await searchParams);
   const libraryPage = selectPurchasedLibraryPage(groups, filters, requestedPage);
   // Preserve the original full-library calculations on the authenticated server.
@@ -85,7 +95,7 @@ export default async function PurchasedAnalysesPage({ searchParams }: {
             <p className="text-xs font-bold tracking-[0.18em] text-[#6f5ce7]">MY LIBRARY</p>
             <h1 className="mt-2 text-3xl font-black tracking-[-0.03em] text-[#11162d] sm:text-4xl">구매한 분석 보관함</h1>
             <p className="mt-3 max-w-2xl text-[15px] leading-7 text-slate-700">
-              구매한 리포트와 연도판, 준비 상태를 한곳에서 확인하고 완료된 분석은 언제든 다시 이어볼 수 있습니다.
+              구매한 리포트와 연도판, 준비 상태를 한곳에서 확인합니다. 신규 구매 리포트는 결제일부터 12개월 동안 다시 열람할 수 있습니다.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-2 text-sm font-bold text-[#5e4bd1]">
@@ -97,6 +107,18 @@ export default async function PurchasedAnalysesPage({ searchParams }: {
             </div>
           </header>
           <PurchasedAnalysesAutoRefresh groups={recentGroups} profileId={activeProfile.id} libraryPage={libraryPage} libraryOverview={libraryOverview} phase9Recommendations={phase9Recommendations} />
+          {(expiredReports?.length ?? 0) > 0 ? (
+            <section className="mt-6 rounded-3xl border border-[#dce1ef] bg-white p-5 sm:p-7" aria-label="열람기간 만료된 구매 리포트">
+              <h2 className="text-lg font-bold text-[#11162d]">열람기간이 끝난 구매 리포트</h2>
+              <p className="mt-1 text-sm text-slate-600">구매내역은 보존되며, 해당 리포트의 온라인 열람과 새 AI 상담은 종료되었습니다.</p>
+              <ul className="mt-4 divide-y divide-slate-100">{(expiredReports??[]).map(item => (
+                <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
+                  <strong>{getSpecialAnalysisProduct(item.resource_id)?.title ?? getPremiumProduct(item.resource_id)?.title ?? "구매한 분석"}</strong>
+                  <span className="text-slate-500">열람 종료 · {new Intl.DateTimeFormat("ko-KR", { timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit" }).format(new Date(item.service_expires_at!))}</span>
+                </li>
+              ))}</ul>
+            </section>
+          ) : null}
         </div>
       </main>
     </AppShell>

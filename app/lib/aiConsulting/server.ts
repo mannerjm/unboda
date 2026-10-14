@@ -88,7 +88,13 @@ export async function getAiConsultingCreditBalance(input: {
   userId: string;
   profileId: string;
 }): Promise<number> {
-  const { data, error } = await createAdminClient().rpc("get_ai_consulting_credit_balance", {
+  const client = createAdminClient();
+  const { error: expiryError } = await client.rpc("expire_due_ai_credit_lots", {
+    p_user_id: input.userId,
+    p_profile_id: input.profileId,
+  });
+  if (expiryError) throw new Error(`AI_CREDIT_EXPIRATION_SYNC_FAILED: ${expiryError.message}`);
+  const { data, error } = await client.rpc("get_ai_consulting_credit_balance", {
     p_user_id: input.userId,
     p_profile_id: input.profileId,
   });

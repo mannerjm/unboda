@@ -200,7 +200,7 @@ export default function PremiumProductDetail({
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3">
             <p className="font-bold text-white">3. 구매한 분석에 보관</p>
-            <p className="mt-1 leading-5">완료 후 다시 확인 가능</p>
+            <p className="mt-1 leading-5">신규 구매 후 12개월 동안 재열람</p>
           </div>
         </div>
       </div>
@@ -222,7 +222,7 @@ export default function PremiumProductDetail({
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {[
                 "내 결과를 바탕으로 개인화 심층 리포트가 생성됩니다.",
-                "완성된 결과는 구매한 분석에 계속 보관됩니다.",
+                "새로 구매하는 리포트는 결제일부터 12개월 동안 구매 보관함에서 다시 열람할 수 있습니다.",
                 "리포트가 완성되면 AI 상담에서 이 주제를 이어서 물어볼 수 있습니다.",
                 "리포트를 읽고 남은 질문도 같은 상담에서 계속 이어갈 수 있습니다.",
               ].map((item) => (

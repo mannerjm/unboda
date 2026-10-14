@@ -135,7 +135,7 @@ export default function CreditCheckoutClient({
           <h2 id="question-bundles-heading" className="mt-1 text-xl font-black text-[#11162d]">
             내게 맞는 질문 횟수를 골라보세요
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">질문권은 현재 프로필에서 보유한 분석의 AI 상담에 함께 사용할 수 있어요.</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">질문권은 현재 프로필에서 보유한 분석의 AI 상담에 함께 사용할 수 있어요. 신규 구매 질문권 이용기간은 결제일부터 12개월이며, 기간 내 미사용분은 중도해지·환불을 신청할 수 있습니다.</p>
         </div>
         <p className="self-start rounded-full bg-[#f3f1ff] px-4 py-2 text-sm font-bold text-[#5e4bd1] sm:self-center">
           현재 {currentBalance}회 남음

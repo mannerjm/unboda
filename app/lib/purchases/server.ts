@@ -47,6 +47,7 @@ type PurchaseRow = {
   product_id: string;
   order_id: string;
   purchased_at: string;
+  service_expires_at?: string | null;
   analysis_edition_key: string | null;
   analysis_reference_snapshot: unknown;
   analysis_input_snapshot: unknown;
@@ -59,6 +60,7 @@ type EntitlementRow = {
   resource_id: string;
   resource_type: string;
   is_active: boolean;
+  service_expires_at?: string | null;
   purchase_id: string | null;
   source: "purchase" | "subscription" | "credit" | "grant";
   created_at: string;
@@ -117,6 +119,7 @@ function toPurchaseRecord(row: PurchaseRow): PurchaseRecord {
     productId: row.product_id,
     orderId: row.order_id,
     purchasedAt: row.purchased_at,
+    serviceExpiresAt: row.service_expires_at ?? null,
     analysisEditionKey: row.analysis_edition_key,
     analysisReferenceSnapshot: row.analysis_reference_snapshot,
     analysisInputSnapshot: row.analysis_input_snapshot,
@@ -131,6 +134,7 @@ function toEntitlementRecord(row: EntitlementRow): EntitlementRecord {
     resourceId: row.resource_id,
     resourceType: row.resource_type,
     isActive: row.is_active,
+    serviceExpiresAt: row.service_expires_at ?? null,
     purchaseId: row.purchase_id,
     source: row.source,
     createdAt: row.created_at,
@@ -772,7 +776,8 @@ export async function getActiveEntitlementForProfile(
     .eq("profile_id", profileId)
     .eq("resource_id", resolved.productId)
     .eq("resource_type", resourceType)
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .or(`service_expires_at.is.null,service_expires_at.gt.${new Date().toISOString()}`);
 
   if (error || !data || data.length === 0) {
     return null;
@@ -820,6 +825,7 @@ export async function getActiveEntitlementForProfileEdition(
     .eq("resource_type", resourceType)
     .eq("analysis_edition_key", analysisEditionKey)
     .eq("is_active", true)
+    .or(`service_expires_at.is.null,service_expires_at.gt.${new Date().toISOString()}`)
     .maybeSingle<EntitlementRow>();
 
   if (error || !data) {
@@ -894,7 +900,8 @@ export async function listUserEntitlements(
     .from("entitlements")
     .select("*")
     .eq("user_id", userId)
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .or(`service_expires_at.is.null,service_expires_at.gt.${new Date().toISOString()}`);
 
   if (error || !data) {
     return [];

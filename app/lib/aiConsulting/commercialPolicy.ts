@@ -21,7 +21,10 @@ export function getAiConsultingCreditBundle(id: string) {
 
 export const AI_CONSULTING_CREDIT_POLICY = {
   scope: "PROFILE" as const,
+  // Legacy credit purchases retain their original non-expiring terms.
+  // New purchases carry a DB-stamped 12-month expiry independently of this flag.
   expiresByDefault: false,
+  newPurchaseTermMonths: 12,
   deductOnlyAfterCompletedAnswer: true,
   allowAcrossPurchasedAnalyses: true,
   requireExactAnalysisEntitlement: true,

@@ -120,6 +120,8 @@ export type PaidAnalysisSummary = {
   reportStatus: PaidReportStatus | "none";
   analysisEditionKey: string | null;
   acquiredAt: string;
+  /** Null for existing purchases made before the new 12-month terms. */
+  serviceExpiresAt?: string | null;
   acquisitionSource: "purchase" | "subscription" | "credit" | "grant";
 };
 
@@ -170,6 +172,7 @@ export async function listUserPaidAnalysisSummaries(
           ) ?? "none",
         analysisEditionKey: editionKey,
         acquiredAt: entitlement.createdAt,
+        serviceExpiresAt: entitlement.serviceExpiresAt ?? null,
         acquisitionSource: entitlement.source,
       };
     });

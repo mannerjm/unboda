@@ -20,6 +20,8 @@ export type PurchasedAnalysisProductGroup = {
     editionLabel: string;
     isLatest: boolean;
     acquiredAt: string;
+    /** Explicit expiry only for new purchases; legacy purchases have no new cutoff. */
+    serviceExpiresAt?: string | null;
     acquisitionSource: "purchase" | "subscription" | "credit" | "grant";
   }>;
 };
@@ -76,6 +78,7 @@ export function groupPurchasedAnalysesByProduct(
       editionLabel: formatAnalysisEditionLabel(editionKey ?? "LEGACY"),
       isLatest: index === 0, // First (most recent) edition
       acquiredAt: summary.acquiredAt,
+      serviceExpiresAt: summary.serviceExpiresAt ?? null,
       acquisitionSource: summary.acquisitionSource,
     }));
     const latestAcquiredAt = editions.reduce(

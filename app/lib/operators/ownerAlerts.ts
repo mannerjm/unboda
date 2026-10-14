@@ -13,6 +13,7 @@ const STALE_SENDING_MS = 15 * 60 * 1000;
 type IncidentKind =
   | "PAYMENT_OWNER_REVIEW"
   | "REFUND_OWNER_REVIEW"
+  | "AI_CREDIT_REFUND_OWNER_REVIEW"
   | "REPORT_FAILED"
   | "CLOSURE_OWNER_REVIEW"
   | "AI_CHARGE_INTEGRITY";
@@ -57,6 +58,7 @@ function countKinds(incidents: readonly Incident[]): Record<IncidentKind, number
   const counts: Record<IncidentKind, number> = {
     PAYMENT_OWNER_REVIEW: 0,
     REFUND_OWNER_REVIEW: 0,
+    AI_CREDIT_REFUND_OWNER_REVIEW: 0,
     REPORT_FAILED: 0,
     CLOSURE_OWNER_REVIEW: 0,
     AI_CHARGE_INTEGRITY: 0,
@@ -126,13 +128,16 @@ async function collectAiChargeIntegrityIncidents(): Promise<Incident[]> {
 
 async function collectOwnerReviewIncidents(): Promise<Incident[]> {
   const db = createAdminClient();
-  const [paymentResult, refundResult, reportResult, closureResult, aiIncidents] = await Promise.all([
+  const [paymentResult, refundResult, creditRefundResult, reportResult, closureResult, aiIncidents] = await Promise.all([
     db.from("toss_payment_records")
       .select("order_id,reconciliation_status,updated_at")
       .in("reconciliation_status", ["terminal_mismatch", "reconciliation_failed"]),
     db.from("refund_workflows")
       .select("order_id,status,updated_at")
       .eq("status", "OWNER_REVIEW_REQUIRED"),
+    db.from("ai_credit_refund_requests")
+      .select("id,status,updated_at")
+      .in("status", ["REVIEW_REQUIRED", "MANUAL_BANK_REQUIRED"]),
     db.from("paid_reports")
       .select("id,status,updated_at")
       .eq("status", "failed"),
@@ -142,7 +147,7 @@ async function collectOwnerReviewIncidents(): Promise<Incident[]> {
       .eq("closure_owner_review_required", true),
     collectAiChargeIntegrityIncidents(),
   ]);
-  if (paymentResult.error || refundResult.error || reportResult.error || closureResult.error) {
+  if (paymentResult.error || refundResult.error || creditRefundResult.error || reportResult.error || closureResult.error) {
     throw new Error("OWNER_ALERT_OPERATIONAL_READ_FAILED");
   }
 
@@ -155,6 +160,11 @@ async function collectOwnerReviewIncidents(): Promise<Incident[]> {
     ...(refundResult.data ?? []).map((row) => ({
       kind: "REFUND_OWNER_REVIEW" as const,
       reference: digest(String(row.order_id)),
+      version: normalizeVersion(row.updated_at as string | null),
+    })),
+    ...(creditRefundResult.data ?? []).map((row) => ({
+      kind: "AI_CREDIT_REFUND_OWNER_REVIEW" as const,
+      reference: digest(String(row.id)),
       version: normalizeVersion(row.updated_at as string | null),
     })),
     ...(reportResult.data ?? []).map((row) => ({
@@ -292,6 +302,7 @@ function renderAlert(incidents: readonly Incident[]): { subject: string; text: s
   const lines = [
     ["결제 상태 불일치", counts.PAYMENT_OWNER_REVIEW],
     ["환불 수동 확인", counts.REFUND_OWNER_REVIEW],
+    ["AI 질문권 환불 예외", counts.AI_CREDIT_REFUND_OWNER_REVIEW],
     ["유료 분석 생성 실패", counts.REPORT_FAILED],
     ["계정 종료 수동 확인", counts.CLOSURE_OWNER_REVIEW],
     ["AI 질문권 무결성", counts.AI_CHARGE_INTEGRITY],

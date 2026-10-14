@@ -190,6 +190,7 @@ export default async function AiConsultingCreditsPage({
             <div>
               <p className="text-xs font-semibold tracking-[0.18em] text-slate-500">CREDIT HISTORY</p>
               <h2 className="mt-2 text-xl font-bold text-[#11162d]">질문권 구매·사용 내역</h2>
+            <Link href={`/ai-consulting/credits/refunds?profileId=${encodeURIComponent(profile.id)}`} className="mt-2 inline-block text-sm font-bold text-[#5143b0] underline">구매 건별 이용기간·환불 관리 →</Link>
             </div>
             <p className="text-sm text-slate-700">현재 잔액 <strong className="text-[#11162d]">{session.questionsRemaining}회</strong></p>
           </div>

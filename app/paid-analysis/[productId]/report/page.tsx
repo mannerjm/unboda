@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import ReportAccessGate from "./ReportAccessGate";
 import AiConsultingEntryCard from "./AiConsultingEntryCard";
 import Phase9NextAnalysisSection from "@/app/components/Phase9NextAnalysisSection";
+import ReportLibraryReturnLink from "@/app/components/ReportLibraryReturnLink";
 import ReportCompletionGate from "./ReportCompletionGate";
 import VerifiedReviewPanel from "@/app/components/VerifiedReviewPanel";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
@@ -142,6 +143,9 @@ async function PaidReportBody({
 
   return (
     <>
+      <div className="mx-auto max-w-5xl px-5 pt-6 sm:px-8">
+        <ReportLibraryReturnLink placement="top" />
+      </div>
       <PaidAnalysisDetailV2Client
         key={`${profileId}:${productId}:${exactEdition}`}
         productId={productId}
@@ -174,6 +178,7 @@ async function PaidReportBody({
           sourceProductId={productId}
           sourceEditionKey={exactEdition}
         />
+        <ReportLibraryReturnLink placement="bottom" />
       </ReportCompletionGate>
     </>
   );

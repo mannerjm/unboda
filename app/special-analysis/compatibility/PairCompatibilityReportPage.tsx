@@ -7,6 +7,7 @@ import Phase9NextAnalysisSection from "@/app/components/Phase9NextAnalysisSectio
 import VerifiedReviewPanel from "@/app/components/VerifiedReviewPanel";
 import { isStoredCompatibilityReport } from "@/app/lib/compatibilityPaidAnalysis";
 import { getPaidReport } from "@/app/lib/paidReports/server";
+import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { listUserEntitlements } from "@/app/lib/purchases/server";
@@ -31,6 +32,8 @@ export default async function PairCompatibilityReportPage({
   if (!profileId || !isProfileId(profileId)) notFound();
   const profile = await getUserProfile(profileId, user.id);
   if (!profile) notFound();
+  const activeProfile = await getActiveProfile(user.id);
+  if (activeProfile?.id !== profile.id) notFound();
 
   const entitlements = (await listUserEntitlements(user.id))
     .filter((item) => item.profileId === profileId

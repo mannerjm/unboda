@@ -10,6 +10,7 @@ import {
   type StoredFamilySiblingReport,
 } from "@/app/lib/familyCompatibilityExtendedPaidAnalysis";
 import { getPaidReport } from "@/app/lib/paidReports/server";
+import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { listUserEntitlements } from "@/app/lib/purchases/server";
@@ -29,6 +30,8 @@ export default async function FamilySiblingPurchasedReportPage({ searchParams }:
   if (!profileId || !isProfileId(profileId)) notFound();
   const profile = await getUserProfile(profileId, user.id);
   if (!profile) notFound();
+  const activeProfile = await getActiveProfile(user.id);
+  if (activeProfile?.id !== profile.id) notFound();
 
   const entitlements = (await listUserEntitlements(user.id))
     .filter((item) => item.profileId === profileId

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { reconcileAiConsultingCreditPaymentsBatch } from "@/app/lib/aiConsulting/creditCheckout";
+import { retryDueCreditRefunds } from "@/app/lib/aiConsulting/creditRefunds";
 import { reconcilePaymentsBatch } from "@/app/lib/purchases/server";
 
 export const dynamic = "force-dynamic";
@@ -19,8 +20,9 @@ async function reconcile(request: Request) {
   try {
     const summary = await reconcilePaymentsBatch();
     const aiConsultingCredits = await reconcileAiConsultingCreditPaymentsBatch();
+    const aiCreditRefunds = await retryDueCreditRefunds();
     return NextResponse.json(
-      { ...summary, aiConsultingCredits },
+      { ...summary, aiConsultingCredits, aiCreditRefunds },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch {

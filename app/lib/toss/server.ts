@@ -241,9 +241,15 @@ export class TossCancellationError extends Error {
 export async function cancelPaymentWithToss(input: {
   paymentKey: string;
   cancelReason: string;
+  /** Optional exact amount for an approved partial refund. */
+  cancelAmount?: number;
+  /** Retry-safe provider idempotency key for this distinct refund request. */
+  idempotencyKey?: string;
 }): Promise<TossCancellationResponse> {
   const { apiBaseUrl, secretKey } = getTossConfig();
-  if (!input.paymentKey || !input.cancelReason || input.cancelReason.length > 200) {
+  if (!input.paymentKey || !input.cancelReason || input.cancelReason.length > 200
+    || (input.cancelAmount !== undefined && (!Number.isSafeInteger(input.cancelAmount) || input.cancelAmount <= 0))
+    || (input.idempotencyKey !== undefined && !/^[0-9a-f-]{36}$/i.test(input.idempotencyKey))) {
     throw new TossCancellationError({
       provider: "toss", httpStatus: 400, providerErrorCode: "INVALID_CANCEL_REQUEST",
       safeMessage: "취소 요청 정보가 올바르지 않습니다.", failureStage: "cancellation",
@@ -258,8 +264,9 @@ export async function cancelPaymentWithToss(input: {
       headers: {
         Authorization: `Basic ${Buffer.from(`${secretKey}:`).toString("base64")}`,
         "Content-Type": "application/json",
+        ...(input.idempotencyKey ? { "Idempotency-Key": input.idempotencyKey } : {}),
       },
-      body: JSON.stringify({ cancelReason: input.cancelReason }),
+      body: JSON.stringify({ cancelReason: input.cancelReason, ...(input.cancelAmount !== undefined ? { cancelAmount: input.cancelAmount } : {}) }),
     });
   } catch {
     throw new TossCancellationError({
@@ -287,7 +294,11 @@ export async function cancelPaymentWithToss(input: {
 
   const payload = await response.json() as Partial<TossCancellationResponse>;
   const cancel = payload.cancels?.[payload.cancels.length - 1];
-  if (!payload.paymentKey || !payload.orderId || payload.status !== "CANCELED" || !cancel || cancel.cancelStatus !== "DONE") {
+  if (!payload.paymentKey || !payload.orderId
+    || !["CANCELED", "PARTIAL_CANCELED"].includes(payload.status ?? "")
+    || (!input.cancelAmount && payload.status !== "CANCELED")
+    || !cancel || cancel.cancelStatus !== "DONE"
+    || (input.cancelAmount !== undefined && cancel.cancelAmount !== input.cancelAmount)) {
     throw new TossCancellationError({
       provider: "toss", httpStatus: 502, providerErrorCode: "MALFORMED_CANCELLATION_RESPONSE",
       safeMessage: "Toss 취소 응답이 올바르지 않습니다.", failureStage: "cancellation",

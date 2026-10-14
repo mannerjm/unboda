@@ -61,6 +61,8 @@ export type PurchaseRecord = {
   productId: string;
   orderId: string;
   purchasedAt: string;
+  /** Null for a legacy purchase; precise online access cutoff for new purchases. */
+  serviceExpiresAt?: string | null;
   /** STEP 57D-48F-B foundation column; null/LEGACY until a later phase threads it through. */
   analysisEditionKey: string | null;
   /** STEP 57D-48F-D: copied verbatim from the originating order, never recomputed. */
@@ -116,6 +118,8 @@ export type EntitlementRecord = {
   resourceId: string;
   resourceType: string;
   isActive: boolean;
+  /** Null for legacy grants; read access ends exactly at this instant. */
+  serviceExpiresAt?: string | null;
   purchaseId: string | null;
   source: "purchase" | "subscription" | "credit" | "grant";
   createdAt: string;

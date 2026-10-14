@@ -33,6 +33,13 @@ assert(paid.indexOf("<ReportCompletionGate") < paid.indexOf('<ReportLibraryRetur
   "deep report exit only appears after completed report");
 for (const path of reportFiles.slice(1)) {
   const src = read(path);
+  assert(src.includes('import { getActiveProfile } from "@/app/lib/profiles/activeServer"'),
+    `${path}: compatibility report must verify current active profile`);
+  assert(src.includes("const activeProfile = await getActiveProfile(user.id);") &&
+    src.includes("if (activeProfile?.id !== profile.id) notFound();"),
+    `${path}: block reports for a non-active profile even within same account`);
+  assert(src.indexOf("activeProfile?.id !== profile.id") < src.indexOf("listUserEntitlements(user.id)"),
+    `${path}: active profile guard must run before entitlement/report loading`);
   assert(src.indexOf("if (!completed)") < src.indexOf('<ReportLibraryReturnLink placement="top"'),
     `${path}: completed-only specialized navigation`);
 }

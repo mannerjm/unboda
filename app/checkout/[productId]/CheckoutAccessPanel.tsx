@@ -316,6 +316,7 @@ export default function CheckoutAccessPanel({
                   <div className="flex justify-between gap-4"><dt className="text-slate-500">상품</dt><dd className="text-right font-semibold">{productTitle}</dd></div>
                   <div className="flex justify-between gap-4"><dt className="text-slate-500">분석 대상</dt><dd className="text-right font-semibold">{profileLabel ?? "-"}</dd></div>
                   <div className="flex justify-between gap-4"><dt className="text-slate-500">결제 금액</dt><dd className="text-right font-semibold">{priceLabel}</dd></div>
+                  <div className="flex justify-between gap-4"><dt className="text-slate-500">온라인 재열람</dt><dd className="text-right font-semibold">결제 승인일부터 12개월</dd></div>
                   {editionLabel ? <div className="flex justify-between gap-4"><dt className="text-slate-500">분석 기준</dt><dd className="text-right font-semibold">{editionLabel}</dd></div> : null}
                 </dl>
                 <p className="mt-5 text-sm font-semibold leading-6 text-[#11162d]">결제가 승인되면 개인화 분석 생성이 즉시 시작되고 구매한 분석에 보관됩니다.</p>

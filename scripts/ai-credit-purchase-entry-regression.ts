@@ -35,4 +35,8 @@ for (const { questions, priceKrw } of AI_CONSULTING_CREDIT_BUNDLES) {
   assert(questions > 0 && priceKrw > 0, "bundles must have a positive count and price");
 }
 assert(success.includes("router.replace(consultationHref)") && success.includes("confirm-payment"), "successful purchase returns to the existing consultation only after payment confirmation");
+assert(success.includes('bg-[#f5f7fc]') && success.includes('bg-[linear-gradient(135deg,#111734,#282052)]') && !success.includes('bg-[#f7f2e8]'), "AI credit payment loading must use Unboda navy and cool-grey colors, not the legacy beige screen");
+assert(success.includes('role={isError ? "alert" : "status"}') && success.includes("animate-spin"), "credit confirmation must show a live loading indicator and separate error state");
+assert(!success.includes("<button") && !success.includes("router.refresh()") && !success.includes("setTimeout("), "confirmed payments must return directly to consultation without an extra button, timer, or competing refresh");
+assert(success.indexOf("if (!response.ok)") < success.indexOf("router.replace(consultationHref)"), "credit confirmation must navigate only after the server confirms payment and credits");
 console.log("AI credit purchase entry regression: PASS");

@@ -30,6 +30,7 @@ export type TossCancellationResponse = TossConfirmResponse & {
   balanceAmount: number;
   cancels: Array<{
     transactionKey: string;
+    cancelReason?: string;
     cancelAmount: number;
     cancelStatus: string;
     canceledAt: string;

@@ -310,7 +310,7 @@ export async function cancelPaymentWithToss(input: {
     paymentKey: payload.paymentKey,
     orderId: payload.orderId,
     totalAmount: payload.totalAmount ?? 0,
-    status: payload.status,
+    status: payload.status!,
     method: payload.method ?? null,
     currency: payload.currency ?? "KRW",
     mId: payload.mId ?? null,

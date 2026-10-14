@@ -1,4 +1,4 @@
-import Link from "next/link";
+import ReportLibraryReturnLink from "@/app/components/ReportLibraryReturnLink";
 import { notFound, redirect } from "next/navigation";
 import CompatibilityPaidReportPreparing from "@/app/components/CompatibilityPaidReportPreparing";
 import FamilyExtendedPaidReportView from "@/app/components/FamilyExtendedPaidReportView";
@@ -71,7 +71,7 @@ export default async function FamilyOtherPurchasedReportPage({ searchParams }: P
     <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
         <div className="mx-auto w-full max-w-5xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <Link href="/purchased-analyses" className="text-sm font-semibold text-slate-600 underline decoration-[#c4c9d9] underline-offset-4">← 구매한 분석</Link>
+            <ReportLibraryReturnLink placement="top" />
             <span className="text-xs text-slate-500">{profile.label}님의 구매 리포트</span>
           </div>
           <>
@@ -87,6 +87,7 @@ export default async function FamilyOtherPurchasedReportPage({ searchParams }: P
                 sourceProductId={COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID}
                 sourceEditionKey={entitlement.analysisEditionKey}
               />
+              <ReportLibraryReturnLink placement="bottom" />
             </>
         </div>
     </main>

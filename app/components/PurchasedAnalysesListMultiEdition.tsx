@@ -63,6 +63,18 @@ function formatAcquiredDate(value: string): string {
   }).format(date);
 }
 
+/** Purchase terms come from the stored entitlement, never from display-day math. */
+function reportServiceTermLabel(expiresAt: string | null | undefined): string {
+  if (!expiresAt) return "기존 구매 이용조건 유지";
+  const endDate = new Date(expiresAt);
+  if (Number.isNaN(endDate.getTime())) return "이용기간 확인 필요";
+  const stamp = new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric", month: "2-digit", day: "2-digit",
+    timeZone: "Asia/Seoul",
+  }).format(endDate);
+  return `열람 종료일 ${stamp}`;
+}
+
 function acquisitionLabel(source: PurchasedAnalysisProductGroup["editions"][number]["acquisitionSource"]): string {
   return source === "purchase" ? "구매" : "보관 시작";
 }
@@ -177,6 +189,7 @@ export default function PurchasedAnalysesList({
               <span>
                 {acquisitionLabel(recent.edition.acquisitionSource)} · {formatAcquiredDate(recent.edition.acquiredAt)}
               </span>
+              <span className="font-semibold">{reportServiceTermLabel(recent.edition.serviceExpiresAt)}</span>
             </div>
             <span className={`mt-3 inline-flex rounded-full border px-3 py-1.5 text-xs font-bold ${statusClasses[recent.edition.reportStatus]}`}>
               {statusLabels[recent.edition.reportStatus]}
@@ -221,7 +234,7 @@ export default function PurchasedAnalysesList({
           <div>
             <p className="text-xs font-bold tracking-[0.15em] text-[#6f5ce7]">MY LIBRARY</p>
             <h2 id="purchased-library-heading" className="mt-2 text-2xl font-black text-[#11162d]">전체 보관함</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">연도판과 분석 상태를 확인하고, 완료된 리포트는 언제든 다시 열 수 있습니다.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">연도판·분석 상태와 구매 당시 약속된 열람기간을 확인할 수 있습니다.</p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-semibold">
             <span className="rounded-full bg-[#eef0f6] px-3 py-2 text-slate-600">보관 {libraryOverview?.total ?? allEditions.length}개</span>
@@ -313,6 +326,7 @@ export default function PurchasedAnalysesList({
                           </div>
                           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
                             <span>{acquisitionLabel(edition.acquisitionSource)} · {formatAcquiredDate(edition.acquiredAt)}</span>
+                            <span className="font-semibold text-[#5143b0]">{reportServiceTermLabel(edition.serviceExpiresAt)}</span>
                             <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-bold ${statusClasses[edition.reportStatus]}`}>
                               {statusLabels[edition.reportStatus]}
                             </span>

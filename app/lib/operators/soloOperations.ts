@@ -21,7 +21,6 @@ export type SoloOperationsSnapshot = {
 
 export async function getSoloOperationsSnapshot(): Promise<SoloOperationsSnapshot> {
   const db = createAdminClient();
-  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const since48h = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
   const [
     support, supportAged, review, reviewAged, creditRefund, creditRefundRecovering,

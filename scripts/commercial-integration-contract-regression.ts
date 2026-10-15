@@ -14,6 +14,7 @@ const runtime=read("supabase/migrations/20261014200000_enforce_commercial_credit
 const page=read("app/ai-consulting/credits/refunds/page.tsx");
 const refundPage=read("app/refund/page.tsx");
 const u=read("app/terms/page.tsx");
+const alerts=read("app/lib/operators/ownerAlerts.ts");
 const checks:Record<string,boolean>={
   legacyPurchasePreserved:terms.includes("effective_at is not null and new.purchased_at>=v_effective_at"),
   newPurchase12Months:terms.includes("new.service_expires_at:=new.purchased_at+interval '12 months'"),
@@ -41,7 +42,17 @@ const checks:Record<string,boolean>={
   buyerScreenShowsExpired:page.includes("lot.expiresAt"),
   buyerScreenRequiresEnabled:page.includes("enabled&&active&&lot.available>0&&!lot.refundId"),
   noFalseAutoRefundPromise:refundPage.includes("자동 카드 환불은 시험·검증 중"),
-  publicTermsDisclose12mo:u.includes("온라인 열람·재열람기간은 결제 승인 시각부터 12개월")
+  publicTermsDisclose12mo:u.includes("온라인 열람·재열람기간은 결제 승인 시각부터 12개월"),
+  exhaustedRetrySkipped:purchase.includes(".filter((record) => record.retryCount < record.maxRetryCount)"),
+  pendingFallbackOnlyWhenUnrecorded:purchase.includes('.select("order_id")') &&
+    purchase.includes(".in(\"order_id\", pendingOrders.map((order) => order.id))") &&
+    purchase.includes("!knownOrderIds.has(row.id) && !alreadyRecordedIds.has(row.id)"),
+  pendingFallbackFailsClosedOnLookupError:purchase.includes("if (existingPaymentError)") &&
+    purchase.includes("throw new Error(`Toss pending 주문의 기존 결제 기록을 확인하지 못했습니다:"),
+  ownerEmailStableForSamePaymentIssue:alerts.includes("version: normalizeVersion(row.reconciliation_status as string | null)") &&
+    !alerts.includes("version: normalizeVersion(row.updated_at as string | null),\n    })),"),
+  paymentConfirmPathUnchanged:purchase.includes('if (provider.status !== "DONE")') &&
+    purchase.includes("provider payment verified and access restored")
 };
 for (const [name,pass] of Object.entries(checks))assert.ok(pass,`contract failed: ${name}`);
 console.log("commercial integration static contract: PASS",Object.keys(checks).length,"checks (NOT actual payment E2E)");

@@ -7,6 +7,7 @@ import { cleanupExpiredGuestFreeAnalyses } from "@/app/lib/guestFreeAnalyses/ser
 import { cleanupCustomerJourneyEvents } from "@/app/lib/analytics/customerJourney";
 import { sendOwnerReviewAlertIfNeeded } from "@/app/lib/operators/ownerAlerts";
 import { dispatchSupportNotificationDeliveries } from "@/app/lib/support/notifications";
+import { recordJobHeartbeat } from "@/app/lib/operators/heartbeat";
 
 export const dynamic = "force-dynamic";
 
@@ -175,11 +176,22 @@ async function dispatch(request: Request) {
     console.error("[customer-journey] retention cleanup unavailable");
   }
 
-  const ok = payments.ok && refunds.ok && accountClosures.ok && guestCleanup.ok;
+  const coreOk = payments.ok && refunds.ok && accountClosures.ok && guestCleanup.ok;
+  const notificationsOk = operatorAlerts.ok && supportNotifications.ok
+    && !["unconfigured", "no_recipients", "failed_final"].includes(operatorAlerts.status)
+    && supportNotifications.configured && supportNotifications.failedFinal === 0;
+  const ok = coreOk && notificationsOk;
+  let heartbeatSaved = false;
+  try {
+    await recordJobHeartbeat("reconcile", ok, !coreOk ? "CORE_WORKER_FAILED" : "NOTIFICATION_WORKER_FAILED");
+    heartbeatSaved = true;
+  } catch {
+    console.error("[cron-heartbeat] persistence failed");
+  }
 
   return NextResponse.json(
-    { ok, payments, refunds, accountClosures, guestCleanup, journeyCleanup, operatorAlerts, supportNotifications },
-    { status: ok ? 200 : 500, headers: { "Cache-Control": "no-store" } },
+    { ok: ok && heartbeatSaved, payments, refunds, accountClosures, guestCleanup, journeyCleanup, operatorAlerts, supportNotifications },
+    { status: ok && heartbeatSaved ? 200 : 500, headers: { "Cache-Control": "no-store" } },
   );
 }
 

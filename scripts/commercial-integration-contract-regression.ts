@@ -15,6 +15,10 @@ const page=read("app/ai-consulting/credits/refunds/page.tsx");
 const refundPage=read("app/refund/page.tsx");
 const u=read("app/terms/page.tsx");
 const alerts=read("app/lib/operators/ownerAlerts.ts");
+const paymentAlertIncident=alerts.slice(
+  alerts.indexOf('kind: "PAYMENT_OWNER_REVIEW" as const'),
+  alerts.indexOf('kind: "REFUND_OWNER_REVIEW" as const'),
+);
 const checks:Record<string,boolean>={
   legacyPurchasePreserved:terms.includes("effective_at is not null and new.purchased_at>=v_effective_at"),
   newPurchase12Months:terms.includes("new.service_expires_at:=new.purchased_at+interval '12 months'"),
@@ -49,8 +53,8 @@ const checks:Record<string,boolean>={
     purchase.includes("!knownOrderIds.has(row.id) && !alreadyRecordedIds.has(row.id)"),
   pendingFallbackFailsClosedOnLookupError:purchase.includes("if (existingPaymentError)") &&
     purchase.includes("throw new Error(`Toss pending 주문의 기존 결제 기록을 확인하지 못했습니다:"),
-  ownerEmailStableForSamePaymentIssue:alerts.includes("version: normalizeVersion(row.reconciliation_status as string | null)") &&
-    !alerts.includes("version: normalizeVersion(row.updated_at as string | null),\n    })),"),
+  ownerEmailStableForSamePaymentIssue:paymentAlertIncident.includes("version: normalizeVersion(row.reconciliation_status as string | null)") &&
+    !paymentAlertIncident.includes("version: normalizeVersion(row.updated_at as string | null)"),
   paymentConfirmPathUnchanged:purchase.includes('if (provider.status !== "DONE")') &&
     purchase.includes("provider payment verified and access restored")
 };

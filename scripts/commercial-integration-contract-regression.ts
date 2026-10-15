@@ -29,7 +29,7 @@ const adminOperations=read("app/admin/AdminOperationsOverview.tsx");
 const adminPage=read("app/admin/page.tsx");
 const recoverySchema=read("supabase/migrations/20261015194500_solo_operations_safety.sql");
 const recoveryHardening=read("supabase/migrations/20261015194800_solo_report_recovery_hardening.sql");
-const cronConfig=read("vercel.json");
+const cronConfig=JSON.parse(read("vercel.json")) as { crons?: Array<{ path: string; schedule: string }> };
 const reportGenerator=read("app/lib/paidReports/generation.ts");
 const guide=read("app/admin/guide/page.tsx");
 const paymentAlertIncident=alerts.slice(
@@ -97,9 +97,8 @@ const checks:Record<string,boolean>={
     purchase.includes('return { outcome: "awaiting_payment" }'),
   untouchedTossReviewGuards:orderConfirm.includes("isTossCheckoutUserAllowed(user.id)") &&
     purchase.includes('if (provider.status !== "DONE")'),
-  hourlyCoreCronPreserved:cronConfig.includes('"schedule": "0 * * * *"') &&
-    cronConfig.includes('"path": "/api/internal/reconcile"'),
-  safeRecoveryScheduled:cronConfig.includes('"path": "/api/internal/report-recovery"') &&
+  hourlyCoreCronPreserved:cronConfig.crons?.some((job) => job.path === "/api/internal/reconcile" && job.schedule === "0 * * * *") === true,
+  safeRecoveryScheduled:cronConfig.crons?.some((job) => job.path === "/api/internal/report-recovery" && job.schedule === "23 * * * *") === true &&
     recoveryRoute.includes('isAuthorizedSchedulerRequest(request)') &&
     recoveryRoute.includes('export const maxDuration = 300'),
   recoveryRequiresPaidEntitlement:recoverySchema.includes('e.purchase_id=pr.purchase_id') &&

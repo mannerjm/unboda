@@ -8,6 +8,7 @@ import { cleanupCustomerJourneyEvents } from "@/app/lib/analytics/customerJourne
 import { sendOwnerReviewAlertIfNeeded } from "@/app/lib/operators/ownerAlerts";
 import { dispatchSupportNotificationDeliveries } from "@/app/lib/support/notifications";
 import { recordJobHeartbeat } from "@/app/lib/operators/heartbeat";
+import { retryDueCreditRefunds } from "@/app/lib/aiConsulting/creditRefunds";
 
 export const dynamic = "force-dynamic";
 
@@ -166,6 +167,19 @@ async function dispatch(request: Request) {
     console.error("[support-email]", { trigger: "scheduled_retry", status: "worker_failed" });
   }
 
+  // Extra independent opt-in: DO NOT activate Toss partial refunds during review.
+  // Both flags must be intentionally enabled after sandbox cancellation E2E.
+  let creditRefunds: WorkerReport<{ checked: number; completed: number; exceptions: number }> = { ok: true, checked: 0, completed: 0, exceptions: 0 };
+  if (process.env.AI_CREDIT_SELF_REFUNDS_ENABLED === "true"
+      && process.env.AI_CREDIT_REFUND_RETRY_WORKER_ENABLED === "true") {
+    try {
+      creditRefunds = { ok: true, ...(await retryDueCreditRefunds(5)) };
+    } catch {
+      creditRefunds = { ok: false };
+      console.error("[ai-credit-refunds] background retry failed");
+    }
+  }
+
   // Analytics retention is isolated from financial reconciliation and can never block it.
   let journeyCleanup: WorkerReport<{ removed: number }>;
   try {
@@ -176,7 +190,7 @@ async function dispatch(request: Request) {
     console.error("[customer-journey] retention cleanup unavailable");
   }
 
-  const coreOk = payments.ok && refunds.ok && accountClosures.ok && guestCleanup.ok;
+  const coreOk = payments.ok && refunds.ok && accountClosures.ok && guestCleanup.ok && creditRefunds.ok;
   const notificationsOk = operatorAlerts.ok && supportNotifications.ok
     && !["unconfigured", "no_recipients", "failed_final"].includes(operatorAlerts.status)
     && supportNotifications.configured && supportNotifications.failedFinal === 0;
@@ -190,7 +204,7 @@ async function dispatch(request: Request) {
   }
 
   return NextResponse.json(
-    { ok: ok && heartbeatSaved, payments, refunds, accountClosures, guestCleanup, journeyCleanup, operatorAlerts, supportNotifications },
+    { ok: ok && heartbeatSaved, payments, refunds, accountClosures, guestCleanup, creditRefunds, journeyCleanup, operatorAlerts, supportNotifications },
     { status: ok && heartbeatSaved ? 200 : 500, headers: { "Cache-Control": "no-store" } },
   );
 }

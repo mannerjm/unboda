@@ -19,6 +19,20 @@ const expiredMigration=read("supabase/migrations/20261015192000_close_expired_un
 const orderConfirm=read("app/api/orders/[orderId]/confirm-payment/route.ts");
 const failures=read("app/lib/operators/failureVisibilityServer.ts");
 const ordersMigration=read("supabase/migrations/032_active_edition_order_uniqueness.sql");
+const heartbeats=read("app/lib/operators/heartbeat.ts");
+const recoveryWorker=read("app/lib/operators/paidReportRecovery.ts");
+const recoveryRoute=read("app/api/internal/report-recovery/route.ts");
+const masterCron=read("app/api/internal/reconcile/route.ts");
+const healthRoute=read("app/api/health/operations/route.ts");
+const soloDashboard=read("app/lib/operators/soloOperations.ts");
+const adminOperations=read("app/admin/AdminOperationsOverview.tsx");
+const adminPage=read("app/admin/page.tsx");
+const recoverySchema=read("supabase/migrations/20261015194500_solo_operations_safety.sql");
+const recoveryHardening=read("supabase/migrations/20261015194800_solo_report_recovery_hardening.sql");
+const cronConfig=JSON.parse(read("vercel.json")) as { crons?: Array<{ path: string; schedule: string }> };
+const reportGenerator=read("app/lib/paidReports/generation.ts");
+const guide=read("app/admin/guide/page.tsx");
+const aiFullMetricsMigration=read("supabase/migrations/20261015195000_solo_ai_full_integrity_metrics.sql");
 const paymentAlertIncident=alerts.slice(
   alerts.indexOf('kind: "PAYMENT_OWNER_REVIEW" as const'),
   alerts.indexOf('kind: "REFUND_OWNER_REVIEW" as const'),
@@ -83,7 +97,50 @@ const checks:Record<string,boolean>={
     purchase.includes('provider.status === "WAITING_FOR_DEPOSIT"') &&
     purchase.includes('return { outcome: "awaiting_payment" }'),
   untouchedTossReviewGuards:orderConfirm.includes("isTossCheckoutUserAllowed(user.id)") &&
-    purchase.includes('if (provider.status !== "DONE")')
+    purchase.includes('if (provider.status !== "DONE")'),
+  hourlyCoreCronPreserved:cronConfig.crons?.some((job) => job.path === "/api/internal/reconcile" && job.schedule === "0 * * * *") === true,
+  safeRecoveryScheduled:cronConfig.crons?.some((job) => job.path === "/api/internal/report-recovery" && job.schedule === "23 * * * *") === true &&
+    recoveryRoute.includes('isAuthorizedSchedulerRequest(request)') &&
+    recoveryRoute.includes('export const maxDuration = 300'),
+  recoveryRequiresPaidEntitlement:recoverySchema.includes('e.purchase_id=pr.purchase_id') &&
+    recoverySchema.includes('e.is_active=true') &&
+    recoverySchema.includes("a.status='ACTIVE'"),
+  recoveryNeverCreatesPurchase:!recoveryWorker.includes("createPendingOrder") &&
+    !recoveryWorker.includes("createPurchaseFromPaidOrder") &&
+    recoveryWorker.includes('p_limit: 1'),
+  recoveryBoundedAndLocked:recoverySchema.includes('for update of pr skip locked') &&
+    recoverySchema.includes('attempt_count,0)<3') &&
+    recoveryHardening.includes('on conflict on constraint paid_report_recovery_attempts_pkey'),
+  recoveryConvergesViaExistingClaim:recoveryWorker.includes('preparePaidReportGeneration(input)') &&
+    recoveryWorker.includes('runPaidReportGeneration(input, claim)') &&
+    reportGenerator.includes('if (!(await canPublish(input)))'),
+  healthCannotLeakCustomers:healthRoute.includes('status: healthy ? 200 : 503') &&
+    !healthRoute.includes('select("user_id') && !healthRoute.includes('select("email'),
+  heartbeatFailClosed:heartbeats.includes('INTERNAL_HEARTBEAT_PERSIST_FAILED') &&
+    masterCron.includes('await recordJobHeartbeat("reconcile"') &&
+    recoveryRoute.includes('await recordJobHeartbeat("paid_report_recovery"'),
+  extraRefundsOptInOnly:masterCron.includes('AI_CREDIT_REFUND_RETRY_WORKER_ENABLED === "true"') &&
+    masterCron.includes('AI_CREDIT_SELF_REFUNDS_ENABLED === "true"'),
+  healthForSoloInbox:soloDashboard.includes('readJobHeartbeats()') &&
+    adminOperations.includes('1인 통합 운영 업무함') &&
+    adminPage.includes('getSoloOperationsSnapshot()'),
+  alertAfterBudget:alerts.includes('recovery?.attempts ?? 0') &&
+    alerts.includes('analysis_input_snapshot_invalid') &&
+    alerts.includes('SUPPORT_OVERDUE'),
+  overdueAndEmailAlerts:alerts.includes('NOTIFICATION_FAILURE') &&
+    alerts.includes('REVIEWS_OVERDUE') &&
+    alerts.includes('AI_OPERATIONS_ANOMALY'),
+  supervisorRunbookAvailable:guide.includes('1인 운영 비상 대응') &&
+    guide.includes('Supabase 프로젝트 상태'),
+  serviceRoleOnly:recoverySchema.includes('revoke all on function public.claim_due_paid_report_recovery') &&
+    recoveryHardening.includes('grant execute on function public.count_exhausted_paid_report_recoveries() to service_role'),
+  fullAiCreditIntegrityScan:alerts.includes('rpc("list_ai_charge_integrity_incidents_24h")') &&
+    aiFullMetricsMigration.includes('not exists(select 1 from public.ai_consulting_credit_ledger'),
+  accurate24hAiMetrics:soloDashboard.includes('rpc("get_ai_solo_operations_metrics_24h")') &&
+    aiFullMetricsMigration.includes('from public.ai_consulting_attempts a') &&
+    !soloDashboard.includes('limit(500)'),
+  privateAiMonitoring:aiFullMetricsMigration.includes('revoke all on function public.list_ai_charge_integrity_incidents_24h()') &&
+    aiFullMetricsMigration.includes('grant execute on function public.get_ai_solo_operations_metrics_24h() to service_role')
 
 };
 for (const [name,pass] of Object.entries(checks))assert.ok(pass,`contract failed: ${name}`);

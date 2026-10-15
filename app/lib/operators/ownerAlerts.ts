@@ -2,11 +2,11 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 import { createAdminClient } from "@/app/lib/supabase/admin";
+import { getSoloOperationsSnapshot } from "./soloOperations";
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const ALERT_FROM = "운보다 운영 알림 <noreply@mail.unboda.kr>";
 const ADMIN_URL = "https://unboda.kr/admin";
-const AI_WINDOW_HOURS = 24;
 const MAX_ALERT_ATTEMPTS = 10;
 const STALE_SENDING_MS = 15 * 60 * 1000;
 
@@ -16,7 +16,13 @@ type IncidentKind =
   | "AI_CREDIT_REFUND_OWNER_REVIEW"
   | "REPORT_FAILED"
   | "CLOSURE_OWNER_REVIEW"
-  | "AI_CHARGE_INTEGRITY";
+  | "AI_CHARGE_INTEGRITY"
+  | "REPORT_RECOVERY_EXHAUSTED"
+  | "SUPPORT_OVERDUE"
+  | "REVIEWS_OVERDUE"
+  | "NOTIFICATION_FAILURE"
+  | "AI_OPERATIONS_ANOMALY"
+  | "SCHEDULER_UNHEALTHY";
 
 type Incident = {
   kind: IncidentKind;
@@ -62,73 +68,32 @@ function countKinds(incidents: readonly Incident[]): Record<IncidentKind, number
     REPORT_FAILED: 0,
     CLOSURE_OWNER_REVIEW: 0,
     AI_CHARGE_INTEGRITY: 0,
+    REPORT_RECOVERY_EXHAUSTED: 0,
+    SUPPORT_OVERDUE: 0,
+    REVIEWS_OVERDUE: 0,
+    NOTIFICATION_FAILURE: 0,
+    AI_OPERATIONS_ANOMALY: 0,
+    SCHEDULER_UNHEALTHY: 0,
   };
   for (const incident of incidents) counts[incident.kind] += 1;
   return counts;
 }
 
 async function collectAiChargeIntegrityIncidents(): Promise<Incident[]> {
-  const db = createAdminClient();
-  const since = new Date(Date.now() - AI_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
-  const nowMs = Date.now();
-  const { data: userRows, error: userError } = await db
-    .from("ai_consulting_messages")
-    .select("id,charged,reservation_token,reservation_expires_at,reservation_released_at,created_at")
-    .eq("role", "user")
-    .eq("scope_decision", "ALLOW")
-    .gte("created_at", since)
-    .order("created_at", { ascending: false })
-    .limit(500);
-  if (userError) throw new Error("OWNER_ALERT_AI_MESSAGES_READ_FAILED");
-
-  const rows = userRows ?? [];
-  const ids = rows.map((row) => row.id as string);
-  if (ids.length === 0) return [];
-
-  const [assistantResult, consumeResult, attemptResult] = await Promise.all([
-    db.from("ai_consulting_messages").select("reply_to_message_id").eq("role", "assistant").in("reply_to_message_id", ids),
-    db.from("ai_consulting_credit_ledger").select("related_message_id").eq("entry_type", "CONSUME").in("related_message_id", ids),
-    db.from("ai_consulting_attempts").select("user_message_id").in("user_message_id", ids),
-  ]);
-  if (assistantResult.error || consumeResult.error || attemptResult.error) {
-    throw new Error("OWNER_ALERT_AI_INTEGRITY_READ_FAILED");
-  }
-
-  const replies = new Set((assistantResult.data ?? []).map((row) => row.reply_to_message_id).filter(Boolean) as string[]);
-  const consumes = new Set((consumeResult.data ?? []).map((row) => row.related_message_id).filter(Boolean) as string[]);
-  const attempts = new Set((attemptResult.data ?? []).map((row) => row.user_message_id).filter(Boolean) as string[]);
-  const incidents: Incident[] = [];
-
-  for (const row of rows) {
-    const id = row.id as string;
-    const charged = Boolean(row.charged);
-    const createdAt = normalizeVersion(row.created_at as string | null);
-    const integrityProblem = [
-      charged && !replies.has(id),
-      charged && !consumes.has(id),
-      !charged && replies.has(id),
-      !charged && consumes.has(id),
-    ].some(Boolean);
-    const expiresAt = row.reservation_expires_at as string | null;
-    const expiresMs = expiresAt ? new Date(expiresAt).getTime() : Number.NaN;
-    const staleReservation = !charged
-      && Boolean(row.reservation_token)
-      && !row.reservation_released_at
-      && Number.isFinite(expiresMs)
-      && expiresMs <= nowMs;
-    const releasedWithoutFailureTelemetry = !charged && Boolean(row.reservation_released_at) && !attempts.has(id);
-
-    if (integrityProblem || staleReservation || releasedWithoutFailureTelemetry) {
-      incidents.push({ kind: "AI_CHARGE_INTEGRITY", reference: digest(id), version: createdAt });
-    }
-  }
-
-  return incidents;
+  // Fully evaluated on the DB using indexed joins, not an arbitrary latest-500 slice.
+  // The RPC only returns internal identifiers and timestamps, never user text.
+  const { data, error } = await createAdminClient().rpc("list_ai_charge_integrity_incidents_24h");
+  if (error) throw new Error("OWNER_ALERT_AI_INTEGRITY_READ_FAILED");
+  return (data ?? []).map((row: { message_id: string; message_created_at: string }) => ({
+    kind: "AI_CHARGE_INTEGRITY" as const,
+    reference: digest(row.message_id),
+    version: normalizeVersion(row.message_created_at),
+  }));
 }
 
 async function collectOwnerReviewIncidents(): Promise<Incident[]> {
   const db = createAdminClient();
-  const [paymentResult, refundResult, creditRefundResult, reportResult, closureResult, aiIncidents] = await Promise.all([
+  const [paymentResult, refundResult, creditRefundResult, reportResult, recoveryStateResult, closureResult, aiIncidents, solo] = await Promise.all([
     db.from("toss_payment_records")
       .select("order_id,reconciliation_status")
       .in("reconciliation_status", ["terminal_mismatch", "reconciliation_failed"]),
@@ -139,18 +104,24 @@ async function collectOwnerReviewIncidents(): Promise<Incident[]> {
       .select("id,status,updated_at")
       .in("status", ["REVIEW_REQUIRED", "MANUAL_BANK_REQUIRED"]),
     db.from("paid_reports")
-      .select("id,status,updated_at")
+      .select("id,status,error_code,updated_at")
       .eq("status", "failed"),
+    db.from("paid_report_recovery_attempts")
+      .select("report_id,attempt_count,last_outcome"),
     db.from("account_lifecycles")
       .select("user_id,status,updated_at")
       .eq("status", "DELETION_REQUESTED")
       .eq("closure_owner_review_required", true),
     collectAiChargeIntegrityIncidents(),
+    getSoloOperationsSnapshot(),
   ]);
-  if (paymentResult.error || refundResult.error || creditRefundResult.error || reportResult.error || closureResult.error) {
+  if (paymentResult.error || refundResult.error || creditRefundResult.error || reportResult.error || recoveryStateResult.error || closureResult.error) {
     throw new Error("OWNER_ALERT_OPERATIONAL_READ_FAILED");
   }
 
+  const recoveryStates = new Map((recoveryStateResult.data ?? []).map((row) =>
+    [row.report_id as string, { attempts: row.attempt_count as number, outcome: row.last_outcome as string }],
+  ));
   const incidents: Incident[] = [
     ...(paymentResult.data ?? []).map((row) => ({
       kind: "PAYMENT_OWNER_REVIEW" as const,
@@ -169,10 +140,14 @@ async function collectOwnerReviewIncidents(): Promise<Incident[]> {
       reference: digest(String(row.id)),
       version: normalizeVersion(row.updated_at as string | null),
     })),
-    ...(reportResult.data ?? []).map((row) => ({
+    ...(reportResult.data ?? []).filter((row) => {
+      const recovery = recoveryStates.get(String(row.id));
+      return row.error_code === "analysis_input_snapshot_invalid"
+        || (recovery?.attempts ?? 0) >= 3;
+    }).map((row) => ({
       kind: "REPORT_FAILED" as const,
       reference: digest(String(row.id)),
-      version: normalizeVersion(row.updated_at as string | null),
+      version: normalizeVersion(row.error_code as string | null),
     })),
     ...(closureResult.data ?? []).map((row) => ({
       kind: "CLOSURE_OWNER_REVIEW" as const,
@@ -180,6 +155,27 @@ async function collectOwnerReviewIncidents(): Promise<Incident[]> {
       version: normalizeVersion(row.updated_at as string | null),
     })),
     ...aiIncidents,
+    ...(solo.supportOverdue > 0 ? [{
+      kind: "SUPPORT_OVERDUE" as const, reference: digest("support-overdue"), version: String(solo.supportOverdue),
+    }] : []),
+    ...(solo.reviewsOverdue > 0 ? [{
+      kind: "REVIEWS_OVERDUE" as const, reference: digest("reviews-overdue"), version: String(solo.reviewsOverdue),
+    }] : []),
+    ...(solo.failedOwnerEmails + solo.failedSupportEmails > 0 ? [{
+      kind: "NOTIFICATION_FAILURE" as const, reference: digest("notification-final-failure"),
+      version: String(solo.failedOwnerEmails + solo.failedSupportEmails),
+    }] : []),
+    ...(solo.reportRecoveryExhausted > 0 ? [{
+      kind: "REPORT_RECOVERY_EXHAUSTED" as const, reference: digest("report-recovery-exhausted"),
+      version: String(solo.reportRecoveryExhausted),
+    }] : []),
+    ...(solo.aiAnomaly ? [{
+      kind: "AI_OPERATIONS_ANOMALY" as const, reference: digest(solo.aiAnomaly),
+      version: new Date().toISOString().slice(0, 10),
+    }] : []),
+    ...(["stale", "failed"].includes(solo.scheduler) || ["stale", "failed"].includes(solo.reportRecovery)
+      ? [{ kind: "SCHEDULER_UNHEALTHY" as const, reference: digest("scheduler"),
+          version: solo.scheduler + "/" + solo.reportRecovery }] : []),
   ];
   incidents.sort((a, b) => `${a.kind}:${a.reference}:${a.version}`.localeCompare(`${b.kind}:${b.reference}:${b.version}`));
   return incidents;
@@ -308,6 +304,12 @@ function renderAlert(incidents: readonly Incident[]): { subject: string; text: s
     ["유료 분석 생성 실패", counts.REPORT_FAILED],
     ["계정 종료 수동 확인", counts.CLOSURE_OWNER_REVIEW],
     ["AI 질문권 무결성", counts.AI_CHARGE_INTEGRITY],
+    ["유료 리포트 자동 복구 한도 초과", counts.REPORT_RECOVERY_EXHAUSTED],
+    ["고객 문의 24시간 미처리", counts.SUPPORT_OVERDUE],
+    ["구매 후기 48시간 검수 대기", counts.REVIEWS_OVERDUE],
+    ["중요 이메일 최종 발송 실패", counts.NOTIFICATION_FAILURE],
+    ["AI 상담 품질·비용 이상", counts.AI_OPERATIONS_ANOMALY],
+    ["자동 작업 실행 이상", counts.SCHEDULER_UNHEALTHY],
   ].filter(([, count]) => Number(count) > 0) as Array<[string, number]>;
   const summary = lines.map(([label, count]) => `${label}: ${count}건`).join("\n");
   const htmlSummary = lines.map(([label, count]) => `<li>${label}: <strong>${count}건</strong></li>`).join("");

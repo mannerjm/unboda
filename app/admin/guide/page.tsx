@@ -97,7 +97,7 @@ export default async function AdminGuidePage() {
             <li><strong>2.</strong> 각 건의 ‘연결 주문 상세 확인’ 또는 ‘연결 계정 상세 확인’을 눌러 관련 상태를 한 화면에서 확인합니다. 리포트 실패도 구매와 연결된 원래 주문으로 이어집니다.</li>
             <li><strong>3.</strong> 자동 재시도 시각이 있으면 기다립니다. 대표 확인 상태라면 화면에 적힌 최소 증거만 확인합니다.</li>
             <li><strong>4.</strong> 결제·환불처럼 외부 결제사 확인이 필요한 경우에만 Toss 관리자 기록을 대조합니다. 내부 DB 값을 맞추기 위해 직접 수정하지 않습니다.</li>
-            <li><strong>5.</strong> 화면 지침으로 결론이 나지 않거나 외부·내부 기록이 모순되면 그때만 개발 검토로 넘깁니다.</li>
+            <li><strong>5.</strong> 해결되지 않는 문제는 아래 ‘1인 운영 비상 대응’ 순서대로 상태를 확보한 뒤 기술 지원에 도움을 요청합니다. 확인 전에는 DB를 임의 수정하지 않습니다.</li>
           </ol>
         </section>
 
@@ -109,6 +109,19 @@ export default async function AdminGuidePage() {
           <p className="mt-3 text-sm leading-7 text-slate-700">
             이메일은 승인 버튼이 아니라 “관리자 화면을 확인하라”는 신호입니다. 메일을 받은 뒤 <Link href="/admin" className="font-semibold underline underline-offset-4">운영 대시보드</Link>에서 해당 분류를 열어 실제 상태를 확인합니다.
           </p>
+        </section>
+
+        <section className="mt-6 rounded-2xl border border-[#dce1ef] bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-bold">1인 운영 비상 대응 — 대표가 직접 확인하는 순서</h2>
+          <ol className="mt-3 space-y-2 text-sm leading-7 text-slate-700">
+            <li><strong>1. 서비스 장애:</strong> <a className="font-bold underline" href="https://unboda.kr/api/health/operations" target="_blank" rel="noreferrer">자동 작업 상태</a>, <a className="font-bold underline" href="https://vercel.com/dashboard" target="_blank" rel="noreferrer">Vercel 배포·로그</a>, <a className="font-bold underline" href="https://status.vercel.com/" target="_blank" rel="noreferrer">Vercel 장애 공지</a>를 확인합니다.</li>
+            <li><strong>2. DB 장애:</strong> <a className="font-bold underline" href="https://supabase.com/dashboard" target="_blank" rel="noreferrer">Supabase 프로젝트 상태</a>와 백업·복구 가능 범위를 확인합니다. 데이터 복구는 원본 백업을 확인하기 전 실행하지 않습니다.</li>
+            <li><strong>3. 결제·환불 이상:</strong> Toss 관리자 거래내역과 주문번호·금액·결제상태를 대조하고, 불확실하면 결제 완료/환불 완료로 표시하지 않습니다. 필요한 경우 고객에게 처리 지연을 안내합니다.</li>
+            <li><strong>4. 이메일 이상:</strong> <a className="font-bold underline" href="https://resend.com/emails" target="_blank" rel="noreferrer">Resend 발송 기록</a>과 관리자 ‘중요 알림 발송 실패’를 확인합니다. 이메일 문제를 해결해도 기존 금전 상태는 임의 변경하지 않습니다.</li>
+            <li><strong>5. 긴급한 서비스 영향:</strong> 결제 결과를 보장할 수 없다면 신규 결제 유도를 중단하고 고객지원 채널에 안내합니다. 서버 설정이나 배포를 추측으로 변경하지 않고, 증거를 모아 기술 지원에 문의합니다.</li>
+            <li><strong>6. 판매 전 주기적 점검:</strong> 관리자 다중 인증과 복구 수단, Supabase 백업 보존·복원 테스트, 토스 테스트 환경 결제/환불 회귀검사를 확인합니다.</li>
+          </ol>
+          <p className="mt-3 text-xs leading-6 text-slate-600">비상 시 참고용 가이드입니다. 관리자가 버튼 하나로 운영 결제를 중단하거나 DB를 복구하는 기능이 있다는 뜻은 아닙니다.</p>
         </section>
 
         <section className="mt-8 space-y-4">

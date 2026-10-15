@@ -6,6 +6,7 @@ import { getAiConsultingCreditBundle } from "@/app/lib/aiConsulting/commercialPo
 import { getAiConsultingOperationsReport } from "@/app/lib/aiConsulting/operations";
 import { getAiConsultingQualityCostReport } from "@/app/lib/aiConsulting/qualityCost";
 import { getOperationalFailureSummary } from "@/app/lib/operators/failureVisibilityServer";
+import { getSoloOperationsSnapshot } from "@/app/lib/operators/soloOperations";
 import { OperatorAuthorizationError, requireOperator } from "@/app/lib/operators/server";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getActiveSupportRequestCount } from "@/app/lib/support/operatorServer";
@@ -37,7 +38,7 @@ export default async function AdminPage() {
     );
   }
 
-  const [growthResult, refundClosureResult, failureResult, operationsResult, qualityResult, supportResult, journeyResult, reviewResult] = await Promise.allSettled([
+  const [growthResult, refundClosureResult, failureResult, operationsResult, qualityResult, supportResult, journeyResult, reviewResult, soloResult] = await Promise.allSettled([
     getAdminGrowthDashboard(30),
     getAdminRefundClosureDashboard(20),
     getOperationalFailureSummary(),
@@ -46,6 +47,7 @@ export default async function AdminPage() {
     getActiveSupportRequestCount(),
     getAdminCustomerJourneyDashboard(),
     getAdminReviewDashboard(),
+    getSoloOperationsSnapshot(),
   ]);
 
   const growth = growthResult.status === "fulfilled" ? growthResult.value : null;
@@ -56,6 +58,7 @@ export default async function AdminPage() {
   const quality = qualityResult.status === "fulfilled" ? qualityResult.value : null;
   const supportQueueCount = supportResult.status === "fulfilled" ? supportResult.value : null;
   const reviewDashboard = reviewResult.status === "fulfilled" ? reviewResult.value : null;
+  const soloOps = soloResult.status === "fulfilled" ? soloResult.value : null;
 
   const chargeIntegrityIssueCount = operations
     ? operations.chargeIntegrity.chargedWithoutAssistant
@@ -98,6 +101,16 @@ export default async function AdminPage() {
   return (
     <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
       <div className="mx-auto w-full max-w-6xl">
+        <AdminOperationsOverview
+          failureSummary={failureSummary}
+          aiOperations={aiOperations}
+          aiQuality={aiQuality}
+          operatorAlertConfigured={Boolean(process.env.RESEND_API_KEY?.trim())}
+          supportQueueCount={supportQueueCount}
+          reportPerformance={journey}
+          soloOps={soloOps}
+        />
+        <div className="mt-8" />
         {growth ? (
           <AdminGrowthOverview report={growth} productLabels={productLabels} journey={journey} />
         ) : (
@@ -124,17 +137,7 @@ export default async function AdminPage() {
           </section>
         )}
 
-        <div className="pt-10">
-          <AdminOperationsOverview
-            failureSummary={failureSummary}
-            aiOperations={aiOperations}
-            aiQuality={aiQuality}
-            operatorAlertConfigured={Boolean(process.env.RESEND_API_KEY?.trim())}
-            supportQueueCount={supportQueueCount}
-            reportPerformance={journey}
-          />
-        </div>
-        <div className="mt-8 rounded-2xl border border-[#dce1ef] bg-white p-5">
+         <div className="mt-8 rounded-2xl border border-[#dce1ef] bg-white p-5">
           <h2 className="text-lg font-bold">AI 질문권 환불 예외</h2>
           <p className="mt-2 text-sm text-slate-600">일반 카드 취소는 자동으로 처리하고, 재확인 또는 수동 환불이 필요한 건만 살펴봅니다.</p>
           <Link href="/admin/credit-refunds" className="mt-3 inline-block text-sm font-bold text-[#5143b0] underline">질문권 환불 예외 확인 →</Link>

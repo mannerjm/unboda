@@ -21,6 +21,7 @@ export type SoloOperationsSnapshot = {
 
 export async function getSoloOperationsSnapshot(): Promise<SoloOperationsSnapshot> {
   const db = createAdminClient();
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const since48h = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
   const [
     support, supportAged, review, reviewAged, creditRefund, creditRefundRecovering,
@@ -60,7 +61,7 @@ export async function getSoloOperationsSnapshot(): Promise<SoloOperationsSnapsho
     reviewsPending: review.count ?? 0, reviewsOverdue: reviewAged.count ?? 0,
     creditRefundManual: creditRefund.count ?? 0, creditRefundRecovering: creditRefundRecovering.count ?? 0,
     failedOwnerEmails: alerts.count ?? 0, failedSupportEmails: supportEmails.count ?? 0,
-    aiAnomaly, aiAttempts24h: attempts.length, aiEstimatedCost24hUsd: cost,
+    aiAnomaly, aiAttempts24h: attempts, aiEstimatedCost24hUsd: cost,
     scheduler: summarizeHeartbeat(heartbeats,"reconcile").state,
     reportRecovery: summarizeHeartbeat(heartbeats,"paid_report_recovery").state,
     reportRecoveryExhausted: Number(exhausted.data ?? 0),

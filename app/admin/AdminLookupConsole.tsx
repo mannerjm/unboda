@@ -114,6 +114,7 @@ const labels: Record<string, string> = {
   paid: "결제 완료",
   reconciliation_required: "자동 정산 필요",
   reconciliation_failed: "정산 재시도 실패",
+  expired_unpaid: "미결제 만료 · 정상 종료",
   terminal_mismatch: "최종 상태 불일치",
   generating: "생성 중",
   completed: "완료",

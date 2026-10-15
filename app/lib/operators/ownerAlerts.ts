@@ -7,7 +7,6 @@ import { getSoloOperationsSnapshot } from "./soloOperations";
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const ALERT_FROM = "운보다 운영 알림 <noreply@mail.unboda.kr>";
 const ADMIN_URL = "https://unboda.kr/admin";
-const AI_WINDOW_HOURS = 24;
 const MAX_ALERT_ATTEMPTS = 10;
 const STALE_SENDING_MS = 15 * 60 * 1000;
 

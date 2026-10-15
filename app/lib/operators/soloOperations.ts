@@ -28,8 +28,8 @@ export async function getSoloOperationsSnapshot(): Promise<SoloOperationsSnapsho
     support, supportAged, review, reviewAged, creditRefund, creditRefundRecovering,
     alerts, supportEmails, aiAttempts, exhausted, heartbeats,
   ] = await Promise.all([
-    db.from("support_requests").select("id", { head: true, count: "exact" }).in("status", ["OPEN", "IN_REVIEW", "WAITING_USER"]),
-    db.from("support_requests").select("id", { head: true, count: "exact" }).in("status", ["OPEN", "IN_REVIEW", "WAITING_USER"]).lt("created_at", since24h),
+    db.from("support_requests").select("id", { head: true, count: "exact" }).in("status", ["OPEN", "IN_REVIEW"]),
+    db.from("support_requests").select("id", { head: true, count: "exact" }).in("status", ["OPEN", "IN_REVIEW"]).lt("created_at", since24h),
     db.from("paid_product_reviews").select("id", { head: true, count: "exact" }).eq("status", "PENDING"),
     db.from("paid_product_reviews").select("id", { head: true, count: "exact" }).eq("status", "PENDING").lt("created_at", since48h),
     db.from("ai_credit_refund_requests").select("id", { head: true, count: "exact" }).in("status", ["REVIEW_REQUIRED", "MANUAL_BANK_REQUIRED"]),

@@ -3,6 +3,10 @@
     {
       "path": "/api/internal/reconcile",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/internal/report-recovery",
+      "schedule": "23 * * * *"
     }
   ]
 }

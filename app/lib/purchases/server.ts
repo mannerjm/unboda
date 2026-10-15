@@ -381,7 +381,10 @@ export async function listTossPaymentsForReconciliation(): Promise<TossPaymentRe
     throw new Error(`Toss reconciliation 대상을 조회하지 못했습니다: ${recordError?.message ?? "unknown"}`);
   }
 
-  const records = (recordData as TossPaymentRow[]).map(toTossPaymentRecord);
+  // A due status does not override the durable retry budget.
+  const records = (recordData as TossPaymentRow[])
+    .map(toTossPaymentRecord)
+    .filter((record) => record.retryCount < record.maxRetryCount);
   const knownOrderIds = new Set(records.map((record) => record.orderId));
   const { data: orders, error: orderError } = await supabase
     .from("orders")
@@ -393,9 +396,24 @@ export async function listTossPaymentsForReconciliation(): Promise<TossPaymentRe
     throw new Error(`Toss pending 주문을 조회하지 못했습니다: ${orderError?.message ?? "unknown"}`);
   }
 
-  for (const row of orders as OrderRow[]) {
-    if (!knownOrderIds.has(row.id)) {
-      records.push(await recordTossConfirmationStarted(toOrderRecord(row)));
+  // Recovery fallback is ONLY for a pending order without a Toss record.
+  // An existing record excluded above (terminal, exhausted, or not yet due)
+  // must never be upserted back into confirmation_started or retried early.
+  const pendingOrders = orders as OrderRow[];
+  if (pendingOrders.length > 0) {
+    const { data: existingPaymentRows, error: existingPaymentError } = await supabase
+      .from("toss_payment_records")
+      .select("order_id")
+      .in("order_id", pendingOrders.map((order) => order.id));
+    if (existingPaymentError) {
+      throw new Error(`Toss pending 주문의 기존 결제 기록을 확인하지 못했습니다: ${existingPaymentError.message}`);
+    }
+    const alreadyRecordedIds = new Set((existingPaymentRows ?? []).map((row) => row.order_id));
+
+    for (const row of pendingOrders) {
+      if (!knownOrderIds.has(row.id) && !alreadyRecordedIds.has(row.id)) {
+        records.push(await recordTossConfirmationStarted(toOrderRecord(row)));
+      }
     }
   }
 

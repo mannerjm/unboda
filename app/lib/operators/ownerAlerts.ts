@@ -130,7 +130,7 @@ async function collectOwnerReviewIncidents(): Promise<Incident[]> {
   const db = createAdminClient();
   const [paymentResult, refundResult, creditRefundResult, reportResult, closureResult, aiIncidents] = await Promise.all([
     db.from("toss_payment_records")
-      .select("order_id,reconciliation_status,updated_at")
+      .select("order_id,reconciliation_status")
       .in("reconciliation_status", ["terminal_mismatch", "reconciliation_failed"]),
     db.from("refund_workflows")
       .select("order_id,status,updated_at")
@@ -155,7 +155,9 @@ async function collectOwnerReviewIncidents(): Promise<Incident[]> {
     ...(paymentResult.data ?? []).map((row) => ({
       kind: "PAYMENT_OWNER_REVIEW" as const,
       reference: digest(String(row.order_id)),
-      version: normalizeVersion(row.updated_at as string | null),
+      // Retry timestamps are not a new incident. Notify again only when the
+      // underlying payment reconciliation classification actually changes.
+      version: normalizeVersion(row.reconciliation_status as string | null),
     })),
     ...(refundResult.data ?? []).map((row) => ({
       kind: "REFUND_OWNER_REVIEW" as const,

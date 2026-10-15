@@ -81,62 +81,15 @@ function countKinds(incidents: readonly Incident[]): Record<IncidentKind, number
 }
 
 async function collectAiChargeIntegrityIncidents(): Promise<Incident[]> {
-  const db = createAdminClient();
-  const since = new Date(Date.now() - AI_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
-  const nowMs = Date.now();
-  const { data: userRows, error: userError } = await db
-    .from("ai_consulting_messages")
-    .select("id,charged,reservation_token,reservation_expires_at,reservation_released_at,created_at")
-    .eq("role", "user")
-    .eq("scope_decision", "ALLOW")
-    .gte("created_at", since)
-    .order("created_at", { ascending: false })
-    .limit(500);
-  if (userError) throw new Error("OWNER_ALERT_AI_MESSAGES_READ_FAILED");
-
-  const rows = userRows ?? [];
-  const ids = rows.map((row) => row.id as string);
-  if (ids.length === 0) return [];
-
-  const [assistantResult, consumeResult, attemptResult] = await Promise.all([
-    db.from("ai_consulting_messages").select("reply_to_message_id").eq("role", "assistant").in("reply_to_message_id", ids),
-    db.from("ai_consulting_credit_ledger").select("related_message_id").eq("entry_type", "CONSUME").in("related_message_id", ids),
-    db.from("ai_consulting_attempts").select("user_message_id").in("user_message_id", ids),
-  ]);
-  if (assistantResult.error || consumeResult.error || attemptResult.error) {
-    throw new Error("OWNER_ALERT_AI_INTEGRITY_READ_FAILED");
-  }
-
-  const replies = new Set((assistantResult.data ?? []).map((row) => row.reply_to_message_id).filter(Boolean) as string[]);
-  const consumes = new Set((consumeResult.data ?? []).map((row) => row.related_message_id).filter(Boolean) as string[]);
-  const attempts = new Set((attemptResult.data ?? []).map((row) => row.user_message_id).filter(Boolean) as string[]);
-  const incidents: Incident[] = [];
-
-  for (const row of rows) {
-    const id = row.id as string;
-    const charged = Boolean(row.charged);
-    const createdAt = normalizeVersion(row.created_at as string | null);
-    const integrityProblem = [
-      charged && !replies.has(id),
-      charged && !consumes.has(id),
-      !charged && replies.has(id),
-      !charged && consumes.has(id),
-    ].some(Boolean);
-    const expiresAt = row.reservation_expires_at as string | null;
-    const expiresMs = expiresAt ? new Date(expiresAt).getTime() : Number.NaN;
-    const staleReservation = !charged
-      && Boolean(row.reservation_token)
-      && !row.reservation_released_at
-      && Number.isFinite(expiresMs)
-      && expiresMs <= nowMs;
-    const releasedWithoutFailureTelemetry = !charged && Boolean(row.reservation_released_at) && !attempts.has(id);
-
-    if (integrityProblem || staleReservation || releasedWithoutFailureTelemetry) {
-      incidents.push({ kind: "AI_CHARGE_INTEGRITY", reference: digest(id), version: createdAt });
-    }
-  }
-
-  return incidents;
+  // Fully evaluated on the DB using indexed joins, not an arbitrary latest-500 slice.
+  // The RPC only returns internal identifiers and timestamps, never user text.
+  const { data, error } = await createAdminClient().rpc("list_ai_charge_integrity_incidents_24h");
+  if (error) throw new Error("OWNER_ALERT_AI_INTEGRITY_READ_FAILED");
+  return (data ?? []).map((row: { message_id: string; message_created_at: string }) => ({
+    kind: "AI_CHARGE_INTEGRITY" as const,
+    reference: digest(row.message_id),
+    version: normalizeVersion(row.message_created_at),
+  }));
 }
 
 async function collectOwnerReviewIncidents(): Promise<Incident[]> {

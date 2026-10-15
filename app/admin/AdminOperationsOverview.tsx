@@ -96,6 +96,19 @@ export default function AdminOperationsOverview({
     : unavailable ? "일부 운영 현황 조회 불가"
     : !systemHealthy ? "자동 작업 상태 확인 필요"
     : allClear ? "현재 확인된 운영 이상 없음" : "확인이 필요한 항목이 있습니다";
+  const actionTasks = failureSummary && soloOps ? [
+    { title: "결제 상태 확인", count: failureSummary.PAYMENT_RECONCILIATION, href: "#failure-summary-heading", action: "토스 대조" },
+    { title: "환불 수동 확인", count: failureSummary.REFUND_OWNER_REVIEW, href: "#failure-summary-heading", action: "환불 기록 대조" },
+    { title: "리포트 최종 실패", count: Math.min(failureSummary.REPORT_FAILED, soloOps.reportRecoveryExhausted), href: "#failure-summary-heading", action: "자동 재시도 완료 후 확인" },
+    { title: "회원탈퇴 수동 확인", count: failureSummary.CLOSURE_OWNER_REVIEW, href: "#failure-summary-heading", action: "금전 상태 확인" },
+    { title: "AI 질문권 무결성", count: aiOperations?.chargeIntegrityIssueCount ?? 0, href: "/admin/ai-consulting/operations", action: "차감·답변 대조" },
+    { title: "고객 문의 응답", count: soloOps.supportActive, href: "/admin/support", action: "문의 답변" },
+    { title: "구매 후기 검수", count: soloOps.reviewsPending, href: "/admin/reviews", action: "후기 공개 기준 검토" },
+    { title: "질문권 환불 수동 확인", count: soloOps.creditRefundManual, href: "/admin/credit-refunds", action: "토스 환불 여부 확인" },
+    { title: "중요 이메일 최종 발송 실패", count: soloOps.failedOwnerEmails + soloOps.failedSupportEmails, href: "/admin/guide", action: "Resend 상태 확인" },
+    { title: "AI 상담 운영 이상", count: soloOps.aiAnomaly ? 1 : 0, href: "/admin/ai-consulting", action: "실패·원가 확인" },
+    { title: "자동 작업 생존 감시 이상", count: systemHealthy ? 0 : 1, href: "/admin/guide", action: "자동 작업 상태 확인" },
+  ].filter((task) => task.count > 0) : [];
 
   return (
     <section className="border-b border-slate-200 pb-8" aria-labelledby="operator-overview-heading">
@@ -135,6 +148,27 @@ export default function AdminOperationsOverview({
         />
       </div>
 
+      <div className="mt-6 rounded-2xl border border-[#dce1ef] bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-bold">대표가 직접 처리할 업무</h2>
+          <span className="text-sm font-bold text-slate-600">{ownerAttention === null ? "조회 불가" : `${number(ownerAttention)}건`}</span>
+        </div>
+        {unavailable ? (
+          <p className="mt-3 text-sm font-semibold text-amber-800">일부 업무를 읽지 못했습니다. 0건으로 판단하지 마세요.</p>
+        ) : actionTasks.length === 0 ? (
+          <p className="mt-3 text-sm text-emerald-800">현재 직접 처리할 업무가 없습니다. 정상 거래는 자동 처리합니다.</p>
+        ) : (
+          <ul className="mt-3 divide-y divide-slate-100">
+            {actionTasks.map((task) => (
+              <li key={task.title} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
+                <span className="font-semibold text-slate-900">{task.title} · {number(task.count)}건</span>
+                <span className="text-slate-500">{task.action}</span>
+                <Link href={task.href} className="font-bold text-[#5143b0] underline">확인 →</Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="자동 작업" value={!soloOps ? "조회 불가" : systemHealthy ? "정상" : "확인 필요"}
           note={soloOps ? `결제·환불: ${soloOps.scheduler} · 리포트 복구: ${soloOps.reportRecovery}` : "자동 작업 실행 상태 확인 실패"}/>

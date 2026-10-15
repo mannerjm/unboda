@@ -38,7 +38,7 @@ export async function getSoloOperationsSnapshot(): Promise<SoloOperationsSnapsho
     db.from("support_notification_deliveries").select("id", { head: true, count: "exact" }).eq("status", "FAILED_FINAL"),
     db.from("ai_consulting_attempts").select("status,model,input_tokens,output_tokens,duration_ms,started_at").gte("started_at", since24h)
       .order("started_at", { ascending: false }).limit(500),
-    db.from("paid_report_recovery_attempts").select("report_id", { head: true, count: "exact" }).gte("attempt_count", 3).eq("last_outcome", "FAILED"),
+    db.rpc("count_exhausted_paid_report_recoveries"),
     readJobHeartbeats(),
   ]);
   const queries = [support,supportAged,review,reviewAged,creditRefund,creditRefundRecovering,alerts,supportEmails,aiAttempts,exhausted];
@@ -64,6 +64,6 @@ export async function getSoloOperationsSnapshot(): Promise<SoloOperationsSnapsho
     aiAnomaly, aiAttempts24h: attempts.length, aiEstimatedCost24hUsd: cost,
     scheduler: summarizeHeartbeat(heartbeats,"reconcile").state,
     reportRecovery: summarizeHeartbeat(heartbeats,"paid_report_recovery").state,
-    reportRecoveryExhausted: exhausted.count ?? 0,
+    reportRecoveryExhausted: Number(exhausted.data ?? 0),
   };
 }

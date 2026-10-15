@@ -39,7 +39,8 @@ export type TossPaymentRecord = {
     | "paid"
     | "reconciliation_required"
     | "reconciliation_failed"
-    | "terminal_mismatch";
+    | "terminal_mismatch"
+    | "expired_unpaid";
   lastReconciliationResult: string | null;
   lastReconciledAt: string | null;
   retryCount: number;

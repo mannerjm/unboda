@@ -1006,7 +1006,7 @@ export type MockPaymentConfirmation = {
 
 export async function reconcileTossPayment(
   record: TossPaymentRecord,
-): Promise<MockPaymentConfirmation> {
+): Promise<MockPaymentConfirmation | { outcome: "expired_unpaid" | "awaiting_payment" }> {
   const order = await getOrderById(record.orderId);
 
   if (!order || order.paymentProvider !== "toss") {
@@ -1056,6 +1056,41 @@ export async function reconcileTossPayment(
       "provider order reference, amount, or currency mismatch",
     );
     throw new Error("Toss reconciliation provider mismatch");
+  }
+
+  if (provider.status === "EXPIRED") {
+    // No paid order, no captures, no purchase: the DB RPC enforces this atomically.
+    const { data: closed, error: closeError } = await createAdminClient().rpc("close_expired_unpaid_toss_order", {
+      p_order_id: order.id,
+      p_provider_order_id: provider.orderId,
+      p_provider_amount: provider.totalAmount,
+      p_provider_currency: provider.currency,
+      p_provider_status: provider.status,
+    });
+    if (closeError || closed !== true) {
+      await markTossPaymentReconciliationResult(
+        order.id, "terminal_mismatch", "Expired checkout closure failed financial safety checks",
+      );
+      throw new Error("Toss EXPIRED checkout requires owner review");
+    }
+    return { outcome: "expired_unpaid" };
+  }
+
+  if (provider.status === "READY" || provider.status === "IN_PROGRESS" || provider.status === "WAITING_FOR_DEPOSIT") {
+    // Opening checkout is not a failed payment. Poll hourly without spending
+    // the technical retry allowance. Escalate only if unresolved for seven days.
+    if (Date.now() - new Date(order.createdAt).getTime() <= 7 * 24 * 60 * 60 * 1000) {
+      const now = new Date();
+      const { error: pendingError } = await createAdminClient().from("toss_payment_records").update({
+        reconciliation_status: "confirmation_started",
+        last_reconciliation_result: "Toss checkout awaiting completion",
+        last_reconciled_at: now.toISOString(), updated_at: now.toISOString(),
+        last_attempt_at: now.toISOString(),
+        next_retry_at: new Date(now.getTime() + 60 * 60 * 1000).toISOString(),
+      }).eq("order_id", order.id).eq("reconciliation_status", record.reconciliationStatus);
+      if (pendingError) throw new Error("Toss pending checkout update failed");
+      return { outcome: "awaiting_payment" };
+    }
   }
 
   if (provider.status !== "DONE") {
@@ -1135,7 +1170,11 @@ export async function reconcilePaymentsBatch(): Promise<PaymentReconciliationSum
 
   for (const record of records) {
     try {
-      await reconcileTossPayment(record);
+      const result = await reconcileTossPayment(record);
+      if ("outcome" in result) {
+        if (result.outcome === "expired_unpaid") recovered += 1;
+        continue;
+      }
       recovered += 1;
       emitPaymentEvent("reconciliation_converged", {
         operationalClass: "CONVERGED",

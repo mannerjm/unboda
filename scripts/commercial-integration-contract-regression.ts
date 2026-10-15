@@ -15,6 +15,10 @@ const page=read("app/ai-consulting/credits/refunds/page.tsx");
 const refundPage=read("app/refund/page.tsx");
 const u=read("app/terms/page.tsx");
 const alerts=read("app/lib/operators/ownerAlerts.ts");
+const expiredMigration=read("supabase/migrations/20261015192000_close_expired_unpaid_toss_orders.sql");
+const orderConfirm=read("app/api/orders/[orderId]/confirm-payment/route.ts");
+const failures=read("app/lib/operators/failureVisibilityServer.ts");
+const ordersMigration=read("supabase/migrations/032_active_edition_order_uniqueness.sql");
 const paymentAlertIncident=alerts.slice(
   alerts.indexOf('kind: "PAYMENT_OWNER_REVIEW" as const'),
   alerts.indexOf('kind: "REFUND_OWNER_REVIEW" as const'),
@@ -56,7 +60,31 @@ const checks:Record<string,boolean>={
   ownerEmailStableForSamePaymentIssue:paymentAlertIncident.includes("version: normalizeVersion(row.reconciliation_status as string | null)") &&
     !paymentAlertIncident.includes("version: normalizeVersion(row.updated_at as string | null)"),
   paymentConfirmPathUnchanged:purchase.includes('if (provider.status !== "DONE")') &&
-    purchase.includes("provider payment verified and access restored")
+    purchase.includes("provider payment verified and access restored"),
+  expiredProviderRequiresAtomicClosure:purchase.includes('provider.status === "EXPIRED"') &&
+    purchase.includes('rpc("close_expired_unpaid_toss_order"') &&
+    expiredMigration.includes("p_provider_status is distinct from 'EXPIRED'"),
+  expiredNeverCaptures:expiredMigration.includes("v_payment.payment_key is not null") &&
+    expiredMigration.includes("v_payment.confirmed_amount is not null") &&
+    expiredMigration.includes("v_order.paid_at is not null") &&
+    expiredMigration.includes("exists(select 1 from public.purchases"),
+  expiredClosureAccountAndOrderPreserved:expiredMigration.includes("set status='canceled'") &&
+    expiredMigration.includes("reconciliation_status='expired_unpaid'") &&
+    !expiredMigration.includes("delete from public.orders"),
+  expiredNoOwnerQueue:failures.includes('.in("reconciliation_status", ["reconciliation_required", "reconciliation_failed", "terminal_mismatch"])') &&
+    !failures.includes('"expired_unpaid"'),
+  expiredNoEmail:alerts.includes('.in("reconciliation_status", ["terminal_mismatch", "reconciliation_failed"])') &&
+    !alerts.includes('"expired_unpaid"'),
+  canceledOrderNoCheckoutReuse:ordersMigration.includes("status in ('pending', 'paid')") &&
+    purchase.includes('.in("status", ["pending", "paid"])') &&
+    orderConfirm.includes('order.status === "canceled"'),
+  waitingCheckoutNoFalseFailure:purchase.includes('provider.status === "READY"') &&
+    purchase.includes('provider.status === "IN_PROGRESS"') &&
+    purchase.includes('provider.status === "WAITING_FOR_DEPOSIT"') &&
+    purchase.includes('return { outcome: "awaiting_payment" }'),
+  untouchedTossReviewGuards:orderConfirm.includes("isTossCheckoutUserAllowed(user.id)") &&
+    purchase.includes('if (provider.status !== "DONE")')
+
 };
 for (const [name,pass] of Object.entries(checks))assert.ok(pass,`contract failed: ${name}`);
 console.log("commercial integration static contract: PASS",Object.keys(checks).length,"checks (NOT actual payment E2E)");

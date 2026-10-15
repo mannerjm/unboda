@@ -86,6 +86,9 @@ export async function POST(request: Request, context: RouteContext) {
       );
     }
     orderProfileId = order.profileId;
+    if (order.status === "canceled" || order.status === "failed") {
+      return NextResponse.json({ error: "종료된 주문입니다. 새 주문으로 다시 결제해 주세요." }, { status: 409 });
+    }
 
     if (order.status === "paid") {
       const purchase = await createPurchaseFromPaidOrder(order);

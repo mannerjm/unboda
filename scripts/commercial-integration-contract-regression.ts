@@ -32,6 +32,7 @@ const recoveryHardening=read("supabase/migrations/20261015194800_solo_report_rec
 const cronConfig=JSON.parse(read("vercel.json")) as { crons?: Array<{ path: string; schedule: string }> };
 const reportGenerator=read("app/lib/paidReports/generation.ts");
 const guide=read("app/admin/guide/page.tsx");
+const aiFullMetricsMigration=read("supabase/migrations/20261015195000_solo_ai_full_integrity_metrics.sql");
 const paymentAlertIncident=alerts.slice(
   alerts.indexOf('kind: "PAYMENT_OWNER_REVIEW" as const'),
   alerts.indexOf('kind: "REFUND_OWNER_REVIEW" as const'),
@@ -132,7 +133,14 @@ const checks:Record<string,boolean>={
   supervisorRunbookAvailable:guide.includes('1인 운영 비상 대응') &&
     guide.includes('Supabase 프로젝트 상태'),
   serviceRoleOnly:recoverySchema.includes('revoke all on function public.claim_due_paid_report_recovery') &&
-    recoveryHardening.includes('grant execute on function public.count_exhausted_paid_report_recoveries() to service_role')
+    recoveryHardening.includes('grant execute on function public.count_exhausted_paid_report_recoveries() to service_role'),
+  fullAiCreditIntegrityScan:alerts.includes('rpc("list_ai_charge_integrity_incidents_24h")') &&
+    aiFullMetricsMigration.includes('not exists(select 1 from public.ai_consulting_credit_ledger'),
+  accurate24hAiMetrics:soloDashboard.includes('rpc("get_ai_solo_operations_metrics_24h")') &&
+    aiFullMetricsMigration.includes('from public.ai_consulting_attempts a') &&
+    !soloDashboard.includes('limit(500)'),
+  privateAiMonitoring:aiFullMetricsMigration.includes('revoke all on function public.list_ai_charge_integrity_incidents_24h()') &&
+    aiFullMetricsMigration.includes('grant execute on function public.get_ai_solo_operations_metrics_24h() to service_role')
 
 };
 for (const [name,pass] of Object.entries(checks))assert.ok(pass,`contract failed: ${name}`);

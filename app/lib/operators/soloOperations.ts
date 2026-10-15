@@ -1,6 +1,5 @@
 import "server-only";
 import { createAdminClient } from "@/app/lib/supabase/admin";
-import { estimateAiConsultingCostUsd } from "@/app/lib/aiConsulting/qualityCost";
 import { readJobHeartbeats, summarizeHeartbeat } from "./heartbeat";
 
 export type SoloOperationsSnapshot = {
@@ -12,7 +11,7 @@ export type SoloOperationsSnapshot = {
   creditRefundRecovering: number;
   failedOwnerEmails: number;
   failedSupportEmails: number;
-  aiAnomaly: "AI_FAILURE_RATE" | "AI_COST_SPIKE" | "AI_HIGH_LATENCY" | null;
+  aiAnomaly: "AI_FAILURE_RATE" | "AI_COST_SPIKE" | "AI_HIGH_LATENCY" | "AI_COST_ESTIMATE_UNAVAILABLE" | null;
   aiAttempts24h: number;
   aiEstimatedCost24hUsd: number;
   scheduler: "healthy" | "stale" | "failed" | "missing";
@@ -36,26 +35,27 @@ export async function getSoloOperationsSnapshot(): Promise<SoloOperationsSnapsho
     db.from("ai_credit_refund_requests").select("id", { head: true, count: "exact" }).in("status", ["PROVIDER_UNKNOWN", "PENDING"]),
     db.from("operator_alert_deliveries").select("id", { head: true, count: "exact" }).eq("status", "FAILED_FINAL"),
     db.from("support_notification_deliveries").select("id", { head: true, count: "exact" }).eq("status", "FAILED_FINAL"),
-    db.from("ai_consulting_attempts").select("status,model,input_tokens,output_tokens,duration_ms,started_at").gte("started_at", since24h)
-      .order("started_at", { ascending: false }).limit(500),
+    db.rpc("get_ai_solo_operations_metrics_24h"),
     db.rpc("count_exhausted_paid_report_recoveries"),
     readJobHeartbeats(),
   ]);
   const queries = [support,supportAged,review,reviewAged,creditRefund,creditRefundRecovering,alerts,supportEmails,aiAttempts,exhausted];
   if (queries.some((result) => result.error)) throw new Error("SOLO_OPERATIONS_DASHBOARD_UNAVAILABLE");
 
-  const attempts = aiAttempts.data ?? [];
-  const failed = attempts.filter((attempt) => attempt.status === "failed" || attempt.status === "timed_out").length;
-  const durationRows = attempts.filter((attempt) => typeof attempt.duration_ms === "number");
-  const averageDuration = durationRows.length > 0
-    ? durationRows.reduce((sum, attempt) => sum + (attempt.duration_ms ?? 0), 0) / durationRows.length : 0;
-  const cost = attempts.reduce((sum, attempt) => sum + (estimateAiConsultingCostUsd({
-    model: attempt.model, inputTokens: attempt.input_tokens, outputTokens: attempt.output_tokens,
-  }) ?? 0), 0);
-  // Suppress sparse-sample false alarms. Cost is only an estimate based on stored tokens.
+  const metrics = (aiAttempts.data ?? [])[0] as {
+    attempt_count: number; failed_count: number; duration_count: number;
+    average_duration_ms: number | string; estimated_cost_usd: number | string;
+    unknown_cost_count: number;
+  } | undefined;
+  if (!metrics) throw new Error("SOLO_OPERATIONS_AI_METRICS_UNAVAILABLE");
+  const attempts = metrics.attempt_count;
+  const failed = metrics.failed_count;
+  const cost = Number(metrics.estimated_cost_usd);
+  const averageDuration = Number(metrics.average_duration_ms);
   const aiAnomaly = cost >= 5 ? "AI_COST_SPIKE"
-    : attempts.length >= 20 && failed / attempts.length >= 0.25 ? "AI_FAILURE_RATE"
-    : durationRows.length >= 20 && averageDuration >= 30000 ? "AI_HIGH_LATENCY" : null;
+    : attempts >= 20 && failed / attempts >= 0.25 ? "AI_FAILURE_RATE"
+    : metrics.duration_count >= 20 && averageDuration >= 30000 ? "AI_HIGH_LATENCY"
+    : metrics.unknown_cost_count >= 20 ? "AI_COST_ESTIMATE_UNAVAILABLE" : null;
   return {
     supportActive: support.count ?? 0, supportOverdue: supportAged.count ?? 0,
     reviewsPending: review.count ?? 0, reviewsOverdue: reviewAged.count ?? 0,

@@ -5,6 +5,7 @@ import { buildSajuResponse } from "../buildSajuResponse";
 import { buildFreeAnalysis } from "../buildFreeAnalysis";
 import { buildPremiumAnalysis } from "../buildPremiumAnalysis";
 import { buildAnalysisProductRecommendations } from "../analysisProductRecommendations";
+import { buildMonthlyCycleFacts } from "../paidAnalysisEvidenceFacts";
 import { buildAnalysisRecommendation } from "../analysisRecommendationBuilder";
 import { buildDeterministicRecommendationExplanation } from "../generateAnalysisRecommendation";
 import { buildMainAnalysisPrompt, type MainAnalysisRecommendationFocus } from "../mainAnalysisPrompt";
@@ -52,6 +53,7 @@ export async function buildFreeAnalysisResponse(input: {
     elementRelations: recommendationAnalysis.elementRelations,
     fortuneFlow: recommendationAnalysis.fortuneFlowAnalysis,
     elementAnalysis: recommendationAnalysis.elementAnalysis,
+    monthlyCycle: buildMonthlyCycleFacts(saju),
     evaluationContext,
   });
 

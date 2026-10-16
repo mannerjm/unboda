@@ -24,86 +24,19 @@ import {
   isUsableGuestFreeAnalysis,
 } from "@/app/lib/guestFreeAnalyses/server";
 import {
-  buildAnalysisProductRecommendations,
   resolveCanonicalRecommendationProduct,
   type AnalysisProductRecommendation,
 } from "@/app/lib/analysisProductRecommendations";
 import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
 import { isProfileId, type ProfileDto } from "@/app/lib/profiles/types";
-import { getSaju } from "@/app/lib/manse";
-import { buildPremiumAnalysis } from "@/app/lib/buildPremiumAnalysis";
+
+
 import { createEvaluationContext } from "@/app/lib/evaluationContext";
+import { buildCurrentFreeRecommendations } from "@/app/lib/currentFreeRecommendations";
 
 type RecommendationsPageProps = {
   searchParams: Promise<{ profileId?: string }>;
 };
-
-function mergeRecommendationStoryline(
-  storedRecommendations: readonly AnalysisProductRecommendation[],
-  refreshedRecommendations: readonly AnalysisProductRecommendation[],
-): AnalysisProductRecommendation[] {
-  const selected: AnalysisProductRecommendation[] = [];
-  const selectedProductIds = new Set<string>();
-  const selectedCategories = new Set<string>();
-
-  const tryAdd = (recommendation: AnalysisProductRecommendation, requireNewCategory: boolean) => {
-    const product = resolveCanonicalRecommendationProduct(recommendation.productId);
-    if (!product || selectedProductIds.has(product.id)) return;
-    if (requireNewCategory && selectedCategories.has(product.category)) return;
-
-    selected.push({ ...recommendation, productId: product.id });
-    selectedProductIds.add(product.id);
-    selectedCategories.add(product.category);
-  };
-
-  const storedPrimary = storedRecommendations[0];
-  if (storedPrimary) tryAdd(storedPrimary, false);
-
-  for (const recommendation of refreshedRecommendations) {
-    if (selected.length >= 3) break;
-    tryAdd(recommendation, true);
-  }
-
-  for (const recommendation of storedRecommendations.slice(1)) {
-    if (selected.length >= 3) break;
-    tryAdd(recommendation, true);
-  }
-
-  for (const recommendation of refreshedRecommendations) {
-    if (selected.length >= 3) break;
-    tryAdd(recommendation, false);
-  }
-
-  for (const recommendation of storedRecommendations.slice(1)) {
-    if (selected.length >= 3) break;
-    tryAdd(recommendation, false);
-  }
-
-  return selected.slice(0, 3);
-}
-
-function buildCurrentRecommendations(profile: ProfileDto): AnalysisProductRecommendation[] {
-  const evaluationContext = createEvaluationContext();
-  const isLeapMonth = profile.isLeapMonth ? "윤달" : "평달";
-  const saju = getSaju(
-    profile.birthDate,
-    profile.birthTime,
-    profile.calendarType,
-    isLeapMonth,
-    profile.gender,
-    evaluationContext.evaluationDate,
-  );
-  const recommendationAnalysis = buildPremiumAnalysis(saju);
-
-  return buildAnalysisProductRecommendations({
-    fortuneBrain: recommendationAnalysis.fortuneBrain,
-    strengthAnalysis: recommendationAnalysis.strengthAnalysis,
-    elementRelations: recommendationAnalysis.elementRelations,
-    fortuneFlow: recommendationAnalysis.fortuneFlowAnalysis,
-    elementAnalysis: recommendationAnalysis.elementAnalysis,
-    evaluationContext,
-  }).recommendations;
-}
 
 function RecommendationPrerequisite({
   mode,
@@ -267,16 +200,15 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
         return <RecommendationPrerequisite mode="guest" />;
       }
 
-      const guestRecommendations = (record.content.productRecommendations?.recommendations ?? [])
-        .filter((recommendation) => resolveCanonicalRecommendationProduct(recommendation.productId))
-        .slice(0, 3);
+      const current = buildCurrentFreeRecommendations(record.content.profile);
+      const guestRecommendations = current.productRecommendations.recommendations;
 
       return (
         <RecommendationsContent
           profileLabel={record.content.profile.label?.trim() || "나"}
           profileId={record.id}
           recommendations={guestRecommendations}
-          explanation={record.content.recommendationExplanation ?? null}
+          explanation={current.recommendationExplanation}
           paidSummaries={[]}
           guestMode
         />
@@ -317,18 +249,18 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
     return <RecommendationPrerequisite mode="member-none" profileId={profile.id} />;
   }
 
-  const storedRecommendations = (analysisRecord.content.productRecommendations?.recommendations ?? [])
+  // Recompute from the actual active profile and current solar-term month.
+  // Never pin an outdated stored first card above a stronger current signal.
+  let recommendations = (analysisRecord.content.productRecommendations?.recommendations ?? [])
     .filter((recommendation) => resolveCanonicalRecommendationProduct(recommendation.productId));
-
-  let recommendations = storedRecommendations;
+  let recommendationExplanation = analysisRecord.content.recommendationExplanation ?? null;
   try {
-    const refreshedRecommendations = buildCurrentRecommendations(profile);
-    recommendations = mergeRecommendationStoryline(storedRecommendations, refreshedRecommendations);
+    const current = buildCurrentFreeRecommendations(profile);
+    recommendations = current.productRecommendations.recommendations;
+    recommendationExplanation = current.recommendationExplanation;
   } catch (error) {
-    console.error("[recommendations] failed to refresh deterministic recommendation storyline", error);
+    console.error("[recommendations] deterministic current recommendation calculation failed", error);
   }
-
-  const recommendationExplanation = analysisRecord.content.recommendationExplanation ?? null;
   const paidSummaries = await listUserPaidAnalysisSummaries(user.id);
 
   return (

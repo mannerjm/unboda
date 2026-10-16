@@ -140,7 +140,7 @@ function getMonthlyBranchRelation(
   return null;
 }
 
-function buildMonthlyCycleFacts(saju: SajuResult): PaidAnalysisEvidenceFacts["monthlyCycle"] {
+export function buildMonthlyCycleFacts(saju: SajuResult): PaidAnalysisEvidenceFacts["monthlyCycle"] {
   const context = saju.evaluationContext;
   if (!context) return undefined;
 

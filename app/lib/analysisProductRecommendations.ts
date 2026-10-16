@@ -13,7 +13,7 @@ import {
   type RecommendationSignalKey,
 } from "./premiumProductRegistry";
 import { getLaunchProductIds } from "./paidAnalysisTopicConfig";
-import { normalizeRecommendationSignals } from "./recommendationSignals";
+import { normalizeRecommendationSignals, type MonthlyRecommendationCycle } from "./recommendationSignals";
 import { createEvaluationContext, type EvaluationContext } from "./evaluationContext";
 
 type FortuneFlowAnalysisResult =
@@ -44,6 +44,7 @@ export interface AnalysisProductRecommendationInput {
   elementRelations: ElementRelationsAnalysis;
   fortuneFlow: ReturnType<typeof analyzeFullFortuneFlow> | null;
   elementAnalysis: ElementAnalysis;
+  monthlyCycle?: MonthlyRecommendationCycle;
   evaluationContext?: EvaluationContext;
 }
 
@@ -253,6 +254,11 @@ export function buildTopicAwareRecommendations(
 ): AnalysisProductRecommendationResult {
   const normalizedSignals = normalizeRecommendationSignals({
     strengthLevel: input.strengthAnalysis.level,
+    strengthSupportScore: input.strengthAnalysis.supportScore,
+    dayElement: input.strengthAnalysis.dayElement,
+    resourceElement: input.strengthAnalysis.resourceElement,
+    elementPercentages: input.elementAnalysis.percentages,
+    monthlyCycle: input.monthlyCycle,
     strongestElements: input.elementAnalysis.strongest,
     weakestElements: input.elementAnalysis.weakest,
     flowLabel: input.fortuneFlow?.currentFlow,
@@ -270,6 +276,11 @@ export function buildTopicAwareRecommendations(
   const scored = topicCandidates
     .map((product) => {
       const profile = product.recommendationProfile!;
+      const activeKeys = new Set(normalizedSignals.signals.map((signal) => signal.key));
+      if (profile.requiredSignals?.some((key) => !activeKeys.has(key))
+        || profile.excludedSignals?.some((key) => activeKeys.has(key))) {
+        return null;
+      }
       const evidence = Object.entries(profile.weights)
         .flatMap(([signalKey, weight]) => {
           const signal = normalizedSignals.signals.find(
@@ -299,11 +310,15 @@ export function buildTopicAwareRecommendations(
       return {
         productId: product.id,
         score,
-        reasons: evidence.map((item) => `${item.signal}:${item.source}`),
+        reasons: evidence.map((item) =>
+          normalizedSignals.signals.find((signal) => signal.key === item.signal)?.reason ?? "현재 사주를 바탕으로 관련 흐름을 점검합니다."
+        ),
         evidence,
       } satisfies AnalysisProductRecommendation;
     })
-    .filter((item) => item.score > 0 && item.evidence && item.evidence.length > 0)
+    .filter((item): item is NonNullable<typeof item> =>
+      item !== null && item.score > 0 && item.evidence.length > 0
+    )
     .sort((a, b) => {
       const scoreDifference = b.score - a.score;
 

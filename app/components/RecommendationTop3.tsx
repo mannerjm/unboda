@@ -78,9 +78,10 @@ export default function RecommendationTop3({
           <p className="text-xs font-black tracking-[0.14em] text-[#7768c7]">이번 결과에서 이어지는 질문</p>
           <h2 id="recommendation-top3-title" className="mt-2 text-2xl font-black tracking-[-0.035em] text-[#11162d] sm:text-3xl">내 결과에서 이어지는 질문 3가지</h2>
         </div>
-        <span className="text-xs font-medium text-slate-500">무료 분석과 같은 계산 근거로 선정</span>
+        <span className="text-xs font-medium text-slate-500">개인 사주 구조와 현재 월 흐름으로 선정</span>
       </div>
 
+      <p className="mt-2 text-xs leading-5 text-slate-500">추천은 매월 실제 계산 근거로 다시 평가합니다. 근거가 비슷하면 다른 사람과 같은 질문이 나올 수도 있습니다.</p>
       <div className="mt-5 grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
         {validRecommendations[0] ? (() => {
           const { recommendation, product } = validRecommendations[0];

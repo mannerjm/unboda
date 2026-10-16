@@ -56,14 +56,17 @@ for (const pageCopy of [
 }
 
 for (const contract of [
-  "buildCurrentRecommendations",
-  "mergeRecommendationStoryline",
-  "storedRecommendations[0]",
+  "buildCurrentFreeRecommendations",
   "RecommendationTop3",
   "listUserPaidAnalysisSummaries",
 ]) {
   assert(recommendationPage.includes(contract), `phase 3 must preserve recommendation logic: ${contract}`);
 }
+assert(
+  !recommendationPage.includes("mergeRecommendationStoryline") &&
+  !recommendationPage.includes("storedRecommendations[0]"),
+  "phase 3 must not pin stale recommendations ahead of current month evidence",
+);
 
 for (const cardCopy of [
   "getRecommendationQuestion",

@@ -12,6 +12,7 @@ import type { AnalyzeSuccessResponse } from "@/app/lib/analyzeApiTypes";
 import type { ProfileDto } from "@/app/lib/profiles/types";
 import { enrichSupplementalPillarStars } from "@/app/lib/sajuSupplementalStars";
 import { enrichSajuRelationStars } from "@/app/lib/sajuRelationStars";
+import { withCurrentFreeRecommendations } from "@/app/lib/currentFreeRecommendations";
 
 type RouteContext = {
   params: Promise<{ profileId: string }>;
@@ -35,6 +36,7 @@ function withCurrentProfile(
       label: profile.label,
       birthDate: profile.birthDate,
       birthTime: profile.birthTime,
+      ...(profile.birthTimeKnown != null ? { birthTimeKnown: profile.birthTimeKnown } : {}),
       gender: profile.gender,
       calendarType: profile.calendarType,
       isLeapMonth: profile.isLeapMonth,
@@ -65,9 +67,10 @@ export async function GET(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "저장된 무료 분석 결과가 없습니다." }, { status: 404 });
     }
 
-    const analysis = withCurrentProfile(cached.content, profile);
+    const historicalAnalysis = withCurrentProfile(cached.content, profile);
     const currentContext = createEvaluationContext();
-    if (!hasCurrentEvaluationPeriod(analysis, currentContext)) {
+    if (!hasCurrentEvaluationPeriod(historicalAnalysis, currentContext)) {
+      const analysis = historicalAnalysis;
       return NextResponse.json({
         analysis,
         status: cached.status === "generating" ? "generating" : "stale",
@@ -76,6 +79,17 @@ export async function GET(_request: Request, context: RouteContext) {
         currentEvaluationContext: currentContext,
         refreshAvailable: cached.status !== "generating",
       }, { status: 200 });
+    }
+
+    // Only a current, ownership-verified result gets an updated recommendation projection.
+    // Saved historical results and AI analysis text remain untouched.
+    let analysis = historicalAnalysis;
+    if (cached.status === "completed") {
+      try {
+        analysis = withCurrentFreeRecommendations(historicalAnalysis, currentContext.evaluationDate);
+      } catch (recommendationError) {
+        console.error("[free-analysis-results] personalized recommendation projection failed", recommendationError);
+      }
     }
 
     if (cached.status === "generating") {

@@ -21,6 +21,7 @@ import {
 } from "@/app/lib/guestFreeAnalyses/server";
 import { createEvaluationContext } from "@/app/lib/evaluationContext";
 import { hasCurrentEvaluationPeriod } from "@/app/lib/freeAnalysisResults/server";
+import { withCurrentFreeRecommendations } from "@/app/lib/currentFreeRecommendations";
 
 function clearGuestCookie(response: NextResponse): NextResponse {
   response.cookies.set(GUEST_ANALYSIS_COOKIE_NAME, "", { ...guestAnalysisCookieOptions, maxAge: 0 });
@@ -42,7 +43,15 @@ export async function GET() {
       return clearGuestCookie(NextResponse.json({ error: "현재 기간의 무료 분석 결과가 없습니다. 다시 분석해 주세요.", code: "STALE_EVALUATION_PERIOD" }, { status: 409 }));
     }
 
-    return NextResponse.json({ analysis: record.content });
+    // Recompute recommendations for previously saved guest analyses without
+    // regenerating AI text, changing birth input or writing the database.
+    let analysis = record.content;
+    try {
+      analysis = withCurrentFreeRecommendations(record.content);
+    } catch (recommendationError) {
+      console.error("[guest-free-analysis] personalized recommendation projection failed", recommendationError);
+    }
+    return NextResponse.json({ analysis });
   } catch (error) {
     console.error("[guest-free-analysis] get failed", error);
     return NextResponse.json({ error: "비회원 분석 결과를 불러오지 못했습니다." }, { status: 500 });

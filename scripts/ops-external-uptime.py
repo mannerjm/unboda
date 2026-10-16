@@ -124,7 +124,7 @@ def main() -> int:
             print("A new external-monitor incident issue was opened.")
         else:
             print(f"Existing incident #{incident} remains open; not repeating alerts.")
-        return 1
+        return 0  # Incident is tracked in GitHub; avoid emailing on every subsequent scheduled run.
 
     if incident is not None:
         gh("issue", "comment", str(incident), "--repo", repo, "--body",

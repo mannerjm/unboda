@@ -117,6 +117,8 @@ def audit():
         return issues + ["sitemap.xml: " + str(error)]
     if len(urls) < 74:
         issues.append(f"sitemap count fell below baseline: {len(urls)} < 74")
+    if len(urls) > 250:
+        return issues + [f"sitemap contains unexpectedly many URLs: {len(urls)}; refusing bulk fetch"]
     if len(urls) != len(set(urls)):
         issues.append("duplicate sitemap URLs")
     for url in urls:
@@ -125,9 +127,13 @@ def audit():
             issues.append("unexpected sitemap origin: " + url)
         if parsed.query or parsed.fragment or any(parsed.path.startswith(p) for p in PRIVATE):
             issues.append("private/parameterized URL in sitemap: " + url)
+    safe_urls = [u for u in urls if urlsplit(u).scheme == "https"
+                 and urlsplit(u).netloc == "unboda.kr"
+                 and not any(urlsplit(u).path.startswith(p) for p in PRIVATE)
+                 and not urlsplit(u).query and not urlsplit(u).fragment]
     known_titles = {}
     with ThreadPoolExecutor(max_workers=8) as pool:
-        for url, title, errors in pool.map(check_page, urls):
+        for url, title, errors in pool.map(check_page, safe_urls):
             issues.extend(f"{url}: {error}" for error in errors)
             if title in known_titles:
                 issues.append("duplicate title: " + known_titles[title] + " and " + url)

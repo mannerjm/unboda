@@ -316,8 +316,8 @@ export function buildTopicAwareRecommendations(
         evidence,
       } satisfies AnalysisProductRecommendation;
     })
-    .filter((item): item is AnalysisProductRecommendation =>
-      Boolean(item && item.score > 0 && item.evidence && item.evidence.length > 0)
+    .filter((item): item is NonNullable<typeof item> =>
+      item !== null && item.score > 0 && item.evidence.length > 0
     )
     .sort((a, b) => {
       const scoreDifference = b.score - a.score;

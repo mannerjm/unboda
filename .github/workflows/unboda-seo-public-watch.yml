@@ -1,0 +1,34 @@
+name: 운보다 공개 SEO 기술 감시
+
+on:
+  schedule:
+    - cron: "15 0 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/unboda-seo-public-watch.yml
+      - scripts/ops-seo-public-watch.py
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: unboda-seo-public-watch
+  cancel-in-progress: false
+
+jobs:
+  public-seo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate Python syntax
+        run: python3 -m py_compile scripts/ops-seo-public-watch.py
+      - name: Check public SEO and manage incident
+        run: python3 scripts/ops-seo-public-watch.py

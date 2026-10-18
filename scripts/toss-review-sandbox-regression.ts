@@ -5,12 +5,15 @@ import { readFileSync } from "node:fs";
 
 const env = process.env as Record<string, string | undefined>;
 const keys = ["NODE_ENV","TOSS_ENVIRONMENT","TOSS_REVIEW_MODE","TOSS_ALLOW_LIVE",
-  "TOSS_CLIENT_KEY","NEXT_PUBLIC_TOSS_CLIENT_KEY","TOSS_SECRET_KEY","TOSS_REVIEW_ACCOUNT_IDS","NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED"] as const;
+  "TOSS_HYBRID_ROUTING_ENABLED","TOSS_LIVE_CHECKOUT_ENABLED","TOSS_LIVE_PILOT_ENABLED","TOSS_CLIENT_KEY","NEXT_PUBLIC_TOSS_CLIENT_KEY","TOSS_SECRET_KEY","TOSS_REVIEW_ACCOUNT_IDS","NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED"] as const;
 const saved = Object.fromEntries(keys.map((key) => [key, env[key]])) as Record<string,string|undefined>;
 const reviewer = "f131d7ca-4024-4e91-a766-d81722f78c51";
 const other = "aeb73ee0-15e1-4f4c-80a7-ce3a5a39a22d";
 function configure(client: string, secret: string, review: boolean) {
   env.NODE_ENV = "production";
+  delete env.TOSS_HYBRID_ROUTING_ENABLED;
+  delete env.TOSS_LIVE_CHECKOUT_ENABLED;
+  delete env.TOSS_LIVE_PILOT_ENABLED;
   env.TOSS_ENVIRONMENT = "sandbox";
   env.TOSS_REVIEW_MODE = review ? "enabled" : "";
   delete env.TOSS_ALLOW_LIVE;

@@ -15,7 +15,7 @@ import {
 } from "@/app/lib/freeAnalysisEligibility";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { emitPaymentEvent } from "@/app/lib/payments/observability";
-import { getTossConfig, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
+import { getTossConfigForAccount, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
 import {
   buildPartnerCompatibilitySnapshot,
   buildProfileCompatibilitySnapshot,
@@ -197,7 +197,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    getTossConfig();
+    getTossConfigForAccount(user.id);
   } catch {
     return NextResponse.json(
       { error: "결제 기능이 아직 준비되지 않았습니다.", code: "PAYMENT_PROVIDER_NOT_READY" },

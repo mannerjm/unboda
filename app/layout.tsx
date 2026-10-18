@@ -27,6 +27,11 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: DEFAULT_SITE_DESCRIPTION,
+  icons: {
+    icon: [{ url: "/unboda-icon.svg", type: "image/svg+xml", sizes: "any" }],
+    shortcut: "/unboda-icon.svg",
+    apple: "/unboda-icon.svg",
+  },
   verification: {
     other: {
       "naver-site-verification": "9156c4832376625dfc22da771745d88f2612dfbe",

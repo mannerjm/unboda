@@ -2,7 +2,7 @@ import "server-only";
 import { createAdminClient } from "../supabase/admin";
 import { getTossPaymentRecordForOrder } from "../purchases/server";
 import { cancelPaymentWithToss, getPaymentByOrderIdFromToss, TossCancellationError } from "../toss/server";
-import { getTossConfigForAccount, isTossCheckoutUserAllowed } from "../toss/config";
+import { getTossConfigForAccount } from "../toss/config";
 
 export function isAiCreditSelfRefundEnabled(): boolean {
   return process.env.AI_CREDIT_SELF_REFUNDS_ENABLED === "true";
@@ -68,8 +68,7 @@ async function updateRefundStatus(id: string,status: string,error?: string): Pro
 
 export async function processCreditRefund(refund: RefundRow): Promise<{status:string;amount:number}> {
   if (!isAiCreditSelfRefundEnabled()) throw new Error("AI_CREDIT_REFUND_NOT_ENABLED");
-  if (!isTossCheckoutUserAllowed(refund.user_id)) throw new Error("TOSS_REVIEW_ACCOUNT_REQUIRED");
-  const accountConfig = getTossConfigForAccount(refund.user_id); // No cross-environment provider requests.
+  const accountConfig = getTossConfigForAccount(refund.user_id, "settlement"); // No cross-environment provider requests.
   if (refund.status==="COMPLETED") return {status:"COMPLETED",amount:refund.refund_amount_krw};
   if (!["PENDING","PROVIDER_UNKNOWN"].includes(refund.status)) {
     return {status:refund.status,amount:refund.refund_amount_krw};

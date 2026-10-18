@@ -85,6 +85,15 @@ export function isTossHybridRoutingEnabled() {
     && process.env.TOSS_HYBRID_ROUTING_ENABLED === "true";
 }
 
+function isTossLivePilotAccount(userId: string): boolean {
+  if (process.env.TOSS_LIVE_PILOT_ENABLED !== "true") return false;
+  return (process.env.TOSS_LIVE_PILOT_ACCOUNT_IDS ?? "")
+    .split(",")
+    .map((id) => id.trim().toLowerCase())
+    .filter((id) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{4}-[0-9a-f]{12}$/.test(id))
+    .includes(userId.toLowerCase());
+}
+
 export function getTossConfigForAccount(userId: string, purpose: "checkout" | "settlement" = "checkout"): TossSandboxConfig {
   if (!isTossHybridRoutingEnabled()) return getTossConfig();
   const testId = process.env.TOSS_TEST_ACCOUNT_ID?.trim().toLowerCase();
@@ -98,7 +107,7 @@ export function getTossConfigForAccount(userId: string, purpose: "checkout" | "s
     if (!allowlisted) throw new Error("TOSS_TEST_ACCOUNT_ALLOWLIST_MISMATCH");
     return config;
   }
-  if (purpose === "checkout" && process.env.TOSS_LIVE_CHECKOUT_ENABLED !== "true") {
+  if (purpose === "checkout" && process.env.TOSS_LIVE_CHECKOUT_ENABLED !== "true" && !isTossLivePilotAccount(userId)) {
     throw new Error("TOSS_LIVE_CHECKOUT_NOT_APPROVED");
   }
   const clientKey = process.env.TOSS_LIVE_CLIENT_KEY?.trim();
@@ -114,7 +123,7 @@ export function getTossConfigForAccount(userId: string, purpose: "checkout" | "s
 export function isTossCheckoutUserAllowed(userId: string): boolean {
   if (isTossHybridRoutingEnabled()) {
     const config = getTossConfigForAccount(userId, "settlement");
-    return config.environment === "production" ||
+    return (config.environment === "production" && (process.env.TOSS_LIVE_CHECKOUT_ENABLED === "true" || isTossLivePilotAccount(userId))) ||
       userId.toLowerCase() === process.env.TOSS_TEST_ACCOUNT_ID?.trim().toLowerCase();
   }
   const config = getTossConfig();

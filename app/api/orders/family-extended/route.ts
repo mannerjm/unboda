@@ -36,7 +36,7 @@ import {
   isCompatibilityFamilySiblingProductId,
 } from "@/app/lib/specialAnalysisProducts";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { getTossConfig, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
+import { getTossConfigForAccount, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
 
 function koreaDate(now = new Date()): string {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
   const evaluationYear = Number(evaluationDate.slice(0, 4));
 
   try {
-    getTossConfig();
+    getTossConfigForAccount(user.id);
   } catch {
     return NextResponse.json(
       { error: "결제 기능이 아직 준비되지 않았습니다.", code: "PAYMENT_PROVIDER_NOT_READY" },

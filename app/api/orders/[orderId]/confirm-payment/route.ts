@@ -12,7 +12,7 @@ import {
   recordTossProviderConfirmation,
 } from "@/app/lib/purchases/server";
 import { confirmPaymentWithToss, TossConfirmationError } from "@/app/lib/toss/server";
-import { isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
+import { getTossConfigForAccount, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
 import { emitPaymentEvent } from "@/app/lib/payments/observability";
 import {
   preparePaidReportGeneration,
@@ -172,6 +172,7 @@ export async function POST(request: Request, context: RouteContext) {
       paymentKey,
       orderId: order.id,
       amount: order.amount,
+      config: getTossConfigForAccount(order.userId),
     });
 
     if (provider.totalAmount !== order.amount) {

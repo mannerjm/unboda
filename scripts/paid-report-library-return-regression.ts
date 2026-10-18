@@ -28,6 +28,8 @@ for (const path of reportFiles) {
     `${path}: AI counseling, reviews and recommendations must remain above exit`);
 }
 const paid = read(reportFiles[0]);
+const paidClient = read("app/paid-analysis/[productId]/PaidAnalysisDetailV2Client.tsx");
+assert(!paidClient.includes("상품 설명으로 돌아가기"), "paid report must not show a competing product-description return link");
 assert(paid.indexOf("<ReportAccessGate") < paid.indexOf("<PaidReportBody"), "deep report stays behind purchase gate");
 assert(paid.indexOf("<ReportCompletionGate") < paid.indexOf('<ReportLibraryReturnLink placement="bottom"'),
   "deep report exit only appears after completed report");

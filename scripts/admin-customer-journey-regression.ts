@@ -16,6 +16,13 @@ const summary = read("app/admin/AdminCustomerJourneyOverview.tsx");
 const growth = read("app/admin/AdminGrowthOverview.tsx");
 const details = read("app/admin/customer-journey/page.tsx");
 const operations = read("app/admin/AdminOperationsOverview.tsx");
+const sales = read("app/admin/AdminGrowthOverview.tsx");
+assert(admin.includes('getSpecialAnalysisProduct(productId)') && admin.includes("special.title"),
+  "admin revenue must resolve specialist compatibility IDs to Korean product titles");
+assert(!admin.includes("return { productId, label: productId }"),
+  "admin revenue must not expose raw internal product IDs as a name");
+assert(sales.includes("title={item.productId}"),
+  "admin must retain access to internal identifiers for troubleshooting without displaying them in the sales list");
 const server = read("app/lib/analytics/customerJourney.ts");
 
 for (const keyword of ["customer_journey_events","enable row level security",

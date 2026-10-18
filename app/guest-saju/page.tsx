@@ -125,7 +125,7 @@ export default function GuestSajuPage() {
         ) : null}
 
         <form
-          className="mt-6 space-y-5 rounded-[2rem] border border-[#dfe3ef] bg-white p-6 shadow-[0_20px_55px_rgba(32,38,72,0.07)] sm:p-8"
+          className="mt-6 min-w-0 space-y-5 rounded-[2rem] border border-[#dfe3ef] bg-white p-6 shadow-[0_20px_55px_rgba(32,38,72,0.07)] sm:p-8"
           onSubmit={(event) => { event.preventDefault(); void submit(); }}
         >
           <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#e7eaf2] pb-5">
@@ -137,20 +137,20 @@ export default function GuestSajuPage() {
           </div>
 
           <label className="block text-sm font-bold">이름 또는 구분
-            <input value={input.label} onChange={(event) => setInput({ ...input, label: event.target.value })} placeholder="이름 또는 구분" className="mt-2 w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10" required />
+            <input value={input.label} onChange={(event) => setInput({ ...input, label: event.target.value })} placeholder="이름 또는 구분" className="mt-2 block box-border w-full min-w-0 max-w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 text-base outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10 sm:text-sm" required />
           </label>
           <label className="block text-sm font-bold">관계
             <select value={input.relationshipType} onChange={(event) => setInput({ ...input, relationshipType: event.target.value as ProfileRelationshipType })} className="mt-2 w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10">
               {relationshipOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </label>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <label className="block text-sm font-bold">생년월일
-              <input type="date" min={GUEST_BIRTH_DATE_MIN} max={getGuestBirthDateMax()} value={input.birthDate} onChange={(event) => setInput({ ...input, birthDate: event.target.value })} className="mt-2 w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10" required />
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <label className="block min-w-0 text-sm font-bold">생년월일
+              <input type="date" min={GUEST_BIRTH_DATE_MIN} max={getGuestBirthDateMax()} value={input.birthDate} onChange={(event) => setInput({ ...input, birthDate: event.target.value })} className="mt-2 block box-border w-full min-w-0 max-w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 text-base outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10 sm:text-sm" required />
             </label>
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-2">
               <label className="block text-sm font-bold" htmlFor="guest-birth-time">태어난 시간</label>
-              <input id="guest-birth-time" type="time" value={input.birthTimeKnown === false ? "" : input.birthTime} disabled={input.birthTimeKnown === false} onChange={(event) => setInput({ ...input, birthTime: event.target.value })} className="w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10 disabled:bg-slate-100" required={input.birthTimeKnown !== false} />
+              <input id="guest-birth-time" type="time" value={input.birthTimeKnown === false ? "" : input.birthTime} disabled={input.birthTimeKnown === false} onChange={(event) => setInput({ ...input, birthTime: event.target.value })} className="block box-border w-full min-w-0 max-w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 text-base outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10 disabled:bg-slate-100 sm:text-sm" required={input.birthTimeKnown !== false} />
               <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
                 <input type="checkbox" checked={input.birthTimeKnown === false} onChange={(event) => setInput({ ...input, birthTimeKnown: !event.target.checked, birthTime: event.target.checked ? "12:00" : "" })} className="h-4 w-4 accent-[#6f5ce7]" />
                 출생 시간 모름
@@ -158,7 +158,7 @@ export default function GuestSajuPage() {
               {input.birthTimeKnown === false ? <p className="text-xs leading-5 text-slate-600">임시 시각은 사주 계산에만 사용하며, 결과의 시주는 ‘시간 미상’으로 표시합니다.</p> : null}
             </div>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <label className="block text-sm font-bold">성별
               <select value={input.gender} onChange={(event) => setInput({ ...input, gender: event.target.value as ProfileInput["gender"] })} className="mt-2 w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10"><option value="남성">남성</option><option value="여성">여성</option></select>
             </label>

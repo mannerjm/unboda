@@ -110,6 +110,15 @@ const gitignore = read(".gitignore");
 assert.ok(gitignore.includes(".env*"), "environment files must stay ignored by default");
 assert.ok(gitignore.includes("*.pem"), "private key material must stay ignored by default");
 
+// Service-role clients must fail at build time when imported into browser components.
+const adminClient = read("app/lib/supabase/admin.ts");
+assert.ok(adminClient.startsWith('import "server-only";'), "Supabase service-role client must be server-only");
+assert.ok(adminClient.includes("persistSession: false") && adminClient.includes("autoRefreshToken: false"), "service-role client must not persist sessions");
+const refundRoute = read("app/api/ai-consulting/credits/refunds/route.ts");
+assert.ok(refundRoute.includes("getCurrentUser()") && refundRoute.includes("getUserProfile(profileId,user.id)") && refundRoute.includes("isAiCreditRefundAllowedForUser(user.id)"), "refund API must enforce session, ownership and pilot gates");
+const confirmRoute = read("app/api/orders/[orderId]/confirm-payment/route.ts");
+assert.ok(confirmRoute.includes("getOrderForUser(orderId, user.id)") && confirmRoute.includes("order.amount !== resolved.amount") && confirmRoute.includes("isTossCheckoutUserAllowed(user.id)"), "paid checkout must require owner, server price and checkout eligibility");
+
 const forbiddenClientSecrets = [
   "SUPABASE_SERVICE_ROLE_KEY",
   "TOSS_SECRET_KEY",

@@ -151,9 +151,18 @@ export async function requestCreditRefund(input:{userId:string;profileId:string;
 
 export async function retryDueCreditRefunds(limit=10):Promise<{checked:number;completed:number;exceptions:number}> {
   if (!isAiCreditSelfRefundEnabled() && process.env.AI_CREDIT_REFUND_PILOT_ENABLED !== "true") return {checked:0,completed:0,exceptions:0};
-  const {data,error}=await createAdminClient().from("ai_credit_refund_requests").select("*")
-    .in("status",["PENDING","PROVIDER_UNKNOWN"]).or(`next_retry_at.is.null,next_retry_at.lte.${new Date().toISOString()}`)
-    .order("created_at",{ascending:true}).limit(limit);
+  // Filter the eligible pilot accounts BEFORE applying the batch limit; otherwise
+  // unrelated pending requests can starve the pilot recovery queue indefinitely.
+  const globalEnabled = isAiCreditSelfRefundEnabled();
+  const pilotIds = (process.env.TOSS_LIVE_PILOT_ACCOUNT_IDS ?? "")
+    .split(",").map(id => id.trim().toLowerCase())
+    .filter(id => /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(id))
+    .filter(id => isAiCreditRefundAllowedForUser(id));
+  if (!globalEnabled && pilotIds.length === 0) return {checked:0,completed:0,exceptions:0};
+  let query = createAdminClient().from("ai_credit_refund_requests").select("*")
+    .in("status",["PENDING","PROVIDER_UNKNOWN"]).or(`next_retry_at.is.null,next_retry_at.lte.${new Date().toISOString()}`);
+  if (!globalEnabled) query = query.in("user_id", pilotIds);
+  const {data,error}=await query.order("created_at",{ascending:true}).limit(limit);
   if(error) throw new Error("AI_CREDIT_REFUND_RECOVERY_READ_FAILED");
   let completed=0,exceptions=0;
   for(const req of (data??[]) as RefundRow[]){

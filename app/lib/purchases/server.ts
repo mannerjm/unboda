@@ -1044,7 +1044,7 @@ export async function reconcileTossPayment(
     return { order, purchase, entitlement };
   }
 
-  const provider = await getPaymentByOrderIdFromToss(order.id, getTossConfigForAccount(order.userId));
+  const provider = await getPaymentByOrderIdFromToss(order.id, getTossConfigForAccount(order.userId, "settlement"));
 
   if (
     provider.orderId !== order.id ||

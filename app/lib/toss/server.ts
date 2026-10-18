@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { getTossConfig } from "./config";
+import { getTossConfig, type TossSandboxConfig } from "./config";
 
 export type TossPaymentStatus =
   | "READY"
@@ -101,8 +101,9 @@ export async function confirmPaymentWithToss(input: {
   paymentKey: string;
   orderId: string;
   amount: number;
+  config?: TossSandboxConfig;
 }): Promise<TossConfirmResponse> {
-  const { apiBaseUrl, secretKey } = getTossConfig();
+  const { apiBaseUrl, secretKey } = input.config ?? getTossConfig();
 
   if (!input.paymentKey || !input.orderId || !Number.isFinite(input.amount)) {
     throw new TossConfirmationError({
@@ -179,8 +180,9 @@ export async function confirmPaymentWithToss(input: {
 
 export async function getPaymentByOrderIdFromToss(
   orderId: string,
+  config: TossSandboxConfig = getTossConfig(),
 ): Promise<TossPaymentLookupResponse> {
-  const { apiBaseUrl, secretKey } = getTossConfig();
+  const { apiBaseUrl, secretKey } = config;
   const response = await fetch(
     `${apiBaseUrl}/payments/orders/${encodeURIComponent(orderId)}`,
     {
@@ -246,8 +248,9 @@ export async function cancelPaymentWithToss(input: {
   cancelAmount?: number;
   /** Retry-safe provider idempotency key for this distinct refund request. */
   idempotencyKey?: string;
+  config?: TossSandboxConfig;
 }): Promise<TossCancellationResponse> {
-  const { apiBaseUrl, secretKey } = getTossConfig();
+  const { apiBaseUrl, secretKey } = input.config ?? getTossConfig();
   if (!input.paymentKey || !input.cancelReason || input.cancelReason.length > 200
     || (input.cancelAmount !== undefined && (!Number.isSafeInteger(input.cancelAmount) || input.cancelAmount <= 0))
     || (input.idempotencyKey !== undefined && !/^[0-9a-f-]{36}$/i.test(input.idempotencyKey))) {

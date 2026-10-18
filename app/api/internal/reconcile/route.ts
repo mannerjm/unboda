@@ -170,7 +170,7 @@ async function dispatch(request: Request) {
   // Extra independent opt-in: DO NOT activate Toss partial refunds during review.
   // Both flags must be intentionally enabled after sandbox cancellation E2E.
   let creditRefunds: WorkerReport<{ checked: number; completed: number; exceptions: number }> = { ok: true, checked: 0, completed: 0, exceptions: 0 };
-  if (process.env.AI_CREDIT_SELF_REFUNDS_ENABLED === "true"
+  if ((process.env.AI_CREDIT_SELF_REFUNDS_ENABLED === "true" || process.env.AI_CREDIT_REFUND_PILOT_ENABLED === "true")
       && process.env.AI_CREDIT_REFUND_RETRY_WORKER_ENABLED === "true") {
     try {
       creditRefunds = { ok: true, ...(await retryDueCreditRefunds(5)) };

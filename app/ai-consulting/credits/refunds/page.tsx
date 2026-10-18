@@ -3,7 +3,7 @@ import RefundCreditButton from "./RefundCreditButton";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getUserProfile } from "@/app/lib/profiles/server";
-import { isAiCreditSelfRefundEnabled, listCreditLotViews } from "@/app/lib/aiConsulting/creditRefunds";
+import { isAiCreditRefundAllowedForUser, listCreditLotViews } from "@/app/lib/aiConsulting/creditRefunds";
 import { getUnusedQuestionRefundKrw } from "@/app/lib/commercialTerms";
 export const dynamic="force-dynamic";
 const packName:Record<string,string>={
@@ -21,7 +21,7 @@ export default async function AiCreditRefundsPage({searchParams}:{searchParams:P
   const profile=profileId?await getUserProfile(profileId,user.id).catch(()=>null):await getActiveProfile(user.id).catch(()=>null);
   if(!profile)return <main className="mx-auto max-w-2xl p-6">분석 대상 프로필을 확인하지 못했습니다.</main>;
   const lots=await listCreditLotViews(user.id,profile.id).catch(()=>null);
-  const enabled=isAiCreditSelfRefundEnabled();
+  const enabled=isAiCreditRefundAllowedForUser(user.id);
   return <main className="min-h-screen bg-[#f5f7fc] p-4 text-[#11162d] sm:p-8">
     <div className="mx-auto max-w-3xl">
       <Link href="/mypage" className="text-sm font-semibold text-slate-600">← 마이페이지</Link>

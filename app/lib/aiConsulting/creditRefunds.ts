@@ -8,6 +8,19 @@ export function isAiCreditSelfRefundEnabled(): boolean {
   return process.env.AI_CREDIT_SELF_REFUNDS_ENABLED === "true";
 }
 
+/** Pilot is server-only and requires the separate LIVE checkout pilot to be enabled. */
+export function isAiCreditRefundAllowedForUser(userId: string): boolean {
+  if (isAiCreditSelfRefundEnabled()) return true;
+  if (process.env.NODE_ENV !== "production"
+    || process.env.AI_CREDIT_REFUND_PILOT_ENABLED !== "true"
+    || process.env.TOSS_HYBRID_ROUTING_ENABLED !== "true"
+    || process.env.TOSS_LIVE_PILOT_ENABLED !== "true"
+    || process.env.TOSS_LIVE_CHECKOUT_ENABLED === "true") return false;
+  if (!/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(userId)) return false;
+  return (process.env.TOSS_LIVE_PILOT_ACCOUNT_IDS ?? "")
+    .split(",").some(id => id.trim().toLowerCase() === userId.toLowerCase());
+}
+
 export type CreditLotView = {
   purchaseId: string; bundleId: string; priceKrw: number; original: number;
   used: number; available: number; purchasedAt: string; expiresAt: string | null;
@@ -67,7 +80,7 @@ async function updateRefundStatus(id: string,status: string,error?: string): Pro
 }
 
 export async function processCreditRefund(refund: RefundRow): Promise<{status:string;amount:number}> {
-  if (!isAiCreditSelfRefundEnabled()) throw new Error("AI_CREDIT_REFUND_NOT_ENABLED");
+  if (!isAiCreditRefundAllowedForUser(refund.user_id)) throw new Error("AI_CREDIT_REFUND_NOT_ENABLED");
   const accountConfig = getTossConfigForAccount(refund.user_id, "settlement"); // No cross-environment provider requests.
   if (refund.status==="COMPLETED") return {status:"COMPLETED",amount:refund.refund_amount_krw};
   if (!["PENDING","PROVIDER_UNKNOWN"].includes(refund.status)) {
@@ -128,7 +141,7 @@ export async function processCreditRefund(refund: RefundRow): Promise<{status:st
 }
 
 export async function requestCreditRefund(input:{userId:string;profileId:string;purchaseId:string}):Promise<{status:string;amount:number}> {
-  if (!isAiCreditSelfRefundEnabled()) throw new Error("AI_CREDIT_REFUND_NOT_ENABLED");
+  if (!isAiCreditRefundAllowedForUser(input.userId)) throw new Error("AI_CREDIT_REFUND_NOT_ENABLED");
   const {data,error}=await createAdminClient().rpc("begin_ai_credit_refund",{
     p_user_id:input.userId,p_profile_id:input.profileId,p_purchase_id:input.purchaseId,
   });
@@ -137,13 +150,14 @@ export async function requestCreditRefund(input:{userId:string;profileId:string;
 }
 
 export async function retryDueCreditRefunds(limit=10):Promise<{checked:number;completed:number;exceptions:number}> {
-  if (!isAiCreditSelfRefundEnabled()) return {checked:0,completed:0,exceptions:0};
+  if (!isAiCreditSelfRefundEnabled() && process.env.AI_CREDIT_REFUND_PILOT_ENABLED !== "true") return {checked:0,completed:0,exceptions:0};
   const {data,error}=await createAdminClient().from("ai_credit_refund_requests").select("*")
     .in("status",["PENDING","PROVIDER_UNKNOWN"]).or(`next_retry_at.is.null,next_retry_at.lte.${new Date().toISOString()}`)
     .order("created_at",{ascending:true}).limit(limit);
   if(error) throw new Error("AI_CREDIT_REFUND_RECOVERY_READ_FAILED");
   let completed=0,exceptions=0;
   for(const req of (data??[]) as RefundRow[]){
+    if (!isAiCreditRefundAllowedForUser(req.user_id)) continue;
     const result=await processCreditRefund(req);
     if(result.status==="COMPLETED")completed++;else exceptions++;
   }

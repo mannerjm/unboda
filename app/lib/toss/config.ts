@@ -90,7 +90,7 @@ function isTossLivePilotAccount(userId: string): boolean {
   return (process.env.TOSS_LIVE_PILOT_ACCOUNT_IDS ?? "")
     .split(",")
     .map((id) => id.trim().toLowerCase())
-    .filter((id) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{4}-[0-9a-f]{12}$/.test(id))
+    .filter((id) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id))
     .includes(userId.toLowerCase());
 }
 

@@ -280,14 +280,7 @@ void detail;
   <main className="min-h-screen bg-[#eef0f6] px-4 py-8">
     <div className="mx-auto max-w-3xl">
       <div className="mb-10">
-  <a
-    href={`/paid-analysis/${productId}?profileId=${profileId}`}
-    className="text-sm font-semibold text-slate-600 transition hover:text-[#11162d]"
-  >
-    ← 상품 설명으로 돌아가기
-  </a>
-
-  <p className="mt-10 text-xs font-semibold tracking-[0.25em] text-slate-500">
+  <p className="mt-4 text-xs font-semibold tracking-[0.25em] text-slate-500">
     PREMIUM REPORT
   </p>
 

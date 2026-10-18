@@ -119,8 +119,17 @@ const checks:Record<string,boolean>={
   heartbeatFailClosed:heartbeats.includes('INTERNAL_HEARTBEAT_PERSIST_FAILED') &&
     masterCron.includes('await recordJobHeartbeat("reconcile"') &&
     recoveryRoute.includes('await recordJobHeartbeat("paid_report_recovery"'),
+  aiRefundPilotOnlyExplicitUsers: read("app/lib/aiConsulting/creditRefunds.ts").includes('isAiCreditRefundAllowedForUser(refund.user_id)') &&
+    read("app/lib/aiConsulting/creditRefunds.ts").includes('isAiCreditRefundAllowedForUser(input.userId)') &&
+    read("app/lib/aiConsulting/creditRefunds.ts").includes('TOSS_LIVE_PILOT_ACCOUNT_IDS') &&
+    read("app/lib/aiConsulting/creditRefunds.ts").includes('TOSS_LIVE_PILOT_ENABLED') &&
+    read("app/lib/aiConsulting/creditRefunds.ts").includes('TOSS_HYBRID_ROUTING_ENABLED') &&
+    read("app/lib/aiConsulting/creditRefunds.ts").includes('AI_CREDIT_REFUND_PILOT_ENABLED') &&
+    read("app/api/ai-consulting/credits/refunds/route.ts").includes('isAiCreditRefundAllowedForUser(user.id)') &&
+    read("app/ai-consulting/credits/refunds/page.tsx").includes('isAiCreditRefundAllowedForUser(user.id)'),
   extraRefundsOptInOnly:masterCron.includes('AI_CREDIT_REFUND_RETRY_WORKER_ENABLED === "true"') &&
-    masterCron.includes('AI_CREDIT_SELF_REFUNDS_ENABLED === "true"'),
+    masterCron.includes('AI_CREDIT_SELF_REFUNDS_ENABLED === "true"') &&
+    masterCron.includes('AI_CREDIT_REFUND_PILOT_ENABLED === "true"'),
   healthForSoloInbox:soloDashboard.includes('readJobHeartbeats()') &&
     adminOperations.includes('1인 통합 운영 업무함') &&
     adminPage.includes('getSoloOperationsSnapshot()'),

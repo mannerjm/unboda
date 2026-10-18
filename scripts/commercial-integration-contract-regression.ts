@@ -57,7 +57,7 @@ const checks:Record<string,boolean>={
   partialTossCancellation:tos.includes("cancelAmount: input.cancelAmount")||tos.includes("cancelAmount: input.cancelAmount }"),
   tossIdempotency:tos.includes('"Idempotency-Key"'),
   refundDisabledByDefault:refund.includes('process.env.AI_CREDIT_SELF_REFUNDS_ENABLED === "true"'),
-  providerStateReconciled:refund.includes("getPaymentByOrderIdFromToss(refund.order_id)"),
+  providerStateReconciled:refund.includes("getPaymentByOrderIdFromToss(refund.order_id, accountConfig)"),
   noDoubleProviderCalls:refund.includes("idempotencyKey:refund.idempotency_key"),
   refundRecurringRecovery:refund.includes("retryDueCreditRefunds"),
   guardReportDuringConsultation:runtime.includes("v_entitlement.service_expires_at<=now()"),

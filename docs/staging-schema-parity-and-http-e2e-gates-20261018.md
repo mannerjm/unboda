@@ -39,3 +39,10 @@
 - staging-only 웹 배포 + staging-only Supabase 키 + 로그인 독립 세션 검증.
 - 읽기 전용 교차 접근 API, 비로그인 차단, 직접 리포트 상태/상담 기억 접근 차단이 네트워크 요청으로 통과.
 - 미완료 단계는 출시 E2E 통과로 표시하지 않음.
+
+## 6. E2E 대상 서버 신원 검사 (코드 추가)
+- `GET /api/internal/e2e-readiness`는 `VERCEL_ENV=preview`, `UNBODA_E2E_STAGING_ENABLED=true`, staging Supabase URL의 정확한 일치, staging 전용 `SUPABASE_SERVICE_ROLE_KEY` 등록 및 모든 LIVE 결제 스위치 비활성일 때에만 `{ready:true}`를 반환한다.
+- Production 및 그 외 환경은 **404**와 `{ready:false}` 반환. 응답에는 DB ID/환경값/비밀키를 넣지 않는다.
+- `scripts/two-account-readonly-e2e.ts`는 **인증 쿠키 전송 전에** 서버 신원 응답을 검증하도록 수정했다. 404라면 실제 테스트를 시작하지 않음.
+- 서버 신원 검사 통과 자체는 DB 스키마 완성이나 두 계정 인증을 증명하지 않는다. 반드시 위 31항목 SQL 및 HTTP E2E를 각각 통과해야 함.
+- 실제 격리된 Preview에 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`를 **staging 값으로만** 설정한다. 별도 staging service-role 비밀키는 비밀관리 시스템에서 직접 구성해야 하며 운영 비밀키 복사 금지.

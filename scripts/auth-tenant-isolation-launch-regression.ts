@@ -9,6 +9,18 @@ const mypage=read("app/api/mypage/summary/route.ts");
 const refund=read("app/api/ai-consulting/credits/refunds/route.ts");
 const checkout=read("app/api/orders/[orderId]/confirm-payment/route.ts");
 const creditCheckout=read("app/api/ai-consulting/credits/orders/[orderId]/confirm-payment/route.ts");
+const memory = read("app/api/ai-consulting/memories/route.ts");
+const portfolio = read("app/api/ai-consulting/portfolio/route.ts");
+const creditBalance = read("app/api/ai-consulting/credits/balance/route.ts");
+const reportStatus = read("app/api/paid-analysis-detail-v2/status/route.ts");
+const httpProbe = read("scripts/two-account-readonly-e2e.ts");
+for(const [name,route] of [["memory",memory],["portfolio",portfolio],["credit balance",creditBalance],["report status",reportStatus]] as const) {
+  assert(route.includes("getCurrentUser()") && route.includes("getUserProfile(profileId, user.id)"), name+" must use server session and owner-bound profile");
+}
+assert(memory.includes("activeProfile.id !== profile.id") && portfolio.includes("activeProfile.id !== profile.id"),"AI memory and portfolio must be active-profile scoped");
+assert(reportStatus.includes("getActiveEntitlementForProfile") && reportStatus.includes("getPaidReport(user.id, profile.id"),"report status must validate purchased entitlement for owner");
+assert(httpProbe.includes("UNBODA_E2E_EXPECTED_HOST") && httpProbe.includes("UNBODA_E2E_COOKIE_A")
+  && httpProbe.includes("mustDeny(\"/api/ai-consulting/memories?profileId=\""),"HTTP probe must pin target host and attempt actual foreign-profile GET");
 const captcha=read("app/auth/AuthCaptcha.tsx");
 const signup=read("app/api/auth/signup/route.ts");
 assert(auth.includes("supabase.auth.getUser()"), "auth identity must be validated server-side");

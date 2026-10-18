@@ -146,11 +146,29 @@ export default function GuestSajuPage() {
           </label>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <label className="block min-w-0 text-sm font-bold">생년월일
-              <input type="date" min={GUEST_BIRTH_DATE_MIN} max={getGuestBirthDateMax()} value={input.birthDate} onChange={(event) => setInput({ ...input, birthDate: event.target.value })} className="mt-2 block box-border w-full min-w-0 max-w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 text-base outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10 sm:text-sm" required />
+              {/* On iOS Safari the native date control can paint wider than its CSS width.
+                  Keep the usable native picker inside a clipped, fixed-width visible field. */}
+              <span className="relative mt-2 block h-14 w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-[#d8ddea] bg-[#fbfcff] focus-within:border-[#7a67e8] focus-within:ring-4 focus-within:ring-[#7a67e8]/10">
+                <span aria-hidden="true" className="pointer-events-none flex h-full w-full min-w-0 items-center justify-between gap-2 px-4">
+                  <span className={input.birthDate ? "min-w-0 truncate text-base font-medium text-[#11162d]" : "min-w-0 truncate text-base font-medium text-[#7b8299]"}>
+                    {input.birthDate ? input.birthDate.replaceAll("-", ". ") : "연도 · 월 · 일 선택"}
+                  </span>
+                  <span className="shrink-0 text-xs font-semibold text-[#7768c7]">선택 ▾</span>
+                </span>
+                <input type="date" min={GUEST_BIRTH_DATE_MIN} max={getGuestBirthDateMax()} value={input.birthDate} onChange={(event) => setInput({ ...input, birthDate: event.target.value })} onClick={(event) => { try { event.currentTarget.showPicker?.(); } catch { /* Native picker tap still works on older Safari. */ } }} className="absolute inset-0 z-10 block h-full w-full min-w-0 max-w-full cursor-pointer opacity-0" required />
+              </span>
             </label>
             <div className="min-w-0 space-y-2">
               <label className="block text-sm font-bold" htmlFor="guest-birth-time">태어난 시간</label>
-              <input id="guest-birth-time" type="time" value={input.birthTimeKnown === false ? "" : input.birthTime} disabled={input.birthTimeKnown === false} onChange={(event) => setInput({ ...input, birthTime: event.target.value })} className="block box-border w-full min-w-0 max-w-full rounded-xl border border-[#d8ddea] bg-[#fbfcff] px-4 py-3 text-base outline-none transition focus:border-[#7a67e8] focus:ring-4 focus:ring-[#7a67e8]/10 disabled:bg-slate-100 sm:text-sm" required={input.birthTimeKnown !== false} />
+              <div className={`relative h-14 w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-[#d8ddea] focus-within:border-[#7a67e8] focus-within:ring-4 focus-within:ring-[#7a67e8]/10 ${input.birthTimeKnown === false ? "bg-slate-100" : "bg-[#fbfcff]"}`}>
+                <span aria-hidden="true" className="pointer-events-none flex h-full w-full min-w-0 items-center justify-between gap-2 px-4">
+                  <span className={input.birthTime && input.birthTimeKnown !== false ? "min-w-0 truncate text-base font-medium text-[#11162d]" : "min-w-0 truncate text-base font-medium text-[#7b8299]"}>
+                    {input.birthTimeKnown === false ? "출생 시간 모름" : input.birthTime || "태어난 시간 선택"}
+                  </span>
+                  <span className="shrink-0 text-xs font-semibold text-[#7768c7]">선택 ▾</span>
+                </span>
+                <input id="guest-birth-time" type="time" value={input.birthTimeKnown === false ? "" : input.birthTime} disabled={input.birthTimeKnown === false} onChange={(event) => setInput({ ...input, birthTime: event.target.value })} onClick={(event) => { try { event.currentTarget.showPicker?.(); } catch { /* Native picker tap still works on older Safari. */ } }} className="absolute inset-0 z-10 block h-full w-full min-w-0 max-w-full cursor-pointer opacity-0 disabled:cursor-not-allowed" required={input.birthTimeKnown !== false} />
+              </div>
               <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
                 <input type="checkbox" checked={input.birthTimeKnown === false} onChange={(event) => setInput({ ...input, birthTimeKnown: !event.target.checked, birthTime: event.target.checked ? "12:00" : "" })} className="h-4 w-4 accent-[#6f5ce7]" />
                 출생 시간 모름

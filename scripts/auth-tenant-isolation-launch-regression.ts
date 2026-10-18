@@ -27,7 +27,10 @@ assert(e2eReadiness.includes('process.env.VERCEL_ENV === "preview"')
   && e2eReadiness.includes('process.env.UNBODA_E2E_STAGING_ENABLED === "true"')
   && e2eReadiness.includes('process.env.TOSS_LIVE_CHECKOUT_ENABLED !== "true"')
   && e2eReadiness.includes('process.env.TOSS_LIVE_PILOT_ENABLED !== "true"')
-  && e2eReadiness.includes('status: enabled ? 200 : 404'),"staging readiness must fail closed");
+  && e2eReadiness.includes('process.env.VERCEL_GIT_COMMIT_REF === "test/staging-tenant-e2e"')
+  && e2eReadiness.includes('createAdminClient()')
+  && e2eReadiness.includes('enabled = !error && typeof count === "number" && count >= 2')
+  && e2eReadiness.includes('status: enabled ? 200 : 404'),"staging readiness must verify server-side staging DB credentials and fail closed");
 assert(e2eProbe.includes('"/api/internal/e2e-readiness"')
   && e2eProbe.indexOf("readyResponse.status") < e2eProbe.indexOf("cookieA),"),"staging proof required before sending any test session");
 const captcha=read("app/auth/AuthCaptcha.tsx");

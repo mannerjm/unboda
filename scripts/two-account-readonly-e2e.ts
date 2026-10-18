@@ -39,6 +39,18 @@ if (!base || !expectedHost || !cookieA || !cookieB) {
     const response = await get(path, cookie);
     assert.equal(response.status, expected, "foreign-owner GET must be blocked on " + path);
   }
+  // Before sending any account cookies, require the server to positively identify
+  // itself as the isolated staging preview and reject all LIVE payment routing.
+  const readyResponse = await fetch(new URL("/api/internal/e2e-readiness", origin), {
+    headers: { accept: "application/json" },
+    redirect: "manual",
+    cache: "no-store",
+    signal: AbortSignal.timeout(10000),
+  });
+  assert.equal(readyResponse.status, 200, "target has not proven isolated staging readiness");
+  const readiness = await readyResponse.json() as { ready?: boolean };
+  assert.equal(readiness.ready, true, "staging identity check failed");
+
   const [a, b, summaryA, summaryB] = await Promise.all([
     ownRead("/api/profiles", cookieA),
     ownRead("/api/profiles", cookieB),

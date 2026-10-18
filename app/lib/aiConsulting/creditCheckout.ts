@@ -12,7 +12,7 @@ import {
 import type { OrderRecord, PurchaseRecord } from "../purchases/types";
 import { createAdminClient } from "../supabase/admin";
 import { getPaymentByOrderIdFromToss } from "../toss/server";
-import { getTossConfig, isTossCheckoutUserAllowed } from "../toss/config";
+import { getTossConfig, getTossConfigForAccount, isTossCheckoutUserAllowed, isTossHybridRoutingEnabled } from "../toss/config";
 import {
   getAiConsultingCreditBundle,
   type AiConsultingCreditBundleId,
@@ -22,6 +22,7 @@ import { getAiConsultingCreditBalance } from "./server";
 export const AI_CONSULTING_CREDIT_PAYMENT_PROVIDER = "toss_ai_credit";
 
 export function isAiConsultingCreditCheckoutEnabled(): boolean {
+  if (isTossHybridRoutingEnabled() && process.env.TOSS_LIVE_CHECKOUT_ENABLED === "true") return true;
   if (process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true") return true;
 
   // Permit the same already-configured, production-hosted Toss TEST review mode
@@ -155,7 +156,7 @@ export async function createPendingAiConsultingCreditOrder(input: {
   }
   // Defense in depth: no internal caller may mint an order on a public
   // customer account while the site uses TEST keys for approval review.
-  getTossConfig();
+  getTossConfigForAccount(input.userId);
   if (!isTossCheckoutUserAllowed(input.userId)) {
     throw new Error("TOSS_REVIEW_ACCOUNT_REQUIRED");
   }

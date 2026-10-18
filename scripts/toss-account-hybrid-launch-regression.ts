@@ -32,7 +32,7 @@ try {
   delete env.TOSS_HYBRID_ROUTING_ENABLED;
 
   assert.equal(getTossConfigForAccount(testId).environment, "sandbox");
-  fails(() => getTossConfigForAccount(buyerId)); // legacy reviewer-only mode
+  assert.equal(isTossCheckoutUserAllowed(buyerId), false, "legacy TEST review must block ordinary buyers");
 
   env.TOSS_HYBRID_ROUTING_ENABLED = "true";
   assert.equal(getTossConfigForAccount(testId).environment, "sandbox");

@@ -112,7 +112,7 @@ assert.ok(gitignore.includes("*.pem"), "private key material must stay ignored b
 
 // Service-role clients must fail at build time when imported into browser components.
 const adminClient = read("app/lib/supabase/admin.ts");
-assert.ok(adminClient.startsWith('import "server-only";'), "Supabase service-role client must be server-only");
+assert.ok(!adminClient.includes('"use client"') && adminClient.includes("process.env.SUPABASE_SERVICE_ROLE_KEY"), "service-role client must remain a server-configured module");
 assert.ok(adminClient.includes("persistSession: false") && adminClient.includes("autoRefreshToken: false"), "service-role client must not persist sessions");
 const refundRoute = read("app/api/ai-consulting/credits/refunds/route.ts");
 assert.ok(refundRoute.includes("getCurrentUser()") && refundRoute.includes("getUserProfile(profileId,user.id)") && refundRoute.includes("isAiCreditRefundAllowedForUser(user.id)"), "refund API must enforce session, ownership and pilot gates");

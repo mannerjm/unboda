@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import AnalyticsVisitTracker from "@/app/components/AnalyticsVisitTracker";
+import PwaRegistration from "@/app/components/PwaRegistration";
 import {
   DEFAULT_SITE_DESCRIPTION,
   DEFAULT_SITE_TITLE,
@@ -27,10 +28,12 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: DEFAULT_SITE_DESCRIPTION,
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: SITE_NAME, statusBarStyle: "default" },
   icons: {
     icon: [{ url: "/unboda-icon.svg", type: "image/svg+xml", sizes: "any" }],
     shortcut: "/unboda-icon.svg",
-    apple: "/unboda-icon.svg",
+    apple: "/apple-icon",
   },
   verification: {
     other: {
@@ -73,6 +76,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#f5f7fc] text-[#11162d]">
         <AnalyticsVisitTracker />
+        <PwaRegistration />
         {children}
       </body>
     </html>

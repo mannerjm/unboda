@@ -113,7 +113,7 @@ export function getTossConfigForAccount(userId: string, purpose: "checkout" | "s
 
 export function isTossCheckoutUserAllowed(userId: string): boolean {
   if (isTossHybridRoutingEnabled()) {
-    const config = getTossConfigForAccount(userId);
+    const config = getTossConfigForAccount(userId, "settlement");
     return config.environment === "production" ||
       userId.toLowerCase() === process.env.TOSS_TEST_ACCOUNT_ID?.trim().toLowerCase();
   }

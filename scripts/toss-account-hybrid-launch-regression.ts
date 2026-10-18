@@ -11,6 +11,7 @@ const keys = [
   "TOSS_CLIENT_KEY","TOSS_SECRET_KEY",
   "TOSS_LIVE_CLIENT_KEY","TOSS_LIVE_SECRET_KEY",
   "TOSS_HYBRID_ROUTING_ENABLED","TOSS_LIVE_CHECKOUT_ENABLED",
+  "TOSS_LIVE_PILOT_ENABLED","TOSS_LIVE_PILOT_ACCOUNT_IDS",
 ] as const;
 const env = process.env as Record<string,string|undefined>;
 const original = Object.fromEntries(keys.map(k => [k,env[k]]));
@@ -30,6 +31,8 @@ try {
   delete env.TOSS_LIVE_SECRET_KEY;
   delete env.TOSS_LIVE_CHECKOUT_ENABLED;
   delete env.TOSS_HYBRID_ROUTING_ENABLED;
+  delete env.TOSS_LIVE_PILOT_ENABLED;
+  delete env.TOSS_LIVE_PILOT_ACCOUNT_IDS;
 
   assert.equal(getTossConfigForAccount(testId).environment, "sandbox");
   assert.equal(isTossCheckoutUserAllowed(buyerId), false, "legacy TEST review must block ordinary buyers");
@@ -60,6 +63,18 @@ try {
     "owner is always TEST even when live customers are enabled");
 
   env.TOSS_LIVE_CHECKOUT_ENABLED = "false";
+  fails(() => getTossConfigForAccount(buyerId));
+  assert.equal(isTossCheckoutUserAllowed(buyerId), false);
+  env.TOSS_LIVE_PILOT_ACCOUNT_IDS = buyerId;
+  fails(() => getTossConfigForAccount(buyerId)); // allowlist alone cannot open live checkout
+  env.TOSS_LIVE_PILOT_ENABLED = "true";
+  assert.equal(getTossConfigForAccount(buyerId).environment, "production");
+  assert.equal(isTossCheckoutUserAllowed(buyerId), true);
+  const otherId = "e2300b12-f546-4651-ab46-644aca902b98";
+  fails(() => getTossConfigForAccount(otherId));
+  assert.equal(isTossCheckoutUserAllowed(otherId), false);
+  assert.equal(getTossConfigForAccount(testId).environment, "sandbox");
+  env.TOSS_LIVE_PILOT_ENABLED = "false";
   fails(() => getTossConfigForAccount(buyerId));
   assert.equal(getTossConfigForAccount(buyerId,"settlement").environment, "production",
     "existing live orders must remain confirmable/refundable after new live sales pause");

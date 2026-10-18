@@ -9,6 +9,7 @@ import { getOperationalFailureSummary } from "@/app/lib/operators/failureVisibil
 import { getSoloOperationsSnapshot } from "@/app/lib/operators/soloOperations";
 import { OperatorAuthorizationError, requireOperator } from "@/app/lib/operators/server";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
+import { getSpecialAnalysisProduct } from "@/app/lib/specialAnalysisProducts";
 import { getActiveSupportRequestCount } from "@/app/lib/support/operatorServer";
 import { getAdminReviewDashboard } from "@/app/lib/reviews/server";
 import AdminGrowthOverview from "./AdminGrowthOverview";
@@ -93,9 +94,12 @@ export default async function AdminPage() {
   const productLabels = [...productIds].map((productId) => {
     const premium = getPremiumProduct(productId);
     if (premium) return { productId, label: premium.title };
+    const special = getSpecialAnalysisProduct(productId);
+    if (special) return { productId, label: special.title };
     const credit = getAiConsultingCreditBundle(productId);
     if (credit) return { productId, label: `AI 질문권 ${credit.questions}회` };
-    return { productId, label: productId };
+    // Keep the technical ID in the row tooltip, not in the customer-facing label.
+    return { productId, label: "상품명 확인 필요" };
   });
 
   return (

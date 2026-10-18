@@ -31,6 +31,8 @@ assert(!section.includes("exact edition"), "customer-facing paid report recommen
 
 assert(libraryPage.includes("getPhase9NextAnalysisRecommendations") && libraryPage.includes("recentSource"), "purchased library must resolve Phase 9 from a deterministic recent source");
 assert(libraryList.includes('data-next-question-slot="phase9"') && libraryList.includes("Phase9NextAnalysisCards"), "reserved Phase 9 library slot must now render recommendations");
+assert(libraryList.includes("다음 질문이 생겼다면") && libraryList.includes("이미 구매한 분석과 겹치지 않도록"), "library must show clear customer-language follow-up copy");
+assert(!libraryList.includes("NEXT QUESTION · PHASE 9") && !libraryList.includes("exact edition"), "library must not expose internal development phases or edition identifiers");
 
 assert(romanticReport.includes("PairCompatibilityReportPage"), "romantic report wrapper must use the shared pair compatibility report surface");
 for (const report of [standardReport, pairCompatibilityReport, parentReport, siblingReport, otherReport]) {

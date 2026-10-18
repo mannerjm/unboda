@@ -362,10 +362,10 @@ export default function PurchasedAnalysesList({
       </section>
 
       <section data-next-question-slot="phase9" className="mt-6 rounded-[1.75rem] border border-[#dce1ef] bg-[#f9faff] p-5 sm:p-6">
-        <p className="text-xs font-bold tracking-[0.15em] text-[#6f5ce7]">NEXT QUESTION · PHASE 9</p>
+        <p className="text-xs font-bold tracking-[0.15em] text-[#6f5ce7]">추천 분석</p>
         <h2 className="mt-2 text-xl font-black text-[#11162d]">다음 질문이 생겼다면</h2>
         <p className="mt-2 max-w-2xl text-[15px] leading-7 text-slate-700">
-          보관한 리포트와 현재 보유한 exact edition을 기준으로, 겹치지 않는 다음 분석을 최대 2개만 제안합니다.
+          이미 구매한 분석과 겹치지 않도록, 이어서 살펴볼 만한 분석을 최대 2개 추천해 드립니다.
         </p>
         {phase9Recommendations.length > 0 ? (
           <Phase9NextAnalysisCards recommendations={phase9Recommendations} compact />

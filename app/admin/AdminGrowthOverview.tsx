@@ -201,7 +201,7 @@ export default function AdminGrowthOverview({
               <thead><tr className="border-b border-slate-200 text-left text-xs text-slate-500"><th className="py-2 pr-3">상품</th><th className="py-2 pr-3">결제</th><th className="py-2 pr-3 text-right">총 결제액</th><th className="py-2 pr-3 text-right">환불</th><th className="py-2 text-right">순매출</th></tr></thead>
               <tbody>
                 {report.topProducts.map((item) => (
-                  <tr key={item.productId} className="border-b border-slate-100 last:border-0">
+                  <tr key={item.productId} title={item.productId} className="border-b border-slate-100 last:border-0">
                     <td className="py-2.5 pr-3 font-medium">{productLabelMap.get(item.productId) ?? item.productId}</td>
                     <td className="py-2.5 pr-3">{number(item.paidOrders)}건</td>
                     <td className="py-2.5 pr-3 text-right">{won(item.grossRevenueKrw)}</td>

@@ -21,6 +21,15 @@ assert(memory.includes("activeProfile.id !== profile.id") && portfolio.includes(
 assert(reportStatus.includes("getActiveEntitlementForProfile") && reportStatus.includes("getPaidReport(user.id, profile.id"),"report status must validate purchased entitlement for owner");
 assert(httpProbe.includes("UNBODA_E2E_EXPECTED_HOST") && httpProbe.includes("UNBODA_E2E_COOKIE_A")
   && httpProbe.includes("mustDeny(\"/api/ai-consulting/memories?profileId=\""),"HTTP probe must pin target host and attempt actual foreign-profile GET");
+const e2eReadiness = read("app/api/internal/e2e-readiness/route.ts");
+const e2eProbe = read("scripts/two-account-readonly-e2e.ts");
+assert(e2eReadiness.includes('process.env.VERCEL_ENV === "preview"')
+  && e2eReadiness.includes('process.env.UNBODA_E2E_STAGING_ENABLED === "true"')
+  && e2eReadiness.includes('process.env.TOSS_LIVE_CHECKOUT_ENABLED !== "true"')
+  && e2eReadiness.includes('process.env.TOSS_LIVE_PILOT_ENABLED !== "true"')
+  && e2eReadiness.includes('status: enabled ? 200 : 404'),"staging readiness must fail closed");
+assert(e2eProbe.includes('"/api/internal/e2e-readiness"')
+  && e2eProbe.indexOf("readyResponse.status") < e2eProbe.indexOf("cookieA),"),"staging proof required before sending any test session");
 const captcha=read("app/auth/AuthCaptcha.tsx");
 const signup=read("app/api/auth/signup/route.ts");
 assert(auth.includes("supabase.auth.getUser()"), "auth identity must be validated server-side");

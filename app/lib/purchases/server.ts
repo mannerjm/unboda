@@ -1,3 +1,4 @@
+import { getTossConfigForAccount } from "../toss/config";
 import type { PaymentStatus } from "../payment";
 import { createAdminClient } from "../supabase/admin";
 import {
@@ -1043,7 +1044,7 @@ export async function reconcileTossPayment(
     return { order, purchase, entitlement };
   }
 
-  const provider = await getPaymentByOrderIdFromToss(order.id);
+  const provider = await getPaymentByOrderIdFromToss(order.id, getTossConfigForAccount(order.userId, "settlement"));
 
   if (
     provider.orderId !== order.id ||

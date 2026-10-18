@@ -1,3 +1,4 @@
+import { getTossConfigForAccount } from "../toss/config";
 import { randomUUID } from "node:crypto";
 import { getPaidReport } from "../paidReports/server";
 import { emitPaymentEvent } from "../payments/observability";
@@ -158,7 +159,7 @@ export async function requestFullRefund(input: {
   emitPaymentEvent("payment_cancellation_requested", { operationalClass: "RECOVERING", orderId: input.order.id, productId: input.order.productId, profileReference: input.order.profileId, runId: correlationId });
   emitPaymentEvent("payment_cancellation_started", { operationalClass: "RECOVERING", orderId: input.order.id, productId: input.order.productId, profileReference: input.order.profileId, runId: correlationId });
   try {
-    const provider = await cancelPaymentWithToss({ paymentKey: payment.paymentKey, cancelReason: input.reasonText || input.reasonCategory });
+    const provider = await cancelPaymentWithToss({ paymentKey: payment.paymentKey, cancelReason: input.reasonText || input.reasonCategory, config: getTossConfigForAccount(input.order.userId, "settlement") });
     if (provider.orderId !== input.order.id || provider.totalAmount !== input.order.amount || provider.currency !== "KRW" || provider.cancels.at(-1)?.cancelAmount !== input.order.amount) throw new TossCancellationError({ provider: "toss", httpStatus: 502, providerErrorCode: "CANCELLATION_MISMATCH", safeMessage: "결제 취소 결과를 확인하지 못했습니다.", failureStage: "cancellation", retryability: "OWNER_ESCALATION_REQUIRED", correlationId, occurredAt: new Date().toISOString() });
     await updateRefund(input.order.id, { provider_status: provider.status, provider_cancellation_reference: provider.cancels.at(-1)?.transactionKey ?? null, provider_confirmed_at: new Date().toISOString(), last_provider_http_status: 200, updated_at: new Date().toISOString() });
     emitPaymentEvent("payment_cancellation_confirmed", { operationalClass: "CONVERGED", orderId: input.order.id, productId: input.order.productId, profileReference: input.order.profileId, runId: correlationId });
@@ -197,7 +198,7 @@ export async function reconcileRefundWorkflow(
   if (orderError || !order || order.status !== "paid") return updateRefund(workflow.orderId, { status: "OWNER_REVIEW_REQUIRED", updated_at: new Date().toISOString() }, workflow.reconciliationClaimToken);
   emitPaymentEvent("refund_reconciliation_started", { operationalClass: "RECOVERING", orderId: workflow.orderId, productId: workflow.productId, profileReference: workflow.profileId, runId: workflow.correlationId, attempt: workflow.retryCount });
   try {
-    const provider = await getPaymentByOrderIdFromToss(workflow.orderId);
+    const provider = await getPaymentByOrderIdFromToss(workflow.orderId, getTossConfigForAccount(order.user_id, "settlement"));
     const cancellation = provider.cancels?.at(-1);
     if (provider.status === "CANCELED" && provider.orderId === workflow.orderId && provider.currency === workflow.currency && cancellation?.cancelStatus === "DONE" && cancellation.cancelAmount === workflow.requestedAmount) {
       await updateRefund(workflow.orderId, { provider_status: "CANCELED", provider_cancellation_reference: cancellation.transactionKey, provider_confirmed_at: workflow.providerConfirmedAt ?? new Date().toISOString(), last_provider_http_status: 200, updated_at: new Date().toISOString() }, workflow.reconciliationClaimToken);

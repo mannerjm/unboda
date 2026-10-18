@@ -15,7 +15,7 @@ import {
   recordTossProviderConfirmation,
 } from "@/app/lib/purchases/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { getTossConfig, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
+import { getTossConfigForAccount, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
 import { confirmPaymentWithToss, TossConfirmationError } from "@/app/lib/toss/server";
 
 type RouteContext = {
@@ -78,7 +78,7 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     try {
-      getTossConfig();
+      getTossConfigForAccount(user.id);
     } catch {
       return NextResponse.json(
         { error: "결제 확인 기능이 아직 준비되지 않았습니다.", code: "PAYMENT_PROVIDER_NOT_READY" },
@@ -102,6 +102,7 @@ export async function POST(request: Request, context: RouteContext) {
       paymentKey,
       orderId: order.id,
       amount: order.amount,
+      config: getTossConfigForAccount(order.userId, "settlement"),
     });
 
     if (

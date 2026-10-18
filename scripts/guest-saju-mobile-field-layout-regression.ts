@@ -16,12 +16,24 @@ assert(src.includes('<div className="min-w-0 space-y-2">'),
 
 const date = src.match(/<input type="date"[^\n]*/)?.[0] ?? "";
 const time = src.match(/<input id="guest-birth-time" type="time"[^\n]*/)?.[0] ?? "";
+// The visible border belongs to the clipped wrapper, not the native input.
+// Safari can enforce minimum intrinsic widths even with w-full/min-w-0.
+assert(src.includes("h-14 w-full min-w-0 max-w-full overflow-hidden rounded-xl border"),
+  "date picker must render inside a fixed-width, clipped visible field");
+assert(src.includes("relative h-14 w-full min-w-0 max-w-full overflow-hidden rounded-xl border"),
+  "time picker must render inside a fixed-width, clipped visible field");
 for (const [name, field] of [["date", date], ["time", time]] as const) {
-  for (const utility of ["block", "box-border", "w-full", "min-w-0", "max-w-full", "text-base"]) {
-    assert(new RegExp(`\\b${utility}\\b`).test(field),
-      `${name} input must contain ${utility} to prevent iOS width overflow and focus zoom`);
+  for (const utility of ["absolute", "inset-0", "z-10", "h-full", "w-full", "min-w-0", "max-w-full", "opacity-0"]) {
+    assert(field.includes(utility),
+      `${name} native picker must be a fully tappable but visually clipped overlay (${utility})`);
   }
+  assert(field.includes("onClick=") && field.includes("showPicker?.()"),
+    `${name} picker must open from a direct user tap when supported`);
 }
+assert(src.includes("input.birthDate.replaceAll") &&
+  src.includes('input.birthTime || "태어난 시간 선택"'),
+  "displayed values must track actual native birth form controls");
+
 assert(date.includes("min={GUEST_BIRTH_DATE_MIN}") && date.includes("max={getGuestBirthDateMax()}"),
   "responsive fix must not change birthdate boundaries");
 assert(date.includes("required />"), "date input remains required");

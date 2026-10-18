@@ -102,7 +102,7 @@ export async function POST(request: Request, context: RouteContext) {
       paymentKey,
       orderId: order.id,
       amount: order.amount,
-      config: getTossConfigForAccount(order.userId),
+      config: getTossConfigForAccount(order.userId, "settlement"),
     });
 
     if (

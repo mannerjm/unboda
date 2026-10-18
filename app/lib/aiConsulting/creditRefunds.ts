@@ -2,7 +2,7 @@ import "server-only";
 import { createAdminClient } from "../supabase/admin";
 import { getTossPaymentRecordForOrder } from "../purchases/server";
 import { cancelPaymentWithToss, getPaymentByOrderIdFromToss, TossCancellationError } from "../toss/server";
-import { getTossConfig, isTossCheckoutUserAllowed } from "../toss/config";
+import { getTossConfigForAccount, isTossCheckoutUserAllowed } from "../toss/config";
 
 export function isAiCreditSelfRefundEnabled(): boolean {
   return process.env.AI_CREDIT_SELF_REFUNDS_ENABLED === "true";
@@ -69,7 +69,7 @@ async function updateRefundStatus(id: string,status: string,error?: string): Pro
 export async function processCreditRefund(refund: RefundRow): Promise<{status:string;amount:number}> {
   if (!isAiCreditSelfRefundEnabled()) throw new Error("AI_CREDIT_REFUND_NOT_ENABLED");
   if (!isTossCheckoutUserAllowed(refund.user_id)) throw new Error("TOSS_REVIEW_ACCOUNT_REQUIRED");
-  getTossConfig(); // Fail closed on missing or inconsistent provider credentials.
+  const accountConfig = getTossConfigForAccount(refund.user_id); // No cross-environment provider requests.
   if (refund.status==="COMPLETED") return {status:"COMPLETED",amount:refund.refund_amount_krw};
   if (!["PENDING","PROVIDER_UNKNOWN"].includes(refund.status)) {
     return {status:refund.status,amount:refund.refund_amount_krw};
@@ -87,7 +87,7 @@ export async function processCreditRefund(refund: RefundRow): Promise<{status:st
   const reason=refundReason(refund.id);
   try {
     // Read provider state first. Never issue an unrelated second cancellation on an ambiguous retry.
-    const prior=await getPaymentByOrderIdFromToss(refund.order_id);
+    const prior=await getPaymentByOrderIdFromToss(refund.order_id, accountConfig);
     if (prior.paymentKey!==payment.paymentKey || prior.orderId!==refund.order_id
       || prior.currency!=="KRW" || prior.totalAmount!==payment.confirmedAmount) {
       throw new Error("AI_CREDIT_PROVIDER_ORDER_MISMATCH");
@@ -101,7 +101,7 @@ export async function processCreditRefund(refund: RefundRow): Promise<{status:st
       }
       const response=await cancelPaymentWithToss({
         paymentKey:payment.paymentKey, cancelAmount:refund.refund_amount_krw,
-        cancelReason:reason, idempotencyKey:refund.idempotency_key,
+        cancelReason:reason, idempotencyKey:refund.idempotency_key, config:accountConfig,
       });
       if (response.orderId!==refund.order_id || response.paymentKey!==payment.paymentKey
         || response.totalAmount!==payment.confirmedAmount || response.currency!=="KRW") {

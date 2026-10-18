@@ -134,6 +134,10 @@ for (const path of walk(join(process.cwd(), "app"))) {
   const source = readFileSync(path, "utf8");
   const isClient = /^\s*["']use client["'];/m.test(source);
   if (!isClient) continue;
+  assert.ok(
+    !/(?:from\s*["']|import\s*\(\s*["'])@\/app\/lib\/supabase\/admin(?:["']|\/)/.test(source),
+    `Privileged Supabase client must not be imported into a browser component: ${path}`,
+  );
   for (const secretName of forbiddenClientSecrets) {
     assert.ok(
       !source.includes(secretName),

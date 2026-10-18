@@ -19,6 +19,13 @@ export type SoloOperationsSnapshot = {
   reportRecoveryExhausted: number;
 };
 
+/** Optional alert threshold in USD, not a billing cap. Invalid values fail back to $5/day. */
+export function getAiCostAlertThresholdUsd(): number {
+  const raw = process.env.AI_COST_ALERT_24H_USD;
+  const value = raw === undefined || raw.trim() === "" ? NaN : Number(raw);
+  return Number.isFinite(value) && value > 0 && value <= 10000 ? value : 5;
+}
+
 export async function getSoloOperationsSnapshot(): Promise<SoloOperationsSnapshot> {
   const db = createAdminClient();
   const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -52,7 +59,7 @@ export async function getSoloOperationsSnapshot(): Promise<SoloOperationsSnapsho
   const failed = metrics.failed_count;
   const cost = Number(metrics.estimated_cost_usd);
   const averageDuration = Number(metrics.average_duration_ms);
-  const aiAnomaly = cost >= 5 ? "AI_COST_SPIKE"
+  const aiAnomaly = cost >= getAiCostAlertThresholdUsd() ? "AI_COST_SPIKE"
     : attempts >= 20 && failed / attempts >= 0.25 ? "AI_FAILURE_RATE"
     : metrics.duration_count >= 20 && averageDuration >= 30000 ? "AI_HIGH_LATENCY"
     : metrics.unknown_cost_count >= 20 ? "AI_COST_ESTIMATE_UNAVAILABLE" : null;

@@ -11,7 +11,7 @@ import {
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import { getTossConfig, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
+import { getTossConfigForAccount, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    getTossConfig();
+    getTossConfigForAccount(user.id);
   } catch {
     return NextResponse.json(
       { error: "결제 기능이 아직 준비되지 않았습니다.", code: "PAYMENT_PROVIDER_NOT_READY" },

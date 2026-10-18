@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
-import { requestCreditRefund, isAiCreditSelfRefundEnabled } from "@/app/lib/aiConsulting/creditRefunds";
+import { requestCreditRefund, isAiCreditRefundAllowedForUser } from "@/app/lib/aiConsulting/creditRefunds";
 export const dynamic="force-dynamic";
 
 export async function POST(request:NextRequest) {
-  if(!isAiCreditSelfRefundEnabled())return NextResponse.json({error:"자동 환불은 현재 준비 중입니다."},{status:503});
   const user=await getCurrentUser();
   if(!user)return NextResponse.json({error:"로그인이 필요합니다."},{status:401});
+  if(!isAiCreditRefundAllowedForUser(user.id))return NextResponse.json({error:"자동 환불은 현재 준비 중입니다."},{status:503});
   const body=await request.json().catch(()=>null) as {profileId?:unknown;purchaseId?:unknown}|null;
   const profileId=body?.profileId,purchaseId=body?.purchaseId;
   if(typeof profileId!=="string"||typeof purchaseId!=="string"||!/^[-0-9a-f]{36}$/i.test(purchaseId))

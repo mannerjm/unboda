@@ -69,4 +69,46 @@ assert(
 assert(!checkoutPanel.includes("profiles[0]") && !checkoutPanel.includes("relationshipType === \"self\""), "checkout must not invent a self or first-profile fallback");
 console.log("6. checkout requires explicit profile context and acknowledgement without a fallback ✓");
 
+// Account A may own multiple profiles. RLS alone is owner-scoped, so privileged
+// app reads must independently enforce the active profile and edition.
+const reportGate = read("app/paid-analysis/[productId]/report/ReportAccessGate.tsx");
+const reportStatus = read("app/api/paid-analysis-detail-v2/status/route.ts");
+const reportStorage = read("app/lib/paidReports/server.ts");
+const memoriesApi = read("app/api/ai-consulting/memories/route.ts");
+const portfolioApi = read("app/api/ai-consulting/portfolio/route.ts");
+const portfolioStorage = read("app/lib/aiConsulting/portfolio.ts");
+const memoryStorage = read("app/lib/aiConsulting/memory.ts");
+for (const [name, source] of [
+  ["report access gate", reportGate],
+  ["report status", reportStatus],
+  ["AI memory route", memoriesApi],
+  ["AI portfolio route", portfolioApi],
+] as const) {
+  assert(source.includes("getCurrentUser()") && source.includes("getUserProfile(")
+    && source.includes("getActiveProfile(") && source.includes("activeProfile"),
+    name + " must check owner and explicitly active profile");
+}
+assert(reportGate.includes("hasActiveEntitlementForProfileEdition(user.id, profile.id, canonicalProductId, edition)"),
+  "specific report edition must require a matching profile entitlement");
+assert(reportStatus.includes("getPaidReport(user.id, profile.id, resolved.productId, entitlement.analysisEditionKey)"),
+  "report status must not cross profiles or editions");
+for (const [name, source] of [
+  ["paid report storage", reportStorage],
+  ["AI memory storage", memoryStorage],
+  ["AI portfolio storage", portfolioStorage],
+] as const) {
+  assert(source.includes('.eq("user_id",') && source.includes('.eq("profile_id",'),
+    name + " must enforce BOTH owner and profile filters even with admin DB access");
+}
+assert(purchaseServer.includes('.eq("profile_id", profileId)')
+  && purchaseServer.includes('.eq("analysis_edition_key", analysisEditionKey)'),
+  "exact-edition entitlement lookup must enforce profile and edition");
+const multiProfileSql = read("scripts/staging-same-user-multiprofile-rollback-20261019.sql");
+assert(multiProfileSql.includes("SAME_OWNER_PROFILE_SCOPING_FAILED")
+  && multiProfileSql.includes("OTHER_ACCOUNT_RLS_FAILED")
+  && multiProfileSql.includes("ANON_RLS_FAILED")
+  && multiProfileSql.trimEnd().endsWith("ROLLBACK;"),
+  "staging multi-profile regression must fail closed and roll back all synthetic rows");
+console.log("7. same-user family-profile report/entitlement/memory ownership guards ✓");
+
 console.log("\nprofile-scoped-purchase-server-regression passed ✓");

@@ -21,6 +21,13 @@ assert(memory.includes("activeProfile.id !== profile.id") && portfolio.includes(
 assert(reportStatus.includes("getActiveEntitlementForProfile") && reportStatus.includes("getPaidReport(user.id, profile.id"),"report status must validate purchased entitlement for owner");
 assert(httpProbe.includes("UNBODA_E2E_EXPECTED_HOST") && httpProbe.includes("UNBODA_E2E_COOKIE_A")
   && httpProbe.includes("mustDeny(\"/api/ai-consulting/memories?profileId=\""),"HTTP probe must pin target host and attempt actual foreign-profile GET");
+assert(httpProbe.includes("async function anonymousMustDeny")
+  && httpProbe.includes('assert.equal(response.status, 401, "anonymous access must return 401:')
+  && httpProbe.includes("own AI memory list must be readable")
+  && httpProbe.includes("own AI portfolio must be readable")
+  && httpProbe.includes("own credit balance must return the selected profile")
+  && httpProbe.includes("unpaid report 403"),
+  "staging HTTP E2E must check anonymous, owner-positive and foreign-owner-negative boundaries");
 const e2eReadiness = read("app/api/internal/e2e-readiness/route.ts");
 const e2eProbe = read("scripts/two-account-readonly-e2e.ts");
 assert(e2eReadiness.includes('process.env.VERCEL_ENV === "preview"')

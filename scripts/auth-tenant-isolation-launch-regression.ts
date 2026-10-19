@@ -40,6 +40,26 @@ assert(e2eReadiness.includes('process.env.VERCEL_ENV === "preview"')
   && e2eReadiness.includes('status: enabled ? 200 : 404'),"staging readiness must verify server-side staging DB credentials and fail closed");
 assert(e2eProbe.includes('"/api/internal/e2e-readiness"')
   && e2eProbe.indexOf("readyResponse.status") < e2eProbe.indexOf("cookieA),"),"staging proof required before sending any test session");
+// Owner-scoped reads use the privileged DB client, so RLS alone is insufficient.
+const paidReportDb = read("app/lib/paidReports/server.ts");
+const purchaseDb = read("app/lib/purchases/server.ts");
+const aiMemoryDb = read("app/lib/aiConsulting/memory.ts");
+const aiPortfolioDb = read("app/lib/aiConsulting/portfolio.ts");
+for(const [name,source] of [["paid report",paidReportDb],["purchase entitlement",purchaseDb],["AI memory",aiMemoryDb],["AI portfolio",aiPortfolioDb]] as const) {
+  assert(source.includes('.eq("user_id",') && source.includes('.eq("profile_id",'),
+    name+" privileged server query must enforce user and profile ownership");
+}
+assert(paidReportDb.includes('.eq("product_id", productId)') && paidReportDb.includes('.eq("analysis_edition_key", analysisEditionKey)'),
+  "paid report must enforce product and purchased edition");
+assert(purchaseDb.includes('getActiveEntitlementForProfileEdition') && purchaseDb.includes('.eq("analysis_edition_key", analysisEditionKey)'),
+  "entitlement must enforce edition identity");
+const paidMemorySql = read("scripts/staging-paid-content-memory-rls-rollback.sql");
+assert(paidMemorySql.includes("\\nROLLBACK;") || paidMemorySql.trimEnd().endsWith("ROLLBACK;"), "staging paid-content test must roll back");
+assert(paidMemorySql.includes("ACCOUNT_A_OWN_CONTENT_VISIBILITY_FAILED")
+  && paidMemorySql.includes("ACCOUNT_B_FOREIGN_CONTENT_DENIAL_FAILED")
+  && paidMemorySql.includes("ANONYMOUS_PAID_OR_AI_CONTENT_VISIBLE")
+  && paidMemorySql.includes("CROSS_ACCOUNT_MESSAGE_REFERENCE_NOT_BLOCKED"),
+  "staging fixture must test both identities, anonymous denial and cross-owner references");
 const captcha=read("app/auth/AuthCaptcha.tsx");
 const signup=read("app/api/auth/signup/route.ts");
 assert(auth.includes("supabase.auth.getUser()"), "auth identity must be validated server-side");

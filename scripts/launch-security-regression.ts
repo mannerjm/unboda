@@ -146,4 +146,42 @@ for (const path of walk(join(process.cwd(), "app"))) {
   }
 }
 
+// Production-only deployment safety net. Preview/local builds are unaffected.
+// The Supabase Auth dashboard CAPTCHA verifier is a separate manual launch gate;
+// these checks confirm only the app-side widget and alert transport configuration.
+if (process.env.VERCEL_ENV === "production") {
+  assert.equal(
+    process.env.NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED,
+    "true",
+    "Production auth CAPTCHA must be enabled before deployment",
+  );
+  assert.ok(
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim(),
+    "Production Turnstile public site key must be configured",
+  );
+  assert.ok(
+    process.env.RESEND_API_KEY?.trim(),
+    "Production operator alert sending must have a configured Resend key",
+  );
+  assert.ok(
+    process.env.CRON_SECRET?.trim(),
+    "Production scheduler must have its CRON_SECRET configured",
+  );
+}
+
+const cron = JSON.parse(read("vercel.json")) as { crons?: Array<{ path: string; schedule: string }> };
+assert.ok(cron.crons?.some(job => job.path === "/api/internal/reconcile" && job.schedule === "0 * * * *"),
+  "operator alert dispatcher must be scheduled hourly");
+assert.ok(cron.crons?.some(job => job.path === "/api/internal/report-recovery"),
+  "paid report recovery scheduler must remain configured");
+const alertDispatcher = read("app/api/internal/reconcile/route.ts");
+const alertSender = read("app/lib/operators/ownerAlerts.ts");
+assert.ok(alertDispatcher.includes("isAuthorizedSchedulerRequest(request)") && alertDispatcher.includes("sendOwnerReviewAlertIfNeeded()"),
+  "authenticated reconciliation schedule must dispatch owner alert emails");
+assert.ok(alertSender.includes('process.env.RESEND_API_KEY?.trim()')
+  && alertSender.includes('Idempotency-Key": alertKey')
+  && alertSender.includes('auth.admin.getUserById')
+  && alertSender.includes('response.ok'),
+  "owner alert transport must use server-only API credential, recipients and idempotent dispatch");
+
 console.log("launch security regression guard passed");

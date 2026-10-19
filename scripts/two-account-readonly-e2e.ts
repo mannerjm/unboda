@@ -65,7 +65,7 @@ if (!base || !expectedHost || !cookieA || !cookieB) {
       signal: AbortSignal.timeout(10000),
     });
     assert.equal(response.status, 401, "anonymous access must return 401: " + path);
-    assert.match(response.headers.get("content-type") ?? "", /application\\/json/, "API must deny in JSON");
+    assert.match(response.headers.get("content-type") ?? "", /application\/json/, "API must deny in JSON");
   }
   const placeholderId = "00000000-0000-4000-8000-000000000000";
   for (const path of [

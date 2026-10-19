@@ -7,7 +7,9 @@ const base = process.env.UNBODA_E2E_BASE_URL;
 const expectedHost = process.env.UNBODA_E2E_EXPECTED_HOST;
 const cookieA = process.env.UNBODA_E2E_COOKIE_A;
 const cookieB = process.env.UNBODA_E2E_COOKIE_B;
-const reportProductId = process.env.UNBODA_E2E_PAID_PRODUCT_ID;
+// Use a server-known launch product without purchasing it. The paid-status
+// checks below must return 403 for unpaid test profiles.
+const reportProductId = process.env.UNBODA_E2E_PAID_PRODUCT_ID || "career";
 if (!base || !expectedHost || !cookieA || !cookieB) {
   console.error("SKIPPED: dedicated test origin, expected hostname and two test sessions required; NOT an E2E pass");
   process.exitCode = 2;
@@ -51,6 +53,30 @@ if (!base || !expectedHost || !cookieA || !cookieB) {
   const readiness = await readyResponse.json() as { ready?: boolean };
   assert.equal(readiness.ready, true, "staging identity check failed");
 
+  // Anonymous reads must fail as application JSON, not a proxy login page.
+  // This runs before either test cookie is sent to the server.
+  async function anonymousMustDeny(path: string) {
+    const url = new URL(path, origin);
+    assert.equal(url.origin, origin.origin);
+    const response = await fetch(url, {
+      headers: { accept: "application/json" },
+      cache: "no-store",
+      redirect: "manual",
+      signal: AbortSignal.timeout(10000),
+    });
+    assert.equal(response.status, 401, "anonymous access must return 401: " + path);
+    assert.match(response.headers.get("content-type") ?? "", /application\/json/, "API must deny in JSON");
+  }
+  const placeholderId = "00000000-0000-4000-8000-000000000000";
+  for (const path of [
+    "/api/profiles",
+    "/api/mypage/summary",
+    "/api/ai-consulting/memories?profileId=" + placeholderId,
+    "/api/ai-consulting/portfolio?profileId=" + placeholderId,
+    "/api/ai-consulting/credits/balance?profileId=" + placeholderId,
+    "/api/paid-analysis-detail-v2/status?profileId=" + placeholderId + "&productId=" + encodeURIComponent(reportProductId),
+  ]) await anonymousMustDeny(path);
+
   const [a, b, summaryA, summaryB] = await Promise.all([
     ownRead("/api/profiles", cookieA),
     ownRead("/api/profiles", cookieB),
@@ -74,16 +100,26 @@ if (!base || !expectedHost || !cookieA || !cookieB) {
       assert(ownIds.has(id) && !otherIds.has(id), "cross-account purchase summary leak");
     }
   }
+  for (const [cookie, own] of [[cookieA, aIds[0]], [cookieB, bIds[0]]] as const) {
+    const id = encodeURIComponent(own);
+    const memory = await ownRead("/api/ai-consulting/memories?profileId=" + id, cookie);
+    assert(Array.isArray(memory.memories), "own AI memory list must be readable");
+    const portfolio = await ownRead("/api/ai-consulting/portfolio?profileId=" + id, cookie);
+    assert(portfolio && typeof portfolio === "object", "own AI portfolio must be readable");
+    const credits = await ownRead("/api/ai-consulting/credits/balance?profileId=" + id, cookie);
+    assert(credits.profileId === own, "own credit balance must return the selected profile");
+    // These dedicated staging accounts have no purchased entitlement.
+    await mustDeny("/api/paid-analysis-detail-v2/status?profileId=" + id
+      + "&productId=" + encodeURIComponent(reportProductId), cookie, 403);
+  }
+
   for (const [cookie, foreign] of [[cookieA, bIds[0]], [cookieB, aIds[0]]] as const) {
     const id = encodeURIComponent(foreign);
     await mustDeny("/api/ai-consulting/memories?profileId=" + id, cookie, 403);
     await mustDeny("/api/ai-consulting/portfolio?profileId=" + id, cookie, 403);
     await mustDeny("/api/ai-consulting/credits/balance?profileId=" + id, cookie, 404);
-    if (reportProductId) {
-      await mustDeny("/api/paid-analysis-detail-v2/status?profileId=" + id
-        + "&productId=" + encodeURIComponent(reportProductId), cookie, 403);
-    }
+    await mustDeny("/api/paid-analysis-detail-v2/status?profileId=" + id
+      + "&productId=" + encodeURIComponent(reportProductId), cookie, 403);
   }
-  console.log("two-account-readonly-e2e: PASS (profile + purchase summary + cross-account AI memory/portfolio/credits)"
-    + (reportProductId ? " + paid report status" : "; paid report status NOT CHECKED"));
+  console.log("two-account-readonly-e2e: PASS (anonymous 401, two owners' profile/AI reads, foreign-owner 403/404, unpaid report 403). Paid purchase ownership with real entitlements still untested.");
 }

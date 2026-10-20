@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
 import { getHomeWeatherRegion, DEFAULT_HOME_WEATHER_REGION } from "@/app/lib/homeWeatherRegions";
+import { resolveWeatherDistrict } from "@/app/lib/weatherDistrictLookup";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type Weather = {
-  region: string;
-  temperatureC: number;
-  condition: string;
-  symbol: string;
-  forecastAt: string;
-};
+type Weather = { region: string; temperatureC: number; condition: string; symbol: string; forecastAt: string };
 
 function describeWeather(code: string): Pick<Weather, "condition" | "symbol"> {
   const text = code.toLowerCase();
@@ -28,13 +23,11 @@ function describeWeather(code: string): Pick<Weather, "condition" | "symbol"> {
 
 async function fetchForecast(lat: number, lon: number, region: string): Promise<Weather | null> {
   const url = new URL("https://api.met.no/weatherapi/locationforecast/2.0/compact");
-  // Round to two decimal places to limit outgoing precision and improve upstream cache reuse.
   url.searchParams.set("lat", lat.toFixed(2));
   url.searchParams.set("lon", lon.toFixed(2));
   const response = await fetch(url, {
     headers: { "User-Agent": "unboda.kr/1.0 (https://unboda.kr)", Accept: "application/json" },
-    next: { revalidate: 1800 },
-    signal: AbortSignal.timeout(5000),
+    next: { revalidate: 1800 }, signal: AbortSignal.timeout(5000),
   });
   if (!response.ok) return null;
   const json = await response.json() as {
@@ -52,50 +45,40 @@ async function fetchForecast(lat: number, lon: number, region: string): Promise<
     return Number.isFinite(t) && t >= now - 90 * 60_000 && t <= now + 150 * 60_000
       && typeof entry.data?.instant?.details?.air_temperature === "number";
   });
-  const temp = item?.data?.instant?.details?.air_temperature;
-  if (!item?.time || typeof temp !== "number" || !Number.isFinite(temp) || temp < -60 || temp > 60) return null;
+  const temperature = item?.data?.instant?.details?.air_temperature;
+  if (!item?.time || typeof temperature !== "number" || !Number.isFinite(temperature) || temperature < -60 || temperature > 60) return null;
   return {
-    region,
-    temperatureC: Math.round(temp),
-    ...describeWeather(item.data?.next_1_hours?.summary?.symbol_code ?? ""),
-    forecastAt: item.time,
+    region, temperatureC: Math.round(temperature),
+    ...describeWeather(item.data?.next_1_hours?.summary?.symbol_code ?? ""), forecastAt: item.time,
   };
 }
-
 function noForecast() { return new NextResponse(null, { status: 204, headers: { "Cache-Control": "no-store" } }); }
 
-// Default API remains Seoul to avoid changing homepage behavior before permission.
 export async function GET() {
   const seoul = getHomeWeatherRegion(DEFAULT_HOME_WEATHER_REGION)!;
   try {
-    const weather = await fetchForecast(Number(seoul.lat), Number(seoul.lon), "서울");
-    return weather
-      ? NextResponse.json(weather, { headers: { "Cache-Control": "public, s-maxage=1800" } })
-      : noForecast();
+    const forecast = await fetchForecast(Number(seoul.lat), Number(seoul.lon), "서울");
+    return forecast ? NextResponse.json(forecast, { headers: { "Cache-Control": "public, s-maxage=1800" } }) : noForecast();
   } catch { return noForecast(); }
 }
 
-// Approximate, non-persistent browser position is sent only after visitor permission.
 export async function POST(request: Request) {
   try {
-    if (Number(request.headers.get("content-length") ?? "0") > 256) {
+    if (Number(request.headers.get("content-length") ?? "0") > 256)
       return NextResponse.json({ error: "요청이 너무 큽니다." }, { status: 413 });
-    }
     const raw = await request.text();
     if (raw.length > 256) return NextResponse.json({ error: "요청이 너무 큽니다." }, { status: 413 });
-    const data: unknown = JSON.parse(raw);
-    if (!data || typeof data !== "object") return NextResponse.json({ error: "위치가 올바르지 않습니다." }, { status: 400 });
-    const position = data as { lat?: unknown; lon?: unknown };
-    if (typeof position.lat !== "number" || typeof position.lon !== "number"
-      || !Number.isFinite(position.lat) || !Number.isFinite(position.lon)
-      || position.lat < 33 || position.lat > 39.5 || position.lon < 124 || position.lon > 132) {
-      return NextResponse.json({ error: "국내 위치만 지원합니다." }, { status: 400 });
-    }
-    const lat = Math.round(position.lat * 50) / 50;
-    const lon = Math.round(position.lon * 50) / 50;
-    const weather = await fetchForecast(lat, lon, "내 위치");
-    return weather
-      ? NextResponse.json(weather, { headers: { "Cache-Control": "private, no-store, max-age=0" } })
-      : noForecast();
+    const body: unknown = JSON.parse(raw);
+    if (!body || typeof body !== "object") return NextResponse.json({ error: "잘못된 위치입니다." }, { status: 400 });
+    const coords = body as { lat?: unknown; lon?: unknown };
+    if (typeof coords.lat !== "number" || typeof coords.lon !== "number"
+      || !Number.isFinite(coords.lat) || !Number.isFinite(coords.lon)
+      || coords.lat < 33 || coords.lat > 39.5 || coords.lon < 124 || coords.lon > 132)
+      return NextResponse.json({ error: "지원하지 않는 위치입니다." }, { status: 400 });
+    const lat = Math.round(coords.lat * 50) / 50, lon = Math.round(coords.lon * 50) / 50;
+    const label = resolveWeatherDistrict(lat, lon);
+    if (!label) return NextResponse.json({ error: "지역명을 확인하지 못했습니다." }, { status: 422, headers: { "Cache-Control": "no-store" } });
+    const weather = await fetchForecast(lat, lon, label);
+    return weather ? NextResponse.json(weather, { headers: { "Cache-Control": "private, no-store, max-age=0" } }) : noForecast();
   } catch { return noForecast(); }
 }

@@ -133,7 +133,14 @@ export default function HomeWeatherLine() {
     return () => window.clearInterval(interval);
   }, [weather]);
 
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(""), 5500);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+
   const display = locating ? "현재 위치 확인 중"
+    : notice ? "위치 확인 실패 · 서울 표시"
     : !ready || status === "loading" ? "날씨 확인 중"
     : status === "unavailable" ? "날씨 정보 없음"
     : weather && panel === "weather"

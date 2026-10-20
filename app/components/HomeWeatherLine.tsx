@@ -68,6 +68,22 @@ export default function HomeWeatherLine() {
       >
         MET 예보
       </a>
+      <a
+        href="https://creativecommons.org/licenses/by/4.0/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[9px] font-normal text-[#aaa3d4] underline-offset-2 hover:underline"
+        title="MET Norway 날씨 예보를 운보다가 한국어로 요약하여 제공 · CC BY 4.0"
+      >CC BY</a>
+      {weather.dustGrade && (
+        <a
+          href="https://www.airkorea.or.kr/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[9px] font-normal text-[#aaa3d4] underline-offset-2 hover:underline"
+          title="미세먼지: 에어코리아 서울 중구 측정소"
+        >에어코리아</a>
+      )}
     </div>
   );
 }

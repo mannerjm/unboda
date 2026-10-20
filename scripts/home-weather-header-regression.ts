@@ -24,4 +24,11 @@ assert(widget.includes("setInterval") && widget.includes("prefers-reduced-motion
 assert(api.includes("resolveWeatherDistrict(lat, lon)") && api.includes('status: 422'), "city is resolved server-side, not submitted by browser");
 assert(home.includes("통계청 2018 행정경계") && home.includes("MET Norway"), "data attribution preserved in footer");
 assert(home.includes("<Link href={aiHref}") && home.includes("<Link href={accountHref}"), "AI 상담, account untouched");
+assert(home.includes('grid-cols-[minmax(0,1fr)_auto]') && home.includes('lg:flex lg:items-center lg:justify-between'), "header stacks mobile weather under branding while keeping desktop layout");
+assert(home.includes('col-span-2 row-start-2') && home.includes('col-start-2 row-start-1'), "weather in mobile second row, nav in first row");
+assert(home.match(/<HomeWeatherLine \/>/g)?.length === 1, "one weather component across PWA and desktop; no duplicate API or geolocation");
+assert(widget.includes('className="flex w-full min-w-0') && !widget.includes('className="hidden items-center'), "weather visible on small screens");
+assert(widget.includes('max-w-[47%]') && widget.includes('min-w-0 flex-1 truncate'), "long city and source strings cannot overflow mobile");
+assert(widget.includes('onClick={locate}') && widget.includes('LAST_LOCATION_KEY'), "same location update/persistence logic on mobile and PC");
+
 console.log("home weather location label regression: PASS");

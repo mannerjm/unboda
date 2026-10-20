@@ -14,6 +14,7 @@ type WeatherSummary = {
   symbol: string;
   forecastAt: string;
   dustGrade: string | null;
+  dustPm25Grade: string | null;
   dustStation: string | null;
   dustObservedAt: string | null;
 };
@@ -84,8 +85,8 @@ function gradeText(value: unknown): string | null {
     : null;
 }
 
-async function fetchDust(): Promise<Pick<WeatherSummary, "dustGrade" | "dustStation" | "dustObservedAt">> {
-  const empty = { dustGrade: null, dustStation: null, dustObservedAt: null };
+async function fetchDust(): Promise<Pick<WeatherSummary, "dustGrade" | "dustPm25Grade" | "dustStation" | "dustObservedAt">> {
+  const empty = { dustGrade: null, dustPm25Grade: null, dustStation: null, dustObservedAt: null };
   // Only enable an approved AirKorea operational key, set privately in Vercel.
   const key = process.env.AIRKOREA_SERVICE_KEY;
   if (!key) return empty;
@@ -107,6 +108,8 @@ async function fetchDust(): Promise<Pick<WeatherSummary, "dustGrade" | "dustStat
       dataTime?: string;
       pm10Grade1h?: string;
       pm10Grade?: string;
+      pm25Grade1h?: string;
+      pm25Grade?: string;
     }> } };
   };
   const station = json.response?.body?.items?.find((item) => item.stationName === "중구");
@@ -114,15 +117,16 @@ async function fetchDust(): Promise<Pick<WeatherSummary, "dustGrade" | "dustStat
   const observed = Date.parse(station.dataTime.replace(" ", "T") + "+09:00");
   if (!Number.isFinite(observed) || Math.abs(Date.now() - observed) > 3 * 60 * 60_000) return empty;
   const grade = gradeText(station.pm10Grade1h ?? station.pm10Grade);
-  if (!grade) return empty;
-  return { dustGrade: grade, dustStation: "중구", dustObservedAt: station.dataTime };
+  const fineGrade = gradeText(station.pm25Grade1h ?? station.pm25Grade);
+  if (!grade && !fineGrade) return empty;
+  return { dustGrade: grade, dustPm25Grade: fineGrade, dustStation: "중구", dustObservedAt: station.dataTime };
 }
 
 export async function GET() {
   try {
     const [forecast, dust] = await Promise.all([
       fetchForecast(),
-      fetchDust().catch(() => ({ dustGrade: null, dustStation: null, dustObservedAt: null })),
+      fetchDust().catch(() => ({ dustGrade: null, dustPm25Grade: null, dustStation: null, dustObservedAt: null })),
     ]);
     if (!forecast) return new NextResponse(null, { status: 204 });
     const body: WeatherSummary = { region: SEOUL.region, ...forecast, ...dust };

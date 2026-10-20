@@ -72,10 +72,6 @@ export default function HomeWeatherLine() {
       if (!res.ok || res.status === 204) throw new Error("weather unavailable");
       const body: unknown = await res.json();
       if (!mountedRef.current || controller.signal.aborted || requestId !== requestRef.current) return false;
-      if (!validWeather(body) || (!!position && body.region === "서울")) {
-        // Seoul may be a legitimate GPS region; validate with the server rather than client assumptions.
-        if (!validWeather(body)) throw new Error("invalid weather");
-      }
       if (!validWeather(body)) throw new Error("invalid weather");
       setWeather(body);
       setStatus("ok");

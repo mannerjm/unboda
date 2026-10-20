@@ -9,6 +9,7 @@ type HomeWeather = {
   symbol: string;
   forecastAt: string;
   dustGrade: string | null;
+  dustPm25Grade: string | null;
   dustStation: string | null;
   dustObservedAt: string | null;
 };
@@ -58,7 +59,10 @@ export default function HomeWeatherLine() {
       <span>{weather.temperatureC}°C</span>
       <span>{weather.condition}</span>
       <span aria-hidden="true" className="text-white/40">·</span>
-      <span>미세먼지 {weather.dustGrade ?? "정보 없음"}</span>
+      {weather.dustGrade
+        ? <span>미세먼지 {weather.dustGrade}</span>
+        : <a href="https://cleanair.seoul.go.kr/" target="_blank" rel="noopener noreferrer" className="text-[#d9d3ff] underline underline-offset-2" title="서울시 공식 실시간 미세먼지 관측정보 확인">미세먼지 확인 ↗</a>}
+      {weather.dustPm25Grade && <span>· 초미세먼지 {weather.dustPm25Grade}</span>}
       <a
         href="https://api.met.no/"
         target="_blank"
@@ -75,7 +79,7 @@ export default function HomeWeatherLine() {
         className="text-[9px] font-normal text-[#aaa3d4] underline-offset-2 hover:underline"
         title="MET Norway 날씨 예보를 운보다가 한국어로 요약하여 제공 · CC BY 4.0"
       >CC BY</a>
-      {weather.dustGrade && (
+      {(weather.dustGrade || weather.dustPm25Grade) && (
         <a
           href="https://www.airkorea.or.kr/"
           target="_blank"

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PwaInstallGuide from "./PwaInstallGuide";
 import BrandMark from "./BrandMark";
+import HomeWeatherLine from "./HomeWeatherLine";
 
 type LandingState =
   | { kind: "guest" }
@@ -52,6 +53,7 @@ function Header({ state }: { state: LandingState }) {
   return <header className="relative z-20 flex items-center justify-between gap-3 py-1 text-white">
     <Link href="/" className="flex shrink-0 items-center gap-3 text-xl font-black tracking-[-0.045em]"><BrandMark />운보다</Link>
     <div className="flex shrink-0 items-center gap-2">
+      <HomeWeatherLine />
       <Link href={aiHref} className="inline-flex items-center gap-1.5 rounded-full border border-[#927fff]/35 bg-[linear-gradient(135deg,rgba(111,92,231,.9),rgba(141,113,255,.9))] px-3.5 py-2.5 text-xs font-black text-white shadow-[0_0_24px_rgba(111,92,231,.24)] transition hover:-translate-y-0.5 hover:brightness-110 sm:px-4 sm:text-sm"><Icon name="chat" className="h-4 w-4"/>AI 상담</Link>
       <Link href={accountHref} className="rounded-full border border-white/20 bg-white/10 px-3.5 py-2.5 text-xs font-bold text-white backdrop-blur-xl transition hover:bg-white/15 sm:px-4 sm:text-sm">{isGuest ? "로그인" : "마이페이지"}</Link>
     </div>

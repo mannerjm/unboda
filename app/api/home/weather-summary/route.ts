@@ -1,23 +1,18 @@
 import { NextResponse } from "next/server";
-import { DEFAULT_HOME_WEATHER_REGION, getHomeWeatherRegion, type HomeWeatherRegion } from "@/app/lib/homeWeatherRegions";
+import { getHomeWeatherRegion, DEFAULT_HOME_WEATHER_REGION } from "@/app/lib/homeWeatherRegions";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type WeatherSummary = {
-  regionId: string;
+type Weather = {
   region: string;
   temperatureC: number;
   condition: string;
   symbol: string;
   forecastAt: string;
-  dustGrade: string | null;
-  dustPm25Grade: string | null;
-  dustStation: string | null;
-  dustObservedAt: string | null;
 };
 
-function describeWeather(code: string): { condition: string; symbol: string } {
+function describeWeather(code: string): Pick<Weather, "condition" | "symbol"> {
   const text = code.toLowerCase();
   if (text.includes("thunder")) return { condition: "뇌우", symbol: "⛈" };
   if (text.includes("snow")) return { condition: "눈", symbol: "❄" };
@@ -31,12 +26,13 @@ function describeWeather(code: string): { condition: string; symbol: string } {
   return { condition: "예보", symbol: "☁" };
 }
 
-async function fetchForecast(region: HomeWeatherRegion): Promise<Pick<WeatherSummary, "temperatureC" | "condition" | "symbol" | "forecastAt"> | null> {
+async function fetchForecast(lat: number, lon: number, region: string): Promise<Weather | null> {
   const url = new URL("https://api.met.no/weatherapi/locationforecast/2.0/compact");
-  url.searchParams.set("lat", region.lat);
-  url.searchParams.set("lon", region.lon);
+  // Round to two decimal places to limit outgoing precision and improve upstream cache reuse.
+  url.searchParams.set("lat", lat.toFixed(2));
+  url.searchParams.set("lon", lon.toFixed(2));
   const response = await fetch(url, {
-    headers: { "User-Agent": "unboda.kr/1.0 (https://unboda.kr)", "Accept": "application/json" },
+    headers: { "User-Agent": "unboda.kr/1.0 (https://unboda.kr)", Accept: "application/json" },
     next: { revalidate: 1800 },
     signal: AbortSignal.timeout(5000),
   });
@@ -50,72 +46,56 @@ async function fetchForecast(region: HomeWeatherRegion): Promise<Pick<WeatherSum
       };
     }> };
   };
-  const entries = json.properties?.timeseries;
-  if (!Array.isArray(entries)) return null;
   const now = Date.now();
-  const item = entries.find((entry) => {
-    if (typeof entry.time !== "string") return false;
-    const t = Date.parse(entry.time);
+  const item = json.properties?.timeseries?.find((entry) => {
+    const t = typeof entry.time === "string" ? Date.parse(entry.time) : NaN;
     return Number.isFinite(t) && t >= now - 90 * 60_000 && t <= now + 150 * 60_000
       && typeof entry.data?.instant?.details?.air_temperature === "number";
   });
-  if (!item) return null;
-  const temperature = item.data?.instant?.details?.air_temperature;
-  if (typeof temperature !== "number" || !Number.isFinite(temperature) || temperature < -60 || temperature > 60) return null;
+  const temp = item?.data?.instant?.details?.air_temperature;
+  if (!item?.time || typeof temp !== "number" || !Number.isFinite(temp) || temp < -60 || temp > 60) return null;
   return {
-    temperatureC: Math.round(temperature),
+    region,
+    temperatureC: Math.round(temp),
     ...describeWeather(item.data?.next_1_hours?.summary?.symbol_code ?? ""),
-    forecastAt: item.time!,
+    forecastAt: item.time,
   };
 }
 
-function gradeText(value: unknown): string | null {
-  return value === "1" ? "좋음" : value === "2" ? "보통" : value === "3" ? "나쁨" : value === "4" ? "매우 나쁨" : null;
-}
+function noForecast() { return new NextResponse(null, { status: 204, headers: { "Cache-Control": "no-store" } }); }
 
-async function fetchDust(region: HomeWeatherRegion): Promise<Pick<WeatherSummary, "dustGrade" | "dustPm25Grade" | "dustStation" | "dustObservedAt">> {
-  const empty = { dustGrade: null, dustPm25Grade: null, dustStation: null, dustObservedAt: null };
-  // Never substitute an unrelated measurement station. Only Seoul has a verified station mapping.
-  const key = process.env.AIRKOREA_SERVICE_KEY;
-  if (!key || !region.airStation) return empty;
-  const url = new URL("https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getCtprvnRltmMesureDnsty");
-  url.searchParams.set("serviceKey", key);
-  url.searchParams.set("returnType", "json");
-  url.searchParams.set("numOfRows", "100");
-  url.searchParams.set("pageNo", "1");
-  url.searchParams.set("sidoName", region.airSido);
-  url.searchParams.set("ver", "1.3");
-  const response = await fetch(url, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(5000) });
-  if (!response.ok) return empty;
-  const json = await response.json() as {
-    response?: { body?: { items?: Array<{
-      stationName?: string; dataTime?: string; pm10Grade1h?: string; pm10Grade?: string;
-      pm25Grade1h?: string; pm25Grade?: string;
-    }> } };
-  };
-  const station = json.response?.body?.items?.find(item => item.stationName === region.airStation);
-  if (!station || !station.dataTime) return empty;
-  const observed = Date.parse(station.dataTime.replace(" ", "T") + "+09:00");
-  if (!Number.isFinite(observed) || Math.abs(Date.now() - observed) > 3 * 60 * 60_000) return empty;
-  const dustGrade = gradeText(station.pm10Grade1h ?? station.pm10Grade);
-  const dustPm25Grade = gradeText(station.pm25Grade1h ?? station.pm25Grade);
-  if (!dustGrade && !dustPm25Grade) return empty;
-  return { dustGrade, dustPm25Grade, dustStation: station.stationName ?? region.airStation, dustObservedAt: station.dataTime };
-}
-
-export async function GET(request: Request) {
-  const id = new URL(request.url).searchParams.get("region") ?? DEFAULT_HOME_WEATHER_REGION;
-  const region = getHomeWeatherRegion(id);
-  if (!region) return NextResponse.json({ error: "지원하지 않는 지역입니다." }, { status: 400, headers: { "Cache-Control": "no-store" } });
+// Default API remains Seoul to avoid changing homepage behavior before permission.
+export async function GET() {
+  const seoul = getHomeWeatherRegion(DEFAULT_HOME_WEATHER_REGION)!;
   try {
-    const [forecast, dust] = await Promise.all([
-      fetchForecast(region),
-      fetchDust(region).catch(() => ({ dustGrade: null, dustPm25Grade: null, dustStation: null, dustObservedAt: null })),
-    ]);
-    if (!forecast) return new NextResponse(null, { status: 204, headers: { "Cache-Control": "no-store" } });
-    const body: WeatherSummary = { regionId: region.id, region: region.label, ...forecast, ...dust };
-    return NextResponse.json(body, { headers: { "Cache-Control": "public, s-maxage=1800" } });
-  } catch {
-    return new NextResponse(null, { status: 204, headers: { "Cache-Control": "no-store" } });
-  }
+    const weather = await fetchForecast(Number(seoul.lat), Number(seoul.lon), "서울");
+    return weather
+      ? NextResponse.json(weather, { headers: { "Cache-Control": "public, s-maxage=1800" } })
+      : noForecast();
+  } catch { return noForecast(); }
+}
+
+// Approximate, non-persistent browser position is sent only after visitor permission.
+export async function POST(request: Request) {
+  try {
+    if (Number(request.headers.get("content-length") ?? "0") > 256) {
+      return NextResponse.json({ error: "요청이 너무 큽니다." }, { status: 413 });
+    }
+    const raw = await request.text();
+    if (raw.length > 256) return NextResponse.json({ error: "요청이 너무 큽니다." }, { status: 413 });
+    const data: unknown = JSON.parse(raw);
+    if (!data || typeof data !== "object") return NextResponse.json({ error: "위치가 올바르지 않습니다." }, { status: 400 });
+    const position = data as { lat?: unknown; lon?: unknown };
+    if (typeof position.lat !== "number" || typeof position.lon !== "number"
+      || !Number.isFinite(position.lat) || !Number.isFinite(position.lon)
+      || position.lat < 33 || position.lat > 39.5 || position.lon < 124 || position.lon > 132) {
+      return NextResponse.json({ error: "국내 위치만 지원합니다." }, { status: 400 });
+    }
+    const lat = Math.round(position.lat * 50) / 50;
+    const lon = Math.round(position.lon * 50) / 50;
+    const weather = await fetchForecast(lat, lon, "내 위치");
+    return weather
+      ? NextResponse.json(weather, { headers: { "Cache-Control": "private, no-store, max-age=0" } })
+      : noForecast();
+  } catch { return noForecast(); }
 }

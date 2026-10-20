@@ -171,19 +171,19 @@ export default function HomeWeatherLine() {
       : "날씨 자료 · MET Norway 예보";
 
   return (
-    <div className="hidden items-center gap-2 rounded-full border border-white/15 bg-white/[0.065] px-3 py-2 text-[11px] font-semibold text-[#e0e4f5] backdrop-blur-lg lg:flex" aria-label="지역별 날씨 정보">
+    <div className="flex w-full min-w-0 items-center gap-2 rounded-full border border-white/15 bg-white/[0.065] px-3 py-2 text-[11px] font-semibold text-[#e0e4f5] backdrop-blur-lg lg:w-auto" aria-label="지역별 날씨 정보">
       <button
         type="button"
         onClick={locate}
         disabled={locating}
-        className="inline-flex shrink-0 items-center gap-1 rounded text-white transition hover:text-[#c5baff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#b4a5ff]"
+        className="inline-flex max-w-[47%] min-w-0 shrink-0 items-center gap-1 whitespace-nowrap rounded text-white transition hover:text-[#c5baff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#b4a5ff] lg:max-w-none"
         aria-label={regionLabel + " 지역을 눌러 현재 위치 새로 확인"}
         title="지역명을 누르면 현재 위치를 다시 확인합니다"
       >
-        {regionLabel}<span aria-hidden="true" className="text-[9px] text-[#c2b6ff]">⌄</span>
+        <span className="truncate">{regionLabel}</span><span aria-hidden="true" className="shrink-0 text-[9px] text-[#c2b6ff]">⌄</span>
       </button>
       <span className="text-white/40">·</span>
-      <span className="w-[164px] truncate text-left" role="status" title={weather?.forecastAt ? "예보 기준 " + weather.forecastAt : notice}>{display}</span>
+      <span className="min-w-0 flex-1 truncate text-right lg:w-[164px] lg:flex-none lg:text-left" role="status" title={weather?.forecastAt ? "예보 기준 " + weather.forecastAt : notice}>{display}</span>
     </div>
   );
 }

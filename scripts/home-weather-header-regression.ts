@@ -9,7 +9,10 @@ assert(home.includes('import HomeWeatherLine from "./HomeWeatherLine"'), "home i
 assert(home.indexOf("<HomeWeatherLine />") < home.indexOf("<Link href={aiHref}"), "weather is left of AI 상담");
 assert(home.includes("<Link href={accountHref}"), "account navigation preserved");
 assert(widget.includes('className="hidden items-center') && widget.includes("lg:flex"), "desktop header single-line weather");
-assert(widget.includes("미세먼지 {weather.dustGrade ?? \"정보 없음\"}"), "no fabricated dust grades");
+assert(widget.includes("weather.dustGrade") && widget.includes("미세먼지 확인 ↗"), "unavailable dust links to official measurements instead of showing a fake grade");
+assert(widget.includes("https://cleanair.seoul.go.kr/"), "official live Seoul air quality fallback is available");
+assert(widget.includes("weather.dustPm25Grade"), "fine dust is displayed only when real data is available");
+assert(api.includes("pm25Grade1h") && api.includes("pm25Grade"), "AirKorea PM2.5 grade parsing is supported");
 assert(widget.includes('href="https://api.met.no/"'), "MET attribution remains visible");
 assert(!widget.includes("navigator.geolocation") && !api.includes("geolocation"), "no geolocation access");
 assert(api.includes("AIRKOREA_SERVICE_KEY") && api.includes('const key = process.env.AIRKOREA_SERVICE_KEY'), "dust is gated behind a server-side key");

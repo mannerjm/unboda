@@ -260,6 +260,12 @@ export default function MyPage() {
           return;
         }
         setIsAuthChecked(true);
+        // Reuse this verified response for the account badge instead of
+        // issuing a second identical request. JSON parsing failures must not
+        // convert an already authenticated account into a guest.
+        void response.json()
+          .then((status: AccountStatus) => setAccountStatus(status))
+          .catch(() => {});
       })
       .catch(() => router.replace("/auth/login?returnTo=/mypage&origin=guest-navigation"));
   }, [router]);
@@ -280,15 +286,6 @@ export default function MyPage() {
       })
       .catch(() => setMessage("로그인 상태를 확인한 뒤 다시 시도해 주세요."))
       .finally(() => setIsProfilesLoaded(true));
-  }, []);
-
-  useEffect(() => {
-    void fetch("/api/account/status")
-      .then(async (response) => {
-        if (!response.ok) return;
-        setAccountStatus(await response.json() as AccountStatus);
-      })
-      .catch(() => {});
   }, []);
 
   useEffect(() => {

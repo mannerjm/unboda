@@ -22,7 +22,11 @@ assert(widget.includes("getItem(LAST_LOCATION_KEY)") && widget.includes("fetchWe
 assert(widget.includes("이전 지역은 유지됩니다"), "permission failure preserves last selected location");
 assert(widget.includes("setInterval") && widget.includes("prefers-reduced-motion"), "existing rotating weather/source continues");
 assert(api.includes("resolveWeatherDistrict(lat, lon)") && api.includes('status: 422'), "city is resolved server-side, not submitted by browser");
-assert(home.includes("통계청 2018 행정경계") && home.includes("MET Norway"), "data attribution preserved in footer");
+const footerSource = home.slice(home.indexOf("function Footer()"), home.indexOf("function StarField()"));
+assert(!footerSource.includes("MET Norway") && !footerSource.includes("통계청 2018 행정경계"), "weather attribution removed from PC/mobile footer");
+assert(widget.includes('aria-label="날씨 자료 출처"') && widget.includes("<details"), "weather source disclosure available beside weather status");
+assert(widget.includes("MET Norway") && widget.includes("CC BY 4.0") && widget.includes("통계청 2018 행정경계"), "provider and regional map-data attribution retained near weather widget");
+assert(widget.includes("https://www.met.no/en") && widget.includes("https://creativecommons.org/licenses/by/4.0/") && widget.includes("https://sgis.kostat.go.kr/"), "source, license and map links remain actionable");
 assert(home.includes("<Link href={aiHref}") && home.includes("<Link href={accountHref}"), "AI 상담, account untouched");
 assert(home.includes('grid-cols-[minmax(0,1fr)_auto]') && home.includes('lg:flex lg:items-center lg:justify-between'), "header stacks mobile weather under branding while keeping desktop layout");
 assert(home.includes('col-span-2 row-start-2') && home.includes('col-start-2 row-start-1'), "weather in mobile second row, nav in first row");

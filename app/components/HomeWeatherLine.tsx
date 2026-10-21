@@ -184,6 +184,19 @@ export default function HomeWeatherLine() {
       </button>
       <span className="text-white/40">·</span>
       <span className="min-w-0 flex-1 truncate text-right lg:w-[164px] lg:flex-none lg:text-left" role="status" title={weather?.forecastAt ? "예보 기준 " + weather.forecastAt : notice}>{display}</span>
+      {/* Keep the weather provider and map-data credits next to the feature,
+          without placing a long technical notice under the business footer. */}
+      <details className="group relative shrink-0">
+        <summary
+          className="flex h-5 w-5 cursor-pointer list-none items-center justify-center rounded-full border border-white/20 text-[10px] font-black text-[#c9c2ed] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b4a5ff] [&::-webkit-details-marker]:hidden"
+          aria-label="날씨 자료 출처"
+          title="날씨 자료 출처"
+        >ⓘ</summary>
+        <div className="absolute right-0 top-[calc(100%+0.75rem)] z-50 w-[min(19rem,calc(100vw-3rem))] rounded-xl border border-white/20 bg-[#13192e] p-3 text-left text-[11px] font-medium leading-5 text-[#d0d4e5] shadow-2xl">
+          날씨: <a href="https://www.met.no/en" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white">MET Norway</a> 예보를 운보다가 한국어로 요약·변경 (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white">CC BY 4.0</a>)
+          <p className="mt-2">지역명: <a href="https://sgis.kostat.go.kr/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white">통계청 2018 행정경계(공공누리 제1유형)</a> 참고</p>
+        </div>
+      </details>
     </div>
   );
 }

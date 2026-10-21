@@ -61,10 +61,13 @@ async function getLandingState(): Promise<LandingState> {
   const user = await getCurrentUser();
   if (!user) return { kind: "guest" };
 
-  const profiles = await listUserProfiles(user.id);
+  // These authenticated, read-only queries have no dependency on each other.
+  // Run them together to remove one cross-region DB round trip from home navigation.
+  const [profiles, activeProfile] = await Promise.all([
+    listUserProfiles(user.id),
+    getActiveProfile(user.id),
+  ]);
   if (profiles.length === 0) return { kind: "no_profiles" };
-
-  const activeProfile = await getActiveProfile(user.id);
   if (!activeProfile) return { kind: "needs_profile_selection" };
 
   const summaries = await listUserFreeAnalysisResults(user.id);

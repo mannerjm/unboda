@@ -63,11 +63,18 @@ async function getLandingState(): Promise<LandingState> {
 
   // These authenticated, read-only queries have no dependency on each other.
   // Run them together to remove one cross-region DB round trip from home navigation.
-  const [profiles, activeProfile] = await Promise.all([
+  const [profiles, activeProfileResult] = await Promise.all([
     listUserProfiles(user.id),
-    getActiveProfile(user.id),
+    getActiveProfile(user.id).then(
+      (profile) => ({ ok: true as const, profile }),
+      (error: unknown) => ({ ok: false as const, error }),
+    ),
   ]);
+  // Preserve the previous "no profiles" response even if an unrelated
+  // active-profile lookup fails while that same no-profile state is loading.
   if (profiles.length === 0) return { kind: "no_profiles" };
+  if (!activeProfileResult.ok) throw activeProfileResult.error;
+  const activeProfile = activeProfileResult.profile;
   if (!activeProfile) return { kind: "needs_profile_selection" };
 
   const summaries = await listUserFreeAnalysisResults(user.id);

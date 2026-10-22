@@ -7,7 +7,7 @@ export const REFUND_BANK_OPTIONS=[
   {value:"IBK",label:"IBK기업은행"},
   {value:"KAKAO",label:"카카오뱅크"},
   {value:"TOSS",label:"토스뱅크"},
-  {value:"K",label:"케이뱅크"},
+  {value:"KBANK",label:"케이뱅크"},
   {value:"SC",label:"SC제일은행"},
   {value:"POST",label:"우체국"},
   {value:"BUSAN",label:"부산은행"},

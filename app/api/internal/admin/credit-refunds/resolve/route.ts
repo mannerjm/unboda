@@ -6,7 +6,7 @@ import { getPaymentByOrderIdFromToss } from "@/app/lib/toss/server";
 import { getTossConfigForAccount } from "@/app/lib/toss/config";
 
 export const dynamic="force-dynamic";
-type Action="manual_required"|"manual_paid"|"restore_credit";
+type Action="manual_required"|"manual_paid"|"restore_credit"|"reset_bank";
 type RefundRow={
   id:string;order_id:string;user_id:string;refund_amount_krw:number;
   status:string;provider_final_failure:boolean;processing_claim_expires_at:string|null;
@@ -19,12 +19,15 @@ export async function POST(request:NextRequest) {
   let operator;
   try {operator=await requireOperator();}
   catch(e) {return NextResponse.json({error:"관리자 권한이 필요합니다."},{status:e instanceof OperatorAuthorizationError && e.code==="UNAUTHENTICATED"?401:403});}
-  const payload=await request.json().catch(()=>null) as {refundId?:unknown;action?:unknown;note?:unknown;customerConfirmed?:unknown;transferConfirmed?:unknown}|null;
+  const payload=await request.json().catch(()=>null) as {refundId?:unknown;action?:unknown;note?:unknown;customerConfirmed?:unknown;transferConfirmed?:unknown;noTransferConfirmed?:unknown}|null;
   const refundId=payload?.refundId,action=payload?.action,note=payload?.note;
   if(typeof refundId!=="string"||!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(refundId)
-    || !["manual_required","manual_paid","restore_credit"].includes(String(action))
+    || !["manual_required","manual_paid","restore_credit","reset_bank"].includes(String(action))
     || typeof note!=="string" || note.trim().length<6 || note.length>180) {
     return NextResponse.json({error:"환불 요청과 확인 메모를 정확히 입력해 주세요."},{status:400});
+  }
+  if(action==="reset_bank"&&payload?.noTransferConfirmed!==true){
+    return NextResponse.json({error:"아직 계좌로 송금하지 않았음을 확인해야 계좌 재입력을 요청할 수 있습니다."},{status:400});
   }
   if(action==="manual_paid"&&payload?.transferConfirmed!==true) {
     return NextResponse.json({error:"실제 송금 완료 여부를 확인해야 합니다."},{status:400});
@@ -42,12 +45,12 @@ export async function POST(request:NextRequest) {
   if(readError||!refund)return NextResponse.json({error:"환불 요청을 확인할 수 없습니다."},{status:404});
   if(!refund.provider_final_failure
     || !((action==="manual_required" && refund.status==="REVIEW_REQUIRED")
-      || (action==="manual_paid" && refund.status==="MANUAL_BANK_REQUIRED")
+      || (["manual_paid","reset_bank"].includes(String(action)) && refund.status==="MANUAL_BANK_REQUIRED")
       || (action==="restore_credit" && ["REVIEW_REQUIRED","MANUAL_BANK_REQUIRED"].includes(refund.status)))
     || (refund.processing_claim_expires_at && new Date(refund.processing_claim_expires_at).getTime()>Date.now())){
     return NextResponse.json({error:"이 환불은 카드 취소 거절이 확정된 예외 상태가 아닙니다."},{status:409});
   }
-  if(action==="manual_paid"){
+  if(action==="manual_paid"||action==="reset_bank"){
     const {data:bank,error:bankError}=await db.from("ai_credit_refund_bank_details")
       .select("refund_id").eq("refund_id",refundId).maybeSingle();
     if(bankError||!bank)return NextResponse.json({error:"고객의 환불 계좌가 아직 접수되지 않았습니다."},{status:409});
@@ -67,6 +70,13 @@ export async function POST(request:NextRequest) {
     if((provider.cancels??[]).some(c=>c.cancelStatus==="DONE"
       && c.cancelAmount===refund.refund_amount_krw)){
       throw new Error("TOSS_POSSIBLE_PRIOR_REFUND");
+    }
+    if(action==="reset_bank"){
+      const {data:reset,error:resetError}=await db.rpc("reset_ai_credit_bank_intake",{
+        p_request_id:refundId,p_operator_id:operator.authUserId,p_reason:safeNote,
+      });
+      if(resetError||reset!==true)throw new Error("AI_CREDIT_BANK_RESET_FAILED");
+      return NextResponse.json({status:"BANK_INFO_RESET"},{headers:{"Cache-Control":"no-store"}});
     }
     const rpc=action==="manual_required"?"mark_ai_credit_manual_required"
       :action==="manual_paid"?"finish_ai_credit_manual_bank_refund":"restore_ai_credit_refund_hold";

@@ -14,6 +14,8 @@ assert(code.includes("await getPaymentByOrderIdFromToss"));
 assert(code.includes("await getRefundWorkflowForOrder"));
 assert(code.includes("await inspect(input.ticketId, input.reason, true)"));
 assert(refundCore.includes("idempotencyKey: workflow.id"));
+assert(refundCore.includes('if (error) throw new Error("REFUND_WORKFLOW_LOOKUP_FAILED")'));
+
 assert(customerRoute.includes("REFUND_SUPPORT_REQUIRED"));
 
 const buyerId = "22222222-2222-4222-8222-222222222222";

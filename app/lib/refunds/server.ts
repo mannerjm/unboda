@@ -89,7 +89,9 @@ function toRefundRecord(row: RefundRow): RefundWorkflowRecord {
 
 export async function getRefundWorkflowForOrder(orderId: string): Promise<RefundWorkflowRecord | null> {
   const { data, error } = await createAdminClient().from("refund_workflows").select("id,order_id,payment_record_id,user_id,profile_id,product_id,requested_amount,currency,reason_category,reason_text,status,provider_status,provider_cancellation_reference,requested_at,processing_started_at,provider_confirmed_at,completed_at,entitlement_revoked_at,retry_count,max_retry_count,next_retry_at,last_attempt_at,last_provider_http_status,last_provider_error_code,last_provider_error_message,last_retryability,correlation_id,reconciliation_claim_token,reconciliation_claimed_at,reconciliation_claim_expires_at").eq("order_id", orderId).order("created_at", { ascending: false }).limit(1).maybeSingle<RefundRow>();
-  if (error || !data) return null;
+  // Financial safety: a failed lookup is NOT proof that no refund exists.
+  if (error) throw new Error("REFUND_WORKFLOW_LOOKUP_FAILED");
+  if (!data) return null;
   return toRefundRecord(data);
 }
 

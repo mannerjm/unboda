@@ -1,27 +1,8 @@
 import "server-only";
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 
-export const REFUND_BANK_OPTIONS=[
-  {value:"SHINHAN",label:"신한은행"},
-  {value:"KB",label:"KB국민은행"},
-  {value:"WOORI",label:"우리은행"},
-  {value:"HANA",label:"하나은행"},
-  {value:"NH",label:"NH농협은행"},
-  {value:"IBK",label:"IBK기업은행"},
-  {value:"KAKAO",label:"카카오뱅크"},
-  {value:"TOSS",label:"토스뱅크"},
-  {value:"K",label:"케이뱅크"},
-  {value:"SC",label:"SC제일은행"},
-  {value:"POST",label:"우체국"},
-  {value:"BUSAN",label:"부산은행"},
-  {value:"DAEGU",label:"iM뱅크"},
-  {value:"GWANGJU",label:"광주은행"},
-  {value:"JEONBUK",label:"전북은행"},
-  {value:"GYEONGNAM",label:"경남은행"},
-  {value:"JEJU",label:"제주은행"},
-  {value:"SUHYUP",label:"수협은행"},
-] as const;
-export type RefundBankCode=(typeof REFUND_BANK_OPTIONS)[number]["value"];
+import { REFUND_BANK_OPTIONS, type RefundBankCode } from "./refundBankOptions";
+
 export type BankRefundDetails={accountNumber:string;accountHolder:string};
 
 function encryptionKey():Buffer {

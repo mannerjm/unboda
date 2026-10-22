@@ -1,4 +1,5 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { createAdminClient } from "../supabase/admin";
 import { getTossPaymentRecordForOrder } from "../purchases/server";
 import { cancelPaymentWithToss, getPaymentByOrderIdFromToss, TossCancellationError } from "../toss/server";
@@ -17,14 +18,19 @@ export function isAiCreditRefundAllowedForUser(userId: string): boolean {
     || process.env.TOSS_LIVE_PILOT_ENABLED !== "true"
     || process.env.TOSS_LIVE_CHECKOUT_ENABLED === "true") return false;
   if (!/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(userId)) return false;
-  return (process.env.TOSS_LIVE_PILOT_ACCOUNT_IDS ?? "")
+  // A second, refund-specific allowlist protects other LIVE pilot purchasers.
+  const dedicated = (process.env.AI_CREDIT_REFUND_PILOT_ACCOUNT_IDS ?? "")
+    .split(",").some(id => id.trim().toLowerCase() === userId.toLowerCase());
+  return dedicated && (process.env.TOSS_LIVE_PILOT_ACCOUNT_IDS ?? "")
     .split(",").some(id => id.trim().toLowerCase() === userId.toLowerCase());
 }
 
 export type CreditLotView = {
   purchaseId: string; bundleId: string; priceKrw: number; original: number;
   used: number; available: number; purchasedAt: string; expiresAt: string | null;
+  held: number; refunded: number; expired: number;
   refundId: string | null; refundStatus: string | null;
+  refundAmountKrw: number | null; refundQuantity: number | null;
 };
 
 type Lot = {
@@ -37,6 +43,7 @@ type RefundRow = {
   id: string; purchase_id: string; order_id: string; user_id: string; profile_id: string;
   refund_quantity: number; refund_amount_krw: number; status: string;
   idempotency_key: string; provider_transaction_key: string | null; retry_count: number;
+  processing_claim_token: string | null; provider_final_failure: boolean;
 };
 
 export async function listCreditLotViews(userId: string, profileId: string): Promise<CreditLotView[]> {
@@ -48,18 +55,20 @@ export async function listCreditLotViews(userId: string, profileId: string): Pro
   if (expirationError) throw new Error("AI_CREDIT_EXPIRATION_SYNC_FAILED");
   const [lots, refunds] = await Promise.all([
     supabase.from("ai_credit_lots").select("*").eq("user_id", userId).eq("profile_id", profileId).order("purchased_at", {ascending:false}),
-    supabase.from("ai_credit_refund_requests").select("id,purchase_id,status").eq("user_id", userId).eq("profile_id", profileId),
+    supabase.from("ai_credit_refund_requests").select("id,purchase_id,status,refund_quantity,refund_amount_krw").eq("user_id", userId).eq("profile_id", profileId),
   ]);
   if (lots.error || refunds.error) throw new Error("AI_CREDIT_LOT_READ_FAILED");
-  const statusMap = new Map((refunds.data??[]).map(r=>[r.purchase_id,{id:r.id,status:r.status}]));
+  const statusMap = new Map((refunds.data??[]).map(r=>[r.purchase_id,{id:r.id,status:r.status,quantity:r.refund_quantity,amount:r.refund_amount_krw}]));
   return ((lots.data??[]) as Lot[]).map(lot=>{
     const refund=statusMap.get(lot.purchase_id);
     return {
       purchaseId:lot.purchase_id, bundleId:lot.bundle_id, priceKrw:lot.paid_amount_krw,
       original:lot.purchased_quantity, used:lot.consumed_quantity,
+      held:lot.held_quantity, refunded:lot.refunded_quantity, expired:lot.expired_quantity,
       available:Math.max(0,lot.purchased_quantity-lot.consumed_quantity-lot.held_quantity-lot.refunded_quantity-lot.expired_quantity),
       purchasedAt:lot.purchased_at, expiresAt:lot.expires_at,
       refundId:refund?.id??null, refundStatus:refund?.status??null,
+      refundAmountKrw:refund?.amount??null, refundQuantity:refund?.quantity??null,
     };
   });
 }
@@ -67,16 +76,24 @@ export async function listCreditLotViews(userId: string, profileId: string): Pro
 function refundReason(refundId: string): string {
   return `Unboda AI credit unused refund: ${refundId}`;
 }
-async function updateRefundStatus(id: string,status: string,error?: string): Promise<void> {
-  const supabase=createAdminClient();
-  const { data: old } = await supabase.from("ai_credit_refund_requests")
-    .select("retry_count").eq("id",id).single<{retry_count:number}>();
-  await supabase.from("ai_credit_refund_requests").update({
+async function updateRefundStatus(id: string, status: string, error: string | undefined, claimToken: string, finalFailure = false): Promise<void> {
+  const db = createAdminClient();
+  const { data: old, error: readError } = await db.from("ai_credit_refund_requests")
+    .select("retry_count").eq("id",id).eq("processing_claim_token",claimToken)
+    .single<{retry_count:number}>();
+  if (readError || !old) throw new Error("AI_CREDIT_REFUND_CLAIM_LOST");
+  const count = old.retry_count + 1;
+  const { data, error: writeError } = await db.from("ai_credit_refund_requests").update({
     status, provider_error:error?.slice(0,180)??null,
-    retry_count:(old?.retry_count??0)+1,
-    next_retry_at:new Date(Date.now()+Math.min(3600000,60000*2**Math.min(old?.retry_count??0,6))).toISOString(),
+    provider_final_failure:finalFailure,
+    retry_count:count,
+    next_retry_at:status==="PROVIDER_UNKNOWN"
+      ? new Date(Date.now()+Math.min(3600000,60000*2**Math.min(count-1,6))).toISOString() : null,
+    processing_claim_token:null, processing_claim_expires_at:null,
     updated_at:new Date().toISOString(),
-  }).eq("id",id).neq("status","COMPLETED");
+  }).eq("id",id).eq("processing_claim_token",claimToken).neq("status","COMPLETED")
+    .select("id").maybeSingle();
+  if (writeError || !data) throw new Error("AI_CREDIT_REFUND_STATUS_SAVE_FAILED");
 }
 
 export async function processCreditRefund(refund: RefundRow): Promise<{status:string;amount:number}> {
@@ -86,14 +103,22 @@ export async function processCreditRefund(refund: RefundRow): Promise<{status:st
   if (!["PENDING","PROVIDER_UNKNOWN"].includes(refund.status)) {
     return {status:refund.status,amount:refund.refund_amount_krw};
   }
-  if (refund.retry_count>=6) {
-    await updateRefundStatus(refund.id,"REVIEW_REQUIRED","Automatic provider retries exhausted");
+  // Acquire an exclusive DB lease before any Toss cancellation attempt.
+  const token=randomUUID();
+  const {data:claims,error:claimError}=await createAdminClient().rpc("claim_ai_credit_refund_processing",{
+    p_request_id:refund.id,p_token:token,
+  });
+  if(claimError)throw new Error("AI_CREDIT_REFUND_CLAIM_FAILED");
+  const claimed=(claims as RefundRow[]|null)?.[0];
+  if(!claimed) return {status:"PROVIDER_UNKNOWN",amount:refund.refund_amount_krw};
+  if (claimed.retry_count>=6) {
+    await updateRefundStatus(refund.id,"REVIEW_REQUIRED","Automatic provider retries exhausted",token);
     return {status:"REVIEW_REQUIRED",amount:refund.refund_amount_krw};
   }
   const payment=await getTossPaymentRecordForOrder(refund.order_id);
   if (!payment?.paymentKey || payment.currency!=="KRW" || payment.confirmedAmount===null
     || payment.confirmedAmount<refund.refund_amount_krw) {
-    await updateRefundStatus(refund.id,"REVIEW_REQUIRED","Provider payment evidence missing");
+    await updateRefundStatus(refund.id,"REVIEW_REQUIRED","Provider payment evidence missing",token);
     return {status:"REVIEW_REQUIRED",amount:refund.refund_amount_krw};
   }
   const reason=refundReason(refund.id);
@@ -108,7 +133,7 @@ export async function processCreditRefund(refund: RefundRow): Promise<{status:st
       && c.cancelAmount===refund.refund_amount_krw && c.cancelStatus==="DONE");
     if (!successful) {
       if (prior.method!=="카드" && prior.method!=="CARD") {
-        await updateRefundStatus(refund.id,"REVIEW_REQUIRED","Card cancellation not supported for this method");
+        await updateRefundStatus(refund.id,"REVIEW_REQUIRED","Card cancellation not supported for this method",token);
         return {status:"REVIEW_REQUIRED",amount:refund.refund_amount_krw};
       }
       const response=await cancelPaymentWithToss({
@@ -135,7 +160,8 @@ export async function processCreditRefund(refund: RefundRow): Promise<{status:st
       ? error.failure.retryability==="RETRYABLE"
       : true; // Unknown provider state is NEVER proof of failure.
     await updateRefundStatus(refund.id,retryable?"PROVIDER_UNKNOWN":"REVIEW_REQUIRED",
-      error instanceof TossCancellationError ? error.failure.providerErrorCode : "PROVIDER_RESULT_UNCERTAIN");
+      error instanceof TossCancellationError ? error.failure.providerErrorCode : "PROVIDER_RESULT_UNCERTAIN",
+      token,error instanceof TossCancellationError && error.failure.retryability==="NON_RETRYABLE");
     return {status:retryable?"PROVIDER_UNKNOWN":"REVIEW_REQUIRED",amount:refund.refund_amount_krw};
   }
 }

@@ -9,6 +9,7 @@ import { sendOwnerReviewAlertIfNeeded } from "@/app/lib/operators/ownerAlerts";
 import { dispatchSupportNotificationDeliveries } from "@/app/lib/support/notifications";
 import { recordJobHeartbeat } from "@/app/lib/operators/heartbeat";
 import { retryDueCreditRefunds } from "@/app/lib/aiConsulting/creditRefunds";
+import { dispatchCreditRefundNotices } from "@/app/lib/aiConsulting/refundNotifications";
 
 export const dynamic = "force-dynamic";
 
@@ -180,6 +181,18 @@ async function dispatch(request: Request) {
     }
   }
 
+  // Customer notices are independent from money movement. Failed email must
+  // never trigger a second cancellation or block the reconciliation workers.
+  let creditRefundNotices: WorkerReport<{
+    configured:boolean;scanned:number;sent:number;retrying:number;failedFinal:number;skipped:number;
+  }>;
+  try {
+    creditRefundNotices={ok:true,...(await dispatchCreditRefundNotices(10))};
+  } catch {
+    creditRefundNotices={ok:false};
+    console.error("[ai-credit-refund-notices] worker failed");
+  }
+
   // Analytics retention is isolated from financial reconciliation and can never block it.
   let journeyCleanup: WorkerReport<{ removed: number }>;
   try {
@@ -191,7 +204,7 @@ async function dispatch(request: Request) {
   }
 
   const coreOk = payments.ok && refunds.ok && accountClosures.ok && guestCleanup.ok && creditRefunds.ok;
-  const notificationsOk = operatorAlerts.ok && supportNotifications.ok
+  const notificationsOk = operatorAlerts.ok && supportNotifications.ok && creditRefundNotices.ok
     && !["unconfigured", "no_recipients", "failed_final"].includes(operatorAlerts.status)
     && supportNotifications.configured && supportNotifications.failedFinal === 0;
   const ok = coreOk && notificationsOk;
@@ -204,7 +217,7 @@ async function dispatch(request: Request) {
   }
 
   return NextResponse.json(
-    { ok: ok && heartbeatSaved, payments, refunds, accountClosures, guestCleanup, creditRefunds, journeyCleanup, operatorAlerts, supportNotifications },
+    { ok: ok && heartbeatSaved, payments, refunds, accountClosures, guestCleanup, creditRefunds, creditRefundNotices, journeyCleanup, operatorAlerts, supportNotifications },
     { status: ok && heartbeatSaved ? 200 : 500, headers: { "Cache-Control": "no-store" } },
   );
 }

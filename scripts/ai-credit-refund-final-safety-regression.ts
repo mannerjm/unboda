@@ -19,7 +19,7 @@ assert(ui.includes("환불 보류")&&ui.includes("사용 가능")&&ui.includes("
 assert(ui.includes("refundAmountKrw"),"original refund amount stays visible when all credits are held");
 assert(ui.includes("MANUAL_BANK_REQUIRED")&&ui.includes("MANUAL_BANK_PAID")&&ui.includes("CANCELLED_NO_REFUND"),"customer exception states");
 assert(admin.includes("getPaymentByOrderIdFromToss"),"operator must check actual Toss state before manual resolution");
-assert(admin.includes("getTossConfigForAccount(refund.user_id,\\"settlement\\")".replaceAll("\\\\","")),"same settlement rail");
+assert(admin.includes('getTossConfigForAccount(refund.user_id,"settlement")'),"same settlement rail");
 assert(admin.includes('requireOperator()'),"admin-only exception action");
 assert(admin.includes("provider_final_failure"),"never manually pay ambiguous card refund");
 assert(admin.includes('customerConfirmed!==true'),"explicit customer withdrawal before credit restoration");

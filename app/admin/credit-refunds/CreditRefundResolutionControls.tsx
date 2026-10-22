@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-type Action="manual_required"|"manual_paid"|"restore_credit";
+type Action="manual_required"|"manual_paid"|"restore_credit"|"reset_bank";
 export default function CreditRefundResolutionControls({refundId,status,finalFailure,bankSubmitted}:{
   refundId:string;status:string;finalFailure:boolean;bankSubmitted:boolean;
 }) {
@@ -12,20 +12,25 @@ export default function CreditRefundResolutionControls({refundId,status,finalFai
   const [message,setMessage]=useState<string|null>(null);
   const [customerConfirmed,setCustomerConfirmed]=useState(false);
   const [transferConfirmed,setTransferConfirmed]=useState(false);
+  const [noTransferConfirmed,setNoTransferConfirmed]=useState(false);
   async function submit(action:Action) {
     if(busy)return;
+    if(action==="reset_bank"&&(!bankSubmitted||!noTransferConfirmed)){
+      setMessage("아직 이체하지 않았음을 확인해야 계좌를 재입력할 수 있습니다.");
+      return;
+    }
     if(action==="manual_paid"&&(!bankSubmitted||!transferConfirmed)){
       setMessage("환불 계좌가 접수되고 실제 송금이 완료됐는지 확인해야 합니다.");
       return;
     }
-    const label=action==="manual_required"?"대체 환불 대상 지정":action==="manual_paid"?"이미 송금한 환불의 완료 기록":"고객 동의 확인 후 질문권 보류 해제";
+    const label=action==="manual_required"?"대체 환불 대상 지정":action==="manual_paid"?"이미 송금한 환불의 완료 기록":action==="reset_bank"?"고객 계좌 재입력 요청":"고객 동의 확인 후 질문권 보류 해제";
     if(note.trim().length<6){setMessage("확인 메모는 6자 이상 작성해 주세요.");return;}
     if(!window.confirm(label+"을(를) 진행하시겠습니까? 실제 계좌송금은 이 버튼으로 실행되지 않습니다."))return;
     setBusy(true);setMessage(null);
     try {
       const response=await fetch("/api/internal/admin/credit-refunds/resolve",{
         method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({refundId,action,note,customerConfirmed,transferConfirmed}),
+        body:JSON.stringify({refundId,action,note,customerConfirmed,transferConfirmed,noTransferConfirmed}),
       });
       const data=await response.json().catch(()=>({})) as {status?:string;error?:string};
       if(!response.ok)throw new Error(data.error??"처리를 완료하지 못했습니다.");
@@ -50,6 +55,14 @@ export default function CreditRefundResolutionControls({refundId,status,finalFai
     </label>:null}
     {(status==="MANUAL_BANK_REQUIRED")?<button type="button" disabled={busy||!bankSubmitted||!transferConfirmed} onClick={()=>submit("manual_paid")}
       className="rounded-xl bg-[#171a3d] px-4 py-2 text-sm font-bold text-white disabled:opacity-50">실제 송금 완료 확인 후 기록</button>:null}
+    {status==="MANUAL_BANK_REQUIRED"&&bankSubmitted?<div className="space-y-2 rounded-xl border border-slate-200 bg-white p-3">
+      <label className="flex items-start gap-2 text-xs font-semibold text-slate-700">
+        <input type="checkbox" checked={noTransferConfirmed} onChange={e=>setNoTransferConfirmed(e.target.checked)} className="mt-0.5"/>
+        아직 계좌이체를 실행하지 않았으며, 고객의 정정 요청을 확인했습니다.
+      </label>
+      <button type="button" disabled={busy||!noTransferConfirmed} onClick={()=>submit("reset_bank")}
+        className="rounded-xl border border-slate-500 px-4 py-2 text-sm font-bold disabled:opacity-50">계좌정보 삭제 · 고객에게 재입력 요청</button>
+    </div>:null}
     {status==="MANUAL_BANK_REQUIRED"&&!bankSubmitted?<p className="text-xs text-amber-900">고객이 환불 계좌를 제출해야 완료 처리 버튼이 활성화됩니다.</p>:null}
     {["REVIEW_REQUIRED","MANUAL_BANK_REQUIRED"].includes(status)?<div className="space-y-2 border-t border-amber-200 pt-3">
       <label className="flex items-start gap-2 text-xs font-semibold text-slate-700">

@@ -142,6 +142,9 @@ export default async function AdminPage() {
         )}
 
          <div className="mt-8 rounded-2xl border border-[#dce1ef] bg-white p-5">
+          <Link href="/admin/mfa" className="mb-5 inline-flex rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-900">
+            <span>관리자 인증 앱(MFA) 등록 · 추가 인증 →</span>
+          </Link>
           <h2 className="text-lg font-bold">AI 질문권 환불 예외</h2>
           <p className="mt-2 text-sm text-slate-600">일반 카드 취소는 자동으로 처리하고, 재확인 또는 수동 환불이 필요한 건만 살펴봅니다.</p>
           <Link href="/admin/credit-refunds" className="mt-3 inline-block text-sm font-bold text-[#5143b0] underline">질문권 환불 예외 확인 →</Link>

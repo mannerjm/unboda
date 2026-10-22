@@ -19,12 +19,15 @@ export async function POST(request:NextRequest) {
   let operator;
   try {operator=await requireOperator();}
   catch(e) {return NextResponse.json({error:"관리자 권한이 필요합니다."},{status:e instanceof OperatorAuthorizationError && e.code==="UNAUTHENTICATED"?401:403});}
-  const payload=await request.json().catch(()=>null) as {refundId?:unknown;action?:unknown;note?:unknown;customerConfirmed?:unknown}|null;
+  const payload=await request.json().catch(()=>null) as {refundId?:unknown;action?:unknown;note?:unknown;customerConfirmed?:unknown;transferConfirmed?:unknown}|null;
   const refundId=payload?.refundId,action=payload?.action,note=payload?.note;
   if(typeof refundId!=="string"||!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(refundId)
     || !["manual_required","manual_paid","restore_credit"].includes(String(action))
     || typeof note!=="string" || note.trim().length<6 || note.length>180) {
     return NextResponse.json({error:"환불 요청과 확인 메모를 정확히 입력해 주세요."},{status:400});
+  }
+  if(action==="manual_paid"&&payload?.transferConfirmed!==true) {
+    return NextResponse.json({error:"실제 송금 완료 여부를 확인해야 합니다."},{status:400});
   }
   if(action==="restore_credit"&&payload?.customerConfirmed!==true) {
     return NextResponse.json({error:"고객의 환불 신청 철회 의사를 확인해야 합니다."},{status:400});
@@ -43,6 +46,11 @@ export async function POST(request:NextRequest) {
       || (action==="restore_credit" && ["REVIEW_REQUIRED","MANUAL_BANK_REQUIRED"].includes(refund.status)))
     || (refund.processing_claim_expires_at && new Date(refund.processing_claim_expires_at).getTime()>Date.now())){
     return NextResponse.json({error:"이 환불은 카드 취소 거절이 확정된 예외 상태가 아닙니다."},{status:409});
+  }
+  if(action==="manual_paid"){
+    const {data:bank,error:bankError}=await db.from("ai_credit_refund_bank_details")
+      .select("refund_id").eq("refund_id",refundId).maybeSingle();
+    if(bankError||!bank)return NextResponse.json({error:"고객의 환불 계좌가 아직 접수되지 않았습니다."},{status:409});
   }
   try {
     // Mandatory fresh provider verification before any separate bank transfer or credit restoration.

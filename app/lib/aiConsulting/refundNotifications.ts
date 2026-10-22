@@ -29,7 +29,7 @@ function textForStatus(status:RefundStatus):{subject:string;body:string}{
     };
     case "MANUAL_BANK_REQUIRED":return {
       subject:"[운보다] AI 질문권 대체 환불 안내",
-      body:"원결제 카드의 부분취소가 어려워 대체 환불 절차가 필요합니다. 고객지원센터를 통해 안전한 환불 방법을 안내하겠습니다.",
+      body:"원결제 카드의 부분취소가 어려워 대체 환불 절차가 필요합니다. 이메일 회신으로 계좌번호를 보내지 말고, 로그인 후 운보다의 AI 질문권 환불 관리 화면에서 안전하게 환불 계좌를 제출해 주세요. 송금은 담당자가 확인 후 진행합니다.",
     };
     case "CANCELLED_NO_REFUND":return {
       subject:"[운보다] AI 질문권 환불 신청 종료",

@@ -1,6 +1,5 @@
 import { getTossConfigForAccount } from "../toss/config";
 import { randomUUID } from "node:crypto";
-import { getPaidReport } from "../paidReports/server";
 import { emitPaymentEvent } from "../payments/observability";
 import {
   getTossPaymentRecordForOrder,
@@ -90,7 +89,9 @@ function toRefundRecord(row: RefundRow): RefundWorkflowRecord {
 
 export async function getRefundWorkflowForOrder(orderId: string): Promise<RefundWorkflowRecord | null> {
   const { data, error } = await createAdminClient().from("refund_workflows").select("id,order_id,payment_record_id,user_id,profile_id,product_id,requested_amount,currency,reason_category,reason_text,status,provider_status,provider_cancellation_reference,requested_at,processing_started_at,provider_confirmed_at,completed_at,entitlement_revoked_at,retry_count,max_retry_count,next_retry_at,last_attempt_at,last_provider_http_status,last_provider_error_code,last_provider_error_message,last_retryability,correlation_id,reconciliation_claim_token,reconciliation_claimed_at,reconciliation_claim_expires_at").eq("order_id", orderId).order("created_at", { ascending: false }).limit(1).maybeSingle<RefundRow>();
-  if (error || !data) return null;
+  // Financial safety: a failed lookup is NOT proof that no refund exists.
+  if (error) throw new Error("REFUND_WORKFLOW_LOOKUP_FAILED");
+  if (!data) return null;
   return toRefundRecord(data);
 }
 
@@ -159,7 +160,7 @@ export async function requestFullRefund(input: {
   emitPaymentEvent("payment_cancellation_requested", { operationalClass: "RECOVERING", orderId: input.order.id, productId: input.order.productId, profileReference: input.order.profileId, runId: correlationId });
   emitPaymentEvent("payment_cancellation_started", { operationalClass: "RECOVERING", orderId: input.order.id, productId: input.order.productId, profileReference: input.order.profileId, runId: correlationId });
   try {
-    const provider = await cancelPaymentWithToss({ paymentKey: payment.paymentKey, cancelReason: input.reasonText || input.reasonCategory, config: getTossConfigForAccount(input.order.userId, "settlement") });
+    const provider = await cancelPaymentWithToss({ paymentKey: payment.paymentKey, cancelReason: input.reasonText || input.reasonCategory, idempotencyKey: workflow.id, config: getTossConfigForAccount(input.order.userId, "settlement") });
     if (provider.orderId !== input.order.id || provider.totalAmount !== input.order.amount || provider.currency !== "KRW" || provider.cancels.at(-1)?.cancelAmount !== input.order.amount) throw new TossCancellationError({ provider: "toss", httpStatus: 502, providerErrorCode: "CANCELLATION_MISMATCH", safeMessage: "결제 취소 결과를 확인하지 못했습니다.", failureStage: "cancellation", retryability: "OWNER_ESCALATION_REQUIRED", correlationId, occurredAt: new Date().toISOString() });
     await updateRefund(input.order.id, { provider_status: provider.status, provider_cancellation_reference: provider.cancels.at(-1)?.transactionKey ?? null, provider_confirmed_at: new Date().toISOString(), last_provider_http_status: 200, updated_at: new Date().toISOString() });
     emitPaymentEvent("payment_cancellation_confirmed", { operationalClass: "CONVERGED", orderId: input.order.id, productId: input.order.productId, profileReference: input.order.profileId, runId: correlationId });

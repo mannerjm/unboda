@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import AdminReportRefundControls from "./AdminReportRefundControls";
 import { FormEvent, useMemo, useState } from "react";
 import {
   SUPPORT_CATEGORY_LABELS,
@@ -132,6 +133,7 @@ export default function AdminSupportConsole({ initialRequests }: { initialReques
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link href="/admin" className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700">운영 대시보드에서 고객/주문 조회</Link>
               </div>
+              {item.category === "PAYMENT_REFUND" && item.orderId ? <AdminReportRefundControls key={item.id + ":" + item.status} ticketId={item.id} status={item.status} /> : null}
               {item.operatorResponse ? (
                 <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                   <p className="text-xs font-semibold text-emerald-700">현재 고객에게 표시되는 답변</p>

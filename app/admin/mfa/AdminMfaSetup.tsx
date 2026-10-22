@@ -19,11 +19,11 @@ export default function AdminMfaSetup() {
   const [message, setMessage] = useState<string | null>(null);
 
   const refreshState = useCallback(async () => {
-    setMessage(null);
     const [aal, factors] = await Promise.all([
       supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
       supabase.auth.mfa.listFactors(),
     ]);
+    setMessage(null);
     if (aal.error || factors.error) {
       setStep("error");
       setMessage("인증 상태를 확인하지 못했습니다. 다시 로그인한 뒤 시도해 주세요.");
@@ -114,6 +114,7 @@ export default function AdminMfaSetup() {
       <h2 className="font-bold">2. QR코드 스캔 및 등록 확인</h2>
       <p className="mt-2 text-sm leading-6">인증 앱의 계정 추가 기능으로 QR코드를 스캔한 뒤 표시되는 6자리 코드를 입력하세요. QR코드는 비밀 인증정보이므로 보관·공유하지 마세요.</p>
       {/* Supabase provides an in-session SVG QR data URI; never persist or log it. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={enrollment.qr} width={200} height={200} alt="관리자 인증 앱 등록용 일회성 QR코드" className="mt-4 rounded-lg border p-2" />
     </>}
     {(step === "verify-enrollment" || step === "challenge") && <>

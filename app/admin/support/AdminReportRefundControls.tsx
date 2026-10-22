@@ -68,7 +68,7 @@ export default function AdminReportRefundControls({ ticketId, status }: {
       disabled={busy || !inReview} onClick={() => void inspect()}>
       {busy ? "확인 중..." : "원결제·중복 환불·정책 사전검사"}
     </button>
-    {!inReview ? <p className="mt-2 text-xs text-amber-900">먼저 고객지원 문의 상태를 '확인 중'으로 저장하세요.</p> : null}
+    {!inReview ? <p className="mt-2 text-xs text-amber-900">먼저 고객지원 문의 상태를 &apos;확인 중&apos;으로 저장하세요.</p> : null}
     {preview ? <p role="status" className="mt-3 text-xs font-semibold leading-5">
       {preview.message} {preview.amount != null ? " · 원결제 " + preview.amount.toLocaleString("ko-KR") + "원" : ""}
     </p> : null}

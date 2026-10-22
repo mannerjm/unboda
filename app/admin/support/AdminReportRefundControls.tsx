@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 type Reason = "CONTENT_NOT_PROVIDED" | "MATERIAL_DEFECT" | "MATERIALLY_DIFFERENT" | "CHANGE_OF_MIND";
 type Preview = { enabled?: boolean; ready?: boolean; amount?: number | null; message?: string; error?: string };
@@ -87,6 +88,10 @@ export default function AdminReportRefundControls({ ticketId, status }: {
         카드 전액 환불 승인 · 실제 취소 실행
       </button>
     </div> : null}
+    <p className="mt-3 text-xs text-slate-700">
+      금융 실행 승인에는 인증 앱 추가 인증이 필요합니다.{" "}
+      <Link href="/admin/mfa" className="font-bold underline">관리자 MFA 등록·인증 →</Link>
+    </p>
     {result ? <p role="status" className="mt-3 text-xs font-semibold leading-5">{result}</p> : null}
   </section>;
 }

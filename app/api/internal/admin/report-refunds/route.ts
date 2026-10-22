@@ -7,6 +7,7 @@ import { assessFullRefundEligibility, type RefundReasonCategory } from "@/app/li
 import { getRefundWorkflowForOrder, requestFullRefund } from "@/app/lib/refunds/server";
 import { getPaymentByOrderIdFromToss } from "@/app/lib/toss/server";
 import { getTossConfigForAccount } from "@/app/lib/toss/config";
+import { isFinancialMfaVerified } from "@/app/lib/operators/financialMfa";
 
 export const dynamic = "force-dynamic";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -89,6 +90,10 @@ export async function GET(request: NextRequest) {
     ready: false, enabled: false,
     message: "리포트 카드 환불이 비활성 상태이거나 승인 계정이 아닙니다.",
   });
+  if (!(await isFinancialMfaVerified())) return reply({
+    ready: false, enabled: false, mfaRequired: true, mfaHref: "/admin/mfa",
+    message: "카드 환불 확인 전에 인증 앱으로 추가 인증(AAL2)을 완료해 주세요.",
+  }, 403);
   const ticketId = request.nextUrl.searchParams.get("ticketId");
   const reason = request.nextUrl.searchParams.get("reason");
   if (!ticketId || !UUID.test(ticketId) || !isReason(reason))
@@ -109,6 +114,9 @@ export async function POST(request: NextRequest) {
     error instanceof OperatorAuthorizationError && error.code === "UNAUTHENTICATED" ? 401 : 403); }
   if (!isApprover(operator.authUserId))
     return reply({ error: "별도로 승인된 환불 담당자만 실행할 수 있습니다." }, 403);
+  if (!(await isFinancialMfaVerified())) return reply({
+    error: "관리자 인증 앱의 추가 인증(AAL2)이 필요합니다.", mfaRequired: true, mfaHref: "/admin/mfa",
+  }, 403);
   const input = await request.json().catch(() => null) as {
     ticketId?: unknown; reason?: unknown; note?: unknown;
     confirmed?: unknown; amountConfirmation?: unknown;

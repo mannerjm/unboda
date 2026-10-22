@@ -9,6 +9,9 @@ const customerRoute = fs.readFileSync("app/api/orders/[orderId]/refund/route.ts"
 assert(code.includes('process.env.REPORT_REFUND_ADMIN_ENABLED !== "true"'));
 assert(code.includes("process.env.REPORT_REFUND_APPROVER_IDS"));
 assert(code.includes("await requireOperator()"));
+assert(code.includes("await isFinancialMfaVerified()"));
+assert(code.includes('mfaHref: "/admin/mfa"'));
+assert(require("node:fs").readFileSync("app/admin/mfa/AdminMfaSetup.tsx","utf8").includes("challengeAndVerify"));
 assert(code.includes("await recordOperatorAuditEvent"));
 assert(code.includes("await getPaymentByOrderIdFromToss"));
 assert(code.includes("await getRefundWorkflowForOrder"));
@@ -23,7 +26,7 @@ const approver = "11111111-1111-4111-8111-111111111111";
 const ticketId = "33333333-3333-4333-8333-333333333333";
 const orderId = "44444444-4444-4444-8444-444444444444";
 const state = {
-  authorized: true, ticket: {id:ticketId,user_id:buyerId,order_id:orderId,category:"PAYMENT_REFUND",status:"IN_REVIEW"},
+  authorized: true, mfaVerified: true, ticket: {id:ticketId,user_id:buyerId,order_id:orderId,category:"PAYMENT_REFUND",status:"IN_REVIEW"},
   existing: null, paymentStatus: "DONE", providerStatus:"DONE", cancelled:false,
   providerOutage:false, policyEligible:true, auditError:false,
   attempts:0, auditAttempts:0, confirmedAmount:9900,
@@ -38,6 +41,7 @@ const mocks = {
   requireOperator:async()=>{if(!state.authorized)throw new OperatorAuthorizationError("MISSING_ROLE");return {authUserId:approver};},
   recordOperatorAuditEvent:async()=>{state.auditAttempts++;if(state.auditError)throw Error("synthetic audit unavailable");}
  },
+ "@/app/lib/operators/financialMfa": {isFinancialMfaVerified:async()=>state.mfaVerified},
  "@/app/lib/supabase/admin": {createAdminClient:()=>({from:(t)=>{assert.equal(t,"support_requests");return {
   select(){return this;},eq(){return this;},
   async maybeSingle(){return {data:state.ticket,error:null};}
@@ -85,6 +89,12 @@ async function expectBlocked(action,label){
  process.env.REPORT_REFUND_APPROVER_IDS=buyerId;
  await expectBlocked(handler.POST(request()),"not in approver allowlist");
  process.env.REPORT_REFUND_APPROVER_IDS=approver;
+ state.mfaVerified=false;
+ await expectBlocked(handler.POST(request()),"MFA missing");
+ const blockedPreview=await handler.GET(request());
+ assert.equal(blockedPreview.status,403,"MFA missing blocks preflight");
+ assert.equal(blockedPreview.data.mfaRequired,true);
+ state.mfaVerified=true;
  await expectBlocked(handler.POST(request(payload,"https://evil.example")),"CSRF");
  state.authorized=false;
  await expectBlocked(handler.POST(request()),"not an operator");state.authorized=true;
@@ -122,5 +132,5 @@ async function expectBlocked(action,label){
  assert.ok(state.auditAttempts>=2);
  state.existing={status:"REFUND_COMPLETED"};
  await expectBlocked(handler.POST(request()),"replay after completion");
- console.log("admin-report-refund-safety-regression: PASS (19 synthetic gates, NO Toss or real DB)");
+ console.log("admin-report-refund-safety-regression: PASS (MFA plus existing financial safety gates; NO Toss or real DB)");
 })().catch(e=>{console.error("admin-report-refund-safety-regression: FAIL",e);process.exitCode=1;});

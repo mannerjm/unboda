@@ -42,7 +42,7 @@ export default function AdminMfaSetup() {
     }
   }, []);
 
-  useEffect(() => { void refreshState(); }, [refreshState]);
+  useEffect(() => { void Promise.resolve().then(refreshState); }, [refreshState]);
 
   async function startEnrollment() {
     if (busy) return;

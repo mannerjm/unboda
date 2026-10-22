@@ -32,7 +32,7 @@ function statusDetails(status:string|null):string|null {
     case "PENDING":return "환불 요청이 접수되었습니다. 중복 신청하실 필요가 없습니다.";
     case "PROVIDER_UNKNOWN":return "카드 취소 결과를 확인하고 있습니다. 확정 전까지 환불 대상 질문권의 사용이 보류됩니다.";
     case "REVIEW_REQUIRED":return "자동 카드 취소가 어려워 담당자가 확인하고 있습니다. 카드 취소 결과 확인 후 환불 방법을 안내합니다.";
-    case "MANUAL_BANK_REQUIRED":return "카드 취소가 불가능한 것으로 확인되어 고객지원센터에서 대체 환불을 안내하고 있습니다. 중복 신청은 필요하지 않습니다.";
+    case "MANUAL_BANK_REQUIRED":return "원결제 카드 환불이 불가능해 계좌 환불로 진행합니다. 아래에 환불 계좌를 안전하게 제출해 주세요. 중복 환불 신청은 필요하지 않습니다.";
     case "COMPLETED":return "카드 환불이 완료되었습니다. 실제 청구 취소 반영 시점은 카드사에 따라 다릅니다.";
     case "MANUAL_BANK_PAID":return "대체 환불 처리가 완료되었습니다. 환불 상세 내역은 고객지원센터에서 확인할 수 있습니다.";
     case "CANCELLED_NO_REFUND":return "요청한 환불은 진행되지 않았습니다. 사용 가능한 질문권은 이용기간 내 다시 사용할 수 있습니다.";

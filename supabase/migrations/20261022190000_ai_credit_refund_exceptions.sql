@@ -154,3 +154,28 @@ begin
 end; $$;
 revoke all on function public.restore_ai_credit_refund_hold(uuid,uuid,text) from public,anon,authenticated;
 grant execute on function public.restore_ai_credit_refund_hold(uuid,uuid,text) to service_role;
+
+-- Atomic escalation to a manually handled refund after verified definitive card refusal.
+create or replace function public.mark_ai_credit_manual_required(
+  p_request_id uuid,p_operator_id uuid,p_reason text)
+returns setof public.ai_credit_refund_requests
+language plpgsql security definer set search_path=public,pg_temp as $$
+declare v_req public.ai_credit_refund_requests%rowtype;
+begin
+  if p_operator_id is null or length(btrim(coalesce(p_reason,'')))<6
+     or length(p_reason)>180 then raise exception 'AI_CREDIT_MANUAL_REASON_REQUIRED';end if;
+  select * into v_req from public.ai_credit_refund_requests where id=p_request_id for update;
+  if not found then raise exception 'AI_CREDIT_REFUND_NOT_FOUND';end if;
+  if v_req.status='MANUAL_BANK_REQUIRED' then return next v_req;return;end if;
+  if v_req.status<>'REVIEW_REQUIRED' or not v_req.provider_final_failure
+    or v_req.processing_claim_expires_at>now() then
+    raise exception 'AI_CREDIT_PROVIDER_FAILURE_NOT_FINAL';end if;
+  update public.ai_credit_refund_requests
+    set status='MANUAL_BANK_REQUIRED',resolution_note=p_reason,updated_at=now()
+    where id=p_request_id returning * into v_req;
+  insert into public.ai_credit_refund_resolution_events(refund_id,operator_auth_id,resolution_action,reference_note)
+    values(v_req.id,p_operator_id,'MANUAL_REQUIRED',p_reason);
+  return next v_req;
+end; $$;
+revoke all on function public.mark_ai_credit_manual_required(uuid,uuid,text) from public,anon,authenticated;
+grant execute on function public.mark_ai_credit_manual_required(uuid,uuid,text) to service_role;

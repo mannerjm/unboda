@@ -8,7 +8,7 @@ type NoticeRow={
   id:string;refund_id:string;refund_status:RefundStatus;status:string;
   attempt_count:number;next_retry_at:string|null;updated_at:string;
 };
-type RefundRow={id:string;user_id:string;status:RefundStatus};
+type RefundRow={id:string;user_id:string;profile_id:string;status:RefundStatus};
 const statuses:RefundStatus[]=[
   "PENDING","PROVIDER_UNKNOWN","COMPLETED","REVIEW_REQUIRED",
   "MANUAL_BANK_REQUIRED","MANUAL_BANK_PAID","CANCELLED_NO_REFUND",
@@ -98,7 +98,7 @@ export async function dispatchCreditRefundNotices(limit=10):Promise<CreditRefund
     if(!claimed){summary.skipped++;continue;}
     try {
       const {data:refund,error:refundError}=await db.from("ai_credit_refund_requests")
-        .select("id,user_id,status").eq("id",candidate.refund_id).single<RefundRow>();
+        .select("id,user_id,profile_id,status").eq("id",candidate.refund_id).single<RefundRow>();
       if(refundError||!refund)throw new Error("AI_CREDIT_NOTICE_REFUND_NOT_FOUND");
       if(refund.status!==candidate.refund_status){
         await db.from("ai_credit_refund_notice_deliveries").update({
@@ -110,13 +110,14 @@ export async function dispatchCreditRefundNotices(limit=10):Promise<CreditRefund
       const email=auth.user?.email?.trim();
       if(authError||!email)throw new Error("AI_CREDIT_NOTICE_CUSTOMER_EMAIL_MISSING");
       const mail=textForStatus(refund.status);
-      const text=mail.body+"\n\n환불 진행 상황 확인: "+CUSTOMER_URL+"\n고객지원: https://unboda.kr/support";
+      const detailsUrl=CUSTOMER_URL+"?profileId="+encodeURIComponent(refund.profile_id);
+      const text=mail.body+"\n\n환불 진행 상황 확인: "+detailsUrl+"\n고객지원: https://unboda.kr/support";
       const response=await fetch("https://api.resend.com/emails",{
         method:"POST",
         headers:{Authorization:"Bearer "+key,"Content-Type":"application/json","Idempotency-Key":candidate.id},
         body:JSON.stringify({
           from:FROM,to:[email],subject:mail.subject,text,
-          html:"<p>"+mail.body+"</p><p><a href=\""+CUSTOMER_URL+"\">운보다 환불 진행 상황 확인</a></p>",
+          html:"<p>"+mail.body+"</p><p><a href=\""+detailsUrl+"\">운보다 환불 진행 상황 확인</a></p>",
         }),
       });
       if(!response.ok)throw new Error(response.status>=500||response.status===429?"AI_CREDIT_NOTICE_PROVIDER_RETRY":"AI_CREDIT_NOTICE_PROVIDER_REJECTED");

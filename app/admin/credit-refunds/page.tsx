@@ -11,12 +11,7 @@ export default async function CreditRefundExceptionsPage() {
   catch(error) {
     if(error instanceof OperatorAuthorizationError && error.code==="UNAUTHENTICATED")
       redirect("/auth/login?returnTo=/admin/credit-refunds");
-    const bankRefundIds=(data??[]).filter(refund=>refund.status==="MANUAL_BANK_REQUIRED").map(refund=>refund.id);
-  const receipts=bankRefundIds.length?await createAdminClient().from("ai_credit_refund_bank_details")
-    .select("refund_id,bank_code,account_last4,submitted_at")
-    .in("refund_id",bankRefundIds):{data:[],error:null};
-  const bankMap=new Map((receipts.data??[]).map(record=>[record.refund_id,record]));
-  return <main className="mx-auto max-w-3xl p-8"><h1 className="text-2xl font-bold">운영자 접근 권한이 없습니다.</h1></main>;
+return <main className="mx-auto max-w-3xl p-8"><h1 className="text-2xl font-bold">운영자 접근 권한이 없습니다.</h1></main>;
   }
   await recordOperatorAuditEvent({
     action:"FAILURE_QUEUE_VIEW",targetType:"FAILURE_QUEUE",
@@ -26,6 +21,12 @@ export default async function CreditRefundExceptionsPage() {
     .select("id,order_id,refund_amount_krw,refund_quantity,status,provider_error,provider_final_failure,created_at,updated_at")
     .in("status",["REVIEW_REQUIRED","MANUAL_BANK_REQUIRED","PROVIDER_UNKNOWN"])
     .order("created_at",{ascending:false}).limit(100);
+  const bankRefundIds=(data??[]).filter(refund=>refund.status==="MANUAL_BANK_REQUIRED").map(refund=>refund.id);
+  const receipts=bankRefundIds.length?await createAdminClient().from("ai_credit_refund_bank_details")
+    .select("refund_id,bank_code,account_last4,submitted_at")
+    .in("refund_id",bankRefundIds):{data:[],error:null};
+  const bankMap=new Map((receipts.data??[]).map(record=>[record.refund_id,record]));
+  
   return <main className="min-h-screen bg-[#f5f7fc] px-4 py-8 text-[#11162d] sm:px-8">
     <div className="mx-auto max-w-4xl">
       <Link href="/admin" className="text-sm font-semibold underline">← 운영 대시보드</Link>

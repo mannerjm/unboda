@@ -1,5 +1,8 @@
 import Link from "next/link";
 import RefundCreditButton from "./RefundCreditButton";
+import RefundBankIntakeForm from "./RefundBankIntakeForm";
+import { createAdminClient } from "@/app/lib/supabase/admin";
+import { REFUND_BANK_OPTIONS } from "@/app/lib/aiConsulting/refundBankOptions";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getUserProfile } from "@/app/lib/profiles/server";
@@ -44,6 +47,15 @@ export default async function AiCreditRefundsPage({searchParams}:{searchParams:P
   if(!profile)return <main className="mx-auto max-w-2xl p-6">분석 대상 프로필을 확인하지 못했습니다.</main>;
   const lots=await listCreditLotViews(user.id,profile.id).catch(()=>null);
   const enabled=isAiCreditRefundAllowedForUser(user.id);
+  // Select only masked metadata for the current authenticated account; NEVER
+  // deliver decrypted bank details to a customer page or server-rendered HTML.
+  const pendingRefundIds=(lots??[]).filter(lot=>lot.refundStatus==="MANUAL_BANK_REQUIRED"&&lot.refundId)
+    .map(lot=>lot.refundId as string);
+  const received=pendingRefundIds.length?await createAdminClient().from("ai_credit_refund_bank_details")
+    .select("refund_id,bank_code,account_last4,submitted_at")
+    .eq("user_id",user.id).in("refund_id",pendingRefundIds):{data:[],error:null};
+  const bankReceiptMap=new Map((received.data??[]).map(entry=>[entry.refund_id,entry]));
+
   return <main className="min-h-screen bg-[#f5f7fc] p-4 text-[#11162d] sm:p-8">
     <div className="mx-auto max-w-3xl">
       <Link href="/mypage" className="text-sm font-semibold text-slate-600">← 마이페이지</Link>
@@ -55,6 +67,9 @@ export default async function AiCreditRefundsPage({searchParams}:{searchParams:P
           const active=!lot.expiresAt||new Date(lot.expiresAt).getTime()>Date.now();
           const status=statusLabel(lot,active);
           const info=statusDetails(lot.refundStatus);
+          const bankReceipt=lot.refundId?bankReceiptMap.get(lot.refundId):undefined;
+          const bankLabel=REFUND_BANK_OPTIONS.find(b=>b.value===bankReceipt?.bank_code)?.label??"은행";
+
           const amount=lot.refundAmountKrw??getUnusedQuestionRefundKrw({
             paidAmount:lot.priceKrw,purchasedCount:lot.original,
             consumedCount:lot.original-lot.available,
@@ -84,6 +99,17 @@ export default async function AiCreditRefundsPage({searchParams}:{searchParams:P
               <strong>현재 미사용분 환불 예상액</strong><strong className="text-xl">{amount.toLocaleString("ko-KR")}원</strong>
             </div>}
             {info?<p role="status" className="mt-4 rounded-xl bg-[#f5f3ff] p-4 text-sm leading-6 text-slate-800">{info}</p>:null}
+            {lot.refundStatus==="MANUAL_BANK_REQUIRED"&&lot.refundId
+              ?bankReceipt
+                ?<div className="mt-4 rounded-xl border border-[#dad7f6] bg-[#f7f6ff] p-4">
+                  <p className="font-semibold">대체 환불 계좌 접수 완료</p>
+                  <p className="mt-1 text-sm text-slate-700">{bankLabel} · ****{bankReceipt.account_last4}</p>
+                  <p className="mt-1 text-xs text-slate-600">담당자 확인 후 직접 송금합니다. 계좌 변경이 필요하면 송금 전에 고객지원센터로 문의해 주세요.</p>
+                </div>
+                :received.error
+                  ?<p className="mt-4 text-sm text-red-700">계좌 접수 상태를 확인하지 못했습니다. 고객지원센터에 문의해 주세요.</p>
+                  :<RefundBankIntakeForm refundId={lot.refundId} refundAmount={amount} refundQuantity={lot.refundQuantity??lot.held}/>
+              :null}
             {enabled&&active&&lot.available>0&&!lot.refundId
               ?<div className="mt-4"><RefundCreditButton profileId={profile.id} purchaseId={lot.purchaseId} quantity={lot.available} amount={amount}/></div>
               :null}

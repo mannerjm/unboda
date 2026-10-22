@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CreditRefundResolutionControls from "./CreditRefundResolutionControls";
+import RefundBankDetailsReveal from "./RefundBankDetailsReveal";
 import { redirect } from "next/navigation";
 import { OperatorAuthorizationError, requireOperator, recordOperatorAuditEvent } from "@/app/lib/operators/server";
 import { createAdminClient } from "@/app/lib/supabase/admin";
@@ -10,7 +11,7 @@ export default async function CreditRefundExceptionsPage() {
   catch(error) {
     if(error instanceof OperatorAuthorizationError && error.code==="UNAUTHENTICATED")
       redirect("/auth/login?returnTo=/admin/credit-refunds");
-    return <main className="mx-auto max-w-3xl p-8"><h1 className="text-2xl font-bold">운영자 접근 권한이 없습니다.</h1></main>;
+return <main className="mx-auto max-w-3xl p-8"><h1 className="text-2xl font-bold">운영자 접근 권한이 없습니다.</h1></main>;
   }
   await recordOperatorAuditEvent({
     action:"FAILURE_QUEUE_VIEW",targetType:"FAILURE_QUEUE",
@@ -20,6 +21,12 @@ export default async function CreditRefundExceptionsPage() {
     .select("id,order_id,refund_amount_krw,refund_quantity,status,provider_error,provider_final_failure,created_at,updated_at")
     .in("status",["REVIEW_REQUIRED","MANUAL_BANK_REQUIRED","PROVIDER_UNKNOWN"])
     .order("created_at",{ascending:false}).limit(100);
+  const bankRefundIds=(data??[]).filter(refund=>refund.status==="MANUAL_BANK_REQUIRED").map(refund=>refund.id);
+  const receipts=bankRefundIds.length?await createAdminClient().from("ai_credit_refund_bank_details")
+    .select("refund_id,bank_code,account_last4,submitted_at")
+    .in("refund_id",bankRefundIds):{data:[],error:null};
+  const bankMap=new Map((receipts.data??[]).map(record=>[record.refund_id,record]));
+  
   return <main className="min-h-screen bg-[#f5f7fc] px-4 py-8 text-[#11162d] sm:px-8">
     <div className="mx-auto max-w-4xl">
       <Link href="/admin" className="text-sm font-semibold underline">← 운영 대시보드</Link>
@@ -36,7 +43,12 @@ export default async function CreditRefundExceptionsPage() {
             <p className="mt-2 text-xs text-slate-500">접수: {new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",dateStyle:"medium",timeStyle:"short"}).format(new Date(row.created_at))}</p>
             {row.provider_error?<p className="mt-2 text-xs text-amber-800">안전 확인 코드: {row.provider_error}</p>:null}
             <Link href="/admin/support" className="mt-3 inline-block text-sm font-semibold text-[#5143b0] underline">고객지원 확인 →</Link>
-            <CreditRefundResolutionControls refundId={row.id} status={row.status} finalFailure={Boolean(row.provider_final_failure)}/>
+            {row.status==="MANUAL_BANK_REQUIRED"&&(receipts.error
+              ?<p className="mt-3 text-sm font-semibold text-red-700">환불 계좌 접수 상태 조회에 실패했습니다.</p>
+              :bankMap.has(row.id)
+                ?<RefundBankDetailsReveal refundId={row.id} bankCode={bankMap.get(row.id)!.bank_code} last4={bankMap.get(row.id)!.account_last4}/>
+                :<p className="mt-3 rounded-lg bg-[#f5f5fb] p-3 text-sm text-slate-700">고객의 대체 환불 계좌 제출을 기다리고 있습니다. 고객은 운보다 질문권 환불 관리 화면에서 직접 제출할 수 있습니다.</p>)}
+            <CreditRefundResolutionControls refundId={row.id} status={row.status} finalFailure={Boolean(row.provider_final_failure)} bankSubmitted={Boolean(bankMap.get(row.id))&&!receipts.error}/>
           </li>
         ))}</ul>}
       <p className="mt-6 text-xs leading-6 text-slate-600">카드 취소 가능 상태를 토스에서 직접 확인한 후 대체 환불을 진행해야 합니다. 실제 송금은 대표가 직접 수행하고 거래식별자를 기록합니다. 자동 계좌송금은 지원하지 않습니다.</p>

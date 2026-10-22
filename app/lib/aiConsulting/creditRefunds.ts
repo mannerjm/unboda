@@ -18,7 +18,10 @@ export function isAiCreditRefundAllowedForUser(userId: string): boolean {
     || process.env.TOSS_LIVE_PILOT_ENABLED !== "true"
     || process.env.TOSS_LIVE_CHECKOUT_ENABLED === "true") return false;
   if (!/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(userId)) return false;
-  return (process.env.TOSS_LIVE_PILOT_ACCOUNT_IDS ?? "")
+  // A second, refund-specific allowlist protects other LIVE pilot purchasers.
+  const dedicated = (process.env.AI_CREDIT_REFUND_PILOT_ACCOUNT_IDS ?? "")
+    .split(",").some(id => id.trim().toLowerCase() === userId.toLowerCase());
+  return dedicated && (process.env.TOSS_LIVE_PILOT_ACCOUNT_IDS ?? "")
     .split(",").some(id => id.trim().toLowerCase() === userId.toLowerCase());
 }
 

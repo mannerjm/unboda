@@ -12,11 +12,18 @@ const orders = readFileSync("app/api/orders/route.ts", "utf8");
 
 assert(checkout.includes('import ProfileSelector from "@/app/components/ProfileSelector"'), "checkout must reuse ProfileSelector");
 assert(checkout.includes('user && !profileId'), "profile-less checkout selector must be limited to authenticated customers");
-assert(checkout.includes('<ProfileSelector productId={product.id} destination="checkout" />'), "profile-less checkout must select the current product destination");
+assert(checkout.includes('user && !profileId && premiumProduct')
+  && checkout.includes('<ProfileSelector productId={premiumProduct.id} destination="checkout" />'),
+  "profile-less premium checkout must select the resolved premium product destination");
+assert(checkout.includes('user && !profileId && specialProduct')
+  && checkout.includes('getSpecialAnalysisProduct(canonicalProductId)'),
+  "special compatibility checkout must retain its separate profile recovery path");
 assert(!checkout.includes('getActiveProfile('), "checkout must not silently select the active profile");
 assert(checkoutPanel.includes("{profileId ? ("), "payment CTA must be conditional on a selected profile");
 assert(!checkoutPanel.includes("분석 대상을 선택해 주세요"), "profile-less checkout must not render a redundant disabled payment CTA");
-assert(checkoutPanel.includes('"결제 계속하기"'), "profile-bound checkout must preserve the payment CTA");
+assert(checkoutPanel.includes('`${priceLabel} 결제하기`')
+  && checkoutPanel.includes('onClick={handlePayment}'),
+  "profile-bound checkout must preserve the explicit priced payment action");
 assert(!checkoutPanel.includes("disabled={isPaying || !profileId}"), "profile-less checkout must not expose a disabled payment control");
 assert(selector.includes('router.push(`/${destination}/${productId}?profileId=${profile.id}`)'), "profile choice must bind the selected profile to checkout");
 assert(selector.includes("relationshipLabels[profile.relationshipType]"), "profile selection must use customer-facing relationship labels");

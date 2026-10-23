@@ -113,7 +113,14 @@ assert(detailRoute.includes("getActiveProfile(user.id)") && detailRoute.includes
 console.log("4c. profile A report URLs are denied while profile B is active ✓");
 
 // Section 5: Purchased-analyses page composes grouping, refresh, and multi-edition rendering.
-assert(purchasedAnalysesPage.includes("PurchasedAnalysesAutoRefresh") && purchasedAnalysesPage.includes("groups={groups}"), "page must pass grouped analyses to the server-refresh wrapper");
+assert(purchasedAnalysesPage.includes("PurchasedAnalysesAutoRefresh")
+  && purchasedAnalysesPage.includes("groups={recentGroups}")
+  && purchasedAnalysesPage.includes("libraryPage={libraryPage}")
+  && purchasedAnalysesPage.includes("libraryOverview={libraryOverview}"),
+  "page must pass recent groups plus the paginated library and full-library counters to the refresh wrapper");
+assert(purchasedAnalysesPage.includes("paidSummaries.filter((analysis) => analysis.profileId === activeProfile.id)")
+  && purchasedAnalysesPage.includes("selectPurchasedLibraryPage(groups, filters, requestedPage)"),
+  "pagination and overview must derive only from the verified active profile's groups");
 assert(purchasedAnalysesPage.includes("groupPurchasedAnalysesByProduct(summaries)") || purchasedAnalysesPage.includes("groupPurchasedAnalysesByProduct(analyses)"), "grouping must be applied to summaries");
 assert(purchasedAnalysesRefresh.includes("PurchasedAnalysesListMultiEdition") && purchasedAnalysesRefresh.includes("groups={groups}"), "refresh wrapper must render the multi-edition list with the grouped data");
 console.log("5. purchased-analyses page composes grouping, refresh, and multi-edition rendering ✓");

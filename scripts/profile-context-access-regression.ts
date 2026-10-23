@@ -41,9 +41,12 @@ console.log("2. result requires explicit Profile selection before paid-analysis 
 
 assert(checkoutPage.includes("<ProfileSelector") && checkoutPage.includes("user && !profileId"), "checkout may show explicit ProfileSelector only when authenticated profile context is absent");
 assert(!checkoutPage.includes("getActiveProfile("), "checkout must not auto-select an active profile");
-for (const [name, source] of [["checkout page", checkoutPage], ["paid page", paidPage]] as const) {
-  assert(source.includes("if (!product) {") && source.includes("notFound();"), `${name} must return an HTTP 404 for an invalid product`);
-}
+assert(checkoutPage.includes("resolveLaunchPurchasableProduct(productId)")
+  && checkoutPage.includes("if (!resolved.ok) notFound();")
+  && checkoutPage.includes("if (!specialProduct && !premiumProduct) notFound();"),
+  "checkout must reject an unavailable product before rendering its profile selector or payment controls");
+assert(paidPage.includes("if (!product) {") && paidPage.includes("notFound();"),
+  "paid page must return an HTTP 404 for an invalid product");
 assert(notFoundPage.includes("페이지를 찾을 수 없습니다.") && notFoundPage.includes('href="/deep-analysis"'), "shared 404 page must provide Korean recovery guidance");
 console.log("2b. invalid paid product routes use the shared 404 contract ✓");
 
@@ -67,7 +70,8 @@ assert(ordersRoute.includes("getUserProfile(rawProfileId, user.id)"), "orders AP
 console.log("3. checkout requires and preserves selected profileId ✓");
 
 assert(!purchasedAnalysesPage.includes("ProfileSelector") && purchasedAnalysesPage.includes("getActiveProfile(user.id)"), "purchased analyses must remain active-profile scoped without a switcher");
-assert(mypage.includes("분석 대상 선택 해제") && mypage.includes("인원 추가"), "My Page must remain the profile management location");
+assert(mypage.includes("/api/profiles/active") && mypage.includes("인원 추가"),
+  "My Page must retain server-backed profile selection and profile creation");
 console.log("3b. profile switching stays in My Page except approved checkout recovery ✓");
 
 for (const [name, source] of [["paid page", paidPage], ["report page", reportPage]] as const) {
@@ -83,7 +87,10 @@ assert(reportGate.includes("? edition") && reportGate.includes("hasAccess"), "ex
 assert(reportGate.includes("?profileId=${profileId}"), "report gate return link must preserve profileId");
 console.log("4. paid access and report gate are profile-scoped ✓");
 
-assert(reportPage.includes("<PaidAnalysisDetailV2Client productId={productId} profileId={profileId} edition={edition}"), "report page must pass profileId and edition to the detail client");
+assert(reportPage.includes("<PaidAnalysisDetailV2Client")
+  && reportPage.includes("productId={productId}") && reportPage.includes("profileId={profileId}")
+  && reportPage.includes("edition={exactEdition}") && reportPage.includes("initialDetail={initialDetail}"),
+  "report body must pass the verified profile, resolved purchased edition and stored content to the detail client");
 assert(detailClient.includes("profileId?: string") && detailClient.includes("edition?: string") && detailClient.includes("JSON.stringify({ productId, profileId, edition })"), "detail client must send only productId, profileId, and the optional edition selector");
 assert(!detailClient.includes("sessionStorage"), "detail client must not use free-analysis sessionStorage as report input");
 assert(detailRoute.includes("isProfileId(input.profileId)"), "detail API must reject missing/invalid profileId");

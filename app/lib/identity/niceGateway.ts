@@ -4,6 +4,35 @@ export const NICE_ADULT_POLICY_VERSION = "NICE_ADULT_19_V1";
 export const NICE_EVIDENCE_VERSION = "NICE_INTC_V1";
 export const NICE_PUBLIC_ORIGIN = "https://unboda.kr";
 
+/** Keep identity callbacks in the same explicitly isolated staging deployment. */
+export function getNicePublicOrigin(requestUrl: string): string {
+  if (process.env.VERCEL_ENV !== "preview") return NICE_PUBLIC_ORIGIN;
+
+  const isolatedStaging = process.env.VERCEL_GIT_COMMIT_REF === "test/staging-tenant-e2e"
+    && process.env.UNBODA_E2E_STAGING_ENABLED === "true"
+    && process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() === "https://xdiitqyysmhicjcytckm.supabase.co"
+    && process.env.TOSS_LIVE_CHECKOUT_ENABLED !== "true"
+    && process.env.TOSS_LIVE_PILOT_ENABLED !== "true"
+    && process.env.TOSS_ALLOW_LIVE !== "true"
+    && process.env.TOSS_ENVIRONMENT !== "production";
+  if (!isolatedStaging) throw new NiceGatewayError("IDENTITY_ORIGIN_NOT_CONFIGURED");
+
+  const trustedHosts = [process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL]
+    .filter((host): host is string => typeof host === "string"
+      && /^unboda-[a-z0-9]+(?:-[a-z0-9]+)*-unboda\.vercel\.app$/.test(host));
+  let url: URL;
+  try {
+    url = new URL(requestUrl);
+  } catch {
+    throw new NiceGatewayError("IDENTITY_ORIGIN_NOT_CONFIGURED");
+  }
+  if (url.protocol !== "https:" || url.username || url.password || url.port
+    || !trustedHosts.includes(url.host)) {
+    throw new NiceGatewayError("IDENTITY_ORIGIN_NOT_CONFIGURED");
+  }
+  return url.origin;
+}
+
 const SIGNATURE_VERSION = "v1";
 const GATEWAY_TIMEOUT_MS = 20_000;
 

@@ -1,18 +1,18 @@
 import { createHash } from "node:crypto";
-import { NICE_PUBLIC_ORIGIN } from "@/app/lib/identity/niceGateway";
+import { getNicePublicOrigin } from "@/app/lib/identity/niceGateway";
 import { createAdminClient } from "@/app/lib/supabase/admin";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 
 export const runtime = "nodejs";
 
-function closeResponse() {
+function closeResponseForOrigin(publicOrigin: string) {
   const payload = JSON.stringify({
     type: "unboda:nice-verification",
     status: "cancelled",
     message: "본인확인이 취소되었습니다.",
   });
-  const targetOrigin = JSON.stringify(NICE_PUBLIC_ORIGIN);
-  const accountUrl = JSON.stringify(`${NICE_PUBLIC_ORIGIN}/account?nice=cancelled`);
+  const targetOrigin = JSON.stringify(publicOrigin);
+  const accountUrl = JSON.stringify(`${publicOrigin}/account?nice=cancelled`);
   const html = `<!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>본인확인</title></head>
 <body><p>본인확인이 취소되었습니다.</p><script>
@@ -33,6 +33,16 @@ setTimeout(function(){ if (!window.closed) window.location.replace(${accountUrl}
 }
 
 export async function GET(request: Request) {
+  let publicOrigin: string;
+  try {
+    publicOrigin = getNicePublicOrigin(request.url);
+  } catch {
+    return new Response("본인확인 환경이 준비되지 않았습니다.", {
+      status: 503,
+      headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "private, no-store" },
+    });
+  }
+  const closeResponse = () => closeResponseForOrigin(publicOrigin);
   const url = new URL(request.url);
   const state = url.searchParams.get("state") ?? "";
   if (!/^[A-Za-z0-9_-]{32,128}$/.test(state)) return closeResponse();

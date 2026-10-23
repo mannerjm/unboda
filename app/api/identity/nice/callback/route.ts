@@ -4,7 +4,7 @@ import {
   completeNiceGatewayVerification,
   NICE_ADULT_POLICY_VERSION,
   NICE_EVIDENCE_VERSION,
-  NICE_PUBLIC_ORIGIN,
+  getNicePublicOrigin,
   NiceGatewayError,
 } from "@/app/lib/identity/niceGateway";
 import { createAdminClient } from "@/app/lib/supabase/admin";
@@ -12,10 +12,10 @@ import { getCurrentUser } from "@/app/lib/supabase/auth";
 
 export const runtime = "nodejs";
 
-function popupResponse(status: "success" | "underage" | "error", message: string, httpStatus = 200) {
+function popupResponseForOrigin(publicOrigin: string, status: "success" | "underage" | "error", message: string, httpStatus = 200) {
   const payload = JSON.stringify({ type: "unboda:nice-verification", status, message });
-  const targetOrigin = JSON.stringify(NICE_PUBLIC_ORIGIN);
-  const accountUrl = JSON.stringify(`${NICE_PUBLIC_ORIGIN}/account?nice=${status}`);
+  const targetOrigin = JSON.stringify(publicOrigin);
+  const accountUrl = JSON.stringify(`${publicOrigin}/account?nice=${status}`);
   const html = `<!doctype html>
 <html lang="ko">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>본인확인</title></head>
@@ -50,6 +50,17 @@ async function markFailed(sessionId: string, outcomeCode: "PROVIDER_ERROR" | "AC
 }
 
 export async function GET(request: Request) {
+  let publicOrigin: string;
+  try {
+    publicOrigin = getNicePublicOrigin(request.url);
+  } catch {
+    return new Response("본인확인 환경이 준비되지 않았습니다.", {
+      status: 503,
+      headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "private, no-store" },
+    });
+  }
+  const popupResponse = (status: "success" | "underage" | "error", message: string, httpStatus = 200) =>
+    popupResponseForOrigin(publicOrigin, status, message, httpStatus);
   const url = new URL(request.url);
   const state = url.searchParams.get("state") ?? "";
   const webTransactionId = url.searchParams.get("web_transaction_id") ?? "";

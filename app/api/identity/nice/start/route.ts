@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { AccountAccessError, requireVerifiedEmailAccount } from "@/app/lib/accounts/server";
 import {
-  NICE_PUBLIC_ORIGIN,
+  getNicePublicOrigin,
   NiceGatewayError,
   startNiceGatewayVerification,
 } from "@/app/lib/identity/niceGateway";
@@ -18,7 +18,13 @@ function noStoreJson(body: unknown, init?: ResponseInit) {
   return response;
 }
 
-export async function POST() {
+export async function POST(request: Request) {
+  let publicOrigin: string;
+  try {
+    publicOrigin = getNicePublicOrigin(request.url);
+  } catch {
+    return noStoreJson({ error: "본인확인 환경이 준비되지 않았습니다." }, { status: 503 });
+  }
   let auth;
   try {
     auth = await requireVerifiedEmailAccount();
@@ -78,8 +84,8 @@ export async function POST() {
 
   const state = randomBytes(32).toString("base64url");
   const stateHash = createHash("sha256").update(state, "utf8").digest("hex");
-  const returnUrl = `${NICE_PUBLIC_ORIGIN}/api/identity/nice/callback?state=${encodeURIComponent(state)}`;
-  const closeUrl = `${NICE_PUBLIC_ORIGIN}/api/identity/nice/close?state=${encodeURIComponent(state)}`;
+  const returnUrl = `${publicOrigin}/api/identity/nice/callback?state=${encodeURIComponent(state)}`;
+  const closeUrl = `${publicOrigin}/api/identity/nice/close?state=${encodeURIComponent(state)}`;
 
   let gateway;
   try {

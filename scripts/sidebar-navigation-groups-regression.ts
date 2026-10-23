@@ -46,4 +46,25 @@ assert(source.includes('if (item.href === "/saju") return hasGuestResult ? "/gue
   source.includes('return `/auth/login?returnTo=${encodeURIComponent(item.href)}&origin=${guestOrigin}`;'),
   "guest routing and authentication gates must remain unchanged");
 assert(!analysis.includes('href: "/compatibility"'), "two-person compatibility stays inside existing professional analysis");
+// The main landing and every app navigation surface share one exact mark.
+const home = readFileSync("app/components/HomeExperience.tsx", "utf8");
+const mark = readFileSync("app/components/BrandMark.tsx", "utf8");
+assert(home.includes('import BrandMark from "./BrandMark";') && home.includes("<BrandMark />운보다"),
+  "homepage must render the shared official logo");
+assert(source.includes('import BrandMark from "@/app/components/BrandMark";'),
+  "sidebar must import the same homepage logo");
+assert.equal((source.match(/<BrandMark \/>운보다/g) ?? []).length, 2,
+  "desktop sidebar and mobile header must both render the official logo");
+assert(!source.includes("bg-[linear-gradient(135deg,#ff7f9f,#7b61ff)]"),
+  "legacy sidebar-only circular placeholder must not return");
+for (const part of [
+  "bg-[linear-gradient(135deg,#ff6f61,#8a6dff)]",
+  "border border-white/75",
+  "translate-x-[7px] -translate-y-[7px]",
+  "shadow-[0_0_10px_white]",
+]) {
+  assert(mark.includes(part), "official home mark must preserve its original geometry: " + part);
+}
+assert(!home.includes("function BrandMark()"),
+  "homepage must not create a diverging brand mark");
 console.log("sidebar-navigation-groups-regression: OK");

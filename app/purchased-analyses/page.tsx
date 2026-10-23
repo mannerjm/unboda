@@ -41,15 +41,21 @@ export default async function PurchasedAnalysesPage({ searchParams }: {
     );
   }
 
-  const analyses = (await listUserPaidAnalysisSummaries(user.id))
-    .filter((analysis) => analysis.profileId === activeProfile.id);
+  // Purchase summaries and expired-entitlement display are independent, read-only
+  // lookups for the *same verified user/profile*. Keep all existing filters and
+  // failure behavior; only remove unnecessary serial network waiting.
+  const [paidSummaries, expiredReportsResult] = await Promise.all([
+    listUserPaidAnalysisSummaries(user.id),
+    createAdminClient().from("entitlements")
+      .select("id,resource_id,service_expires_at")
+      .eq("user_id", user.id).eq("profile_id", activeProfile.id)
+      .eq("resource_type", "paid_analysis").eq("is_active", true)
+      .lte("service_expires_at", new Date().toISOString())
+      .order("service_expires_at", { ascending: false }).limit(50),
+  ]);
+  const analyses = paidSummaries.filter((analysis) => analysis.profileId === activeProfile.id);
   const groups = groupPurchasedAnalysesByProduct(analyses);
-  const { data: expiredReports, error: expiredReportsError } = await createAdminClient().from("entitlements")
-    .select("id,resource_id,service_expires_at")
-    .eq("user_id", user.id).eq("profile_id", activeProfile.id)
-    .eq("resource_type", "paid_analysis").eq("is_active", true)
-    .lte("service_expires_at", new Date().toISOString())
-    .order("service_expires_at", { ascending: false }).limit(50);
+  const { data: expiredReports, error: expiredReportsError } = expiredReportsResult;
   if (expiredReportsError) throw new Error("EXPIRED_REPORT_LIBRARY_READ_FAILED");
   const { filters, requestedPage } = parseLibraryParams(await searchParams);
   const libraryPage = selectPurchasedLibraryPage(groups, filters, requestedPage);

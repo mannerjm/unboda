@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Suspense } from "react";
 import type { ReactNode } from "react";
 import MonthlyFreeAnalysisRefreshNotice from "@/app/components/MonthlyFreeAnalysisRefreshNotice";
+import BrandMark from "@/app/components/BrandMark";
 
 type NavItem = {
   href: string;
@@ -201,7 +202,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
       <div className="flex min-h-screen">
         <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 shrink-0 overflow-y-auto border-r border-white/10 bg-[linear-gradient(180deg,#091127_0%,#0d1530_58%,#15143a_100%)] px-4 py-6 text-white lg:flex lg:flex-col">
           <div className="mb-10">
-            <Link href="/" className="inline-flex items-center gap-2.5 text-xl font-black tracking-tight text-white"><span aria-hidden="true" className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#ff7f9f,#7b61ff)] shadow-[0_0_28px_rgba(123,97,255,0.35)]"><span className="h-3 w-3 rounded-full border border-white/80" /></span>운보다</Link>
+            <Link href="/" className="inline-flex items-center gap-2.5 text-xl font-black tracking-tight text-white"><BrandMark />운보다</Link>
             <p className="mt-3 text-[11px] leading-5 text-[#8f98b5]">AI 명리 분석 플랫폼</p>
           </div>
 
@@ -274,7 +275,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
 
         <div className="min-w-0 flex-1 lg:pl-60">
           <header className="flex h-14 items-center justify-between border-b border-white/10 bg-[#0b122b] px-5 text-white lg:hidden">
-            <Link href="/" className="text-lg font-black tracking-tight text-white">운보다</Link>
+            <Link href="/" className="inline-flex items-center gap-2 text-lg font-black tracking-tight text-white"><BrandMark />운보다</Link>
             {pathname === "/mypage" && isGuest === false && profileId ? (
               <span className="rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-xs font-semibold text-[#d9dcef]">AI 질문권 {aiCreditBalanceLabel}</span>
             ) : (

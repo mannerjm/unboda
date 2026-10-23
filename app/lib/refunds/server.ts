@@ -2,10 +2,11 @@ import { getTossConfigForAccount } from "../toss/config";
 import { randomUUID } from "node:crypto";
 import { emitPaymentEvent } from "../payments/observability";
 import {
+  getOrderForUser,
   getTossPaymentRecordForOrder,
   revokeEntitlementForRefund,
 } from "../purchases/server";
-import type { OrderRecord, RefundStatus, RefundWorkflowRecord } from "../purchases/types";
+import { PAID_ANALYSIS_RESOURCE_TYPE, type OrderRecord, type RefundStatus, type RefundWorkflowRecord } from "../purchases/types";
 import { createAdminClient } from "../supabase/admin";
 import {
   cancelPaymentWithToss,
@@ -95,26 +96,51 @@ export async function getRefundWorkflowForOrder(orderId: string): Promise<Refund
   return toRefundRecord(data);
 }
 
-async function updateRefund(orderId: string, values: Record<string, unknown>, claimToken?: string): Promise<RefundWorkflowRecord> {
-  let query = createAdminClient().from("refund_workflows").update(values).eq("order_id", orderId);
-  if (claimToken) query = query.eq("reconciliation_claim_token", claimToken);
+async function updateRefund(orderId: string, values: Record<string, unknown>, claimToken: string): Promise<RefundWorkflowRecord> {
+  if (!claimToken) throw new Error("REFUND_CLAIM_REQUIRED");
+  const query = createAdminClient().from("refund_workflows").update(values)
+    .eq("order_id", orderId).eq("reconciliation_claim_token", claimToken);
   const { data, error } = await query.select("*").single<RefundRow>();
   if (error || !data) throw new Error(`환불 상태를 저장하지 못했습니다: ${error?.message ?? "unknown"}`);
   return toRefundRecord(data);
 }
 
-async function completeRefund(order: OrderRecord, workflow: RefundWorkflowRecord, claimToken?: string, options: { beforeEntitlementRevocation?: () => Promise<void> } = {}): Promise<RefundWorkflowRecord> {
-  if (claimToken) {
-    const current = await createAdminClient().from("refund_workflows").select("id").eq("order_id", order.id).eq("reconciliation_claim_token", claimToken).maybeSingle<{ id: string }>();
-    if (!current.data) throw new Error("환불 재조정 claim 소유권이 만료되었습니다.");
-  }
+/** Resolve the immutable purchase behind this order, including legacy null editions. */
+async function getRefundPurchaseId(order: OrderRecord): Promise<string> {
+  let query = createAdminClient().from("purchases").select("id")
+    .eq("order_id", order.id).eq("user_id", order.userId)
+    .eq("profile_id", order.profileId).eq("product_id", order.productId);
+  query = order.analysisEditionKey === null
+    ? query.is("analysis_edition_key", null)
+    : query.eq("analysis_edition_key", order.analysisEditionKey);
+  const { data, error } = await query.maybeSingle<{ id: string }>();
+  if (error || !data) throw new Error("REFUND_PURCHASE_SCOPE_NOT_FOUND");
+  return data.id;
+}
+
+async function completeRefund(order: OrderRecord, workflow: RefundWorkflowRecord, claimToken: string, options: { beforeEntitlementRevocation?: () => Promise<void> } = {}): Promise<RefundWorkflowRecord> {
+  if (!claimToken) throw new Error("REFUND_CLAIM_REQUIRED");
+  const current = await createAdminClient().from("refund_workflows").select("id")
+    .eq("id", workflow.id).eq("order_id", order.id)
+    .eq("reconciliation_claim_token", claimToken).maybeSingle<{ id: string }>();
+  if (current.error || !current.data) throw new Error("환불 재조정 claim 소유권이 만료되었습니다.");
+  const purchaseId = await getRefundPurchaseId(order);
   emitPaymentEvent("entitlement_revocation_started", { operationalClass: "RECOVERING", orderId: order.id, productId: order.productId, profileReference: order.profileId, runId: workflow.correlationId });
   await options.beforeEntitlementRevocation?.();
-  const fencedRevoked = claimToken
-    ? await revokeEntitlementForRefund({ userId: order.userId, profileId: order.profileId, productId: order.productId, orderId: order.id, claimToken })
-    : await revokeEntitlementForRefund({ userId: order.userId, profileId: order.profileId, productId: order.productId });
-  const remaining = await createAdminClient().from("entitlements").select("id").eq("user_id", order.userId).eq("profile_id", order.profileId).eq("resource_id", order.productId).eq("is_active", true).maybeSingle<{ id: string }>();
-  if (remaining.data) throw new Error("환불 확정 후 이용 권한을 회수하지 못했습니다.");
+  const fencedRevoked = await revokeEntitlementForRefund({
+    userId: order.userId, profileId: order.profileId, productId: order.productId,
+    orderId: order.id, claimToken,
+  });
+  let remainingQuery = createAdminClient().from("entitlements").select("id")
+    .eq("user_id", order.userId).eq("profile_id", order.profileId)
+    .eq("resource_id", order.productId).eq("resource_type", PAID_ANALYSIS_RESOURCE_TYPE)
+    .eq("purchase_id", purchaseId).eq("is_active", true);
+  remainingQuery = order.analysisEditionKey === null
+    ? remainingQuery.is("analysis_edition_key", null)
+    : remainingQuery.eq("analysis_edition_key", order.analysisEditionKey);
+  const remaining = await remainingQuery.limit(1);
+  if (remaining.error) throw new Error("REFUND_ENTITLEMENT_VERIFICATION_FAILED");
+  if (remaining.data?.length) throw new Error("환불 확정 후 이용 권한을 회수하지 못했습니다.");
   if (fencedRevoked) emitPaymentEvent("entitlement_revoked", { operationalClass: "CONVERGED", orderId: order.id, productId: order.productId, profileReference: order.profileId, runId: workflow.correlationId });
   return updateRefund(order.id, { status: "REFUND_COMPLETED", completed_at: new Date().toISOString(), entitlement_revoked_at: fencedRevoked ? new Date().toISOString() : null, updated_at: new Date().toISOString() }, claimToken);
 }
@@ -134,11 +160,16 @@ export async function requestFullRefund(input: {
   if (!input.order.analysisEditionKey) {
     throw new Error("주문의 분석 에디션을 확인하지 못했습니다.");
   }
+  // A paid order alone is not enough evidence to revoke a customer's access.
+  // Fail before contacting the provider if its exact purchase cannot be proven.
+  await getRefundPurchaseId(input.order);
   const eligibility = await assessFullRefundEligibility({ userId: input.order.userId, profileId: input.order.profileId, productId: input.order.productId, analysisEditionKey: input.order.analysisEditionKey, reasonCategory: input.reasonCategory });
   if (!eligibility.eligible) {
     throw new Error("현재 환불 정책상 담당자 확인이 필요합니다.");
   }
   const correlationId = randomUUID();
+  const claimToken = randomUUID();
+  const claimedAt = new Date();
   const supabase = createAdminClient();
   const { data, error } = await supabase.from("refund_workflows").insert({
     order_id: input.order.id,
@@ -154,6 +185,10 @@ export async function requestFullRefund(input: {
     processing_started_at: new Date().toISOString(),
     last_attempt_at: new Date().toISOString(),
     correlation_id: correlationId,
+    // The initial request owns the same fenced path as recovery workers.
+    reconciliation_claim_token: claimToken,
+    reconciliation_claimed_at: claimedAt.toISOString(),
+    reconciliation_claim_expires_at: new Date(claimedAt.getTime() + 300_000).toISOString(),
   }).select("*").single<RefundRow>();
   if (error || !data) throw new Error(`환불 요청을 저장하지 못했습니다: ${error?.message ?? "unknown"}`);
   const workflow = toRefundRecord(data);
@@ -162,13 +197,13 @@ export async function requestFullRefund(input: {
   try {
     const provider = await cancelPaymentWithToss({ paymentKey: payment.paymentKey, cancelReason: input.reasonText || input.reasonCategory, idempotencyKey: workflow.id, config: getTossConfigForAccount(input.order.userId, "settlement") });
     if (provider.orderId !== input.order.id || provider.totalAmount !== input.order.amount || provider.currency !== "KRW" || provider.cancels.at(-1)?.cancelAmount !== input.order.amount) throw new TossCancellationError({ provider: "toss", httpStatus: 502, providerErrorCode: "CANCELLATION_MISMATCH", safeMessage: "결제 취소 결과를 확인하지 못했습니다.", failureStage: "cancellation", retryability: "OWNER_ESCALATION_REQUIRED", correlationId, occurredAt: new Date().toISOString() });
-    await updateRefund(input.order.id, { provider_status: provider.status, provider_cancellation_reference: provider.cancels.at(-1)?.transactionKey ?? null, provider_confirmed_at: new Date().toISOString(), last_provider_http_status: 200, updated_at: new Date().toISOString() });
+    await updateRefund(input.order.id, { provider_status: provider.status, provider_cancellation_reference: provider.cancels.at(-1)?.transactionKey ?? null, provider_confirmed_at: new Date().toISOString(), last_provider_http_status: 200, updated_at: new Date().toISOString() }, claimToken);
     emitPaymentEvent("payment_cancellation_confirmed", { operationalClass: "CONVERGED", orderId: input.order.id, productId: input.order.productId, profileReference: input.order.profileId, runId: correlationId });
-    return completeRefund(input.order, workflow);
+    return completeRefund(input.order, workflow, claimToken);
   } catch (error) {
     if (error instanceof TossCancellationError) {
       const status: RefundStatus = error.failure.retryability === "RETRYABLE" ? "REFUND_FAILED_RETRYING" : "OWNER_REVIEW_REQUIRED";
-      await updateRefund(input.order.id, { status, last_provider_http_status: error.failure.httpStatus, last_provider_error_code: error.failure.providerErrorCode, last_provider_error_message: error.failure.safeMessage, last_retryability: error.failure.retryability, last_attempt_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+      await updateRefund(input.order.id, { status, last_provider_http_status: error.failure.httpStatus, last_provider_error_code: error.failure.providerErrorCode, last_provider_error_message: error.failure.safeMessage, last_retryability: error.failure.retryability, last_attempt_at: new Date().toISOString(), updated_at: new Date().toISOString() }, claimToken);
       emitPaymentEvent(status === "REFUND_FAILED_RETRYING" ? "refund_retry_scheduled" : "refund_owner_escalation_required", { operationalClass: status === "REFUND_FAILED_RETRYING" ? "RETRY_PENDING" : "OWNER_ESCALATION_REQUIRED", orderId: input.order.id, productId: input.order.productId, profileReference: input.order.profileId, runId: correlationId, retryability: error.failure.retryability });
     }
     throw error;
@@ -195,16 +230,18 @@ export async function reconcileRefundWorkflow(
 ): Promise<RefundWorkflowRecord> {
   if (workflow.status === "REFUND_COMPLETED" || workflow.status === "OWNER_REVIEW_REQUIRED") return workflow;
   if (!workflow.reconciliationClaimToken) throw new Error("환불 재조정 claim 소유권을 확인하지 못했습니다.");
-  const { data: order, error: orderError } = await createAdminClient().from("orders").select("id,user_id,profile_id,product_id,amount,status,payment_provider,transaction_id,created_at,paid_at").eq("id", workflow.orderId).maybeSingle<{ id: string; user_id: string; profile_id: string; product_id: string; amount: number; status: "paid" | "pending"; payment_provider: string | null; transaction_id: string | null; created_at: string; paid_at: string | null }>();
-  if (orderError || !order || order.status !== "paid") return updateRefund(workflow.orderId, { status: "OWNER_REVIEW_REQUIRED", updated_at: new Date().toISOString() }, workflow.reconciliationClaimToken);
+  const order = await getOrderForUser(workflow.orderId, workflow.userId);
+  if (!order || order.status !== "paid" || order.profileId !== workflow.profileId
+    || order.productId !== workflow.productId || order.amount !== workflow.requestedAmount)
+    return updateRefund(workflow.orderId, { status: "OWNER_REVIEW_REQUIRED", updated_at: new Date().toISOString() }, workflow.reconciliationClaimToken);
   emitPaymentEvent("refund_reconciliation_started", { operationalClass: "RECOVERING", orderId: workflow.orderId, productId: workflow.productId, profileReference: workflow.profileId, runId: workflow.correlationId, attempt: workflow.retryCount });
   try {
-    const provider = await getPaymentByOrderIdFromToss(workflow.orderId, getTossConfigForAccount(order.user_id, "settlement"));
+    const provider = await getPaymentByOrderIdFromToss(workflow.orderId, getTossConfigForAccount(order.userId, "settlement"));
     const cancellation = provider.cancels?.at(-1);
     if (provider.status === "CANCELED" && provider.orderId === workflow.orderId && provider.currency === workflow.currency && cancellation?.cancelStatus === "DONE" && cancellation.cancelAmount === workflow.requestedAmount) {
       await updateRefund(workflow.orderId, { provider_status: "CANCELED", provider_cancellation_reference: cancellation.transactionKey, provider_confirmed_at: workflow.providerConfirmedAt ?? new Date().toISOString(), last_provider_http_status: 200, updated_at: new Date().toISOString() }, workflow.reconciliationClaimToken);
       await options.afterProviderCancellationVerified?.();
-      const completed = await completeRefund({ id: order.id, userId: order.user_id, profileId: order.profile_id, productId: order.product_id, amount: order.amount, status: order.status, paymentProvider: order.payment_provider, transactionId: order.transaction_id, createdAt: order.created_at, paidAt: order.paid_at, analysisEditionKey: null, analysisReferenceSnapshot: null, analysisInputSnapshot: null }, workflow, workflow.reconciliationClaimToken, { beforeEntitlementRevocation: options.beforeEntitlementRevocation });
+      const completed = await completeRefund(order, workflow, workflow.reconciliationClaimToken, { beforeEntitlementRevocation: options.beforeEntitlementRevocation });
       emitPaymentEvent("refund_reconciliation_converged", { operationalClass: "CONVERGED", orderId: workflow.orderId, productId: workflow.productId, profileReference: workflow.profileId, runId: workflow.correlationId });
       return completed;
     }

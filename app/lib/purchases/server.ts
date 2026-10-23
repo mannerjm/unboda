@@ -223,7 +223,8 @@ async function revokeEntitlement(input: {
       claim_token: input.claimToken,
       reason: revocationReason,
     });
-    if (error || !data?.[0]) return null;
+    if (error || !data) throw new Error("REFUND_ENTITLEMENT_REVOCATION_FAILED");
+    if (!data[0]) return null;
     return toEntitlementRecord(data[0] as EntitlementRow);
   }
   // Account-closure path only (refund always supplies orderId+claimToken above):
@@ -243,9 +244,11 @@ export async function revokeEntitlementForRefund(input: {
   userId: string;
   profileId: string;
   productId: string;
-  orderId?: string;
-  claimToken?: string;
+  orderId: string;
+  claimToken: string;
 }): Promise<EntitlementRecord | null> {
+  // Runtime guard also protects JavaScript callers from the account-closure path.
+  if (!input.orderId || !input.claimToken) throw new Error("REFUND_REVOCATION_SCOPE_REQUIRED");
   return revokeEntitlement({ ...input, reason: "REFUND_CANCELLATION" });
 }
 

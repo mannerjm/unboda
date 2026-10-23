@@ -1,89 +1,149 @@
-# Same-account self/spouse purchase isolation — staging checkpoint
+# 본인·배우자 프로필별 구매·열람 권한 — staging E2E 결과
 
-Environment: `test/staging-tenant-e2e`, Supabase `xdiitqyysmhicjcytckm` only.
-PR #319 remains draft and unmerged. Production `main`, production Supabase and
-LIVE/payment settings must not be changed as part of this verification.
+검증일: 2026-10-23. 저장소 `mannerjm/unboda`, 브랜치
+`test/staging-tenant-e2e`, Supabase `xdiitqyysmhicjcytckm`에서 실행했다.
+**본인 A와 배우자 B는 동일한 기존 사용자 계정의 서로 다른 프로필**이다.
+별도 사용자 계정 B를 배우자로 사용하지 않았다.
 
-## Executed evidence
+실제 브라우저 검증 대상 커밋은 `345592e07ab613d15181b272d98bb775a50c5e1a`,
+Vercel 배포는 `dpl_98qVQzTGePQBYggciLMZjP49xokH`이다.
+`https://unboda-dmzb8dtil-unboda.vercel.app/api/internal/e2e-readiness`에서
+실제 HTTP 200 / `{"ready":true}`를 확인하고 테스트를 시작했다.
 
-- The original staging deployment `d4e92357a7e59601dbfbf9b7dfd66f094bf5f008`
-  returned actual HTTP 200 / `{"ready":true}` from `/api/internal/e2e-readiness`.
-- The real refund services passed 17 isolated mocked scenarios. The staging
-  refund RPC passed 19 real SQL assertions, followed by ROLLBACK.
-- `scripts/sql/profile-purchase-isolation-staging.sql` passed 17 real staging
-  database assertions. It reused the existing self profile, created a temporary
-  spouse with the SAME owner, seeded A only, checked B's absence of rights,
-  separately seeded B for the SAME `career` / `YEAR:2026`, and switched back to A.
-  Owner/profile/product/edition and purchase lineage matched at all four layers;
-  A's rows stayed byte-for-byte unchanged after B's purchase. All rows and the
-  temporary active-profile selections were rolled back.
-- The synthetic report fixture is validated with the application's actual
-  `parseStoredPaidAnalysisDetail` before SQL execution. The existing V3 stored
-  report contract remains supported; synthetic canaries replace its headline.
-- The actual browser reached the staging login page. The secure credential
-  request was submitted, but the application displayed an incorrect-email-or-
-  password error. This is NOT a successful signed-in test. No persistent browser
-  fixtures have been inserted, and no browser profile-switch/report-access result
-  is PASS at this checkpoint.
+## 결과
 
-## Regression maintenance
+| 항목 | 결과 | 실제 근거 |
+| --- | --- | --- |
+| PR #319 환불 정산 수정 | PASS, 미병합 | 서비스 모의 회귀 17개, staging 실제 RPC SQL 19개 통과. SQL 자료는 ROLLBACK |
+| 같은 계정의 본인·배우자 준비 | PASS | 기존 본인 프로필 유지, 고유 표시의 합성 배우자 1개 생성 |
+| A 상품 X 구매권·열람 | PASS | A 보관함 1개, A 전용 V4 합성 리포트 표시, 상태 API 200/completed |
+| B 전환 후 A 권한 미적용 | PASS | B 보관함 0개, B 자신의 상태 API 403, A ID 상태 API 403, A 직접 URL 404 |
+| B 동일 상품 별도 구매·열람 | PASS | B 보관함 1개, 다른 구매 ID와 B 전용 V4 리포트, 상태 API 200/completed |
+| A 복귀 후 기존 권한 유지 | PASS | A 보관함 1개, 원래 A 리포트·표시 유지, 새로고침 유지, 상태 API 200/completed |
+| 프로필·에디션 경계 | PASS | A→B 및 B→A 상태 API 403, 각 프로필의 미구매 YEAR:2025도 403 |
+| 주문→구매→이용권→리포트 연결 | PASS | 두 세트 모두 owner/profile/product/edition/purchase ID 일치, 고정 입력 스냅샷이 각 프로필과 일치 |
+| 뒤로 가기·새로고침 | PASS | B 전환 후 기존 A URL로 뒤로 가기와 새로고침 모두 404, A 표시 없음 |
+| 테스트 자료 정리 | 완료 | 각 상업 자료 2개와 합성 배우자 1개만 삭제. 원래 A 선택 복구 |
+| 기존 자료 보존 | 확인 | 원래 계정 2개·프로필 2개 유지, 13개 업무 테이블의 건수·전체 행 지문이 시작 전과 동일 |
+| 운영·실제 금전 작업 보호 | 확인 | staging만 변경, 실제 결제·취소·환불·송금·AI 생성 호출 없음, main 및 PR #319 미변경 |
 
-Three older regression scripts failed because they asserted obsolete source
-strings: checkout's former single-product variable and payment label, the old
-profile deselection copy, and the full-library payload before pagination and
-stored-report prefetch. They now assert the current product validation,
-server-backed selection, priced payment action, active-profile filtering,
-pagination/overview payload and exact purchased edition/initial stored report.
-No application authorization rule was relaxed and no application code changed.
+## 합성 자료와 안전 조건
 
-Run `npm run test:profile-edition-isolation` for the targeted service/source
-checks. These checks are not a substitute for authenticated browser/HTTP tests.
+상품 X는 실제 판매 식별자 `career`, 에디션은 서버 정책으로 계산한
+`YEAR:2026`이다. 주문 금액은 모두 **0원**, 결제수단은
+`STAGING_SYNTHETIC_PROFILE_E2E_20261023_c6c1ca00`, 실제 거래번호는 NULL이다.
+실제 Toss 기록·환불 워크플로·질문권 원장·AI 접근 grant를 만들지 않았다.
 
-## SQL rehearsal
+주문과 구매에는 각 프로필의 실제 canonical 입력을 SQL 안에서 복사한
+동일한 불변 스냅샷과 합성 작업 표시를 저장했다. 개인 출생 정보는 합성 fixture
+파일이나 Git 보고서에 포함하지 않았다. 리포트는 실제 `parseStoredPaidAnalysisDetail`로
+검증한 **V4 완성 자료**를 주문·구매·이용권과 같은 트랜잭션에서 저장했다.
+따라서 화면을 열었을 때 미완성 보고서 생성이나 OpenAI 호출이 필요하지 않았다.
 
-Run the SQL script only through the staging connector. Replace its
-`-- STAGING_TEST_SETUP` marker with transaction-local settings:
+A 구매만 먼저 생성한 뒤 B의 미구매 음성 검사를 실행했고, 그 후에 B를
+별도 구매시켰다. A 구매 자료 네 행의 지문은 B 구매 전후 모두
+`bd891bed5496616cdb3bb4fc834b2978`로 같았다.
 
-- `unboda.e2e_project_ref`: exactly `xdiitqyysmhicjcytckm`
-- `unboda.e2e_user_a`: the existing staging account owner UUID
-- `unboda.e2e_profile_a`: that owner's existing self profile UUID
-- `unboda.e2e_report`: JSON from `scripts/fixtures/paid-report-v3.json`, validated
-  first by `parseStoredPaidAnalysisDetail`
+| 프로필 | 주문 ID 앞부분 | 구매 ID 앞부분 | 이용권 ID 앞부분 | 리포트 ID 앞부분 | 상품·에디션 |
+| --- | --- | --- | --- | --- | --- |
+| 본인 A | 86664a3c | 08a60b28 | 8756a753 | bc4eea22 | career / YEAR:2026 |
+| 합성 배우자 B | f02f69f4 | 9c1589c0 | 02ed0b65 | 46628a46 | career / YEAR:2026 |
 
-The script requires an existing self/active profile and refuses to overwrite a
-matching existing commercial scope. It has no COMMIT, permanent DDL, grants,
-Toss records, refund workflows, AI grants, credit ledger or generation calls.
-Its final ROLLBACK is mandatory. Database selections are explicitly database-only
-evidence, not HTTP or UI evidence.
+리포트에는 각각 `SELF_A_ONLY`, `SPOUSE_B_ONLY` 표시가 있었다.
+상대 프로필의 표시가 섞이지 않았으며, 정리 후 이 실행 표시를 포함한
+주문·리포트의 잔존 건수는 0이다.
 
-## Authenticated continuation and cleanup
+## 실제 HTTP와 화면 근거
 
-1. Complete normal staging sign-in for the owner of the self profile via the
-   secure browser surface; verify a positive signed-in signal. Do not reset a
-   known password, reuse production credentials or read browser tokens.
-2. Verify the latest test-branch Preview and readiness 200/true again.
-3. Record original profiles, active selection and table fingerprints. Prepare
-   exact-ID insert and cleanup manifests before committing any fixtures.
-4. Create only one synthetic spouse for that SAME owner. Use 0-KRW paid orders
-   with a unique `STAGING_SYNTHETIC_PROFILE_*` provider, NULL transaction ID,
-   matching frozen input snapshots and parser-valid COMPLETED reports. Never
-   create Toss/refund/credit/grant rows or invoke checkout/payment confirmation.
-5. Seed A only, verify A library/report/status and B negative cases using actual
-   UI and read-only HTTP; only then seed B for the same product/edition. Verify B
-   gets its own canary and switch back to A. Do not open an unfinished report,
-   retry generation or submit an AI consultation.
-6. Check exact ownership, profile, edition and source-purchase IDs in SQL.
-   The database RLS model is account-scoped; application reads must also enforce
-   the selected profile. Current financial/report browser table privileges are
-   revoked, so this rehearsal does not temporarily grant them to claim RLS PASS.
-7. Restore the original active selection. Recheck FK dependents and triggers,
-   then remove only manifest IDs: reports, entitlements, purchases, orders and
-   the newly created spouse. Stop if unexpected existing dependencies appear.
-   Verify account/profile preservation, no fixture residue and no money/credit
-   changes. Never delete an existing profile or account.
+브라우저는 사용자가 정상 로그인한 staging 세션을 그대로 사용했다.
+쿠키·토큰을 추출하거나 관리자 세션을 대신 사용하지 않았다.
+상태 API는 브라우저의 일반 URL 이동으로 요청하고 실제 JSON 응답을 읽었다.
+Vercel Observability `4072915949`에서 같은 배포·검증 시간 범위의 상태 코드를
+교차 확인했다.
 
-The zero-value custom provider and absent Toss/refund rows exclude fixtures from
-payment/refund reconciliation. COMPLETED reports are excluded from failed/stale
-generation recovery. Purchase/entitlement insert triggers stamp service terms
-only; the SQL rehearsal verified no financial/AI side effects. Authentication-
-dependent steps above remain pending and must not be reported PASS.
+| 상태 API 요청 | HTTP | 실제 응답 |
+| --- | --- | --- |
+| A 최초 구매 후 | 200 | completed |
+| B 구매 전, B 프로필 | 403 | 구매 권한 없음 |
+| B 활성, A 프로필 ID | 403 | 현재 선택한 대상만 확인 가능 |
+| B 별도 구매 후 | 200 | completed |
+| B도 구매한 뒤 A 프로필 ID | 403 | 현재 선택한 대상만 확인 가능 |
+| B의 YEAR:2025 | 403 | 구매 권한 없음 |
+| A 복귀 후 | 200 | completed |
+| A 활성, B 프로필 ID | 403 | 현재 선택한 대상만 확인 가능 |
+| A의 YEAR:2025 | 403 | 구매 권한 없음 |
+| 합성 자료 정리 후 A | 403 | 구매 권한 없음 |
+
+합계는 **200 3건, 403 7건**이다. 별도로 A URL을 B 상태에서 직접 열기,
+뒤로 가기, 새로고침하는 세 경우에 404 화면을 보았고 같은 리포트 경로의
+실제 HTTP 404도 3건 기록됐다. B 자신의 미구매 리포트 페이지는
+권한 없음 안내를 보여주는 기존 페이지 계약이므로, 그 페이지의 200을
+API 403으로 보고하지 않았다. Next의 prefetch/RSC 요청은 사용자 검사 건수에
+더하지 않았다.
+
+완성 리포트 재열람 중 생성 API `/api/paid-analysis-detail-v2` 요청은
+관측되지 않았다. 실제 DB의 생성·복구 시도 테이블도 0건으로 유지됐다.
+
+## DB·코드 검사와 구분 사항
+
+- 실제 staging SQL 회귀 17개를 V3 저장 형식과 V4 저장 형식으로 각각 실행했고
+  모두 통과한 뒤 ROLLBACK했다. 이는 브라우저/HTTP 성공을 대신하는 근거가 아니다.
+- 이번 작업의 prebuild 94개와 관련 스크립트 7개, 총 **101개 스크립트**가 통과했다.
+  TypeScript와 변경된 TS 검사 파일의 ESLint도 통과했다.
+- 환불의 모의 서비스 시나리오 17개는 실제 취소 결과를 뜻하지 않는다.
+  실제 staging RPC 검사 19개와 분리해 집계했다.
+- 보관함과 열람 권한은 활성 프로필로 제한된다. 마이페이지의 계정 결제 내역과
+  `/api/mypage/summary`는 계정 소유자에게 프로필별 항목을 함께 보여주는 기존
+  계정 단위 재무 기록이다. 모든 재무 목록이 활성 프로필만 보인다고 주장하지 않는다.
+- DB RLS의 소유권 단위는 사용자 계정이며, 같은 계정의 가족 프로필을 별도
+  사용자로 취급하지 않는다. 서버는 소유권에 더해 활성 프로필·에디션을 확인한다.
+  financial/report 테이블의 브라우저 SELECT 권한을 임시로 열어 검사하지 않았다.
+
+## 발견 및 수정
+
+추가로 실행한 예전 검사 스크립트 3개가 현재 코드 구조와 다른 문자열을
+단정하고 있었다. 체크아웃의 상품 분기·금액 표시, 마이페이지의 서버 기반
+프로필 선택, 보관함의 페이지별 전달과 리포트의 exact edition/저장 내용
+전달을 현재 계약에 맞춰 검사하도록 갱신했다. 권한 검사는 유지·보강했고
+앱의 권한 규칙을 완화하지 않았다. 갱신 후 101개가 통과했다.
+
+실제 브라우저·HTTP 검사에서는 프로필/에디션 권한 누출이나 A 권한 소실이
+발견되지 않아 앱 코드를 추가 수정하지 않았다. SQL 재현 스크립트는 현재
+V4와 기존 V3의 합성 표시 경로를 모두 지원하도록 보완했다.
+
+## 정리 확인
+
+삭제 전에 FK 그래프, 트리거와 예기치 않은 연결 자료가 없는지 확인했다.
+삭제는 기록해 둔 이번 실행의 정확한 ID만 사용했고, 다음 순서로 수행했다:
+리포트 → 이용권 → 구매 → 주문 → 합성 배우자.
+기존 계정·본인 프로필·다른 테스트 사용자의 프로필은 유지했다.
+
+정리 후 orders/purchases/entitlements/paid_reports, Toss 기록, 환불 workflow,
+질문권 ledger/lots/refund requests, AI grants, 보고서 생성/복구 시도는 모두
+원래의 0건이다. 기존 profiles는 2건이며 지문도 동일하다. 원래 활성 프로필은
+복구했으며, 정상 선택 동작의 updated_at 갱신은 보존했다. 브라우저의 보관함도
+다시 비었고 상태 API는 403으로 합성 권한이 사라졌음을 확인했다.
+
+## 운영 반영 전 남은 범위
+
+1. PR #319의 코드 리뷰와 운영 마이그레이션·배포 계획 검토가 남아 있다.
+   PR은 Draft/Open/Unmerged, main은 `381a5d153caaa301b230c82a2237703af524cdf2`
+   상태로 유지했다. 이번 작업으로 병합·운영 DB 변경·LIVE 설정 변경을 하지 않았다.
+2. 이번 검사는 DB로 준비한 합성 구매권과 저장 리포트의 분리 검증이다.
+   실제 Toss 결제 승인·취소·환불·송금, 주문/결제 승인 API의 전체 통합 흐름,
+   신규 유료 리포트 생성과 AI 상담 생성은 실행하지 않았으며 PASS가 아니다.
+3. 정식 반영 시에는 승인된 별도 테스트 범위에서 결제 제공자 테스트 환경의
+   승인/중복/취소 복구와 신규 보고서 생성 경로를 검증해야 한다.
+   LIVE/실제 금전을 사용하는 검사는 이번 결과에 포함하지 않는다.
+
+## 반복 실행
+
+`npm run test:profile-edition-isolation`은 관련 서비스/소스 검사를 실행한다.
+DB 재현은 staging connector에서만
+`scripts/sql/profile-purchase-isolation-staging.sql`을 사용한다.
+`-- STAGING_TEST_SETUP`에 transaction-local project ref, 기존 사용자/본인
+프로필 ID, parser-validated report JSON을 제공한다.
+V4 fixture는 `scripts/fixtures/staging-profile-report-v4.json`,
+기존 V3 fixture는 `scripts/fixtures/paid-report-v3.json`이다.
+SQL의 마지막 ROLLBACK을 유지해야 하며, 자료를 영구 저장하는 브라우저 검사는
+별도 고유 ID manifest와 FK 사전검사·정리 절차를 먼저 준비한다.

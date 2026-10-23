@@ -25,6 +25,8 @@ declare
   edition text := 'YEAR:2026';
   marker text := 'STAGING_SYNTHETIC_PROFILE_' || spouse_id;
   base_content jsonb := current_setting('unboda.e2e_report', true)::jsonb;
+  canary_path text[] := case when base_content->>'schemaVersion'='v4'
+    then array['conclusion','headline'] else array['heroSummary','headline'] end;
   input_a jsonb; input_b jsonb;
   original_self jsonb; original_active jsonb; a_before jsonb;
   finance_before jsonb;
@@ -72,14 +74,14 @@ begin
     values(owner_id,self_id,'career','paid_analysis',purchase_a,'purchase',true,edition);
   insert into public.paid_reports(id,user_id,profile_id,product_id,purchase_id,status,content,completed_at,analysis_edition_key)
     values(report_a,owner_id,self_id,'career',purchase_a,'completed',
-      jsonb_set(base_content,'{heroSummary,headline}',to_jsonb(marker || ' SELF_A_ONLY')),now(),edition);
+      jsonb_set(base_content,canary_path,to_jsonb(marker || ' SELF_A_ONLY')),now(),edition);
   update public.active_profiles set profile_id=self_id where user_id=owner_id;
   perform pg_temp.profile_scope_assert('A exact profile/product/edition owns an active entitlement',
     (select count(*)=1 from public.entitlements where user_id=owner_id and profile_id=self_id
       and resource_id='career' and resource_type='paid_analysis' and analysis_edition_key=edition and is_active
       and (service_expires_at is null or service_expires_at>now())));
   perform pg_temp.profile_scope_assert('A completed persisted report contains only A canary',
-    (select status='completed' and content#>>'{heroSummary,headline}'=marker || ' SELF_A_ONLY' from public.paid_reports where id=report_a));
+    (select status='completed' and content#>>canary_path=marker || ' SELF_A_ONLY' from public.paid_reports where id=report_a));
   select jsonb_build_array(to_jsonb(o),to_jsonb(p),to_jsonb(e),to_jsonb(r)) into a_before
     from public.orders o join public.purchases p on p.order_id=o.id
     join public.entitlements e on e.purchase_id=p.id join public.paid_reports r on r.purchase_id=p.id where o.id=order_a;
@@ -102,11 +104,11 @@ begin
     values(owner_id,spouse_id,'career','paid_analysis',purchase_b,'purchase',true,edition);
   insert into public.paid_reports(id,user_id,profile_id,product_id,purchase_id,status,content,completed_at,analysis_edition_key)
     values(report_b,owner_id,spouse_id,'career',purchase_b,'completed',
-      jsonb_set(base_content,'{heroSummary,headline}',to_jsonb(marker || ' SPOUSE_B_ONLY')),now(),edition);
+      jsonb_set(base_content,canary_path,to_jsonb(marker || ' SPOUSE_B_ONLY')),now(),edition);
   perform pg_temp.profile_scope_assert('same product and edition coexist for self and spouse',
     (select count(*)=2 and count(distinct profile_id)=2 from public.orders where id in(order_a,order_b) and product_id='career' and analysis_edition_key=edition));
   perform pg_temp.profile_scope_assert('B has its own purchase ID and B-only stored report',
-    purchase_a<>purchase_b and (select purchase_id=purchase_b and content#>>'{heroSummary,headline}'=marker || ' SPOUSE_B_ONLY' from public.paid_reports where id=report_b));
+    purchase_a<>purchase_b and (select purchase_id=purchase_b and content#>>canary_path=marker || ' SPOUSE_B_ONLY' from public.paid_reports where id=report_b));
   perform pg_temp.profile_scope_assert('all four layers retain matching owner/profile/product/edition',
     (select count(*)=2 from public.orders o
       join public.purchases p on p.order_id=o.id and p.user_id=o.user_id and p.profile_id=o.profile_id

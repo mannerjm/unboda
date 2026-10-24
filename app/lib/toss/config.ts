@@ -72,10 +72,28 @@ export function getTossConfig(): TossSandboxConfig {
   };
 }
 /** Do not allow a production TEST payment to mint paid access for ordinary visitors. */
+const TOSS_REVIEW_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * An independent, exact-match owner TEST account authorization.
+ * Never replaces or rewrites the existing Sensitive reviewer allowlist.
+ * Fails closed unless the existing named TEST account, the extra approval,
+ * and production hybrid routing all agree on the exact same valid user ID.
+ */
+function isAdditionalTestReviewAccount(userId: string): boolean {
+  if (!isTossHybridRoutingEnabled()) return false;
+  const testId = process.env.TOSS_TEST_ACCOUNT_ID?.trim().toLowerCase() ?? "";
+  const additionalId = process.env.TOSS_REVIEW_EXTRA_TEST_ACCOUNT_ID?.trim().toLowerCase() ?? "";
+  return TOSS_REVIEW_UUID.test(testId)
+    && additionalId === testId
+    && userId.trim().toLowerCase() === testId;
+}
+
 function hasTossReviewAccountAllowlist(): boolean {
   return (process.env.TOSS_REVIEW_ACCOUNT_IDS ?? "")
     .split(",")
-    .some((id) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id.trim()));
+    .some((id) => TOSS_REVIEW_UUID.test(id.trim()))
+    || isAdditionalTestReviewAccount(process.env.TOSS_TEST_ACCOUNT_ID ?? "");
 }
 
 
@@ -103,7 +121,8 @@ export function getTossConfigForAccount(userId: string, purpose: "checkout" | "s
     const config = getTossConfig();
     if (config.environment !== "sandbox") throw new Error("TOSS_TEST_ACCOUNT_MUST_USE_SANDBOX");
     const allowlisted = (process.env.TOSS_REVIEW_ACCOUNT_IDS ?? "").split(",")
-      .some((id) => id.trim().toLowerCase() === testId);
+      .some((id) => id.trim().toLowerCase() === testId)
+      || isAdditionalTestReviewAccount(testId);
     if (!allowlisted) throw new Error("TOSS_TEST_ACCOUNT_ALLOWLIST_MISMATCH");
     return config;
   }

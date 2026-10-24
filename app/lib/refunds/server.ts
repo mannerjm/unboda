@@ -145,47 +145,10 @@ async function completeRefund(order: OrderRecord, workflow: RefundWorkflowRecord
   return updateRefund(order.id, { status: "REFUND_COMPLETED", completed_at: new Date().toISOString(), entitlement_revoked_at: fencedRevoked ? new Date().toISOString() : null, updated_at: new Date().toISOString() }, claimToken);
 }
 
-/**
- * One-use Production-hosted TEST transaction only.
- * Never authorizes customer refunds, live Toss payments, or another order.
- */
-export function isScopedSandboxTestRefundOrder(order: OrderRecord): boolean {
-  const testId = process.env.TOSS_TEST_ACCOUNT_ID?.trim().toLowerCase();
-  const extraId = process.env.TOSS_REVIEW_EXTRA_TEST_ACCOUNT_ID?.trim().toLowerCase();
-  const expectedOrder = process.env.TOSS_ONE_TIME_TEST_REFUND_ORDER_ID?.trim().toLowerCase();
-  const deadline = Date.parse(process.env.TOSS_ONE_TIME_TEST_REFUND_EXPIRES_AT ?? "");
-  if (
-    process.env.NODE_ENV !== "production" ||
-    process.env.VERCEL_ENV !== "production" ||
-    process.env.TOSS_ONE_TIME_TEST_REFUND_ENABLED !== "true" ||
-    !Number.isFinite(deadline) || Date.now() >= deadline ||
-    process.env.TOSS_LIVE_CHECKOUT_ENABLED !== "false" ||
-    process.env.TOSS_HYBRID_ROUTING_ENABLED !== "true" ||
-    process.env.TOSS_REVIEW_MODE !== "enabled" ||
-    process.env.TOSS_ENVIRONMENT !== "sandbox" ||
-    process.env.TOSS_ALLOW_LIVE === "true" ||
-    !testId || !extraId || testId !== extraId ||
-    !expectedOrder || expectedOrder !== order.id.toLowerCase() ||
-    order.userId.toLowerCase() !== testId ||
-    order.productId !== "money-saving-discipline" ||
-    order.analysisEditionKey !== "MONTH:2026-10" ||
-    order.amount !== 9900 || order.paymentProvider !== "toss" ||
-    order.status !== "paid"
-  ) return false;
-  try {
-    const config = getTossConfigForAccount(order.userId, "settlement");
-    return config.environment === "sandbox" && !config.isProduction
-      && config.clientKey.startsWith("test_ck_")
-      && config.secretKey.startsWith("test_sk_");
-  } catch { return false; }
-}
-
 export async function requestFullRefund(input: {
   order: OrderRecord;
   reasonCategory: RefundReasonCategory;
   reasonText: string | null;
-  /** Never set outside a single exact-order authenticated TEST refund route. */
-  sandboxTestOverride?: boolean;
 }): Promise<RefundWorkflowRecord> {
   const existing = await getRefundWorkflowForOrder(input.order.id);
   if (existing) return existing;
@@ -200,14 +163,7 @@ export async function requestFullRefund(input: {
   // A paid order alone is not enough evidence to revoke a customer's access.
   // Fail before contacting the provider if its exact purchase cannot be proven.
   await getRefundPurchaseId(input.order);
-  // Explicit TEST-only operator-approved policy exception for ONE order.
-  // Every other reason/category and production order still uses the original policy.
-  const sandboxOverride = input.sandboxTestOverride === true;
-  if (sandboxOverride &&
-    (input.reasonCategory !== "OWNER_OVERRIDE" || !isScopedSandboxTestRefundOrder(input.order))) {
-    throw new Error("ONE_TIME_TEST_REFUND_NOT_AUTHORIZED");
-  }
-  const eligibility = sandboxOverride ? { eligible: true } : await assessFullRefundEligibility({ userId: input.order.userId, profileId: input.order.profileId, productId: input.order.productId, analysisEditionKey: input.order.analysisEditionKey, reasonCategory: input.reasonCategory });
+  const eligibility = await assessFullRefundEligibility({ userId: input.order.userId, profileId: input.order.profileId, productId: input.order.productId, analysisEditionKey: input.order.analysisEditionKey, reasonCategory: input.reasonCategory });
   if (!eligibility.eligible) {
     throw new Error("현재 환불 정책상 담당자 확인이 필요합니다.");
   }

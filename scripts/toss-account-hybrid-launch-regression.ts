@@ -7,7 +7,7 @@ const testId = "f131d7ca-4024-4e91-a766-d81722f78c51";
 const buyerId = "aeb73ee0-15e1-4f4c-80a7-ce3a5a39a22d";
 const keys = [
   "NODE_ENV","TOSS_ENVIRONMENT","TOSS_REVIEW_MODE","TOSS_ALLOW_LIVE",
-  "TOSS_REVIEW_ACCOUNT_IDS","TOSS_TEST_ACCOUNT_ID",
+  "TOSS_REVIEW_ACCOUNT_IDS","TOSS_TEST_ACCOUNT_ID","TOSS_REVIEW_EXTRA_TEST_ACCOUNT_ID",
   "TOSS_CLIENT_KEY","TOSS_SECRET_KEY",
   "TOSS_LIVE_CLIENT_KEY","TOSS_LIVE_SECRET_KEY",
   "TOSS_HYBRID_ROUTING_ENABLED","TOSS_LIVE_CHECKOUT_ENABLED",
@@ -42,6 +42,24 @@ try {
   assert.equal(getTossConfigForAccount(testId).clientKey, "test_ck_sample");
   assert.equal(isTossCheckoutUserAllowed(testId), true);
   fails(() => getTossConfigForAccount(buyerId)); // cards not approved
+
+  // Existing reviewer list is Sensitive and opaque in Vercel: NEVER rewrite it.
+  // The dedicated extra-reviewer flag authorizes only the exact configured
+  // production TEST account under hybrid routing, without granting other users.
+  env.TOSS_REVIEW_ACCOUNT_IDS = "";
+  fails(() => getTossConfigForAccount(testId));
+  env.TOSS_REVIEW_EXTRA_TEST_ACCOUNT_ID = buyerId;
+  fails(() => getTossConfigForAccount(testId));
+  env.TOSS_REVIEW_EXTRA_TEST_ACCOUNT_ID = testId;
+  assert.equal(getTossConfigForAccount(testId).environment, "sandbox");
+  assert.equal(isTossCheckoutUserAllowed(testId), true);
+  fails(() => getTossConfigForAccount(buyerId));
+  env.TOSS_HYBRID_ROUTING_ENABLED = "false";
+  fails(() => getTossConfigForAccount(testId));
+  env.TOSS_HYBRID_ROUTING_ENABLED = "true";
+  env.TOSS_REVIEW_EXTRA_TEST_ACCOUNT_ID = "";
+  fails(() => getTossConfigForAccount(testId));
+  env.TOSS_REVIEW_ACCOUNT_IDS = testId;
 
   env.TOSS_LIVE_CHECKOUT_ENABLED = "true";
   fails(() => getTossConfigForAccount(buyerId)); // no live keys installed

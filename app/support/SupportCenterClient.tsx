@@ -149,49 +149,49 @@ export default function SupportCenterClient({
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
-      <div className="mx-auto w-full max-w-4xl">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className="text-sm font-semibold text-slate-600 underline underline-offset-4">← 운보다 홈</Link>
-          <div className="flex gap-3 text-sm">
+    <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-slate-900 sm:px-8 sm:py-10">
+      <div className="mx-auto w-full max-w-5xl">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 px-1">
+          <Link href="/" className="inline-flex min-h-10 items-center rounded-full border border-[#dce1ef] bg-white px-4 text-sm font-bold text-[#151a40] shadow-sm hover:bg-[#f3f1ff]">← 운보다 홈</Link>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs sm:text-sm">
             <Link href="/terms" className="text-slate-500 underline underline-offset-4">이용약관</Link>
             <Link href="/privacy" className="text-slate-500 underline underline-offset-4">개인정보처리방침</Link>
             <Link href="/refund" className="text-slate-500 underline underline-offset-4">환불정책</Link>
           </div>
         </div>
 
-        <header className="mt-8 border-b border-slate-200 pb-7">
-          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">SUPPORT CENTER</p>
-          <h1 className="mt-3 text-3xl font-bold sm:text-4xl">고객지원 센터</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">결제·환불 문의는 해당 주문을 연결해 접수할 수 있습니다. 다른 문제는 안내된 해결 방법을 확인하거나 문의를 남겨 주세요.</p>
+        <header className="rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8">
+          <p className="text-xs font-black tracking-[0.18em] text-[#6f5ce7]">SUPPORT CENTER</p>
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-[#11162d] sm:text-4xl">고객지원 센터</h1>
+          <p className="mt-3 max-w-2xl text-[15px] leading-7 text-slate-700">결제·환불 문의는 해당 주문을 연결해 접수할 수 있습니다. 다른 문제는 안내된 해결 방법을 확인하거나 문의를 남겨 주세요.</p>
         </header>
 
-        <section className="mt-7">
-          <h2 className="text-xl font-bold">무엇이 필요하신가요?</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="mt-7 rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8">
+          <h2 className="text-2xl font-black text-[#11162d]">무엇이 필요하신가요?</h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {SUPPORT_REQUEST_CATEGORIES.map((item) => (
               <button
                 key={item}
                 type="button"
                 onClick={() => { setCategory(item); setShowForm(item === "OTHER" || item === "PAYMENT_REFUND"); setRefundReason(""); setFeedback(null); }}
-                className={`min-h-24 rounded-2xl border p-4 text-left shadow-sm transition ${category === item ? "border-[#6f5ce7] bg-[#171a3d] text-white shadow-[0_10px_28px_rgba(66,56,150,0.18)]" : "border-[#dce1ef] bg-white hover:border-[#aaa0f4] hover:shadow-md"}`}
+                className={`group flex min-h-44 flex-col rounded-3xl border p-5 text-left shadow-sm transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7] ${category === item ? "border-[#6f5ce7] bg-[linear-gradient(145deg,#211b53_0%,#121a3e_100%)] text-white shadow-[0_14px_35px_rgba(66,56,150,0.18)]" : "border-[#dce1ef] bg-[#f8f9fd] text-[#11162d] hover:-translate-y-0.5 hover:border-[#b9b2f6] hover:bg-[#f5f3ff] hover:shadow-md"}`}
               >
-                <span className="text-sm font-bold">{SUPPORT_CATEGORY_LABELS[item]}</span>
-                <span className={`mt-2 block text-xs leading-5 ${category === item ? "text-[#d8d7f2]" : "text-slate-500"}`}>{guides[item].description}</span>
+                <span className="flex w-full items-center justify-between gap-3"><span className="text-base font-black">{SUPPORT_CATEGORY_LABELS[item]}</span><span aria-hidden="true" className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg ${category === item ? "bg-white/15 text-white" : "border border-[#ded9ff] bg-white text-[#6f5ce7]"}`}>→</span></span>
+                <span className={`mt-3 block text-sm leading-6 ${category === item ? "text-[#d8d7f2]" : "text-slate-500"}`}>{guides[item].description}</span>
               </button>
             ))}
           </div>
         </section>
 
         {selectedGuide ? (
-          <section className="mt-6 rounded-2xl border border-[#d8d3ff] bg-[#f1efff] p-5">
-            <p className="text-xs font-semibold text-[#5e4bd1]">{category === "PAYMENT_REFUND" ? "환불·취소 문의" : "먼저 자동 해결을 확인해 주세요"}</p>
-            <h2 className="mt-2 text-lg font-bold">{selectedGuide.title}</h2>
+          <section className="mt-6 rounded-[2rem] border border-[#d8d3ff] bg-[linear-gradient(135deg,#f8f6ff_0%,#eeebff_100%)] p-6 shadow-sm sm:p-8">
+            <p className="text-xs font-black tracking-[0.14em] text-[#5e4bd1]">{category === "PAYMENT_REFUND" ? "환불·취소 문의" : "먼저 자동 해결을 확인해 주세요"}</p>
+            <h2 className="mt-2 text-2xl font-black text-[#11162d]">{selectedGuide.title}</h2>
             <p className="mt-2 text-sm leading-7 text-slate-700">{selectedGuide.description}</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link href={selectedGuide.href} className="rounded-xl bg-[#6f5ce7] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5f4fd2]">{selectedGuide.actionLabel}</Link>
+              <Link href={selectedGuide.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#151a40] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#282559]">{selectedGuide.actionLabel}</Link>
               {category !== "OTHER" && category !== "PAYMENT_REFUND" ? (
-                <button type="button" onClick={() => setShowForm(true)} className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700">안내대로 했지만 해결되지 않았어요</button>
+                <button type="button" onClick={() => setShowForm(true)} className="inline-flex min-h-11 items-center rounded-xl border border-[#d8d3ff] bg-white px-5 py-2.5 text-sm font-bold text-[#5143b0] transition hover:bg-[#f7f5ff]">안내대로 했지만 해결되지 않았어요</button>
               ) : null}
             </div>
           </section>

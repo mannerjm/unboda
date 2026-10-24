@@ -143,9 +143,17 @@ async function PaidReportBody({
 
   return (
     <>
-      <div className="mx-auto max-w-5xl px-5 pt-6 sm:px-8">
-        <ReportLibraryReturnLink placement="top" />
-      </div>
+      <ReportCompletionGate
+        key={`report-nav:${profileId}:${productId}:${exactEdition}`}
+        productId={productId}
+        profileId={profileId}
+        edition={exactEdition}
+        initialCompleted={Boolean(initialDetail)}
+      >
+        <div className="mx-auto max-w-5xl px-5 pt-6 sm:px-8">
+          <ReportLibraryReturnLink placement="top" />
+        </div>
+      </ReportCompletionGate>
       <PaidAnalysisDetailV2Client
         key={`${profileId}:${productId}:${exactEdition}`}
         productId={productId}

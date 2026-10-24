@@ -30,10 +30,24 @@ assert(
   "ordinary and recommended premium purchases must open the exact-edition report, not the product description",
 );
 assert(
-  checkoutSuccess.includes("PaidReportPreparing")
-    && checkoutSuccess.includes('stage="confirming"')
-    && checkoutSuccess.includes('kind="generic"'),
-  "payment confirmation must use the same full-screen preparation visual instead of a separate white status page",
+  checkoutSuccess.includes("PaidReportPaymentConfirmation")
+    && checkoutSuccess.includes("카드 결제를 확인하고 있어요")
+    && checkoutSuccess.includes("카드 승인 내역과 주문 금액을 확인하고 있습니다.")
+    && checkoutSuccess.includes("리포트 준비 화면으로 자동 이동합니다.")
+    && checkoutSuccess.includes('<Suspense fallback={<PaidReportPaymentConfirmation />}>')
+    && checkoutSuccess.includes("errorMessage={errorMessage}")
+    && !checkoutSuccess.includes("PaidReportPreparing")
+    && !checkoutSuccess.includes('stage="confirming"'),
+  "paid checkout must show a distinct card-approval screen, not premature report-generation progress",
+);
+assert(
+  checkoutSuccess.includes('fetch(`/api/orders/${encodeURIComponent(orderId)}/confirm-payment`')
+    && checkoutSuccess.includes('method: "POST"')
+    && checkoutSuccess.includes('if (!response.ok)')
+    && checkoutSuccess.includes('const edition = payload?.purchase?.analysisEditionKey')
+    && checkoutSuccess.includes("router.replace(")
+    && checkoutSuccess.includes("결제 상태가 불확실하면 다시 결제하지 말고"),
+  "card confirmation must complete before navigating to the exact purchased report, with safe failure guidance",
 );
 for (const familyRoute of [
   "getCompatibilityPairReportPath(productId)",

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {motionAssemblyArgs} from "./motion-assembly.mjs";
+import {motionAssemblyArgs,verifyMotionInputProbe,verifyVoiceInputProbe} from "./motion-assembly.mjs";
 const clips=Array.from({length:4},(_,i)=>({file:"/tmp/motion"+i+".mp4",
  ownedOrLicensed:true,licenseProof:"owned motion asset "+i,editorialApproved:true,
  mediaProbeVerified:true}));
@@ -27,4 +27,21 @@ test("H264/AAC 30-second xfade with actual motion clips and voice",()=>{
  assert.ok(args.includes("+faststart"));
  assert.ok(args.some(x=>x.includes("xfade=transition=fade")));
  assert.equal(args.at(-1),"/tmp/final.mp4");
+});
+
+test("motion input requires vertical 8+ second file",()=>{
+ const good={streams:[{codec_type:"video",width:720,height:1280}],format:{duration:"10"}};
+ assert.equal(verifyMotionInputProbe(good).ok,true);
+ assert.ok(verifyMotionInputProbe({...good,format:{duration:"5"}})
+  .reasons.includes("SOURCE_VIDEO_TOO_SHORT"));
+ assert.ok(verifyMotionInputProbe({streams:[{codec_type:"video",width:1920,height:1080}],
+  format:{duration:"10"}}).reasons.includes("SOURCE_NOT_VERTICAL_VIDEO"));
+});
+test("Korean narration must fit 30s short format",()=>{
+ const good={streams:[{codec_type:"audio",codec_name:"mp3"}],format:{duration:"28"}};
+ assert.equal(verifyVoiceInputProbe(good).ok,true);
+ assert.ok(verifyVoiceInputProbe({...good,format:{duration:"65"}})
+  .reasons.includes("VOICE_DURATION_NOT_ALIGNED"));
+ assert.ok(verifyVoiceInputProbe({streams:[],format:{duration:"27"}})
+  .reasons.includes("VOICE_AUDIO_STREAM_MISSING"));
 });

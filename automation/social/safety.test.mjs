@@ -19,3 +19,34 @@ test("media must be metricool normalized",()=>assert.throws(()=>createPayload({p
 test("instagram AI declaration",()=>assert.equal(createPayload({post:base,mediaUrl:"https://static.metricool.com/x.mp4",dateTime:"2026-11-03T10:00:00",network:"instagram"}).instagramData.isAiGenerated,true));
 test("youtube Shorts format",()=>assert.equal(createPayload({post:base,mediaUrl:"https://static.metricool.com/x.mp4",dateTime:"2026-11-03T10:00:00",network:"youtube"}).youtubeData.type,"short"));
 test("mock API POST works",async()=>{let hit=false;const got=await schedule({post:base,mediaUrl:"https://static.metricool.com/x.mp4",network:"youtube",dateTime:"2026-11-03T10:00:00",allowLive:true,env:{SOCIAL_PUBLISH_ENABLED:"true",METRICOOL_API_TOKEN:"mock",METRICOOL_USER_ID:"5729495",METRICOOL_BLOG_ID:"7377653"},fetcher:async(_url,req)=>{hit=true;assert.equal(req.method,"POST");return {ok:true,json:async()=>({id:"fixture"})}}});assert.equal(hit,true);assert.equal(got.state,"SCHEDULED");});
+
+test("Facebook Reel payload",()=>{
+ const payload=createPayload({post:base,mediaUrl:"https://static.metricool.com/test.mp4",dateTime:"2026-11-03T10:00:00",network:"facebook",postType:"reel"});
+ assert.equal(payload.facebookData.type,"REEL");assert.equal(payload.text,base.caption);
+});
+test("Facebook Story payload excludes unsupported story caption",()=>{
+ const payload=createPayload({post:{...base,video:null},mediaUrl:"https://static.metricool.com/photo.png",dateTime:"2026-11-03T10:00:00",network:"facebook",postType:"story"});
+ assert.equal(payload.facebookData.type,"STORY");assert.equal("text" in payload,false);
+});
+test("Instagram Story payload excludes unsupported story caption",()=>{
+ const payload=createPayload({post:{...base,video:null},mediaUrl:"https://static.metricool.com/photo.png",dateTime:"2026-11-03T10:00:00",network:"instagram",postType:"story"});
+ assert.equal(payload.instagramData.type,"STORY");assert.equal("text" in payload,false);
+});
+test("Instagram feed image payload",()=>{
+ const payload=createPayload({post:{...base,video:null},mediaUrl:"https://static.metricool.com/photo.png",dateTime:"2026-11-03T10:00:00",network:"instagram",postType:"post"});
+ assert.equal(payload.instagramData.type,"POST");assert.equal(payload.text,base.caption);
+});
+test("YouTube rejects unsupported Story format",()=>assert.throws(
+ ()=>createPayload({post:base,mediaUrl:"https://static.metricool.com/video.mp4",dateTime:"2026-11-03T10:00:00",network:"youtube",postType:"story"}),/FORMAT_NOT_SUPPORTED/
+));
+test("Facebook Reel rejects image as video",()=>assert.throws(
+ ()=>createPayload({post:base,mediaUrl:"https://static.metricool.com/image.png",dateTime:"2026-11-03T10:00:00",network:"facebook",postType:"reel"}),/VIDEO_MEDIA_REQUIRED/
+));
+test("Instagram Reel requires verified video metadata",()=>assert.throws(
+ ()=>createPayload({post:{...base,video:null},mediaUrl:"https://static.metricool.com/clip.mp4",dateTime:"2026-11-03T10:00:00",network:"instagram",postType:"reel"}),/VIDEO_MEDIA_REQUIRED/
+));
+test("unapproved story must not call Metricool",async()=>{
+ let called=false;
+ const got=await schedule({post:{...base,creatorReviewStatus:"pending"},mediaUrl:"https://static.metricool.com/photo.png",dateTime:"2026-11-03T10:00:00",network:"facebook",postType:"story",allowLive:true,env:{SOCIAL_PUBLISH_ENABLED:"true",METRICOOL_API_TOKEN:"fixture",METRICOOL_USER_ID:"1",METRICOOL_BLOG_ID:"2"},fetcher:()=>{called=true;throw Error("network")}});
+ assert.equal(got.state,"BLOCKED");assert.equal(called,false);
+});

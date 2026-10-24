@@ -351,7 +351,8 @@ export async function reconcileAiConsultingCreditPaymentsBatch(): Promise<AiCons
         continue;
       }
 
-      const provider = await getPaymentByOrderIdFromToss(order.id);
+      // Hybrid mode must query the original TEST/LIVE merchant for this exact order.
+      const provider = await getPaymentByOrderIdFromToss(order.id, getTossConfigForAccount(order.userId, "settlement"));
       if (
         provider.orderId !== order.id ||
         provider.totalAmount !== order.amount ||

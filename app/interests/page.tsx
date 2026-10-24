@@ -68,6 +68,7 @@ export default async function InterestedAnalysesPage() {
             </div>
           </header>
           <InterestedAnalysesList
+            key={activeProfile.id}
             analyses={productsWithMetadata}
             profileId={activeProfile.id}
           />

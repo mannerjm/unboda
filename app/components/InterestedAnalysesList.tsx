@@ -74,7 +74,7 @@ export default function InterestedAnalysesList({
 
   if (displayAnalyses.length === 0) {
     return (
-      <div className="mt-6 space-y-4" data-profile-id={profileId}>
+      <div className="mt-6 space-y-4" key={profileId}>
         <section className="relative overflow-hidden rounded-[2rem] border border-[#dce1ef] bg-white px-6 py-12 text-center shadow-sm sm:px-10 sm:py-16">
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#f3f1ff] to-transparent" />
           <div className="relative mx-auto flex max-w-lg flex-col items-center">
@@ -110,7 +110,7 @@ export default function InterestedAnalysesList({
   }
 
   return (
-    <div className="mt-6 space-y-7" data-profile-id={profileId}>
+    <div className="mt-6 space-y-7" key={profileId}>
       {removeError ? (
         <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{removeError}</p>
       ) : null}

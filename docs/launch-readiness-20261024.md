@@ -1,6 +1,6 @@
 # 운보다 정식 판매 출시 게이트 — 2026-10-24 운영 실증
 
-> 상태: **GO 아님 (일반 고객 LIVE 결제 OFF 유지)**.
+> **최신 운영 상태(2026-10-24 오후): 일반 고객 유료 심층분석 리포트 LIVE 판매 ON.** AI 질문권 신규 유료 결제는 별도 안전 잠금. 이하 과거 단계의 OFF 기록은 그 당시 상태를 설명한다.
 > 이 문서는 운영 DB·Vercel·GitHub와 구매자의 실제 화면·환급 확인을 구분하여 기록한다.
 > 원결제·환불·사용자 프로필 식별자, API 키, 카드정보는 기재하지 않는다.
 
@@ -55,3 +55,15 @@
 - 공식 백업 정책상 PITR은 유료 부가 기능이며 7일 USD 약 100/월 + 최소 Small compute 요구(현 프로젝트의 추가 compute 요금은 미확인). 도입 시 기존 Daily 백업은 PITR 체계로 대체.
 - 사업자의 별도 유료 과금 승인 없이 PITR 설정을 변경하지 않음. 운영 복원은 실행하지 않으며, 격리 환경 복원 시험은 여전히 필요.
 - 세부 근거·후속 절차: `docs/prelaunch-ops-verification-20261024.md`, https://supabase.com/docs/guides/platform/backups
+
+## 7. 2026-10-24 일반 고객 LIVE 판매 개방 — 사업자 승인 및 실제 운영 검증
+
+- 사업자가 **정기 일일 PHYSICAL 백업 유지, PITR 미사용(추가 과금 거절), 일반 고객 LIVE 결제 활성화**를 명시적으로 승인. 유료 백업 부가 기능을 활성화하거나 운영 DB를 복원하지 않음. 일일 백업 이후 최대 약 하루 변경분이 장애 때 손실될 수 있고, 별도 프로젝트 실제 복원 검증은 여전히 미완료.
+- PR #334 `0092e839a5243be0fd66d32a697fc96e6ff6986e`: 일반 고객 **유료 심층분석 리포트 LIVE 카드 결제와 AI 질문권 유료 결제를 분리**. `AI_CREDIT_PUBLIC_CHECKOUT_ENABLED=true` 및 `AI_CREDIT_SELF_REFUNDS_ENABLED=true`가 모두 설정되지 않으면 public credit checkout은 자동으로 열리지 않음. 부적격 질문권 환불 경로를 노출하지 않기 위함. 관리자 환불은 리포트 전액 환불만 담당.
+- 정식 판매 LIVE 개방 조건 검증: GitHub `Launch Security Audit` 및 `AI Consulting E2E Contract` 모두 성공; Vercel Preview READY; PR 병합 후 동일 커밋 운영 배포 READY.
+- 운영자 카드 환불 `REPORT_REFUND_ADMIN_ENABLED=true`. Production allowlist의 **관리자 1개 계정**에 활성 `operator_roles`와 `auth.mfa_factors.status=verified`가 일치함을 다시 확인. 일반 카드 취소 실행은 실제 관리자 세션의 AAL2, 고객지원 `PAYMENT_REFUND` 문의 상태 `IN_REVIEW`, 정책 적격성, 정확한 금액·토스 원결제 조회 및 기록 감사 로그 모두 통과해야 함. 실거래 카드 취소를 새로 실행하지 않음.
+- `TOSS_LIVE_CHECKOUT_ENABLED=true` + `TOSS_HYBRID_ROUTING_ENABLED=true` + `TOSS_LIVE_PILOT_ENABLED=true` 반영한 별도 Production 배포 ID `dpl_DxwZwfvDEoKkLuo5Sbg8VC5oqwem` READY 및 `unboda.kr` / `www.unboda.kr` 할당 확인. 일회성 LIVE/TEST 취소 플래그 모두 `false`.
+- 실제 일반 고객의 타사 브라우저 세션에서 **신규 상용 주문을 만드는 최종 E2E는 이번에 실행하지 않음**. 종전 LIVE 승인·전액 취소·구매권 회수 한 거래 및 자동 검사 + 운영 설정·배포 증거를 기반으로 사업자 요청에 따라 판매 개방. 실제 모바일·두 프로필·독립 계정/계약 자료 검증은 계속 후속 운영 과제이며 완료했다고 표시하지 않는다.
+- 카드사 심사 대기 관련 **고객 대상 별도 현대카드 안내를 추가하지 않음**. 모든 카드사의 승인이 완료됐다는 표현도 추가하지 않음.
+- **운영 중 우선 확인:** `/admin/support` 환불 접수·처리, `/admin` 결제 대사/리포트 생성 실패/복구 현황, `reconcile`·`paid_report_recovery` heartbeat, 결제 성공 후 구매 분석함, 관리자 AAL2 재인증. 결제·환불 내역은 원본 보존.
+- **유료 심층분석 LIVE 결제 긴급 차단:** 운영자 임의 DB 상태 변경이나 실제 카드 환불 반복 호출 대신 `TOSS_LIVE_CHECKOUT_ENABLED=false`로 되돌린 후 검증된 main SHA를 Production 재배포. 기존 주문 정산/환불을 보존하기 위한 `settlement` 라우팅은 유지. 질문권을 개방하기 전에는 실거래 결제·미사용 부분환불·질문 차감·중복 취소와 고객지원 대체 환불을 별도로 검증.

@@ -138,6 +138,25 @@ assert(!interestedList.includes("새 회차 구매") && !interestedList.includes
   "interest cards must not silently introduce unapproved repurchase prompts");
 
 assert(support.includes('fetch("/api/support/requests"'), "support request submission behavior must remain intact");
+
+assert(mypage.includes('max-w-5xl') && mypage.includes('aria-labelledby="account-status-heading"')
+  && mypage.includes('rounded-[2rem] border border-[#dce1ef] bg-white')
+  && mypage.includes('href="/purchased-analyses"') && mypage.includes('href="/interests"'),
+  "My Page must keep purchase-library visual hierarchy and existing library destinations");
+assert(mypage.includes('aria-labelledby="profile-management-heading"')
+  && mypage.includes('aria-labelledby="payment-history-heading"')
+  && mypage.includes('href="/mypage/payments"')
+  && mypage.includes('onClick={() => void signOut()}')
+  && mypage.includes('onClick={openCreateForm}'),
+  "My Page redesign must preserve profile, payment and account actions");
+assert(support.includes('max-w-5xl') && support.includes('rounded-[2rem] border border-[#dce1ef] bg-white')
+  && support.includes('MY REQUESTS') && support.includes('접수된 문의가 없습니다.'),
+  "Support Center must match premium card system in empty and inquiry states");
+assert(support.includes('onClick={() => { setCategory(item);')
+  && support.includes('initialRefundOrder') && support.includes('invalidRefundOrder')
+  && support.includes('onSubmit={submit}') && support.includes('window.location.reload()'),
+  "Support visual changes must preserve category selection, refund-order guards, inquiry submit and refresh");
+
 assert(account.includes('fetch("/api/account/status"') && account.includes('fetch("/api/account/request-closure"'), "account lifecycle behavior must remain intact");
 assert(admin.includes("getAdminGrowthDashboard") && admin.includes("getAdminRefundClosureDashboard"), "admin dashboard data behavior must remain intact");
 assert(adminSupport.includes("listSupportRequestsForOperator"), "admin support data behavior must remain intact");

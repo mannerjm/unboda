@@ -1,0 +1,111 @@
+{
+  "episode_id": "ub-first-zodiac-vs-saju-20261024",
+  "status": "REVISED_VISUAL_DESIGN_REVIEW_ONLY",
+  "topic_key": "zodiac-vs-four-pillars-basics",
+  "kind": "short-video",
+  "intent": "사주에 관한 실질적인 교육을 우선하고 마지막에 무료 사주 조회를 부드럽게 소개",
+  "title": "띠만 보면 사주를 알 수 있을까요?",
+  "hook": "열두 띠만으로 사람의 사주를 전부 설명할 수 있을까요?",
+  "audience": "사주·띠를 처음 접하는 한국어 이용자",
+  "narrator_script": "띠만 알면 사주도 알 수 있을까요? 띠는 태어난 해와 연결된 전통적인 동물 상징입니다. 사주에서는 태어난 해와 달, 날, 시간의 네 기둥을 함께 살펴봅니다. 이런 해석은 미래를 확정하는 예언이 아닌 참고 정보입니다. 나의 사주가 궁금하다면 운보다에서 무료로 살펴보세요.",
+  "educational_claims": [
+    {
+      "claim": "띠는 태어난 해와 연결된 전통적인 동물 상징이다",
+      "required_review": "기준일 경계는 단정하지 않고 양력 1월 1일만으로 판단하지 않을 것"
+    },
+    {
+      "claim": "사주에서는 년·월·일·시 네 기둥을 함께 살핀다",
+      "required_review": "전통 명리의 개념 설명으로 한정"
+    },
+    {
+      "claim": "사주는 미래를 확정하는 객관적 예측이 아니다",
+      "required_review": "전통문화·참고 정보의 한계 명시"
+    }
+  ],
+  "scenes": [
+    {
+      "seconds": 7.5,
+      "role": "educational_hook",
+      "on_screen": "띠만 알면 / 사주도 알 수 있을까?",
+      "voiceover": "띠만 알면 사주도 알 수 있을까요?",
+      "visual": "프리미엄 12띠 상징 링, 넓은 여백, 텍스트 최상단 2줄"
+    },
+    {
+      "seconds": 7.5,
+      "role": "zodiac_explanation",
+      "on_screen": "띠는 태어난 해의 / 동물 상징이에요",
+      "voiceover": "띠는 태어난 해와 연결된 전통적인 동물 상징입니다.",
+      "visual": "동물 상징 12개를 추상적인 원형 장식으로 표현, 텍스트와 이미지 겹침 금지"
+    },
+    {
+      "seconds": 7.5,
+      "role": "four_pillars",
+      "on_screen": "사주는 네 기둥을 / 함께 살펴봐요",
+      "voiceover": "사주에서는 해와 달, 날, 시간의 네 기둥을 함께 살펴봅니다.",
+      "visual": "년주·월주·일주·시주를 4장의 고급 그래픽 카드로 표현"
+    },
+    {
+      "seconds": 7.5,
+      "role": "educational_disclaimer_cta",
+      "on_screen": "사주 해석은 / 참고로 살펴보세요",
+      "voiceover": "이런 해석은 미래를 확정하는 예언이 아닌 참고 정보입니다. 나의 사주가 궁금하다면 운보다에서 무료로 살펴보세요.",
+      "visual": "프리미엄 별빛 심벌과 운보다 무료 사주 안내. CTA는 하단 SNS 컨트롤과 겹치지 않을 것."
+    }
+  ],
+  "ai_generation_plan": {
+    "premium_motion_seconds_per_original": 10,
+    "premium_clips_count": 1,
+    "original_mograph_seconds_per_original": 20,
+    "runway_model": "gen4_turbo",
+    "expected_runway_base_credits": 50,
+    "expected_runway_base_usd": 0.5,
+    "narration_model": "eleven_multilingual_v2",
+    "captions": "최종 한국어 음성의 실제 타이밍과 동기화해 생성",
+    "rights": "원본 제작 이미지 또는 유효한 상업 라이선스가 확인된 소재만 사용"
+  },
+  "publish_approval": {
+    "fact_review_approved": false,
+    "audiovisual_approved": false,
+    "voice_license_verified": false,
+    "metricool_e2e_verified": false,
+    "publish_enabled": false,
+    "notes": "이전 V1과 이번 V2 모두 실제 자동 게시 대상으로 승인되지 않았음. 실제 한국어 TTS와 음성 발음 QA, 미디어 고급화, SNS별 E2E 필요."
+  },
+  "cta": "운보다에서 무료 사주 살펴보기",
+  "site": "https://unboda.kr",
+  "disclaimer": "사주 해석은 전통문화의 참고 정보이며 미래를 보장하지 않습니다.",
+  "productionReady": false,
+  "design_v2": {
+    "version": "2.0",
+    "generated_on": "2026-10-24",
+    "status": "LOCAL_MP4_VISUAL_QA_ONLY",
+    "art_direction": "독창적 코스믹 인디고·샴페인 골드 정보형 모션그래픽, 높은 대비, 간결한 한글",
+    "video": {
+      "width": 1080,
+      "height": 1920,
+      "seconds": 30,
+      "codec": "H.264",
+      "audioCodec": "AAC"
+    },
+    "contentSafeAreaPixels": {
+      "left": 104,
+      "right": 976,
+      "top": 220,
+      "bottom": 1515
+    },
+    "koreanFont": "NanumSquare (font files are not distributed)",
+    "linesPerHeadlineMax": 2,
+    "scenesCount": 4,
+    "CTAOnlyFinalScene": true,
+    "visualOverflowScan": {
+      "textBoxCount": 30,
+      "withinSafeArea": true
+    },
+    "actualVideoCreatedInConversation": true,
+    "exportedVideoNotStoredInRepository": true,
+    "containsKoreanNarration": false,
+    "containsRunwayAIVideo": false,
+    "originalAmbientAudioOnly": true,
+    "commercialPublishApproved": false
+  }
+}

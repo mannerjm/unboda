@@ -75,3 +75,16 @@ The user approved continuing **development only**, not new provider spending/sub
 - ElevenLabs `eleven_multilingual_v2` supports Korean and needs a **paid commercial-use plan** to license output. Monthly Starter $6/30k credits; Creator $22/121k credits (intro discounts ignored). For 120 videos x ~300 characters ~36k credits BEFORE retries, Creator is a safer starting plan than Starter unless a cheaper supported model or shorter script is chosen. https://elevenlabs.io/ko/pricing
 - Pilot testing should be limited to one approved Korean TTS read and one approved 10-sec premium image-to-video call. Because these calls create account charges, neither is executed without explicit subscription/account setup, isolated API keys and a new owner-approved pilot budget. NEVER request API secrets as chat messages; store in a restricted server environment when provisioned.
 - All SNS posting, payment/refunds/customer records and production Vercel/Supabase remain unchanged. Legacy ChatGPT 3h/6h tasks are independent and must not be mistaken for a deployed 365-day server.
+
+## 2026-10-24 visual redesign V2 after owner rejected the first reel
+- Owner reviewed the first video and rejected its crowded Korean copy, line spacing, overlay/cropping and overall visual quality. **Previous file is NOT APPROVED FOR PUBLICATION.**
+- Rebuilt the first educational episode's 30s 1080×1920 MP4 with a new editorial grid; four scenes with only two headline lines and one small informative sentence each:
+  1. "띠만 알면 / 사주도 알 수 있을까?" — simple 12-sign illustration
+  2. "띠는 태어난 해의 / 동물 상징이에요" — cultural information
+  3. "사주는 네 기둥을 / 함께 살펴봐요" — 년주·월주·일주·시주 illustration
+  4. "사주 해석은 / 참고로 살펴보세요" — disclosure and a single "운보다 무료 사주" CTA
+- Drawn with available Korean NanumSquare text layout, coherent deep navy/gold visuals, wider spacing and text-free platform controls zone. Explicit bounding-box check keeps ALL **30 programmatically placed text elements** in [104,220] to [976,1515] pixels, leaving top 220px and bottom 405px no text.
+- `layout.mjs` + tests codifies video shape, conservative text areas and **mandatory separate human visual, voice, educational and rights approvals**. These tests do not themselves approve publication.
+- A new local 30-second MP4, four PNG scenes, a Python rebuild script and numeric layout report are delivered in the conversation artifact. They are **not automatically pushed as binary media into this repo**. The repo holds the updated episode brief and runtime safety gate.
+- V2 is still a **visual-design review animatic only**, with original synthesized ambient audio but **no Korean narrator, no Runway-generated premium moving scene, no actual platform publication**. A video can pass safe-area QA and still fail cinematic quality; content still needs editorial acceptance.
+- No subscription, API purchase, upload, deployment, order/refund/customer data or production cron has been changed.

@@ -6,7 +6,7 @@ const BASE="https://api.dev.runwayml.com";
 const VERSION="2024-11-06";
 const MODEL="gen4_turbo";
 export function motionRequest({
- imageUri,prompt,durationSeconds=5,model=MODEL,
+ imageUri,prompt,durationSeconds=10,model=MODEL,
  imageRightsApproved=false,editorialApproved=false,
  estimatedCents=null,budget={},reservationId,allowPaid=false
 }={}){

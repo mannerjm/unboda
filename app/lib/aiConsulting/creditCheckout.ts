@@ -18,7 +18,7 @@ import {
   type AiConsultingCreditBundleId,
 } from "./commercialPolicy";
 import { getAiConsultingCreditBalance } from "./server";
-import { isAiCreditRefundAllowedForUser } from "./creditRefunds";
+import { isAiCreditLivePilotAllowed } from "./creditPilotAccess";
 
 export const AI_CONSULTING_CREDIT_PAYMENT_PROVIDER = "toss_ai_credit";
 
@@ -34,7 +34,7 @@ export function isAiConsultingCreditCheckoutEnabled(userId?: string): boolean {
     return typeof userId === "string"
       && process.env.AI_CREDIT_LIVE_PILOT_ENABLED === "true"
       && process.env.AI_CREDIT_REFUND_PILOT_ENABLED === "true"
-      && isAiCreditRefundAllowedForUser(userId);
+      && isAiCreditLivePilotAllowed(userId);
   }
   if (process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true") return true;
 

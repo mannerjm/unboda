@@ -637,89 +637,89 @@ export default function MyPage() {
 
   return (
     <AppShell activeProfileId={activeProfileId}>
-      <main className="min-h-screen bg-[#f5f7fc] px-5 py-12 text-slate-900 sm:py-16">
-        <div className="mx-auto w-full max-w-3xl">
-          <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+      <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-slate-900 sm:px-8 sm:py-10">
+        <div className="mx-auto w-full max-w-5xl">
+          <header className="relative overflow-hidden rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-8">
             <div>
-              <p className="text-xs font-semibold tracking-[0.25em] text-slate-500">MY PAGE</p>
-              <h1 className="mt-3 text-3xl font-bold sm:text-4xl">마이페이지</h1>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600">계정 상태와 분석 대상을 관리하고, 저장하거나 구매한 분석을 확인하세요.</p>
+              <p className="text-xs font-black tracking-[0.18em] text-[#6f5ce7]">MY PAGE</p>
+              <h1 className="mt-2 text-3xl font-black tracking-[-0.03em] text-[#11162d] sm:text-4xl">마이페이지</h1>
+              <p className="mt-3 max-w-2xl text-[15px] leading-7 text-slate-700">계정 상태와 분석 대상을 관리하고, 저장하거나 구매한 분석을 확인하세요.</p>
             </div>
-            <div className="flex shrink-0 items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
               <button
                 type="button"
                 onClick={openCreateForm}
-                className={`rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 ${restingFocusRing}`}
+                className={`inline-flex min-h-11 items-center justify-center rounded-xl bg-[#151a40] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#282559] ${restingFocusRing}`}
               >
                 인원 추가
               </button>
               {profiles.length > 0 ? (
-                <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500">
+                <span className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-2 text-xs font-bold text-[#5e4bd1]">
                   {profiles.length}명 등록
                 </span>
               ) : null}
             </div>
           </header>
-          <section className="mt-8 border-y border-slate-200 py-6" aria-labelledby="account-status-heading">
+          <section className="mt-7 rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8" aria-labelledby="account-status-heading">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">ACCOUNT STATUS</p>
-                <h2 id="account-status-heading" className="mt-2 text-xl font-bold text-slate-900">계정 상태</h2>
+                <p className="text-xs font-black tracking-[0.16em] text-[#6f5ce7]">ACCOUNT STATUS</p>
+                <h2 id="account-status-heading" className="mt-2 text-2xl font-black tracking-tight text-[#11162d]">계정 상태</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">계정 인증 상태는 분석 대상 프로필의 출생 정보와 별개로 관리됩니다.</p>
               </div>
-              <Link href="/account" className={`shrink-0 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50 ${restingFocusRing}`}>
+              <Link href="/account" className={`inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-[#dce1ef] bg-[#f7f8fc] px-4 py-2.5 text-center text-sm font-bold text-[#151a40] transition hover:border-[#c4bdf5] hover:bg-[#f3f1ff] ${restingFocusRing}`}>
                 계정 설정에서 확인하기
               </Link>
             </div>
             {accountStatus ? (
-              <dl className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="min-w-0 border-t border-slate-100 pt-3 sm:border-t-0 sm:border-r sm:pr-4 sm:pt-0">
+              <dl className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="min-w-0 rounded-2xl border border-[#e6e9f2] bg-[#f8f9fd] px-4 py-4">
                   <dt className="text-xs font-semibold text-slate-500">로그인 이메일</dt>
                   <dd className="mt-1 break-all text-sm font-semibold text-slate-800">{accountStatus.email}</dd>
                 </div>
-                <div className="border-t border-slate-100 pt-3 sm:border-t-0 sm:border-r sm:px-4 sm:pt-0">
+                <div className="rounded-2xl border border-[#e6e9f2] bg-[#f8f9fd] px-4 py-4">
                   <dt className="text-xs font-semibold text-slate-500">이메일 인증</dt>
                   <dd className="mt-1 text-sm font-semibold text-slate-800">{accountStatus.emailVerified ? "인증됨" : "인증 필요"}</dd>
                 </div>
-                <div className="border-t border-slate-100 pt-3 sm:border-t-0 sm:pl-4 sm:pt-0">
+                <div className="rounded-2xl border border-[#e6e9f2] bg-[#f8f9fd] px-4 py-4">
                   <dt className="text-xs font-semibold text-slate-500">본인/성인 인증</dt>
                   <dd className="mt-1 text-sm font-semibold text-slate-800">{paidEligibilityLabels[accountStatus.account.paidEligibilityStatus]}</dd>
                 </div>
               </dl>
             ) : null}
           </section>
-          <section className="mt-8" aria-labelledby="library-heading">
-            <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">MY LIBRARY</p>
-            <h2 id="library-heading" className="mt-2 text-xl font-bold text-slate-900">내 보관함</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <Link href="/interests" className={`rounded-xl border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 ${restingFocusRing}`}>
-                <p className="text-base font-semibold text-slate-900">관심 분석</p>
+          <section className="mt-7 rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8" aria-labelledby="library-heading">
+            <p className="text-xs font-black tracking-[0.16em] text-[#6f5ce7]">MY LIBRARY</p>
+            <h2 id="library-heading" className="mt-2 text-2xl font-black tracking-tight text-[#11162d]">내 보관함</h2>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <Link href="/interests" className={`group relative rounded-3xl border border-[#dce1ef] bg-[#f8f9fd] p-6 transition hover:-translate-y-0.5 hover:border-[#cfc9f2] hover:bg-[#f4f2ff] hover:shadow-md ${restingFocusRing}`}>
+                <p className="text-lg font-black tracking-tight text-[#11162d]">관심 분석</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">저장한 분석 주제와 현재 회차 상태를 확인합니다.</p>
               </Link>
-              <Link href="/purchased-analyses" className={`rounded-xl border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:bg-slate-50 ${restingFocusRing}`}>
-                <p className="text-base font-semibold text-slate-900">구매한 분석</p>
+              <Link href="/purchased-analyses" className={`group relative rounded-3xl border border-[#d7d4f4] bg-[linear-gradient(145deg,#f5f3ff_0%,#fff_100%)] p-6 transition hover:-translate-y-0.5 hover:border-[#a99ef3] hover:shadow-md ${restingFocusRing}`}>
+                <p className="text-lg font-black tracking-tight text-[#11162d]">구매한 분석</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">보유한 분석과 이전 회차 리포트를 확인합니다.</p>
               </Link>
-              <Link href="/my-unboda" className={`rounded-xl border border-slate-200 bg-white p-5 transition hover:border-[#aaa0f4] hover:bg-[#faf9ff] ${restingFocusRing}`}>
-                <p className="text-base font-semibold text-slate-900">나의 운보다 기록</p>
+              <Link href="/my-unboda" className={`group relative rounded-3xl border border-[#dce1ef] bg-[#f8f9fd] p-6 transition hover:-translate-y-0.5 hover:border-[#cfc9f2] hover:bg-[#f4f2ff] hover:shadow-md ${restingFocusRing}`}>
+                <p className="text-lg font-black tracking-tight text-[#11162d]">나의 운보다 기록</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">저장한 내 상황·목표와 구매 리포트, AI 상담이 어떻게 이어졌는지 확인합니다.</p>
               </Link>
-              <Link href="/ai-consulting" className={`relative overflow-hidden rounded-2xl border border-[#d8d3ff] bg-[linear-gradient(135deg,#f7f5ff_0%,#eeebff_100%)] p-5 transition hover:-translate-y-0.5 hover:border-[#aaa0f4] sm:col-span-2 ${restingFocusRing}`}>
+              <Link href="/ai-consulting" className={`relative overflow-hidden rounded-3xl border border-[#d1caff] bg-[linear-gradient(135deg,#f5f2ff_0%,#eae6ff_100%)] p-6 shadow-[0_12px_32px_rgba(92,78,173,0.08)] transition hover:-translate-y-0.5 hover:border-[#a99ef3] hover:shadow-md sm:col-span-2 sm:p-7 ${restingFocusRing}`}>
                 <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#7b61ff]/10 blur-2xl" />
                 <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-black tracking-[0.12em] text-[#6f5ce7]">UNBODA AI CONSULTING</p>
-                    <p className="mt-2 text-lg font-bold text-[#11162d]">통합 AI 상담 이어가기</p>
+                    <p className="mt-2 text-xl font-black tracking-tight text-[#11162d] sm:text-2xl">통합 AI 상담 이어가기</p>
                     <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">구매한 리포트와 이전 상담 기록, 직접 저장한 기억을 연결해 같은 프로필의 상담을 이어갑니다.</p>
                   </div>
-                  <span className="shrink-0 rounded-xl bg-[#6f5ce7] px-4 py-2.5 text-sm font-bold text-white">바로가기 →</span>
+                  <span className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-[#6f5ce7] px-5 py-2.5 text-sm font-bold text-white shadow-sm">바로가기 →</span>
                 </div>
               </Link>
             </div>
           </section>
         {isFormOpen ? (
           <form
-            className="mt-8 space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+            className="mt-7 space-y-5 rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8"
             onSubmit={(event) => { event.preventDefault(); void submitForm(); }}
           >
             <p className="text-base font-bold">{editingProfileId ? "프로필 수정" : "인원 추가"}</p>
@@ -872,7 +872,7 @@ export default function MyPage() {
           </div>
         ) : null}
         {isProfilesLoaded && profiles.length === 0 && !isFormOpen ? (
-          <section className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white/70 p-8 text-center">
+          <section className="mt-7 rounded-[2rem] border border-dashed border-[#cfc9f2] bg-white p-8 text-center shadow-sm sm:p-12">
             <p className="text-base font-bold">아직 등록된 분석 대상이 없습니다</p>
             <p className="mt-3 text-sm leading-7 text-slate-600">
               본인이나 가족의 출생 정보를 등록하면 무료 사주와 심층 분석을 이어서 볼 수 있습니다.
@@ -886,9 +886,9 @@ export default function MyPage() {
             </button>
           </section>
         ) : null}
-        <section className="mt-10" aria-labelledby="profile-management-heading">
-          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">PROFILE MANAGEMENT</p>
-          <h2 id="profile-management-heading" className="mt-2 text-xl font-bold text-slate-900">프로필 관리</h2>
+        <section className="mt-7 rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8" aria-labelledby="profile-management-heading">
+          <p className="text-xs font-black tracking-[0.16em] text-[#6f5ce7]">PROFILE MANAGEMENT</p>
+          <h2 id="profile-management-heading" className="mt-2 text-2xl font-black tracking-tight text-[#11162d]">프로필 관리</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">프로필은 분석 대상이며 계정 본인 인증과 별개입니다.</p>
         <div className="mt-5">
           {profiles.length > 0 ? <p className="mb-3 text-xs font-semibold tracking-[0.2em] text-slate-500">내 프로필 및 이용 가능한 분석</p> : null}
@@ -898,8 +898,8 @@ export default function MyPage() {
               key={profile.id}
               onClick={(event) => selectFromCardClick(event, profile.id)}
               className={profile.id === activeProfileId
-                ? "rounded-2xl border border-[#b9b2f6] bg-[#f9f9ff] p-4 text-left text-slate-900 shadow-sm sm:p-5"
-                : "cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-slate-300 hover:shadow-md sm:p-5"}
+                ? "rounded-3xl border border-[#b9b2f6] bg-[linear-gradient(145deg,#f8f6ff_0%,#fff_100%)] p-5 text-left text-slate-900 shadow-[0_8px_25px_rgba(111,92,231,0.08)] sm:p-6"
+                 : "cursor-pointer rounded-3xl border border-[#dce1ef] bg-white p-5 text-left shadow-sm transition hover:border-[#b9b2f6] hover:shadow-md sm:p-6"}
             >
               <button
                 type="button"
@@ -1068,7 +1068,7 @@ export default function MyPage() {
           ))}
           </div>
           {profiles.length > 0 ? (
-            <section className="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between" aria-labelledby="selected-profile-action-heading">
+            <section className="mt-6 flex flex-col gap-4 rounded-2xl border border-[#e6e9f2] bg-[#f8f9fd] p-5 sm:flex-row sm:items-center sm:justify-between" aria-labelledby="selected-profile-action-heading">
               <div>
                 <p id="selected-profile-action-heading" className="text-sm font-semibold text-slate-900">선택한 프로필로 분석 이어가기</p>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
@@ -1103,19 +1103,19 @@ export default function MyPage() {
           ) : null}
         </div>
         </section>
-        <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7" aria-labelledby="payment-history-heading">
-            <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">PAYMENT HISTORY</p>
-            <h2 id="payment-history-heading" className="mt-2 text-2xl font-bold text-slate-900">결제 내역</h2>
+        <section className="mt-7 rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8" aria-labelledby="payment-history-heading">
+            <p className="text-xs font-black tracking-[0.16em] text-[#6f5ce7]">PAYMENT HISTORY</p>
+            <h2 id="payment-history-heading" className="mt-2 text-2xl font-black tracking-tight text-[#11162d]">결제 내역</h2>
             <Link href={activeProfileId ? `/ai-consulting/credits/refunds?profileId=${encodeURIComponent(activeProfileId)}` : "/ai-consulting/credits/refunds"} className="mt-3 inline-flex text-sm font-bold text-[#5143b0] underline underline-offset-4">AI 질문권 구매·환불 관리 →</Link>
             <p className="mt-2 text-sm leading-6 text-slate-600">구매한 분석은 보관함에서, 결제와 환불 기록은 여기에서 확인합니다. 최근 결제 5건을 먼저 보여드리며, 환불·취소 문의는 해당 주문에서 고객지원센터로 연결됩니다.</p>
             {paymentHistoryTotal > 0 ? <p className="mt-2 text-xs font-semibold text-slate-600">전체 결제 내역 {paymentHistoryTotal}건 · 최근 최대 5건 표시</p> : null}
             {purchaseHistory.length > 0 ? (
-            <ul className="mt-5 divide-y divide-stone-200">
+            <ul className="mt-6 space-y-3">
               {purchaseHistory.map((item) => {
                 const profile = profiles.find((candidate) => candidate.id === item.profileId);
                 const canAskAboutRefund = item.paymentStatus === "paid" && item.refund?.status !== "REFUND_COMPLETED";
                 return (
-                  <li key={item.purchaseId} className="py-4 first:pt-0 last:pb-0">
+                  <li key={item.purchaseId} className="rounded-2xl border border-[#e5e8f2] bg-[#f8f9fd] p-4 sm:p-5">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
                         <p className="font-semibold text-slate-900">{item.productName}</p>
@@ -1148,15 +1148,15 @@ export default function MyPage() {
             ) : null}
         </section>
         {message ? <p className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{message}</p> : null}
-        <section className="mt-10 border-t border-slate-200 pt-6" aria-labelledby="account-management-heading">
+        <section className="mt-7 rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8" aria-labelledby="account-management-heading">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">ACCOUNT MANAGEMENT</p>
-              <h2 id="account-management-heading" className="mt-2 text-xl font-bold text-slate-900">계정 관리</h2>
+              <p className="text-xs font-black tracking-[0.16em] text-[#6f5ce7]">ACCOUNT MANAGEMENT</p>
+              <h2 id="account-management-heading" className="mt-2 text-2xl font-black tracking-tight text-[#11162d]">계정 관리</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">이메일, 비밀번호, 회원탈퇴 같은 민감한 설정은 계정 관리에서 변경합니다.</p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
-              <Link href="/account" className={`rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 ${restingFocusRing}`}>계정 관리</Link>
+              <Link href="/account" className={`inline-flex min-h-11 items-center rounded-xl border border-[#dce1ef] bg-[#f7f8fc] px-5 py-2.5 text-sm font-bold text-[#151a40] transition hover:bg-[#f3f1ff] ${restingFocusRing}`}>계정 관리</Link>
               <button type="button" onClick={() => void signOut()} disabled={isSigningOut} className={`rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-500 underline-offset-4 transition hover:text-slate-700 hover:underline disabled:cursor-not-allowed disabled:text-slate-300 ${restingFocusRing}`}>
                 {isSigningOut ? "로그아웃 중..." : "로그아웃"}
               </button>

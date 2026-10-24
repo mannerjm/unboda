@@ -27,3 +27,11 @@
 - This only tests cancelling a Toss **sandbox** transaction on production-hosted app; there is no LIVE-card cancellation.
 - A previously generated paid report is normally excluded from change-of-mind automatic refund. `OWNER_OVERRIDE` is deliberately restricted to the one validated owner test transaction.
 - Provider-side cancellation is a financial side effect (TEST rail); do not trigger it via SQL or from a browser URL GET.
+
+## Execution outcome and retirement (2026-10-24 KST)
+- Authorized 9,900 KRW sandbox card cancellation executed once at about 11:49 KST.
+- Database workflow reached `REFUND_COMPLETED`, with provider status `CANCELED`, HTTP 200 cancellation response and a recorded provider cancellation reference.
+- The precise purchased report entitlement was revoked; 12 unrelated entitlements remained active.
+- The buyer confirmed the payment history shows `환불 완료` and the refunded report is no longer in the purchased analyses library.
+- Production variable `TOSS_ONE_TIME_TEST_REFUND_ENABLED` was changed to `false`, and the disabled-flag production deployment became READY.
+- This historical runbook is retained as an audit trail. The temporary route, UI and policy bypass are removed by the follow-up cleanup PR. The normal refund policy and financial audit rows are unchanged.

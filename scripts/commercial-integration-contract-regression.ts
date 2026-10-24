@@ -121,10 +121,13 @@ const checks:Record<string,boolean>={
     recoveryRoute.includes('await recordJobHeartbeat("paid_report_recovery"'),
   aiRefundPilotOnlyExplicitUsers: read("app/lib/aiConsulting/creditRefunds.ts").includes('isAiCreditRefundAllowedForUser(refund.user_id)') &&
     read("app/lib/aiConsulting/creditRefunds.ts").includes('isAiCreditRefundAllowedForUser(input.userId)') &&
-    read("app/lib/aiConsulting/creditRefunds.ts").includes('TOSS_LIVE_PILOT_ACCOUNT_IDS') &&
-    read("app/lib/aiConsulting/creditRefunds.ts").includes('TOSS_LIVE_PILOT_ENABLED') &&
-    read("app/lib/aiConsulting/creditRefunds.ts").includes('TOSS_HYBRID_ROUTING_ENABLED') &&
-    read("app/lib/aiConsulting/creditRefunds.ts").includes('AI_CREDIT_REFUND_PILOT_ENABLED') &&
+    read("app/lib/aiConsulting/creditRefunds.ts").includes('isAiCreditLivePilotAllowed(userId)') &&
+    read("app/lib/aiConsulting/creditPilotAccess.ts").includes('TOSS_LIVE_PILOT_ACCOUNT_IDS') &&
+    read("app/lib/aiConsulting/creditPilotAccess.ts").includes('TOSS_LIVE_PILOT_ENABLED') &&
+    read("app/lib/aiConsulting/creditPilotAccess.ts").includes('TOSS_HYBRID_ROUTING_ENABLED') &&
+    read("app/lib/aiConsulting/creditPilotAccess.ts").includes('AI_CREDIT_LIVE_PILOT_ENABLED') &&
+    read("app/lib/aiConsulting/creditPilotAccess.ts").includes('AI_CREDIT_REFUND_PILOT_ENABLED') &&
+    read("app/lib/aiConsulting/creditPilotAccess.ts").includes('AI_CREDIT_REFUND_PILOT_ACCOUNT_IDS') &&
     read("app/api/ai-consulting/credits/refunds/route.ts").includes('isAiCreditRefundAllowedForUser(user.id)') &&
     read("app/ai-consulting/credits/refunds/page.tsx").includes('isAiCreditRefundAllowedForUser(user.id)'),
   extraRefundsOptInOnly:masterCron.includes('AI_CREDIT_REFUND_RETRY_WORKER_ENABLED === "true"') &&

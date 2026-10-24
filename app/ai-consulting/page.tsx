@@ -70,7 +70,7 @@ export default async function AiConsultingPage({
   // No misleading "buy now" call to action for customers blocked by the
   // production-hosted TEST allowlist or the disabled credit checkout feature.
   let creditCheckoutAvailable = false;
-  if (isAiConsultingCreditCheckoutEnabled()) {
+  if (isAiConsultingCreditCheckoutEnabled(user.id)) {
     try {
       creditCheckoutAvailable = isTossCheckoutUserAllowed(user.id);
     } catch {

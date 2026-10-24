@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
   }
 
-  if (!isAiConsultingCreditCheckoutEnabled()) {
+  if (!isAiConsultingCreditCheckoutEnabled(user.id)) {
     return NextResponse.json(
       { error: "AI 질문권 결제는 아직 준비 중입니다.", code: "AI_CREDIT_CHECKOUT_DISABLED" },
       { status: 503 },

@@ -18,16 +18,23 @@ import {
   type AiConsultingCreditBundleId,
 } from "./commercialPolicy";
 import { getAiConsultingCreditBalance } from "./server";
+import { isAiCreditLivePilotAllowed } from "./creditPilotAccess";
 
 export const AI_CONSULTING_CREDIT_PAYMENT_PROVIDER = "toss_ai_credit";
 
-export function isAiConsultingCreditCheckoutEnabled(): boolean {
-  // Public report checkout alone must never silently open the separate, unverified
-  // AI-question credit purchase + partial refund contract. Both must be explicitly
-  // approved together, or customers could be charged without a self-service refund path.
+export function isAiConsultingCreditCheckoutEnabled(userId?: string): boolean {
+  // Public report checkout alone must never silently open a credit sale.
+  // Full public question-credit launch requires BOTH checkout and refund approval.
   if (isTossHybridRoutingEnabled() && process.env.TOSS_LIVE_CHECKOUT_ENABLED === "true") {
-    return process.env.AI_CREDIT_PUBLIC_CHECKOUT_ENABLED === "true"
+    const publicCreditsEnabled = process.env.AI_CREDIT_PUBLIC_CHECKOUT_ENABLED === "true"
       && process.env.AI_CREDIT_SELF_REFUNDS_ENABLED === "true";
+    if (publicCreditsEnabled) return true;
+    // The only exception is a named owner-only pilot with its own refund
+    // enablement and exact intersecting allowlists. The browser cannot set it.
+    return typeof userId === "string"
+      && process.env.AI_CREDIT_LIVE_PILOT_ENABLED === "true"
+      && process.env.AI_CREDIT_REFUND_PILOT_ENABLED === "true"
+      && isAiCreditLivePilotAllowed(userId);
   }
   if (process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true") return true;
 
@@ -157,7 +164,7 @@ export async function createPendingAiConsultingCreditOrder(input: {
   productId: string;
   analysisEditionKey: string;
 }): Promise<OrderRecord> {
-  if (!isAiConsultingCreditCheckoutEnabled()) {
+  if (!isAiConsultingCreditCheckoutEnabled(input.userId)) {
     throw new Error("AI_CONSULTING_CREDIT_CHECKOUT_DISABLED");
   }
   // Defense in depth: no internal caller may mint an order on a public

@@ -11,9 +11,9 @@ const success = read("app/ai-consulting/credits/success/page.tsx");
 const orders = read("app/api/ai-consulting/credits/orders/route.ts");
 
 assert(main.includes("creditCheckoutAvailable = false") && main.includes("const creditCheckoutEnabled = creditCheckoutAvailable;"), "client must receive server-validated purchase eligibility instead of trusting public config alone");
-assert(page.includes("isAiConsultingCreditCheckoutEnabled()") && page.includes("isTossCheckoutUserAllowed(user.id)") && page.includes("creditCheckoutAvailable={creditCheckoutAvailable}"), "purchase CTA must respect both feature switch and production review-user allowlist");
+assert(page.includes("isAiConsultingCreditCheckoutEnabled(user.id)") && page.includes("isTossCheckoutUserAllowed(user.id)") && page.includes("creditCheckoutAvailable={creditCheckoutAvailable}"), "purchase CTA must respect both feature switch and production review-user allowlist");
 assert(creditsPage.includes("isTossCheckoutUserAllowed(user.id)") && creditsPage.includes("checkoutEnabled={providerReady}") && creditsPage.includes("reviewCheckout={reviewCheckout}"), "credit checkout must stay disabled for users blocked by the TEST allowlist and clearly label allowed sandbox purchases");
-assert(orders.includes("isAiConsultingCreditCheckoutEnabled()") && orders.includes("isTossCheckoutUserAllowed(user.id)"), "purchase server must preserve authoritative feature and review-account checks");
+assert(orders.includes("isAiConsultingCreditCheckoutEnabled(user.id)") && orders.includes("isTossCheckoutUserAllowed(user.id)"), "purchase server must preserve authoritative feature and review-account checks");
 assert(main.includes('href={creditPurchaseHref}') && main.includes("#question-bundles"), "main CTA must jump directly to purchase options");
 assert(main.includes("공용 질문권") && main.includes("질문권 구매하기 →") && main.includes("질문권 상품 안내 보기 →"), "top balance card must expose exactly one purchase or informational product-browse action");
 assert(main.includes("portfolio.questionsRemaining > 0") && main.includes("현재 질문권 결제 준비 중") && !main.includes("credit-recharge-title"), "zero balance must preserve honest disabled-checkout copy without duplicating a large recharge banner");

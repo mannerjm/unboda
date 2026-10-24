@@ -42,5 +42,8 @@ jobs:
       - name: Run launch security regression
         run: npm run test:launch-security
 
+      - name: Verify public LIVE checkout financial separation
+        run: node scripts/public-live-checkout-safety.mjs
+
       - name: Build
         run: npm run build

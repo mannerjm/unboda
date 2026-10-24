@@ -1,0 +1,32 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const read=(name)=>readFileSync(new URL("../"+name,import.meta.url),"utf8");
+const credit=read("app/lib/aiConsulting/creditCheckout.ts");
+const refunds=read("app/lib/aiConsulting/creditRefunds.ts");
+const config=read("app/lib/toss/config.ts");
+const operator=read("app/api/internal/admin/report-refunds/route.ts");
+const reportOrder=read("app/api/orders/route.ts");
+const reportConfirm=read("app/api/orders/[orderId]/confirm-payment/route.ts");
+
+assert.match(credit,/isTossHybridRoutingEnabled\(\) && process\.env\.TOSS_LIVE_CHECKOUT_ENABLED === "true"/);
+assert.match(credit,/return process\.env\.AI_CREDIT_PUBLIC_CHECKOUT_ENABLED === "true"\s*&& process\.env\.AI_CREDIT_SELF_REFUNDS_ENABLED === "true";/);
+assert.doesNotMatch(credit,/TOSS_LIVE_CHECKOUT_ENABLED === "true"\) return true/);
+assert.match(refunds,/return process\.env\.AI_CREDIT_SELF_REFUNDS_ENABLED === "true";/);
+assert.match(refunds,/processCreditRefund\(/);
+assert.match(refunds,/getPaymentByOrderIdFromToss\(refund\.order_id, accountConfig\)/);
+assert.match(refunds,/idempotencyKey:refund\.idempotency_key/);
+assert.match(config,/if \(purpose === "checkout" && process\.env\.TOSS_LIVE_CHECKOUT_ENABLED !== "true" && !isTossLivePilotAccount\(userId\)\)/);
+assert.match(config,/getTossConfigForAccount\(userId: string, purpose: "checkout" \| "settlement"/);
+assert.match(config,/userId\.toLowerCase\(\) === testId/);
+assert.match(config,/TOSS_LIVE_INDIVIDUAL_KEY_PAIR_REQUIRED/);
+assert.match(reportOrder,/isTossCheckoutUserAllowed\(user\.id\)/);
+assert.match(reportConfirm,/isTossCheckoutUserAllowed\(user\.id\)/);
+assert.match(operator,/isFinancialMfaVerified\(\)/);
+assert.match(operator,/REPORT_REFUND_APPROVER_IDS/);
+assert.match(operator,/getRefundWorkflowForOrder\(order\.id\)/);
+assert.match(operator,/getPaymentByOrderIdFromToss/);
+assert.match(operator,/sameOrigin\(request\)/);
+assert.match(operator,/requestFullRefund\(/);
+
+console.log("public-live-checkout-safety: PASS (synthetic assertions; NO provider charges/refunds)");

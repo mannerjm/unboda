@@ -22,7 +22,13 @@ import { getAiConsultingCreditBalance } from "./server";
 export const AI_CONSULTING_CREDIT_PAYMENT_PROVIDER = "toss_ai_credit";
 
 export function isAiConsultingCreditCheckoutEnabled(): boolean {
-  if (isTossHybridRoutingEnabled() && process.env.TOSS_LIVE_CHECKOUT_ENABLED === "true") return true;
+  // Public report checkout alone must never silently open the separate, unverified
+  // AI-question credit purchase + partial refund contract. Both must be explicitly
+  // approved together, or customers could be charged without a self-service refund path.
+  if (isTossHybridRoutingEnabled() && process.env.TOSS_LIVE_CHECKOUT_ENABLED === "true") {
+    return process.env.AI_CREDIT_PUBLIC_CHECKOUT_ENABLED === "true"
+      && process.env.AI_CREDIT_SELF_REFUNDS_ENABLED === "true";
+  }
   if (process.env.NEXT_PUBLIC_AI_CONSULTING_CREDIT_CHECKOUT_ENABLED === "true") return true;
 
   // Permit the same already-configured, production-hosted Toss TEST review mode

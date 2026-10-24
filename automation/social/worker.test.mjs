@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {stageEditorialCandidate} from "./worker.mjs";
 import {planContentBuffer} from "./buffer.mjs";
 const now=Date.parse("2026-10-24T20:00:00+09:00");
-const job=planContentBuffer({now})[0];
+const job=planContentBuffer({now}).find(j=>j.kind==="text-image");
 const budget={approvedMonthlyLimitCents:1000,spentCents:0,reservedCents:0,
  budgetLockAcquired:true,subscriptionConfirmed:true};
 const draft={

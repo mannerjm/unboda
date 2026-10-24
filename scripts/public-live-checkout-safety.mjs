@@ -9,6 +9,7 @@ const config=read("app/lib/toss/config.ts");
 const operator=read("app/api/internal/admin/report-refunds/route.ts");
 const reportOrder=read("app/api/orders/route.ts");
 const reportConfirm=read("app/api/orders/[orderId]/confirm-payment/route.ts");
+const creditRefundPost=read("app/api/ai-consulting/credits/refunds/route.ts");
 
 assert.match(credit,/isTossHybridRoutingEnabled\(\) && process\.env\.TOSS_LIVE_CHECKOUT_ENABLED === "true"/);
 assert.match(credit,/process\.env\.AI_CREDIT_PUBLIC_CHECKOUT_ENABLED === "true"/);
@@ -29,6 +30,8 @@ assert.match(refunds,/return process\.env\.AI_CREDIT_SELF_REFUNDS_ENABLED === "t
 assert.match(refunds,/processCreditRefund\(/);
 assert.match(refunds,/getPaymentByOrderIdFromToss\(refund\.order_id, accountConfig\)/);
 assert.match(refunds,/idempotencyKey:refund\.idempotency_key/);
+assert.match(creditRefundPost,/if \(!sameOrigin\(request\)\)/);
+assert.match(creditRefundPost,/return Boolean\(origin && new URL\(origin\)\.origin === new URL\(request\.url\)\.origin\)/);
 assert.match(config,/if \(purpose === "checkout" && process\.env\.TOSS_LIVE_CHECKOUT_ENABLED !== "true" && !isTossLivePilotAccount\(userId\)\)/);
 assert.match(config,/getTossConfigForAccount\(userId: string, purpose: "checkout" \| "settlement"/);
 assert.match(config,/userId\.toLowerCase\(\) === testId/);

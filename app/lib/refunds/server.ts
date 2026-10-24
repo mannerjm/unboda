@@ -145,52 +145,10 @@ async function completeRefund(order: OrderRecord, workflow: RefundWorkflowRecord
   return updateRefund(order.id, { status: "REFUND_COMPLETED", completed_at: new Date().toISOString(), entitlement_revoked_at: fencedRevoked ? new Date().toISOString() : null, updated_at: new Date().toISOString() }, claimToken);
 }
 
-/**
- * Temporary, exact-order, production LIVE pilot cancellation authorization.
- * Never authorizes a customer-wide refund or a second order; default is OFF.
- * Must be removed after the owner-approved pilot completes.
- */
-export function isScopedOneTimeLivePilotRefund(order: OrderRecord): boolean {
-  const expectedOrderId = process.env.TOSS_ONE_TIME_LIVE_REFUND_ORDER_ID?.trim().toLowerCase();
-  const expectedAccountId = process.env.TOSS_ONE_TIME_LIVE_REFUND_ACCOUNT_ID?.trim().toLowerCase();
-  const expectedProfileId = process.env.TOSS_ONE_TIME_LIVE_REFUND_PROFILE_ID?.trim().toLowerCase();
-  const testAccountId = process.env.TOSS_TEST_ACCOUNT_ID?.trim().toLowerCase();
-  const expiresAt = Date.parse(process.env.TOSS_ONE_TIME_LIVE_REFUND_EXPIRES_AT ?? "");
-  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-  if (
-    process.env.NODE_ENV !== "production" ||
-    process.env.VERCEL_ENV !== "production" ||
-    process.env.TOSS_ONE_TIME_LIVE_REFUND_ENABLED !== "true" ||
-    process.env.TOSS_HYBRID_ROUTING_ENABLED !== "true" ||
-    process.env.TOSS_LIVE_CHECKOUT_ENABLED !== "false" ||
-    process.env.TOSS_LIVE_PILOT_ENABLED !== "true" ||
-    !Number.isFinite(expiresAt) || Date.now() >= expiresAt ||
-    !expectedOrderId || !expectedAccountId || !expectedProfileId ||
-    !uuid.test(expectedOrderId) || !uuid.test(expectedAccountId) || !uuid.test(expectedProfileId) ||
-    expectedAccountId === testAccountId ||
-    order.id.toLowerCase() !== expectedOrderId ||
-    order.userId.toLowerCase() !== expectedAccountId ||
-    order.profileId.toLowerCase() !== expectedProfileId ||
-    order.productId !== "money-saving-discipline" ||
-    order.analysisEditionKey !== "MONTH:2026-10" ||
-    order.amount !== 9900 ||
-    order.paymentProvider !== "toss" ||
-    order.status !== "paid"
-  ) return false;
-  try {
-    const config = getTossConfigForAccount(order.userId, "checkout");
-    return config.environment === "production" && config.isProduction &&
-      config.clientKey.startsWith("live_ck_") &&
-      config.secretKey.startsWith("live_sk_");
-  } catch { return false; }
-}
-
 export async function requestFullRefund(input: {
   order: OrderRecord;
   reasonCategory: RefundReasonCategory;
   reasonText: string | null;
-  /** Owner-approved exact LIVE pilot transaction only; never forward from client input. */
-  oneTimeLivePilotRefundOverride?: boolean;
 }): Promise<RefundWorkflowRecord> {
   const existing = await getRefundWorkflowForOrder(input.order.id);
   if (existing) return existing;
@@ -205,13 +163,7 @@ export async function requestFullRefund(input: {
   // A paid order alone is not enough evidence to revoke a customer's access.
   // Fail before contacting the provider if its exact purchase cannot be proven.
   await getRefundPurchaseId(input.order);
-  const livePilotOverride = input.oneTimeLivePilotRefundOverride === true;
-  if (livePilotOverride &&
-    (input.reasonCategory !== "OWNER_OVERRIDE" || !isScopedOneTimeLivePilotRefund(input.order))) {
-    throw new Error("ONE_TIME_LIVE_REFUND_NOT_AUTHORIZED");
-  }
-  // All other refunds continue to use the unchanged standard eligibility policy.
-  const eligibility = livePilotOverride ? { eligible: true } : await assessFullRefundEligibility({ userId: input.order.userId, profileId: input.order.profileId, productId: input.order.productId, analysisEditionKey: input.order.analysisEditionKey, reasonCategory: input.reasonCategory });
+  const eligibility = await assessFullRefundEligibility({ userId: input.order.userId, profileId: input.order.profileId, productId: input.order.productId, analysisEditionKey: input.order.analysisEditionKey, reasonCategory: input.reasonCategory });
   if (!eligibility.eligible) {
     throw new Error("현재 환불 정책상 담당자 확인이 필요합니다.");
   }

@@ -38,3 +38,13 @@
 - If remote provider or DB disagrees: do not click and do not retry.
 - If POST responds ambiguously: provider may already have canceled. No repeat POST, no manual DB mutation.
 - Do not activate `REPORT_REFUND_ADMIN_ENABLED` or `TOSS_LIVE_CHECKOUT_ENABLED` as a workaround.
+
+## Completed pilot and retirement evidence — 2026-10-24 KST
+
+- Purchaser explicitly confirmed the 9,900 KRW actual LIVE card cancellation and receipt of funds.
+- Authenticated buyer browser displayed "LIVE 카드 9,900원 취소 및 구매 이용권 회수가 완료됐습니다".
+- Operating DB read-only check confirmed: this purchase has exactly 1 entitlement, 0 active, and 1 revoked with a recorded revocation timestamp.
+- Refund-workflow aggregate showed 2 completed workflows total, including the earlier sandbox test. No additional cancellation was issued during cleanup.
+- The one-time LIVE refund production environment flag was switched to false, and a fresh Production deployment of commit 914daf989936851238ad854065b2b77daea87b6b was confirmed READY on unboda.kr and www.unboda.kr.
+- The cleanup change removes the one-time API, page, action UI, override helper, obsolete CI step and standalone regression script, leaving normal refund eligibility and financial audit data untouched.
+- This historical runbook is retained only as a record; it must not be used to re-enable a temporary refund path.

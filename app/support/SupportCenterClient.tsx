@@ -149,73 +149,73 @@ export default function SupportCenterClient({
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
-      <div className="mx-auto w-full max-w-4xl">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className="text-sm font-semibold text-slate-600 underline underline-offset-4">← 운보다 홈</Link>
-          <div className="flex gap-3 text-sm">
+    <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-slate-900 sm:px-8 sm:py-10">
+      <div className="mx-auto w-full max-w-5xl">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 px-1">
+          <Link href="/" className="inline-flex min-h-10 items-center rounded-full border border-[#dce1ef] bg-white px-4 text-sm font-bold text-[#151a40] shadow-sm hover:bg-[#f3f1ff]">← 운보다 홈</Link>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs sm:text-sm">
             <Link href="/terms" className="text-slate-500 underline underline-offset-4">이용약관</Link>
             <Link href="/privacy" className="text-slate-500 underline underline-offset-4">개인정보처리방침</Link>
             <Link href="/refund" className="text-slate-500 underline underline-offset-4">환불정책</Link>
           </div>
         </div>
 
-        <header className="mt-8 border-b border-slate-200 pb-7">
-          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">SUPPORT CENTER</p>
-          <h1 className="mt-3 text-3xl font-bold sm:text-4xl">고객지원 센터</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">결제·환불 문의는 해당 주문을 연결해 접수할 수 있습니다. 다른 문제는 안내된 해결 방법을 확인하거나 문의를 남겨 주세요.</p>
+        <header className="rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8">
+          <p className="text-xs font-black tracking-[0.18em] text-[#6f5ce7]">SUPPORT CENTER</p>
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-[#11162d] sm:text-4xl">고객지원 센터</h1>
+          <p className="mt-3 max-w-2xl text-[15px] leading-7 text-slate-700">결제·환불 문의는 해당 주문을 연결해 접수할 수 있습니다. 다른 문제는 안내된 해결 방법을 확인하거나 문의를 남겨 주세요.</p>
         </header>
 
-        <section className="mt-7">
-          <h2 className="text-xl font-bold">무엇이 필요하신가요?</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="mt-7 rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8">
+          <h2 className="text-2xl font-black text-[#11162d]">무엇이 필요하신가요?</h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {SUPPORT_REQUEST_CATEGORIES.map((item) => (
               <button
                 key={item}
                 type="button"
                 onClick={() => { setCategory(item); setShowForm(item === "OTHER" || item === "PAYMENT_REFUND"); setRefundReason(""); setFeedback(null); }}
-                className={`min-h-24 rounded-2xl border p-4 text-left shadow-sm transition ${category === item ? "border-[#6f5ce7] bg-[#171a3d] text-white shadow-[0_10px_28px_rgba(66,56,150,0.18)]" : "border-[#dce1ef] bg-white hover:border-[#aaa0f4] hover:shadow-md"}`}
+                className={`group flex min-h-44 flex-col rounded-3xl border p-5 text-left shadow-sm transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7] ${category === item ? "border-[#6f5ce7] bg-[linear-gradient(145deg,#211b53_0%,#121a3e_100%)] text-white shadow-[0_14px_35px_rgba(66,56,150,0.18)]" : "border-[#dce1ef] bg-[#f8f9fd] text-[#11162d] hover:-translate-y-0.5 hover:border-[#b9b2f6] hover:bg-[#f5f3ff] hover:shadow-md"}`}
               >
-                <span className="text-sm font-bold">{SUPPORT_CATEGORY_LABELS[item]}</span>
-                <span className={`mt-2 block text-xs leading-5 ${category === item ? "text-[#d8d7f2]" : "text-slate-500"}`}>{guides[item].description}</span>
+                <span className="flex w-full items-center justify-between gap-3"><span className="text-base font-black">{SUPPORT_CATEGORY_LABELS[item]}</span><span aria-hidden="true" className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg ${category === item ? "bg-white/15 text-white" : "border border-[#ded9ff] bg-white text-[#6f5ce7]"}`}>→</span></span>
+                <span className={`mt-3 block text-sm leading-6 ${category === item ? "text-[#d8d7f2]" : "text-slate-500"}`}>{guides[item].description}</span>
               </button>
             ))}
           </div>
         </section>
 
         {selectedGuide ? (
-          <section className="mt-6 rounded-2xl border border-[#d8d3ff] bg-[#f1efff] p-5">
-            <p className="text-xs font-semibold text-[#5e4bd1]">{category === "PAYMENT_REFUND" ? "환불·취소 문의" : "먼저 자동 해결을 확인해 주세요"}</p>
-            <h2 className="mt-2 text-lg font-bold">{selectedGuide.title}</h2>
+          <section className="mt-6 rounded-[2rem] border border-[#d8d3ff] bg-[linear-gradient(135deg,#f8f6ff_0%,#eeebff_100%)] p-6 shadow-sm sm:p-8">
+            <p className="text-xs font-black tracking-[0.14em] text-[#5e4bd1]">{category === "PAYMENT_REFUND" ? "환불·취소 문의" : "먼저 자동 해결을 확인해 주세요"}</p>
+            <h2 className="mt-2 text-2xl font-black text-[#11162d]">{selectedGuide.title}</h2>
             <p className="mt-2 text-sm leading-7 text-slate-700">{selectedGuide.description}</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link href={selectedGuide.href} className="rounded-xl bg-[#6f5ce7] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5f4fd2]">{selectedGuide.actionLabel}</Link>
+              <Link href={selectedGuide.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#151a40] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#282559]">{selectedGuide.actionLabel}</Link>
               {category !== "OTHER" && category !== "PAYMENT_REFUND" ? (
-                <button type="button" onClick={() => setShowForm(true)} className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700">안내대로 했지만 해결되지 않았어요</button>
+                <button type="button" onClick={() => setShowForm(true)} className="inline-flex min-h-11 items-center rounded-xl border border-[#d8d3ff] bg-white px-5 py-2.5 text-sm font-bold text-[#5143b0] transition hover:bg-[#f7f5ff]">안내대로 했지만 해결되지 않았어요</button>
               ) : null}
             </div>
           </section>
         ) : null}
 
         {showForm && category ? (
-          <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="mt-6 rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8">
             {!isAuthenticated ? (
               <div>
-                <h2 className="text-lg font-bold">문의 접수는 로그인 후 가능합니다</h2>
+                <h2 className="text-2xl font-black tracking-tight text-[#11162d]">문의 접수는 로그인 후 가능합니다</h2>
                 <p className="mt-2 text-sm leading-7 text-slate-600">계정과 주문을 안전하게 확인하기 위해 회원 문의는 로그인된 계정 기준으로 접수합니다. 로그인 문제가 있다면 먼저 비밀번호 재설정을 이용해 주세요.</p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Link href="/auth/login?returnTo=/support" className="rounded-xl bg-[#6f5ce7] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5f4fd2]">로그인</Link>
-                  <Link href="/auth/forgot-password?returnTo=/support" className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700">비밀번호 재설정</Link>
+                  <Link href="/auth/login?returnTo=/support" className="inline-flex min-h-11 items-center rounded-xl bg-[#151a40] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#282559]">로그인</Link>
+                  <Link href="/auth/forgot-password?returnTo=/support" className="inline-flex min-h-11 items-center rounded-xl border border-[#dce1ef] bg-[#f8f9fd] px-5 py-2.5 text-sm font-bold text-[#151a40] transition hover:bg-[#f3f1ff]">비밀번호 재설정</Link>
                 </div>
               </div>
             ) : (
               <form onSubmit={submit} className="space-y-4">
                 <div>
-                  <h2 className="text-lg font-bold">{category === "PAYMENT_REFUND" ? "환불·취소 문의 접수" : "해결되지 않은 문제 접수"}</h2>
+                  <h2 className="text-2xl font-black tracking-tight text-[#11162d]">{category === "PAYMENT_REFUND" ? "환불·취소 문의 접수" : "해결되지 않은 문제 접수"}</h2>
                   <p className="mt-2 text-xs leading-6 text-slate-500">비밀번호, 카드번호, 결제키, 주민등록번호, 사주 원문이나 상담 전체 내용 같은 불필요한 민감정보는 적지 마세요. 운영자는 필요한 주문·계정 상태만 별도로 확인합니다.</p>
                 </div>
                 {category === "PAYMENT_REFUND" && initialRefundOrder ? (
-                  <div className="rounded-xl border border-[#dce1ef] bg-[#f7f8fc] p-4 text-sm">
+                  <div className="rounded-2xl border border-[#ded9ff] bg-[#f7f5ff] p-5 text-sm">
                     <p className="font-bold text-[#11162d]">선택한 주문</p>
                     <p className="mt-2 font-semibold text-slate-800">{initialRefundOrder.productName}</p>
                     <p className="mt-1 text-slate-600">분석 대상 · {initialRefundOrder.profileLabel}</p>
@@ -230,7 +230,7 @@ export default function SupportCenterClient({
                 ) : null}
                 {category === "PAYMENT_REFUND" ? (
                   <label className="block text-sm font-semibold">문의 사유
-                    <select value={refundReason} onChange={(event) => setRefundReason(event.target.value as RefundInquiryReason | "")} required className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm">
+                    <select value={refundReason} onChange={(event) => setRefundReason(event.target.value as RefundInquiryReason | "")} required className="mt-2 w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]">
                       <option value="">사유를 선택해 주세요</option>
                       {refundInquiryReasons.map((reason) => <option key={reason.value} value={reason.value}>{reason.label}</option>)}
                     </select>
@@ -238,7 +238,7 @@ export default function SupportCenterClient({
                 ) : null}
                 {category === "PAID_ANALYSIS" ? (
                   <label className="block text-sm font-semibold">주문 ID <span className="font-normal text-slate-400">(알고 있는 경우)</span>
-                    <input value={analysisOrderId} onChange={(event) => setAnalysisOrderId(event.target.value)} placeholder="주문 ID (선택)" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-mono text-sm" />
+                    <input value={analysisOrderId} onChange={(event) => setAnalysisOrderId(event.target.value)} placeholder="주문 ID (선택)" className="mt-2 w-full rounded-xl border border-[#dce1ef] px-4 py-3 font-mono text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]" />
                   </label>
                 ) : null}
                 <label className="block text-sm font-semibold">{category === "PAYMENT_REFUND" ? "추가 설명 (선택)" : "문제 상황"}
@@ -246,36 +246,42 @@ export default function SupportCenterClient({
                     minLength={category === "PAYMENT_REFUND" ? undefined : 20}
                     maxLength={category === "PAYMENT_REFUND" ? 900 : 1200}
                     required={category !== "PAYMENT_REFUND"} rows={category === "PAYMENT_REFUND" ? 3 : 6}
-                    className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm leading-6"
+                    className="mt-2 w-full rounded-xl border border-[#dce1ef] px-4 py-3 text-sm leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f5ce7]"
                     placeholder={category === "PAYMENT_REFUND" ? "문제 내용을 간단히 적어 주세요." : "자동 안내를 따라 해본 뒤에도 남아 있는 문제와 화면에 표시된 안전한 상태 문구를 적어 주세요."} />
                 </label>
                 {category === "PAYMENT_REFUND" ? (
                   <p className="text-xs leading-5 text-slate-600">정상 제공된 리포트에 대한 주관적인 해석 불만족은 자동 환불 사유가 아닙니다. 결제 오류·미제공·계약과 다른 제공 및 법정 청약철회 권리는 별도로 확인합니다. 문의 접수만으로 결제가 취소되지는 않습니다. <Link href="/refund" className="font-semibold underline">환불정책 보기</Link></p>
                 ) : null}
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-xs text-slate-400">{message.length}/{category === "PAYMENT_REFUND" ? 900 : 1200} · 일반 문의는 진행 중 최대 3건</span>
-                  <button type="submit" disabled={submitting || (category === "PAYMENT_REFUND" && invalidRefundOrder)} className="rounded-xl bg-[#6f5ce7] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#5f4fd2] disabled:bg-slate-400">{submitting ? "접수 중..." : category === "PAYMENT_REFUND" ? "환불·취소 문의 접수" : "문의 접수"}</button>
+                  <button type="submit" disabled={submitting || (category === "PAYMENT_REFUND" && invalidRefundOrder)} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#151a40] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#282559] disabled:cursor-not-allowed disabled:bg-slate-400">{submitting ? "접수 중..." : category === "PAYMENT_REFUND" ? "환불·취소 문의 접수" : "문의 접수"}</button>
                 </div>
               </form>
             )}
           </section>
         ) : null}
 
-        {feedback ? <p role="status" className="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">{feedback}</p> : null}
+        {feedback ? <p role="status" className="mt-5 rounded-2xl border border-[#ded9ff] bg-white px-5 py-4 text-sm text-slate-700 shadow-sm">{feedback}</p> : null}
 
         {isAuthenticated ? (
-          <section className="mt-10 border-t border-slate-200 pt-7">
+          <section className="mt-7 rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8">
             <div className="flex items-end justify-between gap-3">
-              <div><p className="text-xs font-semibold tracking-[0.2em] text-slate-500">MY REQUESTS</p><h2 className="mt-2 text-xl font-bold">내 문의</h2></div>
-              <button type="button" onClick={() => window.location.reload()} className="text-sm font-semibold text-slate-600 underline underline-offset-4">새로고침</button>
+              <div><p className="text-xs font-black tracking-[0.16em] text-[#6f5ce7]">MY REQUESTS</p><h2 className="mt-2 text-2xl font-black tracking-tight text-[#11162d]">내 문의</h2></div>
+              <button type="button" onClick={() => window.location.reload()} className="inline-flex min-h-10 items-center rounded-xl border border-[#dce1ef] bg-[#f8f9fd] px-4 text-sm font-bold text-[#151a40] transition hover:bg-[#f3f1ff]">새로고침</button>
             </div>
-            {requests.length === 0 ? <p className="mt-4 text-sm text-slate-500">접수된 문의가 없습니다.</p> : (
-              <div className="mt-4 space-y-3">
+            {requests.length === 0 ? (
+              <div className="mt-6 flex flex-col items-center rounded-3xl border border-[#e3e1f4] bg-[linear-gradient(145deg,#faf9ff_0%,#f7f8fc_100%)] px-6 py-12 text-center sm:py-14">
+                <span aria-hidden="true" className="flex h-16 w-16 items-center justify-center rounded-2xl border border-[#d8d3ff] bg-white text-3xl text-[#6f5ce7] shadow-sm">✉</span>
+                <p className="mt-5 text-lg font-black text-[#11162d]">접수된 문의가 없습니다.</p>
+                <p className="mt-2 max-w-sm text-sm leading-6 text-slate-600">위에서 필요한 도움 항목을 선택하면 문의 접수와 진행 상태를 이곳에서 확인할 수 있습니다.</p>
+              </div>
+            ) : (
+              <div className="mt-6 space-y-3">
                 {requests.map((request) => (
-                  <article key={request.id} className="rounded-xl border border-slate-200 bg-white p-5">
+                  <article key={request.id} className="rounded-3xl border border-[#e4e6f1] bg-[#f8f9fd] p-5 sm:p-6">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="font-bold">{SUPPORT_CATEGORY_LABELS[request.category]}</p>
-                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">{SUPPORT_STATUS_LABELS[request.status]}</span>
+                      <span className="rounded-full border border-[#d8d3ff] bg-white px-3 py-1.5 text-xs font-bold text-[#5e4bd1]">{SUPPORT_STATUS_LABELS[request.status]}</span>
                     </div>
                     <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">{request.message}</p>
                     <p className="mt-3 text-xs text-slate-400">접수 {time(request.createdAt)}</p>

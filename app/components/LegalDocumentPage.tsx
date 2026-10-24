@@ -29,6 +29,7 @@ export default function LegalDocumentPage({ eyebrow, title, summary, children }:
             <dt className="font-semibold text-stone-800">상호</dt><dd>운보다</dd>
             <dt className="font-semibold text-stone-800">대표자</dt><dd>반희</dd>
             <dt className="font-semibold text-stone-800">사업자등록번호</dt><dd>201-28-96364</dd>
+            <dt className="font-semibold text-stone-800">통신판매업 신고</dt><dd>신고 면제(간이과세자) <a href="https://www.law.go.kr/admRulLsInfoP.do?admRulSeq=2100000191541" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-stone-900">관련 고시 확인</a></dd>
             <dt className="font-semibold text-stone-800">사업장 소재지</dt><dd>충청남도 천안시 서북구 백석4길 12, 10층 1001-B52호(백석동, 거성캐슬B빌딩)</dd>
             <dt className="font-semibold text-stone-800">고객센터</dt><dd>070-4792-8900</dd>
             <dt className="font-semibold text-stone-800">공식 지원 이메일</dt><dd>support@unboda.kr</dd>

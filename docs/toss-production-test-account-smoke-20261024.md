@@ -7,6 +7,9 @@ The existing `TOSS_TEST_ACCOUNT_ID` matches one NICE-verified production lifecyc
 
 The code change adds a second, independent, **exact-match** reviewer env `TOSS_REVIEW_EXTRA_TEST_ACCOUNT_ID`, and accepts this ONLY if `TOSS_HYBRID_ROUTING_ENABLED=true`, `TOSS_TEST_ACCOUNT_ID` is valid, and both IDs are identical. All non-test accounts preserve the LIVE/pilot approval checks. It never bypasses NICE adult verification.
 
+## Security audit gate found on 2026-10-24
+GitHub Actions **Launch Security Audit** failed at `npm audit --omit=dev --audit-level=high` before running launch regression or build. The same repository's lockfile pins Next.js **16.3.4** and sharp **0.35.4**; the audit reported **1 critical + 3 high** production dependency findings, including Next.js advisories and librsvg in sharp. The wider audit counted 1 critical + 4 high. **Do not merge or deploy this PR to Production until the dependency audit is fixed and re-run successfully.** Never use `npm audit --force` without a version-compatibility review. The Vercel Preview may be READY while GitHub's blocking security audit is red.
+
 ## Preconditions BEFORE merging or Production redeploy
 1. Owner approves a narrowly scoped Production TEST-smoke deployment; confirm the selected test account can be logged into by the operator (cannot impersonate).
 2. Store only the same merchant's **API individual integration** `test_ck_` client key and `test_sk_` secret in Vercel Production, as `TOSS_CLIENT_KEY` and `TOSS_SECRET_KEY`, **Sensitive**. Existing staging Sensitive keys cannot be retrieved/copied by the automation. Enter them directly in the Vercel dashboard from Toss; never post them to chat, GitHub, logs, or screenshots.

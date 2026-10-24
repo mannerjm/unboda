@@ -23,7 +23,7 @@ export function buildVideoArgs({scenes,narrationPath,outputPath}){
  const filters=[];
  for(let i=0;i<4;i++){
   // Slight scene movement with premium-quality supplied assets.
-  filters.push(`[${i}:v]scale=${WIDTH}:${HEIGHT}:force_original_aspect_ratio=increase,crop=${WIDTH}:${HEIGHT},zoompan=z='min(zoom+0.00008,1.03)':d=1:s=${WIDTH}x${HEIGHT}:fps=${FRAMERATE},setsar=1,trim=duration=8,setpts=PTS-STARTPTS[v${i}]`);
+  filters.push(`[${i}:v]scale=${WIDTH}:${HEIGHT}:force_original_aspect_ratio=increase,crop=${WIDTH}:${HEIGHT},zoompan=z='min(zoom+0.00008,1.03)':d=1:s=${WIDTH}x${HEIGHT}:fps=${FRAMERATE},setsar=1,fps=${FRAMERATE},settb=AVTB,format=yuv420p[v${i}]`);
  }
  filters.push("[v0][v1]xfade=transition=fade:duration=0.5:offset=7.5[x1]");
  filters.push("[x1][v2]xfade=transition=fade:duration=0.5:offset=15[x2]");

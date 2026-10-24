@@ -14,7 +14,7 @@ export function createPayload({post,mediaUrl,dateTime,network,postType}){
  const type=postType??(network==="youtube"?"short":network==="tiktok"?"video":
   network==="threads"?"post":post.video?"reel":"post");
  if(!FORMATS[network].includes(type))throw Error("FORMAT_NOT_SUPPORTED");
- if(!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$/.test(dateTime??""))
+ if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(dateTime??""))
   throw Error("INVALID_PUBLICATION_DATE");
  if(!/^https:\/\/static\.metricool\.com\//.test(mediaUrl??""))
   throw Error("METRICOOL_NORMALIZED_MEDIA_REQUIRED");

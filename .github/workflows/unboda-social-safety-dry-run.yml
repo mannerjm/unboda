@@ -15,4 +15,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test automation/social/*.test.mjs
+      - name: Install FFmpeg test dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          ffmpeg -version | head -n 1
+      - name: Unit tests + real local MP4 render smoke (no external publishing)
+        run: node --test automation/social/*.test.mjs

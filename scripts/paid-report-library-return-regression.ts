@@ -33,6 +33,28 @@ assert(!paidClient.includes("상품 설명으로 돌아가기"), "paid report mu
 assert(paid.indexOf("<ReportAccessGate") < paid.indexOf("<PaidReportBody"), "deep report stays behind purchase gate");
 assert(paid.indexOf("<ReportCompletionGate") < paid.indexOf('<ReportLibraryReturnLink placement="bottom"'),
   "deep report exit only appears after completed report");
+
+// A first-time paid report can show the preparing screen before its snapshot exists.
+// Its top library link must not appear until the same completion event that unlocks
+// post-report actions; completed reports must keep their top + footer exits.
+const topLink = paid.indexOf('<ReportLibraryReturnLink placement="top"');
+const reportBody = paid.indexOf('<PaidAnalysisDetailV2Client');
+const topGate = paid.lastIndexOf('<ReportCompletionGate', topLink);
+const topGateCode = paid.slice(topGate, topLink);
+assert(topGate > -1 && topGate < topLink && topLink < reportBody,
+  "deep report: top return must be completion-gated before the report body");
+assert(topGateCode.includes('initialCompleted={Boolean(initialDetail)}')
+  && topGateCode.includes('edition={exactEdition}')
+  && topGateCode.includes('profileId={profileId}')
+  && topGateCode.includes('productId={productId}'),
+  "deep report: top link must use the exact purchased report completion state");
+const completionGate = read("app/paid-analysis/[productId]/report/ReportCompletionGate.tsx");
+assert(completionGate.includes('if (!completed) return null')
+  && completionGate.includes('unboda:paid-report-ready'),
+  "deep report: wait-state top link must remain hidden until persisted ready event");
+assert(paid.includes('key={`post-report:${profileId}:${productId}:${exactEdition}`}'),
+  "deep report: completed-only AI consultation and footer sections must remain intact");
+
 for (const path of reportFiles.slice(1)) {
   const src = read(path);
   assert(src.includes('import { getActiveProfile } from "@/app/lib/profiles/activeServer"'),

@@ -4,6 +4,7 @@ import { createAdminClient } from "../supabase/admin";
 import { getTossPaymentRecordForOrder } from "../purchases/server";
 import { cancelPaymentWithToss, getPaymentByOrderIdFromToss, TossCancellationError } from "../toss/server";
 import { getTossConfigForAccount } from "../toss/config";
+import { isAiCreditLivePilotAllowed } from "./creditPilotAccess";
 
 export function isAiCreditSelfRefundEnabled(): boolean {
   return process.env.AI_CREDIT_SELF_REFUNDS_ENABLED === "true";
@@ -12,20 +13,7 @@ export function isAiCreditSelfRefundEnabled(): boolean {
 /** Pilot is server-only and requires the separate LIVE checkout pilot to be enabled. */
 export function isAiCreditRefundAllowedForUser(userId: string): boolean {
   if (isAiCreditSelfRefundEnabled()) return true;
-  if (process.env.NODE_ENV !== "production"
-    || process.env.AI_CREDIT_REFUND_PILOT_ENABLED !== "true"
-    || process.env.TOSS_HYBRID_ROUTING_ENABLED !== "true"
-    || process.env.TOSS_LIVE_PILOT_ENABLED !== "true"
-    // Independent, fail-closed opt-in for owner-only LIVE credit pilot while
-    // normal paid-report LIVE checkout is available to other customers.
-    || (process.env.TOSS_LIVE_CHECKOUT_ENABLED === "true"
-      && process.env.AI_CREDIT_LIVE_PILOT_ENABLED !== "true")) return false;
-  if (!/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(userId)) return false;
-  // A second, refund-specific allowlist protects other LIVE pilot purchasers.
-  const dedicated = (process.env.AI_CREDIT_REFUND_PILOT_ACCOUNT_IDS ?? "")
-    .split(",").some(id => id.trim().toLowerCase() === userId.toLowerCase());
-  return dedicated && (process.env.TOSS_LIVE_PILOT_ACCOUNT_IDS ?? "")
-    .split(",").some(id => id.trim().toLowerCase() === userId.toLowerCase());
+  return isAiCreditLivePilotAllowed(userId);
 }
 
 export type CreditLotView = {

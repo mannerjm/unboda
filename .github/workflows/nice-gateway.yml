@@ -5,6 +5,7 @@ on:
     paths:
       - "services/nice-gateway/**"
       - ".github/workflows/nice-gateway.yml"
+      - "scripts/nice-staging-config-template-regression.mjs"
   workflow_dispatch:
 
 permissions:
@@ -28,6 +29,10 @@ jobs:
 
       - name: Run offline gateway tests
         run: npm test
+
+      - name: Verify staging isolation templates
+        working-directory: .
+        run: node --test scripts/nice-staging-config-template-regression.mjs
 
       - name: Syntax check runtime entrypoints
         run: |

@@ -1,0 +1,19 @@
+# TEMPLATE ONLY. Requires explicit DNS verification and NICE callback registration.
+# Isolated host; never change the existing nice-gateway.unboda.kr block.
+nice-staging-gateway.unboda.kr {
+  header {
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+    Referrer-Policy "no-referrer"
+    -Server
+  }
+  handle /health {
+    respond "ok" 200
+  }
+  handle /v1/nice/* {
+    reverse_proxy 127.0.0.1:8788
+  }
+  handle {
+    respond "Not Found" 404
+  }
+}

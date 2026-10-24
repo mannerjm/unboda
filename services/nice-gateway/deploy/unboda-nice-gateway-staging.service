@@ -1,0 +1,39 @@
+# TEMPLATE ONLY — not installed or started by Git/Vercel.
+# Separate environment and distinct port from production (127.0.0.1:8787).
+[Unit]
+Description=Unboda NICE staging identity gateway (isolated)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nicegateway
+Group=nicegateway
+WorkingDirectory=/opt/unboda/services/nice-gateway
+EnvironmentFile=/etc/unboda-nice-gateway-staging.env
+Environment=NICE_GATEWAY_HOST=127.0.0.1
+Environment=NICE_GATEWAY_PORT=8788
+Environment=NICE_PUBLIC_ORIGIN=https://unboda-git-test-staging-tenant-e2e-unboda.vercel.app
+ExecStart=/usr/bin/node src/server.mjs
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=10
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

@@ -18,7 +18,7 @@ test("explicit caller opt-in required",async()=>assert.equal((await schedule({po
 test("media must be metricool normalized",()=>assert.throws(()=>createPayload({post:base,mediaUrl:"https://unboda.kr/video.mp4",dateTime:"2026-11-03T10:00:00",network:"youtube"}),/NORMALIZED/));
 test("instagram AI declaration",()=>assert.equal(createPayload({post:base,mediaUrl:"https://static.metricool.com/x.mp4",dateTime:"2026-11-03T10:00:00",network:"instagram"}).instagramData.isAiGenerated,true));
 test("youtube Shorts format",()=>assert.equal(createPayload({post:base,mediaUrl:"https://static.metricool.com/x.mp4",dateTime:"2026-11-03T10:00:00",network:"youtube"}).youtubeData.type,"short"));
-test("mock API POST works",async()=>{let hit=false;const got=await schedule({post:base,mediaUrl:"https://static.metricool.com/x.mp4",network:"youtube",dateTime:"2026-11-03T10:00:00",allowLive:true,env:{SOCIAL_PUBLISH_ENABLED:"true",METRICOOL_API_TOKEN:"mock",METRICOOL_USER_ID:"5729495",METRICOOL_BLOG_ID:"7377653"},fetcher:async(_url,req)=>{hit=true;assert.equal(req.method,"POST");return {ok:true,json:async()=>({id:"fixture"})}}});assert.equal(hit,true);assert.equal(got.state,"SCHEDULED");});
+test("mock API POST works",async()=>{let hit=false;const got=await schedule({post:base,mediaUrl:"https://static.metricool.com/x.mp4",network:"youtube",dateTime:"2026-11-03T10:00:00",allowLive:true,env:{SOCIAL_PUBLISH_ENABLED:"true",METRICOOL_API_TOKEN:"mock",METRICOOL_USER_ID:"5729495",METRICOOL_BLOG_ID:"7377653",SOCIAL_DURABLE_LEDGER_READY:"true",SOCIAL_ACCOUNT_QUOTA_VERIFIED:"true",SOCIAL_MEDIA_PUBLIC_URL_VERIFIED:"true"},fetcher:async(_url,req)=>{hit=true;assert.equal(req.method,"POST");return {ok:true,json:async()=>({id:"fixture"})}}});assert.equal(hit,true);assert.equal(got.state,"SCHEDULE_REQUEST_ACCEPTED");});
 
 test("Facebook Reel payload",()=>{
  const payload=createPayload({post:base,mediaUrl:"https://static.metricool.com/test.mp4",dateTime:"2026-11-03T10:00:00",network:"facebook",postType:"reel"});
@@ -49,4 +49,23 @@ test("unapproved story must not call Metricool",async()=>{
  let called=false;
  const got=await schedule({post:{...base,creatorReviewStatus:"pending"},mediaUrl:"https://static.metricool.com/photo.png",dateTime:"2026-11-03T10:00:00",network:"facebook",postType:"story",allowLive:true,env:{SOCIAL_PUBLISH_ENABLED:"true",METRICOOL_API_TOKEN:"fixture",METRICOOL_USER_ID:"1",METRICOOL_BLOG_ID:"2"},fetcher:()=>{called=true;throw Error("network")}});
  assert.equal(got.state,"BLOCKED");assert.equal(called,false);
+});
+
+test("TikTok Business video keeps commercial and AI disclosures",()=>{
+ const p=createPayload({post:base,mediaUrl:"https://static.metricool.com/clip.mp4",dateTime:"2026-11-03T10:00:00",network:"tiktok"});
+ assert.equal(p.tiktokData.commercialContentOwnBrand,true);
+ assert.equal(p.tiktokData.isAigc,true);
+ assert.equal(p.autoPublish,true);
+});
+test("Threads image post has text and media",()=>{
+ const p=createPayload({post:{...base,video:null},mediaUrl:"https://static.metricool.com/asset.png",dateTime:"2026-11-03T10:00:00",network:"threads"});
+ assert.equal(p.text,base.caption);
+ assert.equal(p.providers[0].network,"threads");
+});
+test("live requires all independent safety prerequisites",async()=>{
+ await assert.rejects(()=>schedule({post:base,allowLive:true,
+  mediaUrl:"https://static.metricool.com/clip.mp4",
+  network:"tiktok",dateTime:"2026-11-03T10:00:00",
+  env:{SOCIAL_PUBLISH_ENABLED:"true",METRICOOL_API_TOKEN:"mock",METRICOOL_USER_ID:"1",METRICOOL_BLOG_ID:"2"},
+  fetcher:async()=>{throw Error("must never call external network");}}),/LIVE_SAFETY_PREREQUISITES_MISSING/);
 });

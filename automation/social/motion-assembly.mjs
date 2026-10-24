@@ -41,10 +41,44 @@ export function motionAssemblyArgs({clips,narrationPath,narrationProof,outputPat
   "-movflags","+faststart",outputPath);
  return args;
 }
+export function verifyMotionInputProbe(probe){
+ const video=(probe?.streams??[]).find(x=>x.codec_type==="video");
+ const duration=Number(probe?.format?.duration);
+ const reasons=[];
+ if(!video||!Number.isFinite(video.width)||!Number.isFinite(video.height)||
+   video.width/video.height>0.72||video.width<360||video.height<640)
+  reasons.push("SOURCE_NOT_VERTICAL_VIDEO");
+ if(!Number.isFinite(duration)||duration<8)reasons.push("SOURCE_VIDEO_TOO_SHORT");
+ return {ok:reasons.length===0,reasons,duration};
+}
+export function verifyVoiceInputProbe(probe){
+ const audio=(probe?.streams??[]).find(x=>x.codec_type==="audio");
+ const duration=Number(probe?.format?.duration);
+ const reasons=[];
+ if(!audio)reasons.push("VOICE_AUDIO_STREAM_MISSING");
+ if(!Number.isFinite(duration)||duration<20||duration>31)
+  reasons.push("VOICE_DURATION_NOT_ALIGNED");
+ return {ok:reasons.length===0,reasons,duration};
+}
 export async function assembleMotionVideo({clips,narrationPath,narrationProof,outputPath,
  exec=run}={}){
  const args=motionAssemblyArgs({clips,narrationPath,narrationProof,outputPath});
  for(const p of [...clips.map(c=>c.file),narrationPath])await access(p);
+ // Always independently probe the real downloaded files rather than trusting
+ // a flag or provider URL. Synthetic tones can still pass stream-level QA,
+ // and MUST be blocked by a separate editorial pronunciation review.
+ for(const c of clips){
+  const result=await exec("ffprobe",["-v","error","-show_entries",
+   "format=duration:stream=codec_type,width,height","-of","json",c.file],
+   {timeout:20000,maxBuffer:1024*1024});
+  const inspected=verifyMotionInputProbe(JSON.parse(result.stdout));
+  if(!inspected.ok)throw Error("MOTION_SOURCE_QA_FAILED:"+inspected.reasons.join(","));
+ }
+ const voiceResult=await exec("ffprobe",["-v","error","-show_entries",
+  "format=duration:stream=codec_type,codec_name","-of","json",narrationPath],
+  {timeout:20000,maxBuffer:1024*1024});
+ const voiceCheck=verifyVoiceInputProbe(JSON.parse(voiceResult.stdout));
+ if(!voiceCheck.ok)throw Error("VOICE_SOURCE_QA_FAILED:"+voiceCheck.reasons.join(","));
  await mkdir(dirname(outputPath),{recursive:true});
  await exec("ffmpeg",args,{timeout:240000,maxBuffer:1024*1024});
  const data=await exec("ffprobe",["-v","error","-show_entries",

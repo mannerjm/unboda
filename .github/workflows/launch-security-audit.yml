@@ -42,5 +42,8 @@ jobs:
       - name: Run launch security regression
         run: npm run test:launch-security
 
+      - name: Verify one-time TEST refund financial safety guard
+        run: node scripts/one-time-test-refund-regression.mjs
+
       - name: Build
         run: npm run build

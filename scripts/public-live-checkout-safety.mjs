@@ -19,6 +19,8 @@ assert.match(pilot,/process\.env\.AI_CREDIT_LIVE_PILOT_ENABLED === "true"/);
 assert.match(pilot,/process\.env\.AI_CREDIT_REFUND_PILOT_ENABLED === "true"/);
 assert.match(credit,/isAiCreditLivePilotAllowed\(userId\)/);
 assert.match(credit,/isAiConsultingCreditCheckoutEnabled\(input\.userId\)/);
+assert.match(credit,/getPaymentByOrderIdFromToss\(order\.id, getTossConfigForAccount\(order\.userId, "settlement"\)\)/);
+assert.doesNotMatch(credit,/getPaymentByOrderIdFromToss\(order\.id\)/);
 assert.match(refunds,/isAiCreditLivePilotAllowed\(userId\)/);
 assert.match(pilot,/process\.env\.AI_CREDIT_REFUND_PILOT_ENABLED === "true"/);
 assert.match(pilot,/AI_CREDIT_REFUND_PILOT_ACCOUNT_IDS/);

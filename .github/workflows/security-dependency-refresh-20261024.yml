@@ -23,6 +23,8 @@ jobs:
           cache: npm
       - name: Prepare patched lock without package lifecycle scripts
         run: npm install --package-lock-only --ignore-scripts --no-audit --save-exact next@16.4.1 sharp@0.35.5
+      - name: Update compatible vulnerable transitive dependencies
+        run: npm audit fix --package-lock-only --ignore-scripts --no-fund
       - name: Validate lock consistency
         run: npm ci --ignore-scripts --no-audit
       - name: Enforce critical/high production dependency audit

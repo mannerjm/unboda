@@ -1,13 +1,13 @@
 {
   "episode_id": "ub-first-zodiac-vs-saju-20261024",
-  "status": "PREPRODUCTION_REVIEW_ONLY",
+  "status": "REVISED_VISUAL_DESIGN_REVIEW_ONLY",
   "topic_key": "zodiac-vs-four-pillars-basics",
   "kind": "short-video",
   "intent": "사주에 관한 실질적인 교육을 우선하고 마지막에 무료 사주 조회를 부드럽게 소개",
   "title": "띠만 보면 사주를 알 수 있을까요?",
   "hook": "열두 띠만으로 사람의 사주를 전부 설명할 수 있을까요?",
   "audience": "사주·띠를 처음 접하는 한국어 이용자",
-  "narrator_script": "띠만 알면 사주도 알 수 있을까요? 열두 띠는 태어난 해와 연결된 전통적인 동물 상징입니다. 하지만 사주에서는 해뿐 아니라 달과 날, 시간까지 네 가지 기둥을 함께 살펴봅니다. 다만 이런 해석은 전통문화의 참고 정보이지 미래를 확정하는 예언은 아닙니다. 나의 사주가 궁금하다면 운보다에서 무료로 살펴보세요.",
+  "narrator_script": "띠만 알면 사주도 알 수 있을까요? 띠는 태어난 해와 연결된 전통적인 동물 상징입니다. 사주에서는 태어난 해와 달, 날, 시간의 네 기둥을 함께 살펴봅니다. 이런 해석은 미래를 확정하는 예언이 아닌 참고 정보입니다. 나의 사주가 궁금하다면 운보다에서 무료로 살펴보세요.",
   "educational_claims": [
     {
       "claim": "띠는 태어난 해와 연결된 전통적인 동물 상징이다",
@@ -25,31 +25,31 @@
   "scenes": [
     {
       "seconds": 7.5,
-      "role": "hook",
-      "on_screen": "띠만 알면\\n사주도 알 수 있을까?",
+      "role": "educational_hook",
+      "on_screen": "띠만 알면 / 사주도 알 수 있을까?",
       "voiceover": "띠만 알면 사주도 알 수 있을까요?",
-      "visual": "12띠를 상징하는 회전하는 열두 점과 달 원형, 강한 질문 타이포그래피"
+      "visual": "프리미엄 12띠 상징 링, 넓은 여백, 텍스트 최상단 2줄"
     },
     {
       "seconds": 7.5,
-      "role": "educational",
-      "on_screen": "띠 = 태어난 해와\\n연결된 동물 상징",
-      "voiceover": "열두 띠는 태어난 해와 연결된 전통적인 동물 상징입니다.",
-      "visual": "열두 동물 상징을 하나의 원형으로 배치한 차분한 인포그래픽"
+      "role": "zodiac_explanation",
+      "on_screen": "띠는 태어난 해의 / 동물 상징이에요",
+      "voiceover": "띠는 태어난 해와 연결된 전통적인 동물 상징입니다.",
+      "visual": "동물 상징 12개를 추상적인 원형 장식으로 표현, 텍스트와 이미지 겹침 금지"
     },
     {
       "seconds": 7.5,
-      "role": "educational",
-      "on_screen": "사주 = 해 · 달 · 날 · 시간\\n네 기둥의 전통적 해석",
-      "voiceover": "하지만 사주는 해와 달, 날, 시간까지 네 기둥을 함께 살펴봅니다.",
-      "visual": "네 개 기둥이 차례로 빛나며 등장하는 정보 시각화"
+      "role": "four_pillars",
+      "on_screen": "사주는 네 기둥을 / 함께 살펴봐요",
+      "voiceover": "사주에서는 해와 달, 날, 시간의 네 기둥을 함께 살펴봅니다.",
+      "visual": "년주·월주·일주·시주를 4장의 고급 그래픽 카드로 표현"
     },
     {
       "seconds": 7.5,
-      "role": "disclaimer-cta",
-      "on_screen": "미래를 확정하는 예언은 아닙니다\\n운보다 무료 사주",
-      "voiceover": "전통 해석은 참고 정보입니다. 나의 사주가 궁금하다면 운보다에서 무료로 살펴보세요.",
-      "visual": "차분한 별빛 속 무료 사주 조회 안내, unboda.kr"
+      "role": "educational_disclaimer_cta",
+      "on_screen": "사주 해석은 / 참고로 살펴보세요",
+      "voiceover": "이런 해석은 미래를 확정하는 예언이 아닌 참고 정보입니다. 나의 사주가 궁금하다면 운보다에서 무료로 살펴보세요.",
+      "visual": "프리미엄 별빛 심벌과 운보다 무료 사주 안내. CTA는 하단 SNS 컨트롤과 겹치지 않을 것."
     }
   ],
   "ai_generation_plan": {
@@ -68,9 +68,44 @@
     "audiovisual_approved": false,
     "voice_license_verified": false,
     "metricool_e2e_verified": false,
-    "publish_enabled": false
+    "publish_enabled": false,
+    "notes": "이전 V1과 이번 V2 모두 실제 자동 게시 대상으로 승인되지 않았음. 실제 한국어 TTS와 음성 발음 QA, 미디어 고급화, SNS별 E2E 필요."
   },
   "cta": "운보다에서 무료 사주 살펴보기",
   "site": "https://unboda.kr",
-  "disclaimer": "사주 해석은 전통문화의 참고 정보이며 미래를 보장하지 않습니다."
+  "disclaimer": "사주 해석은 전통문화의 참고 정보이며 미래를 보장하지 않습니다.",
+  "productionReady": false,
+  "design_v2": {
+    "version": "2.0",
+    "generated_on": "2026-10-24",
+    "status": "LOCAL_MP4_VISUAL_QA_ONLY",
+    "art_direction": "독창적 코스믹 인디고·샴페인 골드 정보형 모션그래픽, 높은 대비, 간결한 한글",
+    "video": {
+      "width": 1080,
+      "height": 1920,
+      "seconds": 30,
+      "codec": "H.264",
+      "audioCodec": "AAC"
+    },
+    "contentSafeAreaPixels": {
+      "left": 104,
+      "right": 976,
+      "top": 220,
+      "bottom": 1515
+    },
+    "koreanFont": "NanumSquare (font files are not distributed)",
+    "linesPerHeadlineMax": 2,
+    "scenesCount": 4,
+    "CTAOnlyFinalScene": true,
+    "visualOverflowScan": {
+      "textBoxCount": 30,
+      "withinSafeArea": true
+    },
+    "actualVideoCreatedInConversation": true,
+    "exportedVideoNotStoredInRepository": true,
+    "containsKoreanNarration": false,
+    "containsRunwayAIVideo": false,
+    "originalAmbientAudioOnly": true,
+    "commercialPublishApproved": false
+  }
 }

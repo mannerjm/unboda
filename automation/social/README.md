@@ -44,3 +44,13 @@ node --test automation/social/*.test.mjs
 Run tests without Metricool secrets. They use synthetic posts and mocked network responses, never real uploads.
 
 The separate ChatGPT automations currently attempt 3h image and 6h short video *if original media is available*; neither these attempt schedules nor this PR guarantee content creation or unattended publishing. No payments, production deployment, refund processing, real customer data or third-party paid subscriptions have been changed by this branch.
+
+
+## 2026-10-24 real MP4 integration + 48h buffer (review branch only)
+- A previously mock-only video renderer failed during a real local FFmpeg run: combining `trim` and `setpts` caused xfade to receive an invalid nominal framerate. Fixed by preserving explicit 30-fps timebase across each scene. The local smoke now renders a 30-second 1080x1920 H.264/AAC MP4 and `ffprobe` confirms both streams.
+- `render.integration.test.mjs` generates FOUR synthetic colored scene PNG files and ONE synthetic test tone (no natural speech), runs FFmpeg for real and checks actual MP4 metadata. These fixtures are NOT commercial-ready media. GitHub Actions installs FFmpeg explicitly and runs the integration test in isolation with no Metricool or paid AI token.
+- `buffer.mjs`: deterministic local-KST 48-hour candidate schedule; 16 text+image and 8 short-video candidates for a full 48h window, stable per-brand job keys and explicit media+rights+editorial readiness criteria. **It does not fill the buffer with actual created content.**
+- `worker.mjs`: mockable orchestration interface for durable claims and unapproved editorial candidates; production must implement a real atomic database claim and budget reservation before executing the interface. A mock ledger can prove a second call does not regenerate a test candidate.
+- `budget.mjs`: fails closed unless a future provider's cost, monthly USD-cent budget, reserved spend, budget lock and subscription validation are all known and approved; **no purchased service, charge, or vendor is configured**.
+- Browser access, paid-plan upgrades, production migrations, remote Metricool REST posts and server Cron activation have NOT occurred.
+- This test establishes an audiovisual **format baseline**, NOT premium cinematic motion, factual accuracy, natural Korean TTS quality, or public SNS delivery. A high-quality Korean commercial demo must be approved and its original assets/rights documented before launch.

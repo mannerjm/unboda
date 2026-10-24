@@ -54,6 +54,15 @@
 
 공식 자료: https://supabase.com/docs/guides/platform/backups 및 https://supabase.com/docs/guides/platform/clone-project
 
+### 2026-10-24 PITR 활성 상태 확인 — 미활성화
+
+- 운영자 제공 Supabase `Database Backups → Point in time` 스크린샷에는 `Point in Time Recovery is available as an add-on` 및 `Enable add-on`이 표시된다. **운영 프로젝트 PITR은 현재 OFF**다. 확인을 위해 과금이나 설정 변경을 실행하지 않았다.
+- 기본 Pro Daily/Physical 백업 7일이 존재한다는 사실과 별개로, 장애 복구시 마지막 일일 백업 이후 최대 약 하루의 거래/리포트 변경분이 유실될 수 있다. 실제 손실 가능 범위는 장애 시각·백업 시각에 따라 다르며, 백업이 있다는 것과 복원 실증은 별개다.
+- 공식 공개 가격(확인일 2026-10-24): PITR 7일 약 **USD 100/월** (`$0.137/시간`), 14일 약 USD 200/월, 28일 약 USD 400/월. **최소 Small compute add-on 요구**로 기존 compute 구성에 따라 별도 비용 가능. 과금 조건은 실제 Supabase 승인 화면에서 재확인한다. 공식 안내: https://supabase.com/docs/guides/platform/backups
+- PITR 활성화 시 기존 Daily Backups 생성이 PITR 방식으로 전환된다. PITR 도입이 곧 복원 검증 완료를 의미하지 않는다. 비용·과세·복원 책임자는 사업자 승인 전까지 미확정.
+- **다음 선택:** (1) 월 비용과 compute 요건 확인 후 PITR 7일 활성화 승인 및 별도 격리 복원 시험, 또는 (2) 당분간 Pro 일별 백업 유지 + 서비스 오픈 전 복구시점 손실 위험을 정식 수용하고 별도 복원 성공 실증. 아직 어떤 선택도 실행하지 않음.
+- 상단 Supabase 장애 조사 배너가 표시돼 있었으므로, 관련 변경 전 서비스 상태를 다시 확인한다.
+
 ## D. 모바일·계정·프로필 E2E — 실제 브라우저 검증 미완료
 
 정적 검사 및 Supabase DB 구조에서 `orders`, `purchases`, `entitlements`, `paid_reports`의 `profile_id NOT NULL` 및 주문/구매/이용권 프로필 연결 FK를 확인. 서버가 `user_id + profile_id`로 entitlement를 조회함을 확인했다. 이는 브라우저 실사용 E2E의 대체가 아님.

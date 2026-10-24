@@ -1,0 +1,76 @@
+{
+  "episode_id": "ub-first-zodiac-vs-saju-20261024",
+  "status": "PREPRODUCTION_REVIEW_ONLY",
+  "topic_key": "zodiac-vs-four-pillars-basics",
+  "kind": "short-video",
+  "intent": "사주에 관한 실질적인 교육을 우선하고 마지막에 무료 사주 조회를 부드럽게 소개",
+  "title": "띠만 보면 사주를 알 수 있을까요?",
+  "hook": "열두 띠만으로 사람의 사주를 전부 설명할 수 있을까요?",
+  "audience": "사주·띠를 처음 접하는 한국어 이용자",
+  "narrator_script": "띠만 알면 사주도 알 수 있을까요? 열두 띠는 태어난 해와 연결된 전통적인 동물 상징입니다. 하지만 사주에서는 해뿐 아니라 달과 날, 시간까지 네 가지 기둥을 함께 살펴봅니다. 다만 이런 해석은 전통문화의 참고 정보이지 미래를 확정하는 예언은 아닙니다. 나의 사주가 궁금하다면 운보다에서 무료로 살펴보세요.",
+  "educational_claims": [
+    {
+      "claim": "띠는 태어난 해와 연결된 전통적인 동물 상징이다",
+      "required_review": "기준일 경계는 단정하지 않고 양력 1월 1일만으로 판단하지 않을 것"
+    },
+    {
+      "claim": "사주에서는 년·월·일·시 네 기둥을 함께 살핀다",
+      "required_review": "전통 명리의 개념 설명으로 한정"
+    },
+    {
+      "claim": "사주는 미래를 확정하는 객관적 예측이 아니다",
+      "required_review": "전통문화·참고 정보의 한계 명시"
+    }
+  ],
+  "scenes": [
+    {
+      "seconds": 7.5,
+      "role": "hook",
+      "on_screen": "띠만 알면\\n사주도 알 수 있을까?",
+      "voiceover": "띠만 알면 사주도 알 수 있을까요?",
+      "visual": "12띠를 상징하는 회전하는 열두 점과 달 원형, 강한 질문 타이포그래피"
+    },
+    {
+      "seconds": 7.5,
+      "role": "educational",
+      "on_screen": "띠 = 태어난 해와\\n연결된 동물 상징",
+      "voiceover": "열두 띠는 태어난 해와 연결된 전통적인 동물 상징입니다.",
+      "visual": "열두 동물 상징을 하나의 원형으로 배치한 차분한 인포그래픽"
+    },
+    {
+      "seconds": 7.5,
+      "role": "educational",
+      "on_screen": "사주 = 해 · 달 · 날 · 시간\\n네 기둥의 전통적 해석",
+      "voiceover": "하지만 사주는 해와 달, 날, 시간까지 네 기둥을 함께 살펴봅니다.",
+      "visual": "네 개 기둥이 차례로 빛나며 등장하는 정보 시각화"
+    },
+    {
+      "seconds": 7.5,
+      "role": "disclaimer-cta",
+      "on_screen": "미래를 확정하는 예언은 아닙니다\\n운보다 무료 사주",
+      "voiceover": "전통 해석은 참고 정보입니다. 나의 사주가 궁금하다면 운보다에서 무료로 살펴보세요.",
+      "visual": "차분한 별빛 속 무료 사주 조회 안내, unboda.kr"
+    }
+  ],
+  "ai_generation_plan": {
+    "premium_motion_seconds_per_original": 10,
+    "premium_clips_count": 1,
+    "original_mograph_seconds_per_original": 20,
+    "runway_model": "gen4_turbo",
+    "expected_runway_base_credits": 50,
+    "expected_runway_base_usd": 0.5,
+    "narration_model": "eleven_multilingual_v2",
+    "captions": "최종 한국어 음성의 실제 타이밍과 동기화해 생성",
+    "rights": "원본 제작 이미지 또는 유효한 상업 라이선스가 확인된 소재만 사용"
+  },
+  "publish_approval": {
+    "fact_review_approved": false,
+    "audiovisual_approved": false,
+    "voice_license_verified": false,
+    "metricool_e2e_verified": false,
+    "publish_enabled": false
+  },
+  "cta": "운보다에서 무료 사주 살펴보기",
+  "site": "https://unboda.kr",
+  "disclaimer": "사주 해석은 전통문화의 참고 정보이며 미래를 보장하지 않습니다."
+}

@@ -4,7 +4,20 @@ import { getUserProfile } from "@/app/lib/profiles/server";
 import { requestCreditRefund, isAiCreditRefundAllowedForUser } from "@/app/lib/aiConsulting/creditRefunds";
 export const dynamic="force-dynamic";
 
+function sameOrigin(request: NextRequest): boolean {
+  try {
+    const origin = request.headers.get("origin");
+    return Boolean(origin && new URL(origin).origin === new URL(request.url).origin);
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request:NextRequest) {
+  // Financial cancellation is irreversible: fail closed on cross-site POSTs.
+  if (!sameOrigin(request)) return NextResponse.json(
+    {error:"환불 요청 출처를 확인하지 못했습니다."},{status:403}
+  );
   const user=await getCurrentUser();
   if(!user)return NextResponse.json({error:"로그인이 필요합니다."},{status:401});
   if(!isAiCreditRefundAllowedForUser(user.id))return NextResponse.json({error:"자동 환불은 현재 준비 중입니다."},{status:503});

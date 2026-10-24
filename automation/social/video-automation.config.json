@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "brand": "운보다",
+  "site": "https://unboda.kr",
+  "timezone": "Asia/Seoul",
+  "metricool": {
+    "brandId": "7377653",
+    "userId": "5729495",
+    "planRequired": "Advanced_or_Custom",
+    "apiMode": "independent_REST",
+    "credential": "METRICOOL_API_TOKEN"
+  },
+  "existingTextImage": {
+    "cadenceHours": 3,
+    "managedBy": "existing_ChatGPT_task_and_Metricool_reservations",
+    "doNotModify": true
+  },
+  "video": {
+    "enabled": false,
+    "targetCadenceHours": 6,
+    "firstAnchorLocal": "2026-10-24T20:00:00+09:00",
+    "durationSeconds": 30,
+    "output": {
+      "width": 1080,
+      "height": 1920,
+      "codec": "h264",
+      "audio": "aac",
+      "container": "mp4",
+      "fps": 30
+    },
+    "content": {
+      "topicFamilies": [
+        "zodiac",
+        "four-pillars",
+        "dreams",
+        "five-elements",
+        "compatibility",
+        "seasons",
+        "myths"
+      ],
+      "language": "ko",
+      "substantiveEducationFirst": true,
+      "dreamsAreFolkloreNotSajuService": true,
+      "brandCTAOnlyEnd": true
+    },
+    "studio": {
+      "videoProvider": "runway",
+      "videoModel": "gen4_turbo",
+      "premiumMotionSecondsPerOriginal": 10,
+      "otherSeconds": "original_authorized_motion_graphics",
+      "narrationProvider": "elevenlabs_or_approved_Korean_TTS",
+      "autoRejectTextOverflow": true,
+      "requirePronunciationQA": true,
+      "requireOriginalMediaRights": true,
+      "requireCommercialQualityReview": true
+    },
+    "distribution": {
+      "service": "metricool",
+      "supported": [
+        "instagram",
+        "facebook",
+        "tiktok",
+        "youtube"
+      ],
+      "maxNetworksPerOriginal": 2,
+      "confirmActualPublishedPost": true,
+      "avoidPublishingExistingPilotVideos": true
+    },
+    "storage": {
+      "provider": "private_object_storage_and_public_signed_media_asset",
+      "mustPersistBeforeScheduling": true
+    },
+    "queue": {
+      "durableDatabase": "supabase_isolated_social_schema",
+      "bufferHours": 48,
+      "goalReadyVideos": 8,
+      "identityKey": "brand_kind_slot"
+    },
+    "quotas": {
+      "conservativeAllNetworkPostsPerRolling30Days": 500,
+      "requireAccountQuotaVerification": true
+    },
+    "safety": {
+      "allowBlindRetry": false,
+      "remoteConfirmationBeforeRetry": true,
+      "maxRetries": 3,
+      "stopOnAuthAndPolicyErrors": true,
+      "noChangesToPaymentsRefundsCustomerTables": true
+    }
+  },
+  "controls": {
+    "schedulerEnabled": false,
+    "paidGenerationEnabled": false,
+    "livePublishingEnabled": false,
+    "monthlyGenerationBudgetUsdCents": 0,
+    "credentialValuesNeverStoredInJson": true,
+    "unblockOnlyAfterEndToEndProof": true
+  }
+}

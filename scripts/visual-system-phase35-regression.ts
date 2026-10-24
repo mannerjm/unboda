@@ -112,6 +112,31 @@ for (const [name, source] of [
 
 assert(mypage.includes('bg-[#eeecff]') && mypage.includes('border-[#b9b2f6]'), "My Page active profile emphasis must use violet rather than beige");
 assert(interests.includes("MY LIBRARY") && purchased.includes("MY LIBRARY"), "library pages must share the renewed hierarchy");
+
+// Interest library must match the purchased-report library's finished header system
+// without altering the server-authoritative profile or saved-interest controls.
+assert(interests.includes('max-w-5xl') && interests.includes('rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8'),
+  "interest library must match purchased library width and premium header treatment");
+assert(interests.includes("현재 분석 대상 · {activeProfile.label}") && interests.includes('href="/mypage"') && interests.includes("프로필 변경"),
+  "interest library must preserve the existing active profile source and My Page link");
+assert(interestedList.includes("아직 저장한 관심 분석이 없어요")
+  && interestedList.includes('href="/deep-analysis"')
+  && interestedList.includes("심층 분석 둘러보기"),
+  "interest empty state must have a clear premium discovery CTA");
+assert(interestedList.includes("최근 저장한 관심 분석")
+  && interestedList.includes("전체 관심 분석")
+  && interestedList.includes('lg:grid-cols-2')
+  && interestedList.includes("저장 {displayAnalyses.length}개"),
+  "saved interests must render recent and responsive full-library cards");
+assert(interestedList.includes("removeAnalysisAction(productId)")
+  && interestedList.includes("setRemovedIds")
+  && interestedList.includes("현재 분석 보유 중")
+  && interestedList.includes("현재 회차 미보유")
+  && interestedList.includes("구매한 분석에서 보기"),
+  "interest redesign must preserve removal, exact-edition ownership and purchased navigation");
+assert(!interestedList.includes("새 회차 구매") && !interestedList.includes("재구매"),
+  "interest cards must not silently introduce unapproved repurchase prompts");
+
 assert(support.includes('fetch("/api/support/requests"'), "support request submission behavior must remain intact");
 assert(account.includes('fetch("/api/account/status"') && account.includes('fetch("/api/account/request-closure"'), "account lifecycle behavior must remain intact");
 assert(admin.includes("getAdminGrowthDashboard") && admin.includes("getAdminRefundClosureDashboard"), "admin dashboard data behavior must remain intact");

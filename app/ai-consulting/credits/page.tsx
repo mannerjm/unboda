@@ -140,7 +140,7 @@ export default async function AiConsultingCreditsPage({
 
   let providerReady = false;
   let reviewCheckout = false;
-  if (isAiConsultingCreditCheckoutEnabled()) {
+  if (isAiConsultingCreditCheckoutEnabled(user.id)) {
     try {
       const tossConfig = getTossConfigForAccount(user.id);
       // A production-hosted Toss TEST checkout is restricted to review accounts.

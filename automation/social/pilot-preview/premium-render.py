@@ -135,8 +135,8 @@ def motion_only_mask():
     # visible rectangular edge. Baked-in headline/footer rows remain alpha 0.
     band=Image.new("L",(W,H),0)
     bd=ImageDraw.Draw(band)
-    for y in range(600,1340):
-        top=min(1,max(0,(y-600)/150))
+    for y in range(610,1340):
+        top=min(1,max(0,(y-610)/140))
         bottom=min(1,max(0,(1340-y)/210))
         alpha=round(255*min(top,bottom))
         bd.line((0,y,W,y),fill=alpha,width=1)

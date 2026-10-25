@@ -23,3 +23,11 @@ test("status route does not return or log API secret",()=>{
  assert.match(route,/apiKeyPresent:\s*true/);
  assert.match(route,/Cache-Control/);
 });
+
+test("middleware keeps all production and non-diagnostic requests on Supabase authentication flow",async()=>{
+ const middleware=await readFile(new URL("../../middleware.ts",import.meta.url),"utf8");
+ assert.match(middleware,/process\.env\.VERCEL_ENV\s*===\s*"preview"/);
+ assert.match(middleware,/request\.nextUrl\.pathname\s*===\s*"\/api\/internal\/social\/buffer-preview-status"/);
+ assert.match(middleware,/await supabase\.auth\.getClaims\(\)/);
+ assert.doesNotMatch(middleware,/VERCEL_ENV\s*!==\s*"production"/);
+});

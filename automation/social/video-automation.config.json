@@ -55,10 +55,9 @@
       "requireCommercialQualityReview": true
     },
     "distribution": {
-      "service": "metricool",
+      "service": "buffer",
       "supported": [
         "instagram",
-        "facebook",
         "tiktok",
         "youtube"
       ],
@@ -95,5 +94,18 @@
     "monthlyGenerationBudgetUsdCents": 0,
     "credentialValuesNeverStoredInJson": true,
     "unblockOnlyAfterEndToEndProof": true
+  },
+  "buffer": {
+    "freePilot": true,
+    "apiMode": "GraphQL",
+    "credentialsEnv": "BUFFER_API_KEY",
+    "connectedChannelsVerifiedReadOnly": [
+      "instagram",
+      "tiktok",
+      "youtube"
+    ],
+    "writePilotVerified": false,
+    "activePostingServiceAfterApproval": true,
+    "mediaDeliveryRequirement": "permanent_public_https_mp4_not_provider_signed_url"
   }
 }

@@ -22,3 +22,32 @@ jobs:
           ffmpeg -version | head -n 1
       - name: Unit tests + real local MP4 render smoke (no external publishing)
         run: node --test automation/social/*.test.mjs
+
+  blob-sdk-lockfile-bootstrap:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'mannerjm/unboda' && github.head_ref == 'test/social-automation-safety-poc-20261023'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/social-automation-safety-poc-20261023
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pin Vercel Blob SDK and regenerate package-lock only
+        run: |
+          if node -e "process.exit(require('./package.json').dependencies?.['@vercel/blob']==='2.8.2'?0:1)"; then
+            echo "Vercel Blob dependency already locked"
+            exit 0
+          fi
+          npm install @vercel/blob@2.8.2 --save-exact --package-lock-only --ignore-scripts --no-audit --no-fund
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config user.name 'github-actions[bot]'
+          git add package.json package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(social): lock Vercel Blob SDK 2.8.2"
+            git push origin HEAD:test/social-automation-safety-poc-20261023
+          fi

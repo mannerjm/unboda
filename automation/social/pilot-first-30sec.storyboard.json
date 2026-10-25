@@ -15,10 +15,14 @@
     "mime": "video/mp4",
     "bytes": 1799655,
     "verifiedByHead": true,
-    "persistedInPerpetualStorage": false,
+    "persistedInPerpetualStorage": true,
     "runwaySignedUrlEphemeral": true,
-    "downloadBeforeExpiryRequired": true,
-    "fullVisualQA": "USER_ACCEPTED_PRELIMINARY_QUALITY"
+    "downloadBeforeExpiryRequired": false,
+    "fullVisualQA": "USER_ACCEPTED_PRELIMINARY_QUALITY",
+    "durableMediaUrl": "https://aq03voydas4sjjuy.public.blob.vercel-storage.com/unboda-social/pilots/runway-b7d64306-f5d4-48ef-9bd8-b7c9b0445b36-c96569dfa94b47a3.mp4",
+    "sha256": "c96569dfa94b47a315b35f44b6a7c165f39fa28da49bf120ceba8fb5bc29f858",
+    "archiveVerifiedTwice": true,
+    "storageProvider": "Vercel Blob public Seoul"
   },
   "output": {
     "width": 1080,

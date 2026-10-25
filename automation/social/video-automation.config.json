@@ -67,7 +67,15 @@
     },
     "storage": {
       "provider": "private_object_storage_and_public_signed_media_asset",
-      "mustPersistBeforeScheduling": true
+      "mustPersistBeforeScheduling": true,
+      "sourceIngestion": "automatically_fetch_runway_task_output",
+      "sourceTaskId": "b7d64306-f5d4-48ef-9bd8-b7c9b0445b36",
+      "persistentStore": "vercel_public_blob",
+      "persistentStoreConnected": false,
+      "ownerMustManuallyTransferMP4": false,
+      "stablePublicMediaURLRequiredForBuffer": true,
+      "requireExplicitStorageBudgetApproval": true,
+      "rejectUnverifiedAsset": true
     },
     "queue": {
       "durableDatabase": "supabase_isolated_social_schema",

@@ -48,11 +48,17 @@
       "videoModel": "gen4_turbo",
       "premiumMotionSecondsPerOriginal": 10,
       "otherSeconds": "original_authorized_motion_graphics",
-      "narrationProvider": "elevenlabs_or_approved_Korean_TTS",
+      "narrationProvider": "runway/eleven_multilingual_v2",
       "autoRejectTextOverflow": true,
       "requirePronunciationQA": true,
       "requireOriginalMediaRights": true,
-      "requireCommercialQualityReview": true
+      "requireCommercialQualityReview": true,
+      "voiceRealPilotGenerated": false,
+      "realRunwaySourceArchived": true,
+      "first30sVisualDraftRendered": true,
+      "first30sVisualDraftContainsRealRunwayScene": true,
+      "first30sVisualDraftHasNaturalKoreanNarration": false,
+      "first30sVisualDraftApprovedForSocial": false
     },
     "distribution": {
       "service": "buffer",
@@ -63,7 +69,10 @@
       ],
       "maxNetworksPerOriginal": 2,
       "confirmActualPublishedPost": true,
-      "avoidPublishingExistingPilotVideos": true
+      "avoidPublishingExistingPilotVideos": true,
+      "bufferWriteAdapterImplemented": true,
+      "bufferActualWriteVerified": false,
+      "initialScheduledQueueCountsVerifiedReadOnly": true
     },
     "storage": {
       "provider": "private_object_storage_and_public_signed_media_asset",
@@ -84,7 +93,10 @@
       "durableDatabase": "supabase_isolated_social_schema",
       "bufferHours": 48,
       "goalReadyVideos": 8,
-      "identityKey": "brand_kind_slot"
+      "identityKey": "brand_kind_slot",
+      "cloudSixHourRunnerConnected": false,
+      "durableMoneyAndIdempotencyLedgerConnected": false,
+      "actualReadyVideos": 0
     },
     "quotas": {
       "conservativeAllNetworkPostsPerRolling30Days": 500,
@@ -104,7 +116,11 @@
     "livePublishingEnabled": false,
     "monthlyGenerationBudgetUsdCents": 0,
     "credentialValuesNeverStoredInJson": true,
-    "unblockOnlyAfterEndToEndProof": true
+    "unblockOnlyAfterEndToEndProof": true,
+    "ownerMonthlyRunwayCreditCapApproved": false,
+    "autoBillingEnabled": false,
+    "estimateCreditsPer30daysMinimum": 6360,
+    "currentRunwayBalanceLastMeasuredCredits": 1950
   },
   "buffer": {
     "freePilot": true,

@@ -11,9 +11,9 @@ const run=promisify(execFile);
 const SOURCE="https://aq03voydas4sjjuy.public.blob.vercel-storage.com/unboda-social/pilots/runway-b7d64306-f5d4-48ef-9bd8-b7c9b0445b36-c96569dfa94b47a3.mp4";
 const SHA="c96569dfa94b47a315b35f44b6a7c165f39fa28da49bf120ceba8fb5bc29f858";
 const SCENES=[["zodiac.png",7.5],["pillars.png",7.5],["cta.png",6]];
-const BASE="/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc";
+const BASE="/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc";
 const titles=[
- "띠만 알면\n사주도 알 수 있을까?",
+ "띠만 알면\n사주도 알 수 있을까요?",
  "띠는 태어난 해의 상징",
  "사주는 네 기둥을 봐요",
  "전통 해석으로 가볍게"
@@ -72,7 +72,7 @@ for(let i=0;i<4;i++){
  fgraph.push("["+i+":v]scale=1080:1920:force_original_aspect_ratio=increase,"+
    "crop=1080:1920,fps=30,"+pad+"trim=duration="+durations[i]+","+
    "settb=AVTB,setpts=PTS-STARTPTS,"+introTitle+
-   "drawtext=fontfile="+BASE+":text='제작 검증용 · 한국어 음성 미포함':"+
+   "drawtext=fontfile="+BASE+":text='운보다 · 나를 읽는 시간':"+
    "fontsize=28:fontcolor=0xDDBD7D:x=(w-text_w)/2:y=1480,"+
    "format=yuv420p[v"+i+"]");
 }

@@ -40,6 +40,36 @@ async function gql<T>(token: string, query: string): Promise<T | null> {
   return payload.data;
 }
 
+type RunwayOrganization = { creditBalance?: number; tier?: { maxMonthlyCreditSpend?: number } };
+
+// Read-only Runway organization lookup, verified API reference GET /v1/organization.
+// No generation requests are made, and raw provider errors/keys never leave this route.
+async function runwayPreflight(): Promise<Record<string, unknown>> {
+  const key = process.env.RUNWAY_API_KEY?.trim();
+  if (!key || key.length < 10) return { state: "RUNWAY_KEY_MISSING", authenticated: false };
+  try {
+    const response = await fetch("https://api.dev.runwayml.com/v1/organization", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "X-Runway-Version": "2024-11-06",
+      },
+      cache: "no-store",
+      signal: AbortSignal.timeout(9000),
+    });
+    if (!response.ok) return { state: "RUNWAY_AUTH_OR_LOOKUP_FAILED",
+      authenticated: false, status: response.status };
+    const json = (await response.json()) as RunwayOrganization;
+    if (!Number.isSafeInteger(json.creditBalance) || (json.creditBalance ?? -1) < 0)
+      return { state: "RUNWAY_CREDIT_BALANCE_UNVERIFIED", authenticated: false };
+    return { state: "RUNWAY_CONNECTED_READ_ONLY", authenticated: true,
+      creditBalance: json.creditBalance,
+      generatedMediaCount: 0, generationCreditsSpentByThisCheck: 0 };
+  } catch {
+    return { state: "RUNWAY_READ_ONLY_NETWORK_FAILED", authenticated: false };
+  }
+}
+
 export async function GET() {
   if (process.env.VERCEL_ENV !== "preview" ||
       process.env.VERCEL_GIT_COMMIT_REF !== AUDITED_BRANCH) {
@@ -95,6 +125,7 @@ export async function GET() {
       verifiedServices,
       missingServices,
       apiKeyPresent: true,
+      runway: await runwayPreflight(),
       performedReadOnlyBufferQueries: true,
       postsCreated: 0,
       videoGenerationStarted: false,

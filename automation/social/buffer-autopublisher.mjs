@@ -23,6 +23,8 @@ export function planAutomaticBufferVideo(o={}){
   reasons.push("FINAL_VIDEO_DURATION_REQUIRED");
  if(typeof dueAt!=="string"||!/^20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(dueAt)||
    Number.isNaN(Date.parse(dueAt)))reasons.push("UTC_DUE_AT_REQUIRED");
+ if(service==="youtube"&&o.youtubeShortsCoverVerified!==true)
+  reasons.push("YOUTUBE_SHORTS_COVER_CHANNEL_VERIFICATION_REQUIRED");
  const gates={
   mediaRightsApproved:"MEDIA_LICENSE_QA",
   editorialFactChecked:"EDUCATIONAL_FACT_CHECK",
@@ -33,6 +35,7 @@ export function planAutomaticBufferVideo(o={}){
   captionSafeAreaVerified:"SUBTITLE_SAFE_AREA_QA",
   bakedTextLayerIsolationVerified:"BAKED_TEXT_DOUBLE_OVERLAY_RISK",
   renderedFrameVisualReviewApproved:"RENDERED_VISUAL_FRAME_REVIEW_REQUIRED",
+  coverFirstFrameVerified:"COVER_FIRST_SECOND_VISUAL_QA",
   sourceNotRepeated:"ORIGINALITY_QA",
   permanentMediaHeadVerified:"HOSTED_MEDIA_HEAD",
   mediaIsFinal30Sec:"FINAL_30SEC_VIDEO_REQUIRED",
@@ -58,7 +61,7 @@ export function bufferVideoMutation(o={}){
  "schedulingType: automatic",
  "mode: customScheduled",
  "dueAt: "+JSON.stringify(o.dueAt),
- "assets: [{video: {url: "+JSON.stringify(o.videoUrl)+", metadata: {thumbnailOffset: 1000}}}]",
+ "assets: [{video: {url: "+JSON.stringify(o.videoUrl)+", metadata: {thumbnailOffset: 500}}}]",
  "}) { __typename",
  "... on PostActionSuccess { post {id status dueAt channelId} }",
  "... on MutationError { message }",

@@ -33,8 +33,9 @@ export function planRunwayKoreanNarration({
  return {authorized:reasons.length===0,reasons,
   estimatedCredits,characterCount:count,
   ...(reasons.length?{}:{request:{
-    model:MODEL,promptText:text,
-    outputFormat:"mp3",sampleRate:44100
+    model:MODEL,promptText:text
+    // Do not invent outputFormat or sampleRate: this API does not specify them
+    // for eleven_multilingual_v2. Output media verified from the task response.
   }})};
 }
 export async function requestRunwayKoreanNarration({apiKey,fetcher=fetch,...opts}={}){

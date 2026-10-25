@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "program": "UNBODA social automation real Runway video pilot",
+  "dateLocal": "2026-10-25",
+  "status": "RUNWAY_REAL_10S_GENERATION_SUCCEEDED_NOT_COMMERCIAL_PUBLISH_APPROVED",
+  "ownerScopedApproval": "one gen4_turbo 10-second clip maximum 50 credits",
+  "productionEnvironmentModified": false,
+  "provenance": {
+    "image": "custom code-generated original gold zodiac medallion PNG 720x1280 via Vercel Next ImageResponse",
+    "thirdPartySourceImagesUsed": false,
+    "promptTheme": "indigo-gold celestial zodiac sculpture, 12 orbiting charms, slow dolly",
+    "imageSourceFile": "app/api/internal/social/runway-pilot/route.ts",
+    "commercialUseOfAnyResultStillSubjectToEditorialApproval": true
+  },
+  "runway": {
+    "endpoint": "POST /v1/image_to_video",
+    "model": "gen4_turbo",
+    "secondsRequested": 10,
+    "ratio": "720:1280",
+    "remoteTaskId": "b7d64306-f5d4-48ef-9bd8-b7c9b0445b36",
+    "taskStatus": "SUCCEEDED",
+    "beforeCredits": 2000,
+    "afterCredits": 1950,
+    "confirmedDebit": 50,
+    "countGenerationPOSTRequests": 1,
+    "retryCount": 0,
+    "outputMediaMime": "video/mp4",
+    "outputMediaBytes": 1799655,
+    "headStatus": 200,
+    "directCloudfrontUri": "NOT_STORED_SIGNED_TEMPORARY_URL_EXPIRES",
+    "privateReadOnlyViewer": "/api/internal/social/runway-pilot?mode=download&id=b7d64306-f5d4-48ef-9bd8-b7c9b0445b36"
+  },
+  "quality": {
+    "actualFrameByFrameVisualReviewComplete": false,
+    "localVideoDownloadedAndFFprobeVerified": false,
+    "voiceoverKoreanCreated": false,
+    "storyboard30secCompiled": false,
+    "approvedForSNS": false
+  },
+  "distribution": {
+    "provider": "Buffer",
+    "channelsRealReadOnlyVerified": [
+      "instagram",
+      "tiktok",
+      "youtube"
+    ],
+    "postsCreated": 0,
+    "autopublishingEnabled": false
+  },
+  "safety": {
+    "oneOffRoutePaidStartDisabledAfterPilot": true,
+    "existing3hTextPhotoReservationUnchanged": true,
+    "sitePaymentsRefundsCustomerDBUnchanged": true,
+    "autoBillingChanged": false
+  }
+}

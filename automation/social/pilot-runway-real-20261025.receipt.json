@@ -28,7 +28,15 @@
     "outputMediaBytes": 1799655,
     "headStatus": 200,
     "directCloudfrontUri": "NOT_STORED_SIGNED_TEMPORARY_URL_EXPIRES",
-    "privateReadOnlyViewer": "/api/internal/social/runway-pilot?mode=download&id=b7d64306-f5d4-48ef-9bd8-b7c9b0445b36"
+    "privateReadOnlyViewer": "/api/internal/social/runway-pilot?mode=download&id=b7d64306-f5d4-48ef-9bd8-b7c9b0445b36",
+    "durableMediaUrl": "https://aq03voydas4sjjuy.public.blob.vercel-storage.com/unboda-social/pilots/runway-b7d64306-f5d4-48ef-9bd8-b7c9b0445b36-c96569dfa94b47a3.mp4",
+    "durableMediaSHA256": "c96569dfa94b47a315b35f44b6a7c165f39fa28da49bf120ceba8fb5bc29f858",
+    "durableMediaBytes": 1799655,
+    "archivedInVercelBlob": true,
+    "archiveVerifiedTwice": true,
+    "archiveExtraRunwayCredits": 0,
+    "archiveStatus": "PILOT_MP4_PERMANENTLY_ARCHIVED",
+    "repeatedArchiveStatus": "PILOT_MP4_ALREADY_ARCHIVED"
   },
   "quality": {
     "actualFrameByFrameVisualReviewComplete": false,
@@ -51,6 +59,8 @@
     "oneOffRoutePaidStartDisabledAfterPilot": true,
     "existing3hTextPhotoReservationUnchanged": true,
     "sitePaymentsRefundsCustomerDBUnchanged": true,
-    "autoBillingChanged": false
+    "autoBillingChanged": false,
+    "blobSdkPinnedVersion": "2.4.0",
+    "gitHubSecurityAuditPass": true
   }
 }

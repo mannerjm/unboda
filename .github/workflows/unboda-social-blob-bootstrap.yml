@@ -1,0 +1,33 @@
+name: UNBODA social Blob dependency bootstrap
+on:
+  push:
+    branches:
+      - test/social-automation-safety-poc-20261023
+    paths:
+      - .github/workflows/unboda-social-blob-bootstrap.yml
+permissions:
+  contents: write
+jobs:
+  lockfile-only:
+    if: github.repository == 'mannerjm/unboda'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/social-automation-safety-poc-20261023
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Add pinned Vercel Blob SDK dependency to lockfile
+        run: npm install @vercel/blob@2.8.2 --save-exact --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Commit only dependency manifests to isolated draft branch
+        run: |
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config user.name 'github-actions[bot]'
+          git add package.json package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(social): pin Vercel Blob SDK with reproducible lockfile"
+            git push origin HEAD:test/social-automation-safety-poc-20261023
+          fi

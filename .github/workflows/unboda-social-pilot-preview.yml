@@ -33,6 +33,8 @@ jobs:
           name: unboda-real-runway-30sec-PREMIUM-SERIF-NO-VOICE
           path: |
             /tmp/unboda-real-preview/UNBODA_30s_PREMIUM_TYPOGRAPHY_NO_VOICE.mp4
+            /tmp/unboda-real-preview/UNBODA_30s_COVER_FIRST_VISUAL_DRAFT_NO_VOICE.mp4
+            /tmp/unboda-real-preview/UNBODA_REELS_SHORTS_COVER.jpg
             /tmp/unboda-real-preview/VERIFY.txt
           if-no-files-found: error
           retention-days: 5

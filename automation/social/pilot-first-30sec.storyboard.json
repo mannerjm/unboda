@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "id": "unboda-first-real-premium-pilot-20261025",
+  "title": "띠만 알면 사주도 알 수 있을까?",
+  "primaryGoal": "흥미 있는 전통문화 상식 전달, 과장 없는 운보다 무료 사주 안내",
+  "rights": {
+    "sourceOriginalOwnedArtwork": true,
+    "runwayCommercialUseNeedsOwnerReview": true,
+    "licensedMusicVerified": false,
+    "voiceCommercialRightsVerified": false
+  },
+  "sourceRunwayTaskId": "b7d64306-f5d4-48ef-9bd8-b7c9b0445b36",
+  "sourceRunwayRemainingCreditsAtLastCheck": 1950,
+  "sourceMedia": {
+    "mime": "video/mp4",
+    "bytes": 1799655,
+    "verifiedByHead": true,
+    "persistedInPerpetualStorage": false,
+    "runwaySignedUrlEphemeral": true,
+    "downloadBeforeExpiryRequired": true,
+    "fullVisualQA": "USER_ACCEPTED_PRELIMINARY_QUALITY"
+  },
+  "output": {
+    "width": 1080,
+    "height": 1920,
+    "framesPerSecond": 30,
+    "totalSeconds": 30,
+    "format": "mp4",
+    "videoCodec": "h264",
+    "audioCodec": "aac"
+  },
+  "scenePolicy": {
+    "textMaxLines": 2,
+    "textMaxCharactersPerLine": 18,
+    "topSafePaddingPx": 150,
+    "bottomSafePaddingPx": 330,
+    "minimumFontPx": 52,
+    "subtitlesAvoidCenterArtwork": true,
+    "ctaOnLastSceneOnly": true
+  },
+  "narration": {
+    "language": "ko-KR",
+    "tone": "차분하고 친근한 한국어 교육자, 과장·공포 조장 없음",
+    "engineCandidate": "runway/eleven_multilingual_v2",
+    "scriptStatus": "DRAFT_APPROVED_FOR_NONPAID_LOCAL_PRODUCTION_ONLY",
+    "ttsIsNotGenerated": true,
+    "voiceNeedsNaturalPronunciationApproval": true,
+    "elevenlabsDirectSubscriptionNotNeededForRunwayTTS": true,
+    "extraPaidVoiceCallsAuthorized": false,
+    "additionalCreditsApproved": 0
+  },
+  "scenes": [
+    {
+      "startSecond": 0,
+      "durationSeconds": 10,
+      "media": "runway-generated-10s-zodiac-art",
+      "visual": "남색과 금빛 12띠 메달이 실제로 회전하는 런웨이 영상",
+      "title": "띠만 알면\n사주도 알 수 있을까?",
+      "body": null,
+      "voice": "띠만 알면 내 사주도 알 수 있을까요? 비슷해 보이지만 조금 다릅니다.",
+      "placement": "top-aligned large headline, golden object unobscured"
+    },
+    {
+      "startSecond": 10,
+      "durationSeconds": 7,
+      "media": "custom-original-animated-zodiac-year-calendar",
+      "visual": "동물 띠 기호 12개와 태어난 해를 표시하는 단순하고 세련된 그래픽",
+      "title": "띠는 태어난 해의 상징",
+      "body": null,
+      "voice": "띠는 태어난 해를 나타내는 열두 동물의 전통 상징이에요.",
+      "placement": "upper third, imagery central"
+    },
+    {
+      "startSecond": 17,
+      "durationSeconds": 7,
+      "media": "custom-original-animated-four-pillars",
+      "visual": "연·월·일·시 네 기둥이 순서대로 등장, 어려운 한자는 지양",
+      "title": "사주는 네 기둥을 봐요",
+      "body": null,
+      "voice": "사주는 태어난 해와 달, 날, 시간을 함께 살펴봅니다.",
+      "placement": "upper third, 4 blocks center"
+    },
+    {
+      "startSecond": 24,
+      "durationSeconds": 6,
+      "media": "custom-original-animated-reflection-and-cta",
+      "visual": "흔들리는 청금색 빛과 운보다 링크, 작고 명료한 민속 안내",
+      "title": "전통 해석으로 가볍게",
+      "body": "운보다 무료 사주 · unboda.kr",
+      "voice": "전통 해석은 참고로 보세요. 운보다에서 무료로 살펴보세요.",
+      "placement": "upper third headline, middle CTA, avoid bottom controls"
+    }
+  ],
+  "metadata": {
+    "socialCaption": "띠만으로 사주를 모두 알 수 있을까요? 띠는 태어난 해의 동물 상징이고, 사주는 해·달·날·시간을 함께 살펴보는 전통 해석입니다. 어렵지 않게 운보다에서 알아보세요. 사주 해석은 전통문화 참고 정보이며 미래를 보장하지 않습니다. https://unboda.kr",
+    "hashtags": [
+      "#운보다",
+      "#사주상식",
+      "#띠이야기",
+      "#사주기초",
+      "#한국전통문화"
+    ],
+    "isAiGeneratedDisclosureRequired": true,
+    "noUnsupportedScientificClaims": true
+  },
+  "release": {
+    "actual30sVideoRendered": false,
+    "koreanVoiceAndCommercialRightsVerified": false,
+    "subtitleBoundsVisualQA": false,
+    "permanentMediaUrlAvailable": false,
+    "bufferPostCreated": false,
+    "liveAutoPostingAllowed": false
+  }
+}

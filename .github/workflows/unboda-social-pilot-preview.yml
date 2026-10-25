@@ -26,7 +26,7 @@ jobs:
           python -m pip install --disable-pip-version-check 'Pillow==11.3.0'
           fc-match -f '%{file}\n' 'Noto Sans CJK KR'
       - name: Verify Korean voice assembly fails closed without real licensed speech
-        run: node --test automation/social/pilot-preview/voice-preview.test.mjs
+        run: node --test automation/social/pilot-preview/*.test.mjs
       - name: Render 30-second premium Korean editorial typography using actual paid Runway source; no TTS or SNS
         run: node automation/social/pilot-preview/render-preview.mjs /tmp/unboda-real-preview
       - name: Upload protected internal draft video, not approved for publication

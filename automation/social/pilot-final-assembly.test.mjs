@@ -35,6 +35,8 @@ test("FFmpeg keeps 1080x1920, correct crossfade offsets, safe Korean subtitle ar
  assert.match(filters,/offset=24\.0/);
  assert.match(filters,/crop=1080:1920/);
  assert.match(filters,/drawtext=fontfile=/);
+ assert.equal((filters.match(/drawtext=fontfile=/g)??[]).length,1,
+  "only first Runway scene gets overlay; other original cards have baked titles");
  assert.equal(t.firstRunwaySecondsPreserved,10);
  assert.equal(t.readyForPublishing,false);
  assert.ok(t.titleSafeBottomPx>=320);

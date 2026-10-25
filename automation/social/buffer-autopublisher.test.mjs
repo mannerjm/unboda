@@ -16,6 +16,7 @@ const flags={
  audioRightsVerified:true,mediaProbeVerified:true,mediaBitstreamVerified:true,
  captionSafeAreaVerified:true,sourceNotRepeated:true,
  bakedTextLayerIsolationVerified:true,renderedFrameVisualReviewApproved:true,
+ coverFirstFrameVerified:true,youtubeShortsCoverVerified:true,
  permanentMediaHeadVerified:true,mediaIsFinal30Sec:true,
  channelAutoPublishConfirmed:true,accountQuotaConfirmed:true,
  remoteDeduplicationConfirmed:true,durableLedgerClaimed:true,
@@ -38,6 +39,16 @@ test("baked-in Runway titles or unreviewed frames STOP all uploads",()=>{
  assert.equal(unreviewed.state,"BLOCKED");
  assert.ok(unreviewed.reasons.includes("RENDERED_VISUAL_FRAME_REVIEW_REQUIRED"));
 });
+test("missing first-second cover QA blocks Buffer before network",()=>{
+ const r=planAutomaticBufferVideo({...ready,coverFirstFrameVerified:false});
+ assert.equal(r.state,"BLOCKED");
+ assert.ok(r.reasons.includes("COVER_FIRST_SECOND_VISUAL_QA"));
+});
+test("YouTube thumbnail channel proof is required before scheduling",()=>{
+ const r=planAutomaticBufferVideo({...ready,youtubeShortsCoverVerified:false});
+ assert.equal(r.state,"BLOCKED");
+ assert.ok(r.reasons.includes("YOUTUBE_SHORTS_COVER_CHANNEL_VERIFICATION_REQUIRED"));
+});
 test("10-sec original NEVER goes directly to Buffer",()=>{
  const r=planAutomaticBufferVideo({...ready,videoDurationSeconds:10,
    videoUrl:"https://aq03voydas4sjjuy.public.blob.vercel-storage.com/unboda-social/pilots/source10.mp4"});
@@ -48,7 +59,7 @@ test("automatic scheduled video mutation uses official GraphQL enums & public MP
  const mutation=bufferVideoMutation(ready);
  assert.match(mutation,/schedulingType: automatic/);
  assert.match(mutation,/mode: customScheduled/);
- assert.match(mutation,/metadata: \{thumbnailOffset: 1000\}/);
+ assert.match(mutation,/metadata: \{thumbnailOffset: 500\}/);
  assert.match(mutation,/assets: \[\{video: \{url: "https:/);
  assert.match(mutation,/2026-10-28T04:00:00\.000Z/);
  assert.match(mutation,/__typename/);

@@ -145,7 +145,7 @@ def main():
         img.save(out/name,optimize=True)
     intro=out/"premium-intro.mp4"
     run(["ffmpeg","-hide_banner","-loglevel","error","-y","-i",str(source),"-i",str(out/"intro-overlay.png"),
-      "-filter_complex","[0:v]trim=duration=10,setpts=PTS-STARTPTS,fps=30[v];[v][1:v]overlay=0:0:format=auto:shortest=0:repeatlast=1,format=yuv420p,tpad=stop_mode=clone:stop_duration=0.5,settb=AVTB,setpts=PTS-STARTPTS[o]",
+      "-filter_complex","[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30,trim=duration=10,settb=AVTB,setpts=PTS-STARTPTS[v];[v][1:v]overlay=0:0:format=auto:shortest=0:repeatlast=1,format=yuv420p,tpad=stop_mode=clone:stop_duration=0.5,settb=AVTB,setpts=PTS-STARTPTS[o]",
       "-map","[o]","-t","10.5","-r","30","-c:v","libx264","-preset","ultrafast","-crf","19","-threads","2","-an",str(intro)],180)
     clips=[intro]
     for i,(name,sec) in enumerate((("zodiac",7.5),("pillars",7.5),("cta",6.0)),1):

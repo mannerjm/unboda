@@ -25,16 +25,14 @@ jobs:
           sudo apt-get install -y -qq ffmpeg fontconfig fonts-noto-cjk
           python -m pip install --disable-pip-version-check 'Pillow==11.3.0'
           fc-match -f '%{file}\n' 'Noto Sans CJK KR'
-      - name: Generate three legally original 9:16 Korean educational graphics
-        run: python automation/social/pilot-preview/cards.py --out /tmp/unboda-real-preview
-      - name: Render 30-second layout preview using ACTUAL Runway paid source, no TTS or SNS
+      - name: Render 30-second premium Korean editorial typography using actual paid Runway source; no TTS or SNS
         run: node automation/social/pilot-preview/render-preview.mjs /tmp/unboda-real-preview
       - name: Upload protected internal draft video, not approved for publication
         uses: actions/upload-artifact@v4
         with:
-          name: unboda-real-runway-30sec-VISUAL-ONLY-NOT-FOR-POSTING
+          name: unboda-real-runway-30sec-PREMIUM-SERIF-NO-VOICE
           path: |
-            /tmp/unboda-real-preview/UNBODA_30s_VISUAL_DRAFT_NO_KOREAN_AUDIO.mp4
+            /tmp/unboda-real-preview/UNBODA_30s_PREMIUM_TYPOGRAPHY_NO_VOICE.mp4
             /tmp/unboda-real-preview/VERIFY.txt
           if-no-files-found: error
           retention-days: 5

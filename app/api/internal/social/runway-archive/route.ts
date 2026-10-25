@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { put, head } from "@vercel/blob";
+import { put, head, list } from "@vercel/blob";
 import { createHash } from "node:crypto";
 
 // One-time cloud ingestion for the owner's FIRST Runway motion proof.
@@ -30,10 +30,6 @@ function safeUrl(v:string) {
    (u.port===""||u.port==="443")&&
    !u.username&&!u.password&&u.pathname.endsWith(".mp4")&&u.href.length<3500;
  }catch{return false}
-}
-function isMissing(e:unknown){
- return e instanceof Error&&(e.name==="BlobNotFoundError"||
-  e.name==="BlobNotFound");
 }
 export async function GET(request:Request) {
  const url=new URL(request.url);
@@ -76,10 +72,19 @@ export async function GET(request:Request) {
 
   const checksum=createHash("sha256").update(bin).digest("hex");
   const pathname=PREFIX+"runway-"+TASK+"-"+checksum.slice(0,16)+".mp4";
-  let existing;
-  try{existing=await head(pathname,{token:blob})}
-  catch(e){if(!isMissing(e))return reply({state:"BLOB_HEAD_UNAVAILABLE_NO_WRITE"},502);}
-  if(existing){
+  // Unlike head(), list() returns an empty array for a non-existent path.
+  // Verify idempotency through the exact deterministic object pathname.
+  let existingBlob;
+  try {
+   const listed=await list({prefix:pathname,limit:2,token:blob});
+   if(!Array.isArray(listed.blobs)||listed.hasMore)
+    return reply({state:"BLOB_LIST_RESULT_UNVERIFIED_NO_WRITE"},502);
+   existingBlob=listed.blobs.find(item=>item.pathname===pathname);
+  } catch {
+   return reply({state:"BLOB_LIST_UNAVAILABLE_NO_WRITE"},502);
+  }
+  if(existingBlob){
+   const existing=await head(existingBlob.url,{token:blob});
    if(existing.pathname!==pathname||existing.size!==bin.length||
       existing.contentType!==MIME||!existing.url.includes(".public.blob.vercel-storage.com/"))
      return reply({state:"PREEXISTING_BLOB_MISMATCH_NO_WRITE"},409);
@@ -94,7 +99,7 @@ export async function GET(request:Request) {
    contentType:MIME,addRandomSuffix:false,allowOverwrite:false});
   if(created.pathname!==pathname||!created.url.includes(".public.blob.vercel-storage.com/"))
    return reply({state:"BLOB_WRITE_RESPONSE_UNTRUSTED_RECONCILE"},502);
-  const confirmed=await head(pathname,{token:blob});
+  const confirmed=await head(created.url,{token:blob});
   if(confirmed.size!==bin.length||confirmed.contentType!==MIME||
     confirmed.url!==created.url)
    return reply({state:"BLOB_HEAD_MISMATCH_RECONCILE"},502);

@@ -15,6 +15,7 @@ const flags={
  mediaRightsApproved:true,editorialFactChecked:true,koreanSpeechVerified:true,
  audioRightsVerified:true,mediaProbeVerified:true,mediaBitstreamVerified:true,
  captionSafeAreaVerified:true,sourceNotRepeated:true,
+ bakedTextLayerIsolationVerified:true,renderedFrameVisualReviewApproved:true,
  permanentMediaHeadVerified:true,mediaIsFinal30Sec:true,
  channelAutoPublishConfirmed:true,accountQuotaConfirmed:true,
  remoteDeduplicationConfirmed:true,durableLedgerClaimed:true,
@@ -28,6 +29,14 @@ test("no accidental SNS post without final 30sec media and explicit live release
  assert.equal(r.state,"BLOCKED");assert.equal(calls,0);
  assert.ok(r.reasons.includes("KOREAN_VOICE_QA"));
  assert.ok(r.reasons.includes("LIVE_PUBLISH_DISABLED"));
+});
+test("baked-in Runway titles or unreviewed frames STOP all uploads",()=>{
+ const badSource=planAutomaticBufferVideo({...ready,bakedTextLayerIsolationVerified:false});
+ assert.equal(badSource.state,"BLOCKED");
+ assert.ok(badSource.reasons.includes("BAKED_TEXT_DOUBLE_OVERLAY_RISK"));
+ const unreviewed=planAutomaticBufferVideo({...ready,renderedFrameVisualReviewApproved:false});
+ assert.equal(unreviewed.state,"BLOCKED");
+ assert.ok(unreviewed.reasons.includes("RENDERED_VISUAL_FRAME_REVIEW_REQUIRED"));
 });
 test("10-sec original NEVER goes directly to Buffer",()=>{
  const r=planAutomaticBufferVideo({...ready,videoDurationSeconds:10,

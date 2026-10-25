@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { ImageResponse } from "next/og";
 import { createElement, type ReactNode } from "react";
-import { createHash, timingSafeEqual } from "node:crypto";
 
 // One-shot narrowly owner-approved Runway pilot (50 credits, 10s Gen4 Turbo).
 // Hidden behind Vercel SSO Preview; this is NOT an ongoing autopilot or cron.
@@ -10,18 +9,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 const BRANCH = "test/social-automation-safety-poc-20261023";
-const NONCE_SHA256 = "8810e1c8b7bc92729a696c5393d01d3f28b22df8b72831dfd132e579b8002859";
 const API = "https://api.dev.runwayml.com";
 const HEADERS_VERSION = "2024-11-06";
 const creditApproved = 50;
 function send(data: Record<string,unknown>,status=200) {
  return NextResponse.json(data,{status,headers:{"Cache-Control":"no-store, max-age=0","X-Robots-Tag":"noindex, noarchive"}});
-}
-function secureEqual(query:string|null) {
- if(!query||query.length>100)return false;
- const a=Buffer.from(createHash("sha256").update(query).digest("hex"),"utf8");
- const b=Buffer.from(NONCE_SHA256,"utf8");
- return a.length===b.length&&timingSafeEqual(a,b);
 }
 function safeEnvironment() {
  return process.env.VERCEL_ENV==="preview"&&process.env.VERCEL_GIT_COMMIT_REF===BRANCH;
@@ -140,39 +132,9 @@ export async function GET(request:Request){
  }
  if(mode!=="start")return send({state:"PILOT_READ_ONLY",method:"GET",
    createMedia:false,approvedMaxCredits:creditApproved});
- if(!secureEqual(u.searchParams.get("ticket")))return send({state:"PILOT_NOT_AUTHORIZED"},403);
- try{
-  // Fail closed after the ONE allowed generation has debited/held credits.
-  // No blind retry, and the token must not be exposed to any client or logs.
-  const org=await authenticatedApi<{creditBalance?:number}>("/v1/organization",key);
-  if(!org.ok||org.data?.creditBalance!==2000)
-    return send({state:"PREPAID_BALANCE_NOT_EXACTLY_2000",
-       debitAttempted:false,balance:org.data?.creditBalance??null},409);
-  const imageUri=await createOriginalFrame();
-  const response=await fetch(API+"/v1/image_to_video",{
-    method:"POST",headers:{
-      "Authorization":"Bearer "+key,
-      "X-Runway-Version":HEADERS_VERSION,
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      model:"gen4_turbo",duration:10,ratio:"720:1280",
-      promptImage:imageUri,
-      promptText:"Cinematic luxury Korean zodiac medallion suspended in midnight indigo nebula. The bronze-gold sculpture rotates slowly and smoothly in 3D; twelve tiny luminous orbiting animal-sign charms shimmer around it. Warm champagne gold light dances across brushed metal, glittering stardust drifts with volumetric glow, and a smooth slow dolly-in enhances depth. Refined museum-grade cinematic lighting, magical but sophisticated, clean composition, one continuous beautiful scene, no words, no subtitles, no logos, no humans. Preserve the center medallion."
-    }),
-    signal:AbortSignal.timeout(28000),
-    cache:"no-store"
-  });
-  if(!response.ok)return send({state:"RUNWAY_CREATE_REJECTED",
-    httpStatus:response.status,
-    doNotRetryAutomatically:true},502);
-  const json=await response.json() as {id?:string};
-  if(typeof json.id!=="string"||!/^[a-f0-9-]{36}$/i.test(json.id))
-    return send({state:"AMBIGUOUS_REMOTE_CREATE_DO_NOT_RETRY"},502);
-  return send({state:"RUNWAY_GENERATION_TASK_ACCEPTED",taskId:json.id,
-    model:"gen4_turbo",durationSeconds:10,estimatedCredits:50,
-    maxApprovedCredits:creditApproved,autoRetry:false,postsCreated:0,
-    initialFrame:"original_in_house_illustration",
-    statusRequiresPolling:true});
- }catch{return send({state:"REMOTE_OUTCOME_UNKNOWN_DO_NOT_RETRY",autoRetry:false},502)}
+ // Pilot already executed exactly once: deliberately retire paid creation.
+ // Inspect & download remain read-only, but no new provider POST is possible.
+ return send({state:"ONE_SHOT_PILOT_ALREADY_COMPLETED",
+   createdAdditionalTask:false,postedToSocial:false,
+   furtherCreditsAuthorized:0},409);
 }

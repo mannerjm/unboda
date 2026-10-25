@@ -61,13 +61,17 @@ const fgraph=[];
 const durations=[10.5,7.5,7.5,6];
 for(let i=0;i<4;i++){
  const pad=i===0?"tpad=stop_mode=clone:stop_duration=0.5,":"";
+ // Only the real Runway first scene needs a title overlay.
+ // Original cards 2-4 ALREADY include proofread Korean headlines.
+ // Never repeat their titles, otherwise they visually double/overlap.
+ const introTitle=i===0?
+   "drawbox=x=65:y=178:w=950:h=222:color=0x061424@0.69:t=fill,"+
+   "drawtext=fontfile="+BASE+":textfile="+titleFiles[0]+":fontsize=66:"+
+   "fontcolor=0xFFF8E8:line_spacing=19:x=(w-text_w)/2:y=232:"+
+   "borderw=3:bordercolor=0x081020," : "";
  fgraph.push("["+i+":v]scale=1080:1920:force_original_aspect_ratio=increase,"+
    "crop=1080:1920,fps=30,"+pad+"trim=duration="+durations[i]+","+
-   "settb=AVTB,setpts=PTS-STARTPTS,"+
-   "drawbox=x=65:y=178:w=950:h=222:color=0x061424@0.69:t=fill,"+
-   "drawtext=fontfile="+BASE+":textfile="+titleFiles[i]+":fontsize=66:"+
-   "fontcolor=0xFFF8E8:line_spacing=19:x=(w-text_w)/2:y=232:"+
-   "borderw=3:bordercolor=0x081020,"+
+   "settb=AVTB,setpts=PTS-STARTPTS,"+introTitle+
    "drawtext=fontfile="+BASE+":text='제작 검증용 · 한국어 음성 미포함':"+
    "fontsize=28:fontcolor=0xDDBD7D:x=(w-text_w)/2:y=1480,"+
    "format=yuv420p[v"+i+"]");

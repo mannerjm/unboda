@@ -7,7 +7,10 @@ test("30 second educational storyboard reuses ONLY paid and verified Runway 10 s
  assert.equal(storyboard.sourceRunwayTaskId,"b7d64306-f5d4-48ef-9bd8-b7c9b0445b36");
  assert.equal(storyboard.sourceMedia.mime,"video/mp4");
  assert.equal(storyboard.sourceMedia.verifiedByHead,true);
- assert.equal(storyboard.sourceMedia.persistedInPerpetualStorage,false);
+ assert.equal(storyboard.sourceMedia.persistedInPerpetualStorage,true);
+ assert.equal(storyboard.sourceMedia.archiveVerifiedTwice,true);
+ assert.match(storyboard.sourceMedia.durableMediaUrl,/^https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\/.*\.mp4$/);
+ assert.equal(storyboard.sourceMedia.sha256.length,64);
  assert.equal(storyboard.scenes.length,4);
  assert.equal(storyboard.scenes[0].durationSeconds,10);
  assert.equal(storyboard.scenes.reduce((n,s)=>n+s.durationSeconds,0),30);
@@ -50,7 +53,7 @@ test("full Buffer autopilot still disabled and unchanged Metricool 3-hour queue 
  assert.equal(storyboard.release.bufferPostCreated,false);
  assert.equal(storyboard.release.liveAutoPostingAllowed,false);
 });
-test("expiring Runway signed link cannot be mislabeled permanent Buffer source",()=>{
+test("archived premium source is permanent but finished 30s media is not yet ready for Buffer",()=>{
  assert.equal(storyboard.sourceMedia.runwaySignedUrlEphemeral,true);
  assert.equal(storyboard.release.permanentMediaUrlAvailable,false);
  assert.equal(storyboard.release.actual30sVideoRendered,false);

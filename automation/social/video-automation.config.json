@@ -71,11 +71,14 @@
       "sourceIngestion": "automatically_fetch_runway_task_output",
       "sourceTaskId": "b7d64306-f5d4-48ef-9bd8-b7c9b0445b36",
       "persistentStore": "vercel_public_blob",
-      "persistentStoreConnected": false,
+      "persistentStoreConnected": true,
       "ownerMustManuallyTransferMP4": false,
       "stablePublicMediaURLRequiredForBuffer": true,
       "requireExplicitStorageBudgetApproval": true,
-      "rejectUnverifiedAsset": true
+      "rejectUnverifiedAsset": true,
+      "firstVerifiedArchivedSourceUrl": "https://aq03voydas4sjjuy.public.blob.vercel-storage.com/unboda-social/pilots/runway-b7d64306-f5d4-48ef-9bd8-b7c9b0445b36-c96569dfa94b47a3.mp4",
+      "firstVerifiedArchivedSourceSha256": "c96569dfa94b47a315b35f44b6a7c165f39fa28da49bf120ceba8fb5bc29f858",
+      "fullAutonomousPipelineEnabled": false
     },
     "queue": {
       "durableDatabase": "supabase_isolated_social_schema",

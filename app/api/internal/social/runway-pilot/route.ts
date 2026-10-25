@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ImageResponse } from "next/og";
-import { createElement } from "react";
+import { createElement, type ReactNode } from "react";
 import { createHash, timingSafeEqual } from "node:crypto";
 
 // One-shot narrowly owner-approved Runway pilot (50 credits, 10s Gen4 Turbo).
@@ -40,7 +40,7 @@ async function authenticatedApi<T>(path:string,key:string) {
 // and individual traditional animal-sign marker nodes.
 // Text overlays & Korean narration are not baked into the 10-second source.
 async function createOriginalFrame():Promise<string> {
- const el=(type:string,props:Record<string,unknown>,...children:unknown[])=>createElement(type,props,...children as []);
+ const el=(type:string,props:Record<string,unknown>,...children:ReactNode[])=>createElement(type,props,...children);
  const x=Array.from({length:12},(_,i)=>{
    const t=i*Math.PI/6-Math.PI/2;
    const cx=360+244*Math.cos(t),cy=604+244*Math.sin(t);
@@ -107,6 +107,14 @@ export async function GET(request:Request){
        Array.isArray(data.output)?data.output.find(x=>/^https:\/\//.test(x)):null,
       doesNotConfirmVideoQA:true});
   }catch{return send({state:"TASK_LOOKUP_NETWORK_ERROR"},502)}
+ }
+ if(mode==="preview-source") {
+   try {
+     const original=await createOriginalFrame();
+     return send({state:"ORIGINAL_PNG_RENDERED",width:720,height:1280,
+       dataUriLength:original.length,within5MbLimit:original.length<5_000_000,
+       rights:"in-house-original-design",creditsSpent:0});
+   } catch {return send({state:"ORIGINAL_PNG_RENDER_FAILED",creditsSpent:0},500)}
  }
  if(mode!=="start")return send({state:"PILOT_READ_ONLY",method:"GET",
    createMedia:false,approvedMaxCredits:creditApproved});

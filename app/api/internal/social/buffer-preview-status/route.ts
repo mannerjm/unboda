@@ -94,6 +94,7 @@ export async function GET() {
     }
     const services = new Set<string>();
     let channelCount = 0;
+    const scheduledQueue: Record<string, {count: number | null; verified: boolean}> = {};
     for (const org of orgs) {
       if (typeof org.id !== "string" || org.id.length < 3 ||
           org.id.length > 180) {
@@ -113,6 +114,25 @@ export async function GET() {
       for (const ch of channelsResponse.channels) {
         if (typeof ch.service === "string") services.add(ch.service.toLowerCase());
         channelCount++;
+        const service = String(ch.service ?? "").toLowerCase();
+        if (!EXPECTED.includes(service as typeof EXPECTED[number]) ||
+            typeof ch.id !== "string" || ch.id.length < 3) continue;
+        const q = [
+          "query BufferScheduledCount {",
+          "posts(first: 50, input: {",
+          "organizationId: " + JSON.stringify(org.id),
+          "filter: {status: [scheduled], channelIds: [" + JSON.stringify(ch.id) + "]}",
+          "}) { edges {node {id}} pageInfo {hasNextPage} } }",
+        ].join(" ");
+        const data = await gql<{
+          posts?: {edges?: unknown[];pageInfo?:{hasNextPage?:boolean}}
+        }>(token, q);
+        const complete = Array.isArray(data?.posts?.edges) &&
+          data?.posts?.pageInfo?.hasNextPage === false;
+        scheduledQueue[service] = {
+          count: complete ? data!.posts!.edges!.length : null,
+          verified: complete,
+        };
       }
     }
     const verifiedServices = EXPECTED.filter(name => services.has(name));
@@ -124,6 +144,9 @@ export async function GET() {
       channelCount,
       verifiedServices,
       missingServices,
+      scheduledQueue,
+      freePlanMaxQueuePerChannel: 10,
+      scheduledQueueReadOnly: true,
       apiKeyPresent: true,
       runway: await runwayPreflight(),
       performedReadOnlyBufferQueries: true,

@@ -33,7 +33,8 @@ test("approved mock voice request only posts Runway Eleven multilingual v2",asyn
    assert.equal(req.method,"POST");
    const body=JSON.parse(req.body);
    assert.equal(body.model,"eleven_multilingual_v2");
-   assert.equal(body.outputFormat,"mp3");
+   assert.equal(Object.hasOwn(body,"outputFormat"),false);
+   assert.equal(Object.hasOwn(body,"sampleRate"),false);
    assert.equal(body.promptText,script);
    return {ok:true,json:async()=>({id:taskId})};
   }

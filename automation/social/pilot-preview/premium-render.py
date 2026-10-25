@@ -11,7 +11,7 @@ import math
 import random
 import subprocess
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops
 
 W, H = 1080, 1920
 NAVY=(8,18,35)
@@ -131,9 +131,16 @@ def motion_only_mask():
     d=ImageDraw.Draw(mask)
     d.ellipse((92,575,988,1390),fill=255)
     mask=mask.filter(ImageFilter.GaussianBlur(35))
-    d=ImageDraw.Draw(mask)
-    d.rectangle((0,0,W,609),fill=0)
-    d.rectangle((0,1350,W,H),fill=0)
+    # A continuous feather prevents the moving orbit from ending in a
+    # visible rectangular edge. Baked-in headline/footer rows remain alpha 0.
+    band=Image.new("L",(W,H),0)
+    bd=ImageDraw.Draw(band)
+    for y in range(600,1340):
+        top=min(1,max(0,(y-600)/150))
+        bottom=min(1,max(0,(1340-y)/210))
+        alpha=round(255*min(top,bottom))
+        bd.line((0,y,W,y),fill=alpha,width=1)
+    mask=ImageChops.multiply(mask,band)
     if mask.crop((0,0,W,610)).getextrema()!=(0,0):
         raise RuntimeError("RUNWAY_BAKED_TITLE_MASK_FAILED")
     if mask.crop((0,1350,W,H)).getextrema()!=(0,0):

@@ -11,7 +11,7 @@ import math
 import random
 import subprocess
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 W, H = 1080, 1920
 NAVY=(8,18,35)
@@ -112,21 +112,33 @@ def cta():
     footer(d,"전통문화에 바탕을 둔 참고 정보입니다")
     return im
 
-def overlay():
-    im=Image.new("RGBA",(W,H),(0,0,0,0))
+def intro_template():
+    # A clean, single-source typography layer. The Runway clip NEVER owns
+    # audience-facing text: its moving ring will be masked into this artwork.
+    im=gradient()
     d=ImageDraw.Draw(im,"RGBA")
-    for y in range(145,590):
-        alpha=255 if y<=475 else round(255*(590-y)/115)
-        d.line((0,y,W,y),fill=(8,18,35,alpha),width=1)
-    d.line((164,218,916,218),fill=(*GOLD,136),width=2)
-    center(d,"띠만 알면",272,74)
-    center(d,"사주도 알 수 있을까요?",374,59,True,GOLD)
-    # Opaque cover avoids leaked debug text in re-edits of an older draft.
-    for y in range(1415,1595):
-        d.line((60,y,1020,y),fill=(8,18,35,255),width=1)
-    d.line((330,1451,750,1451),fill=(*GOLD,120),width=2)
-    center(d,"운보다  ·  나를 읽는 시간",1492,26,False,CREAM)
+    brand(d)
+    center(d,"지금, 당신의 운은",277,66)
+    center(d,"어디로 흐를까요?",382,75,True,GOLD)
+    center(d,"사주가 들려주는 당신만의 이야기",523,30,False,MUTED)
+    footer(d,"전통 명리에서 찾는 나의 이야기")
     return im
+
+def motion_only_mask():
+    # Literal alpha-zero zones for pre-existing Runway subtitles and footer.
+    # This is a geometric invariant, not an unreliable text/OCR heuristic.
+    mask=Image.new("L",(W,H),0)
+    d=ImageDraw.Draw(mask)
+    d.ellipse((92,575,988,1390),fill=255)
+    mask=mask.filter(ImageFilter.GaussianBlur(35))
+    d=ImageDraw.Draw(mask)
+    d.rectangle((0,0,W,609),fill=0)
+    d.rectangle((0,1350,W,H),fill=0)
+    if mask.crop((0,0,W,610)).getextrema()!=(0,0):
+        raise RuntimeError("RUNWAY_BAKED_TITLE_MASK_FAILED")
+    if mask.crop((0,1350,W,H)).getextrema()!=(0,0):
+        raise RuntimeError("RUNWAY_BAKED_FOOTER_MASK_FAILED")
+    return mask
 
 def run(args,timeout=180):
     subprocess.run(args,check=True,timeout=timeout)
@@ -141,12 +153,29 @@ def main():
     if not source.is_file():
         raise RuntimeError("VERIFIED_RUNWAY_SOURCE_REQUIRED")
     out.mkdir(parents=True,exist_ok=True)
-    for name,img in (("intro-overlay.png",overlay()),("zodiac.png",zodiac()),("pillars.png",pillars()),("cta.png",cta())):
+    for name,img in (("intro-template.png",intro_template()),
+                     ("motion-only-mask.png",motion_only_mask()),
+                     ("zodiac.png",zodiac()),("pillars.png",pillars()),("cta.png",cta())):
         img.save(out/name,optimize=True)
     intro=out/"premium-intro.mp4"
-    run(["ffmpeg","-hide_banner","-loglevel","error","-y","-i",str(source),"-i",str(out/"intro-overlay.png"),
-      "-filter_complex","[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30,trim=duration=10,settb=AVTB,setpts=PTS-STARTPTS[v];[v][1:v]overlay=0:0:format=auto:shortest=0:repeatlast=1,format=yuv420p,tpad=stop_mode=clone:stop_duration=0.5,settb=AVTB,setpts=PTS-STARTPTS[o]",
-      "-map","[o]","-t","10.5","-r","30","-c:v","libx264","-preset","ultrafast","-crf","19","-threads","2","-an",str(intro)],180)
+    # One typography surface only: original Runway baked words never enter
+    # the composited movie. Keep its actual animated celestial core.
+    filtergraph=(
+      "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,"
+      "crop=1080:1920,fps=30,crop=1080:1775:0:0,"
+      "pad=1080:1920:0:145:color=black,format=rgba[src];"
+      "[2:v]format=gray[mask];"
+      "[src][mask]alphamerge[fg];"
+      "[1:v][fg]overlay=0:0:format=auto,format=yuv420p,"
+      "tpad=stop_mode=clone:stop_duration=0.5,settb=AVTB,"
+      "setpts=PTS-STARTPTS[o]"
+    )
+    run(["ffmpeg","-hide_banner","-loglevel","error","-y",
+      "-i",str(source),"-loop","1","-framerate","30","-i",str(out/"intro-template.png"),
+      "-loop","1","-framerate","30","-i",str(out/"motion-only-mask.png"),
+      "-filter_complex",filtergraph,"-map","[o]","-t","10.5",
+      "-r","30","-c:v","libx264","-preset","ultrafast","-crf","19",
+      "-threads","2","-an",str(intro)],240)
     clips=[intro]
     for i,(name,sec) in enumerate((("zodiac",7.5),("pillars",7.5),("cta",6.0)),1):
         target=out/("premium-scene-"+str(i)+".mp4")

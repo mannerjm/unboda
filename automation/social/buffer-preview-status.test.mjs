@@ -31,3 +31,13 @@ test("middleware keeps all production and non-diagnostic requests on Supabase au
  assert.match(middleware,/await supabase\.auth\.getClaims\(\)/);
  assert.doesNotMatch(middleware,/VERCEL_ENV\s*!==\s*"production"/);
 });
+
+test("Runway preflight calls only read-only GET organization and does not spend credits",()=>{
+ assert.match(route,/fetch\("https:\/\/api\.dev\.runwayml\.com\/v1\/organization"/);
+ assert.match(route,/method:\s*"GET"/);
+ assert.match(route,/"X-Runway-Version":\s*"2024-11-06"/);
+ assert.match(route,/process\.env\.RUNWAY_API_KEY/);
+ assert.match(route,/generationCreditsSpentByThisCheck:\s*0/);
+ assert.doesNotMatch(route,/image_to_video|text_to_video|\/v1\/uploads|\/v1\/text_to_speech/);
+ assert.doesNotMatch(route,/runway:\s*key|JSON\.stringify\(key\)/);
+});

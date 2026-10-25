@@ -116,6 +116,28 @@ export async function GET(request:Request){
        rights:"in-house-original-design",creditsSpent:0});
    } catch {return send({state:"ORIGINAL_PNG_RENDER_FAILED",creditsSpent:0},500)}
  }
+ if(mode==="inspect"||mode==="download") {
+   const id=u.searchParams.get("id");
+   if(!id||!/^[0-9a-f-]{36}$/i.test(id))return send({state:"INVALID_TASK_ID"},400);
+   try {
+     const r=await authenticatedApi<{status:string,output?:string[]}>("/v1/tasks/"+encodeURIComponent(id),key);
+     if(!r.ok||r.data?.status!=="SUCCEEDED"||!Array.isArray(r.data.output))
+       return send({state:"VIDEO_NOT_READY_OR_LOOKUP_FAILED"},409);
+     const url=r.data.output.find(v=>typeof v==="string"&&/^https:\/\/[a-z0-9.-]+\.cloudfront\.net\//i.test(v));
+     if(!url)return send({state:"PROVIDER_MEDIA_URL_UNVERIFIED"},502);
+     if(mode==="download")return Response.redirect(url,302);
+     const head=await fetch(url,{method:"HEAD",cache:"no-store",
+       signal:AbortSignal.timeout(15000)});
+     const mime=head.headers.get("content-type")??"";
+     const size=Number(head.headers.get("content-length")??0);
+     return send({state:head.ok&&mime.includes("video/")&&size>10000?"MP4_MEDIA_CONFIRMED":"MEDIA_HEAD_UNVERIFIED",
+        headStatus:head.status,contentType:mime,bytes:size,
+        outputFileName:"unboda_first_runway_10s.mp4",
+        providerTaskSucceeded:true,durationRequestedSeconds:10,
+        downloadedToLocal:false,visualQACompleted:false,
+        narrationPresent:false,snsPublished:false},head.ok?200:502);
+   }catch{return send({state:"MEDIA_INSPECTION_FAILED"},502)}
+ }
  if(mode!=="start")return send({state:"PILOT_READ_ONLY",method:"GET",
    createMedia:false,approvedMaxCredits:creditApproved});
  if(!secureEqual(u.searchParams.get("ticket")))return send({state:"PILOT_NOT_AUTHORIZED"},403);

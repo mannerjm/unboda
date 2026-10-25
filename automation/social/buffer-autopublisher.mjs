@@ -31,6 +31,8 @@ export function planAutomaticBufferVideo(o={}){
   mediaProbeVerified:"FFPROBE_QA",
   mediaBitstreamVerified:"FFMPEG_DECODE_QA",
   captionSafeAreaVerified:"SUBTITLE_SAFE_AREA_QA",
+  bakedTextLayerIsolationVerified:"BAKED_TEXT_DOUBLE_OVERLAY_RISK",
+  renderedFrameVisualReviewApproved:"RENDERED_VISUAL_FRAME_REVIEW_REQUIRED",
   sourceNotRepeated:"ORIGINALITY_QA",
   permanentMediaHeadVerified:"HOSTED_MEDIA_HEAD",
   mediaIsFinal30Sec:"FINAL_30SEC_VIDEO_REQUIRED",

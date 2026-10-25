@@ -57,10 +57,14 @@ export function planFinalRender({clips,narrationFile,narrationProof,outputFile,
   const source=i===0?"tpad=stop_mode=clone:stop_duration=0.5,":"";
   const title=cleanFilePath(titleFiles[i]);
   // Use upper safe zone, never near TikTok/Instagram lower controls.
-  const overlay="drawbox=x=65:y=178:w=950:h=222:color=0x061424@0.63:t=fill,"+
+  // The pilot's original artwork for scenes 2-4 already contains
+  // its Korean headlines; overlaying them again causes visual ghosts.
+  // Only the first actual Runway clip needs a separate title.
+  const overlay=i===0?
+   "drawbox=x=65:y=178:w=950:h=222:color=0x061424@0.63:t=fill,"+
    "drawtext=fontfile="+safeFont+":textfile="+title+
-   ":fontsize=66:fontcolor=0xFFF8E8:line_spacing=19:"+ 
-   "x=(w-text_w)/2:y=232:borderw=3:bordercolor=0x081020";
+   ":fontsize=66:fontcolor=0xFFF8E8:line_spacing=19:"+
+   "x=(w-text_w)/2:y=232:borderw=3:bordercolor=0x081020" : "null";
   fg.push("["+i+":v]scale="+W+":"+H+":force_original_aspect_ratio=increase,"+
    "crop="+W+":"+H+",fps="+FPS+","+source+
    "trim=duration="+trim+",settb=AVTB,setpts=PTS-STARTPTS,"+

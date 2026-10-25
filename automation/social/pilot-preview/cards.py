@@ -26,11 +26,14 @@ def font_path():
         raise RuntimeError("KOREAN_FONT_REQUIRED")
     return v
 FONT=font_path()
-def f(size):
-    return ImageFont.truetype(FONT,size)
+SERIF=subprocess.check_output(["fc-match","-f","%{file}","Noto Serif CJK KR"],text=True).strip()
+if not os.path.isfile(SERIF):
+    raise RuntimeError("KOREAN_SERIF_FONT_REQUIRED")
+def f(size,serif=False):
+    return ImageFont.truetype(SERIF if serif else FONT,size)
 
 def center_text(draw,txt,y,size,color=CREAM):
-    font=f(size)
+    font=f(size,serif=size>=42)
     bbox=draw.textbbox((0,0),txt,font=font)
     text_w=bbox[2]-bbox[0]
     if text_w>W-112:
@@ -57,15 +60,15 @@ def base():
 def frame(draw,page):
     draw.line((78,128,642,128),fill=(230,190,120,140),width=2)
     draw.line((78,1138,642,1138),fill=(230,190,120,110),width=2)
-    draw.text((79,76),"UNBODA  /  SAJU JOURNAL",font=f(22),fill=GOLD)
+    draw.text((79,76),"UNBODA",font=f(22),fill=GOLD)
     draw.text((79,1162),"운보다  ·  unboda.kr",font=f(24),fill=MUTED)
-    draw.text((580,1162),page,font=f(23),fill=GOLD)
+    # No developer scene counts or debug labels in audience-facing frames.
 
 def scene_zodiac(out):
     im,draw=base()
     frame(draw,"02/04")
-    center_text(draw,"띠는 태어난 해의 상징",184,47)
-    center_text(draw,"열두 동물이 전하는 전통문화 이야기",254,24,MUTED)
+    center_text(draw,"태어난 해가 들려주는",184,47)
+    center_text(draw,"열두 가지 이야기",254,42,GOLD)
     cx,cy=360,665
     draw.ellipse((cx-262,cy-262,cx+262,cy+262),outline=(220,171,91,145),width=3)
     draw.ellipse((cx-211,cy-211,cx+211,cy+211),outline=(220,171,91,95),width=2)
@@ -88,7 +91,7 @@ def scene_zodiac(out):
 def scene_pillars(out):
     im,draw=base()
     frame(draw,"03/04")
-    center_text(draw,"사주는 네 기둥을 봐요",184,51)
+    center_text(draw,"사주를 이루는 네 기둥",184,47)
     center_text(draw,"해  ·  달  ·  날  ·  시간",261,27,MUTED)
     entries=[("해","태어난 해"),("달","태어난 달"),
       ("날","태어난 날"),("시","태어난 시간")]
@@ -99,7 +102,7 @@ def scene_pillars(out):
         draw.rounded_rectangle(box,radius=23,fill=(30,44,62,255),
           outline=(231,190,115,230),width=2)
         draw.rectangle((x+26,y+35,x+84,y+39),fill=GOLD)
-        draw.text((x+27,y+59),head,font=f(72),fill=CREAM)
+        draw.text((x+27,y+59),head,font=f(72,serif=True),fill=CREAM)
         draw.text((x+27,y+166),body,font=f(24),fill=MUTED)
     center_text(draw,"네 기둥을 함께 살펴보는 전통 해석",1040,28,MUTED)
     im.save(out,optimize=True)
@@ -107,7 +110,7 @@ def scene_pillars(out):
 def scene_cta(out):
     im,draw=base()
     frame(draw,"04/04")
-    center_text(draw,"전통 해석으로 가볍게",190,48)
+    center_text(draw,"전통의 지혜를 담다",190,48)
     center_text(draw,"결과를 단정하지 않는 사주 이야기",266,25,MUTED)
     draw.ellipse((120,390,600,870),outline=(225,180,107,165),width=2)
     draw.ellipse((143,413,577,847),outline=(225,180,107,105),width=2)

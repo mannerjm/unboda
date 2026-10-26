@@ -173,3 +173,14 @@ The user approved continuing **development only**, not new provider spending/sub
 - Existing Metricool posts and pending reservations must never be edited, cancelled, or duplicated by this update; 48–72h lookahead must check remote queue before any new scheduling.
 - Video generation/publication, provider spending, and autonomous Buffer/Metricool video write remain disabled. No 6-hour video cadence is enabled as a result of this content change.
 - A 20-slot deterministic category rotation tests the intended weights but independent semantic novelty verification and 90-day history checks are still necessary for long-running production. If content/rights/remote status cannot be verified, hold publication.
+
+
+## 2026-10-26 Advanced 15 activated; isolated staging ledger applied
+- Owner screenshot confirmed **Advanced 15 Active**, USD 67 monthly; next payment 2026-11-26. This satisfies the *plan eligibility* only, not standalone API authentication or posting.
+- Verified connected Metricool brand `7377653`, owner user `5729495`. The connected ChatGPT MCP can read scheduled/PUBLISHED history, but its session is **not** the standalone REST token.
+- Created `social_automation` schema with `jobs`, `deliveries`, `delivery_events` **ONLY** in Supabase `unboda-staging` project `xdiitqyysmhicjcytckm`, via reviewed SQL. Production `unboda` and `unboda-prod` were untouched.
+- Confirmed RLS enabled on all three tables and `anon` / `authenticated` have no schema usage nor table read privilege; service-role usage granted. Verified duplicate job keys rejected in a rolled-back transaction.
+- Added `advanced-api-preflight.mjs` and mocked tests: permit a read-only Metricool Advanced REST call solely if explicitly allowed, credential exists, and expected user+brand IDs match; never send POST or echo token. Live token/response verification **still pending**.
+- Vercel isolated Preview env on this branch has `METRICOOL_USER_ID`, `METRICOOL_BLOG_ID`, `SOCIAL_PUBLISH_ENABLED=false`, and `SOCIAL_PAID_GENERATION_ENABLED=false`. No API token inserted; no live automation/paid model worker enabled.
+- Actual Metricool read confirmed 25 channel deliveries PUBLISHED in October and 33 channel deliveries PENDING for the remaining October slots as of this check; the actual account quota must be reverified after plan change. Preserve existing ChatGPT 3-hour task and all existing reservations to avoid duplicates.
+- **Remaining blockers to genuine 365-day autonomous operation:** owner saves the newly available API token directly as a private secret in a safe server environment (NEVER in chat), readonly authenticated REST test, durable DB worker wiring + reviewed service credentials, content/image/original-video/TTS production + QA, platform-by-platform live tests, quota ledger, paid spending ceilings, host cadence verification and gradual ownership handoff. Never turn both ChatGPT and independent worker publishers on for the same slots.

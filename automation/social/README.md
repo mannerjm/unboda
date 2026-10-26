@@ -6,7 +6,7 @@
 - **Original 15–45 second vertical video:** 6-hour candidate slots (4 originals/day).
 - **Long videos are disabled.**
 - Distribution: 1 verified eligible Instagram/Facebook/Threads image destination per creative; up to 2 Instagram/Facebook/YouTube/TikTok video destinations, selected based on available slots and last posting time, **not randomly**.
-- 70% educational / 20% interactive / 10% explicit branded marketing is an initial editorial goal, not a guaranteed realized output mix.
+- **Lifestyle-first editorial mix** (see `lifestyle-content-policy.v1.json`): relationships 30%, work/career 25%, money habits 15%, family/self-understanding 10%, applied saju culture 15%, product/service education 5%. This is an initial target for *new* posts, not a statement about already-scheduled content.
 - Instagram, Facebook, Threads, YouTube and TikTok Business @unboda.kr were verified in Metricool brand 7377653 via connected ChatGPT plugin on 2026-10-24. TikTok first video booked for 2026-10-25 11:00 KST (PENDING then), not proof of actual publishing.
 
 ## What was implemented in this review branch
@@ -164,3 +164,12 @@ The user approved continuing **development only**, not new provider spending/sub
 - Tested live Buffer GraphQL via isolated Preview: connected instagram/tiktok/youtube all verified; **actual scheduled queue counts 0 each**; Buffer FREE allows 10 queued posts per channel (ref https://support.buffer.com/articles/how-many-posts-can-i-schedule-in-advance-Kmy2IEecqm). Do not publish final clips until voice, decode/rights checks and real Automatic publication verification pass.
 - Vercel Hobby Cron (if that is the account plan) CANNOT run every six hours; official docs https://vercel.com/docs/cron-jobs/usage-and-pricing limit Hobby Cron to daily. Production-level runner strategy still needs resolving/connecting (Vercel Pro Cron / Supabase Cron / GitHub Actions scheduled on default branch) and durable social queue isolated from customer/payment database.
 - No change to live Toss money/admin/refunds, paid report or customer DB, current 3-hour Metricool text/image schedule, or user-facing unboda.kr, and no extra Runway credits consumed in this stage.
+
+
+## 2026-10-26 practical-life editorial change
+
+- **Live text/photo cadence** is currently owned by ChatGPT Scheduled Task `6adc5ebc26a88191b20bb4645d7b8ebf`, not by this GitHub JSON alone. Its 3-hour schedule remains enabled. The new editorial policy has been applied in the Task prompt; new creatives start with an everyday concern rather than jargon.
+- `lifestyle-content-policy.v1.json` is a versioned machine-readable policy for the development-only `creative.mjs` generator and planned 6-hour video briefs. It does **not** grant independent Metricool REST API access, and no task consumes GitHub changes automatically except the development unit tests.
+- Existing Metricool posts and pending reservations must never be edited, cancelled, or duplicated by this update; 48–72h lookahead must check remote queue before any new scheduling.
+- Video generation/publication, provider spending, and autonomous Buffer/Metricool video write remain disabled. No 6-hour video cadence is enabled as a result of this content change.
+- A 20-slot deterministic category rotation tests the intended weights but independent semantic novelty verification and 90-day history checks are still necessary for long-running production. If content/rights/remote status cannot be verified, hold publication.

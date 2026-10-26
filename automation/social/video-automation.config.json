@@ -48,11 +48,11 @@
       "brandCTAOnlyEnd": true
     },
     "studio": {
-      "videoProvider": "runway",
+      "videoProvider": "first_party_original_motion_editing",
       "videoModel": "gen4_turbo",
       "premiumMotionSecondsPerOriginal": 10,
       "otherSeconds": "original_authorized_motion_graphics",
-      "narrationProvider": "runway/eleven_multilingual_v2",
+      "narrationProvider": "approved_commercial_korean_voice_source_pending",
       "autoRejectTextOverflow": true,
       "requirePronunciationQA": true,
       "requireOriginalMediaRights": true,
@@ -68,7 +68,12 @@
       "selfHostedOpenModelOptional": true,
       "selfHostedGpuWorkerConnected": false,
       "originalLicensedFootageSourcesApproved": false,
-      "koreanNarrationProductionApproved": false
+      "koreanNarrationProductionApproved": false,
+      "licensedHumanMotionSourcesReady": false,
+      "firstPartyMotionSampleRendered": true,
+      "firstPartyMotionSampleHasNaturalKoreanNarration": false,
+      "firstPartyMotionSampleEditorialApproved": false,
+      "firstPartyMotionSampleVerifiedFormat": "30s_h264_aac_1080x1920_30fps"
     },
     "distribution": {
       "service": "buffer",
@@ -82,7 +87,17 @@
       "avoidPublishingExistingPilotVideos": true,
       "bufferWriteAdapterImplemented": true,
       "bufferActualWriteVerified": false,
-      "initialScheduledQueueCountsVerifiedReadOnly": true
+      "initialScheduledQueueCountsVerifiedReadOnly": true,
+      "singlePrivateDraftTransportTest": {
+        "postId": "406733039",
+        "network": "instagram",
+        "draft": true,
+        "autoPublish": false,
+        "used": "historic_10_second_blob_clip_not_30_second_first_party_video",
+        "mediaNormalized": true,
+        "publicPublishingProof": false
+      },
+      "protectedScheduleUtcCron": "0 3,11,15,23 * * *"
     },
     "storage": {
       "provider": "private_object_storage_and_public_signed_media_asset",
@@ -153,7 +168,8 @@
     "ownerMonthlyRunwayCreditCapApproved": false,
     "autoBillingEnabled": false,
     "estimateCreditsPer30daysMinimum": 6360,
-    "currentRunwayBalanceLastMeasuredCredits": 1950
+    "currentRunwayBalanceLastMeasuredCredits": 1950,
+    "ownerApprovalOfFirstVideoPending": true
   },
   "buffer": {
     "freePilot": true,

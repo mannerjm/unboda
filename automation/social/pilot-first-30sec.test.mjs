@@ -45,7 +45,7 @@ test("planned Korean narration does not imply voice generation or licensing was 
 test("full Buffer autopilot still disabled and unchanged Metricool 3-hour queue is preserved",()=>{
  assert.equal(config.video.distribution.service,"buffer");
  assert.deepEqual(config.video.distribution.supported,["instagram","tiktok","youtube"]);
- assert.equal(config.video.targetCadenceHours,6);
+ assert.deepEqual(config.video.schedule.timesLocal,["00:00","08:00","12:00","20:00"]);
  assert.equal(config.existingTextImage.doNotModify,true);
  assert.equal(config.controls.schedulerEnabled,false);
  assert.equal(config.controls.livePublishingEnabled,false);

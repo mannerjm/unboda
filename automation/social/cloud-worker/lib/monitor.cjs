@@ -14,7 +14,7 @@ function slot(kind,at){
  const hour=((new Date(at+KST_MS).getUTCHours())%24);
  const minute=new Date(at+KST_MS).getUTCMinutes();
  return kind==="text-image"?minute===30 && (hour-1)%3===0:
-        kind==="short-video"?minute===0 && (hour-2)%6===0:false;
+        kind==="short-video"?minute===0 && [0,8,12,20].includes(hour):false;
 }
 function runtimeReady(env){
  return env.METRICOOL_API_TOKEN?.length>0 &&

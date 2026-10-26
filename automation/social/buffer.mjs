@@ -6,7 +6,7 @@ import {CADENCE_HOURS} from "./cadence.mjs";
 export const DEFAULT_BUFFER_HOURS=48;
 export const ANCHORS_KST=Object.freeze({
  "text-image":"2026-10-24T19:30:00+09:00",
- "short-video":"2026-10-24T20:00:00+09:00"
+ "short-video":null
 });
 export function plannedJobKey(kind,scheduledAt,brandId="7377653"){
  if(!Object.hasOwn(CADENCE_HOURS,kind)||!Number.isFinite(scheduledAt))
@@ -24,10 +24,21 @@ export function planContentBuffer({now,hours=DEFAULT_BUFFER_HOURS,knownJobKeys=[
  const limit=now+hours*3600000;
  const jobs=[];
  for(const [kind,anchor] of Object.entries(ANCHORS_KST)){
-  const interval=CADENCE_HOURS[kind]*3600000;
-  const origin=Date.parse(anchor);
-  const first=origin+Math.max(0,Math.ceil((now-origin)/interval))*interval;
-  for(let at=first;at<limit;at+=interval){
+  const candidates=[];
+  if(kind==="short-video"){
+   const offset=9*3600000;
+   const midnight=Math.floor((now+offset)/86400000)*86400000-offset;
+   for(let day=0;day<4;day++)for(const hour of [0,8,12,20]){
+    const at=midnight+day*86400000+hour*3600000;
+    if(at>=now&&at<limit)candidates.push(at);
+   }
+  }else{
+   const interval=CADENCE_HOURS[kind]*3600000;
+   const origin=Date.parse(anchor);
+   const first=origin+Math.max(0,Math.ceil((now-origin)/interval))*interval;
+   for(let at=first;at<limit;at+=interval)candidates.push(at);
+  }
+  for(const at of candidates){
    const jobKey=plannedJobKey(kind,at,brandId);
    if(already.has(jobKey))continue;
    jobs.push(Object.freeze({

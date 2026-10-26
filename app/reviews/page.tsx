@@ -26,7 +26,12 @@ function formatMonth(value: string): string {
 }
 
 export default async function VerifiedReviewsPage() {
-  const reviews = await getPublicVerifiedReviewFeed(40);
+  // Preview branches have no service-role credentials by design.
+  // Never connect production customer data merely to test SEO rendering.
+  // Production still requires the real review backend and fails closed if unavailable.
+  const previewReviewDataUnavailable =
+    process.env.VERCEL_ENV === "preview" && !process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const reviews = previewReviewDataUnavailable ? [] : await getPublicVerifiedReviewFeed(40);
 
   return (
     <AppShell>
@@ -45,9 +50,18 @@ export default async function VerifiedReviewsPage() {
             </div>
           </header>
 
+          {previewReviewDataUnavailable ? (
+            <section role="status" className="mt-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+              Preview 검증 안내: 이 환경에는 후기 데이터 조회 권한이 연결되지 않았습니다.
+              아래 빈 상태는 실제 고객 후기 현황이 아니며, 후기 데이터와 기능은 운영 또는 분리된 테스트 DB에서 별도로 검증해야 합니다.
+            </section>
+          ) : null}
+
           {reviews.length === 0 ? (
             <section className="mt-5 rounded-[1.5rem] border border-[#dce1ef] bg-white p-6 text-sm leading-7 text-slate-600 shadow-sm">
-              아직 공개된 구매 인증 후기가 없습니다. 후기 수를 임의로 채우지 않고 실제 구매 고객이 작성하고 검수를 마친 후기만 이곳에 표시합니다.
+              {previewReviewDataUnavailable
+                ? "Preview에서는 실제 후기 목록을 조회하거나 표시하지 않습니다. 운영 환경에서의 후기 조회 동작은 이 화면으로 검증할 수 없습니다."
+                : "아직 공개된 구매 인증 후기가 없습니다. 후기 수를 임의로 채우지 않고 실제 구매 고객이 작성하고 검수를 마친 후기만 이곳에 표시합니다."}
             </section>
           ) : (
             <section className="mt-5 grid gap-4 lg:grid-cols-2" aria-label="공개 구매 인증 후기">

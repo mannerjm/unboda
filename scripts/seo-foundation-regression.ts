@@ -7,6 +7,7 @@ import { groupTopicCatalogProductsByCategory, listPeriodCatalogProducts } from "
 import { getPremiumProduct } from "../app/lib/premiumProductRegistry";
 import { getPremiumProductDisplayTitle } from "../app/lib/premiumPresentation";
 import { SITE_ORIGIN } from "../app/lib/seo";
+import { buildBreadcrumbStructuredData, getSiteStructuredData, serializeStructuredData } from "../app/lib/structuredData";
 import { COMPATIBILITY_GUIDE_SLUGS, getCompatibilityPublicGuidePath } from "../app/lib/compatibilityPublicGuides";
 
 const entries = sitemap();
@@ -200,4 +201,41 @@ assert(!deepPage.includes("seoFallback="),
 assert(deepPage.includes("initialMode={initialMode}") && deepPage.includes("initialCategory={initialCategory}"),
   "original interactive discovery flow must remain intact");
 
-console.log(`seo-foundation-regression: PASS (57 paid products, ${entries.length} sitemap URLs)`);
+const siteData = getSiteStructuredData();
+const graph = siteData["@graph"] as Array<Record<string, unknown>>;
+assert.deepEqual(graph.map((item) => item["@type"]), ["Organization", "WebSite"]);
+assert(graph.every((item) => item.name === "운보다" && item.url === `${SITE_ORIGIN}/`));
+assert(!/AggregateRating|Review|FAQPage|Article|SearchAction/.test(JSON.stringify(siteData)),
+  "site identity must not invent reviews, articles, FAQ eligibility or a search feature");
+for (const productId of launchIds) {
+  const product = getPremiumProduct(productId)!;
+  const crumbs = buildBreadcrumbStructuredData([
+    { name: "홈", path: "/" },
+    { name: "심층 분석", path: "/deep-analysis" },
+    { name: getPremiumProductDisplayTitle(product.id, product.title), path: `/paid-analysis/${product.id}` },
+  ]).itemListElement as Array<Record<string, unknown>>;
+  assert.deepEqual(crumbs.map((item) => item.position), [1, 2, 3]);
+  assert.equal(crumbs[2].item, `${SITE_ORIGIN}/paid-analysis/${productId}`);
+  assert.equal(crumbs[2].name, getPremiumProductDisplayTitle(product.id, product.title));
+}
+for (const path of ["https://external.example/", "//external.example/", "/\\external.example/", "/paid-analysis/career?profileId=fixture", "/path#personal"]) {
+  assert.throws(() => buildBreadcrumbStructuredData([{ name: "test", path }]));
+}
+const hostileLabel = { name: "</script><script>fixture</script>" };
+const encoded = serializeStructuredData(hostileLabel);
+assert(!encoded.includes("<"), "JSON-LD must not close the script element");
+assert.deepEqual(JSON.parse(encoded), hostileLabel);
+assert(readFileSync("app/layout.tsx", "utf8").includes("data={getSiteStructuredData()}"));
+assert(readFileSync("app/components/HomeExperience.tsx", "utf8").includes('href="/reviews"'),
+  "the sitemap's public review page must have a real server-rendered home link");
+// Preview deployments intentionally lack privileged DB credentials. The review page
+// must stay renderable for public SEO markup tests without claiming to have queried
+// actual customer reviews, while production must continue to require the real backend.
+const reviewPageSource = readFileSync("app/reviews/page.tsx", "utf8");
+assert(reviewPageSource.includes('process.env.VERCEL_ENV === "preview" && !process.env.SUPABASE_SERVICE_ROLE_KEY'),
+  "only a preview missing its service key may show the explicit testing fixture");
+assert(reviewPageSource.includes('previewReviewDataUnavailable ? [] : await getPublicVerifiedReviewFeed(40)'),
+  "production and fully configured previews must still load the actual verified review feed");
+assert(reviewPageSource.includes("운영 환경에서의 후기 조회 동작은 이 화면으로 검증할 수 없습니다."),
+  "preview must not pretend the lack of customer data means there are no reviews");
+console.log(`seo-foundation-regression: PASS (57 paid products, ${entries.length} sitemap URLs, site identity + safe breadcrumbs + preview review guard)`);

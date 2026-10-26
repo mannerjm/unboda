@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import AnalyticsVisitTracker from "@/app/components/AnalyticsVisitTracker";
 import PwaRegistration from "@/app/components/PwaRegistration";
+import StructuredData from "@/app/components/StructuredData";
+import { getSiteStructuredData } from "@/app/lib/structuredData";
 import {
   DEFAULT_SITE_DESCRIPTION,
   DEFAULT_SITE_TITLE,
@@ -75,6 +77,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#f5f7fc] text-[#11162d]">
+        <StructuredData data={getSiteStructuredData()} />
         <AnalyticsVisitTracker />
         <PwaRegistration />
         {children}

@@ -5,7 +5,7 @@ The `CRON_SECRET` (64-character high-entropy sensitive env) is required on both 
 Metricool token is sensitive Production-only. Never print request headers or the token.
 
 Schedules in UTC for KST 3-hour photo/text slots: `30 1,4,7,10,13,16,19,22 * * *`.
-KST 6-hour video windows: `0 5,11,17,23 * * *`. BOTH are READ-ONLY audits; video generation and posting are OFF.
+KST fixed daily video windows **00:00, 08:00, 12:00, 20:00** (24:00 is next-day midnight): `0 3,11,15,23 * * *` in UTC. BOTH are READ-ONLY audits; video generation and posting are OFF.
 Vercel Pro is required for sub-daily cron schedules. Each cron GET requires Vercel's `Authorization: Bearer CRON_SECRET`.
 Backend gets Metricool reservations with authenticated GET, emits only aggregate counts. No post, put, patch, delete, generation or ledger writes.
 

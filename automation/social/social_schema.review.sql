@@ -1,4 +1,5 @@
--- DESIGN REVIEW ONLY. NOT a migration, NOT applied to Supabase production.
+-- Reviewed isolated schema. Applied to unboda-staging ONLY on 2026-10-26.
+-- This file is NOT deployed to unboda production and must not be applied there without release review.
 -- Generate a proper Supabase migration after isolated review and testing.
 -- Private, unexposed marketing schema; nothing here touches orders, refunds or customers.
 BEGIN;

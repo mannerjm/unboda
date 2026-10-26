@@ -1,0 +1,12 @@
+{
+  "name": "unboda-social-worker",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "node --test test/*.test.cjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

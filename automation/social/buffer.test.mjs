@@ -41,3 +41,14 @@ test("invalid buffer window fail closed",()=>{
  assert.throws(()=>planContentBuffer({now,knownJobKeys:null}),/DURABLE_JOB_KEYS/);
  assert.throws(()=>plannedJobKey("long-video",now),/INVALID_SCHEDULE/);
 });
+
+test("fixed four daily video times (00 08 12 20) exclude legacy 02 14",()=>{
+ const now=Date.parse("2026-10-26T23:45:00+09:00");
+ const videos=planContentBuffer({now}).filter(j=>j.kind==="short-video");
+ const fmt=j=>new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",dateStyle:"short",timeStyle:"short",hourCycle:"h23"}).format(Date.parse(j.scheduledAt));
+ assert.equal(videos.length,8);
+ assert.deepEqual(videos.slice(0,4).map(fmt),[
+  "2026-10-27 00:00","2026-10-27 08:00",
+  "2026-10-27 12:00","2026-10-27 20:00"
+ ]);
+});

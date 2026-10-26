@@ -28,4 +28,12 @@
 - Health monitoring and human escalation; no perpetual-success promise without active subscriptions and maintenance.
 
 ## Exact current blocker
-Advanced plan is ACTIVE. **Credential is not stored in an approved independent worker, and no authenticated REST request has yet been proven**, so unattended real publishing cannot be truthfully marked running.
+Advanced plan is ACTIVE. **Private credential and read-only REST access are confirmed in an isolated dedicated Vercel project**, but durable worker execution, cloud ledger, content generation and live publishing E2E are not connected, so unattended real publishing cannot be truthfully marked running.
+
+## Verified direct REST connection — 2026-10-26, Korea Standard Time
+- User saved `METRICOOL_API_TOKEN` as **Sensitive / Production only** in the entirely separate Vercel project `unboda-social-worker` (`prj_RyQvXNzNDpbHyUulparzelfSbD5R`). Credential values were never read, printed, or copied into GitHub.
+- Independent Vercel production deployment **`dpl_BdpjtLh4Bj7TmAExYhwvcpZz3eN4`** READY. Build-only requests used authenticated GET `/api/admin/simpleProfiles?userId=5729495` and verified `blogId=7377653`. Safe build output: `UNBODA_SOCIAL_CHECK: BRAND_AUTHENTICATED_READ_ONLY`.
+- The same token then successfully fetched `GET /api/v2/scheduler/posts` with blogId/userId/date window `2026-10-26 00:00` through `2026-10-31 23:59` Asia/Seoul. Build output (only aggregate counts, no captions/token): `SCHEDULE_READ_OK count=38 pending=33 published=9 error=0 other=0`. Posts and per-provider deliveries are counted separately, so totals differ.
+- The deployment's only public entrypoint returns HTTP 404, `X-Robots-Tag: noindex,nofollow`, body `Social live publishing disabled`, no route with access to the credentials. Posting flag and paid media generation flag both false.
+- This satisfies only **live authentication and scheduled-post inventory READ**. No `POST`, `PUT`, `PATCH`, `DELETE`, paid generation, cron scheduler, or autonomous production publishing was enabled or proven. Treat the counts as a historical snapshot.
+- Next engineering gate: a restricted job runner connected to reviewed Supabase social-only ledger, image+commercial narration/video generation and QA, remote duplicate lock, real publish single-post E2E, and safe switchover from the ChatGPT task.

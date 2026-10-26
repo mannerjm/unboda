@@ -10,8 +10,11 @@
     "apiMode": "independent_REST",
     "credential": "METRICOOL_API_TOKEN",
     "accountPlan": "advanced_15_active_owner_screen_2026-10-26",
-    "restTokenStoredOnWorker": false,
-    "restAccountReadTestPassed": false
+    "restTokenStoredOnWorker": true,
+    "restAccountReadTestPassed": true,
+    "restScheduleReadTestPassed": true,
+    "standaloneWorkerProjectId": "prj_RyQvXNzNDpbHyUulparzelfSbD5R",
+    "verifiedReadOnlyDeploymentId": "dpl_BdpjtLh4Bj7TmAExYhwvcpZz3eN4"
   },
   "existingTextImage": {
     "cadenceHours": 3,

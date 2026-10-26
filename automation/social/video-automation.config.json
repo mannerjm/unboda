@@ -8,7 +8,10 @@
     "userId": "5729495",
     "planRequired": "Advanced_or_Custom",
     "apiMode": "independent_REST",
-    "credential": "METRICOOL_API_TOKEN"
+    "credential": "METRICOOL_API_TOKEN",
+    "accountPlan": "advanced_15_active_owner_screen_2026-10-26",
+    "restTokenStoredOnWorker": false,
+    "restAccountReadTestPassed": false
   },
   "existingTextImage": {
     "cadenceHours": 3,
@@ -96,7 +99,9 @@
       "identityKey": "brand_kind_slot",
       "cloudSixHourRunnerConnected": false,
       "durableMoneyAndIdempotencyLedgerConnected": false,
-      "actualReadyVideos": 0
+      "actualReadyVideos": 0,
+      "durableStagingSchemaCreated": true,
+      "durableProductionLedgerConnected": false
     },
     "quotas": {
       "conservativeAllNetworkPostsPerRolling30Days": 500,

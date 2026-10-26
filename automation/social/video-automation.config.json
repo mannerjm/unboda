@@ -23,8 +23,6 @@
   },
   "video": {
     "enabled": false,
-    "targetCadenceHours": 6,
-    "firstAnchorLocal": "2026-10-24T20:00:00+09:00",
     "durationSeconds": 30,
     "output": {
       "width": 1080,
@@ -110,7 +108,8 @@
       "durableMoneyAndIdempotencyLedgerConnected": false,
       "actualReadyVideos": 0,
       "durableStagingSchemaCreated": true,
-      "durableProductionLedgerConnected": false
+      "durableProductionLedgerConnected": false,
+      "scheduleVersion": "fixed-four-times-kst-20261026"
     },
     "quotas": {
       "conservativeAllNetworkPostsPerRolling30Days": 500,
@@ -122,6 +121,26 @@
       "maxRetries": 3,
       "stopOnAuthAndPolicyErrors": true,
       "noChangesToPaymentsRefundsCustomerTables": true
+    },
+    "schedule": {
+      "kind": "fixed_daily_local_time",
+      "timezone": "Asia/Seoul",
+      "timesLocal": [
+        "00:00",
+        "08:00",
+        "12:00",
+        "20:00"
+      ],
+      "displayOrder": [
+        "08:00",
+        "12:00",
+        "20:00",
+        "24:00"
+      ],
+      "dailyOriginals": 4,
+      "utcCron": "0 3,11,15,23 * * *",
+      "meaningOf2400": "next_day_00:00",
+      "requiresReadyLicensedNarratedVideo": true
     }
   },
   "controls": {

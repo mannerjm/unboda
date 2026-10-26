@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {createEditorialBrief,creativePrompt,generateEditorialCandidate,
- validateCreativeDraft,TOPIC_PILLARS,CONTENT_MIX} from "./creative.mjs";
+ validateCreativeDraft,TOPIC_PILLARS,CONTENT_MIX,LIFESTYLE_ROTATION,LIFESTYLE_POLICY} from "./creative.mjs";
 
 const brief=createEditorialBrief({kind:"short-video",slotIndex:2});
 const draft={
@@ -16,15 +16,26 @@ const draft={
   voiceover:"꿈은 민속적 상징으로 이해할 수 있습니다.",
   onScreenText:"뱀꿈과 상징 "+i}))
 };
-test("topic pillars include dreams and zodiac",()=>{
- assert.ok(TOPIC_PILLARS.some(p=>p.key==="dreams"));
- assert.ok(TOPIC_PILLARS.some(p=>p.key==="zodiac"));
- assert.equal(CONTENT_MIX.educational+CONTENT_MIX.interactive+CONTENT_MIX.brand,100);
+test("real-life editor pillars and 100 percent mix loaded from JSON",()=>{
+ assert.equal(LIFESTYLE_POLICY.schemaVersion,1);
+ assert.ok(TOPIC_PILLARS.some(p=>p.key==="relationships"));
+ assert.ok(TOPIC_PILLARS.some(p=>p.key==="career"));
+ assert.ok(TOPIC_PILLARS.some(p=>p.key==="practicalSaju"));
+ assert.equal(Object.values(CONTENT_MIX).reduce((a,b)=>a+b,0),100);
+ assert.equal(LIFESTYLE_POLICY.status.shortVideoPublishingEnabled,false);
+});
+test("20 consecutive editorial slots match balanced real-life distribution",()=>{
+ const counts=Object.fromEntries(Object.keys(CONTENT_MIX).map(k=>[k,0]));
+ for(const category of LIFESTYLE_ROTATION)counts[category]++;
+ for(const [k,v] of Object.entries(CONTENT_MIX))assert.equal(counts[k],v/5);
+ assert.ok(LIFESTYLE_ROTATION.every((x,i)=>i===0||x!==LIFESTYLE_ROTATION[i-1]));
 });
 test("3h image brief, 6h video brief both build",()=>{
  assert.equal(createEditorialBrief({kind:"text-image",slotIndex:3}).kind,"text-image");
  assert.equal(brief.targetSeconds,30);
- assert.match(creativePrompt(brief),/꿈해몽|12띠|사주/);
+ assert.match(creativePrompt(brief),/생활|고민|연애|직장/);
+ assert.equal(brief.doNotAutoPublish,true);
+ assert.equal(brief.policyId,LIFESTYLE_POLICY.policyId);
 });
 test("long video is disabled",()=>assert.throws(
  ()=>createEditorialBrief({kind:"long-video",slotIndex:1}),/DISABLED/
@@ -53,4 +64,9 @@ test("invalid external generation rejected",async()=>{
  const got=await generateEditorialCandidate({kind:"short-video",slotIndex:2,
    generator:async()=>"{invalid"});
  assert.equal(got.reason,"MALFORMED_GENERATION");
+});
+
+test("jargon-first hook title is rejected",()=>{
+ const result=validateCreativeDraft({...draft,title:"사주의 용신이 의미하는 신비한 비밀"},brief);
+ assert.ok(result.reasons.includes("LIFESTYLE_HOOK_REQUIRED"));
 });

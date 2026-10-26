@@ -1,5 +1,6 @@
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import { getPaidProductSeoGuide } from "@/app/lib/paidProductSeo";
+import PublicBreadcrumbs from "./PublicBreadcrumbs";
 
 /**
  * Server-rendered, public pre-purchase guide. This is never a paid result,
@@ -10,6 +11,11 @@ export default function PaidProductSeoIntro({ product }: { product: PremiumProdu
 
   return (
     <section aria-labelledby="public-paid-product-heading" className="mt-5 overflow-hidden rounded-[1.8rem] border border-[#e1e3ef] bg-white px-5 py-6 shadow-[0_14px_36px_rgba(33,40,83,0.045)] sm:px-8 sm:py-8">
+      <PublicBreadcrumbs items={[
+        { name: "홈", path: "/" },
+        { name: "심층 분석", path: "/deep-analysis" },
+        { name: guide.headline, path: `/paid-analysis/${product.id}` },
+      ]} />
       <p className="text-xs font-extrabold tracking-[0.13em] text-[#6f5ce7]">분석을 선택하기 전에</p>
       <h1 id="public-paid-product-heading" className="mt-3 text-2xl font-black leading-snug tracking-[-0.03em] text-[#11162d] sm:text-3xl">
         {guide.headline}

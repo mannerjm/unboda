@@ -7,6 +7,7 @@ import {
   getCompatibilityPublicGuidePath,
 } from "@/app/lib/compatibilityPublicGuides";
 import { buildPublicMetadata } from "@/app/lib/seo";
+import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
 
 type GuidePageProps = { params: Promise<{ slug: string }> };
 
@@ -38,6 +39,12 @@ export default async function CompatibilityPublicGuidePage({ params }: GuidePage
   return (
     <main className="min-h-screen bg-[#f5f7fc] px-4 py-7 text-[#11162d] sm:px-8 sm:py-12">
       <div className="mx-auto max-w-5xl">
+        <PublicBreadcrumbs items={[
+          { name: "홈", path: "/" },
+          { name: "전문 분석", path: "/special-analysis" },
+          { name: "궁합 분석", path: "/special-analysis/compatibility" },
+          { name: product.title, path: getCompatibilityPublicGuidePath(guide.slug) },
+        ]} />
         <nav className="flex flex-wrap gap-3 text-sm font-semibold text-slate-600" aria-label="경로">
           <Link href="/special-analysis/compatibility" className="underline decoration-slate-300 underline-offset-4 hover:text-[#5e4bd1]">
             ← 궁합 종류 전체 보기

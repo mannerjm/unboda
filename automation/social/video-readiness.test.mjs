@@ -2,12 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
 import {inspectAutopilotReadiness,validateAutopilotConfig,
- plannedSixHourSlots,REQUIRED_VIDEO_ENV} from "./video-readiness.mjs";
+ plannedFixedDailyVideoSlots,REQUIRED_VIDEO_ENV} from "./video-readiness.mjs";
 const cfg=JSON.parse(await readFile(new URL("./video-automation.config.json",import.meta.url),"utf8"));
 test("automation JSON keeps videos OFF until paid/API release checks are done",()=>{
  assert.equal(validateAutopilotConfig(cfg).ok,true);
  assert.equal(cfg.existingTextImage.doNotModify,true);
- assert.equal(cfg.video.targetCadenceHours,6);
+ assert.deepEqual(cfg.video.schedule.timesLocal,["00:00","08:00","12:00","20:00"]);
  assert.equal(cfg.video.enabled,false);
  assert.equal(cfg.controls.livePublishingEnabled,false);
  assert.equal(cfg.controls.monthlyGenerationBudgetUsdCents,0);
@@ -16,7 +16,7 @@ test("no cloud tokens, no live video or false 365-day claim",()=>{
  const r=inspectAutopilotReadiness({config:cfg,env:{},proofs:{}});
  assert.equal(r.ready,false);
  assert.ok(r.missingEnvironment.includes("METRICOOL_API_TOKEN"));
- assert.ok(r.missingEnvironment.includes("RUNWAY_API_KEY"));
+ assert.ok(r.missingEnvironment.includes("SOCIAL_KOREAN_NARRATION_SOURCE"));
  assert.ok(r.gates.includes("LIVE_PUBLISH_DISABLED"));
  assert.ok(r.missingProofs.includes("verifiedKoreanNarrationPronunciation"));
  assert.ok(r.connectedChatPluginDoesNotGrantRESTCredentials);
@@ -59,13 +59,13 @@ test("simulated full readiness is a preflight only, never proof of a real upload
  assert.equal(r.ready,true);
  assert.equal(r.planOnly,true);
 });
-test("eight 6h slots form a 48h forward planning window",()=>{
+test("eight daily-fixed slots form a 48h forward planning window",()=>{
  const from=Date.parse("2026-10-25T08:00:00+09:00");
- const slots=plannedSixHourSlots({now:from,count:8});
+ const slots=plannedFixedDailyVideoSlots({now:from,count:8});
  assert.equal(slots.length,8);
  assert.equal(slots[0].atKst,"2026-10-25 08:00:00");
- assert.equal(slots[1].atKst,"2026-10-25 14:00:00");
- assert.equal(slots[7].atKst,"2026-10-27 02:00:00");
+ assert.equal(slots[1].atKst,"2026-10-25 12:00:00");
+ assert.equal(slots[7].atKst,"2026-10-27 00:00:00");
  assert.equal(new Set(slots.map(x=>x.slotKey)).size,8);
 });
 test("unsafe config fails and no hidden change to 3h text work",()=>{
@@ -73,4 +73,9 @@ test("unsafe config fails and no hidden change to 3h text work",()=>{
  c.existingTextImage.doNotModify=false;
  assert.equal(validateAutopilotConfig(c).ok,false);
  assert.ok(validateAutopilotConfig(c).issues.includes("EXISTING_TEXT_AUTOMATION_MUST_BE_PRESERVED"));
+});
+
+test("local 24:00 means the following day at 00:00",()=>{
+ const slots=plannedFixedDailyVideoSlots({now:Date.parse("2026-10-26T23:45:00+09:00"),count:4});
+ assert.deepEqual(slots.map(s=>s.atKst),["2026-10-27 00:00:00","2026-10-27 08:00:00","2026-10-27 12:00:00","2026-10-27 20:00:00"]);
 });

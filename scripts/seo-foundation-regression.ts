@@ -228,4 +228,14 @@ assert.deepEqual(JSON.parse(encoded), hostileLabel);
 assert(readFileSync("app/layout.tsx", "utf8").includes("data={getSiteStructuredData()}"));
 assert(readFileSync("app/components/HomeExperience.tsx", "utf8").includes('href="/reviews"'),
   "the sitemap's public review page must have a real server-rendered home link");
-console.log(`seo-foundation-regression: PASS (57 paid products, ${entries.length} sitemap URLs, site identity + safe breadcrumbs)`);
+// Preview deployments intentionally lack privileged DB credentials. The review page
+// must stay renderable for public SEO markup tests without claiming to have queried
+// actual customer reviews, while production must continue to require the real backend.
+const reviewPageSource = readFileSync("app/reviews/page.tsx", "utf8");
+assert(reviewPageSource.includes('process.env.VERCEL_ENV === "preview" && !process.env.SUPABASE_SERVICE_ROLE_KEY'),
+  "only a preview missing its service key may show the explicit testing fixture");
+assert(reviewPageSource.includes('previewReviewDataUnavailable ? [] : await getPublicVerifiedReviewFeed(40)'),
+  "production and fully configured previews must still load the actual verified review feed");
+assert(reviewPageSource.includes("운영 환경에서의 후기 조회 동작은 이 화면으로 검증할 수 없습니다."),
+  "preview must not pretend the lack of customer data means there are no reviews");
+console.log(`seo-foundation-regression: PASS (57 paid products, ${entries.length} sitemap URLs, site identity + safe breadcrumbs + preview review guard)`);

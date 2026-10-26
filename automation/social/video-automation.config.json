@@ -61,7 +61,13 @@
       "first30sVisualDraftRendered": true,
       "first30sVisualDraftContainsRealRunwayScene": true,
       "first30sVisualDraftHasNaturalKoreanNarration": false,
-      "first30sVisualDraftApprovedForSocial": false
+      "first30sVisualDraftApprovedForSocial": false,
+      "productionStrategy": "first_party_editing_and_licensed_real_motion_first",
+      "runwayOptional": true,
+      "selfHostedOpenModelOptional": true,
+      "selfHostedGpuWorkerConnected": false,
+      "originalLicensedFootageSourcesApproved": false,
+      "koreanNarrationProductionApproved": false
     },
     "distribution": {
       "service": "buffer",

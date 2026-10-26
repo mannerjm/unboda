@@ -10,7 +10,9 @@ test("secure cron auth denies missing and short secrets",()=>{
 });
 test("KST exact text and video slots",()=>{
  assert.equal(slot("text-image",Date.parse("2026-10-26T19:30:00+09:00")),true);
- assert.equal(slot("short-video",Date.parse("2026-10-26T20:00:00+09:00")),true);
+ for(const hour of [0,8,12,20])assert.equal(slot("short-video",Date.parse(`2026-10-27T${String(hour).padStart(2,"0")}:00:00+09:00`)),true);
+ assert.equal(slot("short-video",Date.parse("2026-10-27T02:00:00+09:00")),false);
+ assert.equal(slot("short-video",Date.parse("2026-10-27T14:00:00+09:00")),false);
  assert.equal(slot("short-video",Date.parse("2026-10-26T19:30:00+09:00")),false);
  assert.equal(kstIso(Date.parse("2026-10-26T20:00:00+09:00")),"2026-10-26T20:00:00");
 });

@@ -1,10 +1,10 @@
-// Independent 6-hour video automation: configuration and release gate.
+// Independent four-fixed-times-daily video automation: configuration and release gate.
 // Does NOT inherit ChatGPT's connected Metricool plugin session.
 // Fail closed: no paid generation, scheduling or 365-day service until each
 // required dependency is independently verified in the actual cloud worker.
 export const REQUIRED_VIDEO_ENV=Object.freeze([
  "METRICOOL_API_TOKEN","METRICOOL_USER_ID","METRICOOL_BLOG_ID",
- "RUNWAY_API_KEY","SOCIAL_KOREAN_TTS_KEY","SOCIAL_TEXT_AI_API_KEY",
+ "SOCIAL_KOREAN_NARRATION_SOURCE","SOCIAL_TEXT_AI_API_KEY",
  "SOCIAL_STORAGE_URL","SOCIAL_STORAGE_WRITE_KEY",
  "SOCIAL_LEDGER_DATABASE_URL"
 ]);
@@ -24,8 +24,10 @@ export function validateAutopilotConfig(c){
  if(c?.existingTextImage?.cadenceHours!==3||c?.existingTextImage?.doNotModify!==true)
   issues.push("EXISTING_TEXT_AUTOMATION_MUST_BE_PRESERVED");
  const v=c?.video??{};
- if(v.targetCadenceHours!==6||v.firstAnchorLocal!=="2026-10-24T20:00:00+09:00")
-  issues.push("SIX_HOUR_VIDEO_SCHEDULE_REQUIRED");
+ if(v.schedule?.kind!=="fixed_daily_local_time"||v.schedule?.timezone!=="Asia/Seoul"||
+    JSON.stringify(v.schedule?.timesLocal)!==JSON.stringify(["00:00","08:00","12:00","20:00"])||
+    v.schedule?.utcCron!=="0 3,11,15,23 * * *")
+  issues.push("FIXED_KST_VIDEO_SCHEDULE_REQUIRED");
  if(v.output?.width!==1080||v.output?.height!==1920||
     v.output?.container!=="mp4"||v.output?.audio!=="aac")
   issues.push("SHORT_VIDEO_OUTPUT_UNSUPPORTED");
@@ -65,20 +67,25 @@ export function inspectAutopilotReadiness({config,env={},proofs={}}={}){
   connectedChatPluginDoesNotGrantRESTCredentials:true
  });
 }
-// Calls scheduling planners without running AI generation, media writes or external SNS API.
-// schedule fields deliberately derive from UTC milliseconds and retain KST anchors.
-export function plannedSixHourSlots({now,count=8,
- anchor=Date.parse("2026-10-24T20:00:00+09:00")}={}){
+// Fixed 00:00/08:00/12:00/20:00 KST; 24:00 means next-day 00:00.
+export const VIDEO_TIMES_KST=Object.freeze([0,8,12,20]);
+export function plannedFixedDailyVideoSlots({now,count=8}={}){
  if(!Number.isFinite(now)||!Number.isInteger(count)||count<1||count>16)
   throw Error("INVALID_PLAN_INPUT");
- const interval=6*60*60*1000;
- const first=anchor+Math.max(0,Math.ceil((now-anchor)/interval))*interval;
- return Array.from({length:count},(_,i)=>{
-  const ms=first+i*interval;
-  return {slotKey:"unboda:short-video:"+new Date(ms).toISOString(),
+ const kstOffset=9*3600000;
+ const midnight=Math.floor((now+kstOffset)/86400000)*86400000-kstOffset;
+ const result=[];
+ for(let day=0;result.length<count&&day<6;day++){
+  for(const hour of VIDEO_TIMES_KST){
+   const ms=midnight+day*86400000+hour*3600000;
+   if(ms<now)continue;
+   result.push({slotKey:"unboda:short-video:"+new Date(ms).toISOString(),
     atUtc:new Date(ms).toISOString(),atKst:
-    new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",
-      dateStyle:"short",timeStyle:"medium",hourCycle:"h23"}).format(ms),
-    state:"NEEDS_CREATIVE_RENDER_AND_APPROVAL"};
- });
+    new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",dateStyle:"short",
+      timeStyle:"medium",hourCycle:"h23"}).format(ms),
+    state:"NEEDS_CREATIVE_RENDER_AND_APPROVAL"});
+   if(result.length>=count)break;
+  }
+ }
+ return result;
 }

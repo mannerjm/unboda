@@ -59,7 +59,9 @@ export default async function VerifiedReviewsPage() {
 
           {reviews.length === 0 ? (
             <section className="mt-5 rounded-[1.5rem] border border-[#dce1ef] bg-white p-6 text-sm leading-7 text-slate-600 shadow-sm">
-              아직 공개된 구매 인증 후기가 없습니다. 후기 수를 임의로 채우지 않고 실제 구매 고객이 작성하고 검수를 마친 후기만 이곳에 표시합니다.
+              {previewReviewDataUnavailable
+                ? "Preview에서는 실제 후기 목록을 조회하거나 표시하지 않습니다. 운영 환경에서의 후기 조회 동작은 이 화면으로 검증할 수 없습니다."
+                : "아직 공개된 구매 인증 후기가 없습니다. 후기 수를 임의로 채우지 않고 실제 구매 고객이 작성하고 검수를 마친 후기만 이곳에 표시합니다."}
             </section>
           ) : (
             <section className="mt-5 grid gap-4 lg:grid-cols-2" aria-label="공개 구매 인증 후기">

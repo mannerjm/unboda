@@ -2,6 +2,7 @@
 // Never call a live SNS publisher, paid model, or write to user/payment tables.
 // When connected to a real database, use service-only RPC behind the worker.
 import {makeNovelLifestyleCandidate} from "./lifestyle-autogenerator.mjs";
+import {checkObservedPublicOriginality} from "./observed-public-novelty.mjs";
 
 const DAY=86400000;
 const CHANNELS=Object.freeze(["facebook","instagram","threads","tiktok","youtube"]);
@@ -34,14 +35,14 @@ export function checkRemote90DayCoverage(snapshot,clockMs){
  return {ok:true,count:snapshot.items.length};
 }
 export async function runOfflineStagingEditorialCycle({
- nowMs,remoteHistory,readStagingHistory,claimCandidate,generateCandidate,
+ nowMs,remoteHistory,readStagingHistory,readObservedPosts,claimCandidate,generateCandidate,
  persistCandidate,hasApprovedReadOnlyProviders=false,offlineDryRun=false
 }={}){
  if(offlineDryRun!==true)return halt("PAID_AND_PUBLISHING_LOCKED");
  if(hasApprovedReadOnlyProviders!==true)return halt("READ_ONLY_SOCIAL_SOURCE_NOT_CONNECTED");
  const coverage=checkRemote90DayCoverage(remoteHistory,nowMs);
  if(!coverage.ok)return halt(coverage.reason);
- if([readStagingHistory,claimCandidate,generateCandidate,persistCandidate]
+ if([readStagingHistory,readObservedPosts,claimCandidate,generateCandidate,persistCandidate]
     .some(fn=>typeof fn!=="function"))
   return halt("STAGING_WORKER_ADAPTERS_NOT_CONNECTED");
  let staging;
@@ -53,6 +54,16 @@ export async function runOfflineStagingEditorialCycle({
   return halt("STAGING_HISTORY_UNVERIFIED");
  const combined=[...staging.items,...remoteHistory.items];
  if(combined.length>1500)return halt("90_DAY_HISTORY_TOO_LARGE");
+ let observations;
+ try{observations=await readObservedPosts({atMs:nowMs})}
+ catch{return halt("OBSERVED_PUBLIC_POST_HISTORY_READ_FAILED")}
+ // All observed posts are additional evidence, not proof of full provider coverage.
+ if(observations?.source!=="isolated-staging-public-post-observations"||
+    observations?.verified90DayCoverage!==false||
+    observations?.allProviderPagesVerified!==false||
+    observations?.truncated!==false||!Array.isArray(observations.items)||
+    observations.items.length>1500)
+  return halt("OBSERVED_PUBLIC_POST_HISTORY_UNVERIFIED");
  let claim;
  try{claim=await claimCandidate({kind:"short-video",atMs:nowMs})}
  catch{return halt("ATOMIC_STAGING_CLAIM_FAILED")}
@@ -62,7 +73,8 @@ export async function runOfflineStagingEditorialCycle({
   return halt("INVALID_OR_MISSING_CLAIM");
  const editorial=await makeNovelLifestyleCandidate({
   atMs:slotMs,fetchHistory:async()=>combined,
-  generator:generateCandidate,historyVerified:true,offlineDryRun:true
+  generator:generateCandidate,historyVerified:true,offlineDryRun:true,
+  extraOriginalityValidator:storyboard=>checkObservedPublicOriginality(storyboard,observations)
  });
  if(editorial.state!=="CANDIDATE_ONLY")
   return halt("GENERATED_DRAFT_NOT_REVIEWABLE",

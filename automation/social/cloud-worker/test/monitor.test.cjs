@@ -100,5 +100,5 @@ test("logs only safe aggregate after authenticated audit, never provider secret 
  assert.equal(serialized.includes(secret),false);
  assert.equal(serialized.includes("PRIVATE_POST_BODY"),false);
  assert.equal(serialized.includes("PRIVATE_PERSON"),false);
- assert.ok(serialized.includes('"publishing":false'));
+ assert.equal(JSON.parse(logs[0][1]).publishing,false);
 });

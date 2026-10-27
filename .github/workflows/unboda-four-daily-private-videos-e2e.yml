@@ -74,7 +74,7 @@ jobs:
           python -m pip install --no-cache-dir 'Pillow==11.3.0'
       - name: Validate exact slot matching and scene text safety
         run: |
-          python -m unittest discover -s automation/social/lifestyle-pilot -p 'test_render.py' -v
+          python -m unittest discover -s automation/social/lifestyle-pilot -p 'test_*.py' -v
           node --input-type=module <<'NODE'
           import {readFileSync} from 'node:fs';
           import {reviewLifestyleVideoScript} from './automation/social/lifestyle-video-planner.mjs';

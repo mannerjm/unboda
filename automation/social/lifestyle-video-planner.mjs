@@ -32,8 +32,8 @@ export const FOUR_KST_TIMES=Object.freeze(["00:00","08:00","12:00","20:00"]);
 const FORBIDDEN=/용신|지장간|십성|격국|대운이 바뀌면|당첨 확정|무조건 대박|절대 헤어져|100% 맞|미래를 보장/i;
 // Deterministic first-pass editorial gate. Human fact, visual, license and voice reviews
 // remain mandatory; passing this function NEVER authorizes publication.
-const PROMOTIONAL=/운보다|unboda(?:\\.kr)?|무료\\s*(?:사주|운세|분석|상담)|(?:심층|유료)\\s*(?:분석|상담)|가입|구매|결제|(?:지금|바로)\\s*(?:클릭|확인|신청)|링크\\s*(?:클릭|확인)|프로필\\s*(?:링크|확인)/i;
-const PRACTICAL=/확인|살펴|돌아보|생각|적어|기록|정리|대화|질문|점검|계산|나눠|준비|비교|시도|한\\s*가지/;
+const PROMOTIONAL=/운보다|unboda(?:\.kr)?|무료\s*(?:사주|운세|분석|상담)|(?:심층|유료)\s*(?:분석|상담)|가입|구매|결제|(?:지금|바로)\s*(?:클릭|확인|신청)|링크\s*(?:클릭|확인)|프로필\s*(?:링크|확인)/i;
+const PRACTICAL=/확인|살펴|돌아보|생각|적어|기록|정리|대화|질문|점검|계산|나눠|준비|비교|시도|한\s*가지/;
 const FIRST_LINE_JARGON=/십성|용신|지장간|일간|일주|상생|상극|천간|지지/;
 export function reviewLifestyleVideoScript({situation,narrationDraft}={}){
  const reasons=[];
@@ -47,8 +47,8 @@ export function reviewLifestyleVideoScript({situation,narrationDraft}={}){
   reasons.push("UNSAFE_STORYBOARD_LANGUAGE");
  if(!PRACTICAL.test(lines.slice(0,-1).join(" ")))reasons.push("NO_PRACTICAL_LIFE_POINT");
  const promotionalPositions=lines.flatMap((line,i)=>PROMOTIONAL.test(line)?[i]:[]);
- const totalCharacters=lines.reduce((n,line)=>n+line.replace(/\\s/g,"").length,0);
- const promoCharacters=promotionalPositions.reduce((n,i)=>n+lines[i].replace(/\\s/g,"").length,0);
+ const totalCharacters=lines.reduce((n,line)=>n+line.replace(/\s/g,"").length,0);
+ const promoCharacters=promotionalPositions.reduce((n,i)=>n+lines[i].replace(/\s/g,"").length,0);
  const promotionalSharePercent=totalCharacters>0?Math.round(1000*promoCharacters/totalCharacters)/10:0;
  if(promotionalSharePercent>15)reasons.push("PROMOTION_EXCEEDS_15_PERCENT");
  if(promotionalPositions.some(i=>i!==lines.length-1))reasons.push("PROMOTION_BEFORE_FINAL_LINE");

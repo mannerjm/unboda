@@ -41,9 +41,13 @@ export function planLifestyleVideoCandidate({atMs,usedTopicKeys=new Set()}={}){
  const category=SLOT_THEMES[slot],items=category.situations;
  const day=Math.floor((atMs+9*3600000)/86400000);
  const start=((day*7+Number(slot.slice(0,2)))%items.length+items.length)%items.length;
- const picked=items.find((it,i)=>!usedTopicKeys.has(slot+":"+((start+i)%items.length).toString()));
- if(!picked)return {state:"BLOCKED",reason:"NO_UNUSED_LIFESTYLE_TOPIC"};
- const index=items.indexOf(picked);
+ let index=-1;
+ for(let step=0;step<items.length;step++){
+  const candidateIndex=(start+step)%items.length;
+  if(!usedTopicKeys.has(slot+":"+candidateIndex)){index=candidateIndex;break;}
+ }
+ if(index<0)return {state:"BLOCKED",reason:"NO_UNUSED_LIFESTYLE_TOPIC"};
+ const picked=items[index];
  const [situation,hook,reflection]=picked;
  const script=[
    hook,

@@ -80,3 +80,25 @@ test("read-only audit never treats a draft video as a publication conflict",asyn
  assert.equal(r.body.fixedSlotVideoConflicts.length,0);
  assert.equal(r.body.canEnableIndependentVideoPublisher,false);
 });
+
+test("logs only safe aggregate after authenticated audit, never provider secret or post text",async()=>{
+ const logs=[],secret="SUPER-SENSITIVE-TEST-TOKEN";
+ const localEnv={...env,METRICOOL_API_TOKEN:secret};
+ const response={statusCode:200,headers:{},setHeader(k,v){this.headers[k]=v;},end(v){this.body=v;}};
+ const run=handlerFor("short-video",{env:localEnv,now:Date.parse("2026-10-28T20:00:00+09:00"),
+  logger:{info(...args){logs.push(args);}},
+  fetcher:async()=>({ok:true,json:async()=>({data:[{
+   publicationDate:{dateTime:"2026-10-29T08:00:00"},
+   providers:[{network:"instagram",status:"PENDING"}],
+   text:"PRIVATE_POST_BODY",title:"PRIVATE_PERSON"
+  }]})})});
+ await run({method:"GET",headers:{authorization:"Bearer "+localEnv.CRON_SECRET}},response);
+ assert.equal(response.statusCode,200);
+ assert.equal(logs.length,1);
+ assert.ok(logs[0][0].includes("unboda_social_cron_audit"));
+ const serialized=JSON.stringify(logs);
+ assert.equal(serialized.includes(secret),false);
+ assert.equal(serialized.includes("PRIVATE_POST_BODY"),false);
+ assert.equal(serialized.includes("PRIVATE_PERSON"),false);
+ assert.ok(serialized.includes('"publishing":false'));
+});

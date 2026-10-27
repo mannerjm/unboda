@@ -55,7 +55,8 @@ jobs:
             /tmp/unboda-korean-voice-review/UNBODA_REELS_SHORTS_COVER.jpg \
             /tmp/unboda-korean-voice-review/UNBODA_30s_KOREAN_NARRATION.wav \
             /tmp/unboda-korean-voice-review/TECHNICAL_QA_REVIEW_NOT_RELEASE.json
-      - name: Retain review only; no Metricool upload, no PUBLICATION
+      - name: Retain measured failing QA report and review media; no SNS publication
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: UNBODA_KOREAN_VOICE_30s_PRIVATE_REVIEW_NOT_PUBLISHED
@@ -65,5 +66,5 @@ jobs:
             /tmp/unboda-korean-voice-review/VOICE_VIDEO_PROOF.json
             /tmp/unboda-korean-voice-review/UNBODA_REELS_SHORTS_COVER.jpg
             /tmp/unboda-korean-voice-review/TECHNICAL_QA_REVIEW_NOT_RELEASE.json
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 5

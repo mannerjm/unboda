@@ -17,6 +17,10 @@ export function createVercelPublicBlobWriter({
      typeof sha256!=="string"||!/^[0-9a-f]{64}$/.test(sha256)||
      contentType!=="video/mp4")
    return {persisted:false,reason:"INVALID_FILE_OR_STORAGE_PATH"};
+  // Reject non-MP4 payloads even if caller knows their hash.
+  if(bytes.length<16||
+     String.fromCharCode(...bytes.slice(4,8))!=="ftyp")
+   return {persisted:false,reason:"MP4_CONTAINER_SIGNATURE_INVALID"};
   // Never trust a caller-supplied checksum: verify source bytes before any write.
   if(createHash("sha256").update(bytes).digest("hex")!==sha256)
    return {persisted:false,reason:"MEDIA_SHA256_MISMATCH"};

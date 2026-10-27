@@ -98,6 +98,11 @@ def draw_frame(brief,scene_index,seconds):
         d.line((225,781-drift,483,781-drift),fill=(245,228,203),width=6)
         d.ellipse((502,529,532,559),fill=GOLD)
     elif kind=="notes":
+        # Large, slowly varying ambient panel is visually moving even after
+        # downsampling to 180x320, so the freeze detector stays meaningful.
+        ambient=int(10+10*math.sin(phase*1.6))
+        d.rounded_rectangle((110,512,610,933),radius=30,
+            fill=(21+ambient,41+ambient,58+ambient))
         d.rounded_rectangle((188,559,534,856),radius=16,fill=(234,226,211))
         d.text((225,588),"TODAY",font=font(27,True),fill=(44,58,69))
         for n in range(3):

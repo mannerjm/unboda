@@ -78,6 +78,12 @@ def draw_frame(brief,scene_index,seconds):
     if kind=="clock":
         r=156
         d.ellipse((cx-r,cy-r,cx+r,cy+r),outline=GOLD,width=7)
+        # One wide moving orbital highlight: avoid barely moving clock hands
+        # being mistaken for a 7+ second frozen frame at social resolution.
+        orbit_x=cx+210*math.cos(phase*1.4)
+        orbit_y=cy+185*math.sin(phase*1.4)
+        d.ellipse((orbit_x-30,orbit_y-30,orbit_x+30,orbit_y+30),fill=(236,179,83))
+
         for n in range(12):
             angle=n*math.pi/6; dx,dy=math.sin(angle),-math.cos(angle)
             d.line((cx+dx*130,cy+dy*130,cx+dx*143,cy+dy*143),fill=(200,180,145),width=4)
@@ -100,6 +106,10 @@ def draw_frame(brief,scene_index,seconds):
             d.line((266,y+12,490,y+12),fill=(110,125,131),width=4)
         progress=max(0,min(1,seconds/SCENE_SECONDS))
         d.line((223,731,245,749,274+progress*16,703-progress*10),fill=(46,138,119),width=7)
+        # Wide animated progress stripe below the paper, away from all text.
+        bar=30+int(390*(.5+.5*math.sin(phase*1.4)))
+        d.rounded_rectangle((146,899,146+bar,925),radius=10,fill=GOLD)
+
     elif kind=="rest":
         for n in range(4):
             r=68+n*38+int(9*sw)

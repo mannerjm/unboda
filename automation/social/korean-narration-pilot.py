@@ -64,7 +64,7 @@ def main():
         inputs.extend(["-i",str(base/f"voice-{i+1}.wav")])
         filter_parts.append(f"[{i}:a]aresample=48000,adelay={DELAYS[i]}:all=1[v{i}]")
     filter_parts.append("[v0][v1][v2][v3]amix=inputs=4:duration=longest:normalize=0,"
-                        "aformat=sample_rates=48000:channel_layouts=stereo[speech]")
+                        "aformat=sample_rates=48000:channel_layouts=stereo,apad=whole_dur=30[speech]")
     master=base/"UNBODA_30s_KOREAN_NARRATION.wav"
     run("ffmpeg","-hide_banner","-loglevel","error","-y",*inputs,
         "-filter_complex",";".join(filter_parts),"-map","[speech]","-t","30",

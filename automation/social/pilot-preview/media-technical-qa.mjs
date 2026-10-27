@@ -51,6 +51,15 @@ export function assessSignals({videoLog='',voiceLog='',coverLog='',videoDuration
  const black=grab(videoLog,/black_duration:([0-9.]+)/g);
  const frozen=grab(videoLog,/freeze_duration:([0-9.]+)/g);
  const silent=grab(voiceLog,/silence_duration:\s*([0-9.]+)/g);
+ const silenceStarts=grab(voiceLog,/silence_start:\s*([0-9.]+)/g);
+ const silenceEnds=grab(voiceLog,/silence_end:\s*([0-9.]+)/g);
+ const voiceGapSegments=silenceStarts.map((start,i)=>({
+  startSeconds:Math.round(start*100)/100,
+  endSeconds:i<silenceEnds.length?Math.round(silenceEnds[i]*100)/100:null,
+  durationSeconds:i<silenceEnds.length?
+   Math.round((silenceEnds[i]-start)*100)/100:
+   Math.round((videoDurationSeconds-start)*100)/100
+ }));
  const trailingBlack=grab(videoLog,/black_start:\s*([0-9.]+)/g);
  const trailingFreeze=grab(videoLog,/freeze_start:\s*([0-9.]+)/g);
  const trailingSilence=grab(voiceLog,/silence_start:\s*([0-9.]+)/g);
@@ -69,7 +78,8 @@ export function assessSignals({videoLog='',voiceLog='',coverLog='',videoDuration
  if(!Number.isFinite(ssim)||ssim<0.70)reasons.push('THUMBNAIL_NOT_MATCHING_FIRST_FRAME');
  return {ok:reasons.length===0,reasons,
   maxBlackSeconds:Math.max(0,...black),maxFreezeSeconds:Math.max(0,...frozen),
-  maxVoiceGapSeconds:Math.max(0,...silent),narrationMeanDb:mean,
+  maxVoiceGapSeconds:Math.max(0,...silent,...voiceGapSegments.map(x=>x.durationSeconds)),
+  voiceGapSegments,narrationMeanDb:mean,
   narrationPeakDb:peak,firstFrameSsim:ssim};
 }
 async function ffLog(runner,args){
@@ -131,7 +141,10 @@ export async function inspectFinalNarratedPilot({videoFile,coverFile,narrationFi
 if(process.argv[1]&&fileURLToPath(import.meta.url)===resolve(process.argv[1])){
  const [videoFile,coverFile,narrationFile,reportFile]=process.argv.slice(2);
  inspectFinalNarratedPilot({videoFile,coverFile,narrationFile,reportFile})
-  .then(x=>{console.log(JSON.stringify({state:x.state,reasons:x.reasons,publicationAllowed:false}));
+  .then(x=>{console.log(JSON.stringify({state:x.state,reasons:x.reasons,
+    voiceGapSegments:x.signals?.voiceGapSegments??[],
+    maxVoiceGapSeconds:x.signals?.maxVoiceGapSeconds??null,
+    publicationAllowed:false}));
    if(x.state!=='PASS_TECHNICAL_ONLY')process.exitCode=1})
   .catch(()=>{console.error('PILOT_TECHNICAL_QA_UNEXPECTED_FAILURE');process.exitCode=1});
 }

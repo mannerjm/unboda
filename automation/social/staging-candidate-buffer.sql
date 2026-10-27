@@ -1,4 +1,6 @@
--- STAGING ONLY. Plan 48h candidate slots; no Metricool writes or paid generations.
+-- STAGING ONLY. Plan 48h guaranteed candidate slots with 3h overlapping lookahead; no Metricool writes or paid generations.
+-- Seed extra 3h beyond 48h so the 3-hourly cron can refill without a 15-of-16 photo gap.
+-- p_hours stays 48 for compatibility; actual provisional lookahead is 51h.
 -- Video clock: 00 08 12 20 local KST. 24:00 means next-day midnight.
 CREATE OR REPLACE FUNCTION social_automation.seed_future_candidates(
  p_clock timestamptz DEFAULT now(),p_hours integer DEFAULT 48
@@ -20,7 +22,7 @@ BEGIN
    first_index:=greatest(0,ceil(extract(epoch from (p_clock-origin))/seconds_per_slot)::bigint);
    FOR n IN 0..16 LOOP
     at_time:=origin+(first_index+n)*seconds_per_slot*interval '1 second';
-    IF at_time>=p_clock AND at_time<p_clock+interval '48 hours' THEN
+    IF at_time>=p_clock AND at_time<p_clock+interval '51 hours' THEN
      hash_key:=encode(sha256(convert_to('7377653|'||k||'|'||
       to_char(at_time AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),'UTF8')),'hex');
      INSERT INTO social_automation.jobs(job_key,kind,topic_key,scheduled_for,content,status)
@@ -36,7 +38,7 @@ BEGIN
     FOREACH h IN ARRAY ARRAY[0,8,12,20] LOOP
      at_time:=(((p_clock AT TIME ZONE 'Asia/Seoul')::date+d)
        +make_interval(hours=>h)) AT TIME ZONE 'Asia/Seoul';
-     IF at_time>=p_clock AND at_time<p_clock+interval '48 hours' THEN
+     IF at_time>=p_clock AND at_time<p_clock+interval '51 hours' THEN
       hash_key:=encode(sha256(convert_to('7377653|'||k||'|'||
        to_char(at_time AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),'UTF8')),'hex');
       INSERT INTO social_automation.jobs(job_key,kind,topic_key,scheduled_for,content,status)

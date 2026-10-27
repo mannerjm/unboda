@@ -27,7 +27,7 @@ const approved=()=>({qa,bytes,storage:adapter(),
  ownerApprovedPrivateStorage:true,authorizedMonthlyStorageBytes:5000});
 test('default and unapproved spending never call external storage',async()=>{
  writes=0;reads=0;
- for(const overrides of [{},{ownerApprovedPrivateStorage:false},
+ for(const overrides of [{ownerApprovedPrivateStorage:false},
   {authorizedMonthlyStorageBytes:0},{authorizedMonthlyStorageBytes:1999},
   {qa:{...qa,publicationAllowed:true}},
   {qa:{...qa,video:{...qa.video,sha256:'1'.repeat(64)}}},

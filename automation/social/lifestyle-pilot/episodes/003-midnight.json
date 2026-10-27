@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "unboda-lifestyle-midnight-20261027",
+  "topicKey": "nightly-thought-reset-20261027",
+  "situation": "잠들기 전 생각이 많아지는 밤",
+  "hook": "잠이 오지 않는 밤엔 무엇부터 정리하면 좋을까요?",
+  "theme": "감정·하루 정리",
+  "thumbnailTitle": "밤마다 생각이 많다면?",
+  "narrationDraft": [
+    "잠들기 전 생각이 많아지는 밤. 오늘 하루가 자꾸 떠오르나요?",
+    "내일의 일을 지금 다 해결하려고 애쓰지 않아도 괜찮아요.",
+    "생각나는 일 한 가지를 메모에 적어 보세요.",
+    "나에게 편안한 마무리 방법을 천천히 찾아봐요."
+  ],
+  "visualConcepts": [
+    "조용한 밤 시곗바늘이 부드럽게 흐르는 생활형 원본 모션",
+    "남아 있는 생각 말풍선이 느리게 사라지는 원본 모션",
+    "따뜻한 스탠드 아래 메모 한 줄을 정리하는 모션",
+    "작은 불빛과 함께 원형 파동이 줄어드는 휴식 모션"
+  ],
+  "scenes": [
+    {
+      "headline": [
+        "잠들기 전",
+        "생각이 많아질 때"
+      ],
+      "subline": "오늘 하루가 계속 떠오르나요?",
+      "illustration": "clock"
+    },
+    {
+      "headline": [
+        "내일의 일은",
+        "내일로 남겨두기"
+      ],
+      "subline": "지금 다 해결할 필요는 없어요",
+      "illustration": "message"
+    },
+    {
+      "headline": [
+        "한 가지 생각만",
+        "메모에 적어봐요"
+      ],
+      "subline": "머릿속을 조금 비워보는 방법",
+      "illustration": "notes"
+    },
+    {
+      "headline": [
+        "편안한 마무리",
+        "내 속도에 맞게"
+      ],
+      "subline": "미래를 단정하지 않는 짧은 조언",
+      "illustration": "rest"
+    }
+  ],
+  "licenseReviewRequired": true,
+  "voiceHumanReviewRequired": true,
+  "automatedPublicationAllowed": false
+}

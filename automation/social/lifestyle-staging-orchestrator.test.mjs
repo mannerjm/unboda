@@ -36,6 +36,10 @@ const valid={
  nowMs,remoteHistory:remote,
  offlineDryRun:true,hasApprovedReadOnlyProviders:true,
  readStagingHistory:async()=>staging,
+ readObservedPosts:async()=>({
+  source:"isolated-staging-public-post-observations",
+  verified90DayCoverage:false,allProviderPagesVerified:false,
+  truncated:false,items:[]}),
  claimCandidate:async()=>({claimed_job_key:"a".repeat(64),candidate_slot:slot}),
  generateCandidate:async()=>proposal(),
  persistCandidate:async({claimed_job_key})=>({
@@ -118,4 +122,34 @@ test("no background paid/provider call without exact offline dry-run flag",async
   assert.equal(result.state,"BLOCKED");
  }
  assert.equal(n,0);
+});
+
+test("actual observed public post duplicate triggers retry, never permanent publication",async()=>{
+ let attempts=0,writes=0;
+ const r=await runOfflineStagingEditorialCycle({...valid,
+  readObservedPosts:async()=>({
+   source:"isolated-staging-public-post-observations",
+   verified90DayCoverage:false,allProviderPagesVerified:false,
+   truncated:false,items:[{network:"instagram",providerId:"unique987",
+     postText:"출근길에 마음이 무거운 날. 출근 전부터 벌써 지친 이유를 생각해 본 적 있나요?"}]
+  }),
+  generateCandidate:async()=>{attempts++;return proposal()},
+  persistCandidate:async()=>{writes++;return {state:"STAGING_REVIEW_ONLY"}}
+ });
+ assert.equal(r.state,"BLOCKED");
+ assert.equal(r.draftReason,"POST_ORIGINALITY_CHECK_EXHAUSTED");
+ assert.equal(attempts,3);assert.equal(writes,0);
+});
+test("no read access to observed actual social posts stops before any slot claim",async()=>{
+ let claimed=0;
+ const r=await runOfflineStagingEditorialCycle({...valid,
+  readObservedPosts:async()=>({
+   source:"isolated-staging-public-post-observations",
+   verified90DayCoverage:true,allProviderPagesVerified:false,truncated:false,items:[]
+  }),
+  claimCandidate:async()=>{claimed++;return {claimed_job_key:"a".repeat(64),candidate_slot:slot}}
+ });
+ assert.equal(r.state,"BLOCKED");
+ assert.equal(r.reason,"OBSERVED_PUBLIC_POST_HISTORY_UNVERIFIED");
+ assert.equal(claimed,0);
 });

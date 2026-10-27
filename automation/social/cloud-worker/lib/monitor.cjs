@@ -50,11 +50,11 @@ async function audit(kind,{env=process.env,fetcher=fetch,now=Date.now()}={}){
        ["REEL","STORY"].includes(String(post?.facebookData?.type??""));
     if(kindVideo)videoPosts++;else imagePosts++;
     const local=String(post?.publicationDate?.dateTime??"");
-    const clock=/^\\d{4}-\\d{2}-\\d{2}T(\\d{2}):(\\d{2}):(\\d{2})/.exec(local);
+    const clock=/^\d{4}-\d{2}-\d{2}T(\d{2}):(\d{2}):(\d{2})/.exec(local);
     if(kindVideo&&post?.draft!==true&&post?.autoPublish===true&&
        networks.some(p=>["PENDING","SCHEDULED","QUEUED"].includes(p.status))&&
        clock&&Number(clock[3])===0){
-      const ts=Date.parse(local.endsWith("Z")||/[+-]\\d{2}:\\d{2}$/.test(local)?local:local+"+09:00");
+      const ts=Date.parse(local.endsWith("Z")||/[+-]\d{2}:\d{2}$/.test(local)?local:local+"+09:00");
       if(Number.isFinite(ts)&&ts>=now&&ts<now+72*60*60*1000 &&
          !([0,8,12,20].includes(Number(clock[1]))&&Number(clock[2])===0)){
         fixedSlotVideoConflicts.push({dateKst:local.slice(0,16),

@@ -11,7 +11,19 @@ def duration(file):
        "-of","default=nokey=1:noprint_wrappers=1",str(file)).stdout.strip())
 def validate(audio,limit):
     d=duration(audio)
-    if d<1.2 or d>limit: raise RuntimeError(f"VOICE_OVERLONG_OR_EMPTY:{d:.2f}s limit:{limit}s")
+    if d<1.2: raise RuntimeError(f"VOICE_TOO_SHORT:{d:.2f}s")
+    if d>limit:
+        # Maximum 12% change: beyond this, reject rather than distort pronunciation.
+        tempo=(d/limit)*1.035
+        if tempo>1.12:
+            raise RuntimeError(f"VOICE_TOO_LONG_FOR_NATURAL_SPEED:{d:.2f}s limit:{limit}s")
+        faster=audio.with_name(audio.stem+"-aligned.wav")
+        run("ffmpeg","-y","-hide_banner","-loglevel","error","-i",str(audio),
+            "-af",f"atempo={tempo:.5f}","-ar","48000",str(faster))
+        faster.replace(audio)
+        d=duration(audio)
+    if d>limit or d<1.2:
+        raise RuntimeError(f"VOICE_ALIGNMENT_FAILED:{d:.2f}s limit:{limit}s")
     return d
 TEXTS=[
  "띠만 알면 사주도 다 알 수 있을까요? 사실 둘은 조금 다릅니다.",

@@ -5,6 +5,8 @@ on:
       - 'automation/social/korean-narration-pilot.py'
       - 'automation/social/pilot-preview/media-technical-qa.mjs'
       - 'automation/social/pilot-preview/media-technical-qa.test.mjs'
+      - 'automation/social/pilot-preview/finalize-review-proof.mjs'
+      - 'automation/social/pilot-preview/finalize-review-proof.test.mjs'
       - '.github/workflows/unboda-korean-voice-private-review.yml'
   workflow_dispatch:
 permissions:
@@ -35,7 +37,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --no-cache-dir 'Pillow==11.3.0'
       - name: Test technical quality gate before generating any voice
-        run: node --test automation/social/pilot-preview/media-technical-qa.test.mjs
+        run: node --test automation/social/pilot-preview/media-technical-qa.test.mjs automation/social/pilot-preview/finalize-review-proof.test.mjs
       - name: Create original editing proof using archived, verified 10-second media
         run: |
           node automation/social/pilot-preview/render-preview.mjs /tmp/unboda-korean-voice-review
@@ -54,6 +56,11 @@ jobs:
             /tmp/unboda-korean-voice-review/UNBODA_30s_KOREAN_NARRATED_REVIEW_NOT_PUBLISHED.mp4 \
             /tmp/unboda-korean-voice-review/UNBODA_REELS_SHORTS_COVER.jpg \
             /tmp/unboda-korean-voice-review/UNBODA_30s_KOREAN_NARRATION.wav \
+            /tmp/unboda-korean-voice-review/TECHNICAL_QA_REVIEW_NOT_RELEASE.json
+      - name: Confirm passed format QA in narration receipt, never grant publication
+        run: |
+          node automation/social/pilot-preview/finalize-review-proof.mjs \
+            /tmp/unboda-korean-voice-review/VOICE_VIDEO_PROOF.json \
             /tmp/unboda-korean-voice-review/TECHNICAL_QA_REVIEW_NOT_RELEASE.json
       - name: Retain measured failing QA report and review media; no SNS publication
         if: ${{ always() }}

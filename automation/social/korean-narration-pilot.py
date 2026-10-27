@@ -29,7 +29,7 @@ TEXTS=[
  "지금 내 운은 어디로 흐를까요? 오늘은 띠와 사주의 차이를 알아봅니다.",
  "띠는 태어난 해를 열두 동물로 표현한 전통 상징이에요.",
  "사주는 태어난 해와 달, 날, 시간을 함께 보는 전통 해석이에요.",
- "미래를 단정하지 말고, 가볍게 참고해 보세요."
+ "사주는 가볍게 참고하세요."
 ]
 # Cover-first visual occupies 0..1.2s, followed by the archived edit.
 # The 4 spoken scenes must start after their visual scenes appear.

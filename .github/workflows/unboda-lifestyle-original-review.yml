@@ -1,0 +1,79 @@
+name: UNBODA original lifestyle + Korean voice private E2E (NO PUBLISH)
+on:
+  pull_request:
+    paths:
+      - 'automation/social/lifestyle-pilot/**'
+      - 'automation/social/pilot-preview/media-technical-qa.mjs'
+      - '.github/workflows/unboda-lifestyle-original-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lifestyle-original-voice-private:
+    if: github.repository == 'mannerjm/unboda' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == 'mannerjm/unboda')
+    runs-on: ubuntu-latest
+    timeout-minutes: 27
+    env:
+      OMP_NUM_THREADS: '2'
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install original video renderer and Korean font
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk fontconfig
+          python -m pip install --no-cache-dir 'Pillow==11.3.0'
+      - name: Reject overflow and misaligned everyday-life script before media generation
+        run: |
+          python -m unittest discover -s automation/social/lifestyle-pilot -p 'test_*.py' -v
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          import {reviewLifestyleVideoScript} from './automation/social/lifestyle-video-planner.mjs';
+          const s=JSON.parse(readFileSync('./automation/social/lifestyle-pilot/episodes/002-afterwork.json','utf8'));
+          const q=reviewLifestyleVideoScript({situation:s.situation,narrationDraft:s.narrationDraft});
+          if(!q.ok||s.automatedPublicationAllowed!==false)throw Error('EDITORIAL_DRY_RUN_BLOCKED:'+q.reasons.join(','));
+          console.log('LIFESTYLE_FIRST_PASS_EDITORIAL_QA_OK_REQUIRES_VERIFIED_90_DAY_LEDGER');
+          NODE
+      - name: Render original animated lifestyle storyboard, cover and self-synthesized music
+        run: |
+          python automation/social/lifestyle-pilot/render.py \
+            --brief automation/social/lifestyle-pilot/episodes/002-afterwork.json \
+            --out /tmp/unboda-lifestyle-original
+      - name: Install Korean CPU TTS engine pinned for reproducibility
+        run: |
+          python -m pip install --no-cache-dir 'git+https://github.com/myshell-ai/MeloTTS.git@209145371cff8fc3bd60d7be902ea69cbdb7965a'
+          python -m unidic download
+      - name: Generate four Korean-voiced original lifestyle scenes (no paid model API)
+        run: |
+          python automation/social/lifestyle-pilot/narrate.py \
+            --brief automation/social/lifestyle-pilot/episodes/002-afterwork.json \
+            --out /tmp/unboda-lifestyle-original
+      - name: Test finished MP4, cover's first frame, audio levels, black/frozen/quiet spans
+        run: |
+          node automation/social/pilot-preview/media-technical-qa.mjs \
+            /tmp/unboda-lifestyle-original/LIFESTYLE_30S_KOREAN_PRIVATE_REVIEW.mp4 \
+            /tmp/unboda-lifestyle-original/LIFESTYLE_COVER.jpg \
+            /tmp/unboda-lifestyle-original/LIFESTYLE_KOREAN_NARRATION.wav \
+            /tmp/unboda-lifestyle-original/LIFESTYLE_TECHNICAL_QA.json
+      - name: Retain only private review artifacts, including failure evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: unboda-lifestyle-original-30s-korean-private-review-no-publish
+          path: |
+            /tmp/unboda-lifestyle-original/LIFESTYLE_30S_KOREAN_PRIVATE_REVIEW.mp4
+            /tmp/unboda-lifestyle-original/LIFESTYLE_COVER.jpg
+            /tmp/unboda-lifestyle-original/LIFESTYLE_TECHNICAL_QA.json
+            /tmp/unboda-lifestyle-original/LIFESTYLE_VOICE_PROOF.json
+            /tmp/unboda-lifestyle-original/VISUAL_PROOF.json
+          if-no-files-found: warn
+          retention-days: 5

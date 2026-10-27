@@ -8,6 +8,12 @@ on:
       - 'automation/social/lifestyle-staging-orchestrator.test.mjs'
       - 'automation/social/observed-public-novelty.mjs'
       - 'automation/social/observed-public-novelty.test.mjs'
+      - 'automation/social/four-kst-video-slots.mjs'
+      - 'automation/social/four-kst-video-slots.test.mjs'
+      - 'automation/social/cloud-worker/vercel.json'
+      - 'automation/social/lifestyle-pilot/four-daily-private-validator.mjs'
+      - 'automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs'
+      - 'automation/social/lifestyle-pilot/four-daily-private-manifest.json'
       - '.github/workflows/unboda-social-editorial-fast-contract.yml'
 permissions:
   contents: read
@@ -28,4 +34,6 @@ jobs:
           node --test \
             automation/social/lifestyle-autogenerator.test.mjs \
             automation/social/lifestyle-staging-orchestrator.test.mjs \
-            automation/social/observed-public-novelty.test.mjs
+            automation/social/observed-public-novelty.test.mjs \
+            automation/social/four-kst-video-slots.test.mjs \
+            automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs

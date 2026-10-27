@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "unboda-lifestyle-commute-20261027",
+  "topicKey": "commute-emotions-20261027",
+  "situation": "출근길에 마음이 무거운 날",
+  "hook": "출근 전부터 마음이 무거울 때 무엇부터 할까요?",
+  "theme": "직장·하루의 선택",
+  "thumbnailTitle": "출근길 마음이 무겁다면?",
+  "narrationDraft": [
+    "출근길에 마음이 무거운 날. 시작하기도 전에 지친 기분인가요?",
+    "급한 일과 중요한 일이 꼭 같은 건 아닐 수 있어요.",
+    "오늘 가장 중요한 일 하나를 먼저 정리해 보세요.",
+    "오늘의 속도는 나에게 맞춰 조금씩 조절해 봐요."
+  ],
+  "visualConcepts": [
+    "아침 시계와 출근 준비 시간을 보여주는 원본 모션",
+    "급한 알림이 겹쳤다가 줄어드는 메시지 모션",
+    "중요한 할 일을 하나씩 골라 체크하는 메모 모션",
+    "조금씩 밝아지는 원형 아침 햇살 모션"
+  ],
+  "scenes": [
+    {
+      "headline": [
+        "출근길부터",
+        "마음이 무겁다면?"
+      ],
+      "subline": "시작 전부터 지치는 하루",
+      "illustration": "clock"
+    },
+    {
+      "headline": [
+        "급한 일과",
+        "중요한 일은 달라요"
+      ],
+      "subline": "오늘의 우선순위를 생각해요",
+      "illustration": "message"
+    },
+    {
+      "headline": [
+        "오늘 할 일",
+        "한 가지부터 시작"
+      ],
+      "subline": "작게 정리하는 것도 방법",
+      "illustration": "notes"
+    },
+    {
+      "headline": [
+        "내 속도를",
+        "조금씩 되찾기"
+      ],
+      "subline": "현실적인 선택부터 하나씩",
+      "illustration": "rest"
+    }
+  ],
+  "licenseReviewRequired": true,
+  "voiceHumanReviewRequired": true,
+  "automatedPublicationAllowed": false
+}

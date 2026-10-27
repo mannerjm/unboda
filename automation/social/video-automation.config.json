@@ -75,14 +75,15 @@
       "firstPartyMotionSampleEditorialApproved": false,
       "firstPartyMotionSampleVerifiedFormat": "30s_h264_aac_1080x1920_30fps",
       "koreanTtsProofModel": "myshell-ai/MeloTTS-Korean",
-      "koreanTtsProofRunId": 40476521136,
+      "koreanTtsProofRunId": 40477668687,
       "firstNarrated30sReviewRendered": true,
       "firstNarrated30sReviewFormatVerified": true,
       "firstNarrated30sReviewCommerciallyApproved": false,
       "firstNarrated30sReviewPublished": false,
       "firstNarrated30sReviewHumanPronunciationApproved": false,
-      "firstNarrated30sReviewNeedsSceneScriptAlignment": true,
-      "firstNarrated30sReviewReusesArchivedVisual": true
+      "firstNarrated30sReviewNeedsSceneScriptAlignment": false,
+      "firstNarrated30sReviewReusesArchivedVisual": true,
+      "firstNarrated30sReviewLastRenderedAt": "2026-10-27"
     },
     "distribution": {
       "service": "buffer",
@@ -121,7 +122,11 @@
       "rejectUnverifiedAsset": true,
       "firstVerifiedArchivedSourceUrl": "https://aq03voydas4sjjuy.public.blob.vercel-storage.com/unboda-social/pilots/runway-b7d64306-f5d4-48ef-9bd8-b7c9b0445b36-c96569dfa94b47a3.mp4",
       "firstVerifiedArchivedSourceSha256": "c96569dfa94b47a315b35f44b6a7c165f39fa28da49bf120ceba8fb5bc29f858",
-      "fullAutonomousPipelineEnabled": false
+      "fullAutonomousPipelineEnabled": false,
+      "separateSocialMediaBlobStoreId": "store_sZIpaZHuVwOcsb69",
+      "blobStoreProject": "unboda-social-worker",
+      "blobStoreObjectCountLastVerified": 0,
+      "audioVideoPilotNotYetUploadedToBlob": true
     },
     "queue": {
       "durableDatabase": "supabase_isolated_social_schema",

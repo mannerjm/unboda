@@ -30,6 +30,31 @@ export const SLOT_THEMES=Object.freeze({
 });
 export const FOUR_KST_TIMES=Object.freeze(["00:00","08:00","12:00","20:00"]);
 const FORBIDDEN=/용신|지장간|십성|격국|대운이 바뀌면|당첨 확정|무조건 대박|절대 헤어져|100% 맞|미래를 보장/i;
+// Deterministic first-pass editorial gate. Human fact, visual, license and voice reviews
+// remain mandatory; passing this function NEVER authorizes publication.
+const PROMOTIONAL=/운보다|unboda(?:\\.kr)?|무료\\s*(?:사주|운세|분석|상담)|(?:심층|유료)\\s*(?:분석|상담)|가입|구매|결제|(?:지금|바로)\\s*(?:클릭|확인|신청)|링크\\s*(?:클릭|확인)|프로필\\s*(?:링크|확인)/i;
+const PRACTICAL=/확인|살펴|돌아보|생각|적어|기록|정리|대화|질문|점검|계산|나눠|준비|비교|시도|한\\s*가지/;
+const FIRST_LINE_JARGON=/십성|용신|지장간|일간|일주|상생|상극|천간|지지/;
+export function reviewLifestyleVideoScript({situation,narrationDraft}={}){
+ const reasons=[];
+ const lines=Array.isArray(narrationDraft)?narrationDraft.map(x=>typeof x==="string"?x.trim():""):[];
+ if(typeof situation!=="string"||!situation.trim()||lines.length<3||lines.some(x=>!x)){
+  return Object.freeze({ok:false,reasons:["INCOMPLETE_LIFESTYLE_SCRIPT"],promotionalSharePercent:0});
+ }
+ if(!lines[0].includes(situation.trim()))reasons.push("FIRST_LINE_NOT_REAL_LIFE_SCENARIO");
+ if(FIRST_LINE_JARGON.test(lines[0]))reasons.push("FIRST_LINE_TOO_TECHNICAL");
+ if(FORBIDDEN.test(lines.join(" "))||/무조건|반드시 성공/.test(lines.join(" ")))
+  reasons.push("UNSAFE_STORYBOARD_LANGUAGE");
+ if(!PRACTICAL.test(lines.slice(0,-1).join(" ")))reasons.push("NO_PRACTICAL_LIFE_POINT");
+ const promotionalPositions=lines.flatMap((line,i)=>PROMOTIONAL.test(line)?[i]:[]);
+ const totalCharacters=lines.reduce((n,line)=>n+line.replace(/\\s/g,"").length,0);
+ const promoCharacters=promotionalPositions.reduce((n,i)=>n+lines[i].replace(/\\s/g,"").length,0);
+ const promotionalSharePercent=totalCharacters>0?Math.round(1000*promoCharacters/totalCharacters)/10:0;
+ if(promotionalSharePercent>15)reasons.push("PROMOTION_EXCEEDS_15_PERCENT");
+ if(promotionalPositions.some(i=>i!==lines.length-1))reasons.push("PROMOTION_BEFORE_FINAL_LINE");
+ if(promotionalPositions.length>1)reasons.push("MULTIPLE_PROMOTIONAL_LINES");
+ return Object.freeze({ok:reasons.length===0,reasons,promotionalSharePercent});
+}
 function localDate(ms){
  return new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(ms);
 }
@@ -50,19 +75,20 @@ export function planLifestyleVideoCandidate({atMs,usedTopicKeys=new Set()}={}){
  const picked=items[index];
  const [situation,hook,reflection]=picked;
  const script=[
-   hook,
+   situation+". "+hook,
    "이럴 땐 먼저 실제 상황과 내 마음이 어땠는지 돌아보세요.",
    reflection+"도 도움이 될 수 있습니다.",
    "사주는 성향을 돌아보는 하나의 전통적 관점일 뿐, 미래를 확정하지는 않아요."
  ];
- const combined=script.join(" ");
- if(FORBIDDEN.test(combined)||/무조건|반드시 성공/.test(combined))return {state:"BLOCKED",reason:"UNSAFE_STORYBOARD_LANGUAGE"};
+ const editorialCheck=reviewLifestyleVideoScript({situation,narrationDraft:script});
+ if(!editorialCheck.ok)return {state:"BLOCKED",reason:editorialCheck.reasons[0],reasons:editorialCheck.reasons};
  return Object.freeze({
   state:"CANDIDATE_ONLY",slotKst:local,topicKey:slot+":"+index,
   theme:category.category,situation,hook,narrationDraft:script,
   suggestedSceneTypes:["움직이는 생활 장면","표정 또는 상황의 변화","해결 실마리","짧은 자기 이해 메시지"],
   format:{seconds:30,width:1080,height:1920,requiredOriginalMotion:true,requiredNaturalKoreanVoice:true},
-  sajuAsPerspectiveOnly:true,siteAdDominant:false,
+  sajuAsPerspectiveOnly:true,siteAdDominant:editorialCheck.promotionalSharePercent>15,
+  editorialCheck,
   notForPublication:true,commercialVideoRightsVerified:false,
   koreanVoiceHumanReviewed:false,remoteNinetyDaySimilarityVerified:false,
   publishingRequiresTwoExplicitChannels:true

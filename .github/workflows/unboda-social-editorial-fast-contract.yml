@@ -1,0 +1,31 @@
+name: UNBODA social observed-post originality fast contract (NO PUBLISH)
+on:
+  pull_request:
+    paths:
+      - 'automation/social/lifestyle-autogenerator.mjs'
+      - 'automation/social/lifestyle-autogenerator.test.mjs'
+      - 'automation/social/lifestyle-staging-orchestrator.mjs'
+      - 'automation/social/lifestyle-staging-orchestrator.test.mjs'
+      - 'automation/social/observed-public-novelty.mjs'
+      - 'automation/social/observed-public-novelty.test.mjs'
+      - '.github/workflows/unboda-social-editorial-fast-contract.yml'
+permissions:
+  contents: read
+jobs:
+  offline-originality-contract:
+    if: github.repository == 'mannerjm/unboda' && github.event.pull_request.head.repo.full_name == 'mannerjm/unboda'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify no remote history omissions bypass 90-day duplicate locks
+        run: |
+          node --test \
+            automation/social/lifestyle-autogenerator.test.mjs \
+            automation/social/lifestyle-staging-orchestrator.test.mjs \
+            automation/social/observed-public-novelty.test.mjs

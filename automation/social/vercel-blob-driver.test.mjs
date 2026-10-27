@@ -49,3 +49,32 @@ test("storage failure remains unconfirmed without blind retry",async()=>{
  assert.equal(r.persisted,false);
  assert.equal(r.reason,"BLOB_WRITE_UNKNOWN_RECONCILE_BY_PATH");
 });
+
+
+test("source content hash mismatch blocks storage before SDK write",async()=>{
+ let calls=0;
+ const writer=createVercelPublicBlobWriter({ownerApprovedStorage:true,
+   put:async()=>{calls++;throw Error("unexpected")}});
+ const r=await writer({key,bytes,sha256:"0".repeat(64),contentType:"video/mp4"});
+ assert.equal(r.persisted,false);
+ assert.equal(r.reason,"MEDIA_SHA256_MISMATCH");
+ assert.equal(calls,0);
+});
+test("untrusted public URL, deceptive suffix or wrong object key never acknowledges storage",async()=>{
+ const urls=[
+   "https://evil.example.com/"+key,
+   "https://example.public.blob.vercel-storage.com.evil.invalid/"+key,
+   "https://example.private.blob.vercel-storage.com/"+key,
+   "https://example.public.blob.vercel-storage.com/"+key+"?token=expiring",
+   "https://example.public.blob.vercel-storage.com/wrong.mp4"
+ ];
+ for(const url of urls){
+  let calls=0;
+  const writer=createVercelPublicBlobWriter({ownerApprovedStorage:true,
+   put:async()=>{calls++;return {url,pathname:key}}});
+  const r=await writer({key,bytes,sha256,contentType:"video/mp4"});
+  assert.equal(calls,1);
+  assert.equal(r.persisted,false);
+  assert.equal(r.reason,"BLOB_RECEIPT_UNVERIFIED_RECONCILE_BY_PATH");
+ }
+});

@@ -10,6 +10,8 @@ on:
       - 'automation/social/observed-public-novelty.test.mjs'
       - 'automation/social/four-kst-video-slots.mjs'
       - 'automation/social/four-kst-video-slots.test.mjs'
+      - 'automation/social/private-review-storage.mjs'
+      - 'automation/social/private-review-storage.test.mjs'
       - 'automation/social/cloud-worker/vercel.json'
       - 'automation/social/lifestyle-pilot/four-daily-private-validator.mjs'
       - 'automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs'
@@ -36,4 +38,5 @@ jobs:
             automation/social/lifestyle-staging-orchestrator.test.mjs \
             automation/social/observed-public-novelty.test.mjs \
             automation/social/four-kst-video-slots.test.mjs \
-            automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs
+            automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs \
+            automation/social/private-review-storage.test.mjs

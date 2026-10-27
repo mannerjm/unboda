@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS social_automation.remote_post_observations (
  provider_id text NOT NULL CHECK(length(provider_id) BETWEEN 4 AND 255),
  provider_datetime text NOT NULL CHECK(provider_datetime ~ '^[0-9]{14}$'),
  post_content text NOT NULL CHECK(length(post_content)<=12000),
- post_sha256 text NOT NULL CHECK(post_sha256 ~ '^[a-f0-9]{64}
+ post_sha256 text NOT NULL CHECK(post_sha256 ~ '^[a-f0-9]{64}$'),
  source text NOT NULL DEFAULT 'metricool_analytics_observation'
    CHECK(source='metricool_analytics_observation'),
  observed_at timestamptz NOT NULL DEFAULT now(),

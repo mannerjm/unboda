@@ -85,7 +85,7 @@ async function audit(kind,{env=process.env,fetcher=fetch,now=Date.now()}={}){
   return {status:502,body:{state:"UPSTREAM_NETWORK_OR_JSON_ERROR",publishing:false}};
  }
 }
-function handlerFor(kind,{env=process.env,fetcher=fetch,now=Date.now()}={}){
+function handlerFor(kind,{env=process.env,fetcher=fetch,now=Date.now(),logger=console}={}){
  return async (req,res)=>{
   res.setHeader("Cache-Control","no-store");
   res.setHeader("X-Robots-Tag","noindex,nofollow");
@@ -95,6 +95,20 @@ function handlerFor(kind,{env=process.env,fetcher=fetch,now=Date.now()}={}){
    res.statusCode=401;return res.end("Unauthorized");
   }
   const result=await audit(kind,{env,fetcher,now});
+  // Only aggregate operational evidence; NEVER log provider tokens, headers,
+  // original posts, names, media links or customer data.
+  try{
+   logger.info?.("unboda_social_cron_audit",JSON.stringify({
+    kind,checkedAt:result.body?.checkedAt??null,
+    state:result.body?.state??"UNKNOWN",httpStatus:result.status,
+    postItems:Number.isInteger(result.body?.postItems)?result.body.postItems:null,
+    next48hQueueItems:Number.isInteger(result.body?.next48hQueueItems)?
+      result.body.next48hQueueItems:null,
+    conflictCount:Array.isArray(result.body?.fixedSlotVideoConflicts)?
+      result.body.fixedSlotVideoConflicts.length:0,
+    publishing:false
+   }));
+  }catch(_){/* diagnostics must never crash a locked monitor */ }
   res.statusCode=result.status;
   res.setHeader("Content-Type","application/json; charset=utf-8");
   return res.end(JSON.stringify(result.body));

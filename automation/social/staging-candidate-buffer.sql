@@ -14,6 +14,9 @@ DECLARE
  added integer; affected integer; hash_key text;
 BEGIN
  IF p_clock IS NULL OR p_hours<>48 THEN RAISE EXCEPTION 'FIXED_48H_WINDOW_REQUIRED'; END IF;
+ -- Every existing 3h staging seed also reclaims stalled unpaid candidates.
+ -- Recovery is bounded (max 30/scan), can never publish, and enforces retries.
+ PERFORM social_automation.recover_stale_candidate_reviews(p_clock);
  FOR k IN SELECT unnest(ARRAY['text-image','short-video']) LOOP
   added:=0;
   IF k='text-image' THEN

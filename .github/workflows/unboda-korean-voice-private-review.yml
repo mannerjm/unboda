@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'automation/social/korean-narration-pilot.py'
+      - 'automation/social/pilot-preview/media-technical-qa.mjs'
+      - 'automation/social/pilot-preview/media-technical-qa.test.mjs'
       - '.github/workflows/unboda-korean-voice-private-review.yml'
   workflow_dispatch:
 permissions:
@@ -32,6 +34,8 @@ jobs:
           sudo apt-get install -y -qq ffmpeg fontconfig fonts-noto-cjk
           python -m pip install --upgrade pip
           python -m pip install --no-cache-dir 'Pillow==11.3.0'
+      - name: Test technical quality gate before generating any voice
+        run: node --test automation/social/pilot-preview/media-technical-qa.test.mjs
       - name: Create original editing proof using archived, verified 10-second media
         run: |
           node automation/social/pilot-preview/render-preview.mjs /tmp/unboda-korean-voice-review
@@ -42,8 +46,15 @@ jobs:
       - name: Render Korean voice into 30s internal video and verify codecs
         run: |
           python automation/social/korean-narration-pilot.py \
-            --visual /tmp/unboda-korean-voice-review/UNBODA_30s_PREMIUM_TYPOGRAPHY_NO_VOICE.mp4 \
+            --visual /tmp/unboda-korean-voice-review/UNBODA_30s_COVER_FIRST_VISUAL_DRAFT_NO_VOICE.mp4 \
             --out /tmp/unboda-korean-voice-review
+      - name: Verify narrated MP4, Korean voice gaps, cover-first match, no frozen/black spans
+        run: |
+          node automation/social/pilot-preview/media-technical-qa.mjs \
+            /tmp/unboda-korean-voice-review/UNBODA_30s_KOREAN_NARRATED_REVIEW_NOT_PUBLISHED.mp4 \
+            /tmp/unboda-korean-voice-review/UNBODA_REELS_SHORTS_COVER.jpg \
+            /tmp/unboda-korean-voice-review/UNBODA_30s_KOREAN_NARRATION.wav \
+            /tmp/unboda-korean-voice-review/TECHNICAL_QA_REVIEW_NOT_RELEASE.json
       - name: Retain review only; no Metricool upload, no PUBLICATION
         uses: actions/upload-artifact@v4
         with:
@@ -52,5 +63,7 @@ jobs:
             /tmp/unboda-korean-voice-review/UNBODA_30s_KOREAN_NARRATED_REVIEW_NOT_PUBLISHED.mp4
             /tmp/unboda-korean-voice-review/UNBODA_30s_KOREAN_NARRATION.wav
             /tmp/unboda-korean-voice-review/VOICE_VIDEO_PROOF.json
+            /tmp/unboda-korean-voice-review/UNBODA_REELS_SHORTS_COVER.jpg
+            /tmp/unboda-korean-voice-review/TECHNICAL_QA_REVIEW_NOT_RELEASE.json
           if-no-files-found: error
           retention-days: 5

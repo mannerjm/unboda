@@ -133,12 +133,22 @@
       "bufferHours": 48,
       "goalReadyVideos": 8,
       "identityKey": "brand_kind_slot",
-      "cloudSixHourRunnerConnected": false,
       "durableMoneyAndIdempotencyLedgerConnected": false,
       "actualReadyVideos": 0,
       "durableStagingSchemaCreated": true,
       "durableProductionLedgerConnected": false,
-      "scheduleVersion": "fixed-four-times-kst-20261026"
+      "scheduleVersion": "fixed-four-times-kst-20261026",
+      "cloudFixedFourTimesReadOnlyMonitorDeployed": true,
+      "independentFixedFourTimesPublisherConnected": false,
+      "stagingAtomicSlotClaimTested": true,
+      "stagingFixedTimeVideoUniquenessEnforced": true,
+      "stagingEditorialCandidates": 4,
+      "stagingEditorialCandidatesApproved": 0,
+      "targetVideoNetworksSelectedAndConfirmed": false,
+      "targetVideoNetworks": [],
+      "permanentOriginVideoTemplateApproved": false,
+      "firstChannelLivePublishedUrlVerified": false,
+      "secondChannelLivePublishedUrlVerified": false
     },
     "quotas": {
       "conservativeAllNetworkPostsPerRolling30Days": 500,
@@ -170,6 +180,14 @@
       "utcCron": "0 3,11,15,23 * * *",
       "meaningOf2400": "next_day_00:00",
       "requiresReadyLicensedNarratedVideo": true
+    },
+    "publicationBudget": {
+      "metricoolFairUseBasePerBrandCalendarMonth": 600,
+      "conservativePerBrandCalendarMonthStop": 500,
+      "requiresActualCurrentMonthlyInventory": true,
+      "requiresVerifiedTargetChannelCount": true,
+      "monthlyBudgetApproved": false,
+      "availableNewPaidVideoCreditsAuthorized": 0
     }
   },
   "controls": {

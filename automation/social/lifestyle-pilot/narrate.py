@@ -7,8 +7,11 @@ All FOUR clips must fit the corresponding scene naturally, or the job fails.
 import argparse,json,pathlib,subprocess
 SCENE_SECONDS=7.5
 SCENE_STARTS=[0,7.5,15,22.5]
-START_OFFSET=.7
-LIMIT=6.3
+# 7.5s scenes: leave 0.25s after each cut, 0.35s before next.
+# The 6.9s upper limit keeps Korean speech natural (atempo <=1.12)
+# while protecting visual boundaries and preventing silent 4s gaps.
+START_OFFSET=.25
+LIMIT=6.9
 
 def run(*args,timeout=180):
     return subprocess.run(args,check=True,capture_output=True,text=True,timeout=timeout)
@@ -46,6 +49,7 @@ def make_narrated_video(brief_dir,output_dir):
         p=folder/f"lifestyle-voice-{i}.wav"
         model.tts_to_file(text,speaker,str(p),speed=1.04)
         dur=validate_audio(p,LIMIT)
+        print(f"KOREAN_SCENE_VOICE_TIMING scene={i+1} sec={dur:.2f} allowed={LIMIT:.2f}",flush=True)
         start=SCENE_STARTS[i]+START_OFFSET
         if start+dur>SCENE_STARTS[i]+SCENE_SECONDS-.3:
             raise RuntimeError("VOICE_OVER_RUNS_NEXT_VISUAL_SCENE")

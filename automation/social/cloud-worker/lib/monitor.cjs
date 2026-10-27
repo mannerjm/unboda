@@ -41,10 +41,27 @@ async function audit(kind,{env=process.env,fetcher=fetch,now=Date.now()}={}){
   const counts={PENDING:0,PUBLISHED:0,FAILED:0,OTHER:0};
   let imagePosts=0,videoPosts=0;
   let nearNext=0;
+  const fixedSlotVideoConflicts=[];
   for(const post of posts){
     const networks=Array.isArray(post?.providers)?post.providers:[];
-    const kindVideo=networks.some(p=>["youtube","tiktok"].includes(p.network)||p?.type==="REEL"||p?.type==="SHORT");
+    const kindVideo=networks.some(p=>["youtube","tiktok"].includes(p.network)||
+       p?.type==="REEL"||p?.type==="SHORT")||
+       ["REEL","TRIAL_REEL","STORY"].includes(String(post?.instagramData?.type??""))||
+       ["REEL","STORY"].includes(String(post?.facebookData?.type??""));
     if(kindVideo)videoPosts++;else imagePosts++;
+    const local=String(post?.publicationDate?.dateTime??"");
+    const clock=/^\\d{4}-\\d{2}-\\d{2}T(\\d{2}):(\\d{2}):(\\d{2})/.exec(local);
+    if(kindVideo&&post?.draft!==true&&post?.autoPublish===true&&
+       networks.some(p=>["PENDING","SCHEDULED","QUEUED"].includes(p.status))&&
+       clock&&Number(clock[3])===0){
+      const ts=Date.parse(local.endsWith("Z")||/[+-]\\d{2}:\\d{2}$/.test(local)?local:local+"+09:00");
+      if(Number.isFinite(ts)&&ts>=now&&ts<now+72*60*60*1000 &&
+         !([0,8,12,20].includes(Number(clock[1]))&&Number(clock[2])===0)){
+        fixedSlotVideoConflicts.push({dateKst:local.slice(0,16),
+          networks:networks.filter(p=>["PENDING","SCHEDULED","QUEUED"].includes(p.status))
+            .map(p=>String(p.network)).sort()});
+      }
+    }
     for(const n of networks){
      const key=String(n.status??"");
      counts[Object.hasOwn(counts,key)?key:"OTHER"]++;
@@ -59,7 +76,11 @@ async function audit(kind,{env=process.env,fetcher=fetch,now=Date.now()}={}){
    publishing:false,mediaGeneration:false,postItems:posts.length,
    perNetwork:counts,estimatedTextImageItems:imagePosts,estimatedVideoItems:videoPosts,
    next48hQueueItems:nearNext,quotaNotVerified:true,
-   durableJobStoreNotConnected:true,source:"metricool_advanced_rest_get"}};
+   durableJobStoreNotConnected:true,
+   fixedSlotVideoConflicts:fixedSlotVideoConflicts.slice(0,12),
+   canEnableIndependentVideoPublisher:false,
+   requiresExistingReservationsReview:fixedSlotVideoConflicts.length>0,
+   source:"metricool_advanced_rest_get"}};
  }catch(_){
   return {status:502,body:{state:"UPSTREAM_NETWORK_OR_JSON_ERROR",publishing:false}};
  }

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "unboda-lifestyle-friendship-20261027",
+  "topicKey": "friendship-words-reflection-20261027",
+  "situation": "친구에게 서운함이 남은 날",
+  "hook": "친구의 말이 마음에 걸릴 때 어떻게 해야 할까요?",
+  "theme": "친구·사람 사이",
+  "thumbnailTitle": "친구의 말이 걸린다면?",
+  "narrationDraft": [
+    "친구에게 서운함이 남은 날. 작은 말이 자꾸 마음에 남나요?",
+    "상대가 어떤 뜻으로 말했는지는 아직 모를 수 있어요.",
+    "내가 서운했던 순간을 짧고 차분하게 적어 보세요.",
+    "대화가 필요하다면 내 마음부터 조심스럽게 전해요."
+  ],
+  "visualConcepts": [
+    "친구 약속 뒤 조용히 흐르는 시계 화면의 원본 모션",
+    "엇갈리는 두 말풍선이 천천히 멀어지는 원본 모션",
+    "내 마음을 한 줄로 기록하는 체크리스트 모션",
+    "서로 다른 감정을 바라보는 부드러운 파동 모션"
+  ],
+  "scenes": [
+    {
+      "headline": [
+        "친구의 한마디",
+        "마음에 남을 때"
+      ],
+      "subline": "가까운 사이여도 서운할 수 있어요",
+      "illustration": "clock"
+    },
+    {
+      "headline": [
+        "상대의 뜻은",
+        "아직 모를 수 있어요"
+      ],
+      "subline": "혼자 결론 내리지 않기",
+      "illustration": "message"
+    },
+    {
+      "headline": [
+        "내가 서운했던 점",
+        "짧게 적어보기"
+      ],
+      "subline": "어떤 순간이 마음에 걸렸나요?",
+      "illustration": "notes"
+    },
+    {
+      "headline": [
+        "필요한 대화는",
+        "차분하게 전하기"
+      ],
+      "subline": "작은 표현부터 시작해요",
+      "illustration": "rest"
+    }
+  ],
+  "licenseReviewRequired": true,
+  "voiceHumanReviewRequired": true,
+  "automatedPublicationAllowed": false
+}

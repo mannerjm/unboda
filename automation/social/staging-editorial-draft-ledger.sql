@@ -22,6 +22,9 @@ BEGIN
   OR jsonb_typeof(p_storyboard) <> 'object' THEN
   RAISE EXCEPTION 'INVALID_STAGING_DRAFT_INPUT' USING ERRCODE='23514';
  END IF;
+ IF p_draft_hash <> encode(pg_catalog.sha256(pg_catalog.convert_to(p_storyboard::text,'UTF8')),'hex') THEN
+  RAISE EXCEPTION 'STORYBOARD_SHA256_INVALID' USING ERRCODE='23514';
+ END IF;
  SELECT * INTO j FROM social_automation.jobs
  WHERE job_key=p_job_key FOR UPDATE;
  IF NOT FOUND OR j.kind<>'short-video' OR j.status<>'GENERATING'

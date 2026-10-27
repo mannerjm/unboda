@@ -69,7 +69,7 @@ BEGIN
             AND scheduled_for>=now()-interval '90 days') THEN
   RAISE EXCEPTION 'DUPLICATE_STAGING_EDITORIAL_DRAFT' USING ERRCODE='23505';
  END IF;
- narration:=narr->>0||E'\n'||narr->>1||E'\n'||narr->>2||E'\n'||narr->>3;
+ narration:=(narr->>0)||E'\n'||(narr->>1)||E'\n'||(narr->>2)||E'\n'||(narr->>3);
  INSERT INTO social_automation.editorial_candidates(
   job_id,topic_key,hook,narration_draft,source,
   visually_reviewed,korean_voice_reviewed,rights_approved,owner_approved,publish_ready)

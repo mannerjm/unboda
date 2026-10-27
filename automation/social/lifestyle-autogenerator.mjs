@@ -67,7 +67,8 @@ export function assessNovelLifestyleCandidate(candidate,{history,nowMs}={}){
   editorialPassed:editorial.ok,mediaVerified:false,publishApproved:false});
 }
 export async function makeNovelLifestyleCandidate({atMs,fetchHistory,generator,
- maxAttempts=3,timeoutMs=20000,historyVerified=false,offlineDryRun=false}={}){
+ maxAttempts=3,timeoutMs=20000,historyVerified=false,offlineDryRun=false,
+ extraOriginalityValidator=null}={}){
  const fail=(reason,extra={})=>Object.freeze({state:"BLOCKED",reason,publicationAllowed:false,...extra});
  if(!Number.isFinite(atMs))return fail("SCHEDULE_TIMESTAMP_REQUIRED");
  const local=new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",
@@ -105,6 +106,16 @@ export async function makeNovelLifestyleCandidate({atMs,fetchHistory,generator,
   }catch{return fail("GENERATOR_UNAVAILABLE_OR_TIMEOUT",{attempts:attempt});}
   const result=assessNovelLifestyleCandidate(proposal,{history,nowMs:atMs});
   if(result.ok){
+   if(extraOriginalityValidator!==null){
+    let novel;
+    try{novel=await extraOriginalityValidator(proposal)}
+    catch{return fail("INDEPENDENT_SOCIAL_NOVELTY_CHECK_FAILED",{attempts:attempt})}
+    if(novel?.ok!==true||novel?.full90DayVerified!==false){
+     if(attempt===maxAttempts)return fail("POST_ORIGINALITY_CHECK_EXHAUSTED",{
+      attempts:attempt,validationReasons:novel?.reasons??["SOCIAL_NOVELTY_UNVERIFIED"]});
+     continue;
+    }
+   }
    return Object.freeze({state:"CANDIDATE_ONLY",slotKst:local,attempts:attempt,
     topicKey:proposal.topicKey,hash:result.hash,storyboard:proposal,
     requiresCommercialRightsReview:true,requiresNaturalKoreanVoice:true,

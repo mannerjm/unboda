@@ -31,7 +31,7 @@ export function createVercelPublicBlobWriter({
    try{
     const url=new URL(object?.url);
     valid=url.protocol==="https:"&&
-     /^[a-z0-9-]+\\.public\\.blob\\.vercel-storage\\.com$/i.test(url.hostname)&&
+     /^[a-z0-9-]+\.public\.blob\.vercel-storage\.com$/i.test(url.hostname)&&
      !url.username&&!url.password&&!url.search&&!url.hash&&
      decodeURIComponent(url.pathname)==="/"+key&&
      object?.pathname===key;

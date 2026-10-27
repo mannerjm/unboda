@@ -91,12 +91,17 @@ export async function makeNovelLifestyleCandidate({atMs,fetchHistory,generator,
  for(let attempt=1;attempt<=maxAttempts;attempt++){
   let proposal;
   try{
-   proposal=await Promise.race([
-    Promise.resolve().then(()=>generator({slotKst:local,attempt,
-      recentTopicKeys:history.map(x=>x.topicKey),
-      usedOpenings:history.map(x=>x.narrationDraft[0])})),
-    new Promise((_,reject)=>setTimeout(()=>reject(Error("GENERATOR_TIMEOUT")),timeoutMs))
-   ]);
+   let timeoutId;
+   try{
+    proposal=await Promise.race([
+     Promise.resolve().then(()=>generator({slotKst:local,attempt,
+       recentTopicKeys:history.map(x=>x.topicKey),
+       usedOpenings:history.map(x=>x.narrationDraft[0])})),
+     new Promise((_,reject)=>{
+      timeoutId=setTimeout(()=>reject(Error("GENERATOR_TIMEOUT")),timeoutMs);
+     })
+    ]);
+   }finally{clearTimeout(timeoutId);}
   }catch{return fail("GENERATOR_UNAVAILABLE_OR_TIMEOUT",{attempts:attempt});}
   const result=assessNovelLifestyleCandidate(proposal,{history,nowMs:atMs});
   if(result.ok){

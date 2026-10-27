@@ -26,7 +26,7 @@ def validate(audio,limit):
         raise RuntimeError(f"VOICE_ALIGNMENT_FAILED:{d:.2f}s limit:{limit}s")
     return d
 TEXTS=[
- "지금 내 운은 어디로 흐를까요? 오늘은 띠와 사주의 차이를 알아봅니다.",
+ "지금 내 운은 어디로 흐를까요? 오늘은 띠와 사주의 차이를 알아봅니다. 많이 헷갈리시죠?",
  "띠는 태어난 해를 열두 동물로 표현한 전통 상징이에요.",
  "사주는 태어난 해와 달, 날, 시간을 함께 보는 전통 해석이에요.",
  "사주는 가볍게 참고하세요."

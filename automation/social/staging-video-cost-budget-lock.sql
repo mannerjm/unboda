@@ -41,10 +41,9 @@ DECLARE
  j social_automation.jobs%ROWTYPE;
  b social_automation.media_cost_policies%ROWTYPE;
  m date; total_krw bigint; prior bigint;
- blocked constant boolean:=false;
 BEGIN
  IF p_job_key IS NULL OR p_job_key !~ '^[a-f0-9]{64}$' OR
-    p_provider NOT IN ('openai','runway','elevenlabs','other-paid-ai') OR
+    (p_provider IS NULL OR p_provider NOT IN ('openai','runway','elevenlabs','other-paid-ai')) OR
     p_request_key IS NULL OR p_request_key !~ '^[a-z0-9_-]{12,100}$' OR
     p_max_krw IS NULL OR p_max_krw NOT BETWEEN 1 AND 1000000 THEN
    RETURN jsonb_build_object('state','BLOCKED','reason','INVALID_BUDGET_REQUEST',
@@ -56,7 +55,7 @@ BEGIN
     OR j.scheduled_for<=now() OR
     j.content->>'origin'<>'isolated-staging-only' OR
     j.content->>'canPublish'<>'false' OR
-    j.content->>'remoteHistoryVerified'<>'true' THEN
+    j.content->>'remoteHistoryVerified' IS DISTINCT FROM 'true' THEN
    RETURN jsonb_build_object('state','BLOCKED','reason','VERIFIED_STAGING_GENERATION_LEASE_REQUIRED',
     'providerCallsAllowed',false,'publishingAllowed',false);
  END IF;

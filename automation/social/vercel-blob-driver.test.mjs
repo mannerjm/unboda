@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {createHash} from "node:crypto";
 import {createVercelPublicBlobWriter} from "./vercel-blob-driver.mjs";
 const bytes=new Uint8Array(1600);
+bytes.set([0x00,0x00,0x00,0x18,0x66,0x74,0x79,0x70,0x69,0x73,0x6f,0x6d],0);
 const sha256=createHash("sha256").update(bytes).digest("hex");
 const key="unboda-social/pilots/first123-aabbccdd.mp4";
 test("unconfigured or unapproved blob writer never writes",async()=>{
@@ -77,4 +78,16 @@ test("untrusted public URL, deceptive suffix or wrong object key never acknowled
   assert.equal(r.persisted,false);
   assert.equal(r.reason,"BLOB_RECEIPT_UNVERIFIED_RECONCILE_BY_PATH");
  }
+});
+
+test("renamed picture or invalid video cannot be stored as MP4",async()=>{
+ let calls=0;
+ const bad=new Uint8Array(1600);
+ const writer=createVercelPublicBlobWriter({ownerApprovedStorage:true,
+  put:async()=>{calls++;throw Error("unexpected")}});
+ const r=await writer({key,bytes:bad,
+  sha256:createHash("sha256").update(bad).digest("hex"),contentType:"video/mp4"});
+ assert.equal(r.persisted,false);
+ assert.equal(r.reason,"MP4_CONTAINER_SIGNATURE_INVALID");
+ assert.equal(calls,0);
 });

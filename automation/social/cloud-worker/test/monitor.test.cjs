@@ -49,3 +49,34 @@ test("upstream fails closed",async()=>{
  const r=await audit("short-video",{env,fetcher:async()=>({ok:false,status:401})});
  assert.equal(r.status,502);assert.equal(r.body.publishing,false);
 });
+
+test("live IG and Facebook Reels outside fixed KST slots trigger nonpublishing conflict warning",async()=>{
+ const now=Date.parse("2026-10-28T20:00:00+09:00");
+ const data={data:[
+  {draft:false,autoPublish:true,publicationDate:{dateTime:"2026-10-29T11:00:00"},
+   instagramData:{type:"REEL"},providers:[{network:"instagram",status:"PENDING"}]},
+  {draft:false,autoPublish:true,publicationDate:{dateTime:"2026-10-29T11:00:00"},
+   facebookData:{type:"REEL"},providers:[{network:"facebook",status:"PENDING"}]},
+  {draft:false,autoPublish:true,publicationDate:{dateTime:"2026-10-29T08:00:00"},
+   instagramData:{type:"REEL"},providers:[{network:"instagram",status:"PENDING"}]},
+  {draft:true,autoPublish:false,publicationDate:{dateTime:"2026-10-30T08:00:00"},
+   instagramData:{type:"REEL"},providers:[{network:"instagram",status:"PENDING"}]}
+ ]};
+ const r=await audit("short-video",{env,now,fetcher:async(_url,options)=>{
+  assert.equal(options.method,"GET");return {ok:true,status:200,json:async()=>data};
+ }});
+ assert.equal(r.status,200);assert.equal(r.body.estimatedVideoItems,4);
+ assert.equal(r.body.fixedSlotVideoConflicts.length,2);
+ assert.equal(r.body.requiresExistingReservationsReview,true);
+ assert.equal(r.body.canEnableIndependentVideoPublisher,false);
+});
+test("read-only audit never treats a draft video as a publication conflict",async()=>{
+ const r=await audit("short-video",{env,now:Date.parse("2026-10-28T20:00:00+09:00"),
+  fetcher:async()=>({ok:true,json:async()=>({data:[{
+    draft:true,autoPublish:false,
+    publicationDate:{dateTime:"2026-10-29T11:00:00"},instagramData:{type:"REEL"},
+    providers:[{network:"instagram",status:"PENDING"}]
+   }]})})});
+ assert.equal(r.body.fixedSlotVideoConflicts.length,0);
+ assert.equal(r.body.canEnableIndependentVideoPublisher,false);
+});

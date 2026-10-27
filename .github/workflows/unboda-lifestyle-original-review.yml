@@ -6,6 +6,9 @@ on:
       - 'automation/social/pilot-preview/media-technical-qa.mjs'
       - '.github/workflows/unboda-lifestyle-original-review.yml'
   workflow_dispatch:
+concurrency:
+  group: unboda-original-voice-private-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:

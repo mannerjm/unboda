@@ -1,0 +1,121 @@
+name: UNBODA 4 unique Korean videos private E2E (NO PUBLISH)
+on:
+  pull_request:
+    paths:
+      - 'automation/social/lifestyle-pilot/**'
+      - 'automation/social/lifestyle-autogenerator.mjs'
+      - 'automation/social/lifestyle-video-planner.mjs'
+      - 'automation/social/pilot-preview/media-technical-qa.mjs'
+      - '.github/workflows/unboda-four-daily-private-videos-e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate-four-kst-previews:
+    if: github.repository == 'mannerjm/unboda' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == 'mannerjm/unboda')
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify four different 30-second ideas, safe titles, no paid or publishing rights
+        run: |
+          node --test automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs
+          node automation/social/lifestyle-pilot/four-daily-private-validator.mjs
+  build-four-korean-previews:
+    needs: validate-four-kst-previews
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - slot: midnight
+            local_time: "00:00"
+            episode: episodes/003-midnight.json
+          - slot: commute
+            local_time: "08:00"
+            episode: episodes/004-commute.json
+          - slot: friendship
+            local_time: "12:00"
+            episode: episodes/005-friendship.json
+          - slot: afterwork
+            local_time: "20:00"
+            episode: episodes/002-afterwork.json
+    runs-on: ubuntu-latest
+    timeout-minutes: 27
+    env:
+      OMP_NUM_THREADS: '2'
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+      UNBODA_SLOT: ${{ matrix.local_time }}
+      UNBODA_EPISODE: ${{ matrix.episode }}
+      UNBODA_OUTPUT: /tmp/unboda-four-previews-${{ matrix.slot }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install FFmpeg and Korean CJK font
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk fontconfig
+          python -m pip install --no-cache-dir 'Pillow==11.3.0'
+      - name: Validate exact slot matching and scene text safety
+        run: |
+          python -m unittest discover -s automation/social/lifestyle-pilot -p 'test_render.py' -v
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          import {reviewLifestyleVideoScript} from './automation/social/lifestyle-video-planner.mjs';
+          import {inspectRepoPreviewBatch} from './automation/social/lifestyle-pilot/four-daily-private-validator.mjs';
+          const m=JSON.parse(readFileSync('./automation/social/lifestyle-pilot/four-daily-private-manifest.json','utf8'));
+          if(inspectRepoPreviewBatch().state!=='FOUR_EPISODE_PRIVATE_REVIEW_PLAN')throw Error('FOUR_SLOT_MANIFEST_BLOCKED');
+          if(!m.slots.some(s=>s.kst===process.env.UNBODA_SLOT&&s.brief===process.env.UNBODA_EPISODE))
+            throw Error('EPISODE_KST_SLOT_MISMATCH');
+          const b=JSON.parse(readFileSync('./automation/social/lifestyle-pilot/'+process.env.UNBODA_EPISODE,'utf8'));
+          const e=reviewLifestyleVideoScript(b);
+          if(!e.ok||b.automatedPublicationAllowed!==false)throw Error('EDITORIAL_QA_BLOCKED:'+e.reasons.join(','));
+          console.log('FOUR_SLOT_PRIVATE_EDITORIAL_OK:'+process.env.UNBODA_SLOT);
+          NODE
+      - name: Render original moving Korean scenes and thumbnail
+        run: |
+          python automation/social/lifestyle-pilot/render.py \
+            --brief automation/social/lifestyle-pilot/"$UNBODA_EPISODE" \
+            --out "$UNBODA_OUTPUT"
+      - name: Install pinned Korean CPU speech engine
+        run: |
+          python -m pip install --no-cache-dir 'git+https://github.com/myshell-ai/MeloTTS.git@209145371cff8fc3bd60d7be902ea69cbdb7965a'
+          python -m unidic download
+      - name: Synthesize 4-scene Korean speech and merge final 30s MP4
+        run: |
+          python automation/social/lifestyle-pilot/narrate.py \
+            --brief automation/social/lifestyle-pilot/"$UNBODA_EPISODE" \
+            --out "$UNBODA_OUTPUT"
+      - name: Reject black/frozen video, voice gaps, cover mismatch or wrong codec
+        run: |
+          node automation/social/pilot-preview/media-technical-qa.mjs \
+            "$UNBODA_OUTPUT/LIFESTYLE_30S_KOREAN_PRIVATE_REVIEW.mp4" \
+            "$UNBODA_OUTPUT/LIFESTYLE_COVER.jpg" \
+            "$UNBODA_OUTPUT/LIFESTYLE_KOREAN_NARRATION.wav" \
+            "$UNBODA_OUTPUT/LIFESTYLE_TECHNICAL_QA.json"
+      - name: Retain private diagnostic proof, never publish or make permanent URL
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: unboda-four-daily-${{ matrix.slot }}-private-review-NO-PUBLISH
+          path: |
+            ${{ env.UNBODA_OUTPUT }}/LIFESTYLE_30S_KOREAN_PRIVATE_REVIEW.mp4
+            ${{ env.UNBODA_OUTPUT }}/LIFESTYLE_COVER.jpg
+            ${{ env.UNBODA_OUTPUT }}/LIFESTYLE_TECHNICAL_QA.json
+            ${{ env.UNBODA_OUTPUT }}/LIFESTYLE_VOICE_PROOF.json
+            ${{ env.UNBODA_OUTPUT }}/VISUAL_PROOF.json
+          if-no-files-found: warn
+          retention-days: 5

@@ -31,8 +31,15 @@ TEXTS=[
  "사주는 태어난 해와 달, 날, 시간을 함께 보는 전통 해석이에요.",
  "미래를 단정하지 말고, 가볍게 참고해 보세요."
 ]
-DELAYS=[1000,10200,17700,24800]
-LIMITS=[8.7,7.2,6.8,5.0]
+# Cover-first visual occupies 0..1.2s, followed by the archived edit.
+# The 4 spoken scenes must start after their visual scenes appear.
+SCENE_STARTS=[1200,11200,18200,25200]
+SCENE_ENDS=[11200,18200,25200,30000]
+DELAYS=[1400,11400,18400,25400]
+LIMITS=[9.0,6.5,6.5,4.3]
+for i in range(4):
+    if DELAYS[i] < SCENE_STARTS[i] or DELAYS[i]+LIMITS[i]*1000 > SCENE_ENDS[i]:
+        raise RuntimeError("NARRATION_SCENE_ALIGNMENT_CONFIG_INVALID")
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--visual",required=True)
@@ -89,6 +96,9 @@ def main():
       "ttsCodeLicense":"MIT; review third-party and trained-model terms",
       "narrationExists":True,"pronunciationHumanReviewed":False,
       "sourceContainsArchivedRunwayFootage":True,
+      "coverFirst1point2SecondsExpected":True,
+      "coverFirstPlatformVerified":False,
+      "objectiveTechnicalQAReportPassed":False,
       "originalityReleaseApproved":False,"scenes":segments}
     (base/"VOICE_VIDEO_PROOF.json").write_text(json.dumps(proof,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print("KOREAN_TTS_REVIEW_READY_OUTPUT_FORMAT_VERIFIED")

@@ -17,6 +17,12 @@ const story={
   '알림 말풍선이 멀어지며 숨을 고르는 모션 그래픽',
   '메모장에 오늘의 중요 할 일 하나를 고르는 원본 모션',
   '부드럽게 번지는 아침 햇살과 쉼표 장면의 원본 영상'
+ ],
+ scenes:[
+  {headline:['출근길부터','마음이 무겁다면'],subline:'작게 살펴보는 오늘의 마음',illustration:'clock'},
+  {headline:['급한 일과','중요한 일은 달라요'],subline:'잠시 구분해도 괜찮아요',illustration:'message'},
+  {headline:['오늘 가장 먼저','한 가지 적어봐요'],subline:'작은 정리가 시작이에요',illustration:'notes'},
+  {headline:['나만의 속도를','찾아가도 괜찮아'],subline:'마음의 속도도 중요한 하루',illustration:'rest'}
  ]};
 const gate={
  approvalSource:'verified-staging-service-worker',ownerExplicitCostApproval:true,
@@ -56,7 +62,7 @@ test('structured output request is four scenes, no user data, no social publish 
  assert.equal(request.text.format.type,'json_schema');
  assert.equal(request.text.format.strict,true);
  assert.equal(request.text.format.schema.additionalProperties,false);
- assert.equal(request.text.format.schema.required.length,6);
+ assert.equal(request.text.format.schema.required.length,7);
  assert.equal(request.input.length,2);
  assert.ok(request.input[0].content.includes('한국어'));
  assert.ok(!JSON.stringify(request).includes('apiKey'));
@@ -87,7 +93,9 @@ test('malformed or unsafe response cannot produce an approved draft',async()=>{
   {...story,narrationDraft:[]},
   {...story,publicationAllowed:true},
   {...story,visualConcepts:[...story.visualConcepts.slice(0,2)]},
-  {...story,topicKey:'NOT ALLOWED KEY'}
+  {...story,topicKey:'NOT ALLOWED KEY'},
+  {...story,scenes:[...story.scenes.slice(0,3)]},
+  {...story,scenes:story.scenes.map((x,i)=>i===0?{...x,headline:['이 문장은 너무 길어 화면 밖으로 나갑니다','다른 문장']}:x)}
  ]){
  const fetcher=async()=>({ok:true,json:async()=>({status:'completed',
   output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(draft)}]}]})});

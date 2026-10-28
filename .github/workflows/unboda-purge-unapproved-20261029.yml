@@ -24,16 +24,16 @@ jobs:
               continue
             fi
             TAG="$tag" python - <<'PY'
-import json,os
-r=json.load(open('/tmp/private-release.json'))
-assert r.get('tag_name') == os.environ['TAG']
-assert r.get('prerelease') is True
-assert not r.get('immutable',False)
-body=(r.get('body') or '').lower()
-assert 'not' in body and 'sns' in body
-for a in r.get('assets',[]):
- print('DELETE_REJECTED_DRAFT_ASSET',r['tag_name'],a['name'],a.get('digest',''))
-PY
+          import json,os
+          r=json.load(open('/tmp/private-release.json'))
+          assert r.get('tag_name') == os.environ['TAG']
+          assert r.get('prerelease') is True
+          assert not r.get('immutable',False)
+          body=(r.get('body') or '').lower()
+          assert 'not' in body and 'sns' in body
+          for a in r.get('assets',[]):
+           print('DELETE_REJECTED_DRAFT_ASSET',r['tag_name'],a['name'],a.get('digest',''))
+          PY
             gh release delete "$tag" --repo mannerjm/unboda --yes --cleanup-tag
             if gh api "repos/mannerjm/unboda/releases/tags/$tag" >/dev/null 2>&1; then
               echo "RELEASE_DELETE_NOT_VERIFIED: $tag" >&2

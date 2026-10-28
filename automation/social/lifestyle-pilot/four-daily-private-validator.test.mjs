@@ -13,7 +13,7 @@ const manifest={
 };
 test('four distinct zero-publish daily KST slots have valid source drafts',()=>{
  const r=inspectRepoPreviewBatch();
- assert.equal(r.state,'FOUR_EPISODE_PRIVATE_REVIEW_PLAN');
+ assert.equal(r.state,'FOUR_EPISODE_PRIVATE_REVIEW_PLAN',r.reason||'VALID');
  assert.deepEqual(r.slots.map(x=>x.kst),['00:00','08:00','12:00','20:00']);
  assert.equal(r.count,4);assert.equal(r.mediaReady,false);
  assert.equal(r.publicationAllowed,false);

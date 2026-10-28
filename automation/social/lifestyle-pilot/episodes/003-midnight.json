@@ -1,57 +1,60 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-lifestyle-midnight-phone-20261029",
-  "topicKey": "bedtime-phone-scroll-stop-20261029",
-  "situation": "자기 전 휴대폰을 계속 넘기는 밤",
-  "hook": "잠깐만 보려던 휴대폰, 언제 내려놓을까요?",
-  "theme": "밤·디지털 습관",
-  "thumbnailTitle": "폰이 안 놓일 때?",
+  "id": "unboda-saju-selfreflection-night-20261029",
+  "topicKey": "saju-evening-self-understanding-20261029",
+  "sajuCategory": "self-understanding",
+  "visualStyle": "midnight-indigo",
+  "situation": "혼자 있을 때 마음이 무거운 밤",
+  "hook": "왜 이런 날이 반복될까요?",
+  "theme": "사주로 보는 자기이해와 일상 감정",
+  "thumbnailTitle": "밤마다 마음이 무겁다면?",
   "narrationDraft": [
-    "자기 전 휴대폰을 계속 넘기는 밤. 잠깐만 보려다 시간이 훌쩍 갔나요?",
-    "보고 싶은 게 끝이 없다면, 화면을 덮을 시간을 먼저 생각해 봐요.",
-    "알림을 잠시 끄고 휴대폰을 손이 닿지 않는 곳에 놓아 보세요.",
-    "남은 영상은 내일 봐도 돼요. 오늘은 여기서 멈춰 볼까요?"
+    "혼자 있을 때 마음이 무거운 밤. 왜 이런 날이 반복될까요?",
+    "사주는 나의 기질과 감정 성향을 돌아보는 한 가지 관점이에요.",
+    "오늘 마음에 걸렸던 일을 한 가지 적어 보세요.",
+    "그 마음을 살핀 뒤, 운보다 무료 사주 조회에서 내 성향도 알아보세요."
   ],
   "visualConcepts": [
-    "잠들기 전 침대 옆에 휴대폰이 놓인 듯한 잔잔한 원형 휴식 모션",
-    "계속 이어지던 화면 흐름이 천천히 멈추는 원본 시계 모션",
-    "알림 말풍선이 작아지며 사라지는 원본 메시지 모션",
-    "조용한 밤의 둥근 빛이 천천히 잦아드는 원본 휴식 모션"
+    "창가 야경 아래 혼자 앉은 사람의 실루엣과 천천히 움직이는 달빛을 표현한 원본 장면",
+    "밤의 감정 파동이 겹쳐졌다 줄어들며 나의 성향을 비유하는 별자리 모션",
+    "어두운 책상 위 한 줄을 기록하는 펜과 노트의 세밀한 움직임",
+    "밤하늘이 옅게 밝아지고 운보다 무료 사주 조회 안내가 나타나는 마무리"
   ],
   "scenes": [
     {
       "headline": [
-        "자기 전에도",
-        "폰이 안 놓일 때"
+        "밤마다 마음이",
+        "무거운 이유?"
       ],
-      "subline": "잠깐만 보려던 밤",
+      "subline": "혼자 있는 밤의 고민",
       "illustration": "rest"
     },
     {
       "headline": [
-        "끝없이 넘기면",
-        "시간이 훌쩍"
+        "사주로 보는",
+        "나의 감정 성향"
       ],
-      "subline": "멈출 시간을 생각해요",
+      "subline": "운명을 단정하지 않아요",
       "illustration": "clock"
     },
     {
       "headline": [
-        "알림 잠시 끄고",
-        "폰을 멀리 두기"
+        "오늘의 감정",
+        "한 가지 적기"
       ],
-      "subline": "손 닿지 않는 곳으로",
-      "illustration": "message"
+      "subline": "내 마음을 살펴봐요",
+      "illustration": "notes"
     },
     {
       "headline": [
-        "내일 봐도 돼요",
-        "오늘은 여기까지"
+        "내 사주부터",
+        "무료로 살펴보기"
       ],
-      "subline": "작은 멈춤부터 시도해요",
-      "illustration": "rest"
+      "subline": "운보다 무료 사주 조회",
+      "illustration": "message"
     }
   ],
+  "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false

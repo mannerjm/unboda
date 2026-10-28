@@ -96,6 +96,11 @@ async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
   return {state:"BLOCKED",reason:"ALREADY_PUBLISHED_EARLY_20261028_SOURCE_DUPLICATE",slot};
  if(new Set(manifest.videos.map(v=>v.sha256)).size!==4)
   return {state:"BLOCKED",reason:"FOUR_RELEASE_MP4_HASHES_REPEATED",slot};
+ // A technical PASS is not a public-commercial release approval. All three
+ // decisions must be explicit and positive in the signed release manifest.
+ if(video.socialPublishingApproved!==true||
+    video.licenseReviewed!==true||video.voiceHumanReviewed!==true)
+  return {state:"BLOCKED",reason:"COMMERCIAL_VIDEO_RIGHTS_AND_VOICE_REVIEW_NOT_APPROVED",slot};
  const videoUrl=trusted(video.mp4);
  if(!videoUrl||files.get(video.mp4)?.size!==video.bytes)
   return {state:"BLOCKED",reason:"RELEASE_MP4_FILE_NOT_UPLOADED",slot};

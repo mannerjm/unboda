@@ -19,7 +19,8 @@ const manifest={schemaVersion:1,targetDateKst:"20261029",
   title:"하루 고민을 사주로 살펴봐요",caption:"현실 속 고민을 사주와 궁합·재물운의 관점에서 돌아보며 운보다 무료 사주 조회로 내 성향도 천천히 살펴보세요.",
   visualStyle:({midnight:"midnight-indigo",commute:"commute-sunrise",friendship:"relationship-coral",afterwork:"finance-emerald"})[name],
   sajuCategory:({midnight:"self-understanding",commute:"career",friendship:"compatibility",afterwork:"money"})[name],
-  destination:"https://unboda.kr"}))};
+  destination:"https://unboda.kr",socialPublishingApproved:true,
+  licenseReviewed:true,voiceHumanReviewed:true}))};
 const metadata={draft:false,prerelease:true,tag_name:tag,
  assets:[
   {name:"manifest.json",size:JSON.stringify(manifest).length,state:"uploaded",
@@ -170,4 +171,20 @@ test("atomic blob slot claim can only be inserted once",async()=>{
   sourceSha256:sha,sourceTag:tag};
  assert.equal((await claim(a)).state,"FIRST_ATOMIC_CLAIM_GRANTED");
  assert.equal((await claim(a)).state,"PREVIOUS_OR_UNCERTAIN_ATOMIC_CLAIM_NO_RETRY");
+});
+
+test("MP4 technical PASS does not authorize unreviewed commercial release",async()=>{
+ const unreviewed=JSON.parse(JSON.stringify(manifest));
+ unreviewed.videos[0].socialPublishingApproved=false;
+ let reads=0;
+ const fetcher=async url=>{
+  reads++;
+  if(url.includes("/releases/tags/"))return reply(metadata);
+  if(url.endsWith("/manifest.json"))return reply(unreviewed);
+  throw Error("UNAPPROVED_VIDEO_MUST_NEVER_BE_DOWNLOADED");
+ };
+ const r=await loadReleaseVideo({now,fetcher});
+ assert.equal(r.state,"BLOCKED");
+ assert.equal(r.reason,"COMMERCIAL_VIDEO_RIGHTS_AND_VOICE_REVIEW_NOT_APPROVED");
+ assert.equal(reads,2);
 });

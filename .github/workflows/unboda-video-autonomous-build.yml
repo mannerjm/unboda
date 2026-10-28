@@ -4,7 +4,7 @@ name: UNBODA 4 daily Korean shorts build and permanent media assets
 # It DOES NOT create Metricool posts or change any social publishing switch.
 on:
   schedule:
-    - cron: '0 8 * * *' # 17:00 KST, prepare the FOLLOWING day's four videos
+    - cron: '13 8 * * *' # 17:13 KST, prepare the FOLLOWING day's four videos
   workflow_dispatch:
   push:
     paths:
@@ -36,7 +36,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --quiet origin main
           SHA="$(git rev-parse HEAD)"
           DATE="$(date -d tomorrow +%Y%m%d)"
           echo "source_sha=$SHA" >> "$GITHUB_OUTPUT"
@@ -147,6 +146,7 @@ jobs:
     env:
       DATE: ${{ needs.preflight.outputs.target_date }}
       GH_TOKEN: ${{ github.token }}
+      SOURCE_COMMIT: ${{ needs.preflight.outputs.source_sha }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -165,7 +165,7 @@ jobs:
           const slots=[['00','midnight'],['08','commute'],['12','friendship'],['20','afterwork']];
           const manifest={schemaVersion:1,targetDateKst:process.env.DATE,
             generatedBy:'github-actions-four-qa-verified',publishAutomatically:false,
-            sourceCommit:process.env.GITHUB_SHA,videos:[]};
+            sourceCommit:process.env.SOURCE_COMMIT,videos:[]};
           fs.mkdirSync('release-assets',{recursive:true});
           let total=0;
           for(const [hour,name] of slots){

@@ -14,6 +14,10 @@ on:
       - 'automation/social/private-review-storage.test.mjs'
       - 'automation/social/supabase-private-adapter.mjs'
       - 'automation/social/supabase-private-adapter.test.mjs'
+      - 'automation/social/openai-lifestyle-generator.mjs'
+      - 'automation/social/openai-lifestyle-generator.test.mjs'
+      - 'automation/social/lifestyle-pilot/compile-ai-private-brief.mjs'
+      - 'automation/social/lifestyle-pilot/compile-ai-private-brief.test.mjs'
       - 'automation/social/cloud-worker/vercel.json'
       - 'automation/social/lifestyle-pilot/four-daily-private-validator.mjs'
       - 'automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs'
@@ -42,4 +46,6 @@ jobs:
             automation/social/four-kst-video-slots.test.mjs \
             automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs \
             automation/social/private-review-storage.test.mjs \
-            automation/social/supabase-private-adapter.test.mjs
+            automation/social/supabase-private-adapter.test.mjs \
+            automation/social/openai-lifestyle-generator.test.mjs \
+            automation/social/lifestyle-pilot/compile-ai-private-brief.test.mjs

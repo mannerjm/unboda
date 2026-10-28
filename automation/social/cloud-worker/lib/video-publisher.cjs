@@ -155,14 +155,25 @@ async function postOne({fetcher,token,video,network,reserveSlot}){
   scheduled:true};
 }
 async function runVideoPublishCron({env=process.env,fetcher=fetch,
- now=Date.now(),reserveSlot}={}){
+ now=Date.now(),reserveSlot,reserveSource}={}){
  if(!configOK(env))return {http:503,body:fail("VIDEO_AUTO_PUBLISH_NOT_ENABLED")};
- const networks=enabledNetworks(env);
- if(!networks||typeof reserveSlot!=="function")
-  return {http:503,body:fail("PROVIDER_LIST_OR_ATOMIC_CLAIM_MISSING")};
+ const rotation=env.SOCIAL_VIDEO_NETWORKS==="rotation";
+ if(rotation&&(typeof reserveSlot!=="function"||typeof reserveSource!=="function"))
+  return {http:503,body:fail("TWO_CHANNEL_ORIGINAL_CLAIM_NOT_CONNECTED")};
  const video=await loadReleaseVideo({now,fetcher});
  if(video.state!=="ONE_KST_VIDEO_PUBLIC_MEDIA_VERIFIED")
   return {http:503,body:fail(video.reason,{slot:video.slot||null})};
+ const networks=enabledNetworks(env,video.slot);
+ if(!networks||typeof reserveSlot!=="function"||(rotation&&networks.length!==2))
+  return {http:503,body:fail("PROVIDER_LIST_OR_ATOMIC_CLAIM_MISSING")};
+ if(rotation){
+  let original;
+  try{original=await reserveSource({brandId:BRAND,slotUtc:video.slot.slotUtc,
+   sourceSha256:video.sha256,sourceTag:video.releaseTag});}
+  catch{return {http:503,body:fail("ORIGINAL_GLOBAL_SHA_CLAIM_FAILED")}}
+  if(original?.state!=="FIRST_ORIGINAL_CLAIM_GRANTED")
+   return {http:503,body:fail("ORIGINAL_USED_OR_CLAIM_UNCERTAIN_NO_REPOST")};
+ }
  const results=[];
  for(const network of networks){
   const r=await postOne({fetcher,token:env.METRICOOL_API_TOKEN,

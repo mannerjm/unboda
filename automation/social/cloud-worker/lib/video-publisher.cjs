@@ -19,8 +19,19 @@ function configOK(env){
   typeof env.METRICOOL_API_TOKEN==="string"&&env.METRICOOL_API_TOKEN.length>20&&
   env.SOCIAL_PUBLISH_ENABLED==="true"&&env.SOCIAL_PAID_GENERATION_ENABLED==="false";
 }
-function enabledNetworks(env){
+// Two unique channels per source, rotating which pair receives each time slot.
+function enabledNetworks(env,slot){
  const supplied=typeof env.SOCIAL_VIDEO_NETWORKS==="string"?env.SOCIAL_VIDEO_NETWORKS:"instagram";
+ if(supplied==="rotation"){
+  const hours=["00","08","12","20"],index=hours.indexOf(slot?.hourKst);
+  const ymd=String(slot?.targetDateKst??"");
+  if(index<0||!/^[0-9]{8}$/.test(ymd))return null;
+  const day=Date.UTC(+ymd.slice(0,4),+ymd.slice(4,6)-1,+ymd.slice(6));
+  if(!Number.isFinite(day)||new Date(day).toISOString().slice(0,10).replaceAll("-","")!==ymd)return null;
+  const pairs=[["instagram","facebook"],["youtube","tiktok"],
+               ["instagram","youtube"],["facebook","tiktok"]];
+  return pairs[(Math.floor(day/86400000)+index)%4].slice();
+ }
  const result=supplied.split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
  if(result.length<1||result.length>NETWORKS.length||
     result.some(x=>!NETWORKS.includes(x))||new Set(result).size!==result.length)return null;

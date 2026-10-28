@@ -9,7 +9,7 @@ function makeVideoClaim({put,token}={}){
     brandId!==REPO_BRAND||
     !["instagram","facebook","youtube","tiktok","threads"].includes(network)||
     !/^[a-f0-9]{64}$/.test(sourceSha256??"")||
-    !/^unboda-shorts-\d{8}$/.test(sourceTag??"")||
+    !/^unboda-saju-shorts-\d{8}$/.test(sourceTag??"")||
     !Number.isFinite(Date.parse(slotUtc))||
     !/^\d{4}-\d\d-\d\dT(?:\d\d):00:00\.000Z$/.test(slotUtc??""))
     return {state:"INVALID_DURABLE_CLAIM"};

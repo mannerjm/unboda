@@ -61,6 +61,16 @@ async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
     new Set(manifest.videos.map(x=>x.hourKst)).size!==4||
     !HOURS.every(h=>manifest.videos.some(x=>x.hourKst===String(h).padStart(2,"0"))))
   return {state:"BLOCKED",reason:"FOUR_RELEASE_QA_PROVENANCE_INVALID",slot};
+ const knownStyles={"00":"midnight-indigo","08":"commute-sunrise",
+   "12":"relationship-coral","20":"finance-emerald"};
+ const knownCategories={"00":"self-understanding","08":"career",
+   "12":"compatibility","20":"money"};
+ if(manifest.videos.some(v=>!Object.hasOwn(knownStyles,v.hourKst)||
+     v.visualStyle!==knownStyles[v.hourKst]||
+     v.sajuCategory!==knownCategories[v.hourKst]||
+     v.destination!=="https://unboda.kr")||
+    new Set(manifest.videos.map(v=>v.visualStyle)).size!==4)
+  return {state:"BLOCKED",reason:"FOUR_SAJU_STYLES_AND_CATEGORIES_NOT_UNIQUE",slot};
  const video=manifest.videos.find(x=>x.hourKst===slot.hourKst);
  if(!video||video.sajuCategory===undefined||
     !["self-understanding","career","compatibility","money"].includes(video.sajuCategory)||

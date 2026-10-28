@@ -110,7 +110,7 @@ export async function generatePaidKoreanLifestyleStoryboard({
   throw NO('AI_PROVIDER_RESPONSE_NOT_COMPLETED');
  const parts=body.output.flatMap(x=>x?.type==='message'?
    (x.content??[]).filter(c=>c?.type==='output_text').map(c=>c.text):[]);
- if(parts.length!==1||!legalText(parts[0])||parts[0].length>8000)
+ if(parts.length!==1||typeof parts[0]!=='string'||parts[0].length<50||parts[0].length>8000)
   throw NO('AI_PROVIDER_STRUCTURED_OUTPUT_INVALID');
  let draft;
  try{draft=JSON.parse(parts[0])}catch{throw NO('AI_PROVIDER_JSON_INVALID')}

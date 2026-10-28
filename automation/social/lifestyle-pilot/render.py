@@ -55,6 +55,124 @@ def base_image():
     return im
 BACKGROUND=base_image()
 
+# Brand scenes are not four copies of the same central clock illustration.
+# Each video has its own background palette and animated real-life metaphor.
+BRAND_PALETTES={
+    "midnight-indigo": {"top":(9,13,35),"bottom":(29,35,72),
+        "accent":(193,175,251),"panel":(34,37,85),"gold":(234,197,126)},
+    "commute-sunrise": {"top":(35,54,76),"bottom":(127,93,86),
+        "accent":(255,190,135),"panel":(44,69,94),"gold":(255,213,144)},
+    "relationship-coral": {"top":(68,31,61),"bottom":(121,64,88),
+        "accent":(255,171,172),"panel":(99,49,82),"gold":(255,203,161)},
+    "finance-emerald": {"top":(6,43,43),"bottom":(20,86,75),
+        "accent":(145,223,176),"panel":(22,77,67),"gold":(211,227,149)}
+}
+def background_for_style(style):
+    colors=BRAND_PALETTES.get(style)
+    if not colors:return BACKGROUND.copy()
+    im=Image.new("RGB",(W,H)); d=ImageDraw.Draw(im)
+    for y in range(H):
+        t=y/H
+        r=tuple(round(colors["top"][i]*(1-t)+colors["bottom"][i]*t) for i in range(3))
+        d.line((0,y,W,y),fill=r)
+    # Four different large background silhouettes; subtle enough for text.
+    if style=="midnight-indigo":
+        for i in range(25):
+            x=(i*113+62)%W;y=(i*137+483)%H
+            d.ellipse((x,y,x+3,y+3),fill=(104,102,157))
+    elif style=="commute-sunrise":
+        d.ellipse((477,465,722,710),fill=(166,115,100))
+        for i in range(7):
+            x=42+i*103
+            d.rectangle((x,865-(i%3)*53,x+80,1200),fill=(38,60,76))
+    elif style=="relationship-coral":
+        for i in range(5):
+            x=83+i*152
+            d.arc((x-94,560,x+95,750),start=220,end=355,fill=(155,82,115),width=5)
+    elif style=="finance-emerald":
+        for i in range(7):
+            x=47+i*100
+            d.line((x,570,x+70,900),fill=(38,106,84),width=3)
+    return im
+
+def draw_brand_hero(d,style,kind,scene_index,seconds):
+    t=seconds/SCENE_SECONDS
+    wave=math.sin(seconds*2*math.pi/SCENE_SECONDS)
+    c=BRAND_PALETTES[style]
+    accent=c["accent"]
+    if style=="midnight-indigo":
+        # Bedroom window, moving moon and silhouette; not a clock.
+        d.rounded_rectangle((126,545,594,906),radius=35,fill=(27,32,70),outline=(98,99,153),width=5)
+        d.line((359,550,359,902),fill=(87,94,149),width=8)
+        d.line((138,730,582,730),fill=(87,94,149),width=7)
+        x=265+26*wave;y=620+20*math.sin(seconds*.5)
+        d.ellipse((x-55,y-55,x+55,y+55),fill=(242,219,166))
+        d.ellipse((x-25,y-67,x+70,y+30),fill=(27,32,70))
+        for k in range(8):
+            sx=150+(k*61)%420;sy=575+(k*79)%250
+            d.ellipse((sx,sy,sx+5,sy+5),fill=(201,181,251))
+        d.ellipse((445,749,505,809),fill=(169,165,199))
+        d.rounded_rectangle((409,802,541,892),radius=25,fill=(109,102,155))
+        if kind=="notes":
+            d.rounded_rectangle((155,788,306,863),radius=12,fill=(208,207,221))
+            d.line((174,817,275,817),fill=(72,63,132),width=5)
+        if kind=="message":
+            d.rounded_rectangle((167,793,322,847),radius=13,fill=(93,101,174))
+            d.ellipse((181+int(t*85),806,198+int(t*85),822),fill=accent)
+    elif style=="commute-sunrise":
+        # Street/city/commuter, moving transit vehicle instead of clock icon.
+        d.ellipse((435,541,552,658),fill=(255,211,133))
+        for k in range(7):
+            x=140+k*64
+            d.rectangle((x,650-(k%3)*54,x+50,861),fill=(66,97,118))
+            d.rectangle((x+14,681-(k%3)*54,x+26,710-(k%3)*54),fill=(188,180,141))
+        busX=132+int(44*wave)
+        d.rounded_rectangle((busX,764,busX+410,864),radius=25,fill=(238,179,111),outline=(253,224,171),width=4)
+        d.rounded_rectangle((busX+28,780,busX+154,814),radius=9,fill=(54,94,124))
+        d.rounded_rectangle((busX+172,780,busX+302,814),radius=9,fill=(54,94,124))
+        d.ellipse((busX+75,849,busX+128,899),fill=(32,52,68))
+        d.ellipse((busX+319,849,busX+372,899),fill=(32,52,68))
+        if kind=="notes":
+            d.rounded_rectangle((450,563,574,694),radius=14,fill=(247,232,210))
+            d.line((470,608,551,608),fill=(70,100,123),width=5)
+        if kind=="message":
+            d.rounded_rectangle((152,570,354,626),radius=13,fill=(99,137,154))
+            d.ellipse((175+int(t*130),583,190+int(t*130),599),fill=accent)
+    elif style=="relationship-coral":
+        # Two PEOPLE facing each other + moving speech bubbles.
+        for x,col in ((244,(239,172,160)),(468,(255,207,159))):
+            d.ellipse((x-70,675,x+70,815),fill=col)
+            d.rounded_rectangle((x-97,794,x+97,917),radius=39,fill=(125,68,103) if x==244 else (152,91,106))
+            d.ellipse((x-16,713,x+12,737),fill=(108,62,87))
+        dy=int(16*wave)
+        d.rounded_rectangle((141,556+dy,340,652+dy),radius=29,fill=(242,166,174))
+        d.rounded_rectangle((382,579-dy,569,675-dy),radius=29,fill=(255,207,172))
+        d.line((175,605+dy,299,605+dy),fill=(96,49,71),width=7)
+        d.line((418,628-dy,531,628-dy),fill=(96,49,71),width=7)
+        if kind=="rest":
+            d.arc((309,696,415,795),start=190,end=345,fill=(255,213,164),width=10)
+        if kind=="notes":
+            d.line((325,840,405,840),fill=(240,187,171),width=11)
+    elif style=="finance-emerald":
+        # Visible budget ledger, animated bars and coins.
+        d.rounded_rectangle((132,546,583,910),radius=24,fill=(230,239,222),outline=(128,186,149),width=4)
+        d.rounded_rectangle((159,571,549,630),radius=11,fill=(42,108,86))
+        d.text((182,581),"MONTHLY",font=font(25,True),fill=(234,240,223))
+        for k in range(4):
+            col=(64,118,104) if k%2 else (86,154,123)
+            bar=63+k*32+int(16*math.sin(seconds*1.1+k))
+            x=172+k*88
+            d.rounded_rectangle((x,840-bar,x+57,840),radius=9,fill=col)
+        d.line((167,849,547,849),fill=(96,136,112),width=5)
+        coinsX=460+int(14*wave)
+        for k in range(3):
+            yy=668+k*20
+            d.ellipse((coinsX-39,yy-18,coinsX+39,yy+45),fill=(229,196,109),outline=(151,147,84),width=4)
+        if kind=="message":
+            d.rounded_rectangle((163,666,342,713),radius=12,fill=(100,180,137))
+            d.line((186,690,300,690),fill=(234,246,218),width=5)
+
+
 def center(draw,text,y,f,color):
     b=draw.textbbox((0,0),text,font=f)
     width=b[2]-b[0]
@@ -63,19 +181,23 @@ def center(draw,text,y,f,color):
 
 def draw_frame(brief,scene_index,seconds):
     scene=brief["scenes"][scene_index]
-    im=BACKGROUND.copy();d=ImageDraw.Draw(im)
+    style=brief.get("visualStyle")
+    colors=BRAND_PALETTES.get(style)
+    im=background_for_style(style);d=ImageDraw.Draw(im)
     d.line((70,126,650,126),fill=(82,102,120),width=2)
     d.ellipse((70,72,86,88),fill=GOLD)
-    d.text((103,67),"UNBODA  /  DAILY INSIGHT",font=font(20),fill=GOLD)
+    d.text((103,67),"UNBODA  /  SAJU & LIFE",font=font(20),fill=(colors["gold"] if colors else GOLD))
     center(d,scene["headline"][0],210,font(55,True),LIGHT)
-    center(d,scene["headline"][1],292,font(55,True),GOLD)
+    center(d,scene["headline"][1],292,font(55,True),colors["gold"] if colors else GOLD)
     center(d,scene["subline"],385,font(25),MUTED)
-    d.rounded_rectangle((88,486,632,957),radius=42,fill=(20,38,55),outline=(61,85,103),width=2)
+    d.rounded_rectangle((88,486,632,957),radius=42,fill=(colors["panel"] if colors else (20,38,55)),outline=(colors["accent"] if colors else (61,85,103)),width=3)
     cx,cy=360,713
     phase=2*math.pi*seconds/SCENE_SECONDS
     sw=math.sin(phase)
     kind=scene["illustration"]
-    if kind=="clock":
+    if colors:
+        draw_brand_hero(d,style,kind,scene_index,seconds)
+    elif kind=="clock":
         r=156
         d.ellipse((cx-r,cy-r,cx+r,cy+r),outline=GOLD,width=7)
         # One wide moving orbital highlight: avoid barely moving clock hands
@@ -123,9 +245,13 @@ def draw_frame(brief,scene_index,seconds):
         d.ellipse((cx-48,cy-48,cx+48,cy+48),fill=GOLD)
         d.ellipse((cx-28,cy-28,cx+28,cy+28),fill=(43,65,76))
     d.line((92,1040,628,1040),fill=(72,91,108),width=2)
-    d.text((98,1061),"작은 선택으로 오늘을 돌아보기",font=font(23),fill=MUTED)
-    d.text((98,1112),f"{scene_index+1:02d} / 04",font=font(19),fill=GOLD)
-    if scene_index==3:d.text((527,1111),"운보다",font=font(25,True),fill=LIGHT)
+    if scene_index==3 and colors:
+        d.text((98,1054),"운보다에서 내 사주 살펴보기",font=font(25,True),fill=colors["gold"])
+        d.text((98,1117),"unboda.kr  |  무료 사주 조회",font=font(19),fill=LIGHT)
+    else:
+        d.text((98,1061),"사주로 이해하는 나의 일상",font=font(23),fill=MUTED)
+    if scene_index!=3 or not colors:d.text((98,1112),f"{scene_index+1:02d} / 04",font=font(19),fill=GOLD)
+    if scene_index==3 and not colors:d.text((527,1111),"운보다",font=font(25,True),fill=LIGHT)
     return im
 
 def score(path):

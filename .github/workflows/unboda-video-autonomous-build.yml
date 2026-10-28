@@ -113,6 +113,9 @@ jobs:
       - name: Check renderer before work
         run: |
           python -m unittest discover -s automation/social/lifestyle-pilot -p 'test_*.py' -v
+      - name: Assert four distinct SAJU hero scenes are visibly animated at phone resolution
+        run: |
+          python -m unittest discover -s automation/social/lifestyle-pilot -p 'test_brand_visuals.py' -v
       - name: Draw original 30s moving scene and title cover
         run: |
           python automation/social/lifestyle-pilot/render.py \

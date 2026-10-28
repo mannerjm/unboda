@@ -1,0 +1,202 @@
+#!/usr/bin/env python3
+"""UNBODA original daily 12-animal general fortune carousel.
+
+This is a culturally framed day-branch zodiac reflection, NOT an individual
+eight-character saju chart or a prediction. All graphics are first-party.
+"""
+import argparse
+import datetime as dt
+import hashlib
+import json
+import os
+import pathlib
+import re
+import sys
+from PIL import Image, ImageDraw, ImageFont
+from korean_lunar_calendar import KoreanLunarCalendar
+
+HERE = pathlib.Path(__file__).resolve().parent
+KST = dt.timezone(dt.timedelta(hours=9))
+BRANCHES = list("子丑寅卯辰巳午未申酉戌亥")
+ANIMALS = [
+ ("쥐", "🐭", "子", 1996, "관찰"),
+ ("소", "🐮", "丑", 1997, "안정"),
+ ("호랑이", "🐯", "寅", 1998, "도전"),
+ ("토끼", "🐰", "卯", 1999, "소통"),
+ ("용", "🐲", "辰", 2000, "계획"),
+ ("뱀", "🐍", "巳", 2001, "판단"),
+ ("말", "🐴", "午", 2002, "활동"),
+ ("양", "🐑", "未", 2003, "배려"),
+ ("원숭이", "🐵", "申", 2004, "아이디어"),
+ ("닭", "🐔", "酉", 2005, "점검"),
+ ("개", "🐶", "戌", 2006, "신뢰"),
+ ("돼지", "🐷", "亥", 2007, "여유"),
+]
+STEMS = list("甲乙丙丁戊己庚辛壬癸")
+ELEMENTS = ["나무", "나무", "불", "불", "흙", "흙", "쇠", "쇠", "물", "물"]
+RELATIONS = {
+ "합": ("서로의 뜻을 맞춰 볼 여지가 있는 날", "함께할 일은 의견을 먼저 확인해 보세요."),
+ "삼합": ("주변 사람과 속도를 맞춰 보기 좋은 날", "도움을 청하거나 작은 역할을 나눠 보세요."),
+ "충": ("서로 다른 생각이 눈에 띌 수 있는 날", "서두르기보다 확인 후 답하는 편이 좋아요."),
+ "같은지지": ("익숙한 방식이 먼저 떠오르기 쉬운 날", "평소 습관 중 하나를 가볍게 점검해 보세요."),
+ "보통": ("나의 일상 리듬을 살펴보기 좋은 날", "지금 중요한 일 하나부터 정리해 보세요."),
+}
+TOPICS = [
+ ("계획", "오늘 할 일을 세 가지로 나눠 적어 보세요."),
+ ("소통", "짧은 안부 한마디가 대화를 부드럽게 해줄 수 있어요."),
+ ("돈관리", "작은 지출 하나부터 영수증이나 앱으로 확인해 보세요."),
+ ("휴식", "잠깐 멈춰 숨을 고르고 무리한 약속을 줄여 보세요."),
+ ("업무", "우선순위를 다시 적고 꼭 필요한 일에 집중해 보세요."),
+ ("관계", "상대의 말을 끝까지 듣고 내 생각을 천천히 전해 보세요."),
+ ("선택", "지금 결정할 일과 미뤄도 되는 일을 구분해 보세요."),
+ ("생활", "오늘의 작은 습관 하나를 스스로 칭찬해 보세요."),
+]
+INK = "#172B35"
+TEAL = "#0D5D5C"
+LIGHT = "#F7F9F7"
+MUTED = "#647981"
+GOLD = "#D7A960"
+CARD = "#FFFFFF"
+CANVAS = (1080, 1350)
+def find_font(bold=False):
+    paths = (
+        ["/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+         "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc"]
+        if bold else
+        ["/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+         "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc"]
+    )
+    for path in paths:
+        if pathlib.Path(path).exists():
+            return path
+    raise RuntimeError("KOREAN_FONT_MISSING")
+def f(size, bold=False):
+    return ImageFont.truetype(find_font(bold), size)
+def emoji_font():
+    for path in ["/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf"]:
+        if pathlib.Path(path).exists():
+            return ImageFont.truetype(path, 109)
+    raise RuntimeError("COLORED_ZODIAC_EMOJI_FONT_MISSING")
+def calendar_day(date):
+    cal = KoreanLunarCalendar()
+    if not cal.setSolarDate(date.year, date.month, date.day):
+        raise ValueError("DATE_OUTSIDE_VALIDATED_KOREAN_CALENDAR_RANGE")
+    gap = cal.getGapJaString()
+    matches = re.search(r"([가-힣]{2})일$", gap)
+    if not matches: raise ValueError("KOREAN_DAY_GANJI_NOT_FOUND")
+    han = gap.rsplit(" ", 1)[-1]
+    day_index = (dt.date(2026,10,29) - date).days
+    # Strong fixed anchor against widely published KST manse calendar: 2026-10-29 병자.
+    if date == dt.date(2026,10,29) and matches.group(1)!="병자":
+        raise ValueError("KNOWN_20261029_DAY_GANJI_MISMATCH")
+    if date == dt.date(2026,10,30) and matches.group(1)!="정축":
+        raise ValueError("KNOWN_20261030_DAY_GANJI_MISMATCH")
+    stem_hangul, branch_hangul = matches.group(1)
+    to_stem={"갑":"甲","을":"乙","병":"丙","정":"丁","무":"戊","기":"己","경":"庚","신":"辛","임":"壬","계":"癸"}
+    to_branch={"자":"子","축":"丑","인":"寅","묘":"卯","진":"辰","사":"巳","오":"午","미":"未","신":"申","유":"酉","술":"戌","해":"亥"}
+    return dict(gapja=matches.group(1), gan=to_stem[stem_hangul],
+                ji=to_branch[branch_hangul], calendarText=gap, lunarDate=cal.LunarIsoFormat())
+def relation(birth, day):
+    a=BRANCHES.index(birth); b=BRANCHES.index(day)
+    if a==b:return "같은지지"
+    pairs=[("子","丑"),("寅","亥"),("卯","戌"),("辰","酉"),("巳","申"),("午","未")]
+    if any(set([birth,day])==set(pair) for pair in pairs):return "합"
+    if (a-b)%12==6:return "충"
+    groups=["申子辰","亥卯未","寅午戌","巳酉丑"]
+    if any(birth in grp and day in grp for grp in groups):return "삼합"
+    return "보통"
+def make_data(date):
+    day=calendar_day(date)
+    idx=STEMS.index(day["gan"])
+    posts=[]
+    for i,(animal,em,branch,baseyear,signature) in enumerate(ANIMALS):
+        rel=relation(branch,day["ji"])
+        title, action = RELATIONS[rel]
+        # Date + exact stem + birth-year branch jointly affect a varied practical theme.
+        theme,extra=TOPICS[(date.toordinal()+idx*3+i*5)%len(TOPICS)]
+        years=[baseyear-24,baseyear-12,baseyear,baseyear+12,baseyear+24]
+        posts.append({"animal":animal,"emoji":em,"branch":branch,
+                      "representativeYears":years, "relationship":rel,
+                      "theme":theme,"signature":signature,
+                      "line1":title,"line2":action,"line3":extra})
+    return {"dateKst":date.isoformat(),"weekdayKo":"월화수목금토일"[date.weekday()],
+            "dayGanji":day["gapja"],"dayGan":day["gan"],"dayJi":day["ji"],
+            "lunarDate":day["lunarDate"],"timeZone":"Asia/Seoul",
+            "logic":"KoreanLunarCalendar day ganji + 12 earthly-branch relationships (합/삼합/충/동지지) + date/stem-based life reflection; no personal birth chart",
+            "notPersonalSaju":True,"entertainmentAndReflectionOnly":True,
+            "animals":posts}
+def rounded(draw,xy,r,fill,outline=None,width=1):
+    draw.rounded_rectangle(xy,radius=r,fill=fill,outline=outline,width=width)
+def label(draw,xy,text,size,color=INK,bold=False):
+    draw.text(xy,text,font=f(size,bold),fill=color)
+def gradient_background():
+    im=Image.new("RGB",CANVAS)
+    p=im.load()
+    for y in range(CANVAS[1]):
+        v=y/CANVAS[1]
+        r=int(247-10*v);g=int(250-5*v);b=int(247-2*v)
+        for x in range(CANVAS[0]):p[x,y]=(r,g,b)
+    return im
+def cover(data):
+    im=gradient_background();d=ImageDraw.Draw(im)
+    d.rounded_rectangle((48,52,1032,1298),radius=66,fill="#125A5A")
+    d.ellipse((694,160,1110,576),outline="#458782",width=4)
+    d.ellipse((782,229,1082,529),outline="#77A59A",width=3)
+    d.ellipse((810,265,1062,517),outline=GOLD,width=3)
+    label(d,(108,116),"UNBODA  |  운보다",40,"#F5F4E8",True)
+    d.rectangle((111,186,969,190),fill="#547D76")
+    label(d,(108,270),f"{data['dateKst'].replace('-','.')}  {data['weekdayKo']}요일",46,"#E4D0AB",True)
+    label(d,(105,390),"오늘의",100,"#FFFFFF",True)
+    label(d,(105,520),"12띠 운세",113,"#FFDD9C",True)
+    label(d,(110,710),f"오늘의 일진  {data['dayGanji']}일",46,"#E9F1EA",True)
+    d.rounded_rectangle((109,850,972,1015),radius=30,fill="#F8F5EC")
+    label(d,(151,878),"12가지 띠의 하루를",47,TEAL,True)
+    label(d,(151,947),"쉬운 말로 살펴보세요",41,INK,False)
+    label(d,(109,1111),"전통 명리 해석 · 참고용, 미래 확정 아님",31,"#E7ECE6")
+    label(d,(109,1194),"무료 사주 조회  unboda.kr",35,"#FFFFFF",True)
+    return im
+def page(data,page_index):
+    im=gradient_background();d=ImageDraw.Draw(im)
+    d.rounded_rectangle((42,44,1038,185),radius=32,fill=TEAL)
+    label(d,(83,63),"UNBODA  |  오늘의 띠별 흐름",43,"#FFFFFF",True)
+    label(d,(83,125),f"{data['dateKst'].replace('-','.')}  ·  {data['dayGanji']}일",30,"#D8E7DC")
+    sub=data["animals"][page_index*4:(page_index+1)*4]
+    ef=emoji_font()
+    for i,post in enumerate(sub):
+        top=211+i*258
+        rounded(d,(45,top,1035,top+240),30,CARD,outline="#DDEAE4",width=2)
+        rounded(d,(68,top+33,208,top+176),33,"#E1F1E8")
+        d.text((85,top+49),post["emoji"],font=ef,embedded_color=True)
+        label(d,(235,top+17),post["animal"]+"띠",47,TEAL,True)
+        label(d,(430,top+26),post["theme"]+" · "+post["relationship"],29,"#94683A",True)
+        label(d,(237,top+90),post["line1"],31,INK,False)
+        label(d,(237,top+140),post["line2"],29,INK,False)
+        label(d,(237,top+190),post["line3"],24,MUTED,False)
+    label(d,(58,1272),"사주·띠 해석은 문화적 참고로 활용하세요.",25,MUTED)
+    label(d,(860,1271),f"{page_index+2:02d} / 04",24,TEAL,True)
+    return im
+def main():
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--date")
+    parser.add_argument("--out",required=True)
+    opts=parser.parse_args()
+    date=dt.date.fromisoformat(opts.date) if opts.date else dt.datetime.now(KST).date()
+    result=make_data(date)
+    out=pathlib.Path(opts.out);out.mkdir(parents=True,exist_ok=True)
+    ims=[cover(result)]+[page(result,i) for i in range(3)]
+    images=[]
+    for i,im in enumerate(ims):
+        path=out/f"unboda-{date.isoformat()}-{i+1:02d}.png"
+        im.save(path,format="PNG",optimize=True)
+        b=path.read_bytes()
+        if not (b.startswith(b"\x89PNG") and len(b)>15000):
+            raise RuntimeError("INVALID_OR_EMPTY_ORIGINAL_ZODIAC_IMAGE")
+        images.append({"name":path.name,"sha256":hashlib.sha256(b).hexdigest(),
+                       "bytes":len(b),"dimensions":[1080,1350]})
+    result["images"]=images
+    (out/"zodiac-manifest.json").write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    captions=[f"{date.month}월 {date.day}일, 12띠의 하루를 운보다에서 전해드려요. 오늘의 일진은 {result['dayGanji']}일입니다.","각 띠마다 사람·일·소비·관계를 돌아보는 간단한 생활 조언을 담았습니다. 카드를 넘겨 나의 띠를 찾아보세요.","※ 전통 명리의 일진과 지지 관계를 바탕으로 만든 일반 참고 콘텐츠이며, 개인 사주 분석이나 미래에 대한 확정적 예측은 아닙니다.", "내 상황에 맞는 무료 사주: https://unboda.kr","#운보다 #띠별운세 #오늘의운세 #무료사주 #명리"]
+    (out/"caption.txt").write_text("\n\n".join(captions)+"\n",encoding="utf-8")
+    print(json.dumps({"state":"FOUR_ORIGINAL_ZODIAC_IMAGES_VERIFIED","date":date.isoformat(),
+       "dayGanji":result["dayGanji"],"images":images,"animalCount":len(result["animals"])},ensure_ascii=False))
+if __name__=="__main__":main()

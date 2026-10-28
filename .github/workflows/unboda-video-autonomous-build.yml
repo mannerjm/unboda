@@ -50,6 +50,7 @@ jobs:
             echo "skip_release=false" >> "$GITHUB_OUTPUT"
           fi
           node --test automation/social/lifestyle-pilot/brand-video-guard.test.mjs
+          node --test automation/social/lifestyle-pilot/topic-visual-guard.test.mjs
           node --test automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs
           node automation/social/lifestyle-pilot/four-daily-private-validator.mjs
           node --input-type=module <<'NODE'
@@ -152,6 +153,7 @@ jobs:
           path: |
             ${{ env.UNBODA_OUTPUT }}/LIFESTYLE_30S_KOREAN_PRIVATE_REVIEW.mp4
             ${{ env.UNBODA_OUTPUT }}/LIFESTYLE_COVER.jpg
+            ${{ env.UNBODA_OUTPUT }}/VISUAL_PROOF.json
             ${{ env.UNBODA_OUTPUT }}/LIFESTYLE_TECHNICAL_QA.json
           if-no-files-found: error
           retention-days: 1
@@ -197,6 +199,7 @@ jobs:
             const movie=fs.readFileSync(base+'LIFESTYLE_30S_KOREAN_PRIVATE_REVIEW.mp4');
             const cover=fs.readFileSync(base+'LIFESTYLE_COVER.jpg');
             const qa=JSON.parse(fs.readFileSync(base+'LIFESTYLE_TECHNICAL_QA.json','utf8'));
+            const visualProof=JSON.parse(fs.readFileSync(base+'VISUAL_PROOF.json','utf8'));
             const sha=createHash('sha256').update(movie).digest('hex');
             if(qa.state!=='PASS_TECHNICAL_ONLY'||qa.technicalChecksPassed!==true||
               qa.video?.sha256!==sha||qa.video?.bytes!==movie.length||
@@ -211,7 +214,17 @@ jobs:
             const briefs={midnight:'003-midnight',commute:'004-commute',
               friendship:'005-friendship',afterwork:'002-afterwork'};
             const b=JSON.parse(fs.readFileSync('automation/social/lifestyle-pilot/episodes/'+briefs[name]+'.json','utf8'));
+            // Verify the actual Python renderer drew the validated object in the
+            // finished MP4 instead of accepting text-only storyboard declarations.
+            if(visualProof.topicVisualMatchVerified!==true||
+              visualProof.topicVisualMotif!==b.visualMotif||
+              !visualProof.actualMotifGraphic||
+              !visualProof.visibleTopicObject||
+              visualProof.originalMovingGraphics!==true||
+              !b.visualMotif)
+             throw Error('ACTUAL_VIDEO_TOPIC_VISUAL_NOT_DRAWN:'+name);
             manifest.videos.push({hourKst:hour,name,mp4:file,jpg:coverName,
+              visualMotif:b.visualMotif,topicVisualMatchVerified:true,
               sha256:sha,bytes:movie.length,topicKey:b.topicKey,
               title:b.thumbnailTitle,caption:b.narrationDraft.join(' '),
               sajuCategory:b.sajuCategory,visualStyle:b.visualStyle,

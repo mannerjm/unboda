@@ -25,6 +25,8 @@ on:
       - 'automation/social/private-review-artifact-loader.mjs'
       - 'automation/social/private-review-staging-upload-cli.mjs'
       - 'automation/social/private-review-staging-upload-cli.test.mjs'
+      - 'automation/social/metricool-video-scheduling.mjs'
+      - 'automation/social/metricool-video-scheduling.test.mjs'
       - '.github/workflows/unboda-private-staging-archive-four.yml'
       - 'automation/social/staging-observed-post-raw-sha256-compat.sql'
       - 'automation/social/staging-remote-post-integrity-guard.sql'
@@ -65,4 +67,5 @@ jobs:
             automation/social/lifestyle-pilot/compile-ai-private-brief.test.mjs \
             automation/social/archive-private-media-and-receipt.test.mjs \
             automation/social/verify-video-publication-evidence.test.mjs \
-            automation/social/private-review-staging-upload-cli.test.mjs
+            automation/social/private-review-staging-upload-cli.test.mjs \
+            automation/social/metricool-video-scheduling.test.mjs

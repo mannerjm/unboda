@@ -160,10 +160,13 @@ async function runVideoPublishCron({env=process.env,fetcher=fetch,
  const rotation=env.SOCIAL_VIDEO_NETWORKS==="rotation";
  if(rotation&&(typeof reserveSlot!=="function"||typeof reserveSource!=="function"))
   return {http:503,body:fail("TWO_CHANNEL_ORIGINAL_CLAIM_NOT_CONNECTED")};
+ const fixedNetworks=rotation?null:enabledNetworks(env);
+ if(!rotation&&(!fixedNetworks||typeof reserveSlot!=="function"))
+  return {http:503,body:fail("PROVIDER_LIST_OR_ATOMIC_CLAIM_MISSING")};
  const video=await loadReleaseVideo({now,fetcher});
  if(video.state!=="ONE_KST_VIDEO_PUBLIC_MEDIA_VERIFIED")
   return {http:503,body:fail(video.reason,{slot:video.slot||null})};
- const networks=enabledNetworks(env,video.slot);
+ const networks=rotation?enabledNetworks(env,video.slot):fixedNetworks;
  if(!networks||typeof reserveSlot!=="function"||(rotation&&networks.length!==2))
   return {http:503,body:fail("PROVIDER_LIST_OR_ATOMIC_CLAIM_MISSING")};
  if(rotation){

@@ -57,5 +57,6 @@
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
-  "automatedPublicationAllowed": false
+  "automatedPublicationAllowed": false,
+  "visualMotif": "subscription-billing"
 }

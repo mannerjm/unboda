@@ -49,3 +49,23 @@ test('unboda domain cannot be swapped for a lookalike redirect',()=>{
  const b={...briefs[0],destination:'https://unboda.kr.attacker.invalid'};
  assert.equal(inspectSajuBrandEpisode(b).ok,false);
 });
+
+test('topic-specific first-frame graphics are mandatory, not just same palette',()=>{
+ for(const brief of briefs){
+  assert.equal(inspectSajuBrandEpisode(brief).ok,true);
+ }
+ const mismatched={...briefs[3],visualMotif:'meeting-presentation'};
+ assert.equal(inspectSajuBrandEpisode(mismatched).reason,'VISUAL_MOTIF_CATEGORY_MISMATCH');
+ const generic={...briefs[1],visualConcepts:[
+  '추상적인 별빛과 무관한 풍경을 보여주는 장면',
+  '어울리지 않는 우주 그래픽 한 장면',
+  '범용 색감과 별만 움직이는 의미 없는 장면',
+  '무료 사주 조회가 끝나는 마무리 장면']};
+ assert.equal(inspectSajuBrandEpisode(generic).reason,
+  'STORYBOARD_HAS_NO_MATCHING_VISIBLE_SCENE_OBJECTS');
+ const wrongFirst={...briefs[2],scenes:[
+  {...briefs[2].scenes[0],headline:['재물운 이야기','돈이 들어올까?']},
+  ...briefs[2].scenes.slice(1)]};
+ assert.equal(inspectSajuBrandEpisode(wrongFirst).reason,
+  'FIRST_FRAME_HOOK_NOT_MATCHED_TO_VISIBLE_MOTIF');
+});

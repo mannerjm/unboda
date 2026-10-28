@@ -16,6 +16,8 @@ FONT_ROOT=pathlib.Path("/usr/share/fonts/opentype/noto")
 LIGHT=(244,238,224)
 GOLD=(240,190,109)
 MUTED=(161,177,186)
+# One policy drives both the script gate and actual rendered subject objects.
+VISUAL_MOTIFS=json.loads((pathlib.Path(__file__).parent/"topic-visual-policy.json").read_text())["motifs"]
 
 def font(px,bold=False):
     p=FONT_ROOT/("NotoSansCJK-Bold.ttc" if bold else "NotoSansCJK-Regular.ttc")
@@ -53,6 +55,19 @@ def verify(brief):
         for text,f in [(titles[0],font(55,True)),(titles[1],font(55,True)),(caption,font(25))]:
             b=d.textbbox((0,0),text,font=f)
             if b[2]-b[0]>W-120:raise ValueError("HEADLINE_SAFE_WIDTH_OVERFLOW")
+    motif=brief.get("visualMotif")
+    evidence=VISUAL_MOTIFS.get(motif)
+    if not evidence or evidence["category"]!=brief.get("sajuCategory"):
+        raise ValueError("UNSUPPORTED_OR_WRONG_TOPIC_VISUAL_MOTIF")
+    if not any(t in brief.get("situation","") for t in evidence["situationTerms"]):
+        raise ValueError("VIDEO_SITUATION_AND_VISIBLE_MOTIF_MISMATCH")
+    if not any(t in " ".join(brief["scenes"][0]["headline"]) for t in evidence["situationTerms"]):
+        raise ValueError("FIRST_FRAME_SUBJECT_NOT_MATCHED")
+    if not any(t in " ".join(brief.get("visualConcepts",[])) for t in evidence["visualTerms"]):
+        raise ValueError("TOPIC_VISUAL_CONCEPT_IS_GENERIC")
+    if evidence["graphic"] not in ("checklist","journal","people","moon","presentation",
+          "signpost","interview","map","phone","calendar","receipt","savings","shopping"):
+        raise ValueError("ACTUAL_SCENE_OBJECT_DRAWING_MISSING")
     return brief
 
 def base_image():
@@ -198,6 +213,104 @@ def draw_brand_hero(d,style,kind,scene_index,seconds):
             d.line((186,690,300,690),fill=(234,246,218),width=5)
 
 
+
+def draw_topic_overlay(d,brief,seconds,scene_index):
+    """Render identifiable subject objects INSIDE every real video frame.
+
+    These graphics are chosen by a validated brief motif, not a category-wide
+    palette, so a meeting must show a presentation, a meetup a map, and a
+    subscription payment a billing notification. Never rely on alt text alone.
+    """
+    motif=VISUAL_MOTIFS[brief["visualMotif"]]
+    graphic=motif["graphic"]
+    palette=BRAND_PALETTES[brief["visualStyle"]]
+    accent=palette["accent"]
+    dy=int(13*math.sin(seconds*2.0+scene_index*0.8))
+    # The motif panel stays wholly within the illustrated central region.
+    d.rounded_rectangle((198,594,522,867),radius=30,fill=(24,37,57),
+                        outline=accent,width=5)
+    d.text((218,613),motif["label"],font=font(25,True),fill=accent)
+    top=671+dy
+    paper=(235,232,220)
+    ink=(56,81,102)
+    if graphic in ("checklist","journal"):
+        d.rounded_rectangle((247,top,471,top+164),radius=17,fill=paper)
+        for i in range(3):
+            yy=top+32+i*43
+            if graphic=="checklist":
+                d.rectangle((269,yy,289,yy+20),outline=ink,width=3)
+                if i<scene_index+1:
+                    d.line([(270,yy+10),(278,yy+18),(292,yy-4)],fill=(45,139,102),width=4)
+            else:
+                d.ellipse((268,yy,288,yy+20),fill=(215,118,136))
+            d.line((304,yy+11,448-i*12,yy+11),fill=ink,width=4)
+    elif graphic in ("people","interview"):
+        for x in (285,421):
+            d.ellipse((x-34,top+10,x+34,top+78),fill=(233,190,153))
+            d.rounded_rectangle((x-53,top+76,x+53,top+153),radius=23,fill=accent)
+        if graphic=="interview":
+            d.rounded_rectangle((252,top+135,467,top+175),radius=9,fill=paper)
+        else:
+            d.rounded_rectangle((302,top+16,401,top+54),radius=17,outline=paper,width=5)
+    elif graphic=="moon":
+        d.ellipse((292,top-5,415,top+118),fill=paper)
+        d.ellipse((329,top-27,440,top+94),fill=(24,37,57))
+        for x,y in ((266,top+56),(451,top+112),(282,top+149)):
+            d.ellipse((x,y,x+8,y+8),fill=accent)
+    elif graphic=="presentation":
+        d.rounded_rectangle((251,top,468,top+146),radius=12,fill=paper)
+        d.line((360,top+146,360,top+181),fill=accent,width=7)
+        d.line((315,top+183,404,top+183),fill=accent,width=6)
+        for i,h in enumerate((36,72,107)):
+            x=278+i*58
+            d.rounded_rectangle((x,top+125-h,x+33,top+125),radius=5,fill=(62,130,160))
+        d.ellipse((417+int(9*math.sin(seconds*2)),top+24,432+int(9*math.sin(seconds*2)),top+39),fill=(220,99,92))
+    elif graphic=="signpost":
+        d.line((363,top+10,363,top+182),fill=paper,width=11)
+        d.polygon([(269,top+28),(436,top+28),(460,top+51),(436,top+74),(269,top+74)],fill=accent)
+        d.polygon([(455,top+92),(274,top+92),(252,top+116),(274,top+139),(455,top+139)],fill=paper)
+    elif graphic=="map":
+        d.rounded_rectangle((240,top-4,483,top+180),radius=15,fill=paper)
+        d.line([(272,top+128),(323,top+86),(383,top+115),(444,top+49)],fill=(83,153,150),width=10)
+        for x,y in ((272,top+117),(444,top+38)):
+            d.ellipse((x-18,y-28,x+18,y+8),fill=(228,119,113))
+            d.ellipse((x-7,y-17,x+7,y-3),fill=paper)
+        d.ellipse((355+int(15*math.sin(seconds)),top+84,373+int(15*math.sin(seconds)),top+102),fill=(65,102,154))
+    elif graphic=="phone":
+        d.rounded_rectangle((271,top-11,451,top+178),radius=20,fill=paper,outline=accent,width=4)
+        d.line((334,top+1,388,top+1),fill=ink,width=5)
+        for i in range(3):
+            yy=top+30+i*47
+            d.rounded_rectangle((290,yy,432,yy+35),radius=9,fill=(92,149,143) if i!=scene_index%3 else (220,171,112))
+            d.ellipse((301,yy+10,317,yy+26),fill=paper)
+            d.line((327,yy+17,415,yy+17),fill=paper,width=3)
+    elif graphic=="calendar":
+        d.rounded_rectangle((245,top,474,top+175),radius=13,fill=paper)
+        d.rectangle((245,top+2,474,top+42),fill=(114,158,170))
+        for row in range(3):
+            for col in range(4):
+                x=270+col*52;y=top+64+row*33
+                d.ellipse((x,y,x+17,y+17),fill=(229,116,118) if (row,col)==(scene_index%3,scene_index%4) else ink)
+    elif graphic=="receipt":
+        d.rounded_rectangle((267,top-8,450,top+178),radius=12,fill=paper)
+        for i in range(4):
+            yy=top+22+i*37
+            d.line((289,yy,410-i*9,yy),fill=ink,width=5)
+        d.ellipse((410,top+116,473,top+179),fill=(222,183,105))
+    elif graphic=="savings":
+        d.rounded_rectangle((267,top+39,456,top+177),radius=35,fill=(137,207,183),outline=paper,width=5)
+        d.line((322,top+38,402,top+38),fill=paper,width=10)
+        for i in range(3):
+            x=290+i*60;y=top+86+i%2*26
+            d.ellipse((x,y,x+41,y+41),fill=(237,196,110))
+        d.line((334,top+9,406,top+9),fill=(237,196,110),width=9)
+    elif graphic=="shopping":
+        d.rounded_rectangle((275,top+56,444,top+178),radius=13,fill=(231,187,130))
+        d.arc((300,top+17,421,top+113),start=175,end=365,fill=paper,width=9)
+        d.rounded_rectangle((315,top+105,405,top+119),radius=7,fill=(120,81,72))
+    else:
+        raise ValueError("UNRENDERED_TOPIC_VISUAL_MOTIF")
+
 def center(draw,text,y,f,color):
     b=draw.textbbox((0,0),text,font=f)
     width=b[2]-b[0]
@@ -222,6 +335,7 @@ def draw_frame(brief,scene_index,seconds):
     kind=scene["illustration"]
     if colors:
         draw_brand_hero(d,style,kind,scene_index,seconds)
+        draw_topic_overlay(d,brief,seconds,scene_index)
     elif kind=="clock":
         r=156
         d.ellipse((cx-r,cy-r,cx+r,cy+r),outline=GOLD,width=7)
@@ -311,6 +425,8 @@ def render(brief,directory):
     score(dest/"LIFESTYLE_ORIGINAL_SCORE.wav")
     proof={"state":"ORIGINAL_MOTION_REVIEW_ONLY","topicKey":brief["topicKey"],
            "originalMovingGraphics":True,"licensedRealFootage":False,
+           "topicVisualMotif":brief["visualMotif"],"actualMotifGraphic":VISUAL_MOTIFS[brief["visualMotif"]]["graphic"],
+           "visibleTopicObject":VISUAL_MOTIFS[brief["visualMotif"]]["label"],"topicVisualMatchVerified":True,
            "narrationExists":False,"commercialQualityApproved":False,
            "publicationAllowed":False}
     (dest/"VISUAL_PROOF.json").write_text(json.dumps(proof,ensure_ascii=False,indent=2)+"\n")

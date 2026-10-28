@@ -19,7 +19,8 @@ const manifest={schemaVersion:1,targetDateKst:"20261029",
   title:"하루 고민을 사주로 살펴봐요",caption:"현실 속 고민을 사주와 궁합·재물운의 관점에서 돌아보며 운보다 무료 사주 조회로 내 성향도 천천히 살펴보세요.",
   visualStyle:({midnight:"midnight-indigo",commute:"commute-sunrise",friendship:"relationship-coral",afterwork:"finance-emerald"})[name],
   sajuCategory:({midnight:"self-understanding",commute:"career",friendship:"compatibility",afterwork:"money"})[name],
-  destination:"https://unboda.kr"}))};
+  destination:"https://unboda.kr",socialPublishingApproved:true,
+  licenseReviewed:true,voiceHumanReviewed:true}))};
 const metadata={draft:false,prerelease:true,tag_name:tag,
  assets:[
   {name:"manifest.json",size:JSON.stringify(manifest).length,state:"uploaded",

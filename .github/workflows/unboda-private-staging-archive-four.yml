@@ -10,7 +10,7 @@ on:
         required: true
         type: string
       max_bytes:
-        description: 'Maximum total MP4 bytes (1..6000000, all four require >=4549627)'
+        description: 'Maximum total MP4 bytes (1..6000000, all four require >=4549628)'
         required: true
         default: '6000000'
         type: string

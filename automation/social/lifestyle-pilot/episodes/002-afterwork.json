@@ -1,57 +1,60 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-lifestyle-evening-dishes-20261029",
-  "topicKey": "evening-dishes-small-start-20261029",
-  "situation": "저녁 설거지가 쌓여 막막한 날",
-  "hook": "설거지가 쌓였을 때 어디부터 시작할까요?",
-  "theme": "집안일·저녁 루틴",
-  "thumbnailTitle": "설거지 산더미?",
+  "id": "unboda-saju-money-pattern-evening-20261029",
+  "topicKey": "saju-money-spending-pattern-20261029",
+  "sajuCategory": "money",
+  "visualStyle": "finance-emerald",
+  "situation": "월급날인데 돈이 남지 않은 밤",
+  "hook": "소비가 왜 반복될까요?",
+  "theme": "사주 재물운과 현실 소비 습관",
+  "thumbnailTitle": "월급이 남지 않는 이유?",
   "narrationDraft": [
-    "저녁 설거지가 쌓여 막막한 날. 싱크대를 보자마자 한숨이 나오나요?",
-    "전부 끝내야 한다고 생각하면 시작부터 부담스러울 수 있어요.",
-    "컵과 수저만 먼저 모아 씻어 보세요. 나머지는 나눠 해도 돼요.",
-    "작게 시작한 뒤 쉬어도 괜찮아요. 오늘 할 만큼만 정해 봐요."
+    "월급날인데 돈이 남지 않은 밤. 소비가 왜 반복될까요?",
+    "사주 재물운은 돈을 대하는 성향을 돌아보는 하나의 관점이에요.",
+    "이번 달 자주 쓴 항목 세 가지만 점검해 보세요.",
+    "지출 기록과 함께 운보다 무료 사주 조회로 내 재물 성향도 살펴보세요."
   ],
   "visualConcepts": [
-    "저녁 싱크대의 컵과 수저를 간단한 체크 항목으로 보여주는 원본 메모 모션",
-    "할 일 목록이 작게 분리되어 정리되는 원본 메모 모션",
-    "컵과 수저 항목에 체크 표시가 차례로 생기는 원본 메모 모션",
-    "조명이 부드럽게 줄어들며 쉬는 시간을 표현하는 원본 휴식 모션"
+    "저녁 책상 위 통장과 지출 영수증이 놓이고 숫자가 변하는 원본 장면",
+    "소비 항목이 세 갈래로 나뉘며 금액의 흐름이 보이는 모션 인포그래픽",
+    "영수증 세 가지를 차례로 정리하는 손과 가계부의 오리지널 영상 모션",
+    "녹색 빛의 예산 그래프가 잔잔해지고 운보다 무료 사주 조회가 나타나는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "설거지가 쌓이면",
-        "어디서 시작해요?"
+        "월급날인데",
+        "왜 돈이 안 남지?"
       ],
-      "subline": "싱크대 앞에서 막막할 때",
+      "subline": "지출 습관이 궁금할 때",
       "illustration": "notes"
     },
     {
       "headline": [
-        "전부 다 하려면",
-        "시작이 어려워요"
+        "사주 재물운은",
+        "소비 성향의 참고"
       ],
-      "subline": "작게 나눠 생각해요",
-      "illustration": "notes"
+      "subline": "금액을 예언하지 않아요",
+      "illustration": "clock"
     },
     {
       "headline": [
-        "컵과 수저부터",
-        "작게 나눠 해요"
+        "이번 달 지출",
+        "세 가지만 점검"
       ],
-      "subline": "먼저 할 일 하나만",
-      "illustration": "notes"
+      "subline": "가계부부터 살펴봐요",
+      "illustration": "message"
     },
     {
       "headline": [
-        "할 만큼만 해요",
-        "쉬어도 괜찮아요"
+        "내 사주부터",
+        "무료로 살펴보기"
       ],
-      "subline": "내 속도로 마무리해요",
+      "subline": "운보다 무료 사주 조회",
       "illustration": "rest"
     }
   ],
+  "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false

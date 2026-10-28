@@ -172,3 +172,19 @@ test("atomic blob slot claim can only be inserted once",async()=>{
  assert.equal((await claim(a)).state,"FIRST_ATOMIC_CLAIM_GRANTED");
  assert.equal((await claim(a)).state,"PREVIOUS_OR_UNCERTAIN_ATOMIC_CLAIM_NO_RETRY");
 });
+
+test("MP4 technical PASS does not authorize unreviewed commercial release",async()=>{
+ const unreviewed=JSON.parse(JSON.stringify(manifest));
+ unreviewed.videos[0].socialPublishingApproved=false;
+ let reads=0;
+ const fetcher=async url=>{
+  reads++;
+  if(url.includes("/releases/tags/"))return reply(metadata);
+  if(url.endsWith("/manifest.json"))return reply(unreviewed);
+  throw Error("UNAPPROVED_VIDEO_MUST_NEVER_BE_DOWNLOADED");
+ };
+ const r=await loadReleaseVideo({now,fetcher});
+ assert.equal(r.state,"BLOCKED");
+ assert.equal(r.reason,"COMMERCIAL_VIDEO_RIGHTS_AND_VOICE_REVIEW_NOT_APPROVED");
+ assert.equal(reads,2);
+});

@@ -27,6 +27,8 @@ export function inspectSajuBrandEpisode(b){
   return DENY('FIRST_TWO_SECONDS_REAL_LIFE_HOOK_REQUIRED');
  if(!SAJU.test(explain)||SAJU.test(hook))
   return DENY('SAJU_INTERPRETATION_AFTER_REAL_LIFE_HOOK_REQUIRED');
+ if(practical.replace(/\s/g,'').length<28)
+  return DENY('PRACTICAL_KOREAN_VOICE_TOO_SHORT_CAUSES_LONG_GAP');
  if(!/(?:생각|살펴|기록|적어|점검|대화|확인|돌아보|말해|구분|비교)/.test(practical))
   return DENY('PRACTICAL_LIFE_REFLECTION_REQUIRED');
  if(!UNBODA.test(cta)||!SAJU.test(cta)||

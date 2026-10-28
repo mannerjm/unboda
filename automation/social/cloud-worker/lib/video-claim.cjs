@@ -29,4 +29,28 @@ function makeVideoClaim({put,token}={}){
   }catch{return {state:"PREVIOUS_OR_UNCERTAIN_ATOMIC_CLAIM_NO_RETRY"}}
  };
 }
-module.exports={makeVideoClaim};
+// A source hash belongs to one publishing slot globally, regardless of which
+// two channels receive the same original within that slot.
+function makeSourceClaim({put,token}={}){
+ return async function reserveSource({brandId,slotUtc,sourceSha256,sourceTag}={}){
+  if(typeof put!=="function"||typeof token!=="string"||token.length<20||
+     brandId!==REPO_BRAND||!/^[a-f0-9]{64}$/.test(sourceSha256??"")||
+     !/^unboda-saju-shorts-\d{8}$/.test(sourceTag??"")||
+     !Number.isFinite(Date.parse(slotUtc))||
+     !/^\d{4}-\d\d-\d\dT\d\d:00:00\.000Z$/.test(slotUtc??""))
+    return {state:"INVALID_DURABLE_SOURCE_CLAIM"};
+  const pathname="unboda-social/source-claims/"+sourceSha256+".json";
+  try{
+   const receipt=await put(pathname,JSON.stringify({brandId,slotUtc,
+      sourceSha256,sourceTag,state:"ORIGINAL_RESERVED_FOR_ONE_SLOT_ONLY"}),{
+     access:"public",contentType:"application/json",allowOverwrite:false,
+     addRandomSuffix:false,token
+   });
+   if(receipt?.pathname!==pathname||typeof receipt?.url!=="string"||
+      !receipt.url.startsWith("https://")||!receipt.url.endsWith(pathname))
+     return {state:"UNTRUSTED_SOURCE_CLAIM_RECEIPT"};
+   return {state:"FIRST_ORIGINAL_CLAIM_GRANTED",pathname};
+  }catch{return {state:"ORIGINAL_USED_OR_CLAIM_UNCERTAIN_NO_RETRY"}}
+ };
+}
+module.exports={makeVideoClaim,makeSourceClaim};

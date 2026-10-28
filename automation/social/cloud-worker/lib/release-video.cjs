@@ -9,13 +9,17 @@ function isoKst(ms){return new Date(ms+KST).toISOString().slice(0,19)}
 function nextSlotFromCron(atMs){
  if(!Number.isFinite(atMs))return null;
  const local=new Date(atMs+KST),h=local.getUTCHours(),minute=local.getUTCMinutes();
- if(!HOURS.includes(h)||minute>30)return null;
+ // Pre-schedule, not at publish time. 23:45 -> next 00:00;
+ // 07:45 -> 08:00; 11:45 -> 12:00; 19:45 -> 20:00.
+ // Late cron invocations (<5m before posting) are blocked, not retried.
+ const nextByHour={23:0,7:8,11:12,19:20};
+ if(!Object.hasOwn(nextByHour,h)||minute<45||minute>55)return null;
  const day=Math.floor((atMs+KST)/86400000)*86400000;
- const next=HOURS.find(x=>x>h);
- const localSlot=(next!==undefined?day+next*3600000:day+86400000);
+ const next=nextByHour[h];
+ const localSlot=day+(h===23?86400000:next*3600000);
  return {slotUtc:new Date(localSlot-KST).toISOString(),slotKst:new Date(localSlot).toISOString().slice(0,19),
   targetDateKst:new Date(localSlot).toISOString().slice(0,10).replaceAll("-",""),
-  hourKst:String(next??0).padStart(2,"0")};
+  hourKst:String(next).padStart(2,"0")};
 }
 async function jsonFrom(response){try{return await response.json()}catch{return null}}
 async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){

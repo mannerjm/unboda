@@ -20,11 +20,18 @@ on:
       - 'automation/social/lifestyle-pilot/compile-ai-private-brief.test.mjs'
       - 'automation/social/archive-private-media-and-receipt.mjs'
       - 'automation/social/archive-private-media-and-receipt.test.mjs'
+      - 'automation/social/verify-video-publication-evidence.mjs'
+      - 'automation/social/verify-video-publication-evidence.test.mjs'
+      - 'automation/social/staging-observed-post-raw-sha256-compat.sql'
+      - 'automation/social/staging-private-media-archive-ledger.sql'
       - 'automation/social/cloud-worker/vercel.json'
       - 'automation/social/lifestyle-pilot/four-daily-private-validator.mjs'
       - 'automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs'
       - 'automation/social/lifestyle-pilot/four-daily-private-manifest.json'
       - '.github/workflows/unboda-social-editorial-fast-contract.yml'
+concurrency:
+  group: unboda-fast-social-review-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -51,4 +58,5 @@ jobs:
             automation/social/supabase-private-adapter.test.mjs \
             automation/social/openai-lifestyle-generator.test.mjs \
             automation/social/lifestyle-pilot/compile-ai-private-brief.test.mjs \
-            automation/social/archive-private-media-and-receipt.test.mjs
+            automation/social/archive-private-media-and-receipt.test.mjs \
+            automation/social/verify-video-publication-evidence.test.mjs

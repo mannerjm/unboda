@@ -53,6 +53,8 @@ async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
  }catch{return {state:"BLOCKED",reason:"RELEASE_MANIFEST_UNREADABLE",slot}};
  if(manifest?.schemaVersion!==1||manifest?.targetDateKst!==slot.targetDateKst||
     manifest?.generatedBy!=="github-actions-four-qa-verified"||
+    manifest?.brandSajuVerified!==true||
+    manifest?.fourDistinctVisualStylesVerified!==true||
     manifest?.publishAutomatically!==false||
     !/^[a-f0-9]{40}$/.test(manifest.sourceCommit??"")||
     !Array.isArray(manifest.videos)||manifest.videos.length!==4||
@@ -60,7 +62,12 @@ async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
     !HOURS.every(h=>manifest.videos.some(x=>x.hourKst===String(h).padStart(2,"0"))))
   return {state:"BLOCKED",reason:"FOUR_RELEASE_QA_PROVENANCE_INVALID",slot};
  const video=manifest.videos.find(x=>x.hourKst===slot.hourKst);
- if(!video||!/^[a-f0-9]{64}$/.test(video.sha256||"")||
+ if(!video||video.sajuCategory===undefined||
+    !["self-understanding","career","compatibility","money"].includes(video.sajuCategory)||
+    !["midnight-indigo","commute-sunrise","relationship-coral","finance-emerald"].includes(video.visualStyle)||
+    !/운보다/.test(video.caption??"")||!/(사주|궁합|재물운)/.test(video.caption??"")||
+    !/^https:\/\/unboda\.kr\/?$/.test(video.destination??"")||
+    !/^[a-f0-9]{64}$/.test(video.sha256||"")||
     video.mp4!==slot.hourKst+"-"+video.name+".mp4"||
     !["midnight","commute","friendship","afterwork"].includes(video.name)||
     !Number.isSafeInteger(video.bytes)||video.bytes<1000||video.bytes>45000000||

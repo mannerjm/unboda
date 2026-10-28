@@ -115,7 +115,7 @@ def draw_brand_hero(d,style,kind,scene_index,seconds):
         d.rounded_rectangle((126,545,594,906),radius=35,fill=(27,32,70),outline=(98,99,153),width=5)
         d.line((359,550,359,902),fill=(87,94,149),width=8)
         d.line((138,730,582,730),fill=(87,94,149),width=7)
-        x=265+26*wave;y=620+20*math.sin(seconds*.5)
+        x=265+104*math.sin(seconds*3.5);y=620+48*math.cos(seconds*2.9)
         d.ellipse((x-55,y-55,x+55,y+55),fill=(242,219,166))
         d.ellipse((x-25,y-67,x+70,y+30),fill=(27,32,70))
         for k in range(8):
@@ -136,7 +136,7 @@ def draw_brand_hero(d,style,kind,scene_index,seconds):
             x=140+k*64
             d.rectangle((x,650-(k%3)*54,x+50,861),fill=(66,97,118))
             d.rectangle((x+14,681-(k%3)*54,x+26,710-(k%3)*54),fill=(188,180,141))
-        busX=132+int(44*wave)
+        busX=132+int(86*math.sin(seconds*2.2))
         d.rounded_rectangle((busX,764,busX+410,864),radius=25,fill=(238,179,111),outline=(253,224,171),width=4)
         d.rounded_rectangle((busX+28,780,busX+154,814),radius=9,fill=(54,94,124))
         d.rounded_rectangle((busX+172,780,busX+302,814),radius=9,fill=(54,94,124))
@@ -154,7 +154,7 @@ def draw_brand_hero(d,style,kind,scene_index,seconds):
             d.ellipse((x-70,675,x+70,815),fill=col)
             d.rounded_rectangle((x-97,794,x+97,917),radius=39,fill=(125,68,103) if x==244 else (152,91,106))
             d.ellipse((x-16,713,x+12,737),fill=(108,62,87))
-        dy=int(16*wave)
+        dy=int(55*math.sin(seconds*3.2))
         d.rounded_rectangle((141,556+dy,340,652+dy),radius=29,fill=(242,166,174))
         d.rounded_rectangle((382,579-dy,569,675-dy),radius=29,fill=(255,207,172))
         d.line((175,605+dy,299,605+dy),fill=(96,49,71),width=7)
@@ -174,7 +174,7 @@ def draw_brand_hero(d,style,kind,scene_index,seconds):
             x=172+k*88
             d.rounded_rectangle((x,840-bar,x+57,840),radius=9,fill=col)
         d.line((167,849,547,849),fill=(96,136,112),width=5)
-        coinsX=460+int(14*wave)
+        coinsX=460+int(46*math.sin(seconds*3.2))
         for k in range(3):
             yy=668+k*20
             d.ellipse((coinsX-39,yy-18,coinsX+39,yy+45),fill=(229,196,109),outline=(151,147,84),width=4)

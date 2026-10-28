@@ -16,7 +16,7 @@ export function inspectPrivateFourSlotManifest(manifest,readBrief){
   return fail('PRIVATE_PUBLICATION_COST_AND_RIGHTS_LOCK_REQUIRED');
  if(!Array.isArray(manifest.slots)||manifest.slots.length!==4||
   typeof readBrief!=='function')return fail('FOUR_PRIVATE_KST_SLOTS_REQUIRED');
- const keys=new Set(),topicKeys=new Set(),openings=[],scenes=[],list=[];
+ const keys=new Set(),topicKeys=new Set(),firstFrameArts=new Set(),openings=[],scenes=[],list=[];
  for(const row of manifest.slots){
   if(!row||!FOUR_KST_TIMES.includes(row.kst)||keys.has(row.kst)||
    typeof row.brief!=='string'||!/^episodes\/[a-z0-9-]+\.json$/.test(row.brief))
@@ -35,6 +35,13 @@ export function inspectPrivateFourSlotManifest(manifest,readBrief){
    !Array.isArray(brief.visualConcepts)||brief.visualConcepts.length!==4||
    brief.scenes.some(s=>!Array.isArray(s.headline)||s.headline.length!==2))
    return fail('FOUR_DIFFERENT_MEDIA_SCENES_REQUIRED');
+  // Shorts/Reels cover art may not reuse the exact same hero illustration
+  // in a four-video daily review batch, or followers see four identical tiles.
+  const firstArt=brief.scenes[0]?.illustration;
+  if(!['clock','message','notes','rest'].includes(firstArt)||
+     firstFrameArts.has(firstArt))
+   return fail('DUPLICATE_OR_MISSING_VIDEO_FIRST_FRAME_ART');
+  firstFrameArts.add(firstArt);
   const editorial=reviewLifestyleVideoScript(brief);
   if(!editorial.ok||!brief.narrationDraft[0].startsWith(brief.situation))
    return fail('EDITORIAL_QUALITY_OR_OPENING_INVALID');

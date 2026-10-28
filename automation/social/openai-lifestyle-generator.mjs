@@ -67,6 +67,7 @@ export function buildKoreanStoryboardRequest({model,slotKst,recentTopicKeys=[],u
     '사주를 의학·재무·연애 결과를 보장하는 확정 예언으로 표현하지 않는다. '+
     '구매 유도는 하지 않는다. 4개 장면, 장면당 읽기 편한 15~70자 대사로 구성한다. '+
     '장면마다 새로운 오리지널 움직임 콘셉트를 제시한다. '+
+    'narrationDraft의 첫 줄은 situation으로 정확히 시작하고, 같은 줄에 hook 질문 전체를 그대로 포함해야 한다. '+
     'scenes는 정확히 4개이며, 각 headline 두 줄은 짧은 한국어(각 9글자 이내), subline 한 줄, '+
     'illustration은 clock/message/notes/rest 중 하나다. 모든 표현은 콘텐츠 검수를 전제로 한다.'},
    {role:'user',content:JSON.stringify({
@@ -119,6 +120,7 @@ export async function generatePaidKoreanLifestyleStoryboard({
   ['situation','hook','thumbnailTitle'].some(k=>typeof draft[k]!=='string')||
   !Array.isArray(draft.narrationDraft)||draft.narrationDraft.length!==4||
   !draft.narrationDraft.every(legalText)||
+  !draft.narrationDraft[0].startsWith(draft.situation)||!draft.narrationDraft[0].includes(draft.hook)||
   !Array.isArray(draft.visualConcepts)||draft.visualConcepts.length!==4||
   !draft.visualConcepts.every(legalText)||
   !Array.isArray(draft.scenes)||draft.scenes.length!==4||

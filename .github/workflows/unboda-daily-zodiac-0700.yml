@@ -1,0 +1,111 @@
+name: UNBODA daily 07KST zodiac original carousel
+on:
+  schedule:
+    - cron: '15 20 * * *'
+  push:
+    paths:
+      - '.github/workflows/unboda-daily-zodiac-0700.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: unboda-zodiac-media-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  render-and-host:
+    if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TZ: Asia/Seoul
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Resolve KST date and guard against duplicate hosting
+        id: date
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TARGET="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          else
+            TARGET="$(TZ=Asia/Seoul date +%Y-%m-%d)"
+          fi
+          TAG="unboda-zodiac-$(echo "$TARGET" | tr -d '-')"
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if gh release view "$TAG" --repo mannerjm/unboda >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "ZODIAC_SOURCE_ALREADY_EXISTS: $TAG"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install renderer and Korean fonts
+        if: steps.date.outputs.skip != 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk fonts-noto-color-emoji
+          python -m pip install --no-cache-dir 'Pillow==11.3.0' 'korean-lunar-calendar==0.3.1'
+      - name: Verify published day ganji dates and 12 traditional branch relations
+        if: steps.date.outputs.skip != 'true'
+        run: |
+          python - <<'PY'
+          import importlib.util,pathlib,datetime
+          p=pathlib.Path('scripts/daily-zodiac/render.py')
+          spec=importlib.util.spec_from_file_location('unboda_zodiac',p)
+          m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+          assert m.calendar_day(datetime.date(2026,10,28))['gapja']=='을해'
+          assert m.calendar_day(datetime.date(2026,10,29))['gapja']=='병자'
+          assert m.calendar_day(datetime.date(2026,10,30))['gapja']=='정축'
+          assert m.relation('子','午')=='충'
+          assert m.relation('子','丑')=='합'
+          assert m.relation('申','子')=='삼합'
+          assert m.relation('子','子')=='같은지지'
+          assert len(m.ANIMALS)==12 and len(set(x[2] for x in m.ANIMALS))==12
+          print('KST_DAY_GANJI_AND_ZODIAC_LOGIC_VERIFIED')
+          PY
+      - name: Draw original Korean four-page branded image carousel
+        if: steps.date.outputs.skip != 'true'
+        run: |
+          python scripts/daily-zodiac/render.py --date "${{ steps.date.outputs.target }}" --out release-zodiac
+      - name: Check actual four PNG image bytes and 12 unique animals
+        if: steps.date.outputs.skip != 'true'
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          from PIL import Image
+          root=pathlib.Path('release-zodiac')
+          x=json.loads((root/'zodiac-manifest.json').read_text())
+          assert len(x['animals'])==12 and len(x['images'])==4
+          assert x['notPersonalSaju'] is True and x['entertainmentAndReflectionOnly'] is True
+          assert len({z['animal'] for z in x['animals']})==12
+          assert len({z['sha256'] for z in x['images']})==4
+          for z in x['images']:
+            p=root/z['name'];b=p.read_bytes()
+            assert hashlib.sha256(b).hexdigest()==z['sha256']
+            assert Image.open(p).size==(1080,1350)
+            assert 20000<len(b)<7000000
+          assert '무료 사주' in (root/'caption.txt').read_text()
+          print('FOUR_KOREAN_ORIGINAL_ZODIAC_CAROUSEL_PAGES_VERIFIED')
+          PY
+      - name: Host only validated first-party media as immutable daily release
+        if: steps.date.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.date.outputs.tag }}"
+          if gh release view "$TAG" --repo mannerjm/unboda >/dev/null 2>&1; then
+            echo "RELEASE_ALREADY_EXISTS_BLOCKED" >&2
+            exit 1
+          fi
+          gh release create "$TAG" release-zodiac/* --repo mannerjm/unboda \
+            --target "${{ github.sha }}" \
+            --title "운보다 12띠 운세 ${{ steps.date.outputs.target }}" \
+            --notes "Original UNBODA images; Korean Lunar Calendar KST date ganji and traditional earthly-branch relationship general reflection. NOT personal saju or guaranteed predictions." \
+            --prerelease
+          gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length' | grep -qx 6
+          echo "DAILY_0700_UNBODA_ZODIAC_SOURCE_HOSTED"

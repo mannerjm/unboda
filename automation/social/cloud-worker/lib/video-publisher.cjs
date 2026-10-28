@@ -189,7 +189,7 @@ async function runVideoPublishCron({env=process.env,fetcher=fetch,
   providerResults:results,scheduledCount:scheduled,blockedCount:blocked,
   actualSocialPlatformPublicationVerified:false,paidAiCalls:0}};
 }
-function makeVideoHandler({env=process.env,fetcher=fetch,reserveSlot,
+function makeVideoHandler({env=process.env,fetcher=fetch,reserveSlot,reserveSource,
  now=()=>Date.now()}={}){
  return async(req,res)=>{
   res.setHeader("Cache-Control","no-store");

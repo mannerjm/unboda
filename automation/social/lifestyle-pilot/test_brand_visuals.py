@@ -23,6 +23,14 @@ class TestSajuBrandVisuals(unittest.TestCase):
    h1=hashlib.sha256(frame1.tobytes()).hexdigest()
    h2=hashlib.sha256(frame2.tobytes()).hexdigest()
    self.assertNotEqual(h1,h2,"Scene must have genuine motion")
+ def test_finance_motion_survives_phone_preview_scale(self):
+  from PIL import ImageChops,ImageStat,Image
+  b=self.films[3]
+  for a,c in ((.2,.6),(2.4,2.8),(5.0,5.4)):
+   frame1=draw_frame(b,0,a).crop((132,546,583,910)).resize((180,150),Image.Resampling.BICUBIC)
+   frame2=draw_frame(b,0,c).crop((132,546,583,910)).resize((180,150),Image.Resampling.BICUBIC)
+   mean=sum(ImageStat.Stat(ImageChops.difference(frame1,frame2)).mean)/3.0
+   self.assertGreater(mean,2.0,"Budget-paper and ledger must visibly animate even on mobile")
  def test_no_saju_explanation_or_unboda_cta_is_rejected(self):
   x=copy.deepcopy(self.films[0])
   x["narrationDraft"][1]="지금은 휴대폰을 내려놓아 보는 것도 좋아요."

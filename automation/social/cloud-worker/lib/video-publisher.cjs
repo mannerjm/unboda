@@ -19,8 +19,19 @@ function configOK(env){
   typeof env.METRICOOL_API_TOKEN==="string"&&env.METRICOOL_API_TOKEN.length>20&&
   env.SOCIAL_PUBLISH_ENABLED==="true"&&env.SOCIAL_PAID_GENERATION_ENABLED==="false";
 }
-function enabledNetworks(env){
+// Two unique channels per source, rotating which pair receives each time slot.
+function enabledNetworks(env,slot){
  const supplied=typeof env.SOCIAL_VIDEO_NETWORKS==="string"?env.SOCIAL_VIDEO_NETWORKS:"instagram";
+ if(supplied==="rotation"){
+  const hours=["00","08","12","20"],index=hours.indexOf(slot?.hourKst);
+  const ymd=String(slot?.targetDateKst??"");
+  if(index<0||!/^[0-9]{8}$/.test(ymd))return null;
+  const day=Date.UTC(+ymd.slice(0,4),+ymd.slice(4,6)-1,+ymd.slice(6));
+  if(!Number.isFinite(day)||new Date(day).toISOString().slice(0,10).replaceAll("-","")!==ymd)return null;
+  const pairs=[["instagram","facebook"],["youtube","tiktok"],
+               ["instagram","youtube"],["facebook","tiktok"]];
+  return pairs[(Math.floor(day/86400000)+index)%4].slice();
+ }
  const result=supplied.split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
  if(result.length<1||result.length>NETWORKS.length||
     result.some(x=>!NETWORKS.includes(x))||new Set(result).size!==result.length)return null;
@@ -144,14 +155,28 @@ async function postOne({fetcher,token,video,network,reserveSlot}){
   scheduled:true};
 }
 async function runVideoPublishCron({env=process.env,fetcher=fetch,
- now=Date.now(),reserveSlot}={}){
+ now=Date.now(),reserveSlot,reserveSource}={}){
  if(!configOK(env))return {http:503,body:fail("VIDEO_AUTO_PUBLISH_NOT_ENABLED")};
- const networks=enabledNetworks(env);
- if(!networks||typeof reserveSlot!=="function")
+ const rotation=env.SOCIAL_VIDEO_NETWORKS==="rotation";
+ if(rotation&&(typeof reserveSlot!=="function"||typeof reserveSource!=="function"))
+  return {http:503,body:fail("TWO_CHANNEL_ORIGINAL_CLAIM_NOT_CONNECTED")};
+ const fixedNetworks=rotation?null:enabledNetworks(env);
+ if(!rotation&&(!fixedNetworks||typeof reserveSlot!=="function"))
   return {http:503,body:fail("PROVIDER_LIST_OR_ATOMIC_CLAIM_MISSING")};
  const video=await loadReleaseVideo({now,fetcher});
  if(video.state!=="ONE_KST_VIDEO_PUBLIC_MEDIA_VERIFIED")
   return {http:503,body:fail(video.reason,{slot:video.slot||null})};
+ const networks=rotation?enabledNetworks(env,video.slot):fixedNetworks;
+ if(!networks||typeof reserveSlot!=="function"||(rotation&&networks.length!==2))
+  return {http:503,body:fail("PROVIDER_LIST_OR_ATOMIC_CLAIM_MISSING")};
+ if(rotation){
+  let original;
+  try{original=await reserveSource({brandId:BRAND,slotUtc:video.slot.slotUtc,
+   sourceSha256:video.sha256,sourceTag:video.releaseTag});}
+  catch{return {http:503,body:fail("ORIGINAL_GLOBAL_SHA_CLAIM_FAILED")}}
+  if(original?.state!=="FIRST_ORIGINAL_CLAIM_GRANTED")
+   return {http:503,body:fail("ORIGINAL_USED_OR_CLAIM_UNCERTAIN_NO_REPOST")};
+ }
  const results=[];
  for(const network of networks){
   const r=await postOne({fetcher,token:env.METRICOOL_API_TOKEN,
@@ -167,7 +192,7 @@ async function runVideoPublishCron({env=process.env,fetcher=fetch,
   providerResults:results,scheduledCount:scheduled,blockedCount:blocked,
   actualSocialPlatformPublicationVerified:false,paidAiCalls:0}};
 }
-function makeVideoHandler({env=process.env,fetcher=fetch,reserveSlot,
+function makeVideoHandler({env=process.env,fetcher=fetch,reserveSlot,reserveSource,
  now=()=>Date.now()}={}){
  return async(req,res)=>{
   res.setHeader("Cache-Control","no-store");
@@ -176,7 +201,7 @@ function makeVideoHandler({env=process.env,fetcher=fetch,reserveSlot,
      "Bearer "+(env.CRON_SECRET??""))){
    res.statusCode=401;return res.end("Unauthorized");
   }
-  const run=await runVideoPublishCron({env,fetcher,reserveSlot,now:now()});
+  const run=await runVideoPublishCron({env,fetcher,reserveSlot,reserveSource,now:now()});
   // Only identifiers and aggregate results; never log authorization headers.
   console.info("unboda_video_publish_cron",JSON.stringify({
    state:run.body.state,scheduledCount:run.body.scheduledCount??0,

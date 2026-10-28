@@ -4,10 +4,11 @@ import {buildNextVideoSlots,verifyWorkerVideoCron,inspectStagingSlotCoverage}
  from './four-kst-video-slots.mjs';
 import {readFileSync} from 'node:fs';
 const worker=JSON.parse(readFileSync(new URL('./cloud-worker/vercel.json',import.meta.url)));
-test('KST 00,08,12,20 are exactly UTC 15 prior day,23 prior day,03,11',()=>{
+test('15-minute prebook of KST 00,08,12,20 uses UTC 14,22 previous day,02,10',()=>{
  const r=verifyWorkerVideoCron(worker);
  assert.equal(r.state,'CORRECT_FOUR_KST_CRON');
- assert.deepEqual(r.utcHours,[3,11,15,23]);
+ assert.deepEqual(r.utcHours,[2,10,14,22]);
+ assert.equal(r.advanceMinutes,15);
  assert.equal(r.actualPublisherConnected,false);
 });
 test('48h plan always contains eight exact, separate local KST slot starts',()=>{
@@ -25,8 +26,8 @@ test('48h plan always contains eight exact, separate local KST slot starts',()=>
  }
 });
 test('will not accept a fifth hour, wrong minute, missing cron or second source cron',()=>{
- for(const schedule of ['0 3,11,15,22 * * *','15 3,11,15,23 * * *',
-  '0 3,11,15,15 * * *','0 3,11,15,23,7 * * *','0 3,11,15,23 * * 1']){
+ for(const schedule of ['45 2,10,14,21 * * *','0 2,10,14,22 * * *',
+  '45 2,10,14,14 * * *','45 2,10,14,22,7 * * *','45 2,10,14,22 * * 1']){
   const invalid={crons:[{path:'/api/cron/video',schedule}]};
   assert.equal(verifyWorkerVideoCron(invalid).state,'BLOCKED',schedule);
  }

@@ -33,16 +33,16 @@ export function verifyWorkerVideoCron(config){
  const target=Array.isArray(entries)&&entries.find(x=>x?.path==='/api/cron/video');
  const result=String(target?.schedule??'').trim();
  const [min,hour,dom,month,dow,...more]=result.split(/\s+/);
- if(more.length||min!=='0'||dom!=='*'||month!=='*'||dow!=='*'||
+ if(more.length||min!=='45'||dom!=='*'||month!=='*'||dow!=='*'||
   !/^(?:[0-9]{1,2},){3}[0-9]{1,2}$/.test(hour??''))
   return stop('VIDEO_CRON_NOT_FOUR_EXACT_UTC_HOURS');
  const hours=hour.split(',').map(Number);
- const expected=LOCAL_HOURS.map(h=>(h+24-9)%24).sort((a,b)=>a-b);
+ const expected=LOCAL_HOURS.map(h=>(h+24-9-1)%24).sort((a,b)=>a-b);
  if(new Set(hours).size!==4||hours.some(h=>!Number.isInteger(h)||h<0||h>23)||
   JSON.stringify([...hours].sort((a,b)=>a-b))!==JSON.stringify(expected))
   return stop('VIDEO_CRON_NOT_MATCHING_FOUR_KST_TIMES');
  return {state:'CORRECT_FOUR_KST_CRON',utcHours:expected,
-  timeZone:'Asia/Seoul',actualPublisherConnected:false};
+  timeZone:'Asia/Seoul',advanceMinutes:15,actualPublisherConnected:false};
 }
 export function inspectStagingSlotCoverage({atMs,jobs}={}){
  const plan=buildNextVideoSlots(atMs);

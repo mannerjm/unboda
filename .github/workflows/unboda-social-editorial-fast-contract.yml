@@ -32,6 +32,13 @@ on:
       - 'automation/social/staging-remote-post-integrity-guard.sql'
       - 'automation/social/staging-private-media-archive-ledger.sql'
       - 'automation/social/cloud-worker/vercel.json'
+      - 'automation/social/cloud-worker/lib/release-video.cjs'
+      - 'automation/social/cloud-worker/lib/video-publisher.cjs'
+      - 'automation/social/cloud-worker/lib/video-claim.cjs'
+      - 'automation/social/cloud-worker/test/live-video.test.cjs'
+      - 'automation/social/cloud-worker/api/cron/video.js'
+      - 'automation/social/cloud-worker/package.json'
+      - 'automation/social/cloud-worker/index.js'
       - 'automation/social/lifestyle-pilot/four-daily-private-validator.mjs'
       - 'automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs'
       - 'automation/social/lifestyle-pilot/four-daily-private-manifest.json'
@@ -69,3 +76,4 @@ jobs:
             automation/social/verify-video-publication-evidence.test.mjs \
             automation/social/private-review-staging-upload-cli.test.mjs \
             automation/social/metricool-video-scheduling.test.mjs
+          node --test automation/social/cloud-worker/test/live-video.test.cjs

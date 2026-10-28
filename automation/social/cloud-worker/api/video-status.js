@@ -13,7 +13,7 @@ module.exports=async(req,res)=>{
   const [workflow,release]=await Promise.all([
    fetch(api+"/actions/workflows/unboda-video-autonomous-build.yml/runs?per_page=4",{
     headers,signal:AbortSignal.timeout(10000)}),
-   fetch(api+"/releases/tags/unboda-shorts-"+date,{
+   fetch(api+"/releases/tags/unboda-saju-shorts-"+date,{
     headers,signal:AbortSignal.timeout(10000)})
   ]);
   const r=release.ok?await release.json():null;

@@ -188,3 +188,25 @@ test("MP4 technical PASS does not authorize unreviewed commercial release",async
  assert.equal(r.reason,"COMMERCIAL_VIDEO_RIGHTS_AND_VOICE_REVIEW_NOT_APPROVED");
  assert.equal(reads,2);
 });
+
+test("independently transcribed Korean voice may replace human review without claiming a human",async()=>{
+ const automated=JSON.parse(JSON.stringify(manifest));
+ automated.videos[0].voiceHumanReviewed=false;
+ automated.videos[0].voiceAutomatedQaApproved=true;
+ automated.videos[0].voiceAsrSimilarity=.86;
+ const fetcher=async(url)=>{
+  if(url.includes("/releases/tags/"))return reply(metadata);
+  if(url.endsWith("/manifest.json"))return reply(automated);
+  if(url.endsWith(".mp4"))return reply(Buffer.from(goodMp4));
+  throw Error("Unexpected URL");
+ };
+ assert.equal((await loadReleaseVideo({now,fetcher})).state,
+  "ONE_KST_VIDEO_PUBLIC_MEDIA_VERIFIED");
+ automated.videos[0].voiceAsrSimilarity=.63;
+ assert.equal((await loadReleaseVideo({now,fetcher})).reason,
+  "COMMERCIAL_VIDEO_RIGHTS_AND_VOICE_REVIEW_NOT_APPROVED");
+ automated.videos[0].voiceAsrSimilarity=.95;
+ automated.videos[0].voiceAutomatedQaApproved=false;
+ assert.equal((await loadReleaseVideo({now,fetcher})).reason,
+  "COMMERCIAL_VIDEO_RIGHTS_AND_VOICE_REVIEW_NOT_APPROVED");
+});

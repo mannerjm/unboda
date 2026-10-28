@@ -98,8 +98,16 @@ async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
   return {state:"BLOCKED",reason:"FOUR_RELEASE_MP4_HASHES_REPEATED",slot};
  // A technical PASS is not a public-commercial release approval. All three
  // decisions must be explicit and positive in the signed release manifest.
+ // Owner-delegated automatic Korean speech review is accepted only with an
+ // independent ASR transcript quality score. It must never be represented as
+ // a human pronunciation review.
+ const speechApproved=video.voiceHumanReviewed===true||
+   (video.voiceAutomatedQaApproved===true&&
+    typeof video.voiceAsrSimilarity==="number"&&
+    Number.isFinite(video.voiceAsrSimilarity)&&
+    video.voiceAsrSimilarity>=0.64&&video.voiceAsrSimilarity<=1);
  if(video.socialPublishingApproved!==true||
-    video.licenseReviewed!==true||video.voiceHumanReviewed!==true)
+    video.licenseReviewed!==true||!speechApproved)
   return {state:"BLOCKED",reason:"COMMERCIAL_VIDEO_RIGHTS_AND_VOICE_REVIEW_NOT_APPROVED",slot};
  const videoUrl=trusted(video.mp4);
  if(!videoUrl||files.get(video.mp4)?.size!==video.bytes)

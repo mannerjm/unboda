@@ -41,6 +41,10 @@ on:
       - 'automation/social/cloud-worker/index.js'
       - 'automation/social/lifestyle-pilot/four-daily-private-validator.mjs'
       - 'automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs'
+      - 'automation/social/lifestyle-pilot/brand-video-guard.mjs'
+      - 'automation/social/lifestyle-pilot/brand-video-guard.test.mjs'
+      - 'automation/social/lifestyle-pilot/test_brand_visuals.py'
+      - '.github/workflows/unboda-video-autonomous-build.yml'
       - 'automation/social/lifestyle-pilot/four-daily-private-manifest.json'
       - '.github/workflows/unboda-social-editorial-fast-contract.yml'
 concurrency:
@@ -68,6 +72,7 @@ jobs:
             automation/social/observed-public-novelty.test.mjs \
             automation/social/four-kst-video-slots.test.mjs \
             automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs \
+            automation/social/lifestyle-pilot/brand-video-guard.test.mjs \
             automation/social/private-review-storage.test.mjs \
             automation/social/supabase-private-adapter.test.mjs \
             automation/social/openai-lifestyle-generator.test.mjs \

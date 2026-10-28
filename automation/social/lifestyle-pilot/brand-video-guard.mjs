@@ -32,7 +32,7 @@ export function inspectSajuBrandEpisode(b){
  if(!UNBODA.test(cta)||!SAJU.test(cta)||
     !/(?:무료\s*사주|무료\s*조회|무료\s*분석)/.test(cta))
   return DENY('UNBODA_FREE_SAJU_CTA_REQUIRED');
- if(!/unboda\.kr/.test(b.destination??''))
+ if(!/^https:\/\/unboda\.kr\/?$/.test(b.destination??''))
   return DENY('ACTUAL_UNBODA_DOMAIN_REQUIRED');
  const all=[hook,explain,practical,cta].join(' ');
  if(/(?:100%|무조건|확정|반드시\s*성공|절대\s*헤어|당첨\s*보장)/.test(all))

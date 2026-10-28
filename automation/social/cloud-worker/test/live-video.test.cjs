@@ -3,7 +3,7 @@ const test=require("node:test"),assert=require("node:assert/strict");
 const {createHash}=require("node:crypto");
 const {nextSlotFromCron,loadReleaseVideo}=require("../lib/release-video.cjs");
 const {makeVideoClaim,makeSourceClaim}=require("../lib/video-claim.cjs");
-const {runVideoPublishCron}=require("../lib/video-publisher.cjs");
+const {runVideoPublishCron,enabledNetworks}=require("../lib/video-publisher.cjs");
 const now=Date.parse("2026-10-28T23:45:00+09:00");
 const slot=nextSlotFromCron(now);
 const goodMp4=Buffer.alloc(1800);goodMp4.write("ftyp",4);

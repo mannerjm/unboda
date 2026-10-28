@@ -89,6 +89,13 @@ async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
     typeof video.caption!=="string"||video.caption.length<30||video.caption.length>850||
     !video.topicKey?.endsWith(slot.targetDateKst))
   return {state:"BLOCKED",reason:"TARGET_SLOT_MP4_MANIFEST_NOT_VALID",slot};
+ // 2026-10-28 20:00 used the next day's 20:00 source early.
+ // It must not be republished by the unattended worker on 2026-10-29.
+ if(slot.targetDateKst==="20261029"&&slot.hourKst==="20"&&
+    video.sha256==="a581205191b29c0615c577afd9f5009a9062b45b0112e1306c260b212d22ea1f")
+  return {state:"BLOCKED",reason:"ALREADY_PUBLISHED_EARLY_20261028_SOURCE_DUPLICATE",slot};
+ if(new Set(manifest.videos.map(v=>v.sha256)).size!==4)
+  return {state:"BLOCKED",reason:"FOUR_RELEASE_MP4_HASHES_REPEATED",slot};
  const videoUrl=trusted(video.mp4);
  if(!videoUrl||files.get(video.mp4)?.size!==video.bytes)
   return {state:"BLOCKED",reason:"RELEASE_MP4_FILE_NOT_UPLOADED",slot};

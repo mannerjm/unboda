@@ -84,6 +84,35 @@ test("GitHub release public MP4 is checked byte-for-byte before use",async()=>{
  assert.equal((await loadReleaseVideo({now,fetcher:bad.fetcher})).reason,
   "PUBLIC_MP4_SHA256_READBACK_MISMATCH");
 });
+test("old generic lifestyle releases never pass the saju video brand gate",async()=>{
+ let calls=0;
+ const broken=JSON.parse(JSON.stringify(manifest));
+ delete broken.brandSajuVerified;
+ const source=async(url)=>{
+  calls++;
+  if(url.includes("/releases/tags/"))return reply(metadata);
+  if(url.endsWith("/manifest.json"))return reply(broken);
+  throw Error("SHOULD_NOT_READ_OLD_MP4");
+ };
+ const r=await loadReleaseVideo({now,fetcher:source});
+ assert.equal(r.state,"BLOCKED");
+ assert.equal(r.reason,"FOUR_RELEASE_QA_PROVENANCE_INVALID");
+ assert.equal(calls,2);
+});
+test("four saju videos sharing one palette are rejected before MP4 bytes transfer",async()=>{
+ let calls=0;
+ const broken=JSON.parse(JSON.stringify(manifest));
+ broken.videos[1].visualStyle="midnight-indigo";
+ const source=async(url)=>{
+  calls++;
+  if(url.includes("/releases/tags/"))return reply(metadata);
+  if(url.endsWith("/manifest.json"))return reply(broken);
+  throw Error("SHOULD_NOT_READ_DUPLICATED_PALETTE_MP4");
+ };
+ const r=await loadReleaseVideo({now,fetcher:source});
+ assert.equal(r.reason,"FOUR_SAJU_STYLES_AND_CATEGORIES_NOT_UNIQUE");
+ assert.equal(calls,2);
+});
 test("disabled by default: no live post, no fetch",async()=>{
  const m=fetcherFactory();
  const r=await runVideoPublishCron({now,fetcher:m.fetcher,env:{

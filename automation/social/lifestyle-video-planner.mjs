@@ -48,7 +48,17 @@ export function reviewLifestyleVideoScript({situation,narrationDraft}={}){
  if(!PRACTICAL.test(lines.slice(0,-1).join(" ")))reasons.push("NO_PRACTICAL_LIFE_POINT");
  const promotionalPositions=lines.flatMap((line,i)=>PROMOTIONAL.test(line)?[i]:[]);
  const totalCharacters=lines.reduce((n,line)=>n+line.replace(/\s/g,"").length,0);
- const promoCharacters=promotionalPositions.reduce((n,i)=>n+lines[i].replace(/\s/g,"").length,0);
+ // For a final, low-pressure CTA, count the explicit promotional phrase,
+// not the entire preceding practical sentence. Early promotions and
+// payment/urgency CTAs are still charged in full and always blocked.
+ const promoCharacters=promotionalPositions.reduce((n,i)=>{
+  const line=lines[i],compact=line.replace(/\s/g,"");
+  const gentle=i===lines.length-1&&/운보다/.test(line)&&
+    /무료\s*사주/.test(line)&&!/(결제|유료|구매|신청|클릭|지금|바로)/.test(line);
+  if(!gentle)return n+compact.length;
+  const explicit=compact.match(/운보다무료사주(?:조회)?/);
+  return n+(explicit?explicit[0].length+4:compact.length);
+ },0);
  const promotionalSharePercent=totalCharacters>0?Math.round(1000*promoCharacters/totalCharacters)/10:0;
  if(promotionalSharePercent>15)reasons.push("PROMOTION_EXCEEDS_15_PERCENT");
  if(promotionalPositions.some(i=>i!==lines.length-1))reasons.push("PROMOTION_BEFORE_FINAL_LINE");

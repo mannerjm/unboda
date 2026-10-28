@@ -198,7 +198,7 @@ function makeVideoHandler({env=process.env,fetcher=fetch,reserveSlot,reserveSour
      "Bearer "+(env.CRON_SECRET??""))){
    res.statusCode=401;return res.end("Unauthorized");
   }
-  const run=await runVideoPublishCron({env,fetcher,reserveSlot,now:now()});
+  const run=await runVideoPublishCron({env,fetcher,reserveSlot,reserveSource,now:now()});
   // Only identifiers and aggregate results; never log authorization headers.
   console.info("unboda_video_publish_cron",JSON.stringify({
    state:run.body.state,scheduledCount:run.body.scheduledCount??0,

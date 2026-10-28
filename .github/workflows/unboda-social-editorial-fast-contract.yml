@@ -23,6 +23,7 @@ on:
       - 'automation/social/verify-video-publication-evidence.mjs'
       - 'automation/social/verify-video-publication-evidence.test.mjs'
       - 'automation/social/staging-observed-post-raw-sha256-compat.sql'
+      - 'automation/social/staging-remote-post-integrity-guard.sql'
       - 'automation/social/staging-private-media-archive-ledger.sql'
       - 'automation/social/cloud-worker/vercel.json'
       - 'automation/social/lifestyle-pilot/four-daily-private-validator.mjs'

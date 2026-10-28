@@ -21,7 +21,7 @@ async function jsonFrom(response){try{return await response.json()}catch{return 
 async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
  const slot=nextSlotFromCron(now);
  if(!slot)return {state:"BLOCKED",reason:"NOT_FOUR_DAILY_KST_CRON"};
- const tag="unboda-shorts-"+slot.targetDateKst;
+ const tag="unboda-saju-shorts-"+slot.targetDateKst;
  let metadata;
  try{
   const res=await fetcher("https://api.github.com/repos/"+REPO+"/releases/tags/"+tag,{

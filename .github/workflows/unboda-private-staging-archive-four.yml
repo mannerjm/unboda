@@ -1,0 +1,79 @@
+name: UNBODA private video archive (MANUAL ONLY, NEVER PUBLISH)
+# Intentionally no pull_request, push, schedule or deployment trigger.
+# Must be merged and explicitly workflow_dispatched by authorized owner
+# with staged secret credentials; this never makes a public or SNS URL.
+on:
+  workflow_dispatch:
+    inputs:
+      approve_private_storage:
+        description: 'Type exactly PRIVATE_STAGING_REVIEW_ONLY_MAX_6000000_BYTES'
+        required: true
+        type: string
+      max_bytes:
+        description: 'Maximum total MP4 bytes (1..6000000, all four require >=4549627)'
+        required: true
+        default: '6000000'
+        type: string
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: unboda-manual-private-archive-four
+  cancel-in-progress: false
+jobs:
+  archive-four:
+    if: >-
+      github.repository == 'mannerjm/unboda' &&
+      github.ref == 'refs/heads/test/social-automation-safety-poc-20261023' &&
+      inputs.approve_private_storage == 'PRIVATE_STAGING_REVIEW_ONLY_MAX_6000000_BYTES'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      UNBODA_PRIVATE_STAGING_APPROVAL: ${{ inputs.approve_private_storage }}
+      UNBODA_PRIVATE_MAX_BYTES: ${{ inputs.max_bytes }}
+      UNBODA_STAGING_SUPABASE_URL: ${{ secrets.UNBODA_STAGING_SUPABASE_URL }}
+      UNBODA_STAGING_SERVICE_ROLE_KEY: ${{ secrets.UNBODA_STAGING_SERVICE_ROLE_KEY }}
+      UNBODA_STAGING_DATABASE_URL: ${{ secrets.UNBODA_STAGING_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install PostgreSQL CLI for isolated private receipt
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+      - name: Confirm staging-only approval, secrets and project pin before any video
+        run: |
+          node --input-type=module <<'NODE'
+          import {checkPrivateArchiveEnv} from './automation/social/private-review-staging-upload-cli.mjs';
+          const result=checkPrivateArchiveEnv(process.env);
+          console.log('STAGING_PRIVATE_STORAGE_PREFLIGHT_OK maximumBytes='+result.allowedBytes);
+          NODE
+      - name: Fetch four GitHub PRIVATE technical-validated artifacts from the exact verified run
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 40521381382
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pattern: unboda-four-daily-*-private-review-NO-PUBLISH
+          merge-multiple: false
+          path: .unboda-private-staging-only
+      - name: Verify exactly four 30-second MP4 SHA256 and quality reports before uploading
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFourTechnicalReviewArtifacts} from './automation/social/private-review-artifact-loader.mjs';
+          const result=readFourTechnicalReviewArtifacts('.unboda-private-staging-only',{
+           maxTotalBytes:Number(process.env.UNBODA_PRIVATE_MAX_BYTES)
+          });
+          console.log('FOUR_VERIFIED_SOURCE_FILES_ONLY totalBytes='+result.totalBytes);
+          NODE
+      - name: Upload PRIVATE MP4, re-download complete bytes, write staging SQL receipt
+        run: |
+          node automation/social/private-review-staging-upload-cli.mjs .unboda-private-staging-only
+      - name: Security non-regression (never SNS publish or use customer DB)
+        if: ${{ always() }}
+        run: |
+          echo 'Manual staging review only. Social publishing was never invoked.'
+          echo 'If incomplete or timed out, reconcile by object SHA before retry.'

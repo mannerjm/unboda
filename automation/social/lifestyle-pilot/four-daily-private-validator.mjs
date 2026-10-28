@@ -5,6 +5,7 @@ import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {contentSimilarity} from '../lifestyle-autogenerator.mjs';
 import {FOUR_KST_TIMES,reviewLifestyleVideoScript} from '../lifestyle-video-planner.mjs';
+import {inspectFourSajuBrandEpisodes,inspectSajuBrandEpisode} from './brand-video-guard.mjs';
 const HERE=dirname(fileURLToPath(import.meta.url));
 const manifestFile=join(HERE,'four-daily-private-manifest.json');
 const fail=(reason)=>({state:'BLOCKED',reason,published:false,mediaReady:false});
@@ -16,7 +17,7 @@ export function inspectPrivateFourSlotManifest(manifest,readBrief){
   return fail('PRIVATE_PUBLICATION_COST_AND_RIGHTS_LOCK_REQUIRED');
  if(!Array.isArray(manifest.slots)||manifest.slots.length!==4||
   typeof readBrief!=='function')return fail('FOUR_PRIVATE_KST_SLOTS_REQUIRED');
- const keys=new Set(),topicKeys=new Set(),firstFrameArts=new Set(),openings=[],scenes=[],list=[];
+ const keys=new Set(),topicKeys=new Set(),firstFrameArts=new Set(),openings=[],scenes=[],list=[],briefs=[];
  for(const row of manifest.slots){
   if(!row||!FOUR_KST_TIMES.includes(row.kst)||keys.has(row.kst)||
    typeof row.brief!=='string'||!/^episodes\/[a-z0-9-]+\.json$/.test(row.brief))
@@ -30,6 +31,9 @@ export function inspectPrivateFourSlotManifest(manifest,readBrief){
    topicKeys.has(brief.topicKey))
    return fail('EPISODE_RIGHTS_OR_TOPIC_NOT_UNIQUE');
   topicKeys.add(brief.topicKey);
+  const brand=inspectSajuBrandEpisode(brief);
+  if(!brand.ok)return fail('NOT_UNBODA_SAJU_BRANDED_VIDEO:'+brand.reason);
+  briefs.push(brief);
   if(!Array.isArray(brief.narrationDraft)||brief.narrationDraft.length!==4||
    !Array.isArray(brief.scenes)||brief.scenes.length!==4||
    !Array.isArray(brief.visualConcepts)||brief.visualConcepts.length!==4||
@@ -55,6 +59,8 @@ export function inspectPrivateFourSlotManifest(manifest,readBrief){
    published:false});
  }
  if(FOUR_KST_TIMES.some(s=>!keys.has(s)))return fail('MISSING_KST_SLOT');
+ const brandSet=inspectFourSajuBrandEpisodes(briefs);
+ if(!brandSet.ok)return fail('FOUR_SAJU_VIDEOS_TOO_SIMILAR:'+brandSet.reason);
  return Object.freeze({state:'FOUR_EPISODE_PRIVATE_REVIEW_PLAN',
   count:4,slots:list,paidProviderCallsAllowed:false,
   generateUniqueLiveAIContent:false,

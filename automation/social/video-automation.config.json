@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "brand": "운보다",
+  "site": "https://unboda.kr",
+  "timezone": "Asia/Seoul",
+  "metricool": {
+    "brandId": "7377653",
+    "userId": "5729495",
+    "planRequired": "Advanced_or_Custom",
+    "apiMode": "independent_REST",
+    "credential": "METRICOOL_API_TOKEN",
+    "accountPlan": "advanced_15_active_owner_screen_2026-10-26",
+    "restTokenStoredOnWorker": true,
+    "restAccountReadTestPassed": true,
+    "restScheduleReadTestPassed": true,
+    "standaloneWorkerProjectId": "prj_RyQvXNzNDpbHyUulparzelfSbD5R",
+    "verifiedReadOnlyDeploymentId": "dpl_BdpjtLh4Bj7TmAExYhwvcpZz3eN4"
+  },
+  "existingTextImage": {
+    "cadenceHours": 3,
+    "managedBy": "existing_ChatGPT_task_and_Metricool_reservations",
+    "doNotModify": true
+  },
+  "video": {
+    "enabled": false,
+    "durationSeconds": 30,
+    "output": {
+      "width": 1080,
+      "height": 1920,
+      "codec": "h264",
+      "audio": "aac",
+      "container": "mp4",
+      "fps": 30
+    },
+    "content": {
+      "topicFamilies": [
+        "zodiac",
+        "four-pillars",
+        "dreams",
+        "five-elements",
+        "compatibility",
+        "seasons",
+        "myths"
+      ],
+      "language": "ko",
+      "substantiveEducationFirst": true,
+      "dreamsAreFolkloreNotSajuService": true,
+      "brandCTAOnlyEnd": true
+    },
+    "studio": {
+      "videoProvider": "first_party_original_motion_editing",
+      "videoModel": "optional_external_AI_generation_NOT_REQUIRED",
+      "premiumMotionSecondsPerOriginal": 10,
+      "otherSeconds": "original_authorized_motion_graphics",
+      "narrationProvider": "MeloTTS_Korean_CPU_private_proof_not_production",
+      "autoRejectTextOverflow": true,
+      "requirePronunciationQA": true,
+      "requireOriginalMediaRights": true,
+      "requireCommercialQualityReview": true,
+      "voiceRealPilotGenerated": true,
+      "realRunwaySourceArchived": true,
+      "first30sVisualDraftRendered": true,
+      "first30sVisualDraftContainsRealRunwayScene": true,
+      "first30sVisualDraftHasNaturalKoreanNarration": false,
+      "first30sVisualDraftApprovedForSocial": false,
+      "productionStrategy": "first_party_editing_and_licensed_real_motion_first",
+      "runwayOptional": true,
+      "selfHostedOpenModelOptional": true,
+      "selfHostedGpuWorkerConnected": false,
+      "originalLicensedFootageSourcesApproved": false,
+      "koreanNarrationProductionApproved": false,
+      "licensedHumanMotionSourcesReady": false,
+      "firstPartyMotionSampleRendered": true,
+      "firstPartyMotionSampleHasNaturalKoreanNarration": false,
+      "firstPartyMotionSampleEditorialApproved": false,
+      "firstPartyMotionSampleVerifiedFormat": "30s_h264_aac_1080x1920_30fps",
+      "koreanTtsProofModel": "myshell-ai/MeloTTS-Korean",
+      "koreanTtsProofRunId": 40477668687,
+      "firstNarrated30sReviewRendered": true,
+      "firstNarrated30sReviewFormatVerified": true,
+      "firstNarrated30sReviewCommerciallyApproved": false,
+      "firstNarrated30sReviewPublished": false,
+      "firstNarrated30sReviewHumanPronunciationApproved": false,
+      "firstNarrated30sReviewNeedsSceneScriptAlignment": false,
+      "firstNarrated30sReviewReusesArchivedVisual": true,
+      "firstNarrated30sReviewLastRenderedAt": "2026-10-27"
+    },
+    "distribution": {
+      "service": "buffer",
+      "supported": [
+        "instagram",
+        "tiktok",
+        "youtube"
+      ],
+      "maxNetworksPerOriginal": 2,
+      "confirmActualPublishedPost": true,
+      "avoidPublishingExistingPilotVideos": true,
+      "bufferWriteAdapterImplemented": true,
+      "bufferActualWriteVerified": false,
+      "initialScheduledQueueCountsVerifiedReadOnly": true,
+      "singlePrivateDraftTransportTest": {
+        "postId": "406733039",
+        "network": "instagram",
+        "draft": true,
+        "autoPublish": false,
+        "used": "historic_10_second_blob_clip_not_30_second_first_party_video",
+        "mediaNormalized": true,
+        "publicPublishingProof": false
+      },
+      "protectedScheduleUtcCron": "0 3,11,15,23 * * *"
+    },
+    "storage": {
+      "provider": "private_object_storage_and_public_signed_media_asset",
+      "mustPersistBeforeScheduling": true,
+      "sourceIngestion": "automatically_fetch_runway_task_output",
+      "sourceTaskId": "b7d64306-f5d4-48ef-9bd8-b7c9b0445b36",
+      "persistentStore": "vercel_public_blob",
+      "persistentStoreConnected": true,
+      "ownerMustManuallyTransferMP4": false,
+      "stablePublicMediaURLRequiredForBuffer": true,
+      "requireExplicitStorageBudgetApproval": true,
+      "rejectUnverifiedAsset": true,
+      "firstVerifiedArchivedSourceUrl": "https://aq03voydas4sjjuy.public.blob.vercel-storage.com/unboda-social/pilots/runway-b7d64306-f5d4-48ef-9bd8-b7c9b0445b36-c96569dfa94b47a3.mp4",
+      "firstVerifiedArchivedSourceSha256": "c96569dfa94b47a315b35f44b6a7c165f39fa28da49bf120ceba8fb5bc29f858",
+      "fullAutonomousPipelineEnabled": false,
+      "separateSocialMediaBlobStoreId": "store_sZIpaZHuVwOcsb69",
+      "blobStoreProject": "unboda-social-worker",
+      "blobStoreObjectCountLastVerified": 0,
+      "audioVideoPilotNotYetUploadedToBlob": true
+    },
+    "queue": {
+      "durableDatabase": "supabase_isolated_social_schema",
+      "bufferHours": 48,
+      "goalReadyVideos": 8,
+      "identityKey": "brand_kind_slot",
+      "durableMoneyAndIdempotencyLedgerConnected": false,
+      "actualReadyVideos": 0,
+      "durableStagingSchemaCreated": true,
+      "durableProductionLedgerConnected": false,
+      "scheduleVersion": "fixed-four-times-kst-20261026",
+      "cloudFixedFourTimesReadOnlyMonitorDeployed": true,
+      "independentFixedFourTimesPublisherConnected": false,
+      "stagingAtomicSlotClaimTested": true,
+      "stagingFixedTimeVideoUniquenessEnforced": true,
+      "stagingEditorialCandidates": 4,
+      "stagingEditorialCandidatesApproved": 0,
+      "targetVideoNetworksSelectedAndConfirmed": false,
+      "targetVideoNetworks": [],
+      "permanentOriginVideoTemplateApproved": false,
+      "firstChannelLivePublishedUrlVerified": false,
+      "secondChannelLivePublishedUrlVerified": false
+    },
+    "quotas": {
+      "conservativeAllNetworkPostsPerRolling30Days": 500,
+      "requireAccountQuotaVerification": true
+    },
+    "safety": {
+      "allowBlindRetry": false,
+      "remoteConfirmationBeforeRetry": true,
+      "maxRetries": 3,
+      "stopOnAuthAndPolicyErrors": true,
+      "noChangesToPaymentsRefundsCustomerTables": true
+    },
+    "schedule": {
+      "kind": "fixed_daily_local_time",
+      "timezone": "Asia/Seoul",
+      "timesLocal": [
+        "00:00",
+        "08:00",
+        "12:00",
+        "20:00"
+      ],
+      "displayOrder": [
+        "08:00",
+        "12:00",
+        "20:00",
+        "24:00"
+      ],
+      "dailyOriginals": 4,
+      "utcCron": "0 3,11,15,23 * * *",
+      "meaningOf2400": "next_day_00:00",
+      "requiresReadyLicensedNarratedVideo": true
+    },
+    "publicationBudget": {
+      "metricoolFairUseBasePerBrandCalendarMonth": 600,
+      "conservativePerBrandCalendarMonthStop": 500,
+      "requiresActualCurrentMonthlyInventory": true,
+      "requiresVerifiedTargetChannelCount": true,
+      "monthlyBudgetApproved": false,
+      "availableNewPaidVideoCreditsAuthorized": 0
+    }
+  },
+  "controls": {
+    "schedulerEnabled": false,
+    "paidGenerationEnabled": false,
+    "livePublishingEnabled": false,
+    "monthlyGenerationBudgetUsdCents": 0,
+    "credentialValuesNeverStoredInJson": true,
+    "unblockOnlyAfterEndToEndProof": true,
+    "ownerMonthlyRunwayCreditCapApproved": false,
+    "autoBillingEnabled": false,
+    "estimateCreditsPer30daysMinimum": 6360,
+    "currentRunwayBalanceLastMeasuredCredits": 1950,
+    "ownerApprovalOfFirstVideoPending": true
+  },
+  "buffer": {
+    "freePilot": true,
+    "apiMode": "GraphQL",
+    "credentialsEnv": "BUFFER_API_KEY",
+    "connectedChannelsVerifiedReadOnly": [
+      "instagram",
+      "tiktok",
+      "youtube"
+    ],
+    "writePilotVerified": false,
+    "activePostingServiceAfterApproval": true,
+    "mediaDeliveryRequirement": "permanent_public_https_mp4_not_provider_signed_url"
+  }
+}

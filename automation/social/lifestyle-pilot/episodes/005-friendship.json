@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "unboda-saju-compatibility-reply-20261029",
+  "topicKey": "saju-relationship-reply-compatibility-20261029",
+  "sajuCategory": "compatibility",
+  "visualStyle": "relationship-coral",
+  "situation": "연락이 늦어 서운한 점심",
+  "hook": "왜 연락 방식이 다를까요?",
+  "theme": "사주 궁합으로 보는 소통 성향",
+  "thumbnailTitle": "답장이 늦어 서운하다면?",
+  "narrationDraft": [
+    "연락이 늦어 서운한 점심. 왜 연락 방식이 다를까요?",
+    "사주 궁합은 서로 다른 소통 성향을 참고하는 한 가지 방법이에요.",
+    "답장 속도보다 서로 원하는 연락 방식에 대해 차분하게 대화해 보세요.",
+    "대화 뒤엔 운보다 무료 사주 조회로 나의 관계 성향도 살펴보세요."
+  ],
+  "visualConcepts": [
+    "서로 다른 곳에서 휴대폰을 보는 두 사람의 표정과 말풍선이 어긋나는 원본 장면",
+    "상대의 연락 패턴 두 가지가 서로 다른 리듬으로 이어지는 궁합 비유 모션",
+    "두 사람의 대화창에서 오해가 줄어들고 서로의 말을 듣는 원본 모션",
+    "붉은 노을의 두 실루엣과 운보다 무료 사주 조회 메시지가 마무리되는 장면"
+  ],
+  "scenes": [
+    {
+      "headline": [
+        "답장 속도가",
+        "서운할 때"
+      ],
+      "subline": "마음이 엇갈리는 순간",
+      "illustration": "message"
+    },
+    {
+      "headline": [
+        "사주 궁합은",
+        "소통 성향 참고"
+      ],
+      "subline": "상대를 단정하지 않아요",
+      "illustration": "rest"
+    },
+    {
+      "headline": [
+        "원하는 연락",
+        "방식 말해보기"
+      ],
+      "subline": "대화가 먼저예요",
+      "illustration": "clock"
+    },
+    {
+      "headline": [
+        "내 사주부터",
+        "무료로 살펴보기"
+      ],
+      "subline": "운보다 무료 사주 조회",
+      "illustration": "notes"
+    }
+  ],
+  "destination": "https://unboda.kr",
+  "licenseReviewRequired": true,
+  "voiceHumanReviewRequired": true,
+  "automatedPublicationAllowed": false
+}

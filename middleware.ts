@@ -2,6 +2,15 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  // Isolated read-only Buffer connectivity audit in a Vercel SSO-protected Preview.
+  // Preview does not have Supabase env credentials. Do not change session handling
+  // for any other path or for any Production deployment.
+  if (process.env.VERCEL_ENV === "preview" &&
+      (request.nextUrl.pathname === "/api/internal/social/buffer-preview-status" ||
+       request.nextUrl.pathname === "/api/internal/social/runway-pilot")) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

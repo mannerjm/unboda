@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "mode": "PRIVATE_REVIEW_ONLY",
+  "noAutomaticPublishing": true,
+  "paidProviderCallsAllowed": false,
+  "mediaRightsReviewed": false,
+  "verified90DayPublicHistory": false,
+  "scheduledProductionActivation": false,
+  "slots": [
+    {
+      "kst": "00:00",
+      "brief": "episodes/003-midnight.json"
+    },
+    {
+      "kst": "08:00",
+      "brief": "episodes/004-commute.json"
+    },
+    {
+      "kst": "12:00",
+      "brief": "episodes/005-friendship.json"
+    },
+    {
+      "kst": "20:00",
+      "brief": "episodes/002-afterwork.json"
+    }
+  ]
+}

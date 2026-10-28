@@ -1,0 +1,77 @@
+name: UNBODA Korean voice + 30s review (NO PUBLISH)
+on:
+  pull_request:
+    paths:
+      - 'automation/social/korean-narration-pilot.py'
+      - 'automation/social/pilot-preview/media-technical-qa.mjs'
+      - 'automation/social/pilot-preview/media-technical-qa.test.mjs'
+      - 'automation/social/pilot-preview/finalize-review-proof.mjs'
+      - 'automation/social/pilot-preview/finalize-review-proof.test.mjs'
+      - '.github/workflows/unboda-korean-voice-private-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  korean-voice-review-no-publishing:
+    if: github.repository == 'mannerjm/unboda' && github.event_name != 'pull_request' || github.repository == 'mannerjm/unboda' && github.event.pull_request.head.repo.full_name == 'mannerjm/unboda'
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    env:
+      OMP_NUM_THREADS: 2
+      TOKENIZERS_PARALLELISM: 'false'
+      HF_HUB_DISABLE_TELEMETRY: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install video runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fontconfig fonts-noto-cjk
+          python -m pip install --upgrade pip
+          python -m pip install --no-cache-dir 'Pillow==11.3.0'
+      - name: Test technical quality gate before generating any voice
+        run: node --test automation/social/pilot-preview/media-technical-qa.test.mjs automation/social/pilot-preview/finalize-review-proof.test.mjs
+      - name: Create original editing proof using archived, verified 10-second media
+        run: |
+          node automation/social/pilot-preview/render-preview.mjs /tmp/unboda-korean-voice-review
+      - name: Install pinned upstream Korean TTS engine (MIT, CPU)
+        run: |
+          python -m pip install --no-cache-dir 'git+https://github.com/myshell-ai/MeloTTS.git@209145371cff8fc3bd60d7be902ea69cbdb7965a'
+          python -m unidic download
+      - name: Render Korean voice into 30s internal video and verify codecs
+        run: |
+          python automation/social/korean-narration-pilot.py \
+            --visual /tmp/unboda-korean-voice-review/UNBODA_30s_COVER_FIRST_VISUAL_DRAFT_NO_VOICE.mp4 \
+            --out /tmp/unboda-korean-voice-review
+      - name: Verify narrated MP4, Korean voice gaps, cover-first match, no frozen/black spans
+        run: |
+          node automation/social/pilot-preview/media-technical-qa.mjs \
+            /tmp/unboda-korean-voice-review/UNBODA_30s_KOREAN_NARRATED_REVIEW_NOT_PUBLISHED.mp4 \
+            /tmp/unboda-korean-voice-review/UNBODA_REELS_SHORTS_COVER.jpg \
+            /tmp/unboda-korean-voice-review/UNBODA_30s_KOREAN_NARRATION.wav \
+            /tmp/unboda-korean-voice-review/TECHNICAL_QA_REVIEW_NOT_RELEASE.json
+      - name: Confirm passed format QA in narration receipt, never grant publication
+        run: |
+          node automation/social/pilot-preview/finalize-review-proof.mjs \
+            /tmp/unboda-korean-voice-review/VOICE_VIDEO_PROOF.json \
+            /tmp/unboda-korean-voice-review/TECHNICAL_QA_REVIEW_NOT_RELEASE.json
+      - name: Retain measured failing QA report and review media; no SNS publication
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: UNBODA_KOREAN_VOICE_30s_PRIVATE_REVIEW_NOT_PUBLISHED
+          path: |
+            /tmp/unboda-korean-voice-review/UNBODA_30s_KOREAN_NARRATED_REVIEW_NOT_PUBLISHED.mp4
+            /tmp/unboda-korean-voice-review/UNBODA_30s_KOREAN_NARRATION.wav
+            /tmp/unboda-korean-voice-review/VOICE_VIDEO_PROOF.json
+            /tmp/unboda-korean-voice-review/UNBODA_REELS_SHORTS_COVER.jpg
+            /tmp/unboda-korean-voice-review/TECHNICAL_QA_REVIEW_NOT_RELEASE.json
+          if-no-files-found: warn
+          retention-days: 5

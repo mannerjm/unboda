@@ -1,0 +1,42 @@
+name: UNBODA real Runway 30s visual draft (NEVER PUBLISH)
+on:
+  pull_request:
+    paths:
+      - 'automation/social/pilot-preview/**'
+      - '.github/workflows/unboda-social-pilot-preview.yml'
+permissions:
+  contents: read
+jobs:
+  real-premium-no-voice-preview:
+    if: github.repository == 'mannerjm/unboda' && github.event.pull_request.head.repo.full_name == 'mannerjm/unboda'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install FFmpeg, authentic Korean typography and graphics library
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fontconfig fonts-noto-cjk
+          python -m pip install --disable-pip-version-check 'Pillow==11.3.0'
+          fc-match -f '%{file}\n' 'Noto Sans CJK KR'
+      - name: Verify Korean voice assembly fails closed without real licensed speech
+        run: node --test automation/social/pilot-preview/*.test.mjs
+      - name: Render 30-second premium Korean editorial typography using actual paid Runway source; no TTS or SNS
+        run: node automation/social/pilot-preview/render-preview.mjs /tmp/unboda-real-preview
+      - name: Upload protected internal draft video, not approved for publication
+        uses: actions/upload-artifact@v4
+        with:
+          name: unboda-real-runway-30sec-PREMIUM-SERIF-NO-VOICE
+          path: |
+            /tmp/unboda-real-preview/UNBODA_30s_PREMIUM_TYPOGRAPHY_NO_VOICE.mp4
+            /tmp/unboda-real-preview/UNBODA_30s_COVER_FIRST_VISUAL_DRAFT_NO_VOICE.mp4
+            /tmp/unboda-real-preview/UNBODA_REELS_SHORTS_COVER.jpg
+            /tmp/unboda-real-preview/VERIFY.txt
+          if-no-files-found: error
+          retention-days: 5

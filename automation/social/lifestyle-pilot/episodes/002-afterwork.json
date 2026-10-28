@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "unboda-saju-money-pattern-evening-20261029",
+  "topicKey": "saju-money-spending-pattern-20261029",
+  "sajuCategory": "money",
+  "visualStyle": "finance-emerald",
+  "situation": "월급날인데 돈이 남지 않은 밤",
+  "hook": "소비가 왜 반복될까요?",
+  "theme": "사주 재물운과 현실 소비 습관",
+  "thumbnailTitle": "월급이 남지 않는 이유?",
+  "narrationDraft": [
+    "월급날인데 돈이 남지 않은 밤. 소비가 왜 반복될까요?",
+    "사주 재물운은 돈을 대하는 성향을 돌아보는 하나의 관점이에요.",
+    "이번 달 자주 쓴 항목 세 가지만 가계부에 천천히 적으며 점검해 보세요.",
+    "지출 기록과 함께 운보다 무료 사주 조회로 내 재물 성향도 살펴보세요."
+  ],
+  "visualConcepts": [
+    "저녁 책상 위 통장과 지출 영수증이 놓이고 숫자가 변하는 원본 장면",
+    "소비 항목이 세 갈래로 나뉘며 금액의 흐름이 보이는 모션 인포그래픽",
+    "영수증 세 가지를 차례로 정리하는 손과 가계부의 오리지널 영상 모션",
+    "녹색 빛의 예산 그래프가 잔잔해지고 운보다 무료 사주 조회가 나타나는 장면"
+  ],
+  "scenes": [
+    {
+      "headline": [
+        "월급날인데",
+        "왜 돈이 안 남지?"
+      ],
+      "subline": "지출 습관이 궁금할 때",
+      "illustration": "notes"
+    },
+    {
+      "headline": [
+        "사주 재물운은",
+        "소비 성향의 참고"
+      ],
+      "subline": "금액을 예언하지 않아요",
+      "illustration": "clock"
+    },
+    {
+      "headline": [
+        "이번 달 지출",
+        "세 가지만 점검"
+      ],
+      "subline": "가계부부터 살펴봐요",
+      "illustration": "message"
+    },
+    {
+      "headline": [
+        "내 사주부터",
+        "무료로 살펴보기"
+      ],
+      "subline": "운보다 무료 사주 조회",
+      "illustration": "rest"
+    }
+  ],
+  "destination": "https://unboda.kr",
+  "licenseReviewRequired": true,
+  "voiceHumanReviewRequired": true,
+  "automatedPublicationAllowed": false
+}

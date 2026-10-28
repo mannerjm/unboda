@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "unboda-saju-job-fit-morning-20261029",
+  "topicKey": "saju-career-job-fit-20261029",
+  "sajuCategory": "career",
+  "visualStyle": "commute-sunrise",
+  "situation": "또 이직을 고민한 아침",
+  "hook": "일이 왜 안 맞을까요?",
+  "theme": "사주로 보는 직업 성향과 선택",
+  "thumbnailTitle": "이직 고민이 반복된다면?",
+  "narrationDraft": [
+    "또 이직을 고민한 아침. 일이 왜 안 맞을까요?",
+    "사주에선 사람마다 다른 일하는 성향을 참고해 볼 수 있어요.",
+    "오늘 하루를 떠올리며 힘든 업무와 잘 맞는 일을 하나씩 나눠 적어 보세요.",
+    "현실적인 준비와 함께 운보다 무료 사주 조회로 직업 성향도 살펴보세요."
+  ],
+  "visualConcepts": [
+    "햇살이 비치는 출근길에서 버스를 기다리는 사람과 움직이는 도시를 표현하는 원본 장면",
+    "서로 다른 작업 환경 두 가지를 선택 카드로 비교하는 시각적 움직임",
+    "달력과 업무 메모를 펼쳐 잘 맞는 일과 어려운 일을 나누는 원본 장면",
+    "아침 햇빛 아래 운보다 무료 사주 조회로 내 직업 성향을 살피는 화면"
+  ],
+  "scenes": [
+    {
+      "headline": [
+        "또 이직 고민?",
+        "나와 맞는 일은"
+      ],
+      "subline": "월요일 아침의 질문",
+      "illustration": "clock"
+    },
+    {
+      "headline": [
+        "사주로 살피는",
+        "나의 직업 성향"
+      ],
+      "subline": "선택의 참고일 뿐이에요",
+      "illustration": "notes"
+    },
+    {
+      "headline": [
+        "잘 맞는 일과",
+        "어려운 일 구분"
+      ],
+      "subline": "오늘 하나씩 적어봐요",
+      "illustration": "message"
+    },
+    {
+      "headline": [
+        "내 사주부터",
+        "무료로 살펴보기"
+      ],
+      "subline": "운보다 무료 사주 조회",
+      "illustration": "rest"
+    }
+  ],
+  "destination": "https://unboda.kr",
+  "licenseReviewRequired": true,
+  "voiceHumanReviewRequired": true,
+  "automatedPublicationAllowed": false
+}

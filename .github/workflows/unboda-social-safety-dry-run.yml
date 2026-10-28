@@ -1,0 +1,24 @@
+name: UNBODA social automation safety dry-run
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'automation/social/**'
+      - '.github/workflows/unboda-social-safety-dry-run.yml'
+jobs:
+  mock-policy-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install FFmpeg test dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          ffmpeg -version | head -n 1
+      - name: Unit tests + real local MP4 render smoke (no external publishing)
+        run: node --test automation/social/*.test.mjs

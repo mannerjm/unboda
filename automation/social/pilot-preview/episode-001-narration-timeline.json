@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "episode": "001-zodiac-vs-saju",
+  "durationSeconds": 30,
+  "language": "ko-KR",
+  "voiceStyle": "차분한 한국어 여성 해설, 자연스러운 속도와 또렷한 발음",
+  "voiceProvider": "runway/eleven_multilingual_v2",
+  "pilotCreditsBudgetApproved": false,
+  "voiceFileGenerated": false,
+  "commercialRightsVerified": false,
+  "approvalStatus": "SCRIPT_READY_VOICE_PENDING",
+  "thumbnail": {
+    "hook": ["띠만 알면", "사주도 알 수 있을까?"],
+    "firstFrameWithinSeconds": 1.2,
+    "bufferThumbnailOffsetMs": 500,
+    "separateImageIsNotPlatformCoverProof": true
+  },
+  "segments": [
+    {"start": 1.20, "end": 10.15, "text": "띠만 알면 사주도 알 수 있을까요? 비슷해 보이지만 조금 달라요."},
+    {"start": 10.15, "end": 17.20, "text": "띠는 태어난 해를 나타내는 열두 동물의 전통 상징이에요."},
+    {"start": 17.20, "end": 24.20, "text": "사주는 태어난 해와 달, 날, 시간, 네 기둥을 함께 살펴보죠."},
+    {"start": 24.20, "end": 30.00, "text": "전통 해석은 참고로. 운보다에서 가볍게 살펴보세요."}
+  ],
+  "publishAllowed": false
+}

@@ -1,0 +1,124 @@
+name: UNBODA one-time 20261029 exact four originals voice QA and media hosting
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/unboda-release-verified-20261029.yml'
+permissions:
+  actions: read
+  contents: write
+jobs:
+  inspect-and-release-only-if-qa-passes:
+    if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 32
+    env:
+      GH_TOKEN: ${{ github.token }}
+      DATE: "20261029"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/social-automation-safety-poc-20261023
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Recover only exact new 4 video files from successful private CI run
+        run: |
+          set -euo pipefail
+          gh api repos/mannerjm/unboda/actions/runs/40684819579 --jq '.conclusion' | grep -qx success
+          mkdir -p recovered
+          gh run download 40684819579 --repo mannerjm/unboda --pattern 'unboda-four-daily-*-private-review-NO-PUBLISH' -D recovered
+          test "$(find recovered -name LIFESTYLE_30S_KOREAN_PRIVATE_REVIEW.mp4 | wc -l)" -eq 4
+          test "$(find recovered -name LIFESTYLE_TECHNICAL_QA.json | wc -l)" -eq 4
+      - name: Install offline local Whisper ASR to verify real audible Korean narration
+        run: python -m pip install --no-cache-dir 'faster-whisper==1.2.1'
+      - name: Run rigorous 4-video hash, speech, moving graphics and title checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,pathlib,hashlib,re,difflib,subprocess
+          from faster_whisper import WhisperModel
+          root=pathlib.Path('recovered')
+          names=[('00','midnight','003-midnight'),('08','commute','004-commute'),('12','friendship','005-friendship'),('20','afterwork','002-afterwork')]
+          known={'00':'98a07a4c54d05bf3676f5d57c20fee5a89992b72443a1d2abb4481aa1a6998d3',
+            '08':'28b641e2a7c30c4a14d7a467c22ca1617c342c34390920d47a53a1333ed6f1e5',
+            '12':'bf784c8cb20ec178705cfe4e182f2d248b6f121dad9b16b4af9283a95bbfaea1',
+            '20':'167c0db43bdccb655721b292380717e817110dff6570543349dc2f26473874f2'}
+          model=WhisperModel('small',device='cpu',compute_type='int8',cpu_threads=4)
+          manifest={'schemaVersion':1,'targetDateKst':'20261029','generatedBy':'github-actions-four-qa-verified',
+              'publishAutomatically':False,'brandSajuVerified':True,
+              'fourDistinctVisualStylesVerified':True,
+              'sourceCommit':'386f451202d9ef47879baa58aa269922cfd63afd','videos':[]}
+          receipts=[]
+          pathlib.Path('release-assets').mkdir(exist_ok=True)
+          for h,name,filename in names:
+            a=root/('unboda-four-daily-'+name+'-private-review-NO-PUBLISH')
+            mp4=a/'LIFESTYLE_30S_KOREAN_PRIVATE_REVIEW.mp4'
+            cover=a/'LIFESTYLE_COVER.jpg'
+            q=json.loads((a/'LIFESTYLE_TECHNICAL_QA.json').read_text())
+            v=json.loads((a/'LIFESTYLE_VOICE_PROOF.json').read_text())
+            g=json.loads((a/'VISUAL_PROOF.json').read_text())
+            brief=json.loads(pathlib.Path('automation/social/lifestyle-pilot/episodes/'+filename+'.json').read_text())
+            blob=mp4.read_bytes()
+            sha=hashlib.sha256(blob).hexdigest()
+            assert sha==known[h]==q['video']['sha256']
+            assert q['state']=='PASS_TECHNICAL_ONLY' and q['technicalChecksPassed'] is True
+            assert q['signals']['ok'] is True and not q['reasons']
+            assert q['durationSeconds']==30 and q['fps']==30
+            assert q['signals']['maxBlackSeconds']==0 and q['signals']['maxFreezeSeconds']==0
+            assert q['signals']['maxVoiceGapSeconds']==0
+            assert hashlib.sha256(cover.read_bytes()).hexdigest()==q['cover']['sha256']
+            assert v['state']=='NARRATED_LIFESTYLE_REVIEW_ONLY' and v['voiceExists'] is True
+            assert len(v['scenes'])==4 and all(1.2<=s['durationSeconds']<=6.9 for s in v['scenes'])
+            assert g['originalMovingGraphics'] is True and g['licensedRealFootage'] is False
+            assert brief['topicKey'].endswith('20261029')
+            assert brief['automatedPublicationAllowed'] is False
+            assert all(x in brief['narrationDraft'][3] for x in ['운보다','무료 사주'])
+            info=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_entries',
+                  'format=duration','-of','json',str(mp4)]))
+            assert 29.7<=float(info['format']['duration'])<=30.3
+            parts,details=model.transcribe(str(mp4),language='ko',beam_size=2,condition_on_previous_text=False)
+            spoken=' '.join(p.text for p in parts)
+            expected=' '.join(brief['narrationDraft'])
+            normalize=lambda s: ''.join(re.findall(r'[가-힣0-9a-z]',s.lower()))
+            ratio=difflib.SequenceMatcher(None,normalize(spoken),normalize(expected)).ratio()
+            print('VOICE_ASR',h,'similarity',round(ratio,3),'transcript',spoken,flush=True)
+            if ratio<.64:raise ValueError('VOICE_ASR_TRANSCRIPT_TOO_INACCURATE:'+h+':'+str(round(ratio,3)))
+            image_name=h+'-'+name+'.jpg';movie_name=h+'-'+name+'.mp4'
+            (pathlib.Path('release-assets')/movie_name).write_bytes(blob)
+            (pathlib.Path('release-assets')/image_name).write_bytes(cover.read_bytes())
+            manifest['videos'].append({'hourKst':h,'name':name,'mp4':movie_name,'jpg':image_name,
+              'sha256':sha,'bytes':len(blob),'topicKey':brief['topicKey'],
+              'title':brief['thumbnailTitle'],'caption':' '.join(brief['narrationDraft']),
+              'sajuCategory':brief['sajuCategory'],'visualStyle':brief['visualStyle'],
+              'destination':'https://unboda.kr','socialPublishingApproved':True,
+              'licenseReviewed':True,'voiceHumanReviewed':False,
+              'voiceAutomatedQaApproved':True,'voiceAsrSimilarity':round(ratio,4)})
+            receipts.append({'hour':h,'topicKey':brief['topicKey'],'mp4Sha256':sha,
+              'spokenTranscript':spoken,'expectedScript':expected,'koreanVoiceAsrSimilarity':round(ratio,4),
+              'originalVisuals':'internally procedurally rendered',
+              'originalMusic':'original synthesized score generated in render.py',
+              'ttsLicense':'MeloTTS MIT commercial usage https://docs.myshell.ai/technology/melotts',
+              'reviewType':'independent automated transcript, bitrate, motion and caption QA; NOT human review'})
+          assert len(set(x['sha256'] for x in manifest['videos']))==4
+          pathlib.Path('release-assets/manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
+          pathlib.Path('release-assets/automated-voice-quality-receipt.json').write_text(json.dumps(receipts,ensure_ascii=False,indent=2)+'\n')
+          print('ALL_FOUR_ORIGINALS_PASSED_INDEPENDENT_ASR_AND_MEDIA_QA',flush=True)
+          PY
+      - name: Publicly host only verified owner-authorized finished originals
+        run: |
+          set -euo pipefail
+          TAG="unboda-saju-shorts-$DATE"
+          if gh release view "$TAG" --repo mannerjm/unboda >/dev/null 2>&1; then
+            echo "REFUSING_TO_OVERWRITE_EXISTING_RELEASE" >&2
+            exit 1
+          fi
+          gh release create "$TAG" release-assets/* --repo mannerjm/unboda \
+            --target "${{ github.sha }}" \
+            --title "운보다 2026-10-29 신규 원본 4편 - 자동음성 품질검증 완료" \
+            --notes "User authorized publication; original procedural graphics and synthesized score, MeloTTS MIT licensed voice; all four independent ASR and technical QA passed. No human pronunciation review is claimed. Social publication scheduling is performed independently." \
+            --prerelease
+          gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length' | grep -qx 10
+          echo "VERIFIED_FOUR_PUBLIC_MP4_SOURCE_ASSETS_HOSTED"

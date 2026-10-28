@@ -2,7 +2,7 @@
 const test=require("node:test"),assert=require("node:assert/strict");
 const {createHash}=require("node:crypto");
 const {nextSlotFromCron,loadReleaseVideo}=require("../lib/release-video.cjs");
-const {makeVideoClaim}=require("../lib/video-claim.cjs");
+const {makeVideoClaim,makeSourceClaim}=require("../lib/video-claim.cjs");
 const {runVideoPublishCron}=require("../lib/video-publisher.cjs");
 const now=Date.parse("2026-10-28T23:45:00+09:00");
 const slot=nextSlotFromCron(now);
@@ -15,7 +15,7 @@ const manifest={schemaVersion:1,targetDateKst:"20261029",
  sourceCommit:"a".repeat(40),brandSajuVerified:true,
  fourDistinctVisualStylesVerified:true,videos:hours.map(([hourKst,name])=>({
   hourKst,name,mp4:hourKst+"-"+name+".mp4",jpg:hourKst+"-"+name+".jpg",
-  sha256:sha,bytes:goodMp4.length,topicKey:"unique-topic-20261029",
+  sha256:hourKst==="00"?sha:createHash("sha256").update(hourKst).digest("hex"),bytes:goodMp4.length,topicKey:"unique-topic-20261029",
   title:"하루 고민을 사주로 살펴봐요",caption:"현실 속 고민을 사주와 궁합·재물운의 관점에서 돌아보며 운보다 무료 사주 조회로 내 성향도 천천히 살펴보세요.",
   visualStyle:({midnight:"midnight-indigo",commute:"commute-sunrise",friendship:"relationship-coral",afterwork:"finance-emerald"})[name],
   sajuCategory:({midnight:"self-understanding",commute:"career",friendship:"compatibility",afterwork:"money"})[name],

@@ -4,7 +4,7 @@ const {createHash}=require("node:crypto");
 const {nextSlotFromCron,loadReleaseVideo}=require("../lib/release-video.cjs");
 const {makeVideoClaim}=require("../lib/video-claim.cjs");
 const {runVideoPublishCron}=require("../lib/video-publisher.cjs");
-const now=Date.parse("2026-10-28T20:00:00+09:00");
+const now=Date.parse("2026-10-28T23:45:00+09:00");
 const slot=nextSlotFromCron(now);
 const goodMp4=Buffer.alloc(1800);goodMp4.write("ftyp",4);
 const sha=createHash("sha256").update(goodMp4).digest("hex");
@@ -69,13 +69,15 @@ function fetcherFactory({badSha=false,preExisting=false,noMediaId=false,badPost=
  };
  return {fetcher,calls};
 }
-test("exact 4 KST cron events schedule NEXT slot (20 -> 00 tomorrow)",()=>{
+test("15-minute-ahead KST cron resolves exact future social slots and rejects late runs",()=>{
  assert.equal(slot.slotKst,"2026-10-29T00:00:00");
  assert.equal(slot.targetDateKst,"20261029");
- assert.equal(nextSlotFromCron(Date.parse("2026-10-29T00:00:00+09:00")).slotKst,"2026-10-29T08:00:00");
- assert.equal(nextSlotFromCron(Date.parse("2026-10-29T08:00:00+09:00")).slotKst,"2026-10-29T12:00:00");
- assert.equal(nextSlotFromCron(Date.parse("2026-10-29T12:00:00+09:00")).slotKst,"2026-10-29T20:00:00");
+ assert.equal(nextSlotFromCron(Date.parse("2026-10-29T07:45:00+09:00")).slotKst,"2026-10-29T08:00:00");
+ assert.equal(nextSlotFromCron(Date.parse("2026-10-29T11:45:00+09:00")).slotKst,"2026-10-29T12:00:00");
+ assert.equal(nextSlotFromCron(Date.parse("2026-10-29T19:45:00+09:00")).slotKst,"2026-10-29T20:00:00");
  assert.equal(nextSlotFromCron(Date.parse("2026-10-28T19:30:00+09:00")),null);
+ assert.equal(nextSlotFromCron(Date.parse("2026-10-28T19:56:00+09:00")),null);
+ assert.equal(nextSlotFromCron(Date.parse("2026-10-28T19:45:00+09:00")).slotKst,"2026-10-28T20:00:00");
 });
 test("GitHub release public MP4 is checked byte-for-byte before use",async()=>{
  const x=fetcherFactory();const r=await loadReleaseVideo({now,fetcher:x.fetcher});

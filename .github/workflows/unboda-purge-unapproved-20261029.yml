@@ -1,0 +1,43 @@
+name: UNBODA remove unapproved 2026-10-29 video release assets
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/unboda-purge-unapproved-20261029.yml'
+permissions:
+  contents: write
+jobs:
+  delete-only-the-unapproved-dated-media:
+    if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Validate private-only status and purge exact two unapproved releases
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for tag in unboda-saju-shorts-20261029 unboda-shorts-20261029; do
+            if ! gh api "repos/mannerjm/unboda/releases/tags/$tag" > /tmp/private-release.json 2>/dev/null; then
+              echo "ALREADY_ABSENT: $tag"
+              continue
+            fi
+            TAG="$tag" python - <<'PY'
+import json,os
+r=json.load(open('/tmp/private-release.json'))
+assert r.get('tag_name') == os.environ['TAG']
+assert r.get('prerelease') is True
+assert not r.get('immutable',False)
+body=(r.get('body') or '').lower()
+assert 'not' in body and 'sns' in body
+for a in r.get('assets',[]):
+ print('DELETE_REJECTED_DRAFT_ASSET',r['tag_name'],a['name'],a.get('digest',''))
+PY
+            gh release delete "$tag" --repo mannerjm/unboda --yes --cleanup-tag
+            if gh api "repos/mannerjm/unboda/releases/tags/$tag" >/dev/null 2>&1; then
+              echo "RELEASE_DELETE_NOT_VERIFIED: $tag" >&2
+              exit 1
+            fi
+            echo "VERIFIED_DELETED_UNAPPROVED_RELEASE: $tag"
+          done

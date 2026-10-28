@@ -25,6 +25,16 @@ def font(px,bold=False):
 def verify(brief):
     if brief.get("schemaVersion")!=1 or brief.get("automatedPublicationAllowed") is not False:
         raise ValueError("UNRELEASED_BRIEF_REQUIRED")
+    if brief.get("visualStyle") not in BRAND_PALETTES:
+        raise ValueError("VIDEO_SAJU_BRAND_STYLE_REQUIRED")
+    if brief.get("destination")!="https://unboda.kr":
+        raise ValueError("VIDEO_UNBODA_DESTINATION_REQUIRED")
+    narr=brief.get("narrationDraft")
+    if not isinstance(narr,list) or len(narr)!=4 or not any(
+      x in narr[1] for x in ("사주","기질","궁합","재물운")):
+        raise ValueError("VIDEO_SAJU_EXPLANATION_REQUIRED")
+    if "운보다" not in narr[3] or "무료 사주" not in narr[3]:
+        raise ValueError("VIDEO_UNBODA_FREE_SAJU_CTA_REQUIRED")
     lines=brief.get("narrationDraft")
     if not isinstance(lines,list) or len(lines)!=4 or any(not isinstance(x,str) or len(x)<15 or len(x)>100 for x in lines):
         raise ValueError("FOUR_VALID_KOREAN_VOICES_REQUIRED")

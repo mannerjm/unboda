@@ -3,6 +3,7 @@
 // One paid request only after authenticated service-side approval + durable
 // budget reservation + VERIFIED COMPLETE external 90-day history.
 // No publishing, uploading, automatic retries, or fallback to customer data.
+import {checkRemote90DayCoverage} from './lifestyle-staging-orchestrator.mjs';
 const API='https://api.openai.com/v1/responses';
 const NO=(reason)=>Object.assign(new Error(reason),{code:reason});
 const schema={
@@ -32,6 +33,7 @@ function assertGate(x){
  if(x?.approvalSource!=='verified-staging-service-worker'||
     x?.ownerExplicitCostApproval!==true||
     x?.budgetReceipt?.state!=='BUDGET_RESERVED_ONLY'||
+    x?.budgetReceipt?.providerCallsAllowed!==true||
     x?.budgetReceipt?.publishingAllowed!==false||
     x?.budgetReceipt?.externalCallNotExecuted!==true||
     !Number.isInteger(x?.budgetReceipt?.reservedKrw)||
@@ -39,6 +41,7 @@ function assertGate(x){
     x?.verifiedPublishedHistory?.source!=='verified-metricool-published-export'||
     x.verifiedPublishedHistory.paginationComplete!==true||
     x.verifiedPublishedHistory.hasPublishedHistory!==true||
+    checkRemote90DayCoverage(x.verifiedPublishedHistory,x.atMs).ok!==true||
     x?.ownerPrivacyApproval!==true||
     x?.purpose!=='STAGING_EDITORIAL_REVIEW'||
     x?.socialPublishingEnabled!==false)

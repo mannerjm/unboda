@@ -40,6 +40,7 @@ jobs:
           DATE="$(date -d tomorrow +%Y%m%d)"
           echo "source_sha=$SHA" >> "$GITHUB_OUTPUT"
           echo "target_date=$DATE" >> "$GITHUB_OUTPUT"
+          node --test automation/social/lifestyle-pilot/brand-video-guard.test.mjs
           node --test automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs
           node automation/social/lifestyle-pilot/four-daily-private-validator.mjs
           node --input-type=module <<'NODE'
@@ -165,7 +166,14 @@ jobs:
           const slots=[['00','midnight'],['08','commute'],['12','friendship'],['20','afterwork']];
           const manifest={schemaVersion:1,targetDateKst:process.env.DATE,
             generatedBy:'github-actions-four-qa-verified',publishAutomatically:false,
+            brandSajuVerified:true,fourDistinctVisualStylesVerified:true,
             sourceCommit:process.env.SOURCE_COMMIT,videos:[]};
+          import {inspectFourSajuBrandEpisodes} from './automation/social/lifestyle-pilot/brand-video-guard.mjs';
+          const subjects=['003-midnight','004-commute','005-friendship','002-afterwork'];
+          const reviewed=subjects.map(name=>JSON.parse(fs.readFileSync(
+            'automation/social/lifestyle-pilot/episodes/'+name+'.json','utf8')));
+          const brand=inspectFourSajuBrandEpisodes(reviewed);
+          if(!brand.ok)throw Error('SAJU_OR_FOUR_VISUAL_IDENTITY_GATE_FAILED:'+brand.reason);
           fs.mkdirSync('release-assets',{recursive:true});
           let total=0;
           for(const [hour,name] of slots){
@@ -189,7 +197,9 @@ jobs:
             const b=JSON.parse(fs.readFileSync('automation/social/lifestyle-pilot/episodes/'+briefs[name]+'.json','utf8'));
             manifest.videos.push({hourKst:hour,name,mp4:file,jpg:coverName,
               sha256:sha,bytes:movie.length,topicKey:b.topicKey,
-              title:b.thumbnailTitle,caption:b.narrationDraft.join(' ')});
+              title:b.thumbnailTitle,caption:b.narrationDraft.join(' '),
+              sajuCategory:b.sajuCategory,visualStyle:b.visualStyle,
+              destination:b.destination,socialPublishingApproved:false});
           }
           if(total>6000000)throw Error('DAY_BYTES_CAP_EXCEEDED');
           fs.writeFileSync('release-assets/manifest.json',JSON.stringify(manifest,null,2)+'\n');
@@ -198,7 +208,7 @@ jobs:
       - name: Publish four original MP4s as stable GitHub release assets, never SNS posts
         run: |
           set -euo pipefail
-          TAG="unboda-shorts-$DATE"
+          TAG="unboda-saju-shorts-$DATE"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Day release already exists: refusing to overwrite or repost"
             exit 1
@@ -206,7 +216,7 @@ jobs:
           gh release create "$TAG" release-assets/* \
             --target "${{ github.sha }}" \
             --title "UNBODA 30s videos $DATE (private review not SNS published)" \
-            --notes "Four original Korean 30-second video assets, source SHA and SHA256 in manifest.json. This release does NOT authorize or prove SNS publication." \
+            --notes "Four Korean 30-second SAJU & LIFE videos, distinct animated artwork, and unboda.kr free saju CTA. SHA256 in manifest.json. This release is NOT SNS publishing approval." \
             --prerelease
           gh release view "$TAG" --json assets --jq '.assets|length' | grep -qx 9
           echo "PUBLIC_STABLE_MEDIA_ARCHIVE_CREATED_WITH_FOUR_VIDEOS"

@@ -22,6 +22,10 @@ on:
       - 'automation/social/archive-private-media-and-receipt.test.mjs'
       - 'automation/social/verify-video-publication-evidence.mjs'
       - 'automation/social/verify-video-publication-evidence.test.mjs'
+      - 'automation/social/private-review-artifact-loader.mjs'
+      - 'automation/social/private-review-staging-upload-cli.mjs'
+      - 'automation/social/private-review-staging-upload-cli.test.mjs'
+      - '.github/workflows/unboda-private-staging-archive-four.yml'
       - 'automation/social/staging-observed-post-raw-sha256-compat.sql'
       - 'automation/social/staging-remote-post-integrity-guard.sql'
       - 'automation/social/staging-private-media-archive-ledger.sql'
@@ -60,4 +64,5 @@ jobs:
             automation/social/openai-lifestyle-generator.test.mjs \
             automation/social/lifestyle-pilot/compile-ai-private-brief.test.mjs \
             automation/social/archive-private-media-and-receipt.test.mjs \
-            automation/social/verify-video-publication-evidence.test.mjs
+            automation/social/verify-video-publication-evidence.test.mjs \
+            automation/social/private-review-staging-upload-cli.test.mjs

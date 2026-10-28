@@ -31,6 +31,27 @@ class TestSajuBrandVisuals(unittest.TestCase):
    frame2=draw_frame(b,0,c).crop((132,546,583,910)).resize((180,150),Image.Resampling.BICUBIC)
    mean=sum(ImageStat.Stat(ImageChops.difference(frame1,frame2)).mean)/3.0
    self.assertGreater(mean,2.0,"Budget-paper and ledger must visibly animate even on mobile")
+ def test_topic_motif_is_actually_drawn_and_changes_subject_not_just_color(self):
+  for b in self.films:
+   self.assertIn("visualMotif",b)
+   self.assertGreater(len(b["visualMotif"]),8)
+  original=draw_frame(self.films[3],0,0.7).crop((198,594,522,867)).tobytes()
+  other=copy.deepcopy(self.films[3])
+  other["visualMotif"]="expense-ledger"
+  generic=draw_frame(other,0,0.7).crop((198,594,522,867)).tobytes()
+  self.assertNotEqual(hashlib.sha256(original).hexdigest(),hashlib.sha256(generic).hexdigest(),
+   "Same colored panel cannot disguise an unrelated topic graphic")
+  with self.assertRaisesRegex(ValueError,"VIDEO_SITUATION_AND_VISIBLE_MOTIF_MISMATCH"):
+   verify(other)
+ def test_missing_or_unrenderable_motif_cannot_pass(self):
+  wrong=copy.deepcopy(self.films[1])
+  wrong["visualMotif"]="subscription-billing"
+  with self.assertRaisesRegex(ValueError,"UNSUPPORTED_OR_WRONG_TOPIC_VISUAL_MOTIF"):
+   verify(wrong)
+  wrong=copy.deepcopy(self.films[1])
+  del wrong["visualMotif"]
+  with self.assertRaisesRegex(ValueError,"UNSUPPORTED_OR_WRONG_TOPIC_VISUAL_MOTIF"):
+   verify(wrong)
  def test_no_saju_explanation_or_unboda_cta_is_rejected(self):
   x=copy.deepcopy(self.films[0])
   x["narrationDraft"][1]="지금은 휴대폰을 내려놓아 보는 것도 좋아요."

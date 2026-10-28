@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "description": "Fail-closed original scene / actual subject-specific drawing policy. Unrelated or unrendered motifs must not ship.",
+  "motifs": {
+    "night-checklist": {
+      "category": "self-understanding",
+      "graphic": "checklist",
+      "label": "내일 할 일",
+      "situationTerms": [
+        "내일",
+        "할 일",
+        "계획"
+      ],
+      "visualTerms": [
+        "메모",
+        "노트",
+        "적기",
+        "체크",
+        "할 일",
+        "기록"
+      ]
+    },
+    "mood-journal": {
+      "category": "self-understanding",
+      "graphic": "journal",
+      "label": "감정 일기",
+      "situationTerms": [
+        "마음",
+        "감정",
+        "기분",
+        "일기"
+      ],
+      "visualTerms": [
+        "마음",
+        "감정",
+        "노트",
+        "일기",
+        "기록"
+      ]
+    },
+    "family-talk": {
+      "category": "self-understanding",
+      "graphic": "people",
+      "label": "가족 대화",
+      "situationTerms": [
+        "가족",
+        "부모",
+        "엄마",
+        "아빠"
+      ],
+      "visualTerms": [
+        "가족",
+        "대화",
+        "두 사람",
+        "말풍선",
+        "집"
+      ]
+    },
+    "sleep-routine": {
+      "category": "self-understanding",
+      "graphic": "moon",
+      "label": "밤의 휴식",
+      "situationTerms": [
+        "잠",
+        "밤",
+        "불면",
+        "수면"
+      ],
+      "visualTerms": [
+        "침실",
+        "잠",
+        "수면",
+        "달빛",
+        "밤"
+      ]
+    },
+    "meeting-presentation": {
+      "category": "career",
+      "graphic": "presentation",
+      "label": "회의 발표",
+      "situationTerms": [
+        "발표",
+        "회의",
+        "목소리"
+      ],
+      "visualTerms": [
+        "발표",
+        "회의",
+        "자료",
+        "노트",
+        "발표장"
+      ]
+    },
+    "career-crossroads": {
+      "category": "career",
+      "graphic": "signpost",
+      "label": "이직 고민",
+      "situationTerms": [
+        "이직",
+        "퇴사",
+        "회사",
+        "직장"
+      ],
+      "visualTerms": [
+        "출근",
+        "회사",
+        "이직",
+        "직장",
+        "선택"
+      ]
+    },
+    "job-interview": {
+      "category": "career",
+      "graphic": "interview",
+      "label": "면접 준비",
+      "situationTerms": [
+        "면접",
+        "채용",
+        "지원"
+      ],
+      "visualTerms": [
+        "면접",
+        "질문",
+        "의자",
+        "자리",
+        "준비"
+      ]
+    },
+    "work-checklist": {
+      "category": "career",
+      "graphic": "checklist",
+      "label": "업무 계획",
+      "situationTerms": [
+        "업무",
+        "일정",
+        "프로젝트"
+      ],
+      "visualTerms": [
+        "업무",
+        "계획",
+        "노트",
+        "메모",
+        "일정"
+      ]
+    },
+    "meetup-location": {
+      "category": "compatibility",
+      "graphic": "map",
+      "label": "약속 장소",
+      "situationTerms": [
+        "약속",
+        "장소",
+        "친구"
+      ],
+      "visualTerms": [
+        "장소",
+        "지도",
+        "이동",
+        "약속",
+        "친구"
+      ]
+    },
+    "message-timing": {
+      "category": "compatibility",
+      "graphic": "phone",
+      "label": "연락 방식",
+      "situationTerms": [
+        "답장",
+        "연락",
+        "메시지"
+      ],
+      "visualTerms": [
+        "메시지",
+        "답장",
+        "대화",
+        "휴대폰",
+        "연락"
+      ]
+    },
+    "relationship-talk": {
+      "category": "compatibility",
+      "graphic": "people",
+      "label": "관계 대화",
+      "situationTerms": [
+        "연인",
+        "배우자",
+        "대화",
+        "다툼",
+        "관계"
+      ],
+      "visualTerms": [
+        "대화",
+        "두 사람",
+        "연인",
+        "서로",
+        "사람"
+      ]
+    },
+    "shared-calendar": {
+      "category": "compatibility",
+      "graphic": "calendar",
+      "label": "서로의 일정",
+      "situationTerms": [
+        "일정",
+        "날짜",
+        "시간"
+      ],
+      "visualTerms": [
+        "달력",
+        "시간",
+        "일정",
+        "약속"
+      ]
+    },
+    "subscription-billing": {
+      "category": "money",
+      "graphic": "phone",
+      "label": "자동결제 알림",
+      "situationTerms": [
+        "자동이체",
+        "자동결제",
+        "구독"
+      ],
+      "visualTerms": [
+        "자동",
+        "결제",
+        "구독",
+        "영수증",
+        "이체"
+      ]
+    },
+    "expense-ledger": {
+      "category": "money",
+      "graphic": "receipt",
+      "label": "지출 점검",
+      "situationTerms": [
+        "월급",
+        "예산",
+        "지출",
+        "돈",
+        "가계부"
+      ],
+      "visualTerms": [
+        "가계부",
+        "지출",
+        "예산",
+        "그래프",
+        "영수증"
+      ]
+    },
+    "savings-goal": {
+      "category": "money",
+      "graphic": "savings",
+      "label": "저축 목표",
+      "situationTerms": [
+        "저축",
+        "적금",
+        "모으"
+      ],
+      "visualTerms": [
+        "저축",
+        "금액",
+        "통장",
+        "적금",
+        "동전"
+      ]
+    },
+    "shopping-choice": {
+      "category": "money",
+      "graphic": "shopping",
+      "label": "구매 고민",
+      "situationTerms": [
+        "장바구니",
+        "구매",
+        "쇼핑",
+        "물건"
+      ],
+      "visualTerms": [
+        "구매",
+        "물건",
+        "카트",
+        "쇼핑",
+        "장바구니"
+      ]
+    }
+  }
+}

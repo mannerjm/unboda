@@ -1,3 +1,4 @@
+import {inspectTopicVisualEpisode} from './topic-visual-guard.mjs';
 // UNBODA: a general life-tip video is NOT a saju-platform video.
 // Editorial/visual hard gate; never grants publication rights.
 const SAJU=/(?:사주|궁합|재물운|직업운|운세|타고난\s*성향|기질)/;
@@ -55,6 +56,8 @@ export function inspectSajuBrandEpisode(b){
   return DENY('ORIGINAL_SITUATIONAL_VISUAL_CONCEPT_REQUIRED');
  if(!b.licenseReviewRequired||!b.voiceHumanReviewRequired)
   return DENY('HUMAN_RIGHTS_REVIEW_REQUIRED');
+ const visual=inspectTopicVisualEpisode(b);
+ if(!visual.ok)return DENY(visual.reason);
  return Object.freeze({ok:true,brandReady:true,style:b.visualStyle,
   sajuCategory:b.sajuCategory,publicationAllowed:false});
 }

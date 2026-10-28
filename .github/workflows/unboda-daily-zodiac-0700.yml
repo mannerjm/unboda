@@ -1,7 +1,7 @@
 name: UNBODA daily 07KST zodiac original carousel
 on:
   schedule:
-    - cron: '15 20 * * *'
+    - cron: '15 18 * * *' # 03:15 KST, ample margin before 07:00
   push:
     paths:
       - '.github/workflows/unboda-daily-zodiac-0700.yml'

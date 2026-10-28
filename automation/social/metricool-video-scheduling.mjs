@@ -106,6 +106,21 @@ export async function scheduleSingleMetricoolVideo({
  if(existing.some(p=>String(p?.publicationDate?.dateTime??'')===slot&&
      networksOf(p).includes(plan.network)))
   return deny('EXISTING_POST_AT_NETWORK_AND_KST_SLOT');
+ // A public URL alone is not enough: normalize it before creating a post.
+ // The upload target must acknowledge an actual media ID, never a text-only post.
+ const normalize=new URL('https://app.metricool.com/api/actions/normalize/image/url');
+ normalize.searchParams.set('url',plan.body.media[0]);
+ let mediaId;
+ try{
+  const prepared=await fetcher(normalize.toString(),{method:'GET',headers:auth,
+   redirect:'error',signal:AbortSignal.timeout(30000),cache:'no-store'});
+  if(!prepared?.ok)return deny('METRICOOL_MEDIA_NORMALIZATION_REJECTED');
+  const raw=await prepared.json();
+  mediaId=raw?.mediaId??raw?.data?.mediaId??raw?.id??raw?.data?.id;
+ }catch{return deny('METRICOOL_MEDIA_NORMALIZATION_UNVERIFIED');}
+ if(!(typeof mediaId==='string'||Number.isSafeInteger(mediaId))||
+     String(mediaId).length<4||String(mediaId).length>255)
+  return deny('METRICOOL_MEDIA_ID_MISSING_REFUSE_TEXT_ONLY_POST');
  let claim;
  try{claim=await confirmWriteReserved({network:plan.network,
    scheduledFor:new Date(plan.slotMs).toISOString(),sha256:plan.sha256});}
@@ -119,7 +134,8 @@ export async function scheduleSingleMetricoolVideo({
  let response;
  try{response=await fetcher(createUrl.toString(),{
   method:'POST',headers:{...auth,'Content-Type':'application/json'},
-  body:JSON.stringify(plan.body),redirect:'error',
+  body:JSON.stringify({...plan.body,media:[{mediaId:String(mediaId)}],
+   saveExternalMediaFiles:true}),redirect:'error',
   signal:AbortSignal.timeout(25000)
  });}catch{return deny('POST_OUTCOME_UNKNOWN_RECONCILE_WITH_METRICOOL',{doNotBlindlyRetry:true});}
  if(!response?.ok)return deny('POST_REJECTED_OR_UNCERTAIN_RECONCILE',{doNotBlindlyRetry:true,
@@ -128,6 +144,31 @@ export async function scheduleSingleMetricoolVideo({
  const id=posted?.id??posted?.data?.id;
  if(!Number.isSafeInteger(Number(id))||Number(id)<=0)
   return deny('POST_RECEIPT_WITHOUT_ID_RECONCILE',{doNotBlindlyRetry:true});
+ // Immediately GET the scheduled post and refuse to call it successful when
+ // Metricool dropped the media. Never blindly recreate a text-only post.
+ const checkUrl=new URL(API+'/'+Number(id));
+ checkUrl.searchParams.set('blogId',BRAND);checkUrl.searchParams.set('userId',USER);
+ let stored;
+ try{
+  const verified=await fetcher(checkUrl.toString(),{
+   method:'GET',headers:auth,redirect:'error',
+   cache:'no-store',signal:AbortSignal.timeout(15000)});
+  if(!verified?.ok)throw Error('GET_FAILED');
+  const result=await verified.json();
+  stored=result?.data&&typeof result.data==='object'?result.data:result;
+ }catch{return deny('METRICOOL_POST_CREATED_BUT_READBACK_UNKNOWN',{
+  metricoolPostId:Number(id),doNotBlindlyRetry:true,manualReconciliationRequired:true});}
+ const media=stored?.media;
+ const hasVideo=Array.isArray(media)&&media.some(x=>
+   typeof x==='string'?/\.mp4(?:\?|$)/i.test(x):
+   x&&typeof x==='object'&&
+   (/\.mp4(?:\?|$)/i.test(x.url||'')||
+     String(x.mediaId??x.id??'')===String(mediaId)));
+ if(!hasVideo||!networksOf(stored).includes(plan.network)||
+    String(stored.publicationDate?.dateTime)!==localTime(plan.slotMs))
+  return deny('METRICOOL_POST_CREATED_WITHOUT_VERIFIED_VIDEO',{
+   metricoolPostId:Number(id),doNotBlindlyRetry:true,
+   manualReconciliationRequired:true});
  // A creation receipt proves only SCHEDULED. A separate future platform read
  // must confirm PUBLISHED and an independently reachable live video URL.
  return Object.freeze({state:'METRICOOL_VIDEO_SCHEDULED_UNVERIFIED',

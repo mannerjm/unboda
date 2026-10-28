@@ -4,7 +4,7 @@ const SAJU=/(?:사주|궁합|재물운|직업운|운세|타고난\s*성향|기�
 const UNBODA=/운보다/;
 const MAX_WORDS=100;
 const ALLOWED_STYLES=Object.freeze({
- 'midnight-indigo':'relationship',
+ 'midnight-indigo':'self-understanding',
  'commute-sunrise':'career',
  'relationship-coral':'compatibility',
  'finance-emerald':'money'

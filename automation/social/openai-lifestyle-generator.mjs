@@ -11,9 +11,19 @@ const schema={
   topicKey:{type:'string'},situation:{type:'string'},hook:{type:'string'},
   thumbnailTitle:{type:'string'},
   narrationDraft:{type:'array',items:{type:'string'}},
-  visualConcepts:{type:'array',items:{type:'string'}}
+  visualConcepts:{type:'array',items:{type:'string'}},
+  scenes:{type:'array',items:{
+    type:'object',
+    properties:{
+      headline:{type:'array',items:{type:'string'}},
+      subline:{type:'string'},
+      illustration:{type:'string',enum:['clock','message','notes','rest']}
+    },
+    required:['headline','subline','illustration'],
+    additionalProperties:false
+  }}
  },
- required:['topicKey','situation','hook','thumbnailTitle','narrationDraft','visualConcepts'],
+ required:['topicKey','situation','hook','thumbnailTitle','narrationDraft','visualConcepts','scenes'],
  additionalProperties:false
 };
 const legalText=t=>typeof t==='string'&&t.length>=12&&t.length<=260;
@@ -56,7 +66,9 @@ export function buildKoreanStoryboardRequest({model,slotKst,recentTopicKeys=[],u
     '실제 일상 문제를 첫 문장에 배치하고, 설명은 쉬운 한국어로 쓴다. '+
     '사주를 의학·재무·연애 결과를 보장하는 확정 예언으로 표현하지 않는다. '+
     '구매 유도는 하지 않는다. 4개 장면, 장면당 읽기 편한 15~70자 대사로 구성한다. '+
-    '장면마다 새로운 오리지널 움직임 콘셉트를 제시한다. 모든 표현은 콘텐츠 검수를 전제로 한다.'},
+    '장면마다 새로운 오리지널 움직임 콘셉트를 제시한다. '+
+    'scenes는 정확히 4개이며, 각 headline 두 줄은 짧은 한국어(각 9글자 이내), subline 한 줄, '+
+    'illustration은 clock/message/notes/rest 중 하나다. 모든 표현은 콘텐츠 검수를 전제로 한다.'},
    {role:'user',content:JSON.stringify({
     kind:'UNBODA_STAGING_DRAFT_NOT_PUBLISHED',slotKst,theme,
     constraints:{
@@ -64,7 +76,8 @@ export function buildKoreanStoryboardRequest({model,slotKst,recentTopicKeys=[],u
      situation:'일상에서 실제로 만나는 상황 7~150자',
      hook:'12~90자 질문',thumbnailTitle:'5~26자의 첫 화면 문구',
      narrationDraft:'정확히 4개, 첫 대사의 시작은 situation과 같아야 함',
-     visualConcepts:'각 12~160자, 정확히 4개'},
+     visualConcepts:'각 12~160자, 정확히 4개',
+     scenes:'정확히 4개, headline 두 줄 각 9글자 이내, subline 간결, illustration 4개 종류 중 하나'},
     excludedTopics:recentTopicKeys,excludedOpenings:usedOpenings
    })}
   ]
@@ -107,7 +120,16 @@ export async function generatePaidKoreanLifestyleStoryboard({
   !Array.isArray(draft.narrationDraft)||draft.narrationDraft.length!==4||
   !draft.narrationDraft.every(legalText)||
   !Array.isArray(draft.visualConcepts)||draft.visualConcepts.length!==4||
-  !draft.visualConcepts.every(legalText))
+  !draft.visualConcepts.every(legalText)||
+  !Array.isArray(draft.scenes)||draft.scenes.length!==4||
+  !draft.scenes.every(x=>x&&typeof x==='object'&&!Array.isArray(x)&&
+    Object.keys(x).sort().join(',')==='headline,illustration,subline'&&
+    Array.isArray(x.headline)&&x.headline.length===2&&
+    x.headline.every(line=>typeof line==='string'&&
+       Array.from(line.replaceAll(' ','')).length>=2&&
+       Array.from(line.replaceAll(' ','')).length<=10)&&
+    typeof x.subline==='string'&&x.subline.length<=40&&x.subline.length>=4&&
+    ['clock','message','notes','rest'].includes(x.illustration)))
   throw NO('AI_PROVIDER_STORYBOARD_CONTRACT_FAILED');
  return Object.freeze(draft);
 }

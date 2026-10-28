@@ -99,9 +99,9 @@ def main():
             raise ValueError("INVALID_NEW_DAILY_SAJU_BRIEF:"+hour)
         if not all(x in brief["narrationDraft"][3] for x in ["운보다","무료 사주"]):
             raise ValueError("UNBODA_BRAND_CALL_TO_ACTION_MISSING:"+hour)
-        if sha256(movie.read_bytes())!=v.get("sha256") or
+        if (sha256(movie.read_bytes())!=v.get("sha256") or
            movie.stat().st_size!=v.get("bytes") or
-           not 29.7<=ffprobe_seconds(movie)<=30.3:
+           not 29.7<=ffprobe_seconds(movie)<=30.3):
             raise ValueError("MEDIA_SOURCE_HASH_OR_DURATION_MISMATCH:"+hour)
         if not (2_000<len(cover.read_bytes())<6_000_000):
             raise ValueError("UNREASONABLE_OR_EMPTY_COVER:"+hour)

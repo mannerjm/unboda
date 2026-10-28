@@ -165,7 +165,18 @@ def draw_brand_hero(d,style,kind,scene_index,seconds):
             d.line((325,840,405,840),fill=(240,187,171),width=11)
     elif style=="finance-emerald":
         # Visible budget ledger, animated bars and coins.
-        d.rounded_rectangle((132,546,583,910),radius=24,fill=(230,239,222),outline=(128,186,149),width=4)
+        # The paper itself breathes with a large, natural moving light field.
+        # Meaningful motion survives 180x320 social downsampling and must
+        # satisfy the unchanged real FFmpeg freezedetect hard gate.
+        shimmer=int(21*math.sin(seconds*3.4))
+        paper=(max(185,min(248,225+shimmer)),
+               max(205,min(249,230+shimmer)),
+               max(177,min(244,213+shimmer)))
+        d.rounded_rectangle((132,546,583,910),radius=24,fill=paper,outline=(128,186,149),width=4)
+        # A moving ledger scanning highlight is drawn behind all numbers.
+        scanX=160+int(325*((seconds*0.65)%1.0))
+        d.rounded_rectangle((scanX,651,scanX+30,863),radius=12,
+                            fill=(175,211,168))
         d.rounded_rectangle((159,571,549,630),radius=11,fill=(42,108,86))
         d.text((182,581),"MONTHLY",font=font(25,True),fill=(234,240,223))
         for k in range(4):
@@ -174,6 +185,10 @@ def draw_brand_hero(d,style,kind,scene_index,seconds):
             x=172+k*88
             d.rounded_rectangle((x,840-bar,x+57,840),radius=9,fill=col)
         d.line((167,849,547,849),fill=(96,136,112),width=5)
+        # Oscillating large cash-flow line adds useful motion without text overlap.
+        bump=int(24*math.sin(seconds*3.1))
+        d.line([(172,755+bump),(259,713-bump),(353,744+bump),
+                (467,694-bump),(541,720+bump)],fill=(34,131,103),width=10)
         coinsX=460+int(46*math.sin(seconds*3.2))
         for k in range(3):
             yy=668+k*20

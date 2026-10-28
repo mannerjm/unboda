@@ -56,11 +56,11 @@ def main():
         raise ValueError("INVALID_GIT_SOURCE_COMMIT")
     manifest_path=RELEASE/"manifest.json"
     manifest=json.loads(manifest_path.read_text())
-    if manifest.get("targetDateKst")!=date or manifest.get("sourceCommit")!=source or
+    if (manifest.get("targetDateKst")!=date or manifest.get("sourceCommit")!=source or
        manifest.get("generatedBy")!="github-actions-four-qa-verified" or
        manifest.get("publishAutomatically") is not False or
        manifest.get("brandSajuVerified") is not True or
-       manifest.get("fourDistinctVisualStylesVerified") is not True:
+       manifest.get("fourDistinctVisualStylesVerified") is not True):
         raise ValueError("INVALID_DAILY_MEDIA_SOURCE_PROVENANCE")
     videos=manifest.get("videos")
     if not isinstance(videos,list) or len(videos)!=4:
@@ -84,18 +84,18 @@ def main():
         v=next((x for x in videos if x.get("hourKst")==hour),None)
         if not v or not movie.is_file() or not cover.is_file():
             raise ValueError("MP4_OR_COVER_NOT_AVAILABLE:"+hour)
-        if v.get("name")!=name or v.get("mp4")!=movie.name or
+        if (v.get("name")!=name or v.get("mp4")!=movie.name or
            v.get("jpg")!=cover.name or v.get("sajuCategory")!=CATEGORIES[hour] or
            v.get("visualStyle")!=STYLES[hour] or
-           v.get("destination")!="https://unboda.kr":
+           v.get("destination")!="https://unboda.kr"):
             raise ValueError("EPISODE_BRAND_OR_MEDIA_MISMATCH:"+hour)
-        if brief.get("visualStyle")!=STYLES[hour] or
+        if (brief.get("visualStyle")!=STYLES[hour] or
            brief.get("sajuCategory")!=CATEGORIES[hour] or
            not brief.get("topicKey","").endswith(date) or
            brief.get("topicKey")!=v.get("topicKey") or
            brief.get("automatedPublicationAllowed") is not False or
            brief.get("licenseReviewRequired") is not True or
-           brief.get("voiceHumanReviewRequired") is not True:
+           brief.get("voiceHumanReviewRequired") is not True):
             raise ValueError("INVALID_NEW_DAILY_SAJU_BRIEF:"+hour)
         if not all(x in brief["narrationDraft"][3] for x in ["운보다","무료 사주"]):
             raise ValueError("UNBODA_BRAND_CALL_TO_ACTION_MISSING:"+hour)

@@ -8,14 +8,18 @@ const now=Date.parse("2026-10-28T20:00:00+09:00");
 const slot=nextSlotFromCron(now);
 const goodMp4=Buffer.alloc(1800);goodMp4.write("ftyp",4);
 const sha=createHash("sha256").update(goodMp4).digest("hex");
-const tag="unboda-shorts-20261029",base="https://github.com/mannerjm/unboda/releases/download/"+tag+"/";
+const tag="unboda-saju-shorts-20261029",base="https://github.com/mannerjm/unboda/releases/download/"+tag+"/";
 const hours=[["00","midnight"],["08","commute"],["12","friendship"],["20","afterwork"]];
 const manifest={schemaVersion:1,targetDateKst:"20261029",
  generatedBy:"github-actions-four-qa-verified",publishAutomatically:false,
- sourceCommit:"a".repeat(40),videos:hours.map(([hourKst,name])=>({
+ sourceCommit:"a".repeat(40),brandSajuVerified:true,
+ fourDistinctVisualStylesVerified:true,videos:hours.map(([hourKst,name])=>({
   hourKst,name,mp4:hourKst+"-"+name+".mp4",jpg:hourKst+"-"+name+".jpg",
   sha256:sha,bytes:goodMp4.length,topicKey:"unique-topic-20261029",
-  title:"하루 고민을 가볍게 풀어봐요",caption:"오늘 하루의 작은 고민을 함께 생각하며 편안한 선택을 찾는 일상 이야기예요. 작은 실천부터 시작해요."}))};
+  title:"하루 고민을 사주로 살펴봐요",caption:"현실 속 고민을 사주와 궁합·재물운의 관점에서 돌아보며 운보다 무료 사주 조회로 내 성향도 천천히 살펴보세요.",
+  visualStyle:({midnight:"midnight-indigo",commute:"commute-sunrise",friendship:"relationship-coral",afterwork:"finance-emerald"})[name],
+  sajuCategory:({midnight:"self-understanding",commute:"career",friendship:"compatibility",afterwork:"money"})[name],
+  destination:"https://unboda.kr"}))};
 const metadata={draft:false,prerelease:true,tag_name:tag,
  assets:[
   {name:"manifest.json",size:JSON.stringify(manifest).length,state:"uploaded",

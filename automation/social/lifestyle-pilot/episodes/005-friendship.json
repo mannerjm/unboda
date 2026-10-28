@@ -1,57 +1,60 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-lifestyle-lunch-menu-20261029",
-  "topicKey": "lunch-group-menu-two-options-20261029",
-  "situation": "점심 메뉴를 함께 정하기 어려운 날",
-  "hook": "다들 아무거나 좋다는데 메뉴는 왜 못 정할까요?",
-  "theme": "점심·동료와 선택",
-  "thumbnailTitle": "메뉴 못 정할 때?",
+  "id": "unboda-saju-compatibility-reply-20261029",
+  "topicKey": "saju-relationship-reply-compatibility-20261029",
+  "sajuCategory": "compatibility",
+  "visualStyle": "relationship-coral",
+  "situation": "연락이 늦어 서운한 점심",
+  "hook": "왜 연락 방식이 다를까요?",
+  "theme": "사주 궁합으로 보는 소통 성향",
+  "thumbnailTitle": "답장이 늦어 서운하다면?",
   "narrationDraft": [
-    "점심 메뉴를 함께 정하기 어려운 날. 다들 아무거나 좋다고 하나요?",
-    "모두의 취향을 한 번에 맞추려 애쓰지 말고 선택지를 둘로 나눠 봐요.",
-    "가까운 두 곳을 단체 대화방에 올리고 하나씩 골라 보자고 해요.",
-    "의견이 갈리면 오늘은 가까운 곳으로, 다음엔 다른 곳을 가 봐요."
+    "연락이 늦어 서운한 점심. 왜 연락 방식이 다를까요?",
+    "사주 궁합은 서로 다른 소통 성향을 참고하는 한 가지 방법이에요.",
+    "답장 속도보다 서로 원하는 연락 방식을 대화해 보세요.",
+    "대화 뒤엔 운보다 무료 사주 조회로 나의 관계 성향도 살펴보세요."
   ],
   "visualConcepts": [
-    "단체 대화방에서 메뉴 의견 말풍선이 차례로 나타나는 원본 메시지 모션",
-    "두 후보의 선택 시간이 흐르는 원본 시계 모션",
-    "두 식당 후보 중 하나를 체크하는 원본 메모 모션",
-    "결정을 마치고 부드럽게 퍼지는 원본 휴식 모션"
+    "서로 다른 곳에서 휴대폰을 보는 두 사람의 표정과 말풍선이 어긋나는 원본 장면",
+    "상대의 연락 패턴 두 가지가 서로 다른 리듬으로 이어지는 궁합 비유 모션",
+    "두 사람의 대화창에서 오해가 줄어들고 서로의 말을 듣는 원본 모션",
+    "붉은 노을의 두 실루엣과 운보다 무료 사주 조회 메시지가 마무리되는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "점심 메뉴",
-        "또 못 정했나요?"
+        "답장 속도가",
+        "서운할 때"
       ],
-      "subline": "아무거나 좋다는 말",
+      "subline": "마음이 엇갈리는 순간",
       "illustration": "message"
     },
     {
       "headline": [
-        "취향이 다르면",
-        "선택지는 두 개"
+        "사주 궁합은",
+        "소통 성향 참고"
       ],
-      "subline": "후보를 간단히 나눠요",
+      "subline": "상대를 단정하지 않아요",
+      "illustration": "rest"
+    },
+    {
+      "headline": [
+        "원하는 연락",
+        "방식 말해보기"
+      ],
+      "subline": "대화가 먼저예요",
       "illustration": "clock"
     },
     {
       "headline": [
-        "단체방에 올려요",
-        "하나씩 골라요"
+        "내 사주부터",
+        "무료로 살펴보기"
       ],
-      "subline": "가까운 두 곳만 제안",
+      "subline": "운보다 무료 사주 조회",
       "illustration": "notes"
-    },
-    {
-      "headline": [
-        "오늘은 가까운 곳",
-        "다음엔 다른 곳"
-      ],
-      "subline": "결정은 가볍게 해요",
-      "illustration": "rest"
     }
   ],
+  "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false

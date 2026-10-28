@@ -24,12 +24,17 @@ const story={
   {headline:['오늘 가장 먼저','한 가지 적어봐요'],subline:'작은 정리가 시작이에요',illustration:'notes'},
   {headline:['나만의 속도를','찾아가도 괜찮아'],subline:'마음의 속도도 중요한 하루',illustration:'rest'}
  ]};
+const nowMs=Date.parse('2026-10-28T08:40:00.000Z');
 const gate={
  approvalSource:'verified-staging-service-worker',ownerExplicitCostApproval:true,
- budgetReceipt:{state:'BUDGET_RESERVED_ONLY',publishingAllowed:false,
-  externalCallNotExecuted:true,reservedKrw:150},
+ atMs:nowMs,
+ budgetReceipt:{state:'BUDGET_RESERVED_ONLY',providerCallsAllowed:true,
+  publishingAllowed:false,externalCallNotExecuted:true,reservedKrw:150},
  verifiedPublishedHistory:{source:'verified-metricool-published-export',
-  paginationComplete:true,hasPublishedHistory:true},
+  paginationComplete:true,hasPublishedHistory:true,
+  from:'2026-07-29T08:00:00.000Z',through:'2026-10-28T08:39:00.000Z',
+  fetchedAt:'2026-10-28T08:38:00.000Z',
+  channels:['facebook','instagram','threads','tiktok','youtube'],items:[]},
  ownerPrivacyApproval:true,purpose:'STAGING_EDITORIAL_REVIEW',
  socialPublishingEnabled:false
 };
@@ -43,7 +48,9 @@ test('current missing owner approvals prevent all paid API requests',async()=>{
  const blocked=[
   undefined,{...gate,ownerExplicitCostApproval:false},
   {...gate,budgetReceipt:{...gate.budgetReceipt,externalCallNotExecuted:false}},
+  {...gate,budgetReceipt:{...gate.budgetReceipt,providerCallsAllowed:false}},
   {...gate,verifiedPublishedHistory:{...gate.verifiedPublishedHistory,paginationComplete:false}},
+  {...gate,verifiedPublishedHistory:{...gate.verifiedPublishedHistory,from:'2026-10-21T00:00:00Z'}},
   {...gate,ownerPrivacyApproval:false},
   {...gate,socialPublishingEnabled:true},
   {...gate,approvalSource:'unknown-web-request'}

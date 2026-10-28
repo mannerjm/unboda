@@ -56,7 +56,11 @@ jobs:
            const p='automation/social/lifestyle-pilot/episodes/'+file+'.json';
            const x=JSON.parse(fs.readFileSync(p,'utf8'));
            if(!x.topicKey?.endsWith(expected)||
-              x.automatedPublicationAllowed!==false||seen.has(x.topicKey))
+              x.automatedPublicationAllowed!==false||seen.has(x.topicKey)||
+              typeof x.narrationDraft?.[2]!=='string'||
+              x.narrationDraft[2].replace(/\s/g,'').length<28||
+              x.destination!=='https://unboda.kr'||
+              !x.narrationDraft?.[3]?.includes('운보다 무료 사주 조회'))
              throw Error('NO_FRESH_NEXT_DAY_STORYBOARD:'+file);
            seen.add(x.topicKey);
           }

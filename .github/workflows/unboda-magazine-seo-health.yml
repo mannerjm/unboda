@@ -1,0 +1,77 @@
+name: UNBODA public magazine search discoverability health
+on:
+  schedule:
+    - cron: '15 1 * * 1' # Mondays 10:15 KST
+  push:
+    paths:
+      - '.github/workflows/unboda-magazine-seo-health.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: unboda-magazine-seo-readonly-monitor
+  cancel-in-progress: false
+jobs:
+  public-read-only-seo-probe:
+    if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Probe public magazine, sitemap, RSS and robots without credentials
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/unboda-blog-monitor
+          for spec in \
+            'https://unboda.kr/blog|blog.html' \
+            'https://unboda.kr/blog/saju-birth-time-unknown|article.html' \
+            'https://unboda.kr/blog/compatibility-conversation-first|compatibility.html' \
+            'https://unboda.kr/sitemap.xml|sitemap.xml' \
+            'https://unboda.kr/robots.txt|robots.txt' \
+            'https://unboda.kr/blog/rss.xml|rss.xml'; do
+            IFS='|' read -r url file <<< "$spec"
+            curl --fail --silent --show-error --location --retry 3 --retry-delay 4 \
+              --connect-timeout 15 --max-time 50 \
+              --user-agent 'UNBODA-Public-SEO-Health/1.0 (+https://unboda.kr/blog)' \
+              "$url" -o "/tmp/unboda-blog-monitor/$file"
+            test -s "/tmp/unboda-blog-monitor/$file"
+          done
+      - name: Verify live, canonical and still crawlable URLs; no fake indexing claims
+        run: |
+          python - <<'PY'
+          import datetime,pathlib,xml.etree.ElementTree as ET
+          from zoneinfo import ZoneInfo
+          root=pathlib.Path('/tmp/unboda-blog-monitor')
+          index=(root/'blog.html').read_text()
+          article=(root/'article.html').read_text()
+          comp=(root/'compatibility.html').read_text()
+          robots=(root/'robots.txt').read_text()
+          assert '운보다 매거진' in index and '<h1' in index
+          for page,slug in [(article,'saju-birth-time-unknown'),(comp,'compatibility-conversation-first')]:
+            assert '<h1' in page and 'canonical' in page and '/blog/'+slug in page
+            assert 'noindex' not in page.split('</head>')[0]
+          assert 'Sitemap: https://unboda.kr/sitemap.xml' in robots
+          site=ET.fromstring((root/'sitemap.xml').read_text())
+          ns={'sm':'http://www.sitemaps.org/schemas/sitemap/0.9'}
+          urls={x.text for x in site.findall('.//sm:loc',ns)}
+          assert 'https://unboda.kr/blog' in urls
+          for slug in ('saju-birth-time-unknown','compatibility-conversation-first'):
+            assert 'https://unboda.kr/blog/'+slug in urls
+          assert sum('/paid-analysis/' in x for x in urls)>=57
+          assert sum('/special-analysis/compatibility/guide/' in x for x in urls)>=7
+          assert not any('/admin/' in x or '/mypage/' in x or '/api/' in x for x in urls)
+          now=datetime.datetime.now(ZoneInfo('Asia/Seoul'))
+          future='https://unboda.kr/blog/money-fortune-budget-review'
+          if now>=datetime.datetime.fromisoformat('2026-10-31T09:00:00+09:00'):
+            assert future in urls,'APPROVED_DATE_GATED_PUBLICATION_NOT_IN_SITEMAP'
+          else:
+            assert future not in urls,'FUTURE_BLOG_POST_INDEXED_EARLY'
+          feed=ET.fromstring((root/'rss.xml').read_text())
+          links={e.text for e in feed.findall('./channel/item/link')}
+          assert 'https://unboda.kr/blog/saju-birth-time-unknown' in links
+          assert 'https://unboda.kr/blog/compatibility-conversation-first' in links
+          if now>=datetime.datetime.fromisoformat('2026-10-31T09:00:00+09:00'):
+            assert future in links,'APPROVED_DATE_GATED_ARTICLE_MISSING_IN_RSS'
+          print('UNBODA_PUBLIC_MAGAZINE_SEO_HEALTH_PASS',len(urls),'URLs',
+                len(links),'RSS_ITEMS',
+                'NOTE: Search engine crawling and indexing status NOT verified')
+          PY

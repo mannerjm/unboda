@@ -97,39 +97,99 @@ function test(){
  assert.throws(()=>check(topics[0],{...o,lead:"<script>"},"2028-12-02T09:00:00+09:00"));
  console.log("MAGAZINE_LOCAL_DRAFT_SELF_TEST_PASS");
 }
+async function localGenerate(messages,schema,maxTokens){
+ const payload={model:"unboda-editorial",temperature:0.45,max_tokens:maxTokens,
+  stream:false,response_format:{type:"json_schema",schema},messages};
+ const ctl=new AbortController(),timer=setTimeout(()=>180000);
+ try{
+  const response=await fetch("http://127.0.0.1:8080/v1/chat/completions",{
+   method:"POST",headers:{"content-type":"application/json"},
+   body:JSON.stringify(payload),signal:ctl.signal
+  });
+  assert(response.ok,"Local model error HTTP "+response.status);
+  const data=await response.json();
+  const message=data.choices?.[0]?.message?.content;
+  assert(typeof message==="string" && message.trim().length>2,"Model returned empty draft");
+  return JSON.parse(message.trim());
+ }finally{clearTimeout(timer);}
+}
+const introSchema={type:"object",properties:{
+ description:{type:"string"},lead:{type:"string"},keyPoint:{type:"string"}
+},required:["description","lead","keyPoint"],additionalProperties:false};
+const sectionSchema={type:"object",properties:{
+ heading:{type:"string"},paragraphs:{type:"array",items:{type:"string"},minItems:2,maxItems:2}
+},required:["heading","paragraphs"],additionalProperties:false};
+const outlines=[
+ "핵심 개념의 정확한 뜻과 쓰이는 맥락",
+ "일상에서 이해할 수 있는 구체적인 사례",
+ "잘못 해석하기 쉬운 부분과 한계",
+ "실제로 확인할 수 있는 정보와 질문",
+ "판단을 서두르지 않고 활용하는 방법"
+];
+function checkOneSection(section,i){
+ assert(section && typeof section==="object","Invalid section");
+ const raw=text(section.heading,3,90,"Section "+i+" heading");
+ const heading=size(raw)>=8?raw:"생활 속에서 이해하는 "+raw;
+ assert(heading.length>=8,"Title");
+ assert(Array.isArray(section.paragraphs) && section.paragraphs.length===2,
+  "Section "+i+" must have exactly two paragraphs");
+ const paragraphs=section.paragraphs.map((p,j)=>text(p,100,450,
+  "Section "+i+" paragraph "+j));
+ assert(paragraphs[0]!==paragraphs[1],"Repeated passage");
+ return {heading,paragraphs};
+}
 async function generate(){
- const topic=nextTopic();if(!topic)throw Error("NO_NEW_TOPIC: add an original fact-checked editorial brief first");
- const instructions="각 heading(소제목)은 공백 포함 최소 12글자 이상의 설명형 제목이어야 합니다. 문단당 최소 100글자, 전체 1000글자 이상이어야 합니다. " +
- "당신은 운보다의 한국어 정보글 편집자입니다. 외부 검색 없이 아래 검증된 주제 힌트만 바탕으로 문화적 사주 해석과 일상적 선택을 구분하는 독창적 설명을 쓰세요. 단정적 미래 예언, 가짜 전문가 호칭, 의학/투자 효과, HTML/URL/인용 없는 사실, 반복, 얕은 글 금지. 반드시 JSON 객체만 작성: description(50-120자),lead(100-250자),sections(소제목 heading과 서로 다른 한국어 문단 paragraphs 2개로 구성된 5개 섹션, 문단당 120-220자),keyPoint(40-120자).";
- const articleSchema={type:"object",properties:{
-   description:{type:"string"},lead:{type:"string"},keyPoint:{type:"string"},
-   sections:{type:"array",minItems:5,maxItems:5,items:{type:"object",properties:{
-     heading:{type:"string"},paragraphs:{type:"array",minItems:2,maxItems:2,items:{type:"string"}}
-   },required:["heading","paragraphs"],additionalProperties:false}}
- },required:["description","lead","sections","keyPoint"],additionalProperties:false};
- const payload={model:"unboda-editorial",temperature:0.55,max_tokens:3800,stream:false,
-  response_format:{type:"json_schema",schema:articleSchema},messages:[
-  {role:"system",content:instructions},
-  {role:"user",content:"/no_think\n제목: "+topic.title+"\n사실 참고 메모: "+topic.factNotes+"\n상세하고 서로 중복되지 않는 각 2문단의 5개 섹션을 작성하되 원문 그대로 복사하지 마세요."}
- ]};
- let last;
- for(let trial=0;trial<2;trial++){
-  if (trial>0 && last) payload.messages.push({role:"user",content:"이전 원고는 품질 검증에서 실패했습니다: "+String(last.message).slice(0,120)+". 모든 소제목을 12글자 이상, 모든 설명 문단을 120글자 이상으로 길게 다시 작성하고 각 문단에 서로 다른 예시를 포함하세요. JSON 객체만 제출하세요."});
-  try{
-   const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),240000);
-   let response;try{response=await fetch("http://127.0.0.1:8080/v1/chat/completions",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload),signal:ctl.signal});}finally{clearTimeout(timer);}
-   assert(response.ok,"Local model failed "+response.status);
-   const data=await response.json();
-   const obj=JSON.parse(String(data.choices?.[0]?.message?.content||"").trim());
-   const article=check(topic,obj,dateKst());
-   mkdirSync(".magazine-draft",{recursive:true});
-   writeFileSync(".magazine-draft/article.json",JSON.stringify(article,null,2)+"\n");
-   writeFileSync(".magazine-draft/cover.svg",svg(article,topic.motif));
-   console.log("MAGAZINE_LOCAL_GENERATION_QA_PASS",article.slug);
-   return;
-  }catch(e){last=e;console.error("Draft rejected",trial+1,String(e).slice(0,220));}
+ const topic=nextTopic();
+ if(!topic)throw Error("NO_NEW_TOPIC: curate more fact-checked briefs; no infinite reuse");
+ const sections=[];
+ // Break work into six bounded, independently validated local calls. Never fabricate padding.
+ for(let i=0;i<5;i++){
+  let accepted=false,lastError=null;
+  for(let trial=0;trial<3 && !accepted;trial++){
+   const guidance="전통 사주명리의 문화적 개념과 확인 가능한 생활 사실을 분리합니다. 근거 없는 상세 사실, 투자/의학/관계 결과 확정, 다른 사람의 원문 복사, HTML과 링크를 피합니다. "+
+    "사주 해석의 한계를 설명하고 구체적 일상 질문과 실행 가능한 행동을 넣습니다. "+
+    "JSON 객체의 heading에는 12글자 이상의 구체적인 소제목을, paragraphs에는 서로 다른 125~200자의 완전한 한국어 문단을 정확히 2개 작성하세요.";
+   const user="제목: "+topic.title+"\n편집 기준: "+topic.factNotes+
+    "\n이번 절의 관점: "+outlines[i]+
+    "\n이미 앞 절에서 다룬 주제: "+sections.map(s=>s.heading).join(" / ")+
+    "\n공백 포함 두 문단 각각 120글자 이상, 복사나 유사 반복 없이 작성하세요. JSON 객체만 반환하세요."+
+    (lastError?"\n이전 결과 반려 사유: "+lastError.slice(0,100):"");
+   try{
+    const obj=await localGenerate([{role:"system",content:guidance},
+      {role:"user",content:"/no_think\n"+user}],sectionSchema,1100);
+    const section=checkOneSection(obj,i);
+    assert(!sections.some(s=>s.heading===section.heading),"Repeated heading");
+    assert(!sections.some(s=>s.paragraphs.some(p=>section.paragraphs.includes(p))),
+      "Reused section text");
+    sections.push(section);accepted=true;
+    console.log("MAGAZINE_LOCAL_SECTION_QA_PASS",i+1,"of",5);
+   }catch(e){lastError=String(e.message||e);console.error("Section rejected",i+1,trial+1,lastError.slice(0,150));}
+  }
+  if(!accepted)throw Error("SECTION_QUALITY_FAIL_"+(i+1)+": "+lastError);
  }
- throw last;
+ let intro,lastError;
+ for(let trial=0;trial<3;trial++){
+  try{
+   const obj=await localGenerate([
+    {role:"system",content:"당신은 운보다의 한국어 편집자입니다. 본문 요약을 바탕으로 읽기 쉬운 도입문·메타 설명·실천 핵심을 JSON으로 적으세요. 과장·의학적 보장·예언·HTML·외부 URL은 금지입니다. description은 55~130자, lead는 110~220자, keyPoint는 40~100자입니다."},
+    {role:"user",content:"/no_think\n제목: "+topic.title+
+      "\n편집 힌트: "+topic.factNotes+
+      "\n실제 작성된 다섯 절 요약: "+sections.map(s=>s.heading).join(" / ")+
+      (lastError?"\n이전 결과 반려 이유: "+lastError:"")+
+      "\n각 문구를 의미 있게 완성한 한국어 JSON 객체로 작성하세요."}
+   ],introSchema,750);
+   text(obj.description,48,180,"Description");
+   text(obj.lead,90,400,"Lead");
+   text(obj.keyPoint,35,200,"Takeaway");
+   intro=obj;break;
+  }catch(e){lastError=String(e.message||e);console.error("Intro rejected",trial+1,lastError.slice(0,150));}
+ }
+ assert(intro,"Intro quality rejected after bounded retries");
+ const article=check(topic,{...intro,sections},dateKst());
+ mkdirSync(".magazine-draft",{recursive:true});
+ writeFileSync(".magazine-draft/article.json",JSON.stringify(article,null,2)+"\n");
+ writeFileSync(".magazine-draft/cover.svg",svg(article,topic.motif));
+ console.log("MAGAZINE_LOCAL_GENERATION_QA_PASS",article.slug,"UNAPPROVED");
 }
 const arg=process.argv[2];
 if(arg==="--self-test")test();

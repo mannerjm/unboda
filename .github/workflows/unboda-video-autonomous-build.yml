@@ -68,6 +68,7 @@ jobs:
            if(!x.topicKey?.endsWith(expected)||
               x.automatedPublicationAllowed!==false||seen.has(x.topicKey)||
               typeof x.narrationDraft?.[2]!=='string'||
+              x.narrationDraft?.some(line=>typeof line!=='string'||line.replace(/\s/g,'').length>32)||
               x.narrationDraft[2].replace(/\s/g,'').length<28||
               x.destination!=='https://unboda.kr'||
               !x.narrationDraft?.[3]?.includes('운보다 무료 사주 조회'))

@@ -21,7 +21,7 @@ function dateKst(){
 }
 function check(t,obj,date){
  assert(t && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(t.slug),"Only curated topics");
- assert(Date.parse(date)>Date.now() && /^\d{4}-\d{2}-\d{2}T09:00:00\+09:00$/.test(date),"Future KST date");
+ assert(Date.parse(date)>Date.now() && /^\d{4}-\d{2}-\d{2}T09:00:00 +09:00$/.test(date),"Future KST date");
  assert(obj && Array.isArray(obj.sections) && obj.sections.length>=4 && obj.sections.length<=6,"Section count");
  const seen=new Set(),prior=[];
  const sections=obj.sections.map((s,i)=>{

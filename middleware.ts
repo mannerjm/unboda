@@ -2,6 +2,16 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  // Public editorial and crawler routes contain no user-specific data.
+  // They must remain readable without a Supabase token or preview credentials.
+  // Every private account, payment and consulting route still uses the existing
+  // auth-token refresh middleware unchanged.
+  const pathname = request.nextUrl.pathname;
+  if (pathname === "/blog" || pathname.startsWith("/blog/") ||
+      pathname === "/sitemap.xml" || pathname === "/robots.txt") {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

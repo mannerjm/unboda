@@ -2,6 +2,10 @@ import type { MetadataRoute } from "next";
 import { getLaunchProductIds } from "@/app/lib/paidAnalysisTopicConfig";
 import { COMPATIBILITY_GUIDE_SLUGS, getCompatibilityPublicGuidePath } from "@/app/lib/compatibilityPublicGuides";
 import { SITE_ORIGIN } from "@/app/lib/seo";
+import { getPublishedMagazineArticles } from "@/app/lib/magazine";
+
+// Date-gated approved posts should appear in the sitemap without a rebuild.
+export const dynamic = "force-dynamic";
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
 
@@ -39,5 +43,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry(getCompatibilityPublicGuidePath(slug), "monthly", 0.8),
   );
 
-  return [...staticPages, ...paidProductPages, ...publicCompatibilityGuidePages];
+  const magazinePages: MetadataRoute.Sitemap = [
+    entry("/blog", "weekly", 0.75),
+    ...getPublishedMagazineArticles().map((article) => ({
+      url: `${SITE_ORIGIN}/blog/${article.slug}`,
+      lastModified: new Date(article.updatedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
+  ];
+
+  return [...staticPages, ...paidProductPages, ...publicCompatibilityGuidePages, ...magazinePages];
 }

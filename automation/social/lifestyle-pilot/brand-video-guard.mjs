@@ -26,7 +26,7 @@ export function inspectSajuBrandEpisode(b){
   return DENY('FOUR_READABLE_KOREAN_VOICES_REQUIRED');
  // A Korean voice segment has 6.9 seconds available. Prevent long daily
  // scripts before any expensive TTS download; never speed up >12% unnaturally.
- if(b.narrationDraft.some(line=>line.replace(/\\s/g,'').length>32))
+ if(b.narrationDraft.some(line=>line.replace(/\s/g,'').length>32))
   return DENY('KOREAN_NARRATION_SCENE_EXCEEDS_NATURAL_6_9S_BUDGET');
  if(!hook.startsWith(b.situation)||!hook.includes('까'))
   return DENY('FIRST_TWO_SECONDS_REAL_LIFE_HOOK_REQUIRED');

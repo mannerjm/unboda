@@ -1,4 +1,4 @@
-name: UNBODA daily 07KST zodiac original carousel
+name: UNBODA 07KST 60 birth-year ganji zodiac carousel
 on:
   schedule:
     - cron: '15 18 * * *' # 03:15 KST, ample margin before 07:00

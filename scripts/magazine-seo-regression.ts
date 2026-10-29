@@ -27,7 +27,11 @@ async function main() {
   assert(getMagazineArticle("money-fortune-budget-review", afterQueue));
   for (const a of all) {
     assert(/^[a-z0-9-]+$/.test(a.slug));
-    assert(a.originalArtwork && a.approvedForPublication);
+    assert(a.originalArtwork, "each reviewed entry needs first-party artwork");
+    if (!a.approvedForPublication) {
+      assert(!getPublishedMagazineArticles().some(p => p.slug === a.slug),
+        "draft cannot be public until approved");
+    }
     assert(Date.parse(a.updatedAt) >= Date.parse(a.publishedAt));
     assert(a.description.length >= 45);
     assert(a.sections.length >= 4);

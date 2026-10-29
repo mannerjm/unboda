@@ -36,7 +36,7 @@ async function main() {
     assert(existsSync("public" + a.cover), "topic matched illustration missing: " + a.cover);
     const svg = readFileSync("public" + a.cover,"utf8");
     assert(svg.includes("<svg") && svg.includes('viewBox="0 0 1200 630"'));
-    assert(!/https?:\/\/|<script|<foreignObject|onerror=|onload=/i.test(svg),
+    assert(!/(?:href|xlink:href)\s*=\s*["']https?:|<script|<foreignObject|onerror=|onload=/i.test(svg),
       "inline artwork must not load third-party resources or execute JS");
     assert(!/수익 보장|결혼 확정|운명 확정|반드시 성공/.test(a.lead));
     assert(!/승인된 전문가|전문가 검토 완료|인증된 명리사/.test(a.lead));

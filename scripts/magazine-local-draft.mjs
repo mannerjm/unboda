@@ -125,15 +125,25 @@ const outlines=[
 ];
 function checkOneSection(section,i){
  assert(section && typeof section==="object","Invalid section");
- const raw=text(section.heading,3,90,"Section "+i+" heading");
- const heading=size(raw)>=8?raw:"생활 속에서 이해하는 "+raw;
- assert(heading.length>=8,"Title");
- assert(Array.isArray(section.paragraphs) && section.paragraphs.length===2,
-  "Section "+i+" must have exactly two paragraphs");
- const paragraphs=section.paragraphs.map((p,j)=>text(p,100,450,
-  "Section "+i+" paragraph "+j));
+ // The editorial outline, not the model, owns the actual heading.
+ assert(Array.isArray(section.paragraphs) && section.paragraphs.length>=1 && section.paragraphs.length<=4,
+  "Section "+i+" needs 1-4 nonempty paragraphs");
+ let parts=section.paragraphs.map(s=>text(s,75,750,"Input paragraph "+i));
+ if(parts.length===1){
+  const sentences=parts[0].split(/(?<=[.!?。])\s+/).filter(Boolean);
+  const candidates=sentences.slice(1).map((_,n)=>[
+    sentences.slice(0,n+1).join(" "),sentences.slice(n+1).join(" ")
+  ]);
+  parts=candidates.find(p=>p.every(x=>size(x)>=100 && size(x)<=450))||[];
+  assert(parts.length===2,"Long single paragraph cannot form two meaningful passages");
+ }else if(parts.length>2){
+  const midpoint=Math.ceil(parts.length/2);
+  parts=[parts.slice(0,midpoint).join(" "),parts.slice(midpoint).join(" ")];
+ }
+ assert(parts.length===2,"Two substantial passages required");
+ const paragraphs=parts.map((p,j)=>text(p,100,450,"Section "+i+" paragraph "+j));
  assert(paragraphs[0]!==paragraphs[1],"Repeated passage");
- return {heading,paragraphs};
+ return {heading:outlines[i],paragraphs};
 }
 async function generate(){
  const topic=nextTopic();
@@ -155,8 +165,7 @@ async function generate(){
     const obj=await localGenerate([{role:"system",content:guidance},
       {role:"user",content:"/no_think\n"+user}],sectionSchema,1100);
     const section=checkOneSection(obj,i);
-    // Editorial outlines are distinct, non-model-owned headings; they also avoid repetitive AI headings.
-    section.heading=outlines[i];
+
     assert(!sections.some(s=>s.paragraphs.some(p=>section.paragraphs.includes(p))),
       "Reused section text");
     sections.push(section);accepted=true;

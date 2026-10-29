@@ -1,0 +1,75 @@
+name: UNBODA magazine editorial supply monitor
+# Independent of ChatGPT scheduled tasks, SNS, and payments; no AI generation.
+on:
+  schedule:
+    - cron: '17 0 * * 1,4' # Monday/Thursday 09:17 KST
+  pull_request:
+    paths:
+      - 'app/lib/magazine.ts'
+      - 'scripts/magazine-editorial-queue-check.ts'
+      - '.github/workflows/unboda-magazine-editorial-queue.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/lib/magazine.ts'
+      - 'scripts/magazine-editorial-queue-check.ts'
+      - '.github/workflows/unboda-magazine-editorial-queue.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: unboda-magazine-editorial-queue-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  inventory:
+    if: github.repository == 'mannerjm/unboda'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    outputs:
+      queue_low: ${{ steps.queue.outputs.queue_low }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Preserve existing SEO quality gates
+        run: npm run test:magazine-seo
+      - name: Verify date gate
+        run: npx --no-install tsx scripts/magazine-editorial-queue-check.ts --self-test
+      - name: Check 21-day editorial supply
+        id: queue
+        run: npx --no-install tsx scripts/magazine-editorial-queue-check.ts
+  notify-if-low:
+    if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main' && github.event_name == 'schedule' && needs.inventory.result == 'success' && needs.inventory.outputs.queue_low == 'true'
+    needs: inventory
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    steps:
+      - name: Create one reminder, unless an editorial PR or reminder exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: mannerjm/unboda
+        shell: bash
+        run: |
+          set -euo pipefail
+          pending="$(gh pr list --state open --limit 100 --json title --jq '[.[] | select(.title | test("magazine|매거진|오행"; "i"))] | length')"
+          if [ "$pending" -gt 0 ]; then
+            echo "An editorial PR already awaits review; skipping reminder."
+            exit 0
+          fi
+          existing="$(gh issue list --state open --limit 100 --json title --jq '[.[] | select(.title == "[UNBODA] Magazine editorial supply low")] | length')"
+          if [ "$existing" -gt 0 ]; then
+            echo "Reminder already open; skipping duplicate."
+            exit 0
+          fi
+          gh issue create --title '[UNBODA] Magazine editorial supply low' --body '운보다 매거진의 향후 21일 승인된 글 재고가 2편 미만입니다. 기존 글 및 편집 정책을 확인하고 새 원본 글 1편과 자체 SVG를 검토용 PR로 준비하세요. 검수/CI/Preview 확인 후 담당자가 병합해야 하며 이 작업은 신규 글 작성, 자동 발행, 결제/SNS 변경을 하지 않았습니다.'

@@ -39,6 +39,8 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
       - run: node scripts/magazine-local-draft.mjs --self-test
       - run: node scripts/magazine-local-draft.mjs --preflight
       - run: npm run test:magazine-seo

@@ -148,7 +148,8 @@ function isSafePublishedArticle(article: MagazineArticle, now: Date): boolean {
     article.sections.length >= 4 &&
     article.sections.every(section => section.heading.length >= 8 &&
       section.paragraphs.length >= 2 && section.paragraphs.every(p => p.length >= 65)) &&
-    article.publishedAt === article.updatedAt &&
+    Number.isFinite(Date.parse(article.updatedAt)) &&
+    Date.parse(article.updatedAt) >= Date.parse(article.publishedAt) &&
     Number.isFinite(Date.parse(article.publishedAt)) &&
     Date.parse(article.publishedAt) <= now.getTime();
 }

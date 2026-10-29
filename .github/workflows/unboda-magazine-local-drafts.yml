@@ -1,0 +1,184 @@
+name: UNBODA local-model magazine draft factory
+# Public GitHub standard runner; creates ONLY a draft PR after strict tests.
+# It never approves, merges, or publishes an article and never calls paid APIs.
+on:
+  schedule:
+    - cron: '33 0 * * 1,4' # Monday / Thursday 09:33 KST
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/magazine-local-draft.mjs'
+      - 'automation/magazine/draft-topic-briefs.json'
+      - 'scripts/magazine-seo-regression.ts'
+      - '.github/workflows/unboda-magazine-local-drafts.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/magazine-local-draft.mjs'
+      - 'automation/magazine/draft-topic-briefs.json'
+      - 'scripts/magazine-seo-regression.ts'
+      - '.github/workflows/unboda-magazine-local-drafts.yml'
+permissions:
+  contents: read
+concurrency:
+  group: unboda-magazine-local-drafts-main
+  cancel-in-progress: false
+jobs:
+  self-test:
+    if: github.repository == 'mannerjm/unboda'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - run: node scripts/magazine-local-draft.mjs --self-test
+      - run: node scripts/magazine-local-draft.mjs --preflight
+      - run: npm run test:magazine-seo
+      - name: Exercise SVG safety gate and unpublished generated article end to end, offline
+        run: |
+          node scripts/magazine-local-draft.mjs --fixture-apply
+          npm run test:magazine-seo
+
+  local-draft:
+    needs: self-test
+    if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      generated: ${{ steps.ready.outputs.generated }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Skip while any magazine PR awaits human review
+        id: queued
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: mannerjm/unboda
+        shell: bash
+        run: |
+          set -euo pipefail
+          count="$(gh pr list --state open --limit 100 --json title,headRefName --jq '[.[] | select((.title | test("magazine|매거진|오행"; "i")) or (.headRefName | startswith("automation/magazine-draft-")) or (.headRefName | startswith("feature/magazine-")))] | length')"
+          if [ "$count" -gt 0 ]; then
+            echo "pending=true" >> "$GITHUB_OUTPUT"
+            echo "Existing editorial PR prevents duplicate drafts; model not downloaded."
+          else
+            echo "pending=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Check remaining curated original topics
+        if: steps.queued.outputs.pending == 'false'
+        run: node scripts/magazine-local-draft.mjs --preflight
+      - name: Install pinned local inference engine without project secrets
+        if: steps.queued.outputs.pending == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone -q --filter=blob:none https://github.com/ggml-org/llama.cpp.git "$RUNNER_TEMP/llama.cpp"
+          git -C "$RUNNER_TEMP/llama.cpp" checkout -q 0ac1a7fd35c127a18c0cbc6c57d12e256a6a385b
+          cmake -S "$RUNNER_TEMP/llama.cpp" -B "$RUNNER_TEMP/llama.cpp/build" -DCMAKE_BUILD_TYPE=Release -DLLAMA_CURL=OFF
+          cmake --build "$RUNNER_TEMP/llama.cpp/build" --target llama-server -j 3
+      - name: Fetch pinned Apache-2.0 model weights and verify SHA256
+        if: steps.queued.outputs.pending == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --connect-timeout 20 --max-time 700 \
+            'https://huggingface.co/Qwen/Qwen3-1.7B-GGUF/resolve/90862c4b9d2787eaed51d12237eafdfe7c5f6077/Qwen3-1.7B-Q8_0.gguf' \
+            --output "$RUNNER_TEMP/unboda-qwen.gguf"
+          echo "061b54daade076b5d3362dac252678d17da8c68f07560be70818cace6590cb1a  $RUNNER_TEMP/unboda-qwen.gguf" | sha256sum --check
+      - name: Run local model and create first draft (not publicly visible)
+        if: steps.queued.outputs.pending == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/llama.cpp/build/bin/llama-server" -m "$RUNNER_TEMP/unboda-qwen.gguf" \
+            --alias unboda-editorial --host 127.0.0.1 --port 8080 --ctx-size 8192 --threads 4 \
+            > "$RUNNER_TEMP/magazine-llama.log" 2>&1 &
+          ready=false
+          for i in $(seq 1 90); do
+            if curl --fail --silent http://127.0.0.1:8080/health > /dev/null; then ready=true; break; fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then echo "Local model did not start"; exit 1; fi
+          node scripts/magazine-local-draft.mjs --generate
+      - name: Save only validated draft data for separate low-privilege handoff
+        if: steps.queued.outputs.pending == 'false'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: magazine-local-draft
+          path: .magazine-draft/
+          if-no-files-found: error
+          retention-days: 1
+      - name: Mark a completed generation, never mark a skipped one as successful
+        if: steps.queued.outputs.pending == 'false'
+        id: ready
+        run: echo "generated=true" >> "$GITHUB_OUTPUT"
+
+  propose-review:
+    needs: local-draft
+    if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main' && needs.local-draft.outputs.generated == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          persist-credentials: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: magazine-local-draft
+          path: .magazine-draft
+      - name: Revalidate untrusted text and convert to unapproved editorial data
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/magazine-local-draft.mjs --apply
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run test:magazine-seo
+          git diff --check
+          test "$(git diff --name-only | wc -l)" -eq 1
+          test -f "public/magazine/$(node -p 'JSON.parse(require("fs").readFileSync(".magazine-draft/article.json")).slug').svg"
+      - name: Open a draft PR; never publish or merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: mannerjm/unboda
+        shell: bash
+        run: |
+          set -euo pipefail
+          slug="$(node -p 'JSON.parse(require("fs").readFileSync(".magazine-draft/article.json")).slug')"
+          title="$(node -p 'JSON.parse(require("fs").readFileSync(".magazine-draft/article.json")).title')"
+          [[ "$slug" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]
+          branch="automation/magazine-draft-$slug"
+          if gh api "repos/mannerjm/unboda/branches/$branch" >/dev/null 2>&1; then
+            echo "Branch already exists; do not overwrite or duplicate a PR."
+            exit 1
+          fi
+          git config user.name 'unboda-magazine-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -b "$branch"
+          git add app/lib/magazine.ts "public/magazine/$slug.svg"
+          git commit -m "Prepare original magazine draft $slug (NOT APPROVED)"
+          git push origin "$branch"
+          gh pr create --draft --base main --head "$branch" \
+            --title "Magazine review draft: $title" \
+            --body "로컬 공개 모델로 생성한 한국어 **검토용 초안**입니다. 승인 여부는 false이므로 PR 병합만으로는 공개되지 않습니다. 원문 정보 정확성, 원본성, 문장 품질, 주제별 일러스트, 저작권 검토가 반드시 필요합니다. 통과 시 담당자가 승인값과 공개일을 별도 검토한 뒤 병합하세요. 기존 사주 서비스·고객 데이터·결제·SNS 자동화는 변경하지 않았습니다. 실제 Google/Naver 색인은 보장하지 않습니다. 생성 모델: Qwen3 1.7B GGUF (Apache 2.0), 로컬 GitHub Actions."

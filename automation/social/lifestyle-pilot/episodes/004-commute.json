@@ -1,48 +1,48 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-career-meeting-first-sentence-20261029",
-  "topicKey": "saju-career-meeting-first-sentence-20261029",
+  "id": "unboda-saju-career-interview-first-answer-20261030",
+  "topicKey": "saju-career-interview-first-answer-20261030",
   "sajuCategory": "career",
   "visualStyle": "commute-sunrise",
-  "situation": "회의 발표를 앞두고 목소리가 떨리는 아침",
-  "hook": "왜 떨림이 오래갈까요?",
-  "theme": "사주 직업 성향과 발표 준비",
-  "thumbnailTitle": "발표 전 떨림, 어떻게 할까?",
+  "situation": "출근길 면접 대기실에서 첫 질문을 기다리는 아침",
+  "hook": "첫마디를 어떻게 열까요?",
+  "theme": "사주 직업 성향과 면접 첫 답변 준비",
+  "thumbnailTitle": "면접 첫마디가 막힌다면",
   "narrationDraft": [
-    "회의 발표를 앞두고 목소리가 떨리는 아침. 왜 떨림이 오래갈까요?",
-    "사주에서는 타고난 기질을 통해 긴장할 때의 대응 성향을 참고해 볼 수 있어요.",
-    "발표 첫 문장을 소리 내어 연습하고 오늘 말할 핵심 세 가지를 노트에 정리해 확인해 보세요.",
-    "준비가 끝나면 운보다 무료 사주 조회에서 나의 직업 성향도 살펴보세요."
+    "출근길 면접 대기실에서 첫 질문을 기다리는 아침. 첫마디를 어떻게 열까요?",
+    "사주 직업 성향은 긴장할 때의 말하기 방식을 돌아보는 참고예요. 결과를 정하진 않아요.",
+    "면접 의자에 앉기 전 첫 답변을 짧게 소리 내어 연습하고, 경험 한 가지를 노트에 적어 보세요.",
+    "준비를 마치면 운보다 무료 사주 조회로 내 직업 성향도 천천히 살펴보세요."
   ],
   "visualConcepts": [
-    "한국어 문구와 고유한 도시 생활 배경 속 회의 발표를 앞두고 목소리가 떨리는 아침 풍경에서 움직이는 오리지널 장면",
-    "흐르는 빛과 시간별 상징 요소를 통해 사주 직업 성향과 발표 준비 주제를 화면에서 읽기 쉽게 표현하는 장면",
-    "생활 속에서 실제로 할 수 있는 점검과 기록을 노트와 움직이는 그래픽으로 구현하는 장면",
-    "시간대별 대표 색상과 움직이는 빛을 배경으로 운보다 무료 사주 조회를 표시하는 마무리 장면"
+    "면접 대기실의 의자 두 개와 질문 카드를 실제로 그려 놓고 지원자가 앉으며 질문 카드가 살짝 움직이는 장면",
+    "면접 의자 옆에 긴장과 차분함을 나타내는 말풍선 두 개가 교차해 움직이며 직업 기질을 참고로 설명하는 장면",
+    "면접 첫 답변을 적은 노트와 질문 카드가 펼쳐지고 핵심 경험 한 줄에 체크 표시가 나타나는 장면",
+    "면접 준비 노트가 접히고 운보다 무료 사주 조회 문구와 사이트 주소가 또렷하게 들어오는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "아침 발표 전",
-        "목소리가 떨려?"
+        "면접 대기실",
+        "첫마디가 막혀?"
       ],
-      "subline": "익숙하지 않은 긴장",
+      "subline": "의자와 질문 카드 앞에서",
       "illustration": "clock"
     },
     {
       "headline": [
-        "사주로 보는",
-        "나의 일하는 기질"
+        "사주 직업 성향",
+        "참고로만 보기"
       ],
-      "subline": "결과를 단정하지 않아요",
+      "subline": "면접 결과를 단정하지 않아요",
       "illustration": "rest"
     },
     {
       "headline": [
-        "첫 문장 연습",
-        "핵심 세 가지"
+        "첫 답변 연습",
+        "경험 하나 적기"
       ],
-      "subline": "준비가 자신감이 돼요",
+      "subline": "노트에 경험 한 줄 기록",
       "illustration": "notes"
     },
     {
@@ -58,5 +58,6 @@
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "visualMotif": "meeting-presentation"
+  "visualMotif": "job-interview",
+  "targetDateKst": "20261030"
 }

@@ -1,48 +1,48 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-night-tomorrow-checklist-20261029",
-  "topicKey": "saju-night-tomorrow-checklist-20261029",
+  "id": "unboda-saju-family-chore-turns-20261030",
+  "topicKey": "saju-family-chore-turns-20261030",
   "sajuCategory": "self-understanding",
   "visualStyle": "midnight-indigo",
-  "situation": "불을 껐는데 내일 할 일이 떠오르는 밤",
-  "hook": "머리가 왜 더 바빠질까요?",
-  "theme": "사주로 보는 자기이해와 생각 정리",
-  "thumbnailTitle": "잠들기 전 생각이 많다면?",
+  "situation": "밤에 가족과 집안일 순서를 정하다 말이 엇갈린 날",
+  "hook": "누가 먼저 해야 할까요?",
+  "theme": "사주 자기이해와 가족의 생활 방식 차이",
+  "thumbnailTitle": "집안일 순서가 엇갈릴 때",
   "narrationDraft": [
-    "불을 껐는데 내일 할 일이 떠오르는 밤. 머리가 왜 더 바빠질까요?",
-    "사주는 생각이 복잡해질 때 드러나는 나의 기질을 살펴보는 참고가 될 수 있어요.",
-    "내일 꼭 해야 할 일과 미뤄도 되는 일을 한 줄씩 나눠 적고 마음을 차분하게 점검해 보세요.",
-    "잠들기 전 운보다 무료 사주 조회에서 나의 성향도 가볍게 살펴보세요."
+    "밤에 가족과 집안일 순서를 정하다 말이 엇갈린 날. 누가 먼저 해야 할까요?",
+    "사주는 서로 다른 생활 기질을 돌아보는 참고예요. 가족의 마음을 단정하지 않아요.",
+    "가족에게 오늘 가능한 집안일을 한 가지씩 물어보고, 각자 편한 순서를 적어 함께 정해 보세요.",
+    "대화를 마친 뒤 운보다 무료 사주 조회에서 나의 성향도 가볍게 살펴보세요."
   ],
   "visualConcepts": [
-    "한국어 문구와 고유한 도시 생활 배경 속 불을 껐는데 내일 할 일이 떠오르는 밤 풍경에서 움직이는 오리지널 장면",
-    "흐르는 빛과 시간별 상징 요소를 통해 사주로 보는 자기이해와 생각 정리 주제를 화면에서 읽기 쉽게 표현하는 장면",
-    "생활 속에서 실제로 할 수 있는 점검과 기록을 노트와 움직이는 그래픽으로 구현하는 장면",
-    "시간대별 대표 색상과 움직이는 빛을 배경으로 운보다 무료 사주 조회를 표시하는 마무리 장면"
+    "거실에서 가족 두 사람이 집안일 순서를 두고 대화하는 모습, 두 말풍선과 사람의 손짓이 번갈아 움직이는 장면",
+    "가족 두 사람의 서로 다른 생활 리듬을 작은 집 모양과 움직이는 말풍선으로 보여 주는 장면",
+    "집안일 항목을 적은 노트에 각자 가능한 순서를 체크하고 체크 표시가 차례로 나타나는 장면",
+    "가족 대화의 말풍선이 정리되며 운보다 무료 사주 조회와 사이트 주소가 나타나는 마무리 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "잠들려는데",
-        "내일이 걱정돼?"
+        "가족 집안일",
+        "순서가 엇갈려?"
       ],
-      "subline": "하루 끝에 떠오르는 걱정",
+      "subline": "가족 두 사람의 집안일 대화",
       "illustration": "rest"
     },
     {
       "headline": [
         "사주로 살피는",
-        "나의 생각 습관"
+        "서로 다른 기질"
       ],
-      "subline": "기질을 참고해 보세요",
+      "subline": "마음을 단정하지 않아요",
       "illustration": "clock"
     },
     {
       "headline": [
-        "내일 할 일",
-        "두 칸에 적기"
+        "할 일 한 가지",
+        "순서 같이 정해"
       ],
-      "subline": "급한 일부터 정리해요",
+      "subline": "서로 편한 순서를 적어요",
       "illustration": "notes"
     },
     {
@@ -58,5 +58,6 @@
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "visualMotif": "night-checklist"
+  "visualMotif": "family-talk",
+  "targetDateKst": "20261030"
 }

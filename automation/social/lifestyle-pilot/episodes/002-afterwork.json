@@ -1,48 +1,48 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-money-auto-subscription-20261029",
-  "topicKey": "saju-money-auto-subscription-20261029",
+  "id": "unboda-saju-money-cart-purchase-pause-20261030",
+  "topicKey": "saju-money-cart-purchase-pause-20261030",
   "sajuCategory": "money",
   "visualStyle": "finance-emerald",
-  "situation": "자동이체 알림이 몰려와 당황한 저녁",
-  "hook": "어디부터 확인해야 할까요?",
-  "theme": "사주 재물운과 자동 구독 지출 점검",
-  "thumbnailTitle": "자동결제, 놓치고 있나요?",
+  "situation": "저녁에 장바구니에 담아둔 물건을 살지 망설이는 순간",
+  "hook": "지금 정말 필요한 걸까요?",
+  "theme": "사주 재물운과 장바구니 구매 기준 점검",
+  "thumbnailTitle": "장바구니 속 물건이 고민될 때",
   "narrationDraft": [
-    "자동이체 알림이 몰려와 당황한 저녁. 어디부터 확인해야 할까요?",
-    "사주 재물운은 돈의 흐름을 예언하기보다 나의 지출 습관을 돌아보는 참고예요.",
-    "이번 주 자동이체 항목을 살펴보고 필요한 지출과 잠시 멈출 구독을 차례로 구분해 보세요.",
-    "지출을 점검한 뒤 운보다 무료 사주 조회에서 내 재물 성향도 알아보세요."
+    "저녁에 장바구니에 담아둔 물건을 살지 망설이는 순간. 지금 정말 필요한 걸까요?",
+    "사주 재물운은 선택을 대신하지 않아요. 돈을 쓰는 습관을 살펴보는 참고예요.",
+    "장바구니 속 물건의 사용 횟수를 생각하고, 이번 달 예산과 비교해 하루 뒤 다시 확인해 보세요.",
+    "선택을 마친 뒤 운보다 무료 사주 조회에서 나의 재물 성향도 살펴보세요."
   ],
   "visualConcepts": [
-    "한국어 문구와 고유한 도시 생활 배경 속 자동이체 알림이 몰려와 당황한 저녁 풍경에서 움직이는 오리지널 장면",
-    "흐르는 빛과 시간별 상징 요소를 통해 사주 재물운과 자동 구독 지출 점검 주제를 화면에서 읽기 쉽게 표현하는 장면",
-    "생활 속에서 실제로 할 수 있는 점검과 기록을 노트와 움직이는 그래픽으로 구현하는 장면",
-    "시간대별 대표 색상과 움직이는 빛을 배경으로 운보다 무료 사주 조회를 표시하는 마무리 장면"
+    "휴대폰 쇼핑 화면의 장바구니와 물건 상자를 실제로 그려 놓고 상품 카드가 살짝 오르내리는 장면",
+    "장바구니 옆에 구매 고민을 뜻하는 물건과 저울 모양이 천천히 움직이며 재물운은 참고라고 설명하는 장면",
+    "장바구니 물건 옆 예산 노트와 사용 횟수 표시를 보여 주고 체크 표시가 차례로 채워지는 장면",
+    "쇼핑 장바구니 화면이 닫히며 운보다 무료 사주 조회와 사이트 주소가 떠오르는 마무리 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "자동이체 알림",
-        "또 결제됐어?"
+        "장바구니 속",
+        "정말 필요할까?"
       ],
-      "subline": "저녁에 온 자동결제 알림",
+      "subline": "물건을 살지 망설일 때",
       "illustration": "notes"
     },
     {
       "headline": [
-        "사주 재물운은",
-        "지출 습관 참고"
+        "사주 재물운",
+        "습관 돌아보기"
       ],
-      "subline": "금액을 예언하지 않아요",
+      "subline": "선택을 대신 정하지 않아요",
       "illustration": "message"
     },
     {
       "headline": [
-        "이번 주 구독",
-        "하나씩 확인"
+        "사용 횟수",
+        "예산과 비교"
       ],
-      "subline": "필요한 지출부터 남겨요",
+      "subline": "하루 뒤 다시 확인해요",
       "illustration": "clock"
     },
     {
@@ -58,5 +58,6 @@
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "visualMotif": "subscription-billing"
+  "visualMotif": "shopping-choice",
+  "targetDateKst": "20261030"
 }

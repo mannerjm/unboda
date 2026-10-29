@@ -1,48 +1,48 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-friendship-meeting-place-20261029",
-  "topicKey": "saju-friendship-meeting-place-20261029",
+  "id": "unboda-saju-compatibility-weekend-calendar-20261030",
+  "topicKey": "saju-compatibility-weekend-calendar-20261030",
   "sajuCategory": "compatibility",
   "visualStyle": "relationship-coral",
-  "situation": "친구들과 만날 장소를 정하다 말이 엇갈린 점심",
-  "hook": "왜 의견이 다를까요?",
-  "theme": "사주 궁합과 약속에서의 소통",
-  "thumbnailTitle": "약속 장소로 다툰다면?",
+  "situation": "점심에 연인과 주말 일정을 맞추는데 빈 시간이 다른 날",
+  "hook": "어느 시간을 골라야 할까요?",
+  "theme": "사주 궁합과 서로 다른 시간 사용 방식",
+  "thumbnailTitle": "주말 일정이 안 맞는다면",
   "narrationDraft": [
-    "친구들과 만날 장소를 정하다 말이 엇갈린 점심. 왜 의견이 다를까요?",
-    "사주 궁합은 사람마다 다른 소통 방식과 관계의 흐름을 생각해 보는 참고 자료예요.",
-    "서로 원하는 장소와 이동 시간을 하나씩 들어 보고 부담 없는 중간 지점을 함께 비교해 보세요.",
-    "친구와 대화한 뒤 운보다 무료 사주 조회로 나의 관계 성향도 살펴보세요."
+    "점심에 연인과 주말 일정을 맞추는데 빈 시간이 다른 날. 어느 시간을 골라야 할까요?",
+    "사주 궁합은 각자 시간을 쓰는 방식의 차이를 이해하는 참고예요. 마음을 예언하진 않아요.",
+    "서로 가능한 날짜를 달력에 표시하고, 꼭 함께할 시간과 혼자 쉴 시간을 나눠 대화해 보세요.",
+    "일정을 정한 뒤 운보다 무료 사주 조회에서 나의 관계 성향도 살펴보세요."
   ],
   "visualConcepts": [
-    "한국어 문구와 고유한 도시 생활 배경 속 친구들과 만날 장소를 정하다 말이 엇갈린 점심 풍경에서 움직이는 오리지널 장면",
-    "흐르는 빛과 시간별 상징 요소를 통해 사주 궁합과 약속에서의 소통 주제를 화면에서 읽기 쉽게 표현하는 장면",
-    "생활 속에서 실제로 할 수 있는 점검과 기록을 노트와 움직이는 그래픽으로 구현하는 장면",
-    "시간대별 대표 색상과 움직이는 빛을 배경으로 운보다 무료 사주 조회를 표시하는 마무리 장면"
+    "연인이 휴대폰으로 공유 달력의 주말 일정을 함께 보고, 서로 다른 색의 일정 칸이 옆으로 움직이는 장면",
+    "달력 위에 두 사람의 시간 선호를 나타내는 작은 말풍선과 시계가 천천히 교차하는 장면",
+    "주말 달력에 함께할 시간과 혼자 쉴 시간을 각각 표시하고 날짜 칸에 체크가 들어가는 장면",
+    "공유 달력이 접히며 운보다 무료 사주 조회와 사이트 주소가 나타나고 작은 날짜 표시가 움직이는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "친구 약속 장소",
-        "왜 안 맞을까?"
+        "주말 일정",
+        "시간이 안 맞아?"
       ],
-      "subline": "점심시간의 작은 갈등",
+      "subline": "연인과 서로 다른 빈 시간",
       "illustration": "message"
     },
     {
       "headline": [
         "사주 궁합은",
-        "대화 성향 참고"
+        "차이 이해 참고"
       ],
-      "subline": "상대를 단정하지 않아요",
+      "subline": "상대 마음을 예언하지 않아요",
       "illustration": "clock"
     },
     {
       "headline": [
-        "이동 시간",
-        "중간 지점 비교"
+        "달력에 표시",
+        "함께할 시간"
       ],
-      "subline": "서로의 입장 들어요",
+      "subline": "혼자 쉴 시간도 남겨요",
       "illustration": "notes"
     },
     {
@@ -58,5 +58,6 @@
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "visualMotif": "meetup-location"
+  "visualMotif": "shared-calendar",
+  "targetDateKst": "20261030"
 }

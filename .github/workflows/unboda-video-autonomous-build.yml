@@ -76,8 +76,57 @@ jobs:
           }
           console.log('NEXT_DAY_PRIVATE_SOURCE_VERIFIED '+expected+' topics='+seen.size);
           NODE
-  render:
+  voice-model:
     needs: preflight
+    if: needs.preflight.result == 'success' && needs.preflight.outputs.skip_release != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - name: Restore official Korean model files from Actions cache
+        id: cached-kr
+        uses: actions/cache@v4
+        with:
+          path: /tmp/unboda-kr-voice-model
+          key: unboda-original-melotts-kr-s3-20261029-v1
+      - name: Download owner-licensed original KR TTS once, not four HF Xet calls
+        env:
+          MODEL_BASE: https://myshell-public-repo-host.s3.amazonaws.com/openvoice/basespeakers/KR
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/unboda-kr-voice-model
+          if [ ! -s /tmp/unboda-kr-voice-model/config.json ] || [ ! -s /tmp/unboda-kr-voice-model/checkpoint.pth ]; then
+            curl --fail --location --retry 7 --retry-all-errors --retry-delay 6 \
+              --connect-timeout 20 --max-time 240 \
+              "$MODEL_BASE/config.json" -o /tmp/unboda-kr-voice-model/config.json
+            curl --fail --location --retry 7 --retry-all-errors --retry-delay 6 \
+              --connect-timeout 20 --max-time 480 \
+              "$MODEL_BASE/checkpoint.pth" -o /tmp/unboda-kr-voice-model/checkpoint.pth
+          fi
+          python - <<'PY'
+          import json,pathlib,hashlib
+          root=pathlib.Path('/tmp/unboda-kr-voice-model')
+          c=root/'config.json'; ck=root/'checkpoint.pth'
+          assert 1000<c.stat().st_size<1000000,'INVALID_KR_TTS_CONFIG'
+          assert 5000000<ck.stat().st_size<800000000,'INVALID_KR_TTS_CHECKPOINT'
+          j=json.loads(c.read_text())
+          assert 'KR' in j.get('data',{}).get('spk2id',{}),'NOT_THE_KOREAN_VOICE_MODEL'
+          hashes=[]
+          for item in (c,ck):
+            hash=hashlib.sha256(item.read_bytes()).hexdigest()
+            hashes.append(hash+'  '+item.name)
+          (root/'model-sha256.txt').write_text('\n'.join(hashes)+'\n')
+          print('ONE_LICENSED_KR_MODEL_DOWNLOADED_AND_SHA256_RECORDED')
+          PY
+      - name: Share model once across four parallel original video render jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: unboda-licensed-melotts-kr-model
+          path: /tmp/unboda-kr-voice-model/
+          if-no-files-found: error
+          retention-days: 1
+
+  render:
+    needs: [preflight,voice-model]
     if: needs.preflight.result == 'success' && needs.preflight.outputs.skip_release != 'true'
     strategy:
       fail-fast: false
@@ -104,6 +153,8 @@ jobs:
       TOKENIZERS_PARALLELISM: 'false'
       UNBODA_BRIEF: ${{ matrix.brief }}
       UNBODA_OUTPUT: /tmp/unboda-ready-${{ matrix.name }}
+      UNBODA_TTS_CONFIG_PATH: ${{ github.workspace }}/voice-asset/config.json
+      UNBODA_TTS_CHECKPOINT_PATH: ${{ github.workspace }}/voice-asset/checkpoint.pth
     steps:
       - uses: actions/checkout@v4
         with:
@@ -135,6 +186,22 @@ jobs:
         run: |
           python -m pip install --no-cache-dir 'git+https://github.com/myshell-ai/MeloTTS.git@209145371cff8fc3bd60d7be902ea69cbdb7965a'
           python -m unidic download
+      - uses: actions/download-artifact@v4
+        with:
+          name: unboda-licensed-melotts-kr-model
+          path: ./voice-asset
+      - name: Verify trusted same Korean model files in each render
+        run: |
+          cd voice-asset
+          sha256sum -c model-sha256.txt
+          python - <<'PY'
+          import pathlib,json
+          p=pathlib.Path('.')
+          c=json.loads((p/'config.json').read_text())
+          assert 'KR' in c.get('data',{}).get('spk2id',{})
+          assert (p/'checkpoint.pth').stat().st_size>5000000
+          print('SAME_KOREAN_MODEL_VERIFIED_FOR_ORIGINAL_CLIP')
+          PY
       - name: Generate Korean voice and merge 30s video
         run: |
           python automation/social/lifestyle-pilot/narrate.py \

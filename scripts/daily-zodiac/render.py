@@ -203,36 +203,52 @@ def cover(data):
     d.ellipse((810,265,1062,517),outline=GOLD,width=3)
     label(d,(108,116),"UNBODA  |  운보다",40,"#F5F4E8",True)
     d.rectangle((111,186,969,190),fill="#547D76")
-    label(d,(108,270),f"{data['dateKst'].replace('-','.')}  {data['weekdayKo']}요일",46,"#E4D0AB",True)
-    label(d,(105,390),"오늘의",100,"#FFFFFF",True)
-    label(d,(105,520),"12띠 운세",113,"#FFDD9C",True)
-    label(d,(110,710),f"오늘의 일진  {data['dayGanji']}일",46,"#E9F1EA",True)
-    d.rounded_rectangle((109,850,972,1015),radius=30,fill="#F8F5EC")
-    label(d,(151,878),"12가지 띠의 하루를",47,TEAL,True)
-    label(d,(151,947),"쉬운 말로 살펴보세요",41,INK,False)
-    label(d,(109,1111),"전통 명리 해석 · 참고용, 미래 확정 아님",31,"#E7ECE6")
-    label(d,(109,1194),"무료 사주 조회  unboda.kr",35,"#FFFFFF",True)
+    label(d,(108,270),f"{data['dateKst'].replace('-','.')}  {data['weekdayKo']}요일",45,"#E4D0AB",True)
+    label(d,(105,390),"오늘의",102,"#FFFFFF",True)
+    label(d,(105,520),"12띠 운세",110,"#FFDD9C",True)
+    label(d,(110,715),"60갑자 · 출생연도별",48,"#E9F1EA",True)
+    d.rounded_rectangle((109,845,972,1033),radius=30,fill="#F8F5EC")
+    label(d,(149,874),"같은 띠도, 태어난 해마다",42,TEAL,True)
+    label(d,(149,946),"다른 하루의 참고 이야기",39,INK)
+    label(d,(108,1098),f"일진 {data['dayGanji']}일  |  1960~2019년생",34,"#F0E6D6",True)
+    label(d,(108,1161),"입춘 전후 출생자는 연주 확인 필요",28,"#DFE9E1")
+    label(d,(108,1221),"무료 사주 조회  unboda.kr",34,"#FFFFFF",True)
     return im
+def fit_label(draw,xy,text,max_width,start_size=35,min_size=24,color=INK,bold=False):
+    font_size=start_size
+    while font_size>min_size and draw.textbbox((0,0),text,font=f(font_size,bold))[2]>max_width:
+        font_size-=1
+    if draw.textbbox((0,0),text,font=f(font_size,bold))[2]>max_width:
+        raise ValueError("ZODIAC_TEXT_OVERFLOW:"+text)
+    draw.text(xy,text,font=f(font_size,bold),fill=color)
 def page(data,page_index):
+    if page_index<0 or page_index>=6:
+        raise ValueError("EXPECTED_SIX_YEAR_DETAIL_PAGES")
     im=gradient_background();d=ImageDraw.Draw(im)
-    d.rounded_rectangle((42,44,1038,185),radius=32,fill=TEAL)
-    label(d,(83,63),"UNBODA  |  오늘의 띠별 흐름",43,"#FFFFFF",True)
-    label(d,(83,125),f"{data['dateKst'].replace('-','.')}  ·  {data['dayGanji']}일",30,"#D8E7DC")
-    sub=data["animals"][page_index*4:(page_index+1)*4]
+    d.rounded_rectangle((42,44,1038,166),radius=30,fill=TEAL)
+    label(d,(83,59),"UNBODA  |  60갑자 연도별 띠운세",42,"#FFFFFF",True)
+    label(d,(83,118),f"{data['dateKst'].replace('-','.')} · {data['dayGanji']}일",27,"#D8E7DC")
+    sub=data["animals"][page_index*2:(page_index+1)*2]
+    if len(sub)!=2:raise ValueError("TWO_ANIMALS_PER_PAGE_REQUIRED")
     ef=emoji_font()
     for i,post in enumerate(sub):
-        top=211+i*258
-        rounded(d,(45,top,1035,top+240),30,CARD,outline="#DDEAE4",width=2)
-        rounded(d,(68,top+33,208,top+176),33,"#E1F1E8")
-        d.text((85,top+49),post["emoji"],font=ef,embedded_color=True)
-        label(d,(235,top+17),post["animal"]+"띠",47,TEAL,True)
-        label(d,(430,top+26),post["theme"]+" · "+post["relationship"],29,"#94683A",True)
-        label(d,(237,top+90),post["line1"],31,INK,False)
-        label(d,(237,top+140),post["line2"],29,INK,False)
-        label(d,(237,top+190),post["line3"],24,MUTED,False)
-    label(d,(58,1272),"사주·띠 해석은 문화적 참고로 활용하세요.",25,MUTED)
-    label(d,(860,1271),f"{page_index+2:02d} / 04",24,TEAL,True)
+        top=190+i*520
+        rounded(d,(48,top,1032,top+502),32,CARD,outline="#DDEAE4",width=2)
+        rounded(d,(77,top+16,188,top+127),26,"#E1F1E8")
+        d.text((91,top+24),post["emoji"],font=ef,embedded_color=True)
+        label(d,(214,top+29),post["animal"]+"띠",47,TEAL,True)
+        label(d,(480,top+42),"출생연도별 60갑자",30,"#94683A",True)
+        d.line((86,top+143,992,top+143),fill="#E2EAE4",width=2)
+        for j,entry in enumerate(post["birthYears"]):
+            y=top+163+j*66
+            rounded(d,(84,y,992,y+59),12,"#F4F8F5" if j%2==0 else "#FCFBF8")
+            label(d,(99,y+5),str(entry["year"])+"년",31,INK,True)
+            label(d,(273,y+7),entry["ganji"]+"년",26,TEAL,True)
+            fit_label(d,(427,y+7),entry["advice"],535,31,25,INK)
+    label(d,(68,1261),"출생연도는 양력 예시 · 입춘 전후 실제 연주는 다를 수 있어요.",24,MUTED)
+    label(d,(858,1298),f"{page_index+2:02d} / 07",24,TEAL,True)
     return im
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--date")
@@ -241,7 +257,7 @@ def main():
     date=dt.date.fromisoformat(opts.date) if opts.date else dt.datetime.now(KST).date()
     result=make_data(date)
     out=pathlib.Path(opts.out);out.mkdir(parents=True,exist_ok=True)
-    ims=[cover(result)]+[page(result,i) for i in range(3)]
+    ims=[cover(result)]+[page(result,i) for i in range(6)]
     images=[]
     for i,im in enumerate(ims):
         path=out/f"unboda-{date.isoformat()}-{i+1:02d}.png"
@@ -253,8 +269,12 @@ def main():
                        "bytes":len(b),"dimensions":[1080,1350]})
     result["images"]=images
     (out/"zodiac-manifest.json").write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    captions=[f"{date.month}월 {date.day}일, 12띠의 하루를 운보다에서 전해드려요. 오늘의 일진은 {result['dayGanji']}일입니다.","각 띠마다 사람·일·소비·관계를 돌아보는 간단한 생활 조언을 담았습니다. 카드를 넘겨 나의 띠를 찾아보세요.","※ 전통 명리의 일진과 지지 관계를 바탕으로 만든 일반 참고 콘텐츠이며, 개인 사주 분석이나 미래에 대한 확정적 예측은 아닙니다.", "내 상황에 맞는 무료 사주: https://unboda.kr","#운보다 #띠별운세 #오늘의운세 #무료사주 #명리"]
+    captions=[f"{date.month}월 {date.day}일, 운보다 12띠 · 60갑자 출생연도별 오늘의 흐름입니다. 오늘의 일진은 {result['dayGanji']}일입니다.",
+      "1960년부터 2019년까지 60개 출생연도를 나눠 같은 띠라도 연도의 천간·지지에 따라 서로 다른 생활 조언을 담았어요. 7장 카드를 넘겨 나의 띠와 연도를 찾아보세요.",
+      "※ 전통 명리의 일진과 연주를 참고한 일반 콘텐츠입니다. 실제 연주는 입춘 전후 출생에 따라 달라질 수 있으며, 개인 사주 전체를 풀이하거나 미래를 보장하지 않습니다.",
+      "운보다 무료 사주 조회: https://unboda.kr",
+      "#운보다 #60갑자 #띠별운세 #출생연도별운세 #무료사주"]
     (out/"caption.txt").write_text("\n\n".join(captions)+"\n",encoding="utf-8")
-    print(json.dumps({"state":"FOUR_ORIGINAL_ZODIAC_IMAGES_VERIFIED","date":date.isoformat(),
-       "dayGanji":result["dayGanji"],"images":images,"animalCount":len(result["animals"])},ensure_ascii=False))
+    print(json.dumps({"state":"SEVEN_ORIGINAL_60_GANJI_IMAGES_VERIFIED","date":date.isoformat(),
+       "dayGanji":result["dayGanji"],"images":images,"animalCount":len(result["animals"]),"birthYearCount":result["birthYearCount"]},ensure_ascii=False))
 if __name__=="__main__":main()

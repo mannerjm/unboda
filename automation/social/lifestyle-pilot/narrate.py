@@ -4,7 +4,7 @@
 No paid TTS API, secrets, metrics posting or production publishing.
 All FOUR clips must fit the corresponding scene naturally, or the job fails.
 """
-import argparse,json,pathlib,subprocess
+import argparse,json,os,pathlib,subprocess
 SCENE_SECONDS=7.5
 SCENE_STARTS=[0,7.5,15,22.5]
 # 7.5s scenes: leave 0.25s after each cut, 0.35s before next.
@@ -42,7 +42,26 @@ def make_narrated_video(brief_dir,output_dir):
     texts=brief.get("narrationDraft")
     if not isinstance(texts,list) or len(texts)!=4:raise RuntimeError("FOUR_KOREAN_SCRIPTS_REQUIRED")
     from melo.api import TTS
-    model=TTS(language="KR",device="cpu")
+    # MeloTTS defaults to Hugging Face Xet token endpoint, which returned HTTP
+    # 429 for all four 2026-10-30 videos. Use the author's documented public S3
+    # model/config URLs instead. This is the SAME KR voice, not a replacement.
+    # No private tokens, newly paid APIs or low-quality voice fallback.
+    config_path=os.getenv("UNBODA_TTS_CONFIG_PATH","")
+    checkpoint_path=os.getenv("UNBODA_TTS_CHECKPOINT_PATH","")
+    if bool(config_path)!=bool(checkpoint_path):
+        raise RuntimeError("KOREAN_VOICE_MODEL_PATH_PAIR_REQUIRED")
+    if config_path:
+        config=pathlib.Path(config_path)
+        checkpoint=pathlib.Path(checkpoint_path)
+        if (not config.is_file() or not checkpoint.is_file() or
+            not 1_000<config.stat().st_size<1_000_000 or
+            not 5_000_000<checkpoint.stat().st_size<800_000_000):
+            raise RuntimeError("PINNED_KOREAN_VOICE_MODEL_FILES_INVALID")
+        print("KOREAN_VOICE_MODEL_LOCAL_PROVENANCE_VERIFIED",flush=True)
+        model=TTS(language="KR",device="cpu",config_path=str(config),
+                  ckpt_path=str(checkpoint))
+    else:
+        model=TTS(language="KR",device="cpu",use_hf=False)
     speaker=model.hps.data.spk2id["KR"]
     voices=[];timing=[]
     for i,text in enumerate(texts):

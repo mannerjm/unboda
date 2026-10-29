@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+<title id="title">오행 목화토금수를 생활의 다섯 상징으로 소개하는 운보다 원본 그림</title>
+<desc id="desc">나무, 불꽃, 땅, 금속, 물의 간단한 도형을 다섯 카드에 배치한 그림</desc>
+<rect width="1200" height="630" fill="#111c3e"/>
+<circle cx="1100" cy="90" r="230" fill="#27325e" opacity=".45"/>
+<text x="78" y="92" fill="#d6cdfd" font-size="28" font-weight="700" font-family="sans-serif">UNBODA MAGAZINE</text>
+<text x="78" y="167" fill="#ffffff" font-size="57" font-weight="800" font-family="sans-serif">오행, 다섯 가지를 이해하는 방법</text>
+<text x="80" y="213" fill="#d7dfef" font-size="23" font-family="sans-serif">목 · 화 · 토 · 금 · 수  |  미래 단정이 아닌 생활의 비유</text>
+<g transform="translate(66 258)">
+ <rect x="0" y="0" width="202" height="280" rx="23" fill="#203c47" stroke="#457f7a" stroke-width="2"/>
+ <path d="M101 203v-76" stroke="#e9d7ab" stroke-width="13" stroke-linecap="round"/>
+ <path d="M101 72c-45 27-50 87 0 100 51-13 46-74 0-100Z" fill="#7dda9b"/>
+ <path d="M77 135l24 30 26-39" fill="none" stroke="#235e4c" stroke-width="5"/>
+ <text x="101" y="251" text-anchor="middle" font-size="34" font-weight="800" fill="#d9ffe6" font-family="sans-serif">목</text>
+</g>
+<g transform="translate(292 258)">
+ <rect width="202" height="280" rx="23" fill="#543245" stroke="#af6970" stroke-width="2"/>
+ <path d="M102 65c-4 54-58 57-45 112 7 29 27 44 49 44 47 0 66-49 48-79-8-13-28-33-29-62-14 18-13 38-23 49-11-14-7-39 0-64Z" fill="#ffb278"/>
+ <path d="M101 144c-25 24-21 61 2 68 22-8 23-33 14-48-7 10-11 15-16 17-4-9-3-23 0-37Z" fill="#fff3bf"/>
+ <text x="101" y="251" text-anchor="middle" font-size="34" font-weight="800" fill="#fff0dc" font-family="sans-serif">화</text>
+</g>
+<g transform="translate(518 258)">
+ <rect width="202" height="280" rx="23" fill="#514333" stroke="#a08e69" stroke-width="2"/>
+ <path d="M20 200 76 111l34 50 29-33 44 72Z" fill="#d8bd83"/>
+ <path d="M20 200h162" stroke="#f4e9c8" stroke-width="6" stroke-linecap="round"/>
+ <circle cx="149" cy="98" r="20" fill="#fae2a8"/>
+ <text x="101" y="251" text-anchor="middle" font-size="34" font-weight="800" fill="#fff1ce" font-family="sans-serif">토</text>
+</g>
+<g transform="translate(744 258)">
+ <rect width="202" height="280" rx="23" fill="#343e5c" stroke="#8497c8" stroke-width="2"/>
+ <circle cx="101" cy="151" r="62" fill="#a8bed9" stroke="#f1f4fc" stroke-width="10"/>
+ <circle cx="101" cy="151" r="36" fill="#5b7299"/>
+ <path d="M67 151h68M101 117v68" stroke="#dce6f8" stroke-width="7" opacity=".8"/>
+ <text x="101" y="251" text-anchor="middle" font-size="34" font-weight="800" fill="#e6efff" font-family="sans-serif">금</text>
+</g>
+<g transform="translate(970 258)">
+ <rect width="164" height="280" rx="23" fill="#183d58" stroke="#4e99bc" stroke-width="2"/>
+ <path d="M10 130q20-23 40 0t40 0t40 0t40 0M10 161q20-23 40 0t40 0t40 0t40 0M10 192q20-23 40 0t40 0t40 0t40 0" fill="none" stroke="#92d8f2" stroke-width="12" stroke-linecap="round"/>
+ <text x="82" y="251" text-anchor="middle" font-size="34" font-weight="800" fill="#d8f3ff" font-family="sans-serif">수</text>
+</g>
+<text x="77" y="600" fill="#bdc6e0" font-size="20" font-family="sans-serif">운보다 자체 제작 원본 일러스트 · 사주는 문화적 참고 자료입니다.</text>
+</svg>

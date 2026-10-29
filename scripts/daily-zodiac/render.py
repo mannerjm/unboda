@@ -105,26 +105,84 @@ def relation(birth, day):
     groups=["申子辰","亥卯未","寅午戌","巳酉丑"]
     if any(birth in grp and day in grp for grp in groups):return "삼합"
     return "보통"
+# Sexagenary 1984 = 甲子. The cohort covers 1960 through 2019 exactly.
+# Births near 입춘 require the actual birth timestamp to compute the year pillar.
+STEM_KO=list("갑을병정무기경신임계")
+BRANCH_KO=list("자축인묘진사오미신유술해")
+GANJI_ELEMENTS=["목","목","화","화","토","토","금","금","수","수"]
+YEAR_ADVICE=[
+ "지출을 한 번 더 확인해요",
+ "말하기 전 핵심을 적어봐요",
+ "일정 하나부터 정리해요",
+ "작은 약속을 지켜봐요",
+ "오늘 쓸 시간을 나눠봐요",
+ "중요한 일부터 살펴봐요",
+ "먼저 상대의 말을 들어봐요",
+ "필요한 지출만 골라봐요",
+ "서두른 답장을 잠시 미뤄요",
+ "하루의 좋은 점을 기록해요",
+ "휴식 시간을 미리 확보해요",
+ "미뤄 둔 할 일을 살펴봐요",
+ "계획에 빈틈이 없는지 봐요",
+ "고마운 마음을 전해봐요",
+ "내 생활 리듬을 지켜봐요",
+]
+def birth_ganji(year):
+    if not 1960 <= year <= 2019:
+        raise ValueError("BIRTH_YEAR_OUTSIDE_SIXTY_YEAR_COHORT")
+    pos=(year-1984)%60
+    stem=pos%10
+    branch=pos%12
+    return {"year":year,"ganji":STEM_KO[stem]+BRANCH_KO[branch],
+            "stem":STEMS[stem],"branch":BRANCHES[branch],
+            "element":GANJI_ELEMENTS[stem],"sexagenaryIndex":pos}
+def stem_relation(birth_stem,day_stem):
+    b=STEMS.index(birth_stem)//2
+    d=STEMS.index(day_stem)//2
+    if b==d:return "같은오행"
+    if (b+1)%5==d:return "생하는관계"
+    if (d+1)%5==b:return "도움받는관계"
+    if (b+2)%5==d:return "극하는관계"
+    return "극받는관계"
 def make_data(date):
     day=calendar_day(date)
     idx=STEMS.index(day["gan"])
     posts=[]
+    seen_years=set()
+    seen_ganji=set()
     for i,(animal,em,branch,baseyear,signature) in enumerate(ANIMALS):
         rel=relation(branch,day["ji"])
-        title, action = RELATIONS[rel]
-        # Date + exact stem + birth-year branch jointly affect a varied practical theme.
-        theme,extra=TOPICS[(date.toordinal()+idx*3+i*5)%len(TOPICS)]
-        years=[baseyear-24,baseyear-12,baseyear,baseyear+12,baseyear+24]
+        title,action=RELATIONS[rel]
+        entries=[]
+        for year in range(1960+i,2020,12):
+            birth=birth_ganji(year)
+            if birth["branch"]!=branch:
+                raise ValueError("ANIMAL_BIRTH_BRANCH_INCONSISTENT")
+            stem_rel=stem_relation(birth["stem"],day["gan"])
+            advice_index=(birth["sexagenaryIndex"]*7+date.toordinal()*11+idx*3)%len(YEAR_ADVICE)
+            topic,extra=TOPICS[(birth["sexagenaryIndex"]+idx+date.toordinal())%len(TOPICS)]
+            entries.append({**birth,"dayBranchRelation":rel,
+               "dayStemRelation":stem_rel,"theme":topic,
+               "advice":YEAR_ADVICE[advice_index]})
+            seen_years.add(year)
+            seen_ganji.add(birth["ganji"])
+        if len(entries)!=5:raise ValueError("EXACT_FIVE_BIRTH_YEARS_PER_ANIMAL")
         posts.append({"animal":animal,"emoji":em,"branch":branch,
-                      "representativeYears":years, "relationship":rel,
-                      "theme":theme,"signature":signature,
-                      "line1":title,"line2":action,"line3":extra})
+              "birthYears":entries,"representativeYears":[v["year"] for v in entries],
+              "relationship":rel,"line1":title,"line2":action,
+              "signature":signature})
+    if seen_years!=set(range(1960,2020)) or len(seen_ganji)!=60:
+        raise ValueError("ALL_SIXTY_DISTINCT_SEXAGENARY_BIRTH_YEARS_REQUIRED")
     return {"dateKst":date.isoformat(),"weekdayKo":"월화수목금토일"[date.weekday()],
-            "dayGanji":day["gapja"],"dayGan":day["gan"],"dayJi":day["ji"],
-            "lunarDate":day["lunarDate"],"timeZone":"Asia/Seoul",
-            "logic":"KoreanLunarCalendar day ganji + 12 earthly-branch relationships (합/삼합/충/동지지) + date/stem-based life reflection; no personal birth chart",
-            "notPersonalSaju":True,"entertainmentAndReflectionOnly":True,
-            "animals":posts}
+       "dayGanji":day["gapja"],"dayGan":day["gan"],"dayJi":day["ji"],
+       "lunarDate":day["lunarDate"],"timeZone":"Asia/Seoul",
+       "logicVersion":"birth-year-sexagenary-60-v2",
+       "logic":"KoreanLunarCalendar KST day ganji + 60 distinct birth-year stem/branch ganji + earthly-branch and five-elements day stem relation; general life reflections only",
+       "birthYearRange":[1960,2019],"birthYearCount":60,"imagesExpected":7,
+       "yearPillarBoundaryNote":"출생연도 표기는 양력 연도 예시입니다. 입춘 전후 실제 사주 연주가 다를 수 있습니다.",
+       "notPersonalSaju":True,"entertainmentAndReflectionOnly":True,
+       "animals":posts}
+
 def rounded(draw,xy,r,fill,outline=None,width=1):
     draw.rounded_rectangle(xy,radius=r,fill=fill,outline=outline,width=width)
 def label(draw,xy,text,size,color=INK,bold=False):

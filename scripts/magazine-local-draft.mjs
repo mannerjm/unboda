@@ -25,7 +25,9 @@ function check(t,obj,date){
  assert(obj && Array.isArray(obj.sections) && obj.sections.length>=4 && obj.sections.length<=6,"Section count");
  const seen=new Set(),prior=[];
  const sections=obj.sections.map((s,i)=>{
-  const h=text(s.heading,8,90,"Heading "+i);
+  const short=text(s.heading,3,90,"Heading "+i);
+  const h=size(short)>=8?short:"생활 속에서 살펴보기: "+short;
+  assert(size(h)<=100,"Heading too long");
   assert(!seen.has(h),"Repeat heading");seen.add(h);
   assert(Array.isArray(s.paragraphs) && s.paragraphs.length===2,"Exactly two paragraphs per section");
   const paragraphs=s.paragraphs.map((p,j)=>text(p,80,500,"Paragraph "+i+"."+j));
@@ -87,13 +89,15 @@ function test(){
 }
 async function generate(){
  const topic=nextTopic();if(!topic)throw Error("NO_NEW_TOPIC: add an original fact-checked editorial brief first");
- const instructions="당신은 운보다의 한국어 정보글 편집자입니다. 외부 검색 없이 아래 검증된 주제 힌트만 바탕으로 문화적 사주 해석과 일상적 선택을 구분하는 독창적 설명을 쓰세요. 단정적 미래 예언, 가짜 전문가 호칭, 의학/투자 효과, HTML/URL/인용 없는 사실, 반복, 얕은 글 금지. 반드시 JSON 객체만 작성: description(50-120자),lead(100-250자),sections(소제목 heading과 서로 다른 한국어 문단 paragraphs 2개로 구성된 5개 섹션, 문단당 120-220자),keyPoint(40-120자).";
+ const instructions="각 heading(소제목)은 공백 포함 최소 12글자 이상의 설명형 제목이어야 합니다. 문단당 최소 100글자, 전체 1000글자 이상이어야 합니다. "\+
+ "당신은 운보다의 한국어 정보글 편집자입니다. 외부 검색 없이 아래 검증된 주제 힌트만 바탕으로 문화적 사주 해석과 일상적 선택을 구분하는 독창적 설명을 쓰세요. 단정적 미래 예언, 가짜 전문가 호칭, 의학/투자 효과, HTML/URL/인용 없는 사실, 반복, 얕은 글 금지. 반드시 JSON 객체만 작성: description(50-120자),lead(100-250자),sections(소제목 heading과 서로 다른 한국어 문단 paragraphs 2개로 구성된 5개 섹션, 문단당 120-220자),keyPoint(40-120자).";
  const payload={model:"unboda-editorial",temperature:0.55,max_tokens:3800,stream:false,response_format:{type:"json_object"},messages:[
   {role:"system",content:instructions},
   {role:"user",content:"/no_think\n제목: "+topic.title+"\n사실 참고 메모: "+topic.factNotes+"\n상세하고 서로 중복되지 않는 각 2문단의 5개 섹션을 작성하되 원문 그대로 복사하지 마세요."}
  ]};
  let last;
  for(let trial=0;trial<2;trial++){
+  if (trial>0 && last) payload.messages.push({role:"user",content:"이전 원고는 품질 검증에서 실패했습니다: "+String(last.message).slice(0,120)+". 모든 소제목을 12글자 이상, 모든 설명 문단을 120글자 이상으로 길게 다시 작성하고 각 문단에 서로 다른 예시를 포함하세요. JSON 객체만 제출하세요."});
   try{
    const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),240000);
    let response;try{response=await fetch("http://127.0.0.1:8080/v1/chat/completions",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload),signal:ctl.signal});}finally{clearTimeout(timer);}

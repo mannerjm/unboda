@@ -42,7 +42,11 @@ def make_narrated_video(brief_dir,output_dir):
     texts=brief.get("narrationDraft")
     if not isinstance(texts,list) or len(texts)!=4:raise RuntimeError("FOUR_KOREAN_SCRIPTS_REQUIRED")
     from melo.api import TTS
-    model=TTS(language="KR",device="cpu")
+    # MeloTTS defaults to Hugging Face Xet token endpoint, which returned HTTP
+    # 429 for all four 2026-10-30 videos. Use the author's documented public S3
+    # model/config URLs instead. This is the SAME KR voice, not a replacement.
+    # No private tokens, newly paid APIs or low-quality voice fallback.
+    model=TTS(language="KR",device="cpu",use_hf=False)
     speaker=model.hps.data.spk2id["KR"]
     voices=[];timing=[]
     for i,text in enumerate(texts):

@@ -88,23 +88,41 @@ jobs:
         with:
           path: /tmp/unboda-kr-voice-model
           key: unboda-original-melotts-kr-s3-20261029-v1
-      - name: Download owner-licensed original KR TTS once, not four HF Xet calls
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned Hugging Face HTTP downloader (Xet explicitly disabled)
+        run: python -m pip install --no-cache-dir 'huggingface_hub==0.36.2'
+      - name: Download Korean original MeloTTS checkpoint once over HTTP, not Xet
         env:
-          MODEL_BASE: https://myshell-public-repo-host.s3.amazonaws.com/openvoice/basespeakers/KR
+          HF_HUB_DISABLE_XET: '1'
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          HF_HUB_DOWNLOAD_TIMEOUT: '180'
+          HF_HUB_ETAG_TIMEOUT: '30'
         run: |
           set -euo pipefail
           mkdir -p /tmp/unboda-kr-voice-model
-          if [ ! -s /tmp/unboda-kr-voice-model/config.json ] || [ ! -s /tmp/unboda-kr-voice-model/checkpoint.pth ]; then
-            curl --fail --location --retry 7 --retry-all-errors --retry-delay 6 \
-              --connect-timeout 20 --max-time 240 \
-              "$MODEL_BASE/config.json" -o /tmp/unboda-kr-voice-model/config.json
-            curl --fail --location --retry 7 --retry-all-errors --retry-delay 6 \
-              --connect-timeout 20 --max-time 480 \
-              "$MODEL_BASE/checkpoint.pth" -o /tmp/unboda-kr-voice-model/checkpoint.pth
-          fi
           python - <<'PY'
-          import json,pathlib,hashlib
+          import hashlib,json,pathlib,random,shutil,time
+          from huggingface_hub import hf_hub_download
           root=pathlib.Path('/tmp/unboda-kr-voice-model')
+          repo='myshell-ai/MeloTTS-Korean'
+          revision='0207e5adfc90129a51b6b03d89be6d84360ed323'
+          for name in ('config.json','checkpoint.pth'):
+            target=root/name
+            if target.is_file() and target.stat().st_size>1000:
+              continue
+            for attempt in range(1,5):
+              try:
+                downloaded=hf_hub_download(repo_id=repo,filename=name,
+                    revision=revision)
+                shutil.copy2(downloaded,target)
+                break
+              except Exception as exc:
+                print('ORIGINAL_KOREAN_MODEL_HTTP_FETCH_ATTEMPT',
+                      name,attempt,type(exc).__name__,str(exc)[:240],flush=True)
+                if attempt==4:raise
+                time.sleep(15*attempt)
           c=root/'config.json'; ck=root/'checkpoint.pth'
           assert 1000<c.stat().st_size<1000000,'INVALID_KR_TTS_CONFIG'
           assert 5000000<ck.stat().st_size<800000000,'INVALID_KR_TTS_CHECKPOINT'
@@ -112,10 +130,10 @@ jobs:
           assert 'KR' in j.get('data',{}).get('spk2id',{}),'NOT_THE_KOREAN_VOICE_MODEL'
           hashes=[]
           for item in (c,ck):
-            hash=hashlib.sha256(item.read_bytes()).hexdigest()
-            hashes.append(hash+'  '+item.name)
+            digest=hashlib.sha256(item.read_bytes()).hexdigest()
+            hashes.append(digest+'  '+item.name)
           (root/'model-sha256.txt').write_text('\n'.join(hashes)+'\n')
-          print('ONE_LICENSED_KR_MODEL_DOWNLOADED_AND_SHA256_RECORDED')
+          print('ONE_ORIGINAL_KR_MODEL_HTTP_DOWNLOADED_AND_SHA256_RECORDED')
           PY
       - name: Share model once across four parallel original video render jobs
         uses: actions/upload-artifact@v4

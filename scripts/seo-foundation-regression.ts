@@ -168,12 +168,13 @@ assert(trustSource.includes('href="/privacy"') && trustSource.includes('href="/t
 assert(legalPageSource.includes("<h1") && legalPageSource.includes('href="/"'),
   "shared document wrapper must provide a server-rendered H1 and home navigation");
 
-const originalPhaseOneUrls = entries.filter((entry) => !new URL(entry.url).pathname.startsWith("/special-analysis/compatibility/guide/"));
+const existingSeoPages = entries.filter((entry) => !new URL(entry.url).pathname.startsWith("/blog"));
+const originalPhaseOneUrls = existingSeoPages.filter((entry) => !new URL(entry.url).pathname.startsWith("/special-analysis/compatibility/guide/"));
 assert.equal(originalPhaseOneUrls.length, 67, "original phase 1 sitemap routes must remain intact");
 for (const slug of COMPATIBILITY_GUIDE_SLUGS) {
   assert(urls.has(`${SITE_ORIGIN}${getCompatibilityPublicGuidePath(slug)}`), `public compatibility guide missing: ${slug}`);
 }
-assert.equal(entries.length, 74, "sitemap must contain 57 paid products + 10 original public routes + 7 compatibility guides");
+assert.equal(existingSeoPages.length, 74, "existing 57 paid products + 10 public + 7 compatibility sitemap pages must remain intact");
  
 // The public entry must provide crawlable product links without clicking client-only
 // category buttons. Keep all 57 links scoped to the existing Launch registry.

@@ -44,6 +44,10 @@ jobs:
       - run: node scripts/magazine-local-draft.mjs --self-test
       - run: node scripts/magazine-local-draft.mjs --preflight
       - run: npm run test:magazine-seo
+      - name: Exercise SVG safety gate and unpublished generated article end to end, offline
+        run: |
+          node scripts/magazine-local-draft.mjs --fixture-apply
+          npm run test:magazine-seo
 
   local-draft:
     needs: self-test

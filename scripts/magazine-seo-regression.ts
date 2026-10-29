@@ -63,6 +63,15 @@ async function main() {
   const detail=readFileSync("app/blog/[slug]/page.tsx","utf8");
   assert(detail.includes("notFound()") && detail.includes("generateMetadata"));
   assert(detail.includes('"@type":"BlogPosting"'));
+  const middleware=readFileSync("middleware.ts","utf8");
+  assert(middleware.includes('pathname === "/blog"') &&
+    middleware.includes('pathname.startsWith("/blog/")') &&
+    middleware.includes('pathname === "/sitemap.xml"') &&
+    middleware.includes('pathname === "/robots.txt"'),
+    "public magazine and crawler endpoints must bypass auth cookie refresh");
+  assert(middleware.includes("await supabase.auth.getClaims()") &&
+    middleware.includes("createServerClient("),
+    "private payment, account and consultation routes must retain original auth");
   const nextConf=readFileSync("next.config.ts","utf8");
   assert(!nextConf.includes('"/blog/:path*"'),"public magazine pages must not receive noindex");
   const robots=readFileSync("app/robots.ts","utf8");

@@ -160,7 +160,7 @@ def make_data(date):
             if birth["branch"]!=branch:
                 raise ValueError("ANIMAL_BIRTH_BRANCH_INCONSISTENT")
             stem_rel=stem_relation(birth["stem"],day["gan"])
-            advice_index=(birth["sexagenaryIndex"]*7+date.toordinal()*11+idx*3)%len(YEAR_ADVICE)
+            advice_index=(birth["sexagenaryIndex"]*7+date.toordinal()*11+idx*3+i*3)%len(YEAR_ADVICE)
             topic,extra=TOPICS[(birth["sexagenaryIndex"]+idx+date.toordinal())%len(TOPICS)]
             year_advice=STEM_FOCUS[STEMS.index(birth["stem"])]+" · "+YEAR_ADVICE[advice_index]
             entries.append({**birth,"dayBranchRelation":rel,

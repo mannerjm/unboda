@@ -110,6 +110,7 @@ def relation(birth, day):
 STEM_KO=list("갑을병정무기경신임계")
 BRANCH_KO=list("자축인묘진사오미신유술해")
 GANJI_ELEMENTS=["목","목","화","화","토","토","금","금","수","수"]
+STEM_FOCUS=["새 계획","작은 변화","첫걸음","표현","우선순위","지속","검토","정리","관찰","여유"]
 YEAR_ADVICE=[
  "지출을 한 번 더 확인해요",
  "말하기 전 핵심을 적어봐요",
@@ -161,9 +162,10 @@ def make_data(date):
             stem_rel=stem_relation(birth["stem"],day["gan"])
             advice_index=(birth["sexagenaryIndex"]*7+date.toordinal()*11+idx*3)%len(YEAR_ADVICE)
             topic,extra=TOPICS[(birth["sexagenaryIndex"]+idx+date.toordinal())%len(TOPICS)]
+            year_advice=STEM_FOCUS[STEMS.index(birth["stem"])]+" · "+YEAR_ADVICE[advice_index]
             entries.append({**birth,"dayBranchRelation":rel,
                "dayStemRelation":stem_rel,"theme":topic,
-               "advice":YEAR_ADVICE[advice_index]})
+               "advice":year_advice})
             seen_years.add(year)
             seen_ganji.add(birth["ganji"])
         if len(entries)!=5:raise ValueError("EXACT_FIVE_BIRTH_YEARS_PER_ANIMAL")
@@ -171,6 +173,8 @@ def make_data(date):
               "birthYears":entries,"representativeYears":[v["year"] for v in entries],
               "relationship":rel,"line1":title,"line2":action,
               "signature":signature})
+    all_advice=[v["advice"] for post in posts for v in post["birthYears"]]
+    if len(set(all_advice))!=60:raise ValueError("SIXTY_DIFFERENT_FORTUNE_TEXTS_REQUIRED")
     if seen_years!=set(range(1960,2020)) or len(seen_ganji)!=60:
         raise ValueError("ALL_SIXTY_DISTINCT_SEXAGENARY_BIRTH_YEARS_REQUIRED")
     return {"dateKst":date.isoformat(),"weekdayKo":"월화수목금토일"[date.weekday()],
@@ -237,7 +241,7 @@ def page(data,page_index):
         rounded(d,(77,top+16,188,top+127),26,"#E1F1E8")
         d.text((91,top+24),post["emoji"],font=ef,embedded_color=True)
         label(d,(214,top+29),post["animal"]+"띠",47,TEAL,True)
-        label(d,(480,top+42),"출생연도별 60갑자",30,"#94683A",True)
+        label(d,(480,top+42),"오늘의 지지 관계: "+post["relationship"],29,"#94683A",True)
         d.line((86,top+143,992,top+143),fill="#E2EAE4",width=2)
         for j,entry in enumerate(post["birthYears"]):
             y=top+163+j*66

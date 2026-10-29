@@ -215,7 +215,6 @@ def cover(data):
     label(d,(149,874),"같은 띠도, 태어난 해마다",42,TEAL,True)
     label(d,(149,946),"다른 하루의 참고 이야기",39,INK)
     label(d,(108,1098),f"일진 {data['dayGanji']}일  |  1960~2019년생",34,"#F0E6D6",True)
-    label(d,(108,1161),"입춘 전후 출생자는 연주 확인 필요",28,"#DFE9E1")
     label(d,(108,1221),"무료 사주 조회  unboda.kr",34,"#FFFFFF",True)
     return im
 def fit_label(draw,xy,text,max_width,start_size=35,min_size=24,color=INK,bold=False):
@@ -241,7 +240,6 @@ def page(data,page_index):
         rounded(d,(77,top+16,188,top+127),26,"#E1F1E8")
         d.text((91,top+24),post["emoji"],font=ef,embedded_color=True)
         label(d,(214,top+29),post["animal"]+"띠",47,TEAL,True)
-        label(d,(480,top+42),"오늘의 지지 관계: "+post["relationship"],29,"#94683A",True)
         d.line((86,top+143,992,top+143),fill="#E2EAE4",width=2)
         for j,entry in enumerate(post["birthYears"]):
             y=top+163+j*66

@@ -111,7 +111,7 @@ jobs:
              z['dayBranchRelation'] for z in births)
           assert x['notPersonalSaju'] is True and x['entertainmentAndReflectionOnly'] is True
           assert len({z['animal'] for z in x['animals']})==12
-          assert len({z['sha256'] for z in x['images']})==4
+          assert len({z['sha256'] for z in x['images']})==7
           for z in x['images']:
             p=root/z['name'];b=p.read_bytes()
             assert hashlib.sha256(b).hexdigest()==z['sha256']

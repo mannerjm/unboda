@@ -73,7 +73,13 @@ function apply(a,art){
  assert(topics.some(t=>t.slug===a.slug && t.topicKey===a.topicKey),"Unknown topic");
  assert(!original.includes('slug: "'+a.slug+'"'),"Already exists");
  assert(art.includes('viewBox="0 0 1200 630"') && art.includes(a.title),"Artwork mismatch");
- assert(!/<script|<foreignObject|onload=|onerror=|href\s*=|https?:\/\//i.test(art),"Unsafe artwork");
+ assert(art.startsWith('<svg xmlns="http://www.w3.org/2000/svg" '),
+  "Only the standard local SVG root namespace is allowed");
+ // A valid SVG must declare its W3C namespace. Exempt only that one exact URI,
+ // and still reject any other outbound URI, scripts, event handlers or links.
+ const audited=art.replace('xmlns="http://www.w3.org/2000/svg"',"");
+ assert(!/<script|<foreignObject|onload\s*=|onerror\s*=|href\s*=|https?:\/\/|data:|javascript:/i.test(audited),
+  "Unsafe artwork");
  const marker="];\n\nconst SLUG";
  assert(original.split(marker).length===2,"Unexpected registry shape");
  const keys=["slug","title","description","category","publishedAt","updatedAt","cover","coverAlt","topicKey","originalArtwork","approvedForPublication","author","lead","sections","keyPoint","relatedHref","relatedLabel"];
@@ -83,6 +89,12 @@ function apply(a,art){
  mkdirSync(dirname(dest),{recursive:true});
  writeFileSync(dest,art);writeFileSync("app/lib/magazine.ts",original.replace(marker,obj+marker));
  console.log("MAGAZINE_DRAFT_APPLIED_UNPUBLISHED",a.slug);
+}
+function assertSafeSvgForTest(art,a){
+ assert(art.includes('viewBox="0 0 1200 630"') && art.includes(a.title));
+ assert(art.startsWith('<svg xmlns="http://www.w3.org/2000/svg" '));
+ const audited=art.replace('xmlns="http://www.w3.org/2000/svg"',"");
+ assert(!/<script|<foreignObject|onload\s*=|onerror\s*=|href\s*=|https?:\/\/|data:|javascript:/i.test(audited));
 }
 function test(){
  assert(topics.length>=8 && topics.every(t=>/^[a-z0-9-]+$/.test(t.slug)));
@@ -94,8 +106,12 @@ function test(){
  const d=check(topics[0],o,"2028-12-02T09:00:00+09:00");
  assert.equal(d.approvedForPublication,false);
  assert(svg(d,topics[0].motif).includes('viewBox="0 0 1200 630"'));
+ const artwork=svg(d,topics[0].motif);
+ assertSafeSvgForTest(artwork,d);
+ assert.throws(()=>assertSafeSvgForTest(artwork.replace("</svg>",'<script>alert(1)</script></svg>'),d));
  assert.throws(()=>check(topics[0],{...o,lead:"<script>"},"2028-12-02T09:00:00+09:00"));
  console.log("MAGAZINE_LOCAL_DRAFT_SELF_TEST_PASS");
+ return {article:d,artwork};
 }
 async function localGenerate(messages,schema,maxTokens){
  const payload={model:"unboda-editorial",temperature:0.45,max_tokens:maxTokens,
@@ -191,6 +207,10 @@ async function generate(){
 }
 const arg=process.argv[2];
 if(arg==="--self-test")test();
+else if(arg==="--fixture-apply"){
+ const {article,artwork}=test();
+ apply(article,artwork);
+}
 else if(arg==="--preflight")console.log("MAGAZINE_LOCAL_DRAFT_NEXT",nextTopic()?.slug??"NO_NEW_TOPIC");
 else if(arg==="--generate")await generate();
 else if(arg==="--apply"){

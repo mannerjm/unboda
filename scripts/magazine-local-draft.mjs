@@ -158,7 +158,8 @@ async function generate(){
     const obj=await localGenerate([{role:"system",content:guidance},
       {role:"user",content:"/no_think\n"+user}],sectionSchema,1100);
     const section=checkOneSection(obj,i);
-    assert(!sections.some(s=>s.heading===section.heading),"Repeated heading");
+    // Editorial outlines are distinct, non-model-owned headings; they also avoid repetitive AI headings.
+    section.heading=outlines[i];
     assert(!sections.some(s=>s.paragraphs.some(p=>section.paragraphs.includes(p))),
       "Reused section text");
     sections.push(section);accepted=true;

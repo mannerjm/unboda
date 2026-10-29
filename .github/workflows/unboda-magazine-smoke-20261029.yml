@@ -5,6 +5,7 @@ on:
       - feature/magazine-local-ai-draft-factory-20261029
     paths:
       - '.github/workflows/unboda-magazine-smoke-20261029.yml'
+      - 'scripts/magazine-local-draft.mjs'
 permissions:
   contents: read
 jobs:

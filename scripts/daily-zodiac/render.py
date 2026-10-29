@@ -105,26 +105,88 @@ def relation(birth, day):
     groups=["申子辰","亥卯未","寅午戌","巳酉丑"]
     if any(birth in grp and day in grp for grp in groups):return "삼합"
     return "보통"
+# Sexagenary 1984 = 甲子. The cohort covers 1960 through 2019 exactly.
+# Births near 입춘 require the actual birth timestamp to compute the year pillar.
+STEM_KO=list("갑을병정무기경신임계")
+BRANCH_KO=list("자축인묘진사오미신유술해")
+GANJI_ELEMENTS=["목","목","화","화","토","토","금","금","수","수"]
+STEM_FOCUS=["새 계획","작은 변화","첫걸음","표현","우선순위","지속","검토","정리","관찰","여유"]
+YEAR_ADVICE=[
+ "지출을 한 번 더 확인해요",
+ "말하기 전 핵심을 적어봐요",
+ "일정 하나부터 정리해요",
+ "작은 약속을 지켜봐요",
+ "오늘 쓸 시간을 나눠봐요",
+ "중요한 일부터 살펴봐요",
+ "먼저 상대의 말을 들어봐요",
+ "필요한 지출만 골라봐요",
+ "서두른 답장을 잠시 미뤄요",
+ "하루의 좋은 점을 기록해요",
+ "휴식 시간을 미리 확보해요",
+ "미뤄 둔 할 일을 살펴봐요",
+ "계획에 빈틈이 없는지 봐요",
+ "고마운 마음을 전해봐요",
+ "내 생활 리듬을 지켜봐요",
+]
+def birth_ganji(year):
+    if not 1960 <= year <= 2019:
+        raise ValueError("BIRTH_YEAR_OUTSIDE_SIXTY_YEAR_COHORT")
+    pos=(year-1984)%60
+    stem=pos%10
+    branch=pos%12
+    return {"year":year,"ganji":STEM_KO[stem]+BRANCH_KO[branch],
+            "stem":STEMS[stem],"branch":BRANCHES[branch],
+            "element":GANJI_ELEMENTS[stem],"sexagenaryIndex":pos}
+def stem_relation(birth_stem,day_stem):
+    b=STEMS.index(birth_stem)//2
+    d=STEMS.index(day_stem)//2
+    if b==d:return "같은오행"
+    if (b+1)%5==d:return "생하는관계"
+    if (d+1)%5==b:return "도움받는관계"
+    if (b+2)%5==d:return "극하는관계"
+    return "극받는관계"
 def make_data(date):
     day=calendar_day(date)
     idx=STEMS.index(day["gan"])
     posts=[]
+    seen_years=set()
+    seen_ganji=set()
     for i,(animal,em,branch,baseyear,signature) in enumerate(ANIMALS):
         rel=relation(branch,day["ji"])
-        title, action = RELATIONS[rel]
-        # Date + exact stem + birth-year branch jointly affect a varied practical theme.
-        theme,extra=TOPICS[(date.toordinal()+idx*3+i*5)%len(TOPICS)]
-        years=[baseyear-24,baseyear-12,baseyear,baseyear+12,baseyear+24]
+        title,action=RELATIONS[rel]
+        entries=[]
+        for year in range(1960+i,2020,12):
+            birth=birth_ganji(year)
+            if birth["branch"]!=branch:
+                raise ValueError("ANIMAL_BIRTH_BRANCH_INCONSISTENT")
+            stem_rel=stem_relation(birth["stem"],day["gan"])
+            advice_index=(birth["sexagenaryIndex"]*7+date.toordinal()*11+idx*3)%len(YEAR_ADVICE)
+            topic,extra=TOPICS[(birth["sexagenaryIndex"]+idx+date.toordinal())%len(TOPICS)]
+            year_advice=STEM_FOCUS[STEMS.index(birth["stem"])]+" · "+YEAR_ADVICE[advice_index]
+            entries.append({**birth,"dayBranchRelation":rel,
+               "dayStemRelation":stem_rel,"theme":topic,
+               "advice":year_advice})
+            seen_years.add(year)
+            seen_ganji.add(birth["ganji"])
+        if len(entries)!=5:raise ValueError("EXACT_FIVE_BIRTH_YEARS_PER_ANIMAL")
         posts.append({"animal":animal,"emoji":em,"branch":branch,
-                      "representativeYears":years, "relationship":rel,
-                      "theme":theme,"signature":signature,
-                      "line1":title,"line2":action,"line3":extra})
+              "birthYears":entries,"representativeYears":[v["year"] for v in entries],
+              "relationship":rel,"line1":title,"line2":action,
+              "signature":signature})
+    all_advice=[v["advice"] for post in posts for v in post["birthYears"]]
+    if len(set(all_advice))!=60:raise ValueError("SIXTY_DIFFERENT_FORTUNE_TEXTS_REQUIRED")
+    if seen_years!=set(range(1960,2020)) or len(seen_ganji)!=60:
+        raise ValueError("ALL_SIXTY_DISTINCT_SEXAGENARY_BIRTH_YEARS_REQUIRED")
     return {"dateKst":date.isoformat(),"weekdayKo":"월화수목금토일"[date.weekday()],
-            "dayGanji":day["gapja"],"dayGan":day["gan"],"dayJi":day["ji"],
-            "lunarDate":day["lunarDate"],"timeZone":"Asia/Seoul",
-            "logic":"KoreanLunarCalendar day ganji + 12 earthly-branch relationships (합/삼합/충/동지지) + date/stem-based life reflection; no personal birth chart",
-            "notPersonalSaju":True,"entertainmentAndReflectionOnly":True,
-            "animals":posts}
+       "dayGanji":day["gapja"],"dayGan":day["gan"],"dayJi":day["ji"],
+       "lunarDate":day["lunarDate"],"timeZone":"Asia/Seoul",
+       "logicVersion":"birth-year-sexagenary-60-v2",
+       "logic":"KoreanLunarCalendar KST day ganji + 60 distinct birth-year stem/branch ganji + earthly-branch and five-elements day stem relation; general life reflections only",
+       "birthYearRange":[1960,2019],"birthYearCount":60,"imagesExpected":7,
+       "yearPillarBoundaryNote":"출생연도 표기는 양력 연도 예시입니다. 입춘 전후 실제 사주 연주가 다를 수 있습니다.",
+       "notPersonalSaju":True,"entertainmentAndReflectionOnly":True,
+       "animals":posts}
+
 def rounded(draw,xy,r,fill,outline=None,width=1):
     draw.rounded_rectangle(xy,radius=r,fill=fill,outline=outline,width=width)
 def label(draw,xy,text,size,color=INK,bold=False):
@@ -145,36 +207,52 @@ def cover(data):
     d.ellipse((810,265,1062,517),outline=GOLD,width=3)
     label(d,(108,116),"UNBODA  |  운보다",40,"#F5F4E8",True)
     d.rectangle((111,186,969,190),fill="#547D76")
-    label(d,(108,270),f"{data['dateKst'].replace('-','.')}  {data['weekdayKo']}요일",46,"#E4D0AB",True)
-    label(d,(105,390),"오늘의",100,"#FFFFFF",True)
-    label(d,(105,520),"12띠 운세",113,"#FFDD9C",True)
-    label(d,(110,710),f"오늘의 일진  {data['dayGanji']}일",46,"#E9F1EA",True)
-    d.rounded_rectangle((109,850,972,1015),radius=30,fill="#F8F5EC")
-    label(d,(151,878),"12가지 띠의 하루를",47,TEAL,True)
-    label(d,(151,947),"쉬운 말로 살펴보세요",41,INK,False)
-    label(d,(109,1111),"전통 명리 해석 · 참고용, 미래 확정 아님",31,"#E7ECE6")
-    label(d,(109,1194),"무료 사주 조회  unboda.kr",35,"#FFFFFF",True)
+    label(d,(108,270),f"{data['dateKst'].replace('-','.')}  {data['weekdayKo']}요일",45,"#E4D0AB",True)
+    label(d,(105,390),"오늘의",102,"#FFFFFF",True)
+    label(d,(105,520),"12띠 운세",110,"#FFDD9C",True)
+    label(d,(110,715),"60갑자 · 출생연도별",48,"#E9F1EA",True)
+    d.rounded_rectangle((109,845,972,1033),radius=30,fill="#F8F5EC")
+    label(d,(149,874),"같은 띠도, 태어난 해마다",42,TEAL,True)
+    label(d,(149,946),"다른 하루의 참고 이야기",39,INK)
+    label(d,(108,1098),f"일진 {data['dayGanji']}일  |  1960~2019년생",34,"#F0E6D6",True)
+    label(d,(108,1161),"입춘 전후 출생자는 연주 확인 필요",28,"#DFE9E1")
+    label(d,(108,1221),"무료 사주 조회  unboda.kr",34,"#FFFFFF",True)
     return im
+def fit_label(draw,xy,text,max_width,start_size=35,min_size=24,color=INK,bold=False):
+    font_size=start_size
+    while font_size>min_size and draw.textbbox((0,0),text,font=f(font_size,bold))[2]>max_width:
+        font_size-=1
+    if draw.textbbox((0,0),text,font=f(font_size,bold))[2]>max_width:
+        raise ValueError("ZODIAC_TEXT_OVERFLOW:"+text)
+    draw.text(xy,text,font=f(font_size,bold),fill=color)
 def page(data,page_index):
+    if page_index<0 or page_index>=6:
+        raise ValueError("EXPECTED_SIX_YEAR_DETAIL_PAGES")
     im=gradient_background();d=ImageDraw.Draw(im)
-    d.rounded_rectangle((42,44,1038,185),radius=32,fill=TEAL)
-    label(d,(83,63),"UNBODA  |  오늘의 띠별 흐름",43,"#FFFFFF",True)
-    label(d,(83,125),f"{data['dateKst'].replace('-','.')}  ·  {data['dayGanji']}일",30,"#D8E7DC")
-    sub=data["animals"][page_index*4:(page_index+1)*4]
+    d.rounded_rectangle((42,44,1038,166),radius=30,fill=TEAL)
+    label(d,(83,59),"UNBODA  |  60갑자 연도별 띠운세",42,"#FFFFFF",True)
+    label(d,(83,118),f"{data['dateKst'].replace('-','.')} · {data['dayGanji']}일",27,"#D8E7DC")
+    sub=data["animals"][page_index*2:(page_index+1)*2]
+    if len(sub)!=2:raise ValueError("TWO_ANIMALS_PER_PAGE_REQUIRED")
     ef=emoji_font()
     for i,post in enumerate(sub):
-        top=211+i*258
-        rounded(d,(45,top,1035,top+240),30,CARD,outline="#DDEAE4",width=2)
-        rounded(d,(68,top+33,208,top+176),33,"#E1F1E8")
-        d.text((85,top+49),post["emoji"],font=ef,embedded_color=True)
-        label(d,(235,top+17),post["animal"]+"띠",47,TEAL,True)
-        label(d,(430,top+26),post["theme"]+" · "+post["relationship"],29,"#94683A",True)
-        label(d,(237,top+90),post["line1"],31,INK,False)
-        label(d,(237,top+140),post["line2"],29,INK,False)
-        label(d,(237,top+190),post["line3"],24,MUTED,False)
-    label(d,(58,1272),"사주·띠 해석은 문화적 참고로 활용하세요.",25,MUTED)
-    label(d,(860,1271),f"{page_index+2:02d} / 04",24,TEAL,True)
+        top=190+i*520
+        rounded(d,(48,top,1032,top+502),32,CARD,outline="#DDEAE4",width=2)
+        rounded(d,(77,top+16,188,top+127),26,"#E1F1E8")
+        d.text((91,top+24),post["emoji"],font=ef,embedded_color=True)
+        label(d,(214,top+29),post["animal"]+"띠",47,TEAL,True)
+        label(d,(480,top+42),"오늘의 지지 관계: "+post["relationship"],29,"#94683A",True)
+        d.line((86,top+143,992,top+143),fill="#E2EAE4",width=2)
+        for j,entry in enumerate(post["birthYears"]):
+            y=top+163+j*66
+            rounded(d,(84,y,992,y+59),12,"#F4F8F5" if j%2==0 else "#FCFBF8")
+            label(d,(99,y+5),str(entry["year"])+"년",31,INK,True)
+            label(d,(273,y+7),entry["ganji"]+"년",26,TEAL,True)
+            fit_label(d,(427,y+7),entry["advice"],535,31,25,INK)
+    label(d,(68,1261),"출생연도는 양력 예시 · 입춘 전후 실제 연주는 다를 수 있어요.",24,MUTED)
+    label(d,(858,1298),f"{page_index+2:02d} / 07",24,TEAL,True)
     return im
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--date")
@@ -183,7 +261,7 @@ def main():
     date=dt.date.fromisoformat(opts.date) if opts.date else dt.datetime.now(KST).date()
     result=make_data(date)
     out=pathlib.Path(opts.out);out.mkdir(parents=True,exist_ok=True)
-    ims=[cover(result)]+[page(result,i) for i in range(3)]
+    ims=[cover(result)]+[page(result,i) for i in range(6)]
     images=[]
     for i,im in enumerate(ims):
         path=out/f"unboda-{date.isoformat()}-{i+1:02d}.png"
@@ -195,8 +273,12 @@ def main():
                        "bytes":len(b),"dimensions":[1080,1350]})
     result["images"]=images
     (out/"zodiac-manifest.json").write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    captions=[f"{date.month}월 {date.day}일, 12띠의 하루를 운보다에서 전해드려요. 오늘의 일진은 {result['dayGanji']}일입니다.","각 띠마다 사람·일·소비·관계를 돌아보는 간단한 생활 조언을 담았습니다. 카드를 넘겨 나의 띠를 찾아보세요.","※ 전통 명리의 일진과 지지 관계를 바탕으로 만든 일반 참고 콘텐츠이며, 개인 사주 분석이나 미래에 대한 확정적 예측은 아닙니다.", "내 상황에 맞는 무료 사주: https://unboda.kr","#운보다 #띠별운세 #오늘의운세 #무료사주 #명리"]
+    captions=[f"{date.month}월 {date.day}일, 운보다 12띠 · 60갑자 출생연도별 오늘의 흐름입니다. 오늘의 일진은 {result['dayGanji']}일입니다.",
+      "1960년부터 2019년까지 60개 출생연도를 나눠 같은 띠라도 연도의 천간·지지에 따라 서로 다른 생활 조언을 담았어요. 7장 카드를 넘겨 나의 띠와 연도를 찾아보세요.",
+      "※ 전통 명리의 일진과 연주를 참고한 일반 콘텐츠입니다. 실제 연주는 입춘 전후 출생에 따라 달라질 수 있으며, 개인 사주 전체를 풀이하거나 미래를 보장하지 않습니다.",
+      "운보다 무료 사주 조회: https://unboda.kr",
+      "#운보다 #60갑자 #띠별운세 #출생연도별운세 #무료사주"]
     (out/"caption.txt").write_text("\n\n".join(captions)+"\n",encoding="utf-8")
-    print(json.dumps({"state":"FOUR_ORIGINAL_ZODIAC_IMAGES_VERIFIED","date":date.isoformat(),
-       "dayGanji":result["dayGanji"],"images":images,"animalCount":len(result["animals"])},ensure_ascii=False))
+    print(json.dumps({"state":"SEVEN_ORIGINAL_60_GANJI_IMAGES_VERIFIED","date":date.isoformat(),
+       "dayGanji":result["dayGanji"],"images":images,"animalCount":len(result["animals"]),"birthYearCount":result["birthYearCount"]},ensure_ascii=False))
 if __name__=="__main__":main()

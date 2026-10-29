@@ -67,13 +67,29 @@ jobs:
           assert m.relation('申','子')=='삼합'
           assert m.relation('子','子')=='같은지지'
           assert len(m.ANIMALS)==12 and len(set(x[2] for x in m.ANIMALS))==12
+          for y,ganji,branch in [(1960,'경자','子'),(1972,'임자','子'),
+                                (1984,'갑자','子'),(1996,'병자','子'),
+                                (2008,'무자','子'),(2019,'기해','亥')]:
+            item=m.birth_ganji(y)
+            assert item['ganji']==ganji and item['branch']==branch
+          data=m.make_data(datetime.date(2026,10,30))
+          entries=[y for item in data['animals'] for y in item['birthYears']]
+          assert len(entries)==60
+          assert len({y['year'] for y in entries})==60
+          assert len({y['ganji'] for y in entries})==60
+          assert len({y['advice'] for y in entries})==60
+          assert len(data['animals'])==12
+          assert data['dayGanji']=='정축'
+          assert all(len(a['birthYears'])==5 for a in data['animals'])
+          assert data['imagesExpected']==7
+          print('ALL_SIXTY_SEXAGENARY_BIRTH_YEARS_AND_DAY_PILLAR_VERIFIED')
           print('KST_DAY_GANJI_AND_ZODIAC_LOGIC_VERIFIED')
           PY
       - name: Draw original Korean four-page branded image carousel
         if: steps.date.outputs.skip != 'true'
         run: |
           python scripts/daily-zodiac/render.py --date "${{ steps.date.outputs.target }}" --out release-zodiac
-      - name: Check actual four PNG image bytes and 12 unique animals
+      - name: Check seven readable PNGs, 60 different birth years and sexagenary pillars
         if: steps.date.outputs.skip != 'true'
         run: |
           python - <<'PY'
@@ -81,7 +97,18 @@ jobs:
           from PIL import Image
           root=pathlib.Path('release-zodiac')
           x=json.loads((root/'zodiac-manifest.json').read_text())
-          assert len(x['animals'])==12 and len(x['images'])==4
+          assert len(x['animals'])==12 and len(x['images'])==7
+          assert x['logicVersion']=='birth-year-sexagenary-60-v2'
+          assert x['birthYearRange']==[1960,2019]
+          assert x['birthYearCount']==60
+          births=[z for animal in x['animals'] for z in animal['birthYears']]
+          assert len(births)==60
+          assert {z['year'] for z in births}==set(range(1960,2020))
+          assert len({z['ganji'] for z in births})==60
+          assert len({z['advice'] for z in births})==60
+          assert all(len(a['birthYears'])==5 for a in x['animals'])
+          assert all(z['advice'] and z['dayStemRelation'] and
+             z['dayBranchRelation'] for z in births)
           assert x['notPersonalSaju'] is True and x['entertainmentAndReflectionOnly'] is True
           assert len({z['animal'] for z in x['animals']})==12
           assert len({z['sha256'] for z in x['images']})==4
@@ -91,7 +118,7 @@ jobs:
             assert Image.open(p).size==(1080,1350)
             assert 20000<len(b)<7000000
           assert '무료 사주' in (root/'caption.txt').read_text()
-          print('FOUR_KOREAN_ORIGINAL_ZODIAC_CAROUSEL_PAGES_VERIFIED')
+          print('SEVEN_KOREAN_ORIGINAL_60_GANJI_PAGES_VERIFIED')
           PY
       - name: Host only validated first-party media as immutable daily release
         if: steps.date.outputs.skip != 'true'
@@ -107,5 +134,5 @@ jobs:
             --title "운보다 12띠 운세 ${{ steps.date.outputs.target }}" \
             --notes "Original UNBODA images; Korean Lunar Calendar KST date ganji and traditional earthly-branch relationship general reflection. NOT personal saju or guaranteed predictions." \
             --prerelease
-          gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length' | grep -qx 6
-          echo "DAILY_0700_UNBODA_ZODIAC_SOURCE_HOSTED"
+          gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length' | grep -qx 9
+          echo "DAILY_0700_UNBODA_60_GANJI_BIRTH_YEAR_SOURCE_HOSTED"

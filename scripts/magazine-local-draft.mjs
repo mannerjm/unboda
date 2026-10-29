@@ -113,9 +113,6 @@ async function localGenerate(messages,schema,maxTokens){
   return JSON.parse(message.trim());
  }finally{clearTimeout(timer);}
 }
-const introSchema={type:"object",properties:{
- description:{type:"string"},lead:{type:"string"},keyPoint:{type:"string"}
-},required:["description","lead","keyPoint"],additionalProperties:false};
 const sectionSchema={type:"object",properties:{
  heading:{type:"string"},paragraphs:{type:"array",items:{type:"string"},minItems:2,maxItems:2}
 },required:["heading","paragraphs"],additionalProperties:false};
@@ -168,24 +165,15 @@ async function generate(){
   }
   if(!accepted)throw Error("SECTION_QUALITY_FAIL_"+(i+1)+": "+lastError);
  }
- let intro,lastError;
- for(let trial=0;trial<3;trial++){
-  try{
-   const obj=await localGenerate([
-    {role:"system",content:"당신은 운보다의 한국어 편집자입니다. 본문 요약을 바탕으로 읽기 쉬운 도입문·메타 설명·실천 핵심을 JSON으로 적으세요. 과장·의학적 보장·예언·HTML·외부 URL은 금지입니다. description은 55~130자, lead는 110~220자, keyPoint는 40~100자입니다."},
-    {role:"user",content:"/no_think\n제목: "+topic.title+
-      "\n편집 힌트: "+topic.factNotes+
-      "\n실제 작성된 다섯 절 요약: "+sections.map(s=>s.heading).join(" / ")+
-      (lastError?"\n이전 결과 반려 이유: "+lastError:"")+
-      "\n각 문구를 의미 있게 완성한 한국어 JSON 객체로 작성하세요."}
-   ],introSchema,750);
-   text(obj.description,48,180,"Description");
-   text(obj.lead,90,400,"Lead");
-   text(obj.keyPoint,35,200,"Takeaway");
-   intro=obj;break;
-  }catch(e){lastError=String(e.message||e);console.error("Intro rejected",trial+1,lastError.slice(0,150));}
- }
- assert(intro,"Intro quality rejected after bounded retries");
+ // SEO intro and article metadata are curated, not invented by the small local model.
+ const intro={
+   description:text(topic.title+" "+topic.factNotes,48,180,"Curated description"),
+   lead:text(topic.title+" "+topic.factNotes+
+     " 이 글에서는 전통적인 해석을 생활 속 질문과 연결하되 확인 가능한 사실을 먼저 살펴보는 방법을 정리합니다.",
+     90,400,"Curated lead"),
+   keyPoint:text(topic.factNotes+
+     " 중요한 선택은 실제로 확인한 정보와 상황을 함께 검토하세요.",35,200,"Curated keyPoint")
+ };
  const article=check(topic,{...intro,sections},dateKst());
  mkdirSync(".magazine-draft",{recursive:true});
  writeFileSync(".magazine-draft/article.json",JSON.stringify(article,null,2)+"\n");

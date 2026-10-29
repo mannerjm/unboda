@@ -69,3 +69,11 @@ test('topic-specific first-frame graphics are mandatory, not just same palette',
  assert.equal(inspectSajuBrandEpisode(wrongFirst).reason,
   'FIRST_FRAME_HOOK_NOT_MATCHED_TO_VISIBLE_MOTIF');
 });
+
+test('no long Korean scene can enter expensive voice synthesis',()=>{
+ for(const brief of briefs)assert.equal(inspectSajuBrandEpisode(brief).ok,true);
+ const tooLong={...briefs[1],narrationDraft:[...briefs[1].narrationDraft]};
+ tooLong.narrationDraft[1]='사주 직업 성향을 긴장할 때의 말하기 방식으로 이해해 보고 나의 실제 경험을 돌아보며 길게 설명하는 장면입니다.';
+ assert.equal(inspectSajuBrandEpisode(tooLong).reason,
+  'KOREAN_NARRATION_SCENE_EXCEEDS_NATURAL_6_9S_BUDGET');
+});

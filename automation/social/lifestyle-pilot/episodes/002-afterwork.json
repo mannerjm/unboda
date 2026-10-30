@@ -1,54 +1,54 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-money-cart-purchase-pause-20261030",
-  "topicKey": "saju-money-cart-purchase-pause-20261030",
+  "id": "unboda-saju-money-first-savings-goal-20261031",
+  "topicKey": "saju-money-first-savings-goal-20261031",
   "sajuCategory": "money",
   "visualStyle": "finance-emerald",
-  "situation": "저녁에 장바구니에 담아둔 물건을 살지 망설이는 순간",
-  "hook": "지금 정말 필요한 걸까요?",
-  "theme": "사주 재물운과 장바구니 구매 기준 점검",
-  "thumbnailTitle": "장바구니 속 물건이 고민될 때",
+  "situation": "저녁에 저축 목표 금액을 정하기 막막한 순간",
+  "hook": "저축 목표, 얼마부터 시작할까?",
+  "theme": "사주 재물운과 현실적인 첫 저축 목표",
+  "thumbnailTitle": "저축 목표 금액이 막막할 때",
   "narrationDraft": [
-    "저녁에 장바구니에 담아둔 물건을 살지 망설이는 순간. 꼭 필요할까요?",
-    "사주 재물운은 돈을 쓰는 나의 습관을 알아보고 점검하는 참고예요.",
-    "물건을 쓸 횟수를 생각하고 이번 달 예산과 비교한 뒤 내일 다시 확인해 보세요.",
-    "선택을 마친 뒤 운보다 무료 사주 조회에서 나의 재물 성향도 살펴보세요."
+    "저녁에 저축 목표 금액을 정하기 막막한 순간. 얼마가 좋을까요?",
+    "사주 재물운은 돈을 모으는 습관을 돌아보는 참고예요.",
+    "저축 목표를 작은 금액으로 나누고 이번 주에 가능한 금액부터 적어 보세요.",
+    "운보다 무료 사주 조회로 내 재물 성향을 살펴보세요."
   ],
   "visualConcepts": [
-    "휴대폰 쇼핑 화면의 장바구니와 물건 상자를 실제로 그려 놓고 상품 카드가 살짝 오르내리는 장면",
-    "장바구니 옆에 구매 고민을 뜻하는 물건과 저울 모양이 천천히 움직이며 재물운은 참고라고 설명하는 장면",
-    "장바구니 물건 옆 예산 노트와 사용 횟수 표시를 보여 주고 체크 표시가 차례로 채워지는 장면",
-    "쇼핑 장바구니 화면이 닫히며 운보다 무료 사주 조회와 사이트 주소가 떠오르는 마무리 장면"
+    "저녁 책상에 저금통과 동전 및 저축 목표 노트를 그려 동전 하나가 저금통으로 움직이는 장면",
+    "저축 통장과 동전 두 개가 오르내리며 재물운은 돈 습관의 참고라고 설명하는 장면",
+    "저축 목표 노트에 이번 주 가능한 금액을 적고 작은 동전들이 차례로 쌓이는 장면",
+    "저금통 옆 저축 목표 노트가 접히고 운보다 무료 사주 조회와 사이트 주소가 나타나는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "장바구니 속",
-        "정말 필요할까?"
+        "저축 목표",
+        "얼마부터 할까?"
       ],
-      "subline": "물건을 살지 망설일 때",
+      "subline": "저금통과 동전 한 개",
       "illustration": "notes"
     },
     {
       "headline": [
         "사주 재물운",
-        "습관 돌아보기"
+        "습관 참고예요"
       ],
-      "subline": "선택을 대신 정하지 않아요",
-      "illustration": "message"
-    },
-    {
-      "headline": [
-        "사용 횟수",
-        "예산과 비교"
-      ],
-      "subline": "하루 뒤 다시 확인해요",
+      "subline": "돈의 미래를 단정 안 해요",
       "illustration": "clock"
     },
     {
       "headline": [
-        "내 사주부터",
-        "무료로 살펴보기"
+        "작은 금액부터",
+        "이번 주 적어봐"
+      ],
+      "subline": "저축 목표 노트와 통장",
+      "illustration": "message"
+    },
+    {
+      "headline": [
+        "내 사주도",
+        "무료로 살펴봐"
       ],
       "subline": "운보다 무료 사주 조회",
       "illustration": "rest"
@@ -58,6 +58,6 @@
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "visualMotif": "shopping-choice",
-  "targetDateKst": "20261030"
+  "visualMotif": "savings-goal",
+  "targetDateKst": "20261031"
 }

@@ -1,63 +1,63 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-career-interview-first-answer-20261030",
-  "topicKey": "saju-career-interview-first-answer-20261030",
+  "id": "unboda-saju-career-task-priority-20261031",
+  "topicKey": "saju-career-task-priority-20261031",
   "sajuCategory": "career",
   "visualStyle": "commute-sunrise",
-  "situation": "출근길 면접 대기실에서 첫 질문을 기다리는 아침",
-  "hook": "첫마디를 어떻게 열까요?",
-  "theme": "사주 직업 성향과 면접 첫 답변 준비",
-  "thumbnailTitle": "면접 첫마디가 막힌다면",
+  "situation": "아침에 업무 알림이 한꺼번에 쌓인 순간",
+  "hook": "업무 알림이 몰리면 뭐부터 할까?",
+  "theme": "사주 직업 성향과 업무 우선순위 정하기",
+  "thumbnailTitle": "업무 알림이 한꺼번에 쌓일 때",
   "narrationDraft": [
-    "출근길 면접 대기실에서 첫 질문을 기다리는 아침. 첫마디를 어떻게 열까요?",
-    "사주 직업 성향은 긴장할 때의 말하기 습관을 돌아보는 참고예요.",
-    "면접 첫 답변을 소리 내어 연습하고, 경험 한 가지를 노트에 적어 보세요.",
-    "준비를 마치면 운보다 무료 사주 조회로 내 직업 성향도 천천히 살펴보세요."
+    "아침에 업무 알림이 한꺼번에 쌓인 순간. 뭐부터 할까요?",
+    "사주 직업 성향은 일하는 습관을 돌아보는 참고예요.",
+    "업무 목록을 급한 일과 미룰 일로 나누고 가장 작은 일부터 적어 보세요.",
+    "운보다 무료 사주 조회로 내 직업 성향을 살펴보세요."
   ],
   "visualConcepts": [
-    "면접 대기실의 의자 두 개와 질문 카드를 실제로 그려 놓고 지원자가 앉으며 질문 카드가 살짝 움직이는 장면",
-    "면접 의자 옆에 긴장과 차분함을 나타내는 말풍선 두 개가 교차해 움직이며 직업 기질을 참고로 설명하는 장면",
-    "면접 첫 답변을 적은 노트와 질문 카드가 펼쳐지고 핵심 경험 한 줄에 체크 표시가 나타나는 장면",
-    "면접 준비 노트가 접히고 운보다 무료 사주 조회 문구와 사이트 주소가 또렷하게 들어오는 장면"
+    "출근 책상 위 업무 알림이 뜬 노트북과 할 일 목록을 그려 알림 카드가 하나씩 올라오는 장면",
+    "업무 목록 옆 시계와 서로 다른 작업 카드가 움직이며 직업 성향은 참고라고 설명하는 장면",
+    "업무 체크리스트에서 급한 일과 미룰 일을 나누고 첫 항목에 체크가 천천히 생기는 장면",
+    "노트북 업무 알림이 정리되고 운보다 무료 사주 조회 문구와 사이트 주소가 또렷하게 나타나는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "면접 대기실",
-        "첫마디가 막혀?"
+        "업무 알림",
+        "한꺼번에 쌓여?"
       ],
-      "subline": "의자와 질문 카드 앞에서",
+      "subline": "노트북과 업무 목록",
       "illustration": "clock"
     },
     {
       "headline": [
         "사주 직업 성향",
-        "참고로만 보기"
+        "참고로 살펴봐"
       ],
-      "subline": "면접 결과를 단정하지 않아요",
-      "illustration": "rest"
+      "subline": "일하는 습관을 돌아봐요",
+      "illustration": "message"
     },
     {
       "headline": [
-        "첫 답변 연습",
-        "경험 하나 적기"
+        "급한 일 먼저",
+        "작게 시작해"
       ],
-      "subline": "노트에 경험 한 줄 기록",
+      "subline": "업무 체크리스트 한 칸",
       "illustration": "notes"
     },
     {
       "headline": [
-        "내 사주부터",
-        "무료로 살펴보기"
+        "내 사주도",
+        "무료로 살펴봐"
       ],
       "subline": "운보다 무료 사주 조회",
-      "illustration": "message"
+      "illustration": "rest"
     }
   ],
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "visualMotif": "job-interview",
-  "targetDateKst": "20261030"
+  "visualMotif": "work-checklist",
+  "targetDateKst": "20261031"
 }

@@ -1,54 +1,54 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-family-chore-turns-20261030",
-  "topicKey": "saju-family-chore-turns-20261030",
+  "id": "unboda-saju-night-waking-rest-20261031",
+  "topicKey": "saju-night-waking-rest-20261031",
   "sajuCategory": "self-understanding",
   "visualStyle": "midnight-indigo",
-  "situation": "밤에 가족과 집안일 순서를 정하다 말이 엇갈린 날",
-  "hook": "누가 먼저 해야 할까요?",
-  "theme": "사주 자기이해와 가족의 생활 방식 차이",
-  "thumbnailTitle": "집안일 순서가 엇갈릴 때",
+  "situation": "밤중에 잠이 깨서 다시 뒤척이는 순간",
+  "hook": "밤중에 깬 잠, 다시 쉴 수 있을까?",
+  "theme": "사주 자기이해와 새벽에 깬 잠의 휴식 방식",
+  "thumbnailTitle": "밤중에 깬 잠, 어떻게 쉴까",
   "narrationDraft": [
-    "밤에 가족과 집안일 순서를 정하다 말이 엇갈린 날. 누가 먼저 할까요?",
-    "사주는 가족의 서로 다른 생활 습관을 이해하고 돌아보는 참고예요.",
-    "가족에게 가능한 일을 물어보고, 각자 맡을 순서를 적어 함께 정해 보세요.",
-    "대화를 마친 뒤 운보다 무료 사주 조회에서 나의 성향도 가볍게 살펴보세요."
+    "밤중에 잠이 깨서 다시 뒤척이는 순간. 다시 쉴 수 있을까요?",
+    "사주는 쉬는 방식의 기질을 돌아보는 참고일 뿐이에요.",
+    "시계를 잠시 멀리 두고 불빛을 낮춘 뒤 내 호흡을 살펴보며 천천히 쉬어 보세요.",
+    "운보다 무료 사주 조회로 내 성향도 살펴보세요."
   ],
   "visualConcepts": [
-    "거실에서 가족 두 사람이 집안일 순서를 두고 대화하는 모습, 두 말풍선과 사람의 손짓이 번갈아 움직이는 장면",
-    "가족 두 사람의 서로 다른 생활 리듬을 작은 집 모양과 움직이는 말풍선으로 보여 주는 장면",
-    "집안일 항목을 적은 노트에 각자 가능한 순서를 체크하고 체크 표시가 차례로 나타나는 장면",
-    "가족 대화의 말풍선이 정리되며 운보다 무료 사주 조회와 사이트 주소가 나타나는 마무리 장면"
+    "침실 침대에서 잠이 깬 사람이 이불을 고쳐 덮고 달빛이 천천히 이동하는 장면",
+    "침실의 시계와 베개가 보이고 시곗바늘이 천천히 움직이며 휴식 기질을 참고로 설명하는 장면",
+    "침대 옆 시계를 뒤집고 스탠드 불빛을 낮추며 호흡을 살피는 작은 원이 차례로 움직이는 장면",
+    "침실의 달빛이 잦아들고 운보다 무료 사주 조회 안내와 주소가 나타나는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "가족 집안일",
-        "순서가 엇갈려?"
+        "밤중에 잠이 깨",
+        "다시 뒤척여?"
       ],
-      "subline": "가족 두 사람의 집안일 대화",
+      "subline": "침실 침대와 달빛",
       "illustration": "rest"
     },
     {
       "headline": [
-        "사주로 살피는",
-        "서로 다른 기질"
+        "쉬는 방식도",
+        "서로 달라요"
       ],
-      "subline": "마음을 단정하지 않아요",
+      "subline": "사주는 참고로만 봐요",
       "illustration": "clock"
     },
     {
       "headline": [
-        "할 일 한 가지",
-        "순서 같이 정해"
+        "불빛을 낮춰",
+        "호흡을 살펴봐"
       ],
-      "subline": "서로 편한 순서를 적어요",
+      "subline": "시계는 잠시 멀리 둬요",
       "illustration": "notes"
     },
     {
       "headline": [
-        "내 사주부터",
-        "무료로 살펴보기"
+        "내 사주도",
+        "무료로 살펴봐"
       ],
       "subline": "운보다 무료 사주 조회",
       "illustration": "message"
@@ -58,6 +58,6 @@
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "visualMotif": "family-talk",
-  "targetDateKst": "20261030"
+  "visualMotif": "sleep-routine",
+  "targetDateKst": "20261031"
 }

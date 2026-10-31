@@ -1,48 +1,49 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-compatibility-joke-tone-20261031",
-  "topicKey": "saju-compatibility-joke-tone-20261031",
+  "id": "unboda-saju-compatibility-old-friend-greeting-20261101",
+  "topicKey": "saju-compatibility-old-friend-greeting-20261101",
   "sajuCategory": "compatibility",
   "visualStyle": "relationship-coral",
-  "situation": "점심에 친구 농담으로 대화가 어색해진 순간",
-  "hook": "친구 농담 뒤 어색해졌다면?",
-  "theme": "사주 궁합과 농담 뒤 서로의 말투 이해",
-  "thumbnailTitle": "친구 농담 뒤 어색해진 순간",
+  "visualMotif": "message-timing",
+  "situation": "점심에 오랜 친구에게 안부 연락을 망설인 순간",
+  "hook": "오랜 친구에게 안부 연락, 보낼까?",
+  "theme": "사주 궁합과 오랜 친구에게 먼저 안부 전하기",
+  "thumbnailTitle": "오랜 친구에게 안부를 전할 때",
   "narrationDraft": [
-    "점심에 친구 농담으로 대화가 어색해진 순간. 뭐라고 말할까요?",
-    "사주 궁합은 말의 온도 차이를 돌아보는 참고일 뿐이에요.",
-    "친구에게 어떤 말이 불편했는지 묻고 내 뜻을 차분히 전하며 확인해 보세요.",
-    "운보다 무료 사주 조회로 관계 성향도 살펴보세요."
+    "점심에 오랜 친구에게 안부 연락을 망설인 순간. 보낼까요?",
+    "사주 궁합은 연락의 성향 차이를 보는 참고예요.",
+    "오랜 친구에게 요즘 잘 지내는지 묻는 한 줄을 적어 편한 때 보내 보세요.",
+    "운보다 무료 사주 조회로 관계를 살펴봐요."
   ],
   "visualConcepts": [
-    "점심 테이블에 마주 앉은 친구 두 사람과 농담 말풍선을 그려 말풍선이 잠깐 멈추는 장면",
-    "두 사람이 대화하며 말풍선의 색과 크기가 달라지고 궁합은 참고임을 설명하는 장면",
-    "친구 두 사람이 서로 질문하는 말풍선을 주고받고 고개를 끄덕이는 작은 움직임이 나타나는 장면",
-    "친구들의 말풍선이 부드럽게 정리되며 운보다 무료 사주 조회와 주소가 나타나는 장면"
+    "점심 카페 테이블 위 휴대폰에 오랜 친구의 연락처가 뜨고 안부 메시지 입력창이 열리는 장면",
+    "휴대폰의 두 메시지 말풍선이 부드럽게 움직이며 사주 궁합은 참고임을 보여 주는 장면",
+    "휴대폰에 짧은 안부 한 줄을 적어 보내고 전송 화살표가 천천히 움직이는 장면",
+    "안부 메시지 말풍선 옆 운보다 무료 사주 조회와 사이트 주소가 나타나는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "친구와 대화",
-        "농담 뒤 어색해?"
+        "오랜 친구",
+        "연락 망설여?"
       ],
-      "subline": "점심 테이블의 두 사람",
+      "subline": "휴대폰의 안부 메시지",
       "illustration": "message"
     },
     {
       "headline": [
         "사주 궁합은",
-        "차이 이해 참고"
+        "참고로 봐요"
       ],
-      "subline": "말투로 마음을 단정 마요",
+      "subline": "연락 방식은 서로 달라요",
       "illustration": "rest"
     },
     {
       "headline": [
-        "불편했던 말",
-        "서로 물어봐"
+        "안부 한 줄",
+        "편할 때 보내"
       ],
-      "subline": "친구의 대답을 들어봐요",
+      "subline": "답장을 재촉하지 않아요",
       "illustration": "clock"
     },
     {
@@ -54,10 +55,9 @@
       "illustration": "notes"
     }
   ],
+  "targetDateKst": "20261101",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
-  "automatedPublicationAllowed": false,
-  "visualMotif": "relationship-talk",
-  "targetDateKst": "20261031"
+  "automatedPublicationAllowed": false
 }

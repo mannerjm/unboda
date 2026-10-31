@@ -1,48 +1,49 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-money-first-savings-goal-20261031",
-  "topicKey": "saju-money-first-savings-goal-20261031",
+  "id": "unboda-saju-money-trip-budget-first-20261101",
+  "topicKey": "saju-money-trip-budget-first-20261101",
   "sajuCategory": "money",
   "visualStyle": "finance-emerald",
-  "situation": "저녁에 저축 목표 금액을 정하기 막막한 순간",
-  "hook": "저축 목표, 얼마부터 시작할까?",
-  "theme": "사주 재물운과 현실적인 첫 저축 목표",
-  "thumbnailTitle": "저축 목표 금액이 막막할 때",
+  "visualMotif": "expense-ledger",
+  "situation": "저녁에 여행 예산표를 처음 만드는 순간",
+  "hook": "여행 예산표, 어디부터 써야 할까?",
+  "theme": "사주 재물운과 여행 비용을 현실적으로 나누는 습관",
+  "thumbnailTitle": "여행 예산표를 처음 만든다면",
   "narrationDraft": [
-    "저녁에 저축 목표 금액을 정하기 막막한 순간. 얼마가 좋을까요?",
-    "사주 재물운은 돈을 모으는 습관을 돌아보는 참고예요.",
-    "저축 목표를 작은 금액으로 나누고 이번 주에 가능한 금액부터 적어 보세요.",
-    "운보다 무료 사주 조회로 내 재물 성향을 살펴보세요."
+    "저녁에 여행 예산표를 처음 만드는 순간. 어디부터 쓸까요?",
+    "사주 재물운은 지출 습관을 보는 참고예요.",
+    "여행의 교통비와 숙박비를 나눠 적어 보고 남는 금액도 함께 계산해 보세요.",
+    "운보다 무료 사주 조회로 재물 성향을 봐요."
   ],
   "visualConcepts": [
-    "저녁 책상에 저금통과 동전 및 저축 목표 노트를 그려 동전 하나가 저금통으로 움직이는 장면",
-    "저축 통장과 동전 두 개가 오르내리며 재물운은 돈 습관의 참고라고 설명하는 장면",
-    "저축 목표 노트에 이번 주 가능한 금액을 적고 작은 동전들이 차례로 쌓이는 장면",
-    "저금통 옆 저축 목표 노트가 접히고 운보다 무료 사주 조회와 사이트 주소가 나타나는 장면"
+    "저녁 책상 위 여행 예산표와 교통 영수증, 숙박 영수증을 그려 숫자 칸이 차례로 채워지는 장면",
+    "여행 예산표 옆 작은 지출 그래프와 영수증이 움직이며 사주 재물운은 참고임을 설명하는 장면",
+    "교통비와 숙박비를 나눠 적은 예산표에 남은 금액을 계산해 표시하는 장면",
+    "여행 예산표와 영수증이 정리되고 운보다 무료 사주 조회와 사이트 주소가 나타나는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "저축 목표",
-        "얼마부터 할까?"
+        "여행 예산표",
+        "어디부터 써?"
       ],
-      "subline": "저금통과 동전 한 개",
+      "subline": "교통·숙박 영수증",
       "illustration": "notes"
     },
     {
       "headline": [
-        "사주 재물운",
+        "재물운은",
         "습관 참고예요"
       ],
-      "subline": "돈의 미래를 단정 안 해요",
+      "subline": "돈의 미래는 단정 안 해요",
       "illustration": "clock"
     },
     {
       "headline": [
-        "작은 금액부터",
-        "이번 주 적어봐"
+        "비용 나눠",
+        "남은 돈 계산"
       ],
-      "subline": "저축 목표 노트와 통장",
+      "subline": "예산표의 금액을 살펴봐요",
       "illustration": "message"
     },
     {
@@ -54,10 +55,9 @@
       "illustration": "rest"
     }
   ],
+  "targetDateKst": "20261101",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
-  "automatedPublicationAllowed": false,
-  "visualMotif": "savings-goal",
-  "targetDateKst": "20261031"
+  "automatedPublicationAllowed": false
 }

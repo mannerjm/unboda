@@ -2,6 +2,8 @@ name: UNBODA 4 daily Korean shorts build, independent ASR QA and publishable rel
 # A small standalone main-branch workflow can run independently of the unmerged
 # video-development PR; GitHub Actions sources are pinned to a single commit.
 # It DOES NOT create Metricool posts or change any social publishing switch.
+# Full rebuild after a test-branch visual-regression correction must re-pin source_sha.
+# Failed-job reruns alone reuse the earlier preflight SHA and cannot apply that fix.
 on:
   schedule:
     - cron: '13 8 * * *' # 17:13 KST, prepare the FOLLOWING day's four videos

@@ -205,6 +205,9 @@ test("independently transcribed Korean voice may replace human review without cl
  automated.videos[0].voiceAsrSimilarity=.63;
  assert.equal((await loadReleaseVideo({now,fetcher})).reason,
   "COMMERCIAL_VIDEO_RIGHTS_AND_VOICE_REVIEW_NOT_APPROVED");
+ automated.videos[0].voiceAsrSimilarity=.81;
+ assert.equal((await loadReleaseVideo({now,fetcher})).reason,
+  "COMMERCIAL_VIDEO_RIGHTS_AND_VOICE_REVIEW_NOT_APPROVED");
  automated.videos[0].voiceAsrSimilarity=.95;
  automated.videos[0].voiceAutomatedQaApproved=false;
  assert.equal((await loadReleaseVideo({now,fetcher})).reason,

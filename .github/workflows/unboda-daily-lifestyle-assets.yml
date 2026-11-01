@@ -1,0 +1,36 @@
+name: UNBODA original lifestyle media self-test
+on:
+  schedule:
+    - cron: '05 11 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/unboda-daily-lifestyle-assets.yml'
+permissions:
+  contents: read
+jobs:
+  original-image-verification:
+    if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install rendering dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+          python -m pip install --no-cache-dir 'Pillow==11.3.0'
+      - name: Create original topic-specific images for tomorrow
+        run: |
+          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          python scripts/daily-lifestyle/render.py --date "$DAY" --out original-images
+      - name: Retain validated originals in a private workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: unboda-first-party-images-qa
+          path: original-images/
+          if-no-files-found: error
+          retention-days: 1

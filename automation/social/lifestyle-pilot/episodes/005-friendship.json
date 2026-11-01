@@ -1,49 +1,49 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-compatibility-old-friend-greeting-20261101",
-  "topicKey": "saju-compatibility-old-friend-greeting-20261101",
+  "id": "unboda-saju-couple-lunch-menu-tastes-20261102",
+  "topicKey": "saju-couple-lunch-menu-tastes-20261102",
   "sajuCategory": "compatibility",
   "visualStyle": "relationship-coral",
-  "visualMotif": "message-timing",
-  "situation": "점심에 오랜 친구에게 안부 연락을 망설인 순간",
-  "hook": "오랜 친구에게 안부 연락, 보낼까?",
-  "theme": "사주 궁합과 오랜 친구에게 먼저 안부 전하기",
-  "thumbnailTitle": "오랜 친구에게 안부를 전할 때",
+  "visualMotif": "relationship-talk",
+  "situation": "점심에 연인과 메뉴 취향이 달라진 순간",
+  "hook": "점심에 연인과 메뉴 취향이 달라진 순간. 뭘 고를까요?",
+  "theme": "사주 궁합과 연인의 식사 취향 차이를 대화로 좁히는 방법",
+  "thumbnailTitle": "연인과 메뉴 취향이 다를 때",
   "narrationDraft": [
-    "점심에 오랜 친구에게 안부 연락을 망설인 순간. 보낼까요?",
-    "사주 궁합은 연락의 성향 차이를 보는 참고예요.",
-    "오랜 친구에게 요즘 잘 지내는지 묻는 한 줄을 적어 편한 때 보내 보세요.",
+    "점심에 연인과 메뉴 취향이 달라진 순간. 뭘 고를까요?",
+    "사주 궁합은 취향 차이를 살피는 참고예요.",
+    "서로 먹고 싶은 메뉴를 말해 보고 겹치는 선택지를 두 가지로 좁혀 보세요.",
     "운보다 무료 사주 조회로 관계를 살펴봐요."
   ],
   "visualConcepts": [
-    "점심 카페 테이블 위 휴대폰에 오랜 친구의 연락처가 뜨고 안부 메시지 입력창이 열리는 장면",
-    "휴대폰의 두 메시지 말풍선이 부드럽게 움직이며 사주 궁합은 참고임을 보여 주는 장면",
-    "휴대폰에 짧은 안부 한 줄을 적어 보내고 전송 화살표가 천천히 움직이는 장면",
-    "안부 메시지 말풍선 옆 운보다 무료 사주 조회와 사이트 주소가 나타나는 장면"
+    "점심 식탁에서 연인 두 사람이 서로 다른 메뉴판을 들고 말풍선을 주고받는 장면",
+    "연인 두 사람의 메뉴 취향 말풍선이 나란히 움직이며 사주 궁합은 참고임을 설명하는 장면",
+    "두 메뉴판에서 서로 먹을 수 있는 음식 두 가지에 체크 표시가 하나씩 생기는 장면",
+    "연인 두 사람과 메뉴판이 정리되며 운보다 무료 사주 조회와 https://unboda.kr 주소가 나타나는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "오랜 친구",
-        "연락 망설여?"
+        "연인과 메뉴",
+        "취향이 달라?"
       ],
-      "subline": "휴대폰의 안부 메시지",
+      "subline": "두 사람과 다른 메뉴판",
       "illustration": "message"
     },
     {
       "headline": [
-        "사주 궁합은",
+        "사주 궁합",
         "참고로 봐요"
       ],
-      "subline": "연락 방식은 서로 달라요",
+      "subline": "취향이 다를 수도 있어요",
       "illustration": "rest"
     },
     {
       "headline": [
-        "안부 한 줄",
-        "편할 때 보내"
+        "원하는 메뉴",
+        "서로 말해 봐"
       ],
-      "subline": "답장을 재촉하지 않아요",
+      "subline": "겹치는 메뉴 두 개 찾기",
       "illustration": "clock"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "notes"
     }
   ],
-  "targetDateKst": "20261101",
+  "targetDateKst": "20261102",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,

@@ -1,49 +1,49 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-money-trip-budget-first-20261101",
-  "topicKey": "saju-money-trip-budget-first-20261101",
+  "id": "unboda-saju-delivery-fee-spending-review-20261102",
+  "topicKey": "saju-delivery-fee-spending-review-20261102",
   "sajuCategory": "money",
   "visualStyle": "finance-emerald",
   "visualMotif": "expense-ledger",
-  "situation": "저녁에 여행 예산표를 처음 만드는 순간",
-  "hook": "여행 예산표, 어디부터 써야 할까?",
-  "theme": "사주 재물운과 여행 비용을 현실적으로 나누는 습관",
-  "thumbnailTitle": "여행 예산표를 처음 만든다면",
+  "situation": "저녁에 배달비 지출이 커진 걸 본 순간",
+  "hook": "저녁에 배달비 지출이 커진 걸 본 순간. 줄일까요?",
+  "theme": "사주 재물운과 배달비 지출을 점검하는 생활 습관",
+  "thumbnailTitle": "배달비 지출이 늘어난 저녁",
   "narrationDraft": [
-    "저녁에 여행 예산표를 처음 만드는 순간. 어디부터 쓸까요?",
-    "사주 재물운은 지출 습관을 보는 참고예요.",
-    "여행의 교통비와 숙박비를 나눠 적어 보고 남는 금액도 함께 계산해 보세요.",
+    "저녁에 배달비 지출이 커진 걸 본 순간. 줄일까요?",
+    "사주 재물운은 소비 습관을 살피는 참고예요.",
+    "배달 주문 내역을 적어 보고 이번 주에는 직접 먹을 메뉴도 함께 정해 보세요.",
     "운보다 무료 사주 조회로 재물 성향을 봐요."
   ],
   "visualConcepts": [
-    "저녁 책상 위 여행 예산표와 교통 영수증, 숙박 영수증을 그려 숫자 칸이 차례로 채워지는 장면",
-    "여행 예산표 옆 작은 지출 그래프와 영수증이 움직이며 사주 재물운은 참고임을 설명하는 장면",
-    "교통비와 숙박비를 나눠 적은 예산표에 남은 금액을 계산해 표시하는 장면",
-    "여행 예산표와 영수증이 정리되고 운보다 무료 사주 조회와 사이트 주소가 나타나는 장면"
+    "저녁 책상 위 배달 주문 영수증과 지출 가계부를 그리고 배달비 숫자가 차례로 나타나는 장면",
+    "배달비 영수증과 지출 그래프가 움직이며 사주 재물운은 소비 습관의 참고임을 설명하는 장면",
+    "배달 주문 내역을 가계부에 적고 직접 먹을 메뉴 한 칸에 체크 표시를 추가하는 장면",
+    "배달비 영수증과 가계부가 정리되며 운보다 무료 사주 조회와 https://unboda.kr 주소가 나타나는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "여행 예산표",
-        "어디부터 써?"
+        "배달비 지출",
+        "왜 늘었지?"
       ],
-      "subline": "교통·숙박 영수증",
+      "subline": "배달 영수증과 가계부",
       "illustration": "notes"
     },
     {
       "headline": [
         "재물운은",
-        "습관 참고예요"
+        "습관 참고"
       ],
-      "subline": "돈의 미래는 단정 안 해요",
+      "subline": "미래 수익을 단정 안 해요",
       "illustration": "clock"
     },
     {
       "headline": [
-        "비용 나눠",
-        "남은 돈 계산"
+        "주문 내역",
+        "한 번 적어"
       ],
-      "subline": "예산표의 금액을 살펴봐요",
+      "subline": "직접 먹을 메뉴도 정해요",
       "illustration": "message"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "rest"
     }
   ],
-  "targetDateKst": "20261101",
+  "targetDateKst": "20261102",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,

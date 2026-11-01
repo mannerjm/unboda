@@ -105,7 +105,7 @@ async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
    (video.voiceAutomatedQaApproved===true&&
     typeof video.voiceAsrSimilarity==="number"&&
     Number.isFinite(video.voiceAsrSimilarity)&&
-    video.voiceAsrSimilarity>=0.64&&video.voiceAsrSimilarity<=1);
+    video.voiceAsrSimilarity>=0.82&&video.voiceAsrSimilarity<=1);
  if(video.socialPublishingApproved!==true||
     video.licenseReviewed!==true||!speechApproved)
   return {state:"BLOCKED",reason:"COMMERCIAL_VIDEO_RIGHTS_AND_VOICE_REVIEW_NOT_APPROVED",slot};

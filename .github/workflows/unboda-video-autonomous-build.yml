@@ -72,6 +72,10 @@ jobs:
               typeof x.narrationDraft?.[2]!=='string'||
               x.narrationDraft?.some(line=>typeof line!=='string'||line.replace(/\s/g,'').length>32)||
               x.narrationDraft[2].replace(/\s/g,'').length<28||
+              // A short second/fourth spoken scene produced >4s silent spans on 2026-11-02.
+              // AVOID_4S_VOICE_GAPS: fail early before TTS; final waveform QA still decides.
+              [1,3].some(i=>typeof x.narrationDraft?.[i]!=='string'||
+                x.narrationDraft[i].replace(/\s/g,'').length<26)||
               x.destination!=='https://unboda.kr'||
               !x.narrationDraft?.[3]?.includes('운보다 무료 사주 조회'))
              throw Error('NO_FRESH_NEXT_DAY_STORYBOARD:'+file);

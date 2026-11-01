@@ -37,7 +37,9 @@ class TestSajuBrandVisuals(unittest.TestCase):
    self.assertGreater(len(b["visualMotif"]),8)
   original=draw_frame(self.films[3],0,0.7).crop((198,594,522,867)).tobytes()
   other=copy.deepcopy(self.films[3])
-  other["visualMotif"]="expense-ledger"
+  other["visualMotif"]="subscription-billing"
+  self.assertNotEqual(other["visualMotif"],self.films[3]["visualMotif"],
+   "The anti-generic visual test must compare genuinely different motifs")
   generic=draw_frame(other,0,0.7).crop((198,594,522,867)).tobytes()
   self.assertNotEqual(hashlib.sha256(original).hexdigest(),hashlib.sha256(generic).hexdigest(),
    "Same colored panel cannot disguise an unrelated topic graphic")

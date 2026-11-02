@@ -219,7 +219,7 @@ def build(date,out,brief_path=None,history_dir=None):
  cards=[make(date,h,i,out,stories[i]) for i,h in enumerate(SLOTS)]
  if len(set(x["sha256"] for x in cards))!=7:raise RuntimeError("REPEATED_IMAGE_SHA")
  if len(set(x["visualMotif"] for x in cards))!=7:raise RuntimeError("REPEATED_VISUAL_SUBJECT")
- m={"schemaVersion":1,"dateKst":date.isoformat(),"brand":"UNBODA",
+ m={"schemaVersion":2,"dateKst":date.isoformat(),"brand":"UNBODA",
   "source":"first-party-procedural-illustration","notPhotographs":True,
   "humanVisualReviewed":False,"automatedImageLayoutQa":True,
   "rightsVerifiedWithoutPaidProvider":True,"imagesExpected":7,

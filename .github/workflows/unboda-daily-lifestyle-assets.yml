@@ -23,6 +23,10 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq fonts-noto-cjk
           python -m pip install --no-cache-dir 'Pillow==11.3.0'
+      - name: Run daily storyboard and duplicate-protection unit tests
+        run: |
+          python -m py_compile scripts/daily-lifestyle/render.py
+          python -m unittest discover -s scripts/daily-lifestyle -p 'test_*.py' -v
       - name: Fetch tomorrow's new editorial briefs and previous 90 days
         shell: bash
         run: |

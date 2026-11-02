@@ -23,10 +23,35 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq fonts-noto-cjk
           python -m pip install --no-cache-dir 'Pillow==11.3.0'
+      - name: Fetch tomorrow's new editorial briefs and previous 90 days
+        shell: bash
+        run: |
+          set -euo pipefail
+          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          STAMP="${DAY//-/}"
+          git fetch --no-tags --depth=1 origin test/social-automation-safety-poc-20261023
+          mkdir -p .daily-lifestyle-briefs .daily-lifestyle-history
+          git show "FETCH_HEAD:automation/social/lifestyle-pilot/daily-images/$STAMP.json" > .daily-lifestyle-briefs/next.json
+          python - "$DAY" <<'PY'
+          import datetime as dt,pathlib,subprocess,sys
+          today=dt.date.fromisoformat(sys.argv[1])
+          paths=subprocess.check_output(["git","ls-tree","-r","--name-only","FETCH_HEAD",
+             "automation/social/lifestyle-pilot/daily-images/"],text=True).splitlines()
+          for path in paths:
+            filename=path.rsplit("/",1)[-1]
+            if not(filename.endswith(".json") and len(filename)==13):continue
+            try:date=dt.date.fromisoformat(filename[:4]+"-"+filename[4:6]+"-"+filename[6:8])
+            except ValueError:continue
+            if not 0<(today-date).days<=90:continue
+            content=subprocess.check_output(["git","show","FETCH_HEAD:"+path])
+            (pathlib.Path(".daily-lifestyle-history")/filename).write_bytes(content)
+          print("UNBODA_DAILY_EDITORIAL_HISTORY_FILES",len(list(pathlib.Path(".daily-lifestyle-history").glob("*.json"))))
+          PY
       - name: Create original topic-specific images for tomorrow
         run: |
           DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
-          python scripts/daily-lifestyle/render.py --date "$DAY" --out original-images
+          python scripts/daily-lifestyle/render.py --date "$DAY" --out original-images \
+            --brief .daily-lifestyle-briefs/next.json --history-dir .daily-lifestyle-history
       - name: Retain validated originals in a private workflow artifact
         uses: actions/upload-artifact@v4
         with:
@@ -43,7 +68,7 @@ jobs:
             const crypto = require('node:crypto');
             const p = 'original-images/';
             const m = JSON.parse(fs.readFileSync(p+'manifest.json','utf8'));
-            if (m.schemaVersion !== 1 || m.brand !== 'UNBODA' ||
+            if (m.schemaVersion !== 2 || m.brand !== 'UNBODA' ||
                 m.notPhotographs !== true || m.humanVisualReviewed !== false ||
                 m.rightsVerifiedWithoutPaidProvider !== true ||
                 m.imagesExpected !== 7 || m.cards.length !== 7) {
@@ -56,7 +81,8 @@ jobs:
             const slots=['01','04','10','13','16','19','22'];
             if(JSON.stringify(m.slotHoursKst)!==JSON.stringify(slots) ||
                new Set(m.cards.map(c=>c.sha256)).size !== 7 ||
-               new Set(m.cards.map(c=>c.visualMotif)).size !== 7) {
+               new Set(m.cards.map(c=>c.visualMotif)).size !== 7 ||
+               new Set(m.cards.map(c=>c.topicKey)).size !== 7) {
               throw Error('LIFESTYLE_SLOT_OR_MOTIF_REPEATED');
             }
             for (const c of m.cards) {

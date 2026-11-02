@@ -41,7 +41,7 @@ function postBody(network,mediaId,video){
  const dateTime=video.slot.slotKst;
  const b={publicationDate:{dateTime,timezone:"Asia/Seoul"},
   text:video.caption+"\n\n#운보다 #생활꿀팁 #shorts",providers:[{network}],
-  media:[{mediaId:String(mediaId)}],autoPublish:true,draft:false,
+  media:[typeof mediaId==="string"&&mediaId.startsWith("https://")?mediaId:{mediaId:String(mediaId)}],autoPublish:true,draft:false,
   saveExternalMediaFiles:true};
  if(network==="instagram")b.instagramData={type:"REEL",autoPublish:true,
    showReelOnFeed:true,isAiGenerated:true};
@@ -53,10 +53,10 @@ function postBody(network,mediaId,video){
    commercialContentThirdParty:false,isAigc:true};
  return b;
 }
-async function request(fetcher,url,token,{method="GET",body}={}){
+async function request(fetcher,url,token,{method="GET",body,accept="application/json",timeoutMs=25000}={}){
  return await fetcher(url,{method,redirect:"error",cache:"no-store",
-  signal:AbortSignal.timeout(25000),
-  headers:{"X-Mc-Auth":token,Accept:"application/json",
+  signal:AbortSignal.timeout(timeoutMs),
+  headers:{"X-Mc-Auth":token,Accept:accept,
    ...(body?{"Content-Type":"application/json"}:{})},
   ...(body?{body:JSON.stringify(body)}:{})});
 }
@@ -89,17 +89,38 @@ async function postOne({fetcher,token,video,network,reserveSlot}){
  if(listedAtSlot(existing,network,video))
   return {state:"EXISTING_PROVIDER_SLOT_NOT_DUPLICATED",network,scheduled:false};
  const normalized=new URL("/api/actions/normalize/image/url",METRICOOL);
+ // The Metricool normalize endpoint accepts a public MP4 URL; it requires
+ // userId and folder=PLANNER, and may return a *plain-text hosted URL*.
+ // Other endpoints use JSON; do not assume the normalize response is JSON.
  normalized.searchParams.set("url",video.videoUrl);
+ normalized.searchParams.set("userId",USER);
+ normalized.searchParams.set("blogId",BRAND);
+ normalized.searchParams.set("folder","PLANNER");
  let mediaId;
  try{
-  const response=await request(fetcher,normalized.toString(),token);
-  if(!response.ok)return fail("METRICOOL_MP4_NORMALIZATION_FAILED",{network});
-  const data=await response.json();
-  mediaId=data?.mediaId??data?.data?.mediaId??data?.id??data?.data?.id;
- }catch{return fail("METRICOOL_MP4_MEDIA_ID_MISSING",{network})}
- if(!(typeof mediaId==="string"||typeof mediaId==="number")||
-    String(mediaId).length<4||String(mediaId).length>180)
-   return fail("METRICOOL_NORMALIZATION_DID_NOT_RETURN_VIDEO_ID",{network});
+  const response=await request(fetcher,normalized.toString(),token,
+   {accept:"*/*",timeoutMs:90000});
+  if(!response.ok)return fail("METRICOOL_MP4_NORMALIZATION_FAILED",{
+   network,httpStatus:response.status});
+  const raw=typeof response.text==="function"?await response.text():
+   JSON.stringify(await response.json());
+  if(raw.length>4096)throw Error("MEDIA_REFERENCE_TOO_LARGE");
+  let data;
+  try{data=JSON.parse(raw)}catch{data=raw.trim()}
+  mediaId=typeof data==="string"?data:
+    data?.mediaId??data?.data?.mediaId??data?.id??data?.data?.id??
+    data?.url??data?.data?.url;
+ }catch{return fail("METRICOOL_MP4_MEDIA_REFERENCE_UNREADABLE",{network})}
+ if(typeof mediaId==="string"&&mediaId.startsWith("https://")){
+  try{
+   const u=new URL(mediaId);
+   if(u.username||u.password||u.hostname==="localhost"||
+     /^([0-9.]+|.*\\.local)$/.test(u.hostname))throw Error("UNSAFE_URL");
+  }catch{return fail("METRICOOL_NORMALIZED_MEDIA_URL_UNSAFE",{network})}
+ }else if(!(typeof mediaId==="string"||typeof mediaId==="number")||
+     String(mediaId).length<4||String(mediaId).length>180){
+  return fail("METRICOOL_NORMALIZATION_DID_NOT_RETURN_VIDEO_ID",{network});
+ }
  let claim;
  try{claim=await reserveSlot({
   brandId:BRAND,network,

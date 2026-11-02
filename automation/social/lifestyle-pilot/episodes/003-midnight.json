@@ -1,49 +1,49 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-declined-favor-reflection-20261102",
-  "topicKey": "saju-declined-favor-reflection-20261102",
+  "id": "unboda-saju-praise-awkward-feeling-20261103",
+  "topicKey": "saju-praise-awkward-feeling-20261103",
   "sajuCategory": "self-understanding",
   "visualStyle": "midnight-indigo",
   "visualMotif": "mood-journal",
-  "situation": "밤에 거절한 부탁이 마음에 걸린 순간",
-  "hook": "밤에 거절한 부탁이 마음에 걸린 순간. 괜찮을까요?",
-  "theme": "사주 자기이해와 거절한 부탁을 돌아보는 습관",
-  "thumbnailTitle": "거절한 부탁이 마음에 남을 때",
+  "situation": "밤에 칭찬받고도 마음이 어색한 순간",
+  "hook": "밤에 칭찬받고도 마음이 어색한 순간. 왜 그럴까요?",
+  "theme": "사주 자기이해와 칭찬을 받아들이는 감정 표현 돌아보기",
+  "thumbnailTitle": "칭찬받아도 어색한 밤",
   "narrationDraft": [
-    "밤에 거절한 부탁이 마음에 걸린 순간. 괜찮을까요?",
-    "사주는 내가 어떤 상황에서 마음이 흔들리는지 살펴보는 참고예요.",
-    "부탁을 거절한 이유를 적어 보고 내게 필요한 휴식 시간을 확인해 보세요.",
-    "운보다 무료 사주 조회로 내 성향과 마음의 반응을 차근차근 살펴봐요."
+    "밤에 칭찬받고도 마음이 어색한 순간. 왜 그럴까요?",
+    "사주는 칭찬을 받아들일 때의 마음과 나의 반응을 돌아보는 참고예요.",
+    "오늘 들은 칭찬을 일기에 적고 내 마음이 어색한 이유를 한 가지 생각해 보세요.",
+    "운보다 무료 사주 조회로 내 감정 표현 습관도 차분히 살펴봐요."
   ],
   "visualConcepts": [
-    "밤 책상 위 거절한 부탁을 적은 감정 일기 노트와 펜을 그리며 마음 표시가 천천히 나타나는 장면",
-    "감정 일기 노트의 마음 단어에 동그라미가 그려지고 사주가 참고 관점임을 보여 주는 장면",
-    "거절한 이유와 휴식 시간을 노트 두 칸에 적고 펜과 체크 표시가 하나씩 움직이는 장면",
-    "감정 일기 노트가 닫히고 운보다 무료 사주 조회와 https://unboda.kr 주소가 나타나는 장면"
+    "밤 책상 위 칭찬받은 말을 적는 감정 일기 노트와 펜을 실제로 그리고 작은 마음 표시가 서서히 움직이는 장면",
+    "감정 일기 노트에 칭찬 문장과 나의 반응을 두 칸으로 적으며 펜 끝과 표시가 천천히 이동하는 장면",
+    "감정 일기 노트에 칭찬 한 줄을 적고 어색했던 이유에 체크 표시를 하나씩 추가하는 장면",
+    "감정 일기 노트가 덮이며 운보다 무료 사주 조회와 https://unboda.kr 주소가 나타나는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "거절한 부탁",
-        "마음에 남아?"
+        "칭찬받고도",
+        "마음이 어색?"
       ],
-      "subline": "펜과 감정 일기 노트",
+      "subline": "칭찬 메모와 감정 일기",
       "illustration": "rest"
     },
     {
       "headline": [
         "사주로 보는",
-        "마음의 기질"
+        "감정 반응"
       ],
-      "subline": "사주는 미래를 정하지 않아요",
+      "subline": "나의 반응을 살피는 참고",
       "illustration": "clock"
     },
     {
       "headline": [
-        "거절한 이유",
-        "노트에 적어"
+        "칭찬 한 줄",
+        "일기에 적어"
       ],
-      "subline": "내 휴식 시간도 확인해요",
+      "subline": "어색한 이유도 생각해요",
       "illustration": "notes"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "message"
     }
   ],
-  "targetDateKst": "20261102",
+  "targetDateKst": "20261103",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,

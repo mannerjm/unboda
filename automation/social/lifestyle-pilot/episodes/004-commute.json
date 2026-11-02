@@ -1,49 +1,49 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-meeting-number-error-20261102",
-  "topicKey": "saju-meeting-number-error-20261102",
+  "id": "unboda-saju-handover-missing-item-20261103",
+  "topicKey": "saju-handover-missing-item-20261103",
   "sajuCategory": "career",
   "visualStyle": "commute-sunrise",
-  "visualMotif": "meeting-presentation",
-  "situation": "아침 회의 자료에서 숫자 오류를 찾은 순간",
-  "hook": "아침 회의 자료에서 숫자 오류를 찾은 순간. 말할까요?",
-  "theme": "사주 직업 성향과 회의 자료의 숫자 오류를 바로잡는 방법",
-  "thumbnailTitle": "회의 자료 숫자가 다를 때",
+  "visualMotif": "work-checklist",
+  "situation": "아침에 업무 인수인계가 빠진 순간",
+  "hook": "아침에 업무 인수인계가 빠진 순간. 뭘 확인할까요?",
+  "theme": "사주 직업 성향과 빠진 업무 인수인계를 확인하는 실천",
+  "thumbnailTitle": "업무 인수인계가 빠졌을 때",
   "narrationDraft": [
-    "아침 회의 자료에서 숫자 오류를 찾은 순간. 말할까요?",
-    "사주 직업 성향은 내가 일하는 방식을 돌아보는 데 도움을 주는 참고예요.",
-    "오류 숫자를 표시하고 원본 자료를 확인한 뒤 담당자에게 차분히 알려 보세요.",
-    "운보다 무료 사주 조회로 나의 일하는 방식과 직업 성향을 살펴봐요."
+    "아침에 업무 인수인계가 빠진 순간. 뭘 확인할까요?",
+    "사주 직업 성향은 일이 꼬일 때 내가 확인하는 방식을 돌아보는 참고예요.",
+    "빠진 업무를 노트에 적어 보고 담당자와 마감 시간을 함께 확인해 보세요.",
+    "운보다 무료 사주 조회로 나의 일하는 방식도 천천히 살펴보세요."
   ],
   "visualConcepts": [
-    "회의 발표 스크린에 서로 다른 두 숫자와 그래프가 나타나고 오류 숫자에 표시가 움직이는 장면",
-    "회의 자료 스크린의 숫자와 그래프를 나란히 보여 주며 사주 직업 성향은 참고임을 설명하는 장면",
-    "원본 자료 노트의 정확한 숫자를 확인하고 발표 스크린의 잘못된 수치를 수정하는 장면",
-    "회의 발표 화면이 정리되고 운보다 무료 사주 조회와 https://unboda.kr 주소가 나타나는 장면"
+    "아침 사무실 책상 위 업무 인수인계 체크리스트와 노트북을 실제로 그려 빈 항목 표시가 깜박이는 장면",
+    "업무 체크리스트의 빈 칸과 완료 칸을 나란히 놓고 커서가 항목 사이를 천천히 이동하는 장면",
+    "노트에 빠진 업무를 적고 담당자와 마감 시간 칸에 체크 표시가 차례로 나타나는 장면",
+    "업무 체크리스트가 정돈되고 운보다 무료 사주 조회와 https://unboda.kr 주소가 나타나는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "회의 자료",
-        "숫자가 달라?"
+        "업무 인수인계",
+        "뭐가 빠졌지?"
       ],
-      "subline": "스크린과 숫자 그래프",
+      "subline": "노트북과 업무 체크리스트",
       "illustration": "clock"
     },
     {
       "headline": [
-        "직업 성향",
-        "참고로 봐요"
+        "사주 직업",
+        "성향 참고"
       ],
-      "subline": "결과를 단정하지 않아요",
+      "subline": "일하는 방식의 참고예요",
       "illustration": "message"
     },
     {
       "headline": [
-        "오류 숫자",
-        "원본 확인해"
+        "빠진 업무",
+        "노트에 적어"
       ],
-      "subline": "담당자에게 차분히 알려요",
+      "subline": "담당자와 마감도 확인",
       "illustration": "notes"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "rest"
     }
   ],
-  "targetDateKst": "20261102",
+  "targetDateKst": "20261103",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,

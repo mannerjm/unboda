@@ -1,49 +1,49 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-couple-lunch-menu-tastes-20261102",
-  "topicKey": "saju-couple-lunch-menu-tastes-20261102",
+  "id": "unboda-saju-coworker-shift-time-20261103",
+  "topicKey": "saju-coworker-shift-time-20261103",
   "sajuCategory": "compatibility",
   "visualStyle": "relationship-coral",
-  "visualMotif": "relationship-talk",
-  "situation": "점심에 연인과 메뉴 취향이 달라진 순간",
-  "hook": "점심에 연인과 메뉴 취향이 달라진 순간. 뭘 고를까요?",
-  "theme": "사주 궁합과 연인의 식사 취향 차이를 대화로 좁히는 방법",
-  "thumbnailTitle": "연인과 메뉴 취향이 다를 때",
+  "visualMotif": "shared-calendar",
+  "situation": "점심에 동료와 교대 시간이 엇갈린 순간",
+  "hook": "점심에 동료와 교대 시간이 엇갈린 순간. 어떻게 맞출까요?",
+  "theme": "사주 궁합을 참고하며 동료와 교대 시간을 조율하는 대화",
+  "thumbnailTitle": "동료와 교대 시간이 다를 때",
   "narrationDraft": [
-    "점심에 연인과 메뉴 취향이 달라진 순간. 뭘 고를까요?",
-    "사주 궁합은 서로 다른 취향을 이해하고 대화하는 데 쓰는 참고예요.",
-    "서로 먹고 싶은 메뉴를 적어 보고 겹치는 선택지를 두 가지로 좁혀 보세요.",
-    "운보다 무료 사주 조회로 우리 대화 방식과 서로의 성향을 살펴봐요."
+    "점심에 동료와 교대 시간이 엇갈린 순간. 어떻게 맞출까요?",
+    "사주 궁합은 함께 일할 때 서로 다른 시간 감각을 이해하는 참고예요.",
+    "각자 가능한 교대 시간을 달력에 적고 겹치는 구간을 함께 비교해 보세요.",
+    "운보다 무료 사주 조회로 서로의 소통 방식도 차분히 살펴봐요."
   ],
   "visualConcepts": [
-    "점심 식탁에서 연인 두 사람이 서로 다른 메뉴판을 들고 말풍선을 주고받는 장면",
-    "연인 두 사람의 메뉴 취향 말풍선이 나란히 움직이며 사주 궁합은 참고임을 설명하는 장면",
-    "두 메뉴판에서 서로 먹을 수 있는 음식 두 가지에 체크 표시가 하나씩 생기는 장면",
-    "연인 두 사람과 메뉴판이 정리되며 운보다 무료 사주 조회와 https://unboda.kr 주소가 나타나는 장면"
+    "점심 휴게실에서 동료 두 사람이 교대 시간표와 공유 달력을 보고 서로 다른 시간 칸이 옆으로 움직이는 장면",
+    "공유 달력에 두 사람의 교대 시간이 서로 다른 색으로 나타나고 날짜 칸이 천천히 이동하는 장면",
+    "각자 가능한 교대 시간을 달력에 적은 뒤 겹치는 시간 구간에 체크 표시가 생기는 장면",
+    "공유 달력과 교대 시간표가 정리되며 운보다 무료 사주 조회와 https://unboda.kr 주소가 나타나는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "연인과 메뉴",
-        "취향이 달라?"
+        "교대 시간",
+        "서로 달라?"
       ],
-      "subline": "두 사람과 다른 메뉴판",
+      "subline": "교대표와 공유 달력",
       "illustration": "message"
     },
     {
       "headline": [
         "사주 궁합",
-        "참고로 봐요"
+        "서로 이해해"
       ],
-      "subline": "취향이 다를 수도 있어요",
+      "subline": "시간 감각은 다를 수 있어요",
       "illustration": "rest"
     },
     {
       "headline": [
-        "원하는 메뉴",
-        "서로 말해 봐"
+        "가능한 시간",
+        "달력에 적어"
       ],
-      "subline": "겹치는 메뉴 두 개 찾기",
+      "subline": "겹치는 구간을 비교해요",
       "illustration": "clock"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "notes"
     }
   ],
-  "targetDateKst": "20261102",
+  "targetDateKst": "20261103",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,

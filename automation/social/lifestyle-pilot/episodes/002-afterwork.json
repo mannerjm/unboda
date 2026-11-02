@@ -1,49 +1,49 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-delivery-fee-spending-review-20261102",
-  "topicKey": "saju-delivery-fee-spending-review-20261102",
+  "id": "unboda-saju-group-dues-reconcile-20261103",
+  "topicKey": "saju-group-dues-reconcile-20261103",
   "sajuCategory": "money",
   "visualStyle": "finance-emerald",
   "visualMotif": "expense-ledger",
-  "situation": "저녁에 배달비 지출이 커진 걸 본 순간",
-  "hook": "저녁에 배달비 지출이 커진 걸 본 순간. 줄일까요?",
-  "theme": "사주 재물운과 배달비 지출을 점검하는 생활 습관",
-  "thumbnailTitle": "배달비 지출이 늘어난 저녁",
+  "situation": "저녁에 모임 회비 지출을 정산하는 순간",
+  "hook": "저녁에 모임 회비 지출을 정산하는 순간. 어떻게 나눌까요?",
+  "theme": "사주 재물운을 참고하며 모임 회비 영수증을 공정하게 정산하기",
+  "thumbnailTitle": "모임 회비 정산이 헷갈릴 때",
   "narrationDraft": [
-    "저녁에 배달비 지출이 커진 걸 본 순간. 줄일까요?",
-    "사주 재물운은 내가 돈을 쓰는 습관과 기준을 살펴보는 참고예요.",
-    "배달 주문 내역을 적어 보고 이번 주에는 직접 먹을 메뉴도 함께 정해 보세요.",
-    "운보다 무료 사주 조회로 평소 소비 습관과 재물 성향을 함께 살펴봐요."
+    "저녁에 모임 회비 지출을 정산하는 순간. 어떻게 나눌까요?",
+    "사주 재물운은 모임 돈을 정산할 때 내 소비 기준을 살펴보는 참고예요.",
+    "영수증을 모아 지출을 기록하고 참석자별 금액을 한 번 더 계산해 보세요.",
+    "운보다 무료 사주 조회로 평소 지출을 보는 태도도 함께 돌아봐요."
   ],
   "visualConcepts": [
-    "저녁 책상 위 배달 주문 영수증과 지출 가계부를 그리고 배달비 숫자가 차례로 나타나는 장면",
-    "배달비 영수증과 지출 그래프가 움직이며 사주 재물운은 소비 습관의 참고임을 설명하는 장면",
-    "배달 주문 내역을 가계부에 적고 직접 먹을 메뉴 한 칸에 체크 표시를 추가하는 장면",
-    "배달비 영수증과 가계부가 정리되며 운보다 무료 사주 조회와 https://unboda.kr 주소가 나타나는 장면"
+    "저녁 테이블 위 모임 회비 영수증과 지출 가계부를 실제로 그려 금액 숫자가 한 칸씩 나타나는 장면",
+    "모임 영수증의 지출 항목이 가계부 표로 옮겨지며 펜과 계산 표시가 움직이는 장면",
+    "참석자별 정산 금액을 가계부에 기록하고 영수증 합계에 확인 표시가 차례로 생기는 장면",
+    "회비 영수증과 가계부가 정돈되며 운보다 무료 사주 조회와 https://unboda.kr 주소가 나타나는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "배달비 지출",
-        "왜 늘었지?"
+        "회비 지출",
+        "정산할 때"
       ],
-      "subline": "배달 영수증과 가계부",
+      "subline": "영수증과 회비 가계부",
       "illustration": "notes"
     },
     {
       "headline": [
-        "재물운은",
-        "습관 참고"
+        "사주 재물운",
+        "참고로 봐요"
       ],
-      "subline": "미래 수익을 단정 안 해요",
+      "subline": "돈의 결과를 단정 안 해요",
       "illustration": "clock"
     },
     {
       "headline": [
-        "주문 내역",
-        "한 번 적어"
+        "지출 내역",
+        "한 번 계산"
       ],
-      "subline": "직접 먹을 메뉴도 정해요",
+      "subline": "참석자별 금액을 확인해요",
       "illustration": "message"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "rest"
     }
   ],
-  "targetDateKst": "20261102",
+  "targetDateKst": "20261103",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,

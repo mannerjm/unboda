@@ -3,12 +3,57 @@ on:
   schedule:
     - cron: '05 11 * * *'
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/daily-lifestyle/**'
+      - '.github/workflows/unboda-daily-lifestyle-assets.yml'
   push:
     paths:
       - '.github/workflows/unboda-daily-lifestyle-assets.yml'
 permissions:
   contents: write
 jobs:
+  test-fresh-editorial-no-sns-post:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install offline Korean fonts and Pillow
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+          python -m pip install --no-cache-dir 'Pillow==11.3.0'
+      - name: Test editorial schema and 90-day novelty guards
+        run: |
+          python -m unittest discover -s scripts/daily-lifestyle -p 'test_*.py' -v
+      - name: Render 11/4 seven new subjects from an approved development brief
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin test/social-automation-safety-poc-20261023
+          git show FETCH_HEAD:automation/social/lifestyle-pilot/daily-images/20261104.json > /tmp/new-lifestyle-brief.json
+          python scripts/daily-lifestyle/render.py --date 2026-11-04 --out /tmp/qa-lifestyle-20261104 \
+            --brief /tmp/new-lifestyle-brief.json
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import json
+          root=Path('/tmp/qa-lifestyle-20261104')
+          m=json.loads((root/'manifest.json').read_text())
+          assert m['dateKst']=='2026-11-04' and m['schemaVersion']==2
+          assert len(m['cards'])==7 and len({x['sha256'] for x in m['cards']})==7
+          assert len({x['topicKey'] for x in m['cards']})==7
+          for card in m['cards']:
+            with Image.open(root/card['name']) as im:
+              assert im.size == (1080,1350) and im.format == 'PNG'
+          print('SEVEN_ORIGINAL_EDITIONAL_IMAGES_RENDER_AND_TECHNICAL_QA_PASSED')
+          PY
   original-image-verification:
     if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest

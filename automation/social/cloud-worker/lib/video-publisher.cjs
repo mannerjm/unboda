@@ -203,9 +203,19 @@ function makeVideoHandler({env=process.env,fetcher=fetch,reserveSlot,reserveSour
   }
   const run=await runVideoPublishCron({env,fetcher,reserveSlot,reserveSource,now:now()});
   // Only identifiers and aggregate results; never log authorization headers.
+  // Safe diagnostic fields only: never log tokens, original captions, names or media URLs.
+  const providerDiagnostics=Array.isArray(run.body.providerResults)?
+    run.body.providerResults.map(x=>({
+      network:["instagram","facebook","youtube","tiktok"].includes(x.network)?x.network:"unknown",
+      state:x.state==="VIDEO_PUBLISH_BLOCKED"?"BLOCKED":x.state,
+      reason:typeof x.reason==="string"&&/^[A-Z0-9_]{4,100}$/.test(x.reason)?x.reason:null,
+      httpStatus:Number.isInteger(x.httpStatus)?x.httpStatus:null
+    })):[];
   console.info("unboda_video_publish_cron",JSON.stringify({
-   state:run.body.state,scheduledCount:run.body.scheduledCount??0,
-   blockedCount:run.body.blockedCount??null,slot:run.body.expectedTimeKst??null}));
+   state:run.body.state,reason:typeof run.body.reason==="string"?run.body.reason:null,
+   scheduledCount:run.body.scheduledCount??0,
+   blockedCount:run.body.blockedCount??null,slot:run.body.expectedTimeKst??null,
+   providerDiagnostics}));
   res.statusCode=run.http;
   res.setHeader("Content-Type","application/json; charset=utf-8");
   return res.end(JSON.stringify(run.body));

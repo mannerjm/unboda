@@ -94,3 +94,35 @@ jobs:
             --notes "Replacement source for 2026-11-04 only; seven visually re-composed original illustrations, all image SHA and pixel-difference checks passed. Prior release retained. NOT SNS published."
           test "$(gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length')" -eq 8
           echo "NOV04_CORRECTED_ORIGINAL_RELEASE_APPROVED: $TAG"
+      - name: Independently re-download the published corrected release for integrity QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p verified-corrected-originals
+          gh release download unboda-lifestyle-20261104-art2 \
+            --repo mannerjm/unboda --dir verified-corrected-originals
+          python - <<'PY'
+          import hashlib,json,pathlib
+          from PIL import Image
+          root=pathlib.Path('verified-corrected-originals')
+          m=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          assert m['brand']=='UNBODA' and m['dateKst']=='2026-11-04'
+          assert m['schemaVersion']==2 and len(m['cards'])==7
+          assert len(list(root.glob('*.png')))==7
+          assert len({c['sha256'] for c in m['cards']})==7
+          for c in m['cards']:
+            p=root/c['name']
+            data=p.read_bytes()
+            assert len(data)==c['bytes']
+            assert hashlib.sha256(data).hexdigest()==c['sha256']
+            with Image.open(p) as im:
+              assert im.size==(1080,1350) and im.format=='PNG'
+          print('PUBLIC_CORRECTED_RELEASE_7_PNG_INDEPENDENT_SHA_READBACK_SUCCESS')
+          PY
+      - name: Export re-downloaded QA originals for user-authorized visual inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: unboda-20261104-corrected-media-independent-qa
+          path: verified-corrected-originals/
+          if-no-files-found: error
+          retention-days: 1

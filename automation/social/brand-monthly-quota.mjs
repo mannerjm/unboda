@@ -10,7 +10,7 @@ export function forecastBrandMonthlyPosts({
 }={}){
  const integers=[daysInMonth,textOriginalsPerDay,zodiacOriginalsPerDay,videoOriginalsPerDay];
  if(!integers.every(Number.isInteger)||daysInMonth<28||daysInMonth>31||
-   textOriginalsPerDay<0||textOriginalsPerDay>12||videoOriginalsPerDay<0||videoOriginalsPerDay>8)
+   textOriginalsPerDay<0||textOriginalsPerDay>12||zodiacOriginalsPerDay<0||zodiacOriginalsPerDay>3||videoOriginalsPerDay<0||videoOriginalsPerDay>8)
   return {state:"BLOCKED",reason:"INVALID_PUBLICATION_INPUT"};
  if(!Number.isInteger(textChannelsPerOriginal)||textChannelsPerOriginal<0||
   !Number.isInteger(videoChannelsPerOriginal)||videoChannelsPerOriginal<0||

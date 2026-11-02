@@ -12,6 +12,9 @@ on:
       - '.github/workflows/unboda-daily-lifestyle-assets.yml'
 permissions:
   contents: write
+concurrency:
+  group: unboda-lifestyle-source-release-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   test-fresh-editorial-no-sns-post:
     if: github.event_name == 'pull_request'
@@ -128,7 +131,7 @@ jobs:
         if: steps.existing.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: unboda-first-party-images-qa
+          name: unboda-first-party-images-qa-day-${{ matrix.daysAhead }}
           path: original-images/
           if-no-files-found: error
           retention-days: 1

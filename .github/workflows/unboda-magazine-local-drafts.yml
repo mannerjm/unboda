@@ -63,7 +63,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
-      - name: Skip while any magazine PR awaits human review
+      - name: Reserve draft PR topics; cap the unreviewed queue at two
         id: queued
         env:
           GH_TOKEN: ${{ github.token }}
@@ -71,12 +71,26 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          count="$(gh pr list --state open --limit 100 --json title,headRefName --jq '[.[] | select((.title | test("magazine|매거진|오행"; "i")) or (.headRefName | startswith("automation/magazine-draft-")) or (.headRefName | startswith("feature/magazine-")))] | length')"
-          if [ "$count" -gt 0 ]; then
+          # A manually reviewed magazine article PR is not a duplicate bot draft.
+          # Only our own exact-namespace draft branches reserve generated topics.
+          reserved="$(gh pr list --state open --limit 100 --json headRefName \
+            --jq '[.[] | select(.headRefName | startswith("automation/magazine-draft-")) | .headRefName | sub("^automation/magazine-draft-"; "")] | join(",")')"
+          if ! [[ "$reserved" =~ ^[a-z0-9,-]*$ ]]; then
+            echo "Unsafe reserved topic list" >&2
+            exit 1
+          fi
+          echo "UNBODA_MAGAZINE_RESERVED_SLUGS=$reserved" >> "$GITHUB_ENV"
+          if [ -z "$reserved" ]; then count=0
+          else
+            IFS=',' read -ra slugs <<< "$reserved"
+            count="${#slugs[@]}"
+          fi
+          if [ "$count" -ge 2 ]; then
             echo "pending=true" >> "$GITHUB_OUTPUT"
-            echo "Existing editorial PR prevents duplicate drafts; model not downloaded."
+            echo "Two unapproved draft PRs already pending; no more generated."
           else
             echo "pending=false" >> "$GITHUB_OUTPUT"
+            echo "Bot draft queue $count/2; manual editorial PRs remain independent."
           fi
       - name: Check remaining curated original topics
         if: steps.queued.outputs.pending == 'false'

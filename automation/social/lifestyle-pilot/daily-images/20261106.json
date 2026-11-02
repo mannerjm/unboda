@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 2,
+  "dateKst": "2026-11-06",
+  "brand": "UNBODA",
+  "firstPartyOriginal": true,
+  "notPhotographs": true,
+  "editorialState": "READY_FOR_AUTOMATED_QA_NOT_HUMAN_REVIEWED",
+  "stories": [
+    {
+      "hourKst": "01",
+      "visualMotif": "journal",
+      "topicCategory": "self-understanding",
+      "label": "수첩에 남긴 행사 메모",
+      "title": "처음 가는 모임에서 소개가 어색하다면",
+      "advice": "모임에서 나누고 싶은 관심사 한 가지와 질문 하나를 미리 적어 보세요.",
+      "lifeSituation": "처음 참석하는 취미 모임에서 자기소개할 말을 조용히 준비하는 순간",
+      "visualAnchors": [
+        "수첩",
+        "메모"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "first-group-introduction-20261106"
+    },
+    {
+      "hourKst": "04",
+      "visualMotif": "bedroom",
+      "topicCategory": "self-understanding",
+      "label": "침대 곁 조명과 달",
+      "title": "새벽에 창밖 소음이 신경 쓰인다면",
+      "advice": "소음이 심한 시간을 기록하고 창문·커튼 위치부터 점검해 보세요.",
+      "lifeSituation": "새벽 창밖에서 들리는 소리에 잠을 깨고 침실 환경을 점검하는 순간",
+      "visualAnchors": [
+        "침대",
+        "조명"
+      ],
+      "sceneVariant": 4,
+      "topicKey": "night-window-noise-20261106"
+    },
+    {
+      "hourKst": "10",
+      "visualMotif": "presentation",
+      "topicCategory": "career",
+      "label": "발표 화면과 자료 표",
+      "title": "보고서에 자료 출처가 빠져 있다면",
+      "advice": "인용한 표의 원문과 날짜를 확인하고 출처를 끝에 표시해 보세요.",
+      "lifeSituation": "발표 직전에 보고서의 인용 그래프 출처를 다시 확인하는 사무실",
+      "visualAnchors": [
+        "업무 자료",
+        "그래프"
+      ],
+      "sceneVariant": 3,
+      "topicKey": "presentation-source-credit-20261106"
+    },
+    {
+      "hourKst": "13",
+      "visualMotif": "receipt",
+      "topicCategory": "money",
+      "label": "구독 결제 영수증",
+      "title": "사용하지 않은 구독료가 청구됐다면",
+      "advice": "현재 이용 중인 정기결제 목록을 확인하고 유지할 항목을 구분해 보세요.",
+      "lifeSituation": "한동안 쓰지 않은 서비스의 월 정기결제 영수증을 확인하는 순간",
+      "visualAnchors": [
+        "영수증",
+        "카드"
+      ],
+      "sceneVariant": 1,
+      "topicKey": "unused-subscription-review-20261106"
+    },
+    {
+      "hourKst": "16",
+      "visualMotif": "dialogue",
+      "topicCategory": "compatibility",
+      "label": "두 사람의 대화 말풍선",
+      "title": "동료가 내 설명을 중간에 끊었다면",
+      "advice": "서로 이해한 내용을 한 문장씩 확인하고 남은 이야기를 마저 전해 보세요.",
+      "lifeSituation": "회의 중 동료가 말을 끊어 오해가 생긴 뒤 차분하게 다시 이야기하는 순간",
+      "visualAnchors": [
+        "두 사람",
+        "말풍선"
+      ],
+      "sceneVariant": 4,
+      "topicKey": "interrupted-team-conversation-20261106"
+    },
+    {
+      "hourKst": "19",
+      "visualMotif": "family",
+      "topicCategory": "family",
+      "label": "가족 식탁 위 달력",
+      "title": "가족의 중요한 날을 놓치지 않으려면",
+      "advice": "함께 볼 수 있는 달력에 생일과 기념일을 적고 준비할 일을 정해 보세요.",
+      "lifeSituation": "가족이 식탁에서 다가오는 생일과 기념일을 달력에 적어 두는 저녁",
+      "visualAnchors": [
+        "달력",
+        "식탁"
+      ],
+      "sceneVariant": 3,
+      "topicKey": "family-birthday-calendar-20261106"
+    },
+    {
+      "hourKst": "22",
+      "visualMotif": "checklist",
+      "topicCategory": "self-understanding",
+      "label": "반품 물품 체크리스트",
+      "title": "택배 반품 전 확인할 것이 많다면",
+      "advice": "물품·부속품·반품 접수번호를 목록에 적고 포장 전 다시 확인해 보세요.",
+      "lifeSituation": "택배 반품을 위해 필요한 부속품과 접수번호를 점검하는 밤",
+      "visualAnchors": [
+        "체크리스트",
+        "표시"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "return-parcel-check-20261106"
+    }
+  ]
+}

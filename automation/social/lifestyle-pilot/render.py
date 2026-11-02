@@ -311,6 +311,104 @@ def draw_topic_overlay(d,brief,seconds,scene_index):
     else:
         raise ValueError("UNRENDERED_TOPIC_VISUAL_MOTIF")
 
+def draw_opening_reveal(d,brief,seconds,scene_index):
+    """A genuine mid-scene object close-up, not a second caption over the same still.
+
+    The hook starts with the validated topic illustration at t=0. The camera
+    changes to a topic-specific prop close-up at t=2.0 and an altered prop state
+    at t=4.8. This is free first-party procedural art; no third-party imagery.
+    Headline/subline/CTA regions are untouched (all art inside y=690..862).
+    """
+    if scene_index != 0 or seconds < 2.0:
+        return
+    beat=1 if seconds < 4.8 else 2
+    graphic=VISUAL_MOTIFS[brief["visualMotif"]]["graphic"]
+    accent=BRAND_PALETTES[brief["visualStyle"]]["accent"]
+    y=690+int(5*math.sin(seconds*2.6))
+    paper=(242,235,219); ink=(52,79,92)
+    d.rounded_rectangle((212,y,508,y+166),radius=21,fill=paper,outline=accent,width=5)
+    if graphic in ("checklist","journal"):
+        for i in range(3):
+            yy=y+35+i*42
+            d.rectangle((238,yy,260,yy+23),outline=ink,width=3)
+            d.line((279,yy+12,464-i*14,yy+12),fill=ink,width=5)
+            if i < beat:
+                d.line([(239,yy+12),(247,yy+20),(264,yy-7)],fill=(28,151,104),width=7)
+        if graphic=="journal":
+            d.line((427,y+138,479,y+89),fill=(178,92,114),width=8)
+    elif graphic in ("people","interview"):
+        for x in (290,425):
+            d.ellipse((x-30,y+33,x+30,y+93),fill=(204,146,118))
+            d.arc((x-38,y+78,x+38,y+139),180,355,fill=ink,width=8)
+        # Speech bubble visibly switches owner or turns into a note handoff.
+        x=253 if beat==1 else 390
+        d.rounded_rectangle((x-33,y+8,x+38,y+37),radius=12,fill=(224,131,116))
+        if graphic=="interview":
+            d.rounded_rectangle((317,y+117,401,y+141),radius=5,fill=(115,163,169))
+    elif graphic=="moon":
+        moon_x=312 if beat==1 else 410
+        d.ellipse((moon_x-44,y+30,moon_x+44,y+118),fill=(219,173,94))
+        d.ellipse((moon_x-12,y+10,moon_x+68,y+90),fill=paper)
+        d.line((260,y+137,457,y+137),fill=ink,width=7)
+    elif graphic=="presentation":
+        for i in range(4):
+            x=252+i*60
+            h=(38+i*25) if beat==1 else (117-i*21)
+            d.rounded_rectangle((x,y+143-h,x+38,y+143),radius=6,fill=(58,143,168))
+        d.line((244,y+145,472,y+145),fill=ink,width=5)
+    elif graphic=="signpost":
+        d.line((360,y+20,360,y+151),fill=ink,width=11)
+        if beat==1:
+            d.polygon([(250,y+42),(452,y+42),(471,y+68),(452,y+94),(250,y+94)],fill=(87,158,149))
+        else:
+            d.polygon([(471,y+42),(269,y+42),(250,y+68),(269,y+94),(471,y+94)],fill=(87,158,149))
+    elif graphic=="map":
+        d.line([(261,y+130),(324,y+66),(391,y+107),(458,y+32)],fill=(90,157,163),width=13)
+        x,z=(324,y+66) if beat==1 else (458,y+32)
+        d.ellipse((x-26,z-30,x+26,z+22),fill=(221,102,109))
+        d.ellipse((x-8,z-12,x+8,z+4),fill=paper)
+    elif graphic=="phone":
+        d.rounded_rectangle((273,y+12,449,y+153),radius=17,fill=(59,94,111))
+        for i in range(2):
+            yy=y+36+i*57
+            col=(230,154,101) if i==beat-1 else (139,192,179)
+            d.rounded_rectangle((288,yy,433,yy+43),radius=10,fill=col)
+            d.ellipse((302,yy+12,320,yy+30),fill=paper)
+            d.line((328,yy+20,418,yy+20),fill=ink,width=4)
+    elif graphic=="calendar":
+        for i in range(3):
+            for j in range(4):
+                x=256+j*52;yy=y+30+i*44
+                active=(i,j)==((beat-1),beat)
+                d.rounded_rectangle((x,yy,x+35,yy+31),radius=6,
+                    fill=(225,115,113) if active else (176,193,184))
+    elif graphic=="receipt":
+        d.rounded_rectangle((277,y+10,438,y+157),radius=10,fill=(252,251,247),outline=ink,width=3)
+        for i in range(3):
+            yy=y+35+i*29
+            d.line((296,yy,405-i*8,yy),fill=ink,width=5)
+        if beat==2:
+            d.ellipse((349,y+103,421,y+159),outline=(46,158,105),width=9)
+            d.line([(365,y+132),(376,y+142),(403,y+115)],fill=(46,158,105),width=7)
+        else:
+            d.line((294,y+130,408,y+130),fill=(221,101,92),width=10)
+    elif graphic=="savings":
+        d.rounded_rectangle((254,y+57,465,y+154),radius=33,fill=(112,177,151))
+        for i in range(beat+1):
+            x=285+i*61
+            d.ellipse((x,y+88,x+43,y+131),fill=(227,187,92),outline=ink,width=3)
+        d.line((332,y+41,399,y+41),fill=ink,width=8)
+    elif graphic=="shopping":
+        d.rounded_rectangle((272,y+46,449,y+147),radius=15,fill=(206,157,105))
+        d.arc((311,y+9,409,y+81),start=175,end=365,fill=ink,width=9)
+        if beat==1:
+            d.ellipse((345,y+83,376,y+114),fill=paper)
+        else:
+            d.line([(315,y+98),(339,y+121),(398,y+70)],fill=(42,150,108),width=13)
+    else:
+        raise ValueError("OPENING_MICROCUT_UNRENDERED_MOTIF")
+
+
 def center(draw,text,y,f,color):
     b=draw.textbbox((0,0),text,font=f)
     width=b[2]-b[0]
@@ -336,6 +434,7 @@ def draw_frame(brief,scene_index,seconds):
     if colors:
         draw_brand_hero(d,style,kind,scene_index,seconds)
         draw_topic_overlay(d,brief,seconds,scene_index)
+        draw_opening_reveal(d,brief,seconds,scene_index)
     elif kind=="clock":
         r=156
         d.ellipse((cx-r,cy-r,cx+r,cy+r),outline=GOLD,width=7)

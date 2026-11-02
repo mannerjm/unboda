@@ -1,4 +1,4 @@
-"""Offline regression guard: no repeated HuggingFace model loads in 4 renders."""
+"""Pinned no-paid-API MeloTTS model source contract for preview runs."""
 import ast, pathlib, unittest
 CODE=pathlib.Path(__file__).with_name("narrate.py")
 class ModelSourceTests(unittest.TestCase):
@@ -10,7 +10,11 @@ class ModelSourceTests(unittest.TestCase):
         self.assertIn("PINNED_KOREAN_VOICE_MODEL_FILES_INVALID",src)
         self.assertIn("ckpt_path=str(checkpoint)",src)
         self.assertIn("config_path=str(config)",src)
-        self.assertIn('use_hf=False',src)
+        self.assertIn('HF_HUB_DISABLE_XET',src)
+        self.assertIn('myshell-ai/MeloTTS-Korean',src)
+        self.assertIn('0207e5adfc90129a51b6b03d89be6d84360ed323',src)
+        self.assertIn('PINNED_KOREAN_VOICE_MODEL_FROM_HF_INVALID',src)
+        self.assertNotIn('use_hf=False',src)
         self.assertNotIn('TTS(language="KR",device="cpu")',src)
     def test_no_unapproved_tts_fallback(self):
         src=CODE.read_text(encoding="utf8")

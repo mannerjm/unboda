@@ -12,7 +12,11 @@ function text(s,min,max,name){
  return norm(s);
 }
 function nextTopic(){
- return topics.find(t=>!original.includes('topicKey: "'+t.topicKey+'"') &&
+ // Existing review PRs are reserved even before their changes reach main.
+ // They must not block unrelated drafts, nor cause identical weekly PRs.
+ const reserved=new Set((process.env.UNBODA_MAGAZINE_RESERVED_SLUGS||"").split(",").filter(Boolean));
+ return topics.find(t=>!reserved.has(t.slug) &&
+ !original.includes('topicKey: "'+t.topicKey+'"') &&
  !original.includes('slug: "'+t.slug+'"'));
 }
 function dateKst(){
@@ -99,6 +103,14 @@ function assertSafeSvgForTest(art,a){
 function test(){
  assert(topics.length>=8 && topics.every(t=>/^[a-z0-9-]+$/.test(t.slug)));
  assert.equal(new Set(topics.map(t=>t.slug)).size,topics.length);
+ const previous=process.env.UNBODA_MAGAZINE_RESERVED_SLUGS;
+ try{
+  process.env.UNBODA_MAGAZINE_RESERVED_SLUGS=topics[0].slug;
+  assert.notEqual(nextTopic()?.slug,topics[0].slug,"Do not regenerate a reserved PR topic");
+ }finally{
+  if(previous===undefined)delete process.env.UNBODA_MAGAZINE_RESERVED_SLUGS;
+  else process.env.UNBODA_MAGAZINE_RESERVED_SLUGS=previous;
+ }
  const paragraph=i=>"생활에서 확인한 실제 기록과 서로 다른 선택을 비교하면서 다룰 수 있는 질문을 적어 봅니다. 전통 명리에서 쓰는 용어를 미래의 확정적인 사실로 해석하기보다 관계와 상황을 함께 살피는 것이 중요합니다. 이번에는 "+i+"번째 장면을 점검합니다.";
  const o={description:"사주의 네 기둥을 간단한 생활 질문으로 바꾸어 보며 확인된 기록과 문화적 해석의 차이를 살펴보는 소개 글입니다.",
  lead:paragraph(20),keyPoint:"사주 정보를 활용할 때는 출생 기록과 실제 생활에서 확인되는 사실을 함께 살펴보는 것이 도움이 됩니다.",
@@ -116,7 +128,7 @@ function test(){
 async function localGenerate(messages,schema,maxTokens){
  const payload={model:"unboda-editorial",temperature:0.45,max_tokens:maxTokens,
   stream:false,response_format:{type:"json_schema",schema},messages};
- const ctl=new AbortController(),timer=setTimeout(()=>180000);
+ const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),180000);
  try{
   const response=await fetch("http://127.0.0.1:8080/v1/chat/completions",{
    method:"POST",headers:{"content-type":"application/json"},

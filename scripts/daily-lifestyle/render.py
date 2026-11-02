@@ -109,7 +109,16 @@ def load_editorial(date, brief_path, history_dir=None):
   raise RuntimeError("DAILY_EDITORIAL_DATE_OR_SOURCE_MISMATCH")
  stories=brief.get("stories")
  if not isinstance(stories,list) or len(stories)!=7:raise RuntimeError("SEVEN_ORIGINAL_BRIEFS_REQUIRED")
- motifs={"journal","bedroom","presentation","receipt","dialogue","family","checklist"}
+ motif_objects={
+  "journal":("수첩","일기장","펜","색연필","메모","공책","종이","연필"),
+  "bedroom":("침대","달","알람","시계","조명","이불","베개"),
+  "presentation":("업무","표","차트","막대그래프","자료","화면","그래프","발표"),
+  "receipt":("영수증","가계부","금액","메모","지갑","동전","선물","카드"),
+  "dialogue":("두 사람","말풍선","메시지","친구","대화","채팅"),
+  "family":("식탁","접시","달력","가족","밥","의자","음식"),
+  "checklist":("체크리스트","체크","짐 가방","가방","표시","준비","목록")
+ }
+ motifs=set(motif_objects)
  keys=set();titles=set();scenes=set()
  for i,st in enumerate(stories):
   if not isinstance(st,dict) or st.get("hourKst")!=SLOTS[i]:
@@ -125,6 +134,8 @@ def load_editorial(date, brief_path, history_dir=None):
     raise RuntimeError("LIFESTYLE_TEXT_LENGTH_INVALID_"+k)
   if not all(isinstance(x,str) and 2<=len(x)<=30 for x in st["visualAnchors"]):
    raise RuntimeError("LIFESTYLE_ANCHOR_TEXT_INVALID")
+  if not all(any(term in x for term in motif_objects[st["visualMotif"]]) for x in st["visualAnchors"]):
+   raise RuntimeError("VISUAL_ANCHOR_NOT_DRAWN_BY_MOTIF")
   for k in ("topicKey","title","lifeSituation"):
    if any(v in st[k] for v in ("오늘은 운이 좋", "반드시 성공", "무조건 대박", "확정된 미래")):
     raise RuntimeError("SAJU_FORTUNE_GUARANTEE_BLOCKED")

@@ -3,12 +3,57 @@ on:
   schedule:
     - cron: '05 11 * * *'
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/daily-lifestyle/**'
+      - '.github/workflows/unboda-daily-lifestyle-assets.yml'
   push:
     paths:
       - '.github/workflows/unboda-daily-lifestyle-assets.yml'
 permissions:
   contents: write
 jobs:
+  test-fresh-editorial-no-sns-post:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install offline Korean fonts and Pillow
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+          python -m pip install --no-cache-dir 'Pillow==11.3.0'
+      - name: Test editorial schema and 90-day novelty guards
+        run: |
+          python -m unittest discover -s scripts/daily-lifestyle -p 'test_*.py' -v
+      - name: Render 11/4 seven new subjects from an approved development brief
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin test/social-automation-safety-poc-20261023
+          git show FETCH_HEAD:automation/social/lifestyle-pilot/daily-images/20261104.json > /tmp/new-lifestyle-brief.json
+          python scripts/daily-lifestyle/render.py --date 2026-11-04 --out /tmp/qa-lifestyle-20261104 \
+            --brief /tmp/new-lifestyle-brief.json
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import json
+          root=Path('/tmp/qa-lifestyle-20261104')
+          m=json.loads((root/'manifest.json').read_text())
+          assert m['dateKst']=='2026-11-04' and m['schemaVersion']==2
+          assert len(m['cards'])==7 and len({x['sha256'] for x in m['cards']})==7
+          assert len({x['topicKey'] for x in m['cards']})==7
+          for card in m['cards']:
+            with Image.open(root/card['name']) as im:
+              assert im.size == (1080,1350) and im.format == 'PNG'
+          print('SEVEN_ORIGINAL_EDITIONAL_IMAGES_RENDER_AND_TECHNICAL_QA_PASSED')
+          PY
   original-image-verification:
     if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -23,11 +68,60 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq fonts-noto-cjk
           python -m pip install --no-cache-dir 'Pillow==11.3.0'
+      - name: Check immutable next-day release before attempting new original upload
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          TAG="unboda-lifestyle-${DAY//-/}"
+          if gh release view "$TAG" --repo mannerjm/unboda >/dev/null 2>&1; then
+            COUNT="$(gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length')"
+            test "$COUNT" -eq 8
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "APPROVED_EXISTING_RELEASE_PRESERVED: $TAG"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Run daily storyboard and duplicate-protection unit tests
+        run: |
+          python -m py_compile scripts/daily-lifestyle/render.py
+          python -m unittest discover -s scripts/daily-lifestyle -p 'test_*.py' -v
+      - name: Fetch tomorrow's new editorial briefs and previous 90 days
+        if: steps.existing.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          STAMP="${DAY//-/}"
+          git fetch --no-tags --depth=1 origin test/social-automation-safety-poc-20261023
+          mkdir -p .daily-lifestyle-briefs .daily-lifestyle-history
+          git show "FETCH_HEAD:automation/social/lifestyle-pilot/daily-images/$STAMP.json" > .daily-lifestyle-briefs/next.json
+          python - "$DAY" <<'PY'
+          import datetime as dt,pathlib,subprocess,sys
+          today=dt.date.fromisoformat(sys.argv[1])
+          paths=subprocess.check_output(["git","ls-tree","-r","--name-only","FETCH_HEAD",
+             "automation/social/lifestyle-pilot/daily-images/"],text=True).splitlines()
+          for path in paths:
+            filename=path.rsplit("/",1)[-1]
+            if not(filename.endswith(".json") and len(filename)==13):continue
+            try:date=dt.date.fromisoformat(filename[:4]+"-"+filename[4:6]+"-"+filename[6:8])
+            except ValueError:continue
+            if not 0<(today-date).days<=90:continue
+            content=subprocess.check_output(["git","show","FETCH_HEAD:"+path])
+            (pathlib.Path(".daily-lifestyle-history")/filename).write_bytes(content)
+          print("UNBODA_DAILY_EDITORIAL_HISTORY_FILES",len(list(pathlib.Path(".daily-lifestyle-history").glob("*.json"))))
+          PY
       - name: Create original topic-specific images for tomorrow
+        if: steps.existing.outputs.skip != 'true'
         run: |
           DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
-          python scripts/daily-lifestyle/render.py --date "$DAY" --out original-images
+          python scripts/daily-lifestyle/render.py --date "$DAY" --out original-images \
+            --brief .daily-lifestyle-briefs/next.json --history-dir .daily-lifestyle-history
       - name: Retain validated originals in a private workflow artifact
+        if: steps.existing.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: unboda-first-party-images-qa
@@ -36,6 +130,7 @@ jobs:
           retention-days: 1
 
       - name: Check original PNGs and upload immutable image release
+        if: steps.existing.outputs.skip != 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -43,7 +138,7 @@ jobs:
             const crypto = require('node:crypto');
             const p = 'original-images/';
             const m = JSON.parse(fs.readFileSync(p+'manifest.json','utf8'));
-            if (m.schemaVersion !== 1 || m.brand !== 'UNBODA' ||
+            if (m.schemaVersion !== 2 || m.brand !== 'UNBODA' ||
                 m.notPhotographs !== true || m.humanVisualReviewed !== false ||
                 m.rightsVerifiedWithoutPaidProvider !== true ||
                 m.imagesExpected !== 7 || m.cards.length !== 7) {
@@ -56,7 +151,8 @@ jobs:
             const slots=['01','04','10','13','16','19','22'];
             if(JSON.stringify(m.slotHoursKst)!==JSON.stringify(slots) ||
                new Set(m.cards.map(c=>c.sha256)).size !== 7 ||
-               new Set(m.cards.map(c=>c.visualMotif)).size !== 7) {
+               new Set(m.cards.map(c=>c.visualMotif)).size !== 7 ||
+               new Set(m.cards.map(c=>c.topicKey)).size !== 7) {
               throw Error('LIFESTYLE_SLOT_OR_MOTIF_REPEATED');
             }
             for (const c of m.cards) {

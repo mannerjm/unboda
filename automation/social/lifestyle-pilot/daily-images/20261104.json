@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 2,
+  "dateKst": "2026-11-04",
+  "brand": "UNBODA",
+  "firstPartyOriginal": true,
+  "notPhotographs": true,
+  "editorialState": "READY_FOR_AUTOMATED_QA_NOT_HUMAN_REVIEWED",
+  "stories": [
+    {
+      "hourKst": "01",
+      "visualMotif": "journal",
+      "topicCategory": "self-understanding",
+      "label": "수첩과 취미 도구",
+      "title": "새로운 취미를 시작하기 망설인다면",
+      "advice": "한 달 계획보다 이번 주에 해 볼 작은 체험 한 가지를 정해 보세요.",
+      "lifeSituation": "관심 있는 취미의 첫 수업을 신청할지 고민하는 순간",
+      "visualAnchors": [
+        "수첩",
+        "색연필"
+      ],
+      "sceneVariant": 3,
+      "topicKey": "hobby-first-trial-20261104"
+    },
+    {
+      "hourKst": "04",
+      "visualMotif": "bedroom",
+      "topicCategory": "self-understanding",
+      "label": "침실의 알람시계",
+      "title": "아침 알람을 자꾸 미루게 된다면",
+      "advice": "기상 직후 해야 할 행동 한 가지를 미리 정하고 알람을 손이 닿지 않는 곳에 두세요.",
+      "lifeSituation": "아침마다 알람을 여러 번 미루게 되는 습관",
+      "visualAnchors": [
+        "알람시계",
+        "침대"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "alarm-snooze-morning-20261104"
+    },
+    {
+      "hourKst": "10",
+      "visualMotif": "presentation",
+      "topicCategory": "career",
+      "label": "업무 그래프와 표",
+      "title": "고객 문의가 갑자기 늘어난 날",
+      "advice": "문의 유형을 세 가지로 묶고 가장 많이 늘어난 항목부터 확인해 보세요.",
+      "lifeSituation": "고객 문의 건수가 증가한 이유를 찾는 사무실",
+      "visualAnchors": [
+        "막대그래프",
+        "업무 자료"
+      ],
+      "sceneVariant": 4,
+      "topicKey": "customer-inquiry-triage-20261104"
+    },
+    {
+      "hourKst": "13",
+      "visualMotif": "receipt",
+      "topicCategory": "money",
+      "label": "영수증과 공동 비용",
+      "title": "친구들과 선물 비용을 나눌 때",
+      "advice": "배송비까지 합한 금액을 먼저 공유하고 모두 동의한 기준으로 나눠 보세요.",
+      "lifeSituation": "친구의 생일 선물을 함께 사며 비용을 정산하는 순간",
+      "visualAnchors": [
+        "영수증",
+        "금액 메모"
+      ],
+      "sceneVariant": 1,
+      "topicKey": "gift-cost-split-20261104"
+    },
+    {
+      "hourKst": "16",
+      "visualMotif": "dialogue",
+      "topicCategory": "compatibility",
+      "label": "두 사람의 메시지",
+      "title": "친구가 약속을 갑자기 취소했다면",
+      "advice": "바로 서운함을 추측하기보다 사정을 묻고 다시 가능한 시간을 확인해 보세요.",
+      "lifeSituation": "친구가 당일 약속을 취소한 뒤 답장을 고민하는 순간",
+      "visualAnchors": [
+        "말풍선",
+        "두 사람"
+      ],
+      "sceneVariant": 3,
+      "topicKey": "friend-cancel-reply-20261104"
+    },
+    {
+      "hourKst": "19",
+      "visualMotif": "family",
+      "topicCategory": "family",
+      "label": "식탁과 설거지",
+      "title": "가족 식사 뒤 뒷정리가 쌓인다면",
+      "advice": "설거지와 식탁 정리를 구분해 각자 할 수 있는 일을 하나씩 맡아 보세요.",
+      "lifeSituation": "가족 식사 후 설거지와 정리 역할이 불분명한 저녁",
+      "visualAnchors": [
+        "식탁",
+        "접시"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "family-after-dinner-chores-20261104"
+    },
+    {
+      "hourKst": "22",
+      "visualMotif": "checklist",
+      "topicCategory": "career",
+      "label": "여행 준비 체크표",
+      "title": "여행 전날 무엇을 챙길지 막막할 때",
+      "advice": "필수 신분증과 예약 확인, 이동 물품을 따로 적고 가방에 넣을 때 표시해 보세요.",
+      "lifeSituation": "여행 가방을 싸며 빠뜨릴 물건이 걱정되는 밤",
+      "visualAnchors": [
+        "체크리스트",
+        "짐 가방"
+      ],
+      "sceneVariant": 4,
+      "topicKey": "trip-packing-checklist-20261104"
+    }
+  ]
+}

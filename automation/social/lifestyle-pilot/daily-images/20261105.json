@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 2,
+  "dateKst": "2026-11-05",
+  "brand": "UNBODA",
+  "firstPartyOriginal": true,
+  "notPhotographs": true,
+  "editorialState": "READY_FOR_AUTOMATED_QA_NOT_HUMAN_REVIEWED",
+  "stories": [
+    {
+      "hourKst": "01",
+      "visualMotif": "journal",
+      "topicCategory": "self-understanding",
+      "label": "수첩과 통화 메모",
+      "title": "낯선 담당자에게 처음 전화해야 한다면",
+      "advice": "통화 목적과 꼭 물어볼 질문 두 가지를 수첩에 적어 보세요.",
+      "lifeSituation": "처음 연락할 담당자에게 전화하기 전 필요한 질문을 준비하는 순간",
+      "visualAnchors": [
+        "수첩",
+        "펜"
+      ],
+      "sceneVariant": 1,
+      "topicKey": "first-service-call-notes-20261105"
+    },
+    {
+      "hourKst": "04",
+      "visualMotif": "bedroom",
+      "topicCategory": "self-understanding",
+      "label": "침실의 조명과 침대",
+      "title": "침실 조명이 너무 밝게 느껴질 때",
+      "advice": "잠들기 한 시간 전부터 조도를 낮추고 편안한 밝기를 찾아보세요.",
+      "lifeSituation": "잠자리에 누웠는데 방 조명이 눈부셔 잠자리 환경을 조절하는 상황",
+      "visualAnchors": [
+        "조명",
+        "침대"
+      ],
+      "sceneVariant": 3,
+      "topicKey": "bedside-lighting-comfort-20261105"
+    },
+    {
+      "hourKst": "10",
+      "visualMotif": "presentation",
+      "topicCategory": "career",
+      "label": "발표 자료와 그래프",
+      "title": "새로운 아이디어를 회의에서 소개할 때",
+      "advice": "기대한 효과와 필요한 자료를 한 장의 그래프로 정리해 보세요.",
+      "lifeSituation": "팀 회의에서 새 아이디어를 이해하기 쉬운 발표 자료로 설명하는 순간",
+      "visualAnchors": [
+        "발표 차트",
+        "업무 자료"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "pitch-new-idea-team-20261105"
+    },
+    {
+      "hourKst": "13",
+      "visualMotif": "receipt",
+      "topicCategory": "money",
+      "label": "세탁 영수증과 금액",
+      "title": "예상보다 세탁 비용이 많이 나왔다면",
+      "advice": "의류 종류별 요금을 영수증에서 확인하고 다음에 맡길 품목을 분류해 보세요.",
+      "lifeSituation": "세탁소에서 예상보다 높은 영수증 금액을 보고 다음 세탁 계획을 세우는 순간",
+      "visualAnchors": [
+        "영수증",
+        "금액 메모"
+      ],
+      "sceneVariant": 4,
+      "topicKey": "laundry-bill-check-20261105"
+    },
+    {
+      "hourKst": "16",
+      "visualMotif": "dialogue",
+      "topicCategory": "compatibility",
+      "label": "두 사람의 책 약속",
+      "title": "빌린 책을 돌려주는 약속을 잊었다면",
+      "advice": "먼저 잊었다고 말하고 반환 가능한 날짜를 직접 제안해 보세요.",
+      "lifeSituation": "친구에게 빌린 책을 기한 내 돌려주지 못해 메시지를 보내는 순간",
+      "visualAnchors": [
+        "두 사람",
+        "말풍선"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "borrowed-book-return-20261105"
+    },
+    {
+      "hourKst": "19",
+      "visualMotif": "family",
+      "topicCategory": "family",
+      "label": "가족 식탁과 달력",
+      "title": "가족사진을 함께 고르기로 했다면",
+      "advice": "서로 좋아하는 사진을 두 장씩 추천하고 함께 보관할 기준을 정해 보세요.",
+      "lifeSituation": "가족이 식탁에 모여 추억 사진을 정리할 날짜와 방법을 정하는 저녁",
+      "visualAnchors": [
+        "식탁",
+        "달력"
+      ],
+      "sceneVariant": 1,
+      "topicKey": "family-photo-selection-20261105"
+    },
+    {
+      "hourKst": "22",
+      "visualMotif": "checklist",
+      "topicCategory": "career",
+      "label": "주소 변경 체크리스트",
+      "title": "이사한 뒤 주소 변경을 깜빡했다면",
+      "advice": "우편·은행·정기배송 주소를 목록으로 나누고 완료한 항목부터 표시해 보세요.",
+      "lifeSituation": "이사 후 각종 기관과 배송지 주소를 체크리스트로 정리하는 밤",
+      "visualAnchors": [
+        "체크리스트",
+        "가방"
+      ],
+      "sceneVariant": 3,
+      "topicKey": "moving-address-update-20261105"
+    }
+  ]
+}

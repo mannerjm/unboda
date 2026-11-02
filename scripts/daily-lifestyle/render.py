@@ -92,6 +92,14 @@ def artwork(d,kind,accent,variant=0):
   elif kind=="checklist":
    roundrect(d,(648,806,846,909),17,(209,150,117))
    d.line((701,807,701,787,791,787,791,807),fill=(246,222,175),width=8)
+def editorial_similarity(a,b):
+ def grams(value):
+  value="".join(c.lower() for c in str(value) if c.isalnum())
+  return {value[i:i+3] for i in range(max(0,len(value)-2))}
+ x,y=grams(a),grams(b)
+ return 2*len(x&y)/max(1,len(x)+len(y))
+
+
 def load_editorial(date, brief_path, history_dir=None):
  if not brief_path: raise RuntimeError("DAILY_NEW_EDITORIAL_BRIEF_REQUIRED")
  brief=json.loads(pathlib.Path(brief_path).read_text(encoding="utf-8"))
@@ -136,7 +144,10 @@ def load_editorial(date, brief_path, history_dir=None):
    for prev in other.get("stories",[]):
     key=str(prev.get("topicKey","")).rsplit("-",1)[0].lower()
     title="".join(str(prev.get("title","")).split())
-    if key in keys or title in titles:
+    if (key in keys or title in titles or
+        any(editorial_similarity(str(prev.get("title","")),st["title"])>=0.73 or
+            editorial_similarity(str(prev.get("lifeSituation","")),st["lifeSituation"])>=0.76
+            for st in stories)):
      raise RuntimeError("RECENT_90_DAY_EDITORIAL_REUSE_"+other_date)
  return stories
 

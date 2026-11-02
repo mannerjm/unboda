@@ -37,7 +37,7 @@ class LifestyleBriefTests(unittest.TestCase):
   x=fixture();x["dateKst"]="2026-11-03"
   with self.assertRaisesRegex(RuntimeError,"DATE_OR_SOURCE"):self.load(x)
  def test_reject_duplicate_motif_and_title(self):
-  x=fixture();x["stories"][1]["visualMotif"]="journal"
+  x=fixture();x["stories"][1]["visualMotif"]="journal";x["stories"][1]["visualAnchors"]=list(ANCHORS[0])
   with self.assertRaisesRegex(RuntimeError,"DUPLICATED_DAILY"):self.load(x)
  def test_reject_same_topic_in_last_90_days(self):
   x=fixture();history=fixture()

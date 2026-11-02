@@ -71,6 +71,31 @@ class LifestyleBriefTests(unittest.TestCase):
     diff=ImageChops.difference(first.crop(region),second.crop(region))
     avg=ImageStat.Stat(diff.convert("L")).mean[0]
     self.assertGreater(avg,12.0,"Consecutive original subjects are mere recolors")
+ def test_contextual_visual_details_are_rasterized_for_real_situations(self):
+  from PIL import Image, ImageDraw
+  cases=(
+   ("journal","낯선 담당자와 통화 준비"),
+   ("bedroom","새벽 창밖 소음 점검"),
+   ("presentation","보고서에 자료 출처 표시"),
+   ("receipt","예상보다 세탁 비용 확인"),
+   ("dialogue","친구에게 빌린 책 돌려주기"),
+   ("family","가족사진을 함께 고르는 시간"),
+   ("checklist","이사 후 주소 변경 확인"),
+   ("checklist","택배 반품 전 확인"),
+  )
+  for motif,title in cases:
+   with self.subTest(motif=motif,title=title):
+    image=Image.new("RGBA",(1080,1350),(0,0,0,0))
+    module.contextual_visual_detail(ImageDraw.Draw(image),
+      {"visualMotif":motif,"title":title,"lifeSituation":title})
+    bounds=image.getbbox()
+    self.assertIsNotNone(bounds,"Story-specific illustration details missing")
+    self.assertGreater(bounds[2]-bounds[0],45)
+    self.assertGreater(bounds[3]-bounds[1],45)
+    self.assertGreaterEqual(bounds[0],155)
+    self.assertGreaterEqual(bounds[1],500)
+    self.assertLessEqual(bounds[2],920)
+    self.assertLessEqual(bounds[3],945)
  def test_no_fixed_story_fallback(self):
   with self.assertRaisesRegex(RuntimeError,"DAILY_NEW_EDITORIAL"):
    module.load_editorial(DATE,None)

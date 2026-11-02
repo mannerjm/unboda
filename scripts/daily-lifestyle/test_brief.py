@@ -49,6 +49,28 @@ class LifestyleBriefTests(unittest.TestCase):
   x=fixture();x["stories"][0]["visualAnchors"]=["지하철 전광판","운동장"]
   with self.assertRaisesRegex(RuntimeError,"VISUAL_ANCHOR_NOT_DRAWN"):
    self.load(x)
+ def test_dynamic_geometry_and_real_raster_change_across_dates(self):
+  from PIL import Image, ImageChops, ImageStat
+  story=fixture()["stories"][0]
+  date2=DATE+dt.timedelta(days=1)
+  p1=module.composition_parameters(DATE,"01",story)
+  p2=module.composition_parameters(date2,"01",story)
+  self.assertNotEqual(p1,p2)
+  with tempfile.TemporaryDirectory() as tmp:
+   root=pathlib.Path(tmp)
+   for d in ("a","b"):(root/d).mkdir()
+   a=module.make(DATE,"01",0,root/"a",story)
+   b=module.make(date2,"01",0,root/"b",story)
+   self.assertNotEqual(a["sha256"],b["sha256"])
+   self.assertEqual(a["compositionParameters"],p1)
+   self.assertEqual(b["compositionParameters"],p2)
+   with Image.open(root/"a"/a["name"]) as first,Image.open(root/"b"/b["name"]) as second:
+    self.assertEqual(first.size,(1080,1350))
+    self.assertEqual(second.size,(1080,1350))
+    region=(155,500,920,945)
+    diff=ImageChops.difference(first.crop(region),second.crop(region))
+    avg=ImageStat.Stat(diff.convert("L")).mean[0]
+    self.assertGreater(avg,12.0,"Consecutive original subjects are mere recolors")
  def test_no_fixed_story_fallback(self):
   with self.assertRaisesRegex(RuntimeError,"DAILY_NEW_EDITORIAL"):
    module.load_editorial(DATE,None)

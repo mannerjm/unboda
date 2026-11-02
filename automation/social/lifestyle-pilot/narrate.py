@@ -61,7 +61,28 @@ def make_narrated_video(brief_dir,output_dir):
         model=TTS(language="KR",device="cpu",config_path=str(config),
                   ckpt_path=str(checkpoint))
     else:
-        model=TTS(language="KR",device="cpu",use_hf=False)
+        # The author's older public S3 KR URL now responds 404. Download the
+        # SAME verified MeloTTS-Korean model from the pinned public HF commit,
+        # as the production-only workflow already does. No paid API or token.
+        import os as _os
+        _os.environ["HF_HUB_DISABLE_XET"]="1"
+        _os.environ["HF_HUB_DISABLE_TELEMETRY"]="1"
+        _os.environ["HF_HUB_DOWNLOAD_TIMEOUT"]="180"
+        from huggingface_hub import hf_hub_download
+        model_repo="myshell-ai/MeloTTS-Korean"
+        model_revision="0207e5adfc90129a51b6b03d89be6d84360ed323"
+        config=pathlib.Path(hf_hub_download(repo_id=model_repo,
+            filename="config.json",revision=model_revision))
+        checkpoint=pathlib.Path(hf_hub_download(repo_id=model_repo,
+            filename="checkpoint.pth",revision=model_revision))
+        model_config=json.loads(config.read_text())
+        if ("KR" not in model_config.get("data",{}).get("spk2id",{}) or
+            not 1_000<config.stat().st_size<1_000_000 or
+            not 5_000_000<checkpoint.stat().st_size<800_000_000):
+            raise RuntimeError("PINNED_KOREAN_VOICE_MODEL_FROM_HF_INVALID")
+        print("PINNED_KOREAN_VOICE_MODEL_PUBLIC_HF_VERIFIED",flush=True)
+        model=TTS(language="KR",device="cpu",
+            config_path=str(config),ckpt_path=str(checkpoint))
     speaker=model.hps.data.spk2id["KR"]
     voices=[];timing=[]
     for i,text in enumerate(texts):

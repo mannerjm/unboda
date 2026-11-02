@@ -45,7 +45,7 @@ def font(sz,bold=False):
    if p.exists(): return ImageFont.truetype(str(p),sz)
  raise RuntimeError("KOREAN_FONTS_REQUIRED")
 def roundrect(d,r,rad,color):d.rounded_rectangle(r,radius=rad,fill=color)
-def artwork(d,kind,accent):
+def artwork(d,kind,accent,variant=0):
  ink=(65,90,110);paper=(239,232,210)
  if kind=="journal":
   roundrect(d,(245,547,812,892),24,paper)
@@ -92,8 +92,86 @@ def artwork(d,kind,accent):
    if i<2:d.line((321,y+17,342,y+31,375,y-4),fill=(67,162,113),width=7)
    d.line((405,y+16,754,y+16),fill=ink,width=6)
  else:raise RuntimeError("MOTIF_NOT_RENDERABLE")
-def make(date,hour,i,out):
- label,headline,advice,kind,category=STORIES[i]
+ # Topic-specific foreground details, not a reused generic cosmic backdrop.
+ if variant:
+  if kind=="journal":
+   roundrect(d,(635,793,824,887),14,(245,222,175))
+   for n in range(3):d.line((663+n*39,803,669+n*39,865),fill=[(77,125,164),(218,134,122),(119,171,126)][n],width=13)
+  elif kind=="bedroom":
+   d.ellipse((690,561,846,717),fill=(247,226,169),outline=(74,89,114),width=8)
+   d.line((768,638,768,589),fill=(73,92,109),width=8)
+   d.line((768,638,813,655),fill=(73,92,109),width=7)
+  elif kind=="presentation":
+   d.line((349,725,477,661,598,706,744,611),fill=(223,102,86),width=11,joint="curve")
+   d.ellipse((726,596,756,626),fill=(223,102,86))
+  elif kind=="receipt":
+   roundrect(d,(710,571,876,700),16,(233,189,134))
+   d.line((789,578,789,686),fill=(165,89,101),width=14)
+   d.line((719,632,869,632),fill=(165,89,101),width=13)
+  elif kind=="dialogue":
+   roundrect(d,(454,784,607,860),20,(238,232,200))
+   d.ellipse((485,818,501,834),fill=ink)
+   d.ellipse((526,818,542,834),fill=ink)
+   d.ellipse((567,818,583,834),fill=ink)
+  elif kind=="family":
+   for n in range(3):
+    x=436+n*112
+    d.ellipse((x,755,x+80,804),fill=(252,247,235),outline=(124,149,143),width=5)
+  elif kind=="checklist":
+   roundrect(d,(648,806,846,909),17,(209,150,117))
+   d.line((701,807,701,787,791,787,791,807),fill=(246,222,175),width=8)
+def load_editorial(date, brief_path, history_dir=None):
+ if not brief_path: raise RuntimeError("DAILY_NEW_EDITORIAL_BRIEF_REQUIRED")
+ brief=json.loads(pathlib.Path(brief_path).read_text(encoding="utf-8"))
+ if (brief.get("schemaVersion")!=2 or brief.get("dateKst")!=date.isoformat()
+     or brief.get("brand")!="UNBODA" or brief.get("notPhotographs") is not True
+     or brief.get("firstPartyOriginal") is not True):
+  raise RuntimeError("DAILY_EDITORIAL_DATE_OR_SOURCE_MISMATCH")
+ stories=brief.get("stories")
+ if not isinstance(stories,list) or len(stories)!=7:raise RuntimeError("SEVEN_ORIGINAL_BRIEFS_REQUIRED")
+ motifs={"journal","bedroom","presentation","receipt","dialogue","family","checklist"}
+ keys=set();titles=set();scenes=set()
+ for i,st in enumerate(stories):
+  if not isinstance(st,dict) or st.get("hourKst")!=SLOTS[i]:
+   raise RuntimeError("LIFESTYLE_BRIEF_HOUR_MISMATCH")
+  required=("topicKey","title","label","advice","lifeSituation","visualAnchors","visualMotif","topicCategory","sceneVariant")
+  if any(k not in st for k in required):raise RuntimeError("LIFESTYLE_BRIEF_REQUIRED_FIELDS_MISSING")
+  if st["visualMotif"] not in motifs or not isinstance(st["sceneVariant"],int) or not 0<=st["sceneVariant"]<=4:
+   raise RuntimeError("LIFESTYLE_VISUAL_NOT_SUPPORTED")
+  if not isinstance(st["visualAnchors"],list) or len(st["visualAnchors"])<2 or len(st["visualAnchors"])>4:
+   raise RuntimeError("LIFESTYLE_VISIBLE_ANCHORS_MISSING")
+  for k,minc,maxc in (("title",12,38),("label",3,22),("advice",20,115),("lifeSituation",12,100),("topicKey",12,90)):
+   if not isinstance(st[k],str) or not minc<=len(st[k].strip())<=maxc:
+    raise RuntimeError("LIFESTYLE_TEXT_LENGTH_INVALID_"+k)
+  if not all(isinstance(x,str) and 2<=len(x)<=30 for x in st["visualAnchors"]):
+   raise RuntimeError("LIFESTYLE_ANCHOR_TEXT_INVALID")
+  for k in ("topicKey","title","lifeSituation"):
+   if any(v in st[k] for v in ("오늘은 운이 좋", "반드시 성공", "무조건 대박", "확정된 미래")):
+    raise RuntimeError("SAJU_FORTUNE_GUARANTEE_BLOCKED")
+  key=st["topicKey"].rsplit("-",1)[0].strip().lower()
+  title="".join(st["title"].split())
+  if key in keys or title in titles or st["visualMotif"] in scenes:
+   raise RuntimeError("DUPLICATED_DAILY_TOPIC_OR_MOTIF")
+  keys.add(key);titles.add(title);scenes.add(st["visualMotif"])
+ if history_dir:
+  directory=pathlib.Path(history_dir)
+  for f in directory.glob("????????.json"):
+   other_date=f.stem
+   try:day=dt.date.fromisoformat(f"{other_date[:4]}-{other_date[4:6]}-{other_date[6:]}")
+   except ValueError:continue
+   if not 0 < (date-day).days <= 90:continue
+   other=json.loads(f.read_text(encoding="utf-8"))
+   for prev in other.get("stories",[]):
+    key=str(prev.get("topicKey","")).rsplit("-",1)[0].lower()
+    title="".join(str(prev.get("title","")).split())
+    if key in keys or title in titles:
+     raise RuntimeError("RECENT_90_DAY_EDITORIAL_REUSE_"+other_date)
+ return stories
+
+
+def make(date,hour,i,out,story):
+ label,headline,advice,kind,category=(story[k] for k in (
+  'label','title','advice','visualMotif','topicCategory'))
  rng=random.Random(date.toordinal()*79+i*173)
  palette=(i+date.toordinal())%7
  top,accent=C1[palette],C2[palette]
@@ -106,7 +184,7 @@ def make(date,hour,i,out):
   d.ellipse((x,y,x+4,y+4),fill=tuple(min(v+20,255) for v in top))
  roundrect(d,(119,468,962,962),45,(33,52,69))
  d.rounded_rectangle((119,468,962,962),radius=45,outline=accent,width=5)
- artwork(d,kind,accent)
+ artwork(d,kind,accent,story['sceneVariant'])
  d.text((106,78),"UNBODA  /  SAJU & LIFE",font=font(33,True),fill=accent)
  d.line((107,140,970,140),fill=accent,width=3)
  d.text((107,204),label,font=font(45,True),fill=accent)
@@ -127,16 +205,18 @@ def make(date,hour,i,out):
  raw=path.read_bytes()
  if not (20000<len(raw)<7000000):raise RuntimeError("IMAGE_SIZE_NOT_VALID")
  if ImageStat.Stat(img.crop((230,500,850,950))).stddev[0]<15:raise RuntimeError("VISIBLE_SUBJECT_MISSING")
- variation=VARIATIONS[(date.toordinal()+i*5)%len(VARIATIONS)]
- text=f"{headline} {advice} {variation} 사주는 자기 성향을 돌아보는 전통적인 참고 방법이지, 결과나 미래를 정해 주는 공식이 아닙니다. 운보다에서 내 상황을 차분히 탐색해 볼 수 있어요."
+ text=f"{headline} {advice} 사주 성향은 상황을 돌아보는 참고 관점이며 관계·금전·미래를 보장하지 않습니다. 오늘 한 가지 실천으로 시작해 보세요."
  return {"hourKst":hour,"name":filename,"sha256":hashlib.sha256(raw).hexdigest(),
   "bytes":len(raw),"title":headline,"textDraft":text,
   "visualMotif":kind,"imageVisibleObjects":label,
+  "lifeSituation":story["lifeSituation"],"visualAnchors":story["visualAnchors"],
+  "topicKey":story["topicKey"],"sceneVariant":story["sceneVariant"],
   "topicCategory":category,"firstPartyOriginal":True,"humanVisualReviewed":False,
   "imageRightsReviewed":True,"width":1080,"height":1350}
-def build(date,out):
+def build(date,out,brief_path=None,history_dir=None):
+ stories=load_editorial(date,brief_path,history_dir)
  out.mkdir(parents=True,exist_ok=True)
- cards=[make(date,h,i,out) for i,h in enumerate(SLOTS)]
+ cards=[make(date,h,i,out,stories[i]) for i,h in enumerate(SLOTS)]
  if len(set(x["sha256"] for x in cards))!=7:raise RuntimeError("REPEATED_IMAGE_SHA")
  if len(set(x["visualMotif"] for x in cards))!=7:raise RuntimeError("REPEATED_VISUAL_SUBJECT")
  m={"schemaVersion":1,"dateKst":date.isoformat(),"brand":"UNBODA",
@@ -148,4 +228,6 @@ def build(date,out):
  print("SEVEN_UNBODA_ORIGINAL_SUBJECT_IMAGES_APPROVED_TECHNICAL_ONLY",date)
 if __name__=="__main__":
  p=argparse.ArgumentParser();p.add_argument("--date",required=True);p.add_argument("--out",required=True)
- a=p.parse_args();build(dt.date.fromisoformat(a.date),pathlib.Path(a.out))
+ p.add_argument("--brief",required=True)
+ p.add_argument("--history-dir")
+ a=p.parse_args();build(dt.date.fromisoformat(a.date),pathlib.Path(a.out),a.brief,a.history_dir)

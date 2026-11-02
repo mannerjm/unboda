@@ -21,10 +21,10 @@
   "days": [
     {
       "date": "2026-11-03",
-      "publishedWithUrl": 2,
+      "publishedWithUrl": 7,
       "expected": 18,
       "status": "UNVERIFIED",
-      "lastCheckedAt": "2026-11-03T01:06:59+09:00",
+      "lastCheckedAt": "2026-11-03T07:45:40.767+09:00",
       "providerEvidence": [
         {
           "kind": "video",
@@ -43,6 +43,51 @@
           "status": "PUBLISHED",
           "publicUrl": "https://www.instagram.com/reel/DfPmAC3AafL/",
           "checkedAtKst": "2026-11-03T00:11:17+09:00"
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-03T01:00:00+09:00",
+          "network": "threads",
+          "metricoolPostId": "413929856",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.threads.com/@unboda.kr/post/DfPs2IeCExn",
+          "checkedAtKst": "2026-11-03T07:45:40.767+09:00"
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-03T04:00:00+09:00",
+          "network": "instagram",
+          "metricoolPostId": "413719021",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.instagram.com/p/DfQAz81ioQv/",
+          "checkedAtKst": "2026-11-03T07:45:40.767+09:00"
+        },
+        {
+          "kind": "zodiac",
+          "slotKst": "2026-11-03T07:00:00+09:00",
+          "network": "facebook",
+          "metricoolPostId": "414464498",
+          "status": "PUBLISHED",
+          "publicUrl": "https://facebook.com/122099486691517851/posts/122107726899517851",
+          "checkedAtKst": "2026-11-03T07:45:40.767+09:00"
+        },
+        {
+          "kind": "zodiac",
+          "slotKst": "2026-11-03T07:00:00+09:00",
+          "network": "instagram",
+          "metricoolPostId": "414464498",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.instagram.com/p/DfQVrlriJxV/",
+          "checkedAtKst": "2026-11-03T07:45:40.767+09:00"
+        },
+        {
+          "kind": "zodiac",
+          "slotKst": "2026-11-03T07:00:00+09:00",
+          "network": "threads",
+          "metricoolPostId": "414464498",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.threads.com/@unboda.kr/post/DfQV0OXCAav",
+          "checkedAtKst": "2026-11-03T07:45:40.767+09:00"
         }
       ]
     },

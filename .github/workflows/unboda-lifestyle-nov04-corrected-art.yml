@@ -1,0 +1,96 @@
+name: UNBODA single-day corrected scene-original release for Nov 04
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/unboda-lifestyle-nov04-corrected-art.yml'
+permissions:
+  contents: write
+concurrency:
+  group: unboda-corrected-nov04-original-art
+  cancel-in-progress: false
+jobs:
+  rebuild-corrected-originals:
+    if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TZ: Asia/Seoul
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install first-party rendering dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+          python -m pip install --no-cache-dir 'Pillow==11.3.0'
+      - name: Preserve original release; reject duplicate corrected uploads
+        id: existing
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="unboda-lifestyle-20261104-art2"
+          if gh release view "$TAG" --repo mannerjm/unboda >/dev/null 2>&1; then
+            test "$(gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length')" -eq 8
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "EXISTING_CORRECTED_RELEASE_PRESERVED: $TAG"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Render Nov 04 with changed subject geometry and compare to prior art
+        if: steps.existing.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s scripts/daily-lifestyle -p 'test_*.py' -v
+          git fetch --no-tags --depth=1 origin test/social-automation-safety-poc-20261023
+          git show FETCH_HEAD:automation/social/lifestyle-pilot/daily-images/20261104.json > /tmp/lifestyle-20261104.json
+          mkdir -p previous-media corrected-media
+          gh release download unboda-lifestyle-20261104 \
+            --repo mannerjm/unboda --dir previous-media \
+            --pattern 'unboda-lifestyle-2026-11-04-*.png'
+          python scripts/daily-lifestyle/render.py --date 2026-11-04 \
+            --out corrected-media --brief /tmp/lifestyle-20261104.json
+          python - <<'PY'
+          import hashlib,json,pathlib
+          from PIL import Image,ImageChops,ImageStat
+          root=pathlib.Path('corrected-media');prev=pathlib.Path('previous-media')
+          m=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          assert m['schemaVersion']==2 and m['dateKst']=='2026-11-04'
+          assert m['source']=='first-party-procedural-illustration'
+          assert m['notPhotographs'] is True and m['rightsVerifiedWithoutPaidProvider'] is True
+          assert len(m['cards'])==7 and len({x['sha256'] for x in m['cards']})==7
+          assert len({x['topicKey'] for x in m['cards']})==7
+          for c in m['cards']:
+            new=root/c['name'];old=prev/c['name']
+            assert new.is_file() and old.is_file()
+            data=new.read_bytes()
+            assert hashlib.sha256(data).hexdigest()==c['sha256']
+            assert c['compositionParameters']['scale']>0.7
+            with Image.open(new) as n, Image.open(old) as o:
+              assert n.size==o.size==(1080,1350)
+              region=(155,500,920,945)
+              diff=ImageChops.difference(n.crop(region).convert('RGB'),
+                                         o.crop(region).convert('RGB'))
+              contrast=ImageStat.Stat(diff.convert('L')).mean[0]
+              print('VISUAL_SCENE_DIFFERENCE',c['hourKst'],round(contrast,2))
+              if contrast<=12: raise RuntimeError('CORRECTED_ART_STILL_REPEATS_OLD_SCENE_'+c['hourKst'])
+          print('NOV04_SEVEN_CORRECTED_ART_ORIGINALS_SHA_AND_PIXELS_PASSED')
+          PY
+      - name: Publish distinct immutable corrective release, no SNS post
+        if: steps.existing.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="unboda-lifestyle-20261104-art2"
+          gh release create "$TAG" corrected-media/* --repo mannerjm/unboda \
+            --target "$GITHUB_SHA" --prerelease \
+            --title "운보다 2026-11-04 구도 개선 원본 7종" \
+            --notes "Replacement source for 2026-11-04 only; seven visually re-composed original illustrations, all image SHA and pixel-difference checks passed. Prior release retained. NOT SNS published."
+          test "$(gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length')" -eq 8
+          echo "NOV04_CORRECTED_ORIGINAL_RELEASE_APPROVED: $TAG"

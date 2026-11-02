@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Original first-party illustrated daily Korean lifestyle posts. Not photographs."""
 import argparse, datetime as dt, hashlib, json, pathlib, random
-from PIL import Image, ImageDraw, ImageFont, ImageStat
+from PIL import Image, ImageDraw, ImageFont, ImageStat, ImageOps
 
 SLOTS=("01","04","10","13","16","19","22")
 # The seven visible subjects are genuinely different; scenes cannot be substituted by text.
@@ -92,6 +92,38 @@ def artwork(d,kind,accent,variant=0):
   elif kind=="checklist":
    roundrect(d,(648,806,846,909),17,(209,150,117))
    d.line((701,807,701,787,791,787,791,807),fill=(246,222,175),width=8)
+def composition_parameters(date,hour,story):
+ """Deterministic actual geometry, with far more than simple color variations."""
+ key=f"{date.isoformat()}:{hour}:{story['topicKey']}:{story['sceneVariant']}"
+ h=hashlib.sha256(key.encode('utf-8')).digest()
+ return {
+  "mirrored":bool(h[0]&1),
+  "rotation":(-13,-9,-5,4,8,12)[h[1]%6],
+  "scale":0.74+(h[2]%25)/100,
+  "offsetX":int(h[3]%131)-65,
+  "offsetY":int(h[4]%61)-30,
+  "accentCorner":int(h[5]%4)
+ }
+
+def draw_composed_artwork(img,date,hour,story,accent):
+ """Make the subject genuinely shift/rotate/resize instead of recoloring old art."""
+ p=composition_parameters(date,hour,story)
+ layer=Image.new("RGBA",(1080,1350),(0,0,0,0))
+ d=ImageDraw.Draw(layer)
+ artwork(d,story["visualMotif"],accent,story["sceneVariant"])
+ art=layer.crop((155,500,920,945))
+ if p["mirrored"]:art=ImageOps.mirror(art)
+ art=art.rotate(p["rotation"],resample=Image.Resampling.BICUBIC,expand=False)
+ width=round(art.width*p["scale"]);height=round(art.height*p["scale"])
+ art=art.resize((width,height),Image.Resampling.LANCZOS)
+ x=155+max(0,min(765-width,(765-width)//2+p["offsetX"]))
+ y=500+max(0,min(445-height,(445-height)//2+p["offsetY"]))
+ # Every illustration stays within the subject card, never overlaid on Korean text.
+ if not (155<=x and 500<=y and x+width<=920 and y+height<=945):
+  raise RuntimeError("COMPOSITION_OUTSIDE_SUBJECT_CARD")
+ img.paste(art,(x,y),art)
+ return p
+
 def editorial_similarity(a,b):
  def grams(value):
   value="".join(c.lower() for c in str(value) if c.isalnum())
@@ -167,7 +199,7 @@ def make(date,hour,i,out,story):
  label,headline,advice,kind,category=(story[k] for k in (
   'label','title','advice','visualMotif','topicCategory'))
  rng=random.Random(date.toordinal()*79+i*173)
- palette=(i+date.toordinal())%7
+ palette=hashlib.sha256((date.isoformat()+story["topicKey"]).encode("utf-8")).digest()[0]%7
  top,accent=C1[palette],C2[palette]
  img=Image.new("RGB",(1080,1350),top);d=ImageDraw.Draw(img)
  for y in range(0,1350,10):
@@ -178,7 +210,12 @@ def make(date,hour,i,out,story):
   d.ellipse((x,y,x+4,y+4),fill=tuple(min(v+20,255) for v in top))
  roundrect(d,(119,468,962,962),45,(33,52,69))
  d.rounded_rectangle((119,468,962,962),radius=45,outline=accent,width=5)
- artwork(d,kind,accent,story['sceneVariant'])
+ composition=draw_composed_artwork(img,date,hour,story,accent)
+ # Accent geometry is also date-specific, not a fixed background reused daily.
+ corners=((134,482,295,637),(786,482,947,637),
+          (134,792,295,947),(786,792,947,947))
+ cx1,cy1,cx2,cy2=corners[composition["accentCorner"]]
+ d.arc((cx1,cy1,cx2,cy2),start=15,end=175,fill=accent,width=7)
  d.text((106,78),"UNBODA  /  SAJU & LIFE",font=font(33,True),fill=accent)
  d.line((107,140,970,140),fill=accent,width=3)
  d.text((107,204),label,font=font(45,True),fill=accent)
@@ -205,6 +242,7 @@ def make(date,hour,i,out,story):
   "visualMotif":kind,"imageVisibleObjects":label,
   "lifeSituation":story["lifeSituation"],"visualAnchors":story["visualAnchors"],
   "topicKey":story["topicKey"],"sceneVariant":story["sceneVariant"],
+  "compositionParameters":composition,
   "topicCategory":category,"firstPartyOriginal":True,"humanVisualReviewed":False,
   "imageRightsReviewed":True,"width":1080,"height":1350}
 def build(date,out,brief_path=None,history_dir=None):

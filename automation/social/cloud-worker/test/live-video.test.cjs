@@ -31,12 +31,13 @@ const metadata={draft:false,prerelease:true,tag_name:tag,
   }))
  ]};
 function reply(body,ok=true){return {ok,status:ok?200:404,json:async()=>body,
+ text:async()=>typeof body==="string"?body:JSON.stringify(body),
  arrayBuffer:async()=>body};}
 const env={SOCIAL_PUBLISH_ENABLED:"true",SOCIAL_PAID_GENERATION_ENABLED:"false",
  METRICOOL_USER_ID:"5729495",METRICOOL_BLOG_ID:"7377653",
  METRICOOL_API_TOKEN:"SIMULATED_ADVANCED_METRICOOL_TOKEN_SAFE_123456789"};
 const seen={calls:[],posts:0};
-function fetcherFactory({badSha=false,preExisting=false,noMediaId=false,badPost=false}={}){
+function fetcherFactory({badSha=false,preExisting=false,noMediaId=false,badPost=false,normalizedUrl=false}={}){
  const calls=[];
  const fetcher=async(url,opts)=>{
   const u=new URL(url);calls.push({url,method:opts.method});
@@ -51,14 +52,21 @@ function fetcherFactory({badSha=false,preExisting=false,noMediaId=false,badPost=
   if(u.pathname==="/api/v2/scheduler/posts"&&opts.method==="GET")
    return reply({data:preExisting?[{publicationDate:{dateTime:slot.slotKst},
      providers:[{network:"instagram"}]}]:[]});
-  if(u.pathname==="/api/actions/normalize/image/url"&&opts.method==="GET")
-   return reply(noMediaId?{}:{mediaId:"metricool-ready-video-123"});
+  if(u.pathname==="/api/actions/normalize/image/url"&&opts.method==="GET"){
+   assert.equal(u.searchParams.get("userId"),"5729495");
+   assert.equal(u.searchParams.get("blogId"),"7377653");
+   assert.equal(u.searchParams.get("folder"),"PLANNER");
+   assert.equal(opts.headers.Accept,"*/*");
+   return reply(noMediaId?{}:normalizedUrl?
+    "https://static.metricool.com/planner/normalized-video.mp4":
+    {mediaId:"metricool-ready-video-123"});
+  }
   if(u.pathname==="/api/v2/scheduler/posts"&&opts.method==="POST"){
    const body=JSON.parse(opts.body);
    assert.equal(body.providers[0].network,"instagram");
    assert.equal(body.instagramData.type,"REEL");
    assert.equal(body.autoPublish,true);
-   assert.deepEqual(body.media,[{mediaId:"metricool-ready-video-123"}]);
+   assert.deepEqual(body.media,normalizedUrl?["https://static.metricool.com/planner/normalized-video.mp4"]:[{mediaId:"metricool-ready-video-123"}]);
    return reply({id:234567});
   }
   if(u.pathname==="/api/v2/scheduler/posts/234567"&&opts.method==="GET")
@@ -130,6 +138,23 @@ test("verified original MP4 -> Metricool mediaId -> POST once -> GET confirms at
  assert.equal(claims,1);
  assert.deepEqual(m.calls.filter(x=>x.method==="POST").map(x=>new URL(x.url).pathname),
   ["/api/v2/scheduler/posts"]);
+});
+test("Metricool normalize plain-text video URL is accepted without bypassing MP4 readback QA",async()=>{
+ const m=fetcherFactory({normalizedUrl:true});let claims=0;
+ const result=await runVideoPublishCron({now,fetcher:m.fetcher,env,
+  reserveSlot:async()=>{claims++;return {state:"FIRST_ATOMIC_CLAIM_GRANTED"}}});
+ assert.equal(result.http,200);
+ assert.equal(result.body.scheduledCount,1);
+ assert.equal(claims,1);
+ assert.equal(m.calls.filter(x=>x.method==="POST").length,1);
+});
+test("non-Metricool plain response without media reference must never POST",async()=>{
+ const m=fetcherFactory({noMediaId:true});let claims=0;
+ const result=await runVideoPublishCron({now,fetcher:m.fetcher,env,
+  reserveSlot:async()=>{claims++;return {state:"FIRST_ATOMIC_CLAIM_GRANTED"}}});
+ assert.equal(result.http,207);
+ assert.equal(claims,0);
+ assert.equal(m.calls.filter(x=>x.method==="POST").length,0);
 });
 test("existing video time never POSTS or claims again",async()=>{
  const m=fetcherFactory({preExisting:true});let claims=0;

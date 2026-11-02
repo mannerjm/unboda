@@ -21,11 +21,30 @@
   "days": [
     {
       "date": "2026-11-03",
-      "publishedWithUrl": 0,
+      "publishedWithUrl": 2,
       "expected": 18,
-      "status": "NOT_CHECKED",
-      "lastCheckedAt": null,
-      "providerEvidence": []
+      "status": "UNVERIFIED",
+      "lastCheckedAt": "2026-11-03T00:11:17+09:00",
+      "providerEvidence": [
+        {
+          "kind": "video",
+          "slotKst": "2026-11-03T00:00:00+09:00",
+          "network": "facebook",
+          "metricoolPostId": "413683471",
+          "status": "PUBLISHED",
+          "publicUrl": "https://facebook.com/reel/1016550074800042",
+          "checkedAtKst": "2026-11-03T00:11:17+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-03T00:00:00+09:00",
+          "network": "instagram",
+          "metricoolPostId": "413683471",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.instagram.com/reel/DfPmAC3AafL/",
+          "checkedAtKst": "2026-11-03T00:11:17+09:00"
+        }
+      ]
     },
     {
       "date": "2026-11-04",

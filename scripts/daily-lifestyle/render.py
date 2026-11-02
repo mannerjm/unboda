@@ -92,6 +92,59 @@ def artwork(d,kind,accent,variant=0):
   elif kind=="checklist":
    roundrect(d,(648,806,846,909),17,(209,150,117))
    d.line((701,807,701,787,791,787,791,807),fill=(246,222,175),width=8)
+
+def contextual_visual_detail(d,story):
+ """Add concrete visible objects tied to the editorial situation, not only a new palette."""
+ scene=story["title"]+" "+story["lifeSituation"]
+ motif=story["visualMotif"]
+ ink=(54,78,95);paper=(251,245,226);accent=(204,153,104)
+ if motif=="receipt":
+  # The receipt explicitly labels its total instead of showing anonymous lines.
+  d.rounded_rectangle((326,823,651,887),radius=8,fill=paper)
+  d.text((337,837),"영수증 합계",font=font(29,True),fill=ink)
+  if "세탁" in scene:
+   # A shirt makes the laundry bill distinguishable from other purchases.
+   d.polygon([(732,578),(761,558),(783,581),(806,558),(846,585),
+              (827,624),(805,614),(805,701),(756,701),(756,614),(736,624)],
+             fill=(230,192,149),outline=ink)
+  elif "구독" in scene or "정기결제" in scene:
+   roundrect(d,(725,567,860,711),15,(232,236,225))
+   roundrect(d,(744,582,840,680),10,(100,153,171))
+   d.text((752,609),"정기",font=font(25,True),fill=paper)
+  elif "선물" in scene:
+   roundrect(d,(718,571,852,691),10,(235,180,134))
+   d.line((784,573,784,688),fill=ink,width=10)
+   d.line((722,623,848,623),fill=ink,width=9)
+ elif motif=="journal" and ("전화" in scene or "통화" in scene):
+  roundrect(d,(676,605,828,822),22,(221,230,226))
+  roundrect(d,(697,627,808,782),10,(90,139,155))
+  d.ellipse((742,794,764,816),fill=ink)
+ elif motif=="bedroom" and ("소음" in scene or "창밖" in scene):
+  roundrect(d,(618,541,842,701),13,(184,217,231))
+  d.line((728,546,728,694),fill=ink,width=8)
+  d.line((623,623,837,623),fill=ink,width=8)
+  for x,y in ((638,604),(661,579),(796,596)):
+   d.arc((x-16,y-14,x+16,y+14),15,160,fill=ink,width=4)
+ elif motif=="presentation" and ("출처" in scene or "인용" in scene):
+  roundrect(d,(664,562,849,674),12,paper)
+  d.text((694,594),"출처",font=font(32,True),fill=ink)
+ elif motif=="dialogue" and ("책" in scene or "반납" in scene):
+  d.polygon([(490,802),(541,817),(541,914),(490,899)],fill=(235,218,177),outline=ink)
+  d.polygon([(545,817),(602,802),(602,899),(545,914)],fill=(240,228,197),outline=ink)
+  d.line((543,817,543,912),fill=ink,width=5)
+ elif motif=="family" and ("사진" in scene or "추억" in scene):
+  roundrect(d,(442,578,642,719),8,(248,241,223))
+  d.rectangle((459,597,625,687),fill=(172,205,204))
+  d.polygon([(463,682),(516,629),(557,658),(594,614),(623,678)],fill=(98,159,130))
+ elif motif=="checklist" and ("주소" in scene or "이사" in scene):
+  roundrect(d,(610,531,846,663),14,paper)
+  d.text((655,560),"주소",font=font(37,True),fill=ink)
+  d.line((648,619,809,619),fill=ink,width=6)
+ elif motif=="checklist" and ("택배" in scene or "반품" in scene):
+  d.polygon([(666,827),(742,787),(841,827),(762,870)],fill=(212,171,121),outline=ink)
+  d.polygon([(666,827),(762,870),(762,925),(666,880)],fill=(179,139,93),outline=ink)
+  d.polygon([(762,870),(841,827),(841,881),(762,925)],fill=(230,193,146),outline=ink)
+
 def composition_parameters(date,hour,story):
  """Deterministic actual geometry, with far more than simple color variations."""
  key=f"{date.isoformat()}:{hour}:{story['topicKey']}:{story['sceneVariant']}"
@@ -111,6 +164,7 @@ def draw_composed_artwork(img,date,hour,story,accent):
  layer=Image.new("RGBA",(1080,1350),(0,0,0,0))
  d=ImageDraw.Draw(layer)
  artwork(d,story["visualMotif"],accent,story["sceneVariant"])
+ contextual_visual_detail(d,story)
  art=layer.crop((155,500,920,945))
  if p["mirrored"]:art=ImageOps.mirror(art)
  art=art.rotate(p["rotation"],resample=Image.Resampling.BICUBIC,expand=False)

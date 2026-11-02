@@ -56,6 +56,10 @@ jobs:
           PY
   original-image-verification:
     if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        daysAhead: [1, 2]
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -75,7 +79,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          DAY="$(TZ=Asia/Seoul date -d "+${{ matrix.daysAhead }} day" +%Y-%m-%d)"
           TAG="unboda-lifestyle-${DAY//-/}"
           if gh release view "$TAG" --repo mannerjm/unboda >/dev/null 2>&1; then
             COUNT="$(gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length')"
@@ -94,7 +98,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          DAY="$(TZ=Asia/Seoul date -d "+${{ matrix.daysAhead }} day" +%Y-%m-%d)"
           STAMP="${DAY//-/}"
           git fetch --no-tags --depth=1 origin test/social-automation-safety-poc-20261023
           mkdir -p .daily-lifestyle-briefs .daily-lifestyle-history
@@ -117,7 +121,7 @@ jobs:
       - name: Create original topic-specific images for tomorrow
         if: steps.existing.outputs.skip != 'true'
         run: |
-          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          DAY="$(TZ=Asia/Seoul date -d "+${{ matrix.daysAhead }} day" +%Y-%m-%d)"
           python scripts/daily-lifestyle/render.py --date "$DAY" --out original-images \
             --brief .daily-lifestyle-briefs/next.json --history-dir .daily-lifestyle-history
       - name: Retain validated originals in a private workflow artifact
@@ -132,6 +136,8 @@ jobs:
       - name: Check original PNGs and upload immutable image release
         if: steps.existing.outputs.skip != 'true'
         uses: actions/github-script@v7
+        env:
+          DAYS_AHEAD: ${{ matrix.daysAhead }}
         with:
           script: |
             const fs = require('node:fs');
@@ -146,8 +152,11 @@ jobs:
             }
             const today = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',
               year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-            const tomorrow = new Date(Date.parse(today+'T00:00:00Z')+86400000).toISOString().slice(0,10);
-            if (m.dateKst !== tomorrow) throw Error('NEXT_DATE_MISMATCH');
+            const daysAhead = Number(process.env.DAYS_AHEAD);
+            if (![1,2].includes(daysAhead)) throw Error('UNEXPECTED_DAY_BUFFER');
+            const targetDate = new Date(Date.parse(today+'T00:00:00Z')+
+              daysAhead*86400000).toISOString().slice(0,10);
+            if (m.dateKst !== targetDate) throw Error('NEXT_DATE_MISMATCH');
             const slots=['01','04','10','13','16','19','22'];
             if(JSON.stringify(m.slotHoursKst)!==JSON.stringify(slots) ||
                new Set(m.cards.map(c=>c.sha256)).size !== 7 ||
@@ -162,14 +171,14 @@ jobs:
                  raw.length>7000000 || c.imageRightsReviewed!==true ||
                  c.width!==1080||c.height!==1350)throw Error('LIFESTYLE_IMAGE_SHA_OR_RIGHTS_FAILED');
             }
-            const tag='unboda-lifestyle-'+tomorrow.replaceAll('-','');
+            const tag='unboda-lifestyle-'+targetDate.replaceAll('-','');
             const owner=context.repo.owner,repo=context.repo.repo;
             let exists=false;
             try {await github.rest.repos.getReleaseByTag({owner,repo,tag});exists=true;}
             catch(e){if(e.status!==404)throw e;}
             if(exists){core.info('LIFESTYLE_RELEASE_ALREADY_EXISTS_NO_REPOST '+tag);return;}
             const release=await github.rest.repos.createRelease({owner,repo,tag_name:tag,
-              target_commitish:context.sha,name:'운보다 생활 속 사주 원본 이미지 '+tomorrow,
+              target_commitish:context.sha,name:'운보다 생활 속 사주 원본 이미지 '+targetDate,
               body:'First-party illustrated visual source; not photographs, not human visual QA; not SNS publication.',
               prerelease:true,draft:true});
             const id=release.data.id;

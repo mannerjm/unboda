@@ -57,6 +57,47 @@ jobs:
               assert im.size == (1080,1350) and im.format == 'PNG'
           print('SEVEN_ORIGINAL_EDITIONAL_IMAGES_RENDER_AND_TECHNICAL_QA_PASSED')
           PY
+      - name: Validate Nov 05 and Nov 06 real editorial-to-image rendering without publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin test/social-automation-safety-poc-20261023
+          mkdir -p /tmp/unboda-contextual-history
+          for stamp in 20261104 20261105 20261106; do
+            git show "FETCH_HEAD:automation/social/lifestyle-pilot/daily-images/$stamp.json" > "/tmp/unboda-contextual-history/$stamp.json"
+          done
+          for day in 2026-11-05 2026-11-06; do
+            stamp="${day//-/}"
+            python scripts/daily-lifestyle/render.py --date "$day" \
+              --brief "/tmp/unboda-contextual-history/$stamp.json" \
+              --history-dir /tmp/unboda-contextual-history \
+              --out "/tmp/unboda-contextual-$stamp"
+          done
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          from PIL import Image,ImageChops,ImageStat
+          stamps=('20261105','20261106')
+          manifests=[]
+          for stamp in stamps:
+            root=Path('/tmp/unboda-contextual-'+stamp)
+            m=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+            assert m['dateKst']==f'{stamp[:4]}-{stamp[4:6]}-{stamp[6:]}'
+            assert len(m['cards'])==7 and len({c['visualMotif'] for c in m['cards']})==7
+            assert len({c['sha256'] for c in m['cards']})==7
+            for c in m['cards']:
+              raw=(root/c['name']).read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==c['sha256']
+              with Image.open(root/c['name']) as im:
+                assert im.format=='PNG' and im.size==(1080,1350)
+            manifests.append((root,m))
+          for a,b in zip(manifests[0][1]['cards'],manifests[1][1]['cards']):
+            with Image.open(manifests[0][0]/a['name']) as left, Image.open(manifests[1][0]/b['name']) as right:
+              region=(155,500,920,945)
+              avg=ImageStat.Stat(ImageChops.difference(left.crop(region),right.crop(region)).convert('L')).mean[0]
+              assert avg>8.0,(a['hourKst'],b['hourKst'],avg)
+          print('NOV_05_06_CONTEXTUAL_ILLUSTRATION_SOURCE_AND_RASTER_QA_PASSED')
+          PY
   original-image-verification:
     if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main'
     strategy:

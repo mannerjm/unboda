@@ -23,11 +23,29 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq fonts-noto-cjk
           python -m pip install --no-cache-dir 'Pillow==11.3.0'
+      - name: Check immutable next-day release before attempting new original upload
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          TAG="unboda-lifestyle-${DAY//-/}"
+          if gh release view "$TAG" --repo mannerjm/unboda >/dev/null 2>&1; then
+            COUNT="$(gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length')"
+            test "$COUNT" -eq 8
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "APPROVED_EXISTING_RELEASE_PRESERVED: $TAG"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Run daily storyboard and duplicate-protection unit tests
         run: |
           python -m py_compile scripts/daily-lifestyle/render.py
           python -m unittest discover -s scripts/daily-lifestyle -p 'test_*.py' -v
       - name: Fetch tomorrow's new editorial briefs and previous 90 days
+        if: steps.existing.outputs.skip != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -52,11 +70,13 @@ jobs:
           print("UNBODA_DAILY_EDITORIAL_HISTORY_FILES",len(list(pathlib.Path(".daily-lifestyle-history").glob("*.json"))))
           PY
       - name: Create original topic-specific images for tomorrow
+        if: steps.existing.outputs.skip != 'true'
         run: |
           DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
           python scripts/daily-lifestyle/render.py --date "$DAY" --out original-images \
             --brief .daily-lifestyle-briefs/next.json --history-dir .daily-lifestyle-history
       - name: Retain validated originals in a private workflow artifact
+        if: steps.existing.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: unboda-first-party-images-qa
@@ -65,6 +85,7 @@ jobs:
           retention-days: 1
 
       - name: Check original PNGs and upload immutable image release
+        if: steps.existing.outputs.skip != 'true'
         uses: actions/github-script@v7
         with:
           script: |

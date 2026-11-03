@@ -21,10 +21,10 @@
   "days": [
     {
       "date": "2026-11-03",
-      "publishedWithUrl": 13,
+      "publishedWithUrl": 15,
       "expected": 18,
       "status": "UNVERIFIED",
-      "lastCheckedAt": "2026-11-03T19:32:32+09:00",
+      "lastCheckedAt": "2026-11-03T21:11:17+09:00",
       "providerEvidence": [
         {
           "kind": "video",
@@ -142,6 +142,24 @@
           "status": "PUBLISHED",
           "publicUrl": "https://facebook.com/122099486691517851/posts/122107873023517851",
           "checkedAtKst": "2026-11-03T19:32:32+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-03T20:00:00+09:00",
+          "network": "facebook",
+          "metricoolPostId": "413684323",
+          "status": "PUBLISHED",
+          "publicUrl": "https://facebook.com/reel/4568080783445976",
+          "checkedAtKst": "2026-11-03T21:11:17+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-03T20:00:00+09:00",
+          "network": "tiktok",
+          "metricoolPostId": "413684323",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.tiktok.com/@unboda.kr/video/7703899142581521672",
+          "checkedAtKst": "2026-11-03T21:11:17+09:00"
         }
       ],
       "providerIssues": [

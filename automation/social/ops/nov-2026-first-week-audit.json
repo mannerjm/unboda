@@ -21,10 +21,10 @@
   "days": [
     {
       "date": "2026-11-03",
-      "publishedWithUrl": 7,
+      "publishedWithUrl": 8,
       "expected": 18,
       "status": "UNVERIFIED",
-      "lastCheckedAt": "2026-11-03T07:45:40.767+09:00",
+      "lastCheckedAt": "2026-11-03T09:11:04.903+09:00",
       "providerEvidence": [
         {
           "kind": "video",
@@ -88,6 +88,28 @@
           "status": "PUBLISHED",
           "publicUrl": "https://www.threads.com/@unboda.kr/post/DfQV0OXCAav",
           "checkedAtKst": "2026-11-03T07:45:40.767+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-03T08:00:00+09:00",
+          "network": "tiktok",
+          "metricoolPostId": "413683732",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.tiktok.com/@unboda.kr/video/7703713600703040789",
+          "checkedAtKst": "2026-11-03T09:11:04.903+09:00"
+        }
+      ],
+      "providerIssues": [
+        {
+          "kind": "video",
+          "slotKst": "2026-11-03T08:00:00+09:00",
+          "network": "youtube",
+          "metricoolPostId": "413683732",
+          "providerStatus": "ERROR",
+          "publicUrl": "https://www.youtube.com/shorts/R183BgXCrtw",
+          "detailedStatus": "The YouTube post was published with some warnings: Could not upload video thumbnail.",
+          "classification": "PUBLISHED_NOT_CONFIRMED_THUMBNAIL_WARNING",
+          "checkedAtKst": "2026-11-03T09:11:04.903+09:00"
         }
       ]
     },

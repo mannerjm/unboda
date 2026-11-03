@@ -21,10 +21,10 @@
   "days": [
     {
       "date": "2026-11-03",
-      "publishedWithUrl": 8,
+      "publishedWithUrl": 9,
       "expected": 18,
       "status": "UNVERIFIED",
-      "lastCheckedAt": "2026-11-03T09:12:01.921+09:00",
+      "lastCheckedAt": "2026-11-03T11:27:14+09:00",
       "providerEvidence": [
         {
           "kind": "video",
@@ -97,6 +97,15 @@
           "status": "PUBLISHED",
           "publicUrl": "https://www.tiktok.com/@unboda.kr/video/7703713600703040789",
           "checkedAtKst": "2026-11-03T09:12:01.921+09:00"
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-03T10:00:00+09:00",
+          "network": "facebook",
+          "metricoolPostId": "413719091",
+          "status": "PUBLISHED",
+          "publicUrl": "https://facebook.com/122099486691517851/posts/122107761357517851",
+          "checkedAtKst": "2026-11-03T11:27:14+09:00"
         }
       ],
       "providerIssues": [

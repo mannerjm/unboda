@@ -21,10 +21,10 @@
   "days": [
     {
       "date": "2026-11-03",
-      "publishedWithUrl": 11,
+      "publishedWithUrl": 12,
       "expected": 18,
       "status": "UNVERIFIED",
-      "lastCheckedAt": "2026-11-03T15:22:35+09:00",
+      "lastCheckedAt": "2026-11-03T17:25:28+09:00",
       "providerEvidence": [
         {
           "kind": "video",
@@ -33,7 +33,7 @@
           "metricoolPostId": "413683471",
           "status": "PUBLISHED",
           "publicUrl": "https://facebook.com/reel/1016550074800042",
-          "checkedAtKst": "2026-11-03T00:11:17+09:00"
+          "checkedAtKst": "2026-11-03T17:25:28+09:00"
         },
         {
           "kind": "video",
@@ -42,7 +42,7 @@
           "metricoolPostId": "413683471",
           "status": "PUBLISHED",
           "publicUrl": "https://www.instagram.com/reel/DfPmAC3AafL/",
-          "checkedAtKst": "2026-11-03T00:11:17+09:00"
+          "checkedAtKst": "2026-11-03T17:25:28+09:00"
         },
         {
           "kind": "lifestyle",
@@ -51,7 +51,7 @@
           "metricoolPostId": "413929856",
           "status": "PUBLISHED",
           "publicUrl": "https://www.threads.com/@unboda.kr/post/DfPs2IeCExn",
-          "checkedAtKst": "2026-11-03T07:45:40.767+09:00"
+          "checkedAtKst": "2026-11-03T17:25:28+09:00"
         },
         {
           "kind": "lifestyle",
@@ -60,7 +60,7 @@
           "metricoolPostId": "413719021",
           "status": "PUBLISHED",
           "publicUrl": "https://www.instagram.com/p/DfQAz81ioQv/",
-          "checkedAtKst": "2026-11-03T07:45:40.767+09:00"
+          "checkedAtKst": "2026-11-03T17:25:28+09:00"
         },
         {
           "kind": "zodiac",
@@ -69,7 +69,7 @@
           "metricoolPostId": "414464498",
           "status": "PUBLISHED",
           "publicUrl": "https://facebook.com/122099486691517851/posts/122107726899517851",
-          "checkedAtKst": "2026-11-03T07:45:40.767+09:00"
+          "checkedAtKst": "2026-11-03T17:25:28+09:00"
         },
         {
           "kind": "zodiac",
@@ -78,7 +78,7 @@
           "metricoolPostId": "414464498",
           "status": "PUBLISHED",
           "publicUrl": "https://www.instagram.com/p/DfQVrlriJxV/",
-          "checkedAtKst": "2026-11-03T07:45:40.767+09:00"
+          "checkedAtKst": "2026-11-03T17:25:28+09:00"
         },
         {
           "kind": "zodiac",
@@ -87,7 +87,7 @@
           "metricoolPostId": "414464498",
           "status": "PUBLISHED",
           "publicUrl": "https://www.threads.com/@unboda.kr/post/DfQV0OXCAav",
-          "checkedAtKst": "2026-11-03T07:45:40.767+09:00"
+          "checkedAtKst": "2026-11-03T17:25:28+09:00"
         },
         {
           "kind": "video",
@@ -96,7 +96,7 @@
           "metricoolPostId": "413683732",
           "status": "PUBLISHED",
           "publicUrl": "https://www.tiktok.com/@unboda.kr/video/7703713600703040789",
-          "checkedAtKst": "2026-11-03T09:12:01.921+09:00"
+          "checkedAtKst": "2026-11-03T17:25:28+09:00"
         },
         {
           "kind": "lifestyle",
@@ -105,7 +105,7 @@
           "metricoolPostId": "413719091",
           "status": "PUBLISHED",
           "publicUrl": "https://facebook.com/122099486691517851/posts/122107761357517851",
-          "checkedAtKst": "2026-11-03T11:27:14+09:00"
+          "checkedAtKst": "2026-11-03T17:25:28+09:00"
         },
         {
           "kind": "video",
@@ -114,7 +114,7 @@
           "metricoolPostId": "413684032",
           "status": "PUBLISHED",
           "publicUrl": "https://www.instagram.com/reel/DfQ3nfDjQyu/",
-          "checkedAtKst": "2026-11-03T12:43:58+09:00"
+          "checkedAtKst": "2026-11-03T17:25:28+09:00"
         },
         {
           "kind": "lifestyle",
@@ -123,7 +123,16 @@
           "metricoolPostId": "413719185",
           "status": "PUBLISHED",
           "publicUrl": "https://www.threads.com/@unboda.kr/post/DfQ-enpCA9F",
-          "checkedAtKst": "2026-11-03T15:22:35+09:00"
+          "checkedAtKst": "2026-11-03T17:25:28+09:00"
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-03T16:00:00+09:00",
+          "network": "instagram",
+          "metricoolPostId": "413719277",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.instagram.com/p/DfRTLlrDXMD/",
+          "checkedAtKst": "2026-11-03T17:25:28+09:00"
         }
       ],
       "providerIssues": [

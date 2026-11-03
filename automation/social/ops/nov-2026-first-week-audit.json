@@ -21,10 +21,10 @@
   "days": [
     {
       "date": "2026-11-03",
-      "publishedWithUrl": 10,
+      "publishedWithUrl": 11,
       "expected": 18,
       "status": "UNVERIFIED",
-      "lastCheckedAt": "2026-11-03T12:43:58+09:00",
+      "lastCheckedAt": "2026-11-03T15:22:35+09:00",
       "providerEvidence": [
         {
           "kind": "video",
@@ -115,6 +115,15 @@
           "status": "PUBLISHED",
           "publicUrl": "https://www.instagram.com/reel/DfQ3nfDjQyu/",
           "checkedAtKst": "2026-11-03T12:43:58+09:00"
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-03T13:00:00+09:00",
+          "network": "threads",
+          "metricoolPostId": "413719185",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.threads.com/@unboda.kr/post/DfQ-enpCA9F",
+          "checkedAtKst": "2026-11-03T15:22:35+09:00"
         }
       ],
       "providerIssues": [
@@ -128,6 +137,17 @@
           "detailedStatus": "The YouTube post was published with some warnings: Could not upload video thumbnail.",
           "classification": "PUBLISHED_NOT_CONFIRMED_THUMBNAIL_WARNING",
           "checkedAtKst": "2026-11-03T09:12:01.921+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-03T12:00:00+09:00",
+          "network": "youtube",
+          "metricoolPostId": "413684032",
+          "providerStatus": "ERROR",
+          "publicUrl": "https://www.youtube.com/shorts/pjUjm2ix17k",
+          "detailedStatus": "The YouTube post was published with some warnings: Could not upload video thumbnail.",
+          "classification": "PUBLISHED_NOT_CONFIRMED_THUMBNAIL_WARNING",
+          "checkedAtKst": "2026-11-03T15:22:35+09:00"
         }
       ]
     },

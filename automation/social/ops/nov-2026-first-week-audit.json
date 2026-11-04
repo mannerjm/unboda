@@ -228,6 +228,24 @@
           "slotKst": "2026-11-04T00:00:00+09:00",
           "classification": "MISSING_OR_UNVERIFIED",
           "detail": "No matching 00:00 video in Metricool scheduled-post read; published-provider status cannot be established from this read-only endpoint."
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-04T08:00:00+09:00",
+          "classification": "MISSING_OR_UNVERIFIED",
+          "detail": "No matching 08:00 video in current Metricool read; publication status not established."
+        },
+        {
+          "kind": "zodiac",
+          "slotKst": "2026-11-04T07:00:00+09:00",
+          "classification": "MISSING_OR_UNVERIFIED",
+          "detail": "No matching 07:00 zodiac post in current Metricool read; publication status not established."
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-04T10:00:00+09:00",
+          "classification": "MISSING_OR_UNVERIFIED",
+          "detail": "10:00 existing post #404805924 is promotional Facebook+Threads (both PUBLISHED with URLs), excluded from lifestyle quota; no independent approved lifestyle post confirmed."
         }
       ]
     },

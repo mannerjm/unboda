@@ -201,7 +201,7 @@
       "publishedWithUrl": 2,
       "expected": 18,
       "status": "UNVERIFIED",
-      "lastCheckedAt": "2026-11-04T08:07:04+09:00",
+      "lastCheckedAt": "2026-11-04T13:22:53+09:00",
       "providerEvidence": [
         {
           "kind": "lifestyle",
@@ -246,6 +246,12 @@
           "slotKst": "2026-11-04T10:00:00+09:00",
           "classification": "MISSING_OR_UNVERIFIED",
           "detail": "10:00 existing post #404805924 is promotional Facebook+Threads (both PUBLISHED with URLs), excluded from lifestyle quota; no independent approved lifestyle post confirmed."
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-04T13:00:00+09:00",
+          "classification": "MISSING_OR_UNVERIFIED",
+          "detail": "No 13:00 independent lifestyle post in official Metricool planner read at 13:22 KST; publication not established; do not repost without approved source and idempotency verification."
         }
       ]
     },

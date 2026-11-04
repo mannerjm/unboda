@@ -292,9 +292,35 @@
       "date": "2026-11-05",
       "publishedWithUrl": 0,
       "expected": 18,
-      "status": "NOT_CHECKED",
-      "lastCheckedAt": null,
-      "providerEvidence": []
+      "status": "UNVERIFIED",
+      "lastCheckedAt": "2026-11-05T07:41:36+09:00",
+      "providerEvidence": [],
+      "providerIssues": [
+        {
+          "kind": "video",
+          "slotKst": "2026-11-05T00:00:00+09:00",
+          "classification": "MISSING_OR_UNVERIFIED",
+          "detail": "No matching post in official Metricool planner read at 07:41 KST; publication not established."
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-05T01:00:00+09:00",
+          "classification": "MISSING_OR_UNVERIFIED",
+          "detail": "No matching post in official Metricool planner read at 07:41 KST."
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-05T04:00:00+09:00",
+          "classification": "MISSING_OR_UNVERIFIED",
+          "detail": "No matching post in official Metricool planner read at 07:41 KST."
+        },
+        {
+          "kind": "zodiac",
+          "slotKst": "2026-11-05T07:00:00+09:00",
+          "classification": "MISSING_OR_UNVERIFIED",
+          "detail": "No matching 07:00 zodiac post in official Metricool planner read at 07:41 KST; published-provider status unverified."
+        }
+      ]
     },
     {
       "date": "2026-11-06",

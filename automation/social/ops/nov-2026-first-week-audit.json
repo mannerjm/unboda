@@ -198,10 +198,10 @@
     },
     {
       "date": "2026-11-04",
-      "publishedWithUrl": 4,
+      "publishedWithUrl": 5,
       "expected": 18,
       "status": "UNVERIFIED",
-      "lastCheckedAt": "2026-11-04T21:26:43+09:00",
+      "lastCheckedAt": "2026-11-04T23:50:52+09:00",
       "providerEvidence": [
         {
           "kind": "lifestyle",
@@ -238,6 +238,15 @@
           "status": "PUBLISHED",
           "publicUrl": "https://www.threads.com/@unboda.kr/post/DfUMsU4CAgi",
           "checkedAtKst": "2026-11-04T19:47:03+09:00"
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-04T22:00:00+09:00",
+          "network": "facebook",
+          "metricoolPostId": "414390229",
+          "status": "PUBLISHED",
+          "publicUrl": "https://facebook.com/122099486691517851/posts/122108219169517851",
+          "checkedAtKst": "2026-11-04T23:50:52+09:00"
         }
       ],
       "providerIssues": [
@@ -276,12 +285,6 @@
           "slotKst": "2026-11-04T20:00:00+09:00",
           "classification": "MISSING_OR_UNVERIFIED",
           "detail": "No matching 20:00 video post in official Metricool planner read at 21:26 KST; provider publication status not established."
-        },
-        {
-          "kind": "lifestyle",
-          "slotKst": "2026-11-04T22:00:00+09:00",
-          "classification": "SCHEDULED_PENDING",
-          "detail": "Existing Facebook image post #414390229 is PENDING at 21:26 KST, before scheduled time; not counted as published."
         }
       ]
     },

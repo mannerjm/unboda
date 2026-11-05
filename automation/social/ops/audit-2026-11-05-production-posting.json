@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "scope": "read-only observed posting, no SNS repost/deletion, no paid API",
+  "asOfKst": "2026-11-05 evening (about 18:30 KST)",
+  "brandId": "7377653",
+  "sevenDayWindow": [
+    "2026-11-03",
+    "2026-11-09"
+  ],
+  "sevenDayPassed": false,
+  "classificationPolicy": "PUBLISHED plus publicUrl is strict Metricool evidence. Owner channel public/processed can independently verify a posted video with a provider thumbnail warning. Missing from planner alone remains missing-or-unverified until corroborated.",
+  "days": {
+    "2026-11-03": {
+      "zodiac": {
+        "publishedUrls": 3,
+        "expected": 3,
+        "postId": "414464498"
+      },
+      "lifestyle": {
+        "publishedUrls": 7,
+        "expected": 7
+      },
+      "videos": {
+        "metricoolPublishedUrls": 6,
+        "warningUrls": 2,
+        "ownerYouTubePublicProcessed": 2,
+        "expected": 8,
+        "providerWarning": "YouTube custom thumbnail could not be uploaded",
+        "youtubeIds": [
+          "R183BgXCrtw",
+          "pjUjm2ix17k"
+        ]
+      }
+    },
+    "2026-11-04": {
+      "zodiac": {
+        "verifiedPublishedUrls": 0,
+        "expected": 3,
+        "sourceRelease": "unboda-zodiac-20261104",
+        "sourceReady": true
+      },
+      "lifestyle": {
+        "verifiedPublishedUrls": 5,
+        "expected": 7,
+        "verifiedHoursKst": [
+          "01",
+          "04",
+          "16",
+          "19",
+          "22"
+        ],
+        "missingHoursKst": [
+          "13"
+        ],
+        "conflictHourKst": "10",
+        "existingPromoPostId": "404805924"
+      },
+      "videos": {
+        "verifiedPublishedUrls": 0,
+        "expected": 8,
+        "sourceReleaseMissing": true
+      }
+    },
+    "2026-11-05": {
+      "zodiac": {
+        "verifiedPublishedUrls": 0,
+        "expected": 3,
+        "sourceRelease": "unboda-zodiac-20261105",
+        "sourceReady": true
+      },
+      "lifestyle": {
+        "verifiedPublishedUrls": 0,
+        "dueBy1840Kst": 5,
+        "fullDayExpected": 7,
+        "sourceRelease": "unboda-lifestyle-20261105",
+        "sourceReady": true
+      },
+      "videos": {
+        "verifiedPublishedUrls": 0,
+        "dueBy1840Kst": 6,
+        "fullDayExpected": 8,
+        "sourceReleaseMissing": true
+      }
+    }
+  },
+  "github": {
+    "failedBuildRuns": [
+      "https://github.com/mannerjm/unboda/actions/runs/41602691814",
+      "https://github.com/mannerjm/unboda/actions/runs/41798856112",
+      "https://github.com/mannerjm/unboda/actions/runs/41993996558"
+    ],
+    "latestVideoBuildError": "NO_FRESH_NEXT_DAY_STORYBOARD:003-midnight",
+    "staleEpisodeDate": "20261103",
+    "zodiacReadyTags": [
+      "unboda-zodiac-20261104",
+      "unboda-zodiac-20261105"
+    ],
+    "lifestyleReadyTags": [
+      "unboda-lifestyle-20261105",
+      "unboda-lifestyle-20261106"
+    ],
+    "missingVideoTags": [
+      "unboda-saju-shorts-20261104",
+      "unboda-saju-shorts-20261105",
+      "unboda-saju-shorts-20261106"
+    ]
+  },
+  "vercelWorker": {
+    "project": "unboda-social-worker",
+    "workerCronVideoObserved": "VIDEO_PUBLISH_BLOCKED, NEXT_DAY_FOUR_MP4_RELEASE_NOT_AVAILABLE",
+    "textImageEndpoint": "read-only queue auditor, never creates a post",
+    "textImage503Note": "Monitor runtimeReady requires SOCIAL_PUBLISH_ENABLED=false; actual config true; CLOSED_CONFIG here does NOT by itself prove text publishing failure.",
+    "configStates": {
+      "SOCIAL_PUBLISH_ENABLED": "true",
+      "SOCIAL_PAID_GENERATION_ENABLED": "false"
+    }
+  },
+  "followup": [
+    "Restore deterministic day-specific four new storyboard JSONs in GitHub before 17:13 KST, then render unique MP4s/voice+ASR QA; do not reuse Nov3 files.",
+    "Ensure tomorrow zodiac 7-image release is idempotently scheduled to IG+FB+Threads for 07:00 with Metricool readback and exact published URLs.",
+    "Establish real daily 01/04/10/13/16/19/22 lifestyle source-to-Metricool scheduling (currently only a read-only text-image Vercel endpoint). Respect existing promos and 600 monthly cap.",
+    "Keep separate creation, scheduling, actual public success, and error statuses. No backdated or duplicate posts; restart seven-consecutive-good-days proof after remediation."
+  ],
+  "modifiedProduction": false,
+  "modifiedMetricool": false,
+  "modifiedVercelConfig": false
+}

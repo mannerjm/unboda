@@ -298,7 +298,8 @@ def make(date,hour,i,out,story):
   "topicKey":story["topicKey"],"sceneVariant":story["sceneVariant"],
   "compositionParameters":composition,
   "topicCategory":category,"firstPartyOriginal":True,"humanVisualReviewed":False,
-  "imageRightsReviewed":True,"width":1080,"height":1350}
+  "imageRightsReviewed":True,"imageRole":"procedural-illustration-qa",
+   "socialPhotoApproved":False,"notARealPhotograph":True,"width":1080,"height":1350}
 def build(date,out,brief_path=None,history_dir=None):
  stories=load_editorial(date,brief_path,history_dir)
  out.mkdir(parents=True,exist_ok=True)
@@ -309,6 +310,7 @@ def build(date,out,brief_path=None,history_dir=None):
   "source":"first-party-procedural-illustration","notPhotographs":True,
   "humanVisualReviewed":False,"automatedImageLayoutQa":True,
   "rightsVerifiedWithoutPaidProvider":True,"imagesExpected":7,
+   "photoReadyForSnsPosting":False,"imageRole":"procedural-illustration-qa",
   "slotHoursKst":list(SLOTS),"cards":cards}
  (out/"manifest.json").write_text(json.dumps(m,ensure_ascii=False,indent=2)+"\n")
  print("SEVEN_UNBODA_ORIGINAL_SUBJECT_IMAGES_APPROVED_TECHNICAL_ONLY",date)

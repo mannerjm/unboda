@@ -1,33 +1,33 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-meeting-slide-order-confused-20261106",
-  "topicKey": "saju-meeting-slide-order-confused-20261106",
+  "id": "unboda-saju-morning-overlapping-tasks-20261107",
+  "topicKey": "saju-morning-overlapping-tasks-20261107",
   "sajuCategory": "career",
   "visualStyle": "commute-sunrise",
-  "visualMotif": "meeting-presentation",
-  "situation": "아침 회의에서 발표 자료 순서가 뒤섞인 순간",
-  "hook": "아침 회의에서 발표 자료 순서가 뒤섞인 순간. 어디부터 볼까요?",
-  "theme": "사주 직업 성향은 발표 준비 습관을 돌아보는 참고예요. 발표 자료를 결론과 근거로 나누고 순서를 번호로 꼼꼼히 확인해 보세요.",
-  "thumbnailTitle": "회의 발표 자료가 뒤섞였을 때",
+  "visualMotif": "work-checklist",
+  "situation": "아침 업무 일정 두 개가 겹쳐 당황한 순간",
+  "hook": "아침 업무 일정 두 개가 겹쳐 당황한 순간. 뭘 먼저 할까요?",
+  "theme": "사주를 참고해 아침 업무 일정 두 개가 겹쳐 당황한 순간 속 생활의 작은 선택 점검",
+  "thumbnailTitle": "업무 일정 서로 겹친다면?",
   "narrationDraft": [
-    "아침 회의에서 발표 자료 순서가 뒤섞인 순간. 어디부터 볼까요?",
-    "사주 직업 성향은 발표 준비 습관을 차분히 돌아보는 참고예요.",
-    "발표 자료를 결론과 근거로 나누고 순서를 번호로 꼼꼼히 확인해 보세요.",
-    "운보다 무료 사주 조회로 일하는 태도와 준비 습관도 차근히 살펴봐요."
+    "아침 업무 일정 두 개가 겹쳐 당황한 순간. 뭘 먼저 할까요?",
+    "사주 직업 성향은 업무 순서를 정하는 내 방식을 돌아보는 참고예요.",
+    "해야 할 일을 시간별로 나눠 적고 급한 순서부터 하나씩 확인해 보세요.",
+    "운보다 무료 사주 조회로 일을 정리하는 내 습관도 차근히 살펴봐요."
   ],
   "visualConcepts": [
-    "첫 화면의 실제 회의 발표 자료와 그래프와 아침 회의에서 발표 자료 순서가 뒤섞인 순간, 페이지 순서가 정리되고 그래프가 움직이는 원본 장면",
-    "회의 발표 자료와 그래프를 가까이 보여주며 페이지 순서가 정리되고 그래프가 움직이는 변화와 움직임을 묘사하는 장면",
-    "화면에 회의 발표 자료와 그래프를 표시하고 생활 속 실천 조언을 확인하는 장면",
-    "회의 발표 자료와 그래프와 함께 운보다 무료 사주 조회 https://unboda.kr로 자연스럽게 이어지는 장면"
+    "첫 장면에서 사무실 업무 체크리스트와 업무 시간표가 겹친 모습을 실제 그림으로 보여주고 주제별 사물을 움직이는 화면",
+    "두 번째 장면에서 사무실 업무 체크리스트와 업무 시간표가 겹친 모습의 강조 위치가 달라지며 사주 성향은 참고임을 설명하는 화면",
+    "세 번째 장면에서 사무실 업무 체크리스트와 업무 시간표가 겹친 모습을 정리하고 실천 표시가 차례로 추가되는 화면",
+    "마지막 장면에서 사무실 업무 체크리스트와 업무 시간표가 겹친 모습과 운보다 무료 사주 조회 https://unboda.kr를 연결하는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "회의 발표",
-        "자료가 뒤죽박죽?"
+        "업무 일정",
+        "서로 겹친다면?"
       ],
-      "subline": "발표 자료와 그래프",
+      "subline": "업무 체크리스트",
       "illustration": "clock"
     },
     {
@@ -35,15 +35,15 @@
         "사주 직업",
         "성향 참고"
       ],
-      "subline": "내 업무 습관 돌아보기",
+      "subline": "업무 습관 돌아보기",
       "illustration": "message"
     },
     {
       "headline": [
-        "자료 순서",
-        "번호로 확인"
+        "작은 실천",
+        "지금 해봐요"
       ],
-      "subline": "결론과 근거 순서 정돈",
+      "subline": "시간별로 나눠 확인",
       "illustration": "notes"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "rest"
     }
   ],
-  "targetDateKst": "20261106",
+  "targetDateKst": "20261107",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,

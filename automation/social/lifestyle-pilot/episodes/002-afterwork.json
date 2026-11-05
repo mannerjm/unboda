@@ -1,49 +1,49 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-small-first-saving-goal-20261106",
-  "topicKey": "saju-small-first-saving-goal-20261106",
+  "id": "unboda-saju-electricity-bill-compare-20261107",
+  "topicKey": "saju-electricity-bill-compare-20261107",
   "sajuCategory": "money",
   "visualStyle": "finance-emerald",
-  "visualMotif": "savings-goal",
-  "situation": "저녁에 저축 목표를 적어 보니 금액이 막막한 순간",
-  "hook": "저녁에 저축 목표를 적어 보니 금액이 막막한 순간. 어떻게 시작할까요?",
-  "theme": "사주 재물운은 저축을 보는 내 태도를 돌아보는 참고예요. 이번 달 남는 금액을 확인하고 작은 목표부터 저축 계획에 적어 보세요.",
-  "thumbnailTitle": "저축 목표가 막막한 저녁",
+  "visualMotif": "expense-ledger",
+  "situation": "저녁에 전기요금 청구서를 보고 지출이 걱정된 순간",
+  "hook": "저녁에 전기요금 청구서를 보고 지출이 걱정된 순간. 뭘 확인할까요?",
+  "theme": "사주를 참고해 저녁에 전기요금 청구서를 보고 지출이 걱정된 순간 속 생활의 작은 선택 점검",
+  "thumbnailTitle": "전기요금 지출 왜 늘었을까?",
   "narrationDraft": [
-    "저녁에 저축 목표를 적어 보니 금액이 막막한 순간. 어떻게 시작할까요?",
-    "사주 재물운은 저축을 보는 내 태도를 차분히 돌아보는 참고예요.",
-    "이번 달 남는 금액을 확인하고 작은 목표부터 저축 계획에 적어 보세요.",
-    "운보다 무료 사주 조회로 돈을 관리하는 내 습관도 차분히 살펴봐요."
+    "저녁에 전기요금 청구서를 보고 지출이 걱정된 순간. 뭘 확인할까요?",
+    "사주 재물운은 지출을 보는 내 태도를 차분히 돌아보는 참고예요.",
+    "지난달 전기요금과 이번 달 청구액을 비교하고 바뀐 항목을 확인해 보세요.",
+    "운보다 무료 사주 조회로 돈을 쓰는 내 생활 습관도 차분히 돌아봐요."
   ],
   "visualConcepts": [
-    "첫 화면의 실제 저축 통장과 동전와 저녁에 저축 목표를 적어 보니 금액이 막막한 순간, 동전 수가 늘고 저축 목표가 표시되는 원본 장면",
-    "저축 통장과 동전를 가까이 보여주며 동전 수가 늘고 저축 목표가 표시되는 변화와 움직임을 묘사하는 장면",
-    "화면에 저축 통장과 동전를 표시하고 생활 속 실천 조언을 확인하는 장면",
-    "저축 통장과 동전와 함께 운보다 무료 사주 조회 https://unboda.kr로 자연스럽게 이어지는 장면"
+    "첫 장면에서 전기요금 영수증과 지출 가계부의 청구 금액을 실제 그림으로 보여주고 주제별 사물을 움직이는 화면",
+    "두 번째 장면에서 전기요금 영수증과 지출 가계부의 청구 금액의 강조 위치가 달라지며 사주 성향은 참고임을 설명하는 화면",
+    "세 번째 장면에서 전기요금 영수증과 지출 가계부의 청구 금액을 정리하고 실천 표시가 차례로 추가되는 화면",
+    "마지막 장면에서 전기요금 영수증과 지출 가계부의 청구 금액과 운보다 무료 사주 조회 https://unboda.kr를 연결하는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "저축 목표",
-        "어디부터 시작?"
+        "전기요금 지출",
+        "왜 늘었을까?"
       ],
-      "subline": "저축 통장과 동전 그림",
+      "subline": "영수증과 가계부",
       "illustration": "notes"
     },
     {
       "headline": [
         "사주 재물운",
-        "참고로 봐요"
+        "성향 참고"
       ],
-      "subline": "돈 관리 태도 돌아보기",
+      "subline": "내 소비 기준 돌아보기",
       "illustration": "clock"
     },
     {
       "headline": [
-        "작은 저축",
-        "계획을 적어요"
+        "작은 실천",
+        "지금 해봐요"
       ],
-      "subline": "남는 금액부터 확인해요",
+      "subline": "지난달과 청구액 비교",
       "illustration": "message"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "rest"
     }
   ],
-  "targetDateKst": "20261106",
+  "targetDateKst": "20261107",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,

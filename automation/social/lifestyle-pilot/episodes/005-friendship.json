@@ -1,49 +1,49 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-waiting-friend-reply-at-lunch-20261106",
-  "topicKey": "saju-waiting-friend-reply-at-lunch-20261106",
+  "id": "unboda-saju-travel-budget-talk-awkward-20261107",
+  "topicKey": "saju-travel-budget-talk-awkward-20261107",
   "sajuCategory": "compatibility",
   "visualStyle": "relationship-coral",
-  "visualMotif": "message-timing",
-  "situation": "점심에 친구의 답장을 기다리다 마음이 급해진 순간",
-  "hook": "점심에 친구의 답장을 기다리다 마음이 급해진 순간. 왜 그럴까요?",
-  "theme": "사주 궁합은 서로 다른 연락 습관을 이해하는 참고예요. 답장을 재촉하기 전에 내 용건을 한 줄로 정리하고 기다릴 시간을 정해 보세요.",
-  "thumbnailTitle": "친구 답장이 늦어지는 점심",
+  "visualMotif": "relationship-talk",
+  "situation": "점심에 연인과 여행 경비 얘기를 하다 서운해진 순간",
+  "hook": "점심에 연인과 여행 경비 얘기를 하다 서운해진 순간. 어떻게 말할까요?",
+  "theme": "사주를 참고해 점심에 연인과 여행 경비 얘기를 하다 서운해진 순간 속 생활의 작은 선택 점검",
+  "thumbnailTitle": "연인 대화 경비가 서운해?",
   "narrationDraft": [
-    "점심에 친구의 답장을 기다리다 마음이 급해진 순간. 왜 그럴까요?",
-    "사주 궁합은 서로 다른 연락 습관을 차분히 이해하는 참고예요.",
-    "답장을 재촉하기 전에 내 용건을 한 줄로 적고 기다릴 시간을 확인해 보세요.",
-    "운보다 무료 사주 조회로 서로 다른 연락 기대 차이도 가볍게 살펴봐요."
+    "점심에 연인과 여행 경비 얘기를 하다 서운해진 순간. 어떻게 말할까요?",
+    "사주 궁합은 여행 비용을 말하는 서로의 방식을 돌아보는 참고예요.",
+    "여행 경비를 교통비와 식비로 나눠 적고 서로의 예산을 확인해 보세요.",
+    "운보다 무료 사주 조회로 서로 다른 대화 방식도 차분히 살펴봐요."
   ],
   "visualConcepts": [
-    "첫 화면의 실제 친구에게 보낸 휴대폰 메시지와 알림와 점심에 친구의 답장을 기다리다 마음이 급해진 순간, 읽지 않은 표시에서 기다림 메모로 바뀌는 원본 장면",
-    "친구에게 보낸 휴대폰 메시지와 알림를 가까이 보여주며 읽지 않은 표시에서 기다림 메모로 바뀌는 변화와 움직임을 묘사하는 장면",
-    "화면에 친구에게 보낸 휴대폰 메시지와 알림를 표시하고 생활 속 실천 조언을 확인하는 장면",
-    "친구에게 보낸 휴대폰 메시지와 알림와 함께 운보다 무료 사주 조회 https://unboda.kr로 자연스럽게 이어지는 장면"
+    "첫 장면에서 연인 두 사람의 여행 경비 대화 말풍선을 실제 그림으로 보여주고 주제별 사물을 움직이는 화면",
+    "두 번째 장면에서 연인 두 사람의 여행 경비 대화 말풍선의 강조 위치가 달라지며 사주 성향은 참고임을 설명하는 화면",
+    "세 번째 장면에서 연인 두 사람의 여행 경비 대화 말풍선을 정리하고 실천 표시가 차례로 추가되는 화면",
+    "마지막 장면에서 연인 두 사람의 여행 경비 대화 말풍선과 운보다 무료 사주 조회 https://unboda.kr를 연결하는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "친구 답장",
-        "왜 늦어질까?"
+        "연인 대화",
+        "경비가 서운해?"
       ],
-      "subline": "휴대폰 메시지 알림",
+      "subline": "두 사람의 여행 대화",
       "illustration": "message"
     },
     {
       "headline": [
         "사주 궁합",
-        "연락 방식 참고"
+        "성향 참고"
       ],
-      "subline": "기대 차이 돌아보기",
+      "subline": "서로 다른 기대 돌아보기",
       "illustration": "rest"
     },
     {
       "headline": [
-        "휴대폰 알림",
-        "잠시 기다려요"
+        "작은 실천",
+        "지금 해봐요"
       ],
-      "subline": "용건부터 정리해요",
+      "subline": "교통비와 식비 나누기",
       "illustration": "clock"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "notes"
     }
   ],
-  "targetDateKst": "20261106",
+  "targetDateKst": "20261107",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,

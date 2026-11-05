@@ -1,49 +1,49 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-tomorrow-task-list-priorities-20261106",
-  "topicKey": "saju-tomorrow-task-list-priorities-20261106",
+  "id": "unboda-saju-bedtime-phone-delay-20261107",
+  "topicKey": "saju-bedtime-phone-delay-20261107",
   "sajuCategory": "self-understanding",
   "visualStyle": "midnight-indigo",
-  "visualMotif": "night-checklist",
-  "situation": "밤에 내일 할 일을 적어도 마음이 복잡한 순간",
-  "hook": "밤에 내일 할 일을 적어도 마음이 복잡한 순간. 왜 그럴까요?",
-  "theme": "사주는 계획할 때 나의 마음과 습관을 돌아보는 참고예요. 내일 할 일 세 가지를 적고 급한 순서대로 내일 하나씩 확인해 보세요.",
-  "thumbnailTitle": "내일 할 일에 마음이 복잡할 때",
+  "visualMotif": "sleep-routine",
+  "situation": "밤에 잠들 시간을 미루고 또 영상을 켠 순간",
+  "hook": "밤에 잠들 시간을 미루고 또 영상을 켠 순간. 언제 멈출까요?",
+  "theme": "사주를 참고해 밤에 잠들 시간을 미루고 또 영상을 켠 순간 속 생활의 작은 선택 점검",
+  "thumbnailTitle": "밤의 휴식 영상을 또 켰어?",
   "narrationDraft": [
-    "밤에 내일 할 일을 적어도 마음이 복잡한 순간. 왜 그럴까요?",
-    "사주는 계획할 때 나의 마음과 습관을 차분히 돌아보는 참고예요.",
-    "내일 할 일 세 가지를 적고 급한 순서대로 내일 하나씩 확인해 보세요.",
-    "운보다 무료 사주 조회로 내가 계획을 세우는 습관도 천천히 돌아봐요."
+    "밤에 잠들 시간을 미루고 또 영상을 켠 순간. 언제 멈출까요?",
+    "사주는 밤의 휴식 습관과 나의 선택을 차분히 돌아보는 참고예요.",
+    "잠들기 전 휴대폰을 놓을 시간을 적고 침실 조명을 조금 낮춰 보세요.",
+    "운보다 무료 사주 조회로 나의 휴식 방식과 생활 리듬도 천천히 돌아봐요."
   ],
   "visualConcepts": [
-    "첫 화면의 실제 할 일 체크리스트와 노트와 밤에 내일 할 일을 적어도 마음이 복잡한 순간, 우선순위가 바뀌고 체크가 추가 원본 장면",
-    "할 일 체크리스트와 노트를 가까이 보여주며 우선순위가 바뀌고 체크가 추가 변화와 움직임을 묘사하는 장면",
-    "화면에 할 일 체크리스트와 노트를 표시하고 생활 속 실천 조언을 확인하는 장면",
-    "할 일 체크리스트와 노트와 함께 운보다 무료 사주 조회 https://unboda.kr로 자연스럽게 이어지는 장면"
+    "첫 장면에서 침실의 달빛과 잠들기 전 휴대폰을 내려놓는 모습을 실제 그림으로 보여주고 주제별 사물을 움직이는 화면",
+    "두 번째 장면에서 침실의 달빛과 잠들기 전 휴대폰을 내려놓는 모습의 강조 위치가 달라지며 사주 성향은 참고임을 설명하는 화면",
+    "세 번째 장면에서 침실의 달빛과 잠들기 전 휴대폰을 내려놓는 모습을 정리하고 실천 표시가 차례로 추가되는 화면",
+    "마지막 장면에서 침실의 달빛과 잠들기 전 휴대폰을 내려놓는 모습과 운보다 무료 사주 조회 https://unboda.kr를 연결하는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "내일 할 일",
-        "마음이 복잡?"
+        "밤의 휴식",
+        "영상을 또 켰어?"
       ],
-      "subline": "할 일 체크리스트",
+      "subline": "잠자리와 달빛",
       "illustration": "rest"
     },
     {
       "headline": [
         "사주로 보는",
-        "계획 습관"
+        "성향 참고"
       ],
-      "subline": "나의 선택 기준 돌아보기",
+      "subline": "휴식 습관 돌아보기",
       "illustration": "notes"
     },
     {
       "headline": [
-        "세 가지 일",
-        "순서 정해요"
+        "작은 실천",
+        "지금 해봐요"
       ],
-      "subline": "차례로 체크하는 노트",
+      "subline": "휴대폰 끄는 시각 정하기",
       "illustration": "clock"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "message"
     }
   ],
-  "targetDateKst": "20261106",
+  "targetDateKst": "20261107",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,

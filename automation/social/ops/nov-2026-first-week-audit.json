@@ -354,11 +354,30 @@
     },
     {
       "date": "2026-11-06",
-      "publishedWithUrl": 0,
+      "publishedWithUrl": 2,
       "expected": 18,
-      "status": "NOT_CHECKED",
-      "lastCheckedAt": null,
-      "providerEvidence": []
+      "status": "INCOMPLETE",
+      "lastCheckedAt": "2026-11-06T00:22:36+09:00",
+      "providerEvidence": [
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T00:00:00+09:00",
+          "network": "facebook",
+          "metricoolPostId": "417610720",
+          "status": "PUBLISHED",
+          "publicUrl": "https://facebook.com/reel/1399485208923095",
+          "checkedAtKst": "2026-11-06T00:22:36+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T00:00:00+09:00",
+          "network": "instagram",
+          "metricoolPostId": "417610720",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.instagram.com/reel/DfXU9KpiXMG/",
+          "checkedAtKst": "2026-11-06T00:22:36+09:00"
+        }
+      ]
     },
     {
       "date": "2026-11-07",

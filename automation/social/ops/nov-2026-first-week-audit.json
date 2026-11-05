@@ -354,10 +354,10 @@
     },
     {
       "date": "2026-11-06",
-      "publishedWithUrl": 2,
+      "publishedWithUrl": 8,
       "expected": 18,
       "status": "INCOMPLETE",
-      "lastCheckedAt": "2026-11-06T00:22:36+09:00",
+      "lastCheckedAt": "2026-11-06T08:45:40+09:00",
       "providerEvidence": [
         {
           "kind": "video",
@@ -376,6 +376,92 @@
           "status": "PUBLISHED",
           "publicUrl": "https://www.instagram.com/reel/DfXU9KpiXMG/",
           "checkedAtKst": "2026-11-06T00:22:36+09:00"
+        },
+        {
+          "kind": "zodiac",
+          "slotKst": "2026-11-06T07:00:00+09:00",
+          "network": "facebook",
+          "metricoolPostId": "417525186",
+          "status": "PUBLISHED",
+          "publicUrl": "https://facebook.com/122099486691517851/posts/122108662845517851",
+          "checkedAtKst": "2026-11-06T08:45:40+09:00"
+        },
+        {
+          "kind": "zodiac",
+          "slotKst": "2026-11-06T07:00:00+09:00",
+          "network": "instagram",
+          "metricoolPostId": "417525186",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.instagram.com/p/DfYD8jzjS7t/",
+          "checkedAtKst": "2026-11-06T08:45:40+09:00"
+        },
+        {
+          "kind": "zodiac",
+          "slotKst": "2026-11-06T07:00:00+09:00",
+          "network": "threads",
+          "metricoolPostId": "417525186",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.threads.com/@unboda.kr/post/DfYECaMDZAD",
+          "checkedAtKst": "2026-11-06T08:45:40+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T08:00:00+09:00",
+          "network": "tiktok",
+          "metricoolPostId": "417610805",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.tiktok.com/@unboda.kr/video/7704826967534603521",
+          "checkedAtKst": "2026-11-06T08:45:40+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T08:00:00+09:00",
+          "network": "youtube",
+          "metricoolPostId": "417610805",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.youtube.com/shorts/MiNw1nYecfw",
+          "checkedAtKst": "2026-11-06T08:45:40+09:00"
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-06T04:00:00+09:00",
+          "network": "facebook",
+          "metricoolPostId": "417611873",
+          "status": "PUBLISHED",
+          "publicUrl": "https://facebook.com/122099486691517851/posts/122108634009517851",
+          "checkedAtKst": "2026-11-06T08:45:40+09:00"
+        }
+      ],
+      "providerIssues": [
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-06T01:00:00+09:00",
+          "network": "threads",
+          "metricoolPostId": "417611728",
+          "providerStatus": "ERROR",
+          "classification": "PROVIDER_ERROR",
+          "detail": "Media container not created by unknown cause; no repost permitted."
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T00:00:00+09:00",
+          "metricoolPostId": "417823664",
+          "classification": "UNEXPECTED_EXTRA_VIDEO",
+          "detail": "Additional PUBLISHED video outside approved 4x2 provider rotation: tiktok"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T08:00:00+09:00",
+          "metricoolPostId": "418321863",
+          "classification": "UNEXPECTED_EXTRA_VIDEO",
+          "detail": "Additional PUBLISHED video outside approved 4x2 provider rotation: instagram"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T08:00:00+09:00",
+          "metricoolPostId": "418321879",
+          "classification": "UNEXPECTED_EXTRA_VIDEO",
+          "detail": "Additional PUBLISHED video outside approved 4x2 provider rotation: facebook"
         }
       ]
     },

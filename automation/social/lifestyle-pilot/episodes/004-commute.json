@@ -1,33 +1,33 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-handover-missing-item-20261103",
-  "topicKey": "saju-handover-missing-item-20261103",
+  "id": "unboda-saju-meeting-slide-order-confused-20261106",
+  "topicKey": "saju-meeting-slide-order-confused-20261106",
   "sajuCategory": "career",
   "visualStyle": "commute-sunrise",
-  "visualMotif": "work-checklist",
-  "situation": "아침에 업무 인수인계가 빠진 순간",
-  "hook": "아침에 업무 인수인계가 빠진 순간. 뭘 확인할까요?",
-  "theme": "사주 직업 성향과 빠진 업무 인수인계를 확인하는 실천",
-  "thumbnailTitle": "업무 인수인계가 빠졌을 때",
+  "visualMotif": "meeting-presentation",
+  "situation": "아침 회의에서 발표 자료 순서가 뒤섞인 순간",
+  "hook": "아침 회의에서 발표 자료 순서가 뒤섞인 순간. 어디부터 볼까요?",
+  "theme": "사주 직업 성향은 발표 준비 습관을 돌아보는 참고예요. 발표 자료를 결론과 근거로 나누고 순서를 번호로 꼼꼼히 확인해 보세요.",
+  "thumbnailTitle": "회의 발표 자료가 뒤섞였을 때",
   "narrationDraft": [
-    "아침에 업무 인수인계가 빠진 순간. 뭘 확인할까요?",
-    "사주 직업 성향은 일이 꼬일 때 내가 확인하는 방식을 돌아보는 참고예요.",
-    "빠진 업무를 노트에 적어 보고 담당자와 마감 시간을 함께 확인해 보세요.",
-    "운보다 무료 사주 조회로 나의 일하는 방식도 천천히 살펴보세요."
+    "아침 회의에서 발표 자료 순서가 뒤섞인 순간. 어디부터 볼까요?",
+    "사주 직업 성향은 발표 준비 습관을 돌아보는 참고예요.",
+    "발표 자료를 결론과 근거로 나누고 순서를 번호로 꼼꼼히 확인해 보세요.",
+    "운보다 무료 사주 조회로 일하는 태도와 준비 습관도 차근히 살펴봐요."
   ],
   "visualConcepts": [
-    "아침 사무실 책상 위 업무 인수인계 체크리스트와 노트북을 실제로 그려 빈 항목 표시가 깜박이는 장면",
-    "업무 체크리스트의 빈 칸과 완료 칸을 나란히 놓고 커서가 항목 사이를 천천히 이동하는 장면",
-    "노트에 빠진 업무를 적고 담당자와 마감 시간 칸에 체크 표시가 차례로 나타나는 장면",
-    "업무 체크리스트가 정돈되고 운보다 무료 사주 조회와 https://unboda.kr 주소가 나타나는 장면"
+    "첫 화면의 실제 회의 발표 자료와 그래프와 아침 회의에서 발표 자료 순서가 뒤섞인 순간, 페이지 순서가 정리되고 그래프가 움직이는 원본 장면",
+    "회의 발표 자료와 그래프를 가까이 보여주며 페이지 순서가 정리되고 그래프가 움직이는 변화와 움직임을 묘사하는 장면",
+    "화면에 회의 발표 자료와 그래프를 표시하고 생활 속 실천 조언을 확인하는 장면",
+    "회의 발표 자료와 그래프와 함께 운보다 무료 사주 조회 https://unboda.kr로 자연스럽게 이어지는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "업무 인수인계",
-        "뭐가 빠졌지?"
+        "회의 발표",
+        "자료가 뒤죽박죽?"
       ],
-      "subline": "노트북과 업무 체크리스트",
+      "subline": "발표 자료와 그래프",
       "illustration": "clock"
     },
     {
@@ -35,15 +35,15 @@
         "사주 직업",
         "성향 참고"
       ],
-      "subline": "일하는 방식의 참고예요",
+      "subline": "내 업무 습관 돌아보기",
       "illustration": "message"
     },
     {
       "headline": [
-        "빠진 업무",
-        "노트에 적어"
+        "자료 순서",
+        "번호로 확인"
       ],
-      "subline": "담당자와 마감도 확인",
+      "subline": "결론과 근거 순서 정돈",
       "illustration": "notes"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "rest"
     }
   ],
-  "targetDateKst": "20261103",
+  "targetDateKst": "20261106",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,

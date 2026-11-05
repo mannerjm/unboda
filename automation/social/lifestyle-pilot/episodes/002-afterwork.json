@@ -1,33 +1,33 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-group-dues-reconcile-20261103",
-  "topicKey": "saju-group-dues-reconcile-20261103",
+  "id": "unboda-saju-small-first-saving-goal-20261106",
+  "topicKey": "saju-small-first-saving-goal-20261106",
   "sajuCategory": "money",
   "visualStyle": "finance-emerald",
-  "visualMotif": "expense-ledger",
-  "situation": "저녁에 모임 회비 지출을 정산하는 순간",
-  "hook": "저녁에 모임 회비 지출을 정산하는 순간. 어떻게 나눌까요?",
-  "theme": "사주 재물운을 참고하며 모임 회비 영수증을 공정하게 정산하기",
-  "thumbnailTitle": "모임 회비 정산이 헷갈릴 때",
+  "visualMotif": "savings-goal",
+  "situation": "저녁에 저축 목표를 적어 보니 금액이 막막한 순간",
+  "hook": "저녁에 저축 목표를 적어 보니 금액이 막막한 순간. 어떻게 시작할까요?",
+  "theme": "사주 재물운은 저축을 보는 내 태도를 돌아보는 참고예요. 이번 달 남는 금액을 확인하고 작은 목표부터 저축 계획에 적어 보세요.",
+  "thumbnailTitle": "저축 목표가 막막한 저녁",
   "narrationDraft": [
-    "저녁에 모임 회비 지출을 정산하는 순간. 어떻게 나눌까요?",
-    "사주 재물운은 모임 돈을 정산할 때 내 소비 기준을 살펴보는 참고예요.",
-    "영수증을 모아 지출을 기록하고 참석자별 금액을 한 번 더 계산해 보세요.",
-    "운보다 무료 사주 조회로 평소 지출을 보는 태도도 함께 돌아봐요."
+    "저녁에 저축 목표를 적어 보니 금액이 막막한 순간. 어떻게 시작할까요?",
+    "사주 재물운은 저축을 보는 내 태도를 돌아보는 참고예요.",
+    "이번 달 남는 금액을 확인하고 작은 목표부터 저축 계획에 적어 보세요.",
+    "운보다 무료 사주 조회로 돈을 관리하는 내 습관도 차분히 살펴봐요."
   ],
   "visualConcepts": [
-    "저녁 테이블 위 모임 회비 영수증과 지출 가계부를 실제로 그려 금액 숫자가 한 칸씩 나타나는 장면",
-    "모임 영수증의 지출 항목이 가계부 표로 옮겨지며 펜과 계산 표시가 움직이는 장면",
-    "참석자별 정산 금액을 가계부에 기록하고 영수증 합계에 확인 표시가 차례로 생기는 장면",
-    "회비 영수증과 가계부가 정돈되며 운보다 무료 사주 조회와 https://unboda.kr 주소가 나타나는 장면"
+    "첫 화면의 실제 저축 통장과 동전와 저녁에 저축 목표를 적어 보니 금액이 막막한 순간, 동전 수가 늘고 저축 목표가 표시되는 원본 장면",
+    "저축 통장과 동전를 가까이 보여주며 동전 수가 늘고 저축 목표가 표시되는 변화와 움직임을 묘사하는 장면",
+    "화면에 저축 통장과 동전를 표시하고 생활 속 실천 조언을 확인하는 장면",
+    "저축 통장과 동전와 함께 운보다 무료 사주 조회 https://unboda.kr로 자연스럽게 이어지는 장면"
   ],
   "scenes": [
     {
       "headline": [
-        "회비 지출",
-        "정산할 때"
+        "저축 목표",
+        "어디부터 시작?"
       ],
-      "subline": "영수증과 회비 가계부",
+      "subline": "저축 통장과 동전 그림",
       "illustration": "notes"
     },
     {
@@ -35,15 +35,15 @@
         "사주 재물운",
         "참고로 봐요"
       ],
-      "subline": "돈의 결과를 단정 안 해요",
+      "subline": "돈 관리 태도 돌아보기",
       "illustration": "clock"
     },
     {
       "headline": [
-        "지출 내역",
-        "한 번 계산"
+        "작은 저축",
+        "계획을 적어요"
       ],
-      "subline": "참석자별 금액을 확인해요",
+      "subline": "남는 금액부터 확인해요",
       "illustration": "message"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "rest"
     }
   ],
-  "targetDateKst": "20261103",
+  "targetDateKst": "20261106",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,

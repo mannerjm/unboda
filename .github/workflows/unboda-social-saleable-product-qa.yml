@@ -1,0 +1,42 @@
+name: UNBODA saleable-product-first social content contract
+on:
+  pull_request:
+    paths:
+      - 'automation/social/saleable-product-catalog.json'
+      - 'scripts/social-saleable-product-guard*'
+      - '.github/workflows/unboda-social-saleable-product-qa.yml'
+      - '.github/workflows/unboda-video-autonomous-build.yml'
+      - '.github/workflows/unboda-daily-lifestyle-assets.yml'
+  push:
+    paths:
+      - 'automation/social/saleable-product-catalog.json'
+      - 'scripts/social-saleable-product-guard*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  saleable-product-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify actual launch-saleable registry and guard regressions
+        run: |
+          node --test scripts/social-saleable-product-guard.test.mjs
+          node scripts/social-saleable-product-guard.mjs
+      - name: Verify next-day staged video and lifestyle source product mapping
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin test/social-automation-safety-poc-20261023
+          for f in 003-midnight 004-commute 005-friendship 002-afterwork; do
+            git show "FETCH_HEAD:automation/social/lifestyle-pilot/episodes/$f.json" > "/tmp/$f.json"
+          done
+          node scripts/social-saleable-product-guard.mjs --video /tmp/003-midnight.json /tmp/004-commute.json /tmp/005-friendship.json /tmp/002-afterwork.json
+          for d in 20261106 20261107 20261108; do
+            git show "FETCH_HEAD:automation/social/lifestyle-pilot/daily-images/$d.json" > "/tmp/$d.json"
+          done
+          node scripts/social-saleable-product-guard.mjs --lifestyle /tmp/20261106.json /tmp/20261107.json /tmp/20261108.json

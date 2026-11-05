@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "recordedKst": "2026-11-05 evening",
+  "project": "UNBODA",
+  "brandId": "7377653",
+  "status": "RECOVERY_20261106_SCHEDULED_NOT_YET_PUBLISHED",
+  "context": "User explicitly authorized full repair; no additional paid AI services or ad spending; existing posts retained",
+  "nov06": {
+    "zodiac": {
+      "timeKst": "07:00",
+      "postId": 417525186,
+      "providers": [
+        "facebook",
+        "instagram",
+        "threads"
+      ],
+      "mediaCount": 7,
+      "originalSourceTag": "unboda-zodiac-20261106",
+      "status": "PENDING",
+      "publicUrlsVerified": 0
+    },
+    "videos": {
+      "sourceTag": "unboda-saju-shorts-20261106",
+      "sourceAssets": 10,
+      "githubRun": "https://github.com/mannerjm/unboda/actions/runs/41993996558",
+      "build": "SUCCESS",
+      "videoSlots": [
+        {
+          "hour": "00",
+          "postId": 417547160,
+          "providers": [
+            "facebook",
+            "instagram"
+          ],
+          "status": "PENDING",
+          "withCustomThumbnail": true
+        },
+        {
+          "hour": "08",
+          "postId": 417548014,
+          "providers": [
+            "tiktok",
+            "youtube"
+          ],
+          "status": "PENDING",
+          "withCustomThumbnail": false
+        },
+        {
+          "hour": "12",
+          "postId": 417548152,
+          "providers": [
+            "instagram",
+            "youtube"
+          ],
+          "status": "PENDING",
+          "withCustomThumbnail": false
+        },
+        {
+          "hour": "20",
+          "postId": 417548323,
+          "providers": [
+            "facebook",
+            "tiktok"
+          ],
+          "status": "PENDING",
+          "withCustomThumbnail": true
+        }
+      ],
+      "publicUrlsVerified": 0
+    },
+    "lifestyle": {
+      "sourceTag": "unboda-lifestyle-20261106",
+      "slotPosts": [
+        {
+          "hour": "01",
+          "postId": 417518304,
+          "provider": "threads"
+        },
+        {
+          "hour": "04",
+          "postId": 417519380,
+          "provider": "facebook"
+        },
+        {
+          "hour": "10",
+          "postId": 417519463,
+          "provider": "instagram"
+        },
+        {
+          "hour": "13",
+          "postId": 417519540,
+          "provider": "threads"
+        },
+        {
+          "hour": "16",
+          "postId": 417519626,
+          "provider": "facebook"
+        },
+        {
+          "hour": "19",
+          "postId": 417519699,
+          "provider": "instagram"
+        },
+        {
+          "hour": "22",
+          "postId": 417519773,
+          "provider": "threads"
+        }
+      ],
+      "status": "PENDING",
+      "publicUrlsVerified": 0
+    },
+    "separatePromo": {
+      "hour": "10",
+      "postId": 404805946,
+      "providers": [
+        "facebook",
+        "threads"
+      ],
+      "doNotAlter": true
+    },
+    "totalCorePlatformScheduled": 18,
+    "totalPlatformScheduledIncludingPromo": 20
+  },
+  "nov07": {
+    "lifestyle": {
+      "sourceTag": "unboda-lifestyle-20261107",
+      "sourceAssets": 8,
+      "sourceBuildGitHubRun": "https://github.com/mannerjm/unboda/actions/runs/41819534911",
+      "qa": "SUCCESS",
+      "slotPosts": [
+        {
+          "hour": "01",
+          "postId": 417544341,
+          "provider": "facebook"
+        },
+        {
+          "hour": "04",
+          "postId": 417544419,
+          "provider": "instagram"
+        },
+        {
+          "hour": "10",
+          "postId": 417544496,
+          "provider": "threads"
+        },
+        {
+          "hour": "13",
+          "postId": 417544647,
+          "provider": "facebook"
+        },
+        {
+          "hour": "16",
+          "postId": 417544748,
+          "provider": "instagram"
+        },
+        {
+          "hour": "19",
+          "postId": 417544926,
+          "provider": "threads"
+        },
+        {
+          "hour": "22",
+          "postId": 417545048,
+          "provider": "facebook"
+        }
+      ],
+      "status": "PENDING"
+    },
+    "video": {
+      "fourOriginalSajuStoryboardsReady": true,
+      "episodeSourceRef": "test/social-automation-safety-poc-20261023",
+      "topicMotifs": [
+        "sleep-routine",
+        "work-checklist",
+        "relationship-talk",
+        "expense-ledger"
+      ],
+      "runExpected": "2026-11-06 17:13 KST",
+      "sourceReleaseNotYetBuilt": true
+    },
+    "zodiac": {
+      "sourceExpected": "2026-11-05 20:17 KST",
+      "fallback": "2026-11-06 03:15 KST",
+      "reservationExpectedFrom21KstAutomation": true,
+      "verifiedScheduledAtRecordTime": false
+    }
+  },
+  "nov08": {
+    "lifestyleSourceBriefExists": true,
+    "sourcePath": "automation/social/lifestyle-pilot/daily-images/20261108.json",
+    "sourceCommit": "caf69d1ad5e8169e978a3aa4457e519a17cfc882",
+    "releaseNotYetBuilt": true,
+    "videoSourceNotYetPrepared": true
+  },
+  "guards": [
+    "PENDING does not mean published; require provider PUBLISHED plus publicUrl, or owner channel public playback confirmation",
+    "No duplicate SNS post for same slot+network; no backdated uploads",
+    "On YouTube Shorts omit unsupported custom thumbnail URL to avoid Nov3 thumbnail warning",
+    "Existing 7-day consecutive proof failed Nov4-Nov5; new proof starts Nov6 only after actual public success",
+    "Do not alter production env, payment, customer data, refund, website, or old SNS posts",
+    "No paid external generative API/ads/subscriber purchases",
+    "Publishing worker and autoscheduler must treat scheduled posts as idempotent; flag duplicated post ids immediately"
+  ],
+  "unresolved": [
+    "2026-11-06 actual 18 platform successes cannot be verified until scheduled times pass",
+    "2026-11-07 07 zodiac not yet scheduled, requires new release",
+    "2026-11-07 videos 4x2 not yet built or scheduled",
+    "2026-11-08 lifestyle images not yet built",
+    "Beyond the preloaded editorial horizon, autonomous source creation needs repeated verified execution"
+  ]
+}

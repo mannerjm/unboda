@@ -12,14 +12,23 @@
       "topicCategory": "self-understanding",
       "label": "수첩 속 기억 메모",
       "title": "새로 배운 단어가 자꾸 기억나지 않는다면",
-      "advice": "처음 알게 된 단어 하나를 수첩에 적고 내가 이해한 뜻을 간단히 정리해 보세요.",
+      "advice": "새로 배운 단어 하나를 수첩에 적고 나의 학습 방식에 맞춰 뜻을 정리해 보세요.",
       "lifeSituation": "저녁에 오늘 새로 배운 단어를 떠올리며 수첩에 뜻과 예시를 적는 순간",
       "visualAnchors": [
         "수첩",
         "메모"
       ],
       "sceneVariant": 2,
-      "topicKey": "new-word-one-line-memory-20261108"
+      "topicKey": "new-word-one-line-memory-20261108",
+      "productId": "study-learning-strategy",
+      "productTitle": "학습 전략 분석",
+      "productCategory": "growth",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/study-learning-strategy",
+      "contentGoal": "premium-conversion",
+      "productProblem": "새로 배운 단어를 정리하는 학습 전략과 기억 방식이 고민인 상황",
+      "productValue": "노력을 이해와 활용으로 바꾸는 학습 구조를 점검",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 학습 전략 분석 https://unboda.kr/paid-analysis/study-learning-strategy"
     },
     {
       "hourKst": "04",
@@ -34,7 +43,16 @@
         "조명"
       ],
       "sceneVariant": 1,
-      "topicKey": "season-blanket-thickness-20261108"
+      "topicKey": "season-blanket-thickness-20261108",
+      "productId": "health-sleep-rhythm",
+      "productTitle": "수면 리듬 점검 분석",
+      "productCategory": "health",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/health-sleep-rhythm",
+      "contentGoal": "premium-conversion",
+      "productProblem": "환절기 침실 온도와 수면 리듬을 위한 이불 선택이 고민인 상황",
+      "productValue": "수면 습관을 진단하지 않고 관찰 가능한 리듬과 다음날 회복 신호를 점검",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 수면 리듬 점검 분석 https://unboda.kr/paid-analysis/health-sleep-rhythm"
     },
     {
       "hourKst": "10",
@@ -49,7 +67,16 @@
         "자료 표"
       ],
       "sceneVariant": 3,
-      "topicKey": "meeting-number-unit-consistency-20261108"
+      "topicKey": "meeting-number-unit-consistency-20261108",
+      "productId": "career-workplace-adaptation",
+      "productTitle": "직장 적응 분석",
+      "productCategory": "career",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/career-workplace-adaptation",
+      "contentGoal": "premium-conversion",
+      "productProblem": "회의 자료 숫자 단위가 일치하지 않아 직장 업무 검수에 신경 쓰이는 상황",
+      "productValue": "현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 직장 적응 분석 https://unboda.kr/paid-analysis/career-workplace-adaptation"
     },
     {
       "hourKst": "13",
@@ -64,7 +91,16 @@
         "카드"
       ],
       "sceneVariant": 4,
-      "topicKey": "grocery-budget-before-shop-20261108"
+      "topicKey": "grocery-budget-before-shop-20261108",
+      "productId": "money-saving-discipline",
+      "productTitle": "저축과 자산 관리 습관",
+      "productCategory": "money",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/money-saving-discipline",
+      "contentGoal": "premium-conversion",
+      "productProblem": "마트 장보기 예산과 저축 기준을 지키기 어려운 상황",
+      "productValue": "저축·예산 기준을 유지하고 반복 가능한 관리 루틴을 재설정하는 방법을 분석",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 저축과 자산 관리 습관 https://unboda.kr/paid-analysis/money-saving-discipline"
     },
     {
       "hourKst": "16",
@@ -79,7 +115,16 @@
         "말풍선"
       ],
       "sceneVariant": 1,
-      "topicKey": "friend-photo-reply-kind-20261108"
+      "topicKey": "friend-photo-reply-kind-20261108",
+      "productId": "relationship-friendship",
+      "productTitle": "친구 관계 분석",
+      "productCategory": "social",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/relationship-friendship",
+      "contentGoal": "premium-conversion",
+      "productProblem": "친구가 보낸 사진에 답하며 상호성과 연락 습관을 돌아보는 상황",
+      "productValue": "친구 관계의 상호성·신뢰·감정 노동을 점검하고 재조정 기준을 만듭니다.",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 친구 관계 분석 https://unboda.kr/paid-analysis/relationship-friendship"
     },
     {
       "hourKst": "19",
@@ -94,22 +139,40 @@
         "달력"
       ],
       "sceneVariant": 2,
-      "topicKey": "family-shared-item-location-20261108"
+      "topicKey": "family-shared-item-location-20261108",
+      "productId": "relationship-family-role",
+      "productTitle": "가족 역할 경계 분석",
+      "productCategory": "social",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/relationship-family-role",
+      "contentGoal": "premium-conversion",
+      "productProblem": "가족이 자주 쓰는 물건을 함께 정리할 때 역할 경계가 어긋나는 상황",
+      "productValue": "가족 역할 기대와 반복 부담을 조정하는 관찰 기준을 분석",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 가족 역할 경계 분석 https://unboda.kr/paid-analysis/relationship-family-role"
     },
     {
       "hourKst": "22",
       "visualMotif": "checklist",
       "topicCategory": "self-understanding",
       "label": "제출 서류 체크리스트",
-      "title": "중요한 서류에 서명을 빠뜨릴까 걱정된다면",
-      "advice": "서류를 보내기 전에 이름과 서명과 첨부파일을 체크리스트로 하나씩 확인해 보세요.",
-      "lifeSituation": "밤에 다음 날 제출할 서류를 펼쳐 두고 서명과 첨부 목록을 점검하는 순간",
+      "title": "업무 서류의 서명과 첨부파일을 놓칠까 걱정된다면",
+      "advice": "업무 서류를 제출하기 전에 이름과 서명과 첨부자료를 체크리스트로 확인해 보세요.",
+      "lifeSituation": "다음 날 제출할 업무 서류를 펼쳐 두고 서명과 첨부자료를 점검하는 밤",
       "visualAnchors": [
         "체크리스트",
         "표시"
       ],
       "sceneVariant": 4,
-      "topicKey": "form-signature-doublecheck-20261108"
+      "topicKey": "form-signature-doublecheck-20261108",
+      "productId": "career-workplace-adaptation",
+      "productTitle": "직장 적응 분석",
+      "productCategory": "career",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/career-workplace-adaptation",
+      "contentGoal": "premium-conversion",
+      "productProblem": "업무 서류에 서명과 첨부자료를 빠뜨릴까 걱정되는 직장 적응 상황",
+      "productValue": "현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 직장 적응 분석 https://unboda.kr/paid-analysis/career-workplace-adaptation"
     }
   ]
 }

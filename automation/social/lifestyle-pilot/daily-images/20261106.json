@@ -19,7 +19,16 @@
         "메모"
       ],
       "sceneVariant": 2,
-      "topicKey": "first-group-introduction-20261106"
+      "topicKey": "first-group-introduction-20261106",
+      "productId": "social-network-expansion",
+      "productTitle": "새로운 인맥과 관계 확장",
+      "productCategory": "social",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/social-network-expansion",
+      "contentGoal": "premium-conversion",
+      "productProblem": "새 모임에서 첫 자기소개가 어색해 인맥을 이어가기 어려운 상황",
+      "productValue": "새로운 인맥이 실제 연결로 이어지는 접점과 후속 교류 기준을 분석",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 새로운 인맥과 관계 확장 https://unboda.kr/paid-analysis/social-network-expansion"
     },
     {
       "hourKst": "04",
@@ -34,7 +43,16 @@
         "조명"
       ],
       "sceneVariant": 4,
-      "topicKey": "night-window-noise-20261106"
+      "topicKey": "night-window-noise-20261106",
+      "productId": "health-sleep-rhythm",
+      "productTitle": "수면 리듬 점검 분석",
+      "productCategory": "health",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/health-sleep-rhythm",
+      "contentGoal": "premium-conversion",
+      "productProblem": "새벽 창밖 소음 때문에 수면 리듬과 잠자리 환경을 점검하는 상황",
+      "productValue": "수면 습관을 진단하지 않고 관찰 가능한 리듬과 다음날 회복 신호를 점검",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 수면 리듬 점검 분석 https://unboda.kr/paid-analysis/health-sleep-rhythm"
     },
     {
       "hourKst": "10",
@@ -49,7 +67,16 @@
         "그래프"
       ],
       "sceneVariant": 3,
-      "topicKey": "presentation-source-credit-20261106"
+      "topicKey": "presentation-source-credit-20261106",
+      "productId": "career-workplace-adaptation",
+      "productTitle": "직장 적응 분석",
+      "productCategory": "career",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/career-workplace-adaptation",
+      "contentGoal": "premium-conversion",
+      "productProblem": "보고서의 자료 출처를 확인해 직장 업무 기대에 맞추는 상황",
+      "productValue": "현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 직장 적응 분석 https://unboda.kr/paid-analysis/career-workplace-adaptation"
     },
     {
       "hourKst": "13",
@@ -64,7 +91,16 @@
         "카드"
       ],
       "sceneVariant": 1,
-      "topicKey": "unused-subscription-review-20261106"
+      "topicKey": "unused-subscription-review-20261106",
+      "productId": "money-contract-commitment",
+      "productTitle": "계약·고정비 검토 분석",
+      "productCategory": "money",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/money-contract-commitment",
+      "contentGoal": "premium-conversion",
+      "productProblem": "사용하지 않는 구독 계약과 반복 고정비를 확인하는 상황",
+      "productValue": "장기 계약과 고정 의무의 중단·검토·출구 조건을 점검",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 계약·고정비 검토 분석 https://unboda.kr/paid-analysis/money-contract-commitment"
     },
     {
       "hourKst": "16",
@@ -79,7 +115,16 @@
         "말풍선"
       ],
       "sceneVariant": 4,
-      "topicKey": "interrupted-team-conversation-20261106"
+      "topicKey": "interrupted-team-conversation-20261106",
+      "productId": "compatibility-workplace",
+      "productTitle": "직장·동료 궁합 분석",
+      "productCategory": "compatibility",
+      "productType": "compatibility",
+      "landingPath": "/special-analysis/compatibility/workplace",
+      "contentGoal": "compatibility-conversion",
+      "productProblem": "동료와 회의 중 대화가 엇갈려 직장 궁합의 소통 차이를 느끼는 상황",
+      "productValue": "동료 사이의 역할 분담·소통·갈등 흐름",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 직장·동료 궁합 분석 https://unboda.kr/special-analysis/compatibility/workplace"
     },
     {
       "hourKst": "19",
@@ -94,7 +139,16 @@
         "식탁"
       ],
       "sceneVariant": 3,
-      "topicKey": "family-birthday-calendar-20261106"
+      "topicKey": "family-birthday-calendar-20261106",
+      "productId": "relationship-family-role",
+      "productTitle": "가족 역할 경계 분석",
+      "productCategory": "social",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/relationship-family-role",
+      "contentGoal": "premium-conversion",
+      "productProblem": "가족 기념일을 챙기는 역할 기대가 반복되며 부담을 나누고 싶은 상황",
+      "productValue": "가족 역할 기대와 반복 부담을 조정하는 관찰 기준을 분석",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 가족 역할 경계 분석 https://unboda.kr/paid-analysis/relationship-family-role"
     },
     {
       "hourKst": "22",
@@ -109,7 +163,16 @@
         "표시"
       ],
       "sceneVariant": 2,
-      "topicKey": "return-parcel-check-20261106"
+      "topicKey": "return-parcel-check-20261106",
+      "productId": "money-leak-risk",
+      "productTitle": "돈이 새는 구조와 손실 위험",
+      "productCategory": "money",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/money-leak-risk",
+      "contentGoal": "premium-conversion",
+      "productProblem": "택배 반품을 놓치거나 환불 조건을 확인하지 않아 손실이 생길까 걱정하는 상황",
+      "productValue": "지출·계약·공동 부담에서 손실 노출이 커지는 구조와 위험 감소 기준을 분석",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 돈이 새는 구조와 손실 위험 https://unboda.kr/paid-analysis/money-leak-risk"
     }
   ]
 }

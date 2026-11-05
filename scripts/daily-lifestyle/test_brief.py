@@ -96,6 +96,16 @@ class LifestyleBriefTests(unittest.TestCase):
     self.assertGreaterEqual(bounds[1],500)
     self.assertLessEqual(bounds[2],920)
     self.assertLessEqual(bounds[3],945)
+ def test_procedural_cards_are_never_mislabeled_as_real_lifestyle_photos(self):
+  # These legacy images remain for QA, not the photo required for SNS.
+  from PIL import Image
+  s=fixture()["stories"][0]
+  with tempfile.TemporaryDirectory() as tmp:
+   result=module.make(DATE,"01",0,pathlib.Path(tmp),s)
+   self.assertEqual(result["imageRole"],"procedural-illustration-qa")
+   self.assertIs(result["socialPhotoApproved"],False)
+   self.assertIs(result["notARealPhotograph"],True)
+   self.assertEqual(Image.open(pathlib.Path(tmp)/result["name"]).size,(1080,1350))
  def test_no_fixed_story_fallback(self):
   with self.assertRaisesRegex(RuntimeError,"DAILY_NEW_EDITORIAL"):
    module.load_editorial(DATE,None)

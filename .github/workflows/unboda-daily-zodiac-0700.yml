@@ -1,7 +1,8 @@
 name: UNBODA 07KST 60 birth-year ganji zodiac carousel
 on:
   schedule:
-    - cron: '15 18 * * *' # 03:15 KST, ample margin before 07:00
+    - cron: '17 11 * * *' # 20:17 KST: NEXT-DAY source, before night-before SNS scheduling
+    - cron: '15 18 * * *' # 03:15 KST: SAME-DAY backup if source missing
   push:
     paths:
       - '.github/workflows/unboda-daily-zodiac-0700.yml'
@@ -31,7 +32,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "push" ]; then
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event.schedule }}" = "17 11 * * *" ]; then
             TARGET="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
           else
             TARGET="$(TZ=Asia/Seoul date +%Y-%m-%d)"

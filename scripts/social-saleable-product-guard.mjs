@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import {pathToFileURL} from 'node:url';
 const root=process.cwd();
-const read=p=>readFileSync(root+'/'+p,'utf8');
+const read=p=>readFileSync(p.startsWith('/')?p:root+'/'+p,'utf8');
 const catalog=JSON.parse(read('automation/social/saleable-product-catalog.json'));
 export const PRODUCTS=new Map(catalog.products.map(x=>[x.id,x]));
 const deny=(why)=>({ok:false,reason:why});

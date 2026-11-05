@@ -1,0 +1,255 @@
+{
+  "schemaVersion": 1,
+  "recordedKst": "2026-11-05 evening",
+  "brandId": "7377653",
+  "scope": "directly applied saleable-product-first editorial metadata and Metricool caption conversion",
+  "catalog": "automation/social/saleable-product-catalog.json",
+  "catalogVerifiedSaleableCount": 19,
+  "mainAutomationGuardPr": "https://github.com/mannerjm/unboda/pull/396",
+  "falseAlarmVideoSkipPr": "https://github.com/mannerjm/unboda/pull/397",
+  "stageVideoOriginalBriefs": [
+    "003-midnight.json",
+    "004-commute.json",
+    "005-friendship.json",
+    "002-afterwork.json"
+  ],
+  "stageDailyBriefs": [
+    "20261106.json",
+    "20261107.json",
+    "20261108.json"
+  ],
+  "videoDailyCount": 4,
+  "lifeDailyCount": 7,
+  "metricoolModifiedReservations": 19,
+  "items": [
+    {
+      "date": "2026-11-05",
+      "hourKst": "22",
+      "network": "instagram",
+      "postId": 417610611,
+      "productId": "money-contract-commitment",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-06",
+      "hourKst": "00",
+      "network": "facebook+instagram",
+      "postId": 417610720,
+      "productId": "health-stress-regulation",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-06",
+      "hourKst": "08",
+      "network": "tiktok+youtube",
+      "postId": 417610805,
+      "productId": "career-workplace-adaptation",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-06",
+      "hourKst": "12",
+      "network": "instagram+youtube",
+      "postId": 417610924,
+      "productId": "compatibility-friend",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-06",
+      "hourKst": "20",
+      "network": "facebook+tiktok",
+      "postId": 417611091,
+      "productId": "money-saving-discipline",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-06",
+      "hourKst": "01",
+      "network": "threads",
+      "postId": 417611728,
+      "productId": "social-network-expansion",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-06",
+      "hourKst": "04",
+      "network": "facebook",
+      "postId": 417611873,
+      "productId": "health-sleep-rhythm",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-06",
+      "hourKst": "10",
+      "network": "instagram",
+      "postId": 417612070,
+      "productId": "career-workplace-adaptation",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-06",
+      "hourKst": "13",
+      "network": "threads",
+      "postId": 417612153,
+      "productId": "money-contract-commitment",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-06",
+      "hourKst": "16",
+      "network": "facebook",
+      "postId": 417612238,
+      "productId": "compatibility-workplace",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-06",
+      "hourKst": "19",
+      "network": "instagram",
+      "postId": 417612492,
+      "productId": "relationship-family-role",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-06",
+      "hourKst": "22",
+      "network": "threads",
+      "postId": 417612631,
+      "productId": "money-leak-risk",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-07",
+      "hourKst": "01",
+      "network": "facebook",
+      "postId": 417612842,
+      "productId": "study-learning-strategy",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-07",
+      "hourKst": "04",
+      "network": "instagram",
+      "postId": 417612889,
+      "productId": "health-sleep-rhythm",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-07",
+      "hourKst": "10",
+      "network": "threads",
+      "postId": 417613070,
+      "productId": "business-team-management",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-07",
+      "hourKst": "13",
+      "network": "facebook",
+      "postId": 417613128,
+      "productId": "money-saving-discipline",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-07",
+      "hourKst": "16",
+      "network": "instagram",
+      "postId": 417613208,
+      "productId": "relationship-friendship",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-07",
+      "hourKst": "19",
+      "network": "threads",
+      "postId": 417613329,
+      "productId": "relationship-family-role",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    },
+    {
+      "date": "2026-11-07",
+      "hourKst": "22",
+      "network": "facebook",
+      "postId": 417613517,
+      "productId": "health-habit-continuity",
+      "status": "PENDING",
+      "autoPublish": true,
+      "mediaAndUuidPreserved": true,
+      "publicUrlConfirmed": false
+    }
+  ],
+  "protectedExisting": [
+    "2026-11-06 07:00 zodiac #417525186",
+    "2026-11-06 10:00 Facebook+Threads promo #404805946",
+    "2026-11-06 immutable 10-asset video release"
+  ],
+  "automationTaskIds": [
+    "6adc5ebc26a88191b20bb4645d7b8ebf",
+    "6ae1bfa8355481919cde5ba51177dc03",
+    "6ae1c6edc0e8819191fab7996fbea20d"
+  ],
+  "warnings": [
+    "The 2026-11-06 MP4s were rendered before the product-first speech update; saleable product linkage was added to reservation captions only.",
+    "2026-11-07 MP4s have product-specific last voice/scene in source but still require next scheduled full ASR/media QA and real public URLs.",
+    "Editing existing scheduled posts changes numeric post IDs while preserving UUID, media and publication time.",
+    "Scheduled/PENDING is not PUBLISHED; 7 consecutive days of actual posting cannot yet be claimed.",
+    "If future storyboards have no product metadata, fail-closed source-build gate blocks media. Existing 7-day monitor must report."
+  ],
+  "modifiedProductionCode": true,
+  "modifiedProductAndPaymentLogic": false,
+  "newPaidServices": false
+}

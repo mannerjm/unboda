@@ -162,6 +162,10 @@ jobs:
             (pathlib.Path(".daily-lifestyle-history")/filename).write_bytes(content)
           print("UNBODA_DAILY_EDITORIAL_HISTORY_FILES",len(list(pathlib.Path(".daily-lifestyle-history").glob("*.json"))))
           PY
+      - name: Enforce real saleable-product metadata for seven daily topics
+        if: steps.existing.outputs.skip != 'true'
+        run: |
+          node scripts/social-saleable-product-guard.mjs --lifestyle .daily-lifestyle-briefs/next.json
       - name: Create original topic-specific images for tomorrow
         if: steps.existing.outputs.skip != 'true'
         run: |

@@ -7,13 +7,13 @@
   "visualMotif": "work-checklist",
   "situation": "아침 업무 일정 두 개가 겹쳐 당황한 순간",
   "hook": "아침 업무 일정 두 개가 겹쳐 당황한 순간. 뭘 먼저 할까요?",
-  "theme": "사주를 참고해 아침 업무 일정 두 개가 겹쳐 당황한 순간 속 생활의 작은 선택 점검",
+  "theme": "아침에 업무 일정이 겹쳐 과부하를 느끼는 상황. 운보다의 업무 과부하 회복 분석 분석은 업무에서 소진을 만드는 패턴과 지속 가능한 업무 경계를 점검.",
   "thumbnailTitle": "업무 일정 서로 겹친다면?",
   "narrationDraft": [
     "아침 업무 일정 두 개가 겹쳐 당황한 순간. 뭘 먼저 할까요?",
-    "사주 직업 성향은 업무 순서를 정하는 내 방식을 돌아보는 참고예요.",
+    "사주 직업 관점에서 업무 과부하와 내 회복 방식을 살펴보는 참고예요.",
     "해야 할 일을 시간별로 나눠 적고 급한 순서부터 하나씩 확인해 보세요.",
-    "운보다 무료 사주 조회로 일을 정리하는 내 습관도 차근히 살펴봐요."
+    "운보다 무료 사주 조회 후 업무 과부하 회복 분석을 살펴보세요."
   ],
   "visualConcepts": [
     "첫 장면에서 사무실 업무 체크리스트와 업무 시간표가 겹친 모습을 실제 그림으로 보여주고 주제별 사물을 움직이는 화면",
@@ -51,7 +51,7 @@
         "내 사주도",
         "무료로 살펴봐"
       ],
-      "subline": "운보다 무료 사주 조회",
+      "subline": "운보다 무료 사주 · 업무 과부하 회복 분석",
       "illustration": "rest"
     }
   ],
@@ -59,5 +59,14 @@
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
-  "automatedPublicationAllowed": false
+  "automatedPublicationAllowed": false,
+  "productId": "career-workload-recovery",
+  "productTitle": "업무 과부하 회복 분석",
+  "productCategory": "career",
+  "productType": "premium",
+  "landingPath": "/paid-analysis/career-workload-recovery",
+  "contentGoal": "premium-conversion",
+  "productProblem": "아침에 업무 일정이 겹쳐 과부하를 느끼는 상황",
+  "productValue": "업무에서 소진을 만드는 패턴과 지속 가능한 업무 경계를 점검",
+  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 업무 과부하 회복 분석 https://unboda.kr/paid-analysis/career-workload-recovery"
 }

@@ -7,13 +7,13 @@
   "visualMotif": "sleep-routine",
   "situation": "밤에 잠들 시간을 미루고 또 영상을 켠 순간",
   "hook": "밤에 잠들 시간을 미루고 또 영상을 켠 순간. 언제 멈출까요?",
-  "theme": "사주를 참고해 밤에 잠들 시간을 미루고 또 영상을 켠 순간 속 생활의 작은 선택 점검",
+  "theme": "취침 전 휴대폰 사용으로 수면 리듬이 흔들리는 습관. 운보다의 수면 리듬 점검 분석 분석은 수면 습관을 진단하지 않고 관찰 가능한 리듬과 다음날 회복 신호를 점검.",
   "thumbnailTitle": "밤의 휴식 영상을 또 켰어?",
   "narrationDraft": [
     "밤에 잠들 시간을 미루고 또 영상을 켠 순간. 언제 멈출까요?",
-    "사주는 밤의 휴식 습관과 나의 선택을 차분히 돌아보는 참고예요.",
+    "사주에서는 수면 습관과 하루의 회복 리듬을 차분히 돌아보는 참고예요.",
     "잠들기 전 휴대폰을 놓을 시간을 적어 두고 침실 조명을 조금 낮춰 보세요.",
-    "운보다 무료 사주 조회로 나의 휴식 방식과 생활 리듬도 천천히 돌아봐요."
+    "운보다 무료 사주 조회 후 수면 리듬 점검 분석도 자세히 살펴보세요."
   ],
   "visualConcepts": [
     "첫 장면에서 침실의 달빛과 잠들기 전 휴대폰을 내려놓는 모습을 실제 그림으로 보여주고 주제별 사물을 움직이는 화면",
@@ -51,7 +51,7 @@
         "내 사주도",
         "무료로 살펴봐"
       ],
-      "subline": "운보다 무료 사주 조회",
+      "subline": "운보다 무료 사주 · 수면 리듬 점검 분석",
       "illustration": "message"
     }
   ],
@@ -59,5 +59,14 @@
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
-  "automatedPublicationAllowed": false
+  "automatedPublicationAllowed": false,
+  "productId": "health-sleep-rhythm",
+  "productTitle": "수면 리듬 점검 분석",
+  "productCategory": "health",
+  "productType": "premium",
+  "landingPath": "/paid-analysis/health-sleep-rhythm",
+  "contentGoal": "premium-conversion",
+  "productProblem": "취침 전 휴대폰 사용으로 수면 리듬이 흔들리는 습관",
+  "productValue": "수면 습관을 진단하지 않고 관찰 가능한 리듬과 다음날 회복 신호를 점검",
+  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 수면 리듬 점검 분석 https://unboda.kr/paid-analysis/health-sleep-rhythm"
 }

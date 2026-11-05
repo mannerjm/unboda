@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 2,
+  "dateKst": "2026-11-07",
+  "brand": "UNBODA",
+  "firstPartyOriginal": true,
+  "notPhotographs": true,
+  "editorialState": "READY_FOR_AUTOMATED_QA_NOT_HUMAN_REVIEWED",
+  "stories": [
+    {
+      "hourKst": "01",
+      "visualMotif": "journal",
+      "topicCategory": "self-understanding",
+      "label": "독서 노트와 볼펜",
+      "title": "책을 읽고도 기억에 남는 내용이 없다면",
+      "advice": "책에서 마음에 남은 문장 한 줄과 나의 생각 한 줄을 수첩에 적어 보세요.",
+      "lifeSituation": "독서를 마친 뒤 마음에 남는 문장을 수첩에 옮겨 적는 조용한 밤",
+      "visualAnchors": [
+        "수첩",
+        "볼펜"
+      ],
+      "sceneVariant": 1,
+      "topicKey": "book-one-sentence-reflection-20261107"
+    },
+    {
+      "hourKst": "04",
+      "visualMotif": "bedroom",
+      "topicCategory": "self-understanding",
+      "label": "침대 옆 정돈한 베개",
+      "title": "침대 옆 물건이 쌓여 자리가 좁다면",
+      "advice": "잠자리에 필요한 물건만 곁에 두고 나머지는 둘 곳을 정해 천천히 정리해 보세요.",
+      "lifeSituation": "침대 옆에 쌓인 물건을 정리하고 베개와 조명을 다시 놓는 새벽",
+      "visualAnchors": [
+        "침대",
+        "베개"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "bedside-clutter-space-20261107"
+    },
+    {
+      "hourKst": "10",
+      "visualMotif": "presentation",
+      "topicCategory": "career",
+      "label": "업무 분담표와 자료",
+      "title": "회의에서 맡은 업무 구분이 겹친다면",
+      "advice": "팀의 업무 자료 표에 각자 담당할 일과 완료 시점을 적어 한 번 더 확인해 보세요.",
+      "lifeSituation": "팀원들이 맡은 업무 역할이 겹쳐 회의 자료 표를 다시 맞추는 아침",
+      "visualAnchors": [
+        "업무 자료",
+        "자료 표"
+      ],
+      "sceneVariant": 4,
+      "topicKey": "team-role-overlap-meeting-20261107"
+    },
+    {
+      "hourKst": "13",
+      "visualMotif": "receipt",
+      "topicCategory": "money",
+      "label": "교통비 영수증과 카드",
+      "title": "교통비를 정산하려는데 내역이 흩어졌다면",
+      "advice": "교통비 카드 알림과 영수증을 날짜별로 정리한 뒤 실제 결제 금액을 확인해 보세요.",
+      "lifeSituation": "한 주 동안 이동한 교통비를 계산하며 카드 알림과 영수증을 나란히 확인하는 순간",
+      "visualAnchors": [
+        "영수증",
+        "카드"
+      ],
+      "sceneVariant": 3,
+      "topicKey": "weekly-transit-receipts-sort-20261107"
+    },
+    {
+      "hourKst": "16",
+      "visualMotif": "dialogue",
+      "topicCategory": "compatibility",
+      "label": "친구에게 전하는 말풍선",
+      "title": "친구에게 고마운 마음을 전하기 어렵다면",
+      "advice": "친구가 도와줬던 구체적인 일을 떠올려 짧은 감사 메시지로 먼저 전해 보세요.",
+      "lifeSituation": "친구의 작은 도움을 떠올리며 직접 고마웠던 장면을 대화로 전하려는 순간",
+      "visualAnchors": [
+        "친구",
+        "말풍선"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "friend-specific-thanks-message-20261107"
+    },
+    {
+      "hourKst": "19",
+      "visualMotif": "family",
+      "topicCategory": "family",
+      "label": "식탁 위 저녁 메뉴 달력",
+      "title": "가족이 저녁 메뉴를 정할 때 오래 걸린다면",
+      "advice": "가족이 원하는 음식 한 가지씩을 적고 이번 주 먹을 메뉴를 달력에 함께 정해 보세요.",
+      "lifeSituation": "가족이 식탁에 둘러앉아 이번 주 저녁 메뉴를 상의하고 달력을 확인하는 시간",
+      "visualAnchors": [
+        "식탁",
+        "달력"
+      ],
+      "sceneVariant": 1,
+      "topicKey": "family-weekly-dinner-menu-20261107"
+    },
+    {
+      "hourKst": "22",
+      "visualMotif": "checklist",
+      "topicCategory": "self-understanding",
+      "label": "주말 청소 체크리스트",
+      "title": "주말 청소를 어디부터 해야 할지 막막하다면",
+      "advice": "방 전체를 한꺼번에 치우기보다 작은 공간 세 곳을 체크리스트로 적어 순서대로 정리해 보세요.",
+      "lifeSituation": "주말 청소를 시작하기 전에 작은 구역별 정리 순서를 체크리스트에 기록하는 밤",
+      "visualAnchors": [
+        "체크리스트",
+        "표시"
+      ],
+      "sceneVariant": 3,
+      "topicKey": "weekend-cleaning-small-zones-20261107"
+    }
+  ]
+}

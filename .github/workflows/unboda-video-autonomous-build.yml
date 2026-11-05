@@ -46,11 +46,16 @@ jobs:
           echo "target_date=$DATE" >> "$GITHUB_OUTPUT"
           TAG="unboda-saju-shorts-$DATE"
           if gh release view "$TAG" --repo mannerjm/unboda >/dev/null 2>&1; then
+            COUNT="$(gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets | length')"
+            test "$COUNT" -eq 10 || { echo "EXISTING_VIDEO_RELEASE_INCOMPLETE: $TAG assets=$COUNT" >&2; exit 1; }
             echo "skip_release=true" >> "$GITHUB_OUTPUT"
             echo "ALREADY_HOSTED_DATE_RELEASE_NO_DUPLICATE_BUILD: $TAG"
-          else
-            echo "skip_release=false" >> "$GITHUB_OUTPUT"
+            # Once a 10-asset release is immutable, don't test the advancing
+            # staging storyboard against the *already released* date.
+            # The separate product-content QA verifies new source at each change.
+            exit 0
           fi
+          echo "skip_release=false" >> "$GITHUB_OUTPUT"
           node --test automation/social/lifestyle-pilot/brand-video-guard.test.mjs
           node --test automation/social/lifestyle-pilot/topic-visual-guard.test.mjs
           node --test automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs

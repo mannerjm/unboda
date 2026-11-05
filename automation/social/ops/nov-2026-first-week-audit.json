@@ -293,7 +293,7 @@
       "publishedWithUrl": 0,
       "expected": 18,
       "status": "UNVERIFIED",
-      "lastCheckedAt": "2026-11-05T07:41:36+09:00",
+      "lastCheckedAt": "2026-11-05T11:57:28+09:00",
       "providerEvidence": [],
       "providerIssues": [
         {
@@ -319,6 +319,18 @@
           "slotKst": "2026-11-05T07:00:00+09:00",
           "classification": "MISSING_OR_UNVERIFIED",
           "detail": "No matching 07:00 zodiac post in official Metricool planner read at 07:41 KST; published-provider status unverified."
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-05T08:00:00+09:00",
+          "classification": "MISSING_OR_UNVERIFIED",
+          "detail": "No matching post in official Metricool planner read at 11:57 KST; provider publication not established. Read-only endpoint absence does not prove failed publication."
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-05T10:00:00+09:00",
+          "classification": "MISSING_OR_UNVERIFIED",
+          "detail": "No matching post in official Metricool planner read at 11:57 KST; provider publication not established. Read-only endpoint absence does not prove failed publication."
         }
       ]
     },

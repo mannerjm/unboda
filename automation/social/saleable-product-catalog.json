@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "brand": "UNBODA",
+  "origin": "https://unboda.kr",
+  "freeSajuPath": "/guest-saju",
+  "canonicalSources": [
+    "app/lib/premiumProductRegistry.ts",
+    "app/lib/analysisTopics.ts",
+    "app/lib/paidAnalysisTopicConfig.ts",
+    "app/lib/specialAnalysisProducts.ts",
+    "app/lib/purchases/products.ts"
+  ],
+  "rule": "Sales eligibility is determined by getLaunchProductIds() or getSpecialAnalysisProduct(), not merely by ANALYSIS_TOPICS taxonomy; compare this allowlist against production registry on every PR.",
+  "products": [
+    {
+      "id": "money-saving-discipline",
+      "title": "저축과 자산 관리 습관",
+      "category": "money",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/money-saving-discipline",
+      "signals": [
+        "저축",
+        "예산",
+        "저축 습관",
+        "돈 관리"
+      ],
+      "analysisValue": "저축·예산 기준을 유지하고 반복 가능한 관리 루틴을 재설정하는 방법을 분석"
+    },
+    {
+      "id": "money-contract-commitment",
+      "title": "계약·고정비 검토 분석",
+      "category": "money",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/money-contract-commitment",
+      "signals": [
+        "계약",
+        "구독",
+        "고정비",
+        "정기 결제",
+        "정기배송"
+      ],
+      "analysisValue": "장기 계약과 고정 의무의 중단·검토·출구 조건을 점검"
+    },
+    {
+      "id": "money-leak-risk",
+      "title": "돈이 새는 구조와 손실 위험",
+      "category": "money",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/money-leak-risk",
+      "signals": [
+        "지출",
+        "손실",
+        "반품",
+        "환불",
+        "돈이 새"
+      ],
+      "analysisValue": "지출·계약·공동 부담에서 손실 노출이 커지는 구조와 위험 감소 기준을 분석"
+    },
+    {
+      "id": "money-spending-decision",
+      "title": "큰 지출 판단 분석",
+      "category": "money",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/money-spending-decision",
+      "signals": [
+        "구매",
+        "지출",
+        "비용",
+        "장바구니"
+      ],
+      "analysisValue": "중요 지출에서 필요·압박·매몰비용을 구분하는 판단 기준을 분석"
+    },
+    {
+      "id": "career-workplace-adaptation",
+      "title": "직장 적응 분석",
+      "category": "career",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/career-workplace-adaptation",
+      "signals": [
+        "직장",
+        "보고서",
+        "발표",
+        "자료",
+        "업무"
+      ],
+      "analysisValue": "현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정"
+    },
+    {
+      "id": "career-workplace-relationships",
+      "title": "직장 관계 분석",
+      "category": "career",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/career-workplace-relationships",
+      "signals": [
+        "동료",
+        "회의",
+        "소통",
+        "갈등"
+      ],
+      "analysisValue": "업무 성과를 돕거나 소진시키는 이해관계자 상호작용과 협업 경계를 점검"
+    },
+    {
+      "id": "career-workload-recovery",
+      "title": "업무 과부하 회복 분석",
+      "category": "career",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/career-workload-recovery",
+      "signals": [
+        "일정",
+        "업무",
+        "과부하",
+        "우선순위"
+      ],
+      "analysisValue": "업무에서 소진을 만드는 패턴과 지속 가능한 업무 경계를 점검"
+    },
+    {
+      "id": "business-team-management",
+      "title": "팀 운영 분석",
+      "category": "business",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/business-team-management",
+      "signals": [
+        "분담",
+        "역할",
+        "팀",
+        "담당"
+      ],
+      "analysisValue": "팀의 결정권·위임·피드백·책임 모호성을 점검"
+    },
+    {
+      "id": "relationship-friendship",
+      "title": "친구 관계 분석",
+      "category": "social",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/relationship-friendship",
+      "signals": [
+        "친구",
+        "답장",
+        "감사",
+        "연락"
+      ],
+      "analysisValue": "친구 관계의 상호성·신뢰·감정 노동을 점검하고 재조정 기준을 만듭니다."
+    },
+    {
+      "id": "relationship-family-role",
+      "title": "가족 역할 경계 분석",
+      "category": "social",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/relationship-family-role",
+      "signals": [
+        "가족",
+        "역할",
+        "기념일",
+        "메뉴"
+      ],
+      "analysisValue": "가족 역할 기대와 반복 부담을 조정하는 관찰 기준을 분석"
+    },
+    {
+      "id": "relationship-current",
+      "title": "현재 관계의 지속성과 조정",
+      "category": "relationship",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/relationship-current",
+      "signals": [
+        "연인",
+        "관계",
+        "예산",
+        "갈등"
+      ],
+      "analysisValue": "현재 관계의 핵심 문제와 이어갈 기준·조정 기준을 분석"
+    },
+    {
+      "id": "health-sleep-rhythm",
+      "title": "수면 리듬 점검 분석",
+      "category": "health",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/health-sleep-rhythm",
+      "signals": [
+        "수면",
+        "잠",
+        "침실",
+        "소음",
+        "휴식"
+      ],
+      "analysisValue": "수면 습관을 진단하지 않고 관찰 가능한 리듬과 다음날 회복 신호를 점검"
+    },
+    {
+      "id": "health-habit-continuity",
+      "title": "생활 습관 유지 분석",
+      "category": "health",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/health-habit-continuity",
+      "signals": [
+        "습관",
+        "정리",
+        "청소",
+        "루틴"
+      ],
+      "analysisValue": "건강 지원 습관이 무너지는 조건과 재시작 기준을 점검"
+    },
+    {
+      "id": "health-stress-regulation",
+      "title": "스트레스 반응 조절 분석",
+      "category": "health",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/health-stress-regulation",
+      "signals": [
+        "스트레스",
+        "불안",
+        "계획",
+        "마음"
+      ],
+      "analysisValue": "외부 부담이 생활 스트레스 반응으로 커지는 흐름과 조절 순서를 점검"
+    },
+    {
+      "id": "study-learning-strategy",
+      "title": "학습 전략 분석",
+      "category": "growth",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/study-learning-strategy",
+      "signals": [
+        "공부",
+        "독서",
+        "책",
+        "학습",
+        "기록"
+      ],
+      "analysisValue": "노력을 이해와 활용으로 바꾸는 학습 구조를 점검"
+    },
+    {
+      "id": "social-network-expansion",
+      "title": "새로운 인맥과 관계 확장",
+      "category": "social",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/social-network-expansion",
+      "signals": [
+        "모임",
+        "소개",
+        "인맥",
+        "첫 만남"
+      ],
+      "analysisValue": "새로운 인맥이 실제 연결로 이어지는 접점과 후속 교류 기준을 분석"
+    },
+    {
+      "id": "compatibility-romantic",
+      "title": "연인·배우자 궁합 분석",
+      "category": "compatibility",
+      "productType": "compatibility",
+      "landingPath": "/special-analysis/compatibility/romantic",
+      "signals": [
+        "연인",
+        "배우자",
+        "궁합",
+        "갈등",
+        "대화"
+      ],
+      "analysisValue": "두 사람의 관계 강점과 갈등·회복 방식"
+    },
+    {
+      "id": "compatibility-friend",
+      "title": "친구·지인 궁합 분석",
+      "category": "compatibility",
+      "productType": "compatibility",
+      "landingPath": "/special-analysis/compatibility/friend",
+      "signals": [
+        "친구",
+        "지인",
+        "연락",
+        "궁합"
+      ],
+      "analysisValue": "친구 관계의 신뢰·친밀감·거리 조절"
+    },
+    {
+      "id": "compatibility-workplace",
+      "title": "직장·동료 궁합 분석",
+      "category": "compatibility",
+      "productType": "compatibility",
+      "landingPath": "/special-analysis/compatibility/workplace",
+      "signals": [
+        "동료",
+        "직장",
+        "협업",
+        "궁합"
+      ],
+      "analysisValue": "동료 사이의 역할 분담·소통·갈등 흐름"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 2,
+  "dateKst": "2026-11-08",
+  "brand": "UNBODA",
+  "firstPartyOriginal": true,
+  "notPhotographs": true,
+  "editorialState": "READY_FOR_AUTOMATED_QA_NOT_HUMAN_REVIEWED",
+  "stories": [
+    {
+      "hourKst": "01",
+      "visualMotif": "journal",
+      "topicCategory": "self-understanding",
+      "label": "수첩 속 기억 메모",
+      "title": "새로 배운 단어가 자꾸 기억나지 않는다면",
+      "advice": "처음 알게 된 단어 하나를 수첩에 적고 내가 이해한 뜻을 간단히 정리해 보세요.",
+      "lifeSituation": "저녁에 오늘 새로 배운 단어를 떠올리며 수첩에 뜻과 예시를 적는 순간",
+      "visualAnchors": [
+        "수첩",
+        "메모"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "new-word-one-line-memory-20261108"
+    },
+    {
+      "hourKst": "04",
+      "visualMotif": "bedroom",
+      "topicCategory": "self-understanding",
+      "label": "이불과 침실 조명",
+      "title": "환절기에 이불을 고르기 어렵게 느껴진다면",
+      "advice": "오늘의 침실 온도와 내가 편안하게 느낀 이불 두께를 간단히 기록해 보세요.",
+      "lifeSituation": "새벽에 이불이 너무 두껍거나 얇은지 확인하고 침실 온도에 맞춰 바꾸는 순간",
+      "visualAnchors": [
+        "이불",
+        "조명"
+      ],
+      "sceneVariant": 1,
+      "topicKey": "season-blanket-thickness-20261108"
+    },
+    {
+      "hourKst": "10",
+      "visualMotif": "presentation",
+      "topicCategory": "career",
+      "label": "발표 자료의 숫자 단위",
+      "title": "회의 자료에서 금액 단위가 다르게 보인다면",
+      "advice": "업무 표의 금액 단위를 하나로 맞추고 원문 숫자와 차이가 없는지 확인해 보세요.",
+      "lifeSituation": "회의 발표 전에 서로 다른 단위로 적힌 자료 표를 같은 기준으로 정리하는 순간",
+      "visualAnchors": [
+        "업무 자료",
+        "자료 표"
+      ],
+      "sceneVariant": 3,
+      "topicKey": "meeting-number-unit-consistency-20261108"
+    },
+    {
+      "hourKst": "13",
+      "visualMotif": "receipt",
+      "topicCategory": "money",
+      "label": "장보기 영수증과 카드",
+      "title": "마트에서 장보기 예산을 자꾸 넘긴다면",
+      "advice": "구입할 물품을 적고 지난 영수증의 실제 결제액과 이번 예산을 비교해 보세요.",
+      "lifeSituation": "마트에 가기 전 장보기 예산을 정하고 영수증과 카드 내역을 확인하는 순간",
+      "visualAnchors": [
+        "영수증",
+        "카드"
+      ],
+      "sceneVariant": 4,
+      "topicKey": "grocery-budget-before-shop-20261108"
+    },
+    {
+      "hourKst": "16",
+      "visualMotif": "dialogue",
+      "topicCategory": "compatibility",
+      "label": "친구의 사진과 말풍선",
+      "title": "친구가 보낸 사진에 뭐라고 답할지 고민된다면",
+      "advice": "친구의 사진에서 인상적이었던 한 장면을 짚어 짧은 대화로 마음을 전해 보세요.",
+      "lifeSituation": "친구가 보내 준 여행 사진을 보고 관심 있는 장면을 말풍선으로 답하는 순간",
+      "visualAnchors": [
+        "친구",
+        "말풍선"
+      ],
+      "sceneVariant": 1,
+      "topicKey": "friend-photo-reply-kind-20261108"
+    },
+    {
+      "hourKst": "19",
+      "visualMotif": "family",
+      "topicCategory": "family",
+      "label": "가족 식탁과 생활 달력",
+      "title": "가족이 자주 쓰는 물건을 찾느라 바쁘다면",
+      "advice": "함께 쓰는 물건의 보관 위치를 하나씩 정하고 식탁 달력에 위치를 적어 보세요.",
+      "lifeSituation": "가족이 식탁에서 생활용품의 보관 위치를 상의하고 공용 달력에 기록하는 저녁",
+      "visualAnchors": [
+        "식탁",
+        "달력"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "family-shared-item-location-20261108"
+    },
+    {
+      "hourKst": "22",
+      "visualMotif": "checklist",
+      "topicCategory": "self-understanding",
+      "label": "제출 서류 체크리스트",
+      "title": "중요한 서류에 서명을 빠뜨릴까 걱정된다면",
+      "advice": "서류를 보내기 전에 이름과 서명과 첨부파일을 체크리스트로 하나씩 확인해 보세요.",
+      "lifeSituation": "밤에 다음 날 제출할 서류를 펼쳐 두고 서명과 첨부 목록을 점검하는 순간",
+      "visualAnchors": [
+        "체크리스트",
+        "표시"
+      ],
+      "sceneVariant": 4,
+      "topicKey": "form-signature-doublecheck-20261108"
+    }
+  ]
+}

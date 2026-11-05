@@ -55,6 +55,12 @@ jobs:
           node --test automation/social/lifestyle-pilot/topic-visual-guard.test.mjs
           node --test automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs
           node automation/social/lifestyle-pilot/four-daily-private-validator.mjs
+          # The staging source must advertise a REAL currently saleable report.
+          node scripts/social-saleable-product-guard.mjs --video \
+            automation/social/lifestyle-pilot/episodes/003-midnight.json \
+            automation/social/lifestyle-pilot/episodes/004-commute.json \
+            automation/social/lifestyle-pilot/episodes/005-friendship.json \
+            automation/social/lifestyle-pilot/episodes/002-afterwork.json
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const d=process.env.TZ?new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()):'';

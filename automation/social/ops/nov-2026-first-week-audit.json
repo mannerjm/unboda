@@ -354,10 +354,10 @@
     },
     {
       "date": "2026-11-06",
-      "publishedWithUrl": 8,
+      "publishedWithUrl": 11,
       "expected": 18,
       "status": "INCOMPLETE",
-      "lastCheckedAt": "2026-11-06T08:45:40+09:00",
+      "lastCheckedAt": "2026-11-06T18:23:14+09:00",
       "providerEvidence": [
         {
           "kind": "video",
@@ -430,6 +430,33 @@
           "status": "PUBLISHED",
           "publicUrl": "https://facebook.com/122099486691517851/posts/122108634009517851",
           "checkedAtKst": "2026-11-06T08:45:40+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T12:00:00+09:00",
+          "network": "instagram",
+          "metricoolPostId": "417610924",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.instagram.com/reel/DfYmAkkklM7/",
+          "checkedAtKst": "2026-11-06T18:23:14+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T12:00:00+09:00",
+          "network": "youtube",
+          "metricoolPostId": "417610924",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.youtube.com/shorts/bt-n4IAyLQk",
+          "checkedAtKst": "2026-11-06T18:23:14+09:00"
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-06T10:00:00+09:00",
+          "network": "instagram",
+          "metricoolPostId": "417612070",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.instagram.com/p/DfYYVfAiplr/",
+          "checkedAtKst": "2026-11-06T18:23:14+09:00"
         }
       ],
       "providerIssues": [

@@ -578,11 +578,39 @@
     },
     {
       "date": "2026-11-07",
-      "publishedWithUrl": 0,
+      "publishedWithUrl": 3,
       "expected": 18,
-      "status": "NOT_CHECKED",
-      "lastCheckedAt": null,
-      "providerEvidence": []
+      "status": "INCOMPLETE",
+      "lastCheckedAt": "2026-11-07T01:12:22+09:00",
+      "providerEvidence": [
+        {
+          "kind": "video",
+          "slotKst": "2026-11-07T00:00:00+09:00",
+          "network": "instagram",
+          "metricoolPostId": "419016184",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.instagram.com/reel/DfZ5P2MjYGU/",
+          "checkedAtKst": "2026-11-07T01:12:22+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-07T00:00:00+09:00",
+          "network": "facebook",
+          "metricoolPostId": "419016269",
+          "status": "PUBLISHED",
+          "publicUrl": "https://facebook.com/reel/1171188258667581",
+          "checkedAtKst": "2026-11-07T01:12:22+09:00"
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-07T01:00:00+09:00",
+          "network": "facebook",
+          "metricoolPostId": "418833307",
+          "status": "PUBLISHED",
+          "publicUrl": "https://facebook.com/122099486691517851/posts/122108893239517851",
+          "checkedAtKst": "2026-11-07T01:12:22+09:00"
+        }
+      ]
     },
     {
       "date": "2026-11-08",

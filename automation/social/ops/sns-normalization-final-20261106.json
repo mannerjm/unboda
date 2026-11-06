@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "asOfKst": "2026-11-06 21:10",
+  "brandId": "7377653",
+  "singleVideoOwner": "Vercel /api/cron/video; all ChatGPT automations forbidden to create/edit video SNS posts",
+  "incident": {
+    "nov06VideoExtraPublished": 6,
+    "nov06LifestyleErrors": [
+      417611728,
+      417612153,
+      417612238
+    ],
+    "repostFailedOldPosts": false
+  },
+  "threadsCorrections": [
+    {
+      "date": "2026-11-06",
+      "slot": "22",
+      "old": 418835749,
+      "current": 418843528,
+      "chars": 444
+    },
+    {
+      "date": "2026-11-07",
+      "slot": "10",
+      "old": 417613070,
+      "current": 418843688,
+      "chars": 319
+    },
+    {
+      "date": "2026-11-07",
+      "slot": "19",
+      "old": 417613329,
+      "current": 418843849,
+      "chars": 327
+    }
+  ],
+  "photoChangesTomorrow": [
+    {
+      "slot": "01",
+      "old": 417612842,
+      "current": 418833307
+    },
+    {
+      "slot": "04",
+      "old": 417612889,
+      "current": 418833671
+    },
+    {
+      "slot": "16",
+      "old": 417613208,
+      "current": 418833743
+    }
+  ],
+  "tomorrowZodiac": {
+    "postId": 418848081,
+    "networks": [
+      "facebook",
+      "instagram",
+      "threads"
+    ],
+    "mediaCount": 7,
+    "status": "PENDING",
+    "autoPublish": true
+  },
+  "existingVideoBuildTomorrow": "unboda-saju-shorts-20261107, 10 assets",
+  "limits": {
+    "videoSlotsKst": [
+      "00",
+      "08",
+      "12",
+      "20"
+    ],
+    "providersPerVideoSlot": 2,
+    "lifestyleSlotsKst": [
+      "01",
+      "04",
+      "10",
+      "13",
+      "16",
+      "19",
+      "22"
+    ],
+    "zodiacAt07Providers": 3,
+    "threadsTextConservativeMax": 450,
+    "photoMaxPreferredBytes": 5000000
+  },
+  "automationTasks": [
+    "6ae1c6edc0e8819191fab7996fbea20d",
+    "6ae1bfa8355481919cde5ba51177dc03",
+    "6adc5ebc26a88191b20bb4645d7b8ebf"
+  ],
+  "qualifications": [
+    "Vercel worker code itself not redeployed: single writer applied via connected automations; future video actual exactly two providers not yet verified.",
+    "Previously published 6 extra videos and three photo errors remain historic; no duplicate replay performed.",
+    "Threads photo normalized pixel dimensions not read from imported static URL; check live status after publication.",
+    "7-day streak incomplete."
+  ]
+}

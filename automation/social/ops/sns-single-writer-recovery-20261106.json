@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "asOfKst": "2026-11-06 20:56",
+  "brandId": "7377653",
+  "domain": "https://unboda.kr",
+  "changeType": "deduplication and media-safety operating controls",
+  "source": "Read-only verified Metricool post states, Vercel production cron logs, ChatGPT automation configs and verified Wikimedia source sizes",
+  "todayKst": "2026-11-06",
+  "outcomeAt2056": {
+    "zodiac": {
+      "expected": 3,
+      "published": 3
+    },
+    "videos": {
+      "expected": 8,
+      "published": 14,
+      "unexpectedExtra": 6
+    },
+    "lifestyle": {
+      "dueBy2056": 6,
+      "published": 3,
+      "error": 3,
+      "night22Pending": true
+    },
+    "promotions": {
+      "published": 2,
+      "excludedFrom18": true
+    }
+  },
+  "videoDuplicateRoot": "Vercel /api/cron/video rotation selected channels independently of already prebooked 2 providers for each hour; Vercel checked individual providers only so extra providers 6 were created.",
+  "videoCanonicalOwner": {
+    "owner": "Vercel unboda-social-worker /api/cron/video",
+    "otherAgentsNeverCreateVideoSNSPosts": true,
+    "workerHasPerSlotPerProviderAtomicBlobClaims": true,
+    "expectedSlotsKst": [
+      "00:00",
+      "08:00",
+      "12:00",
+      "20:00"
+    ],
+    "expectedNetworksPerSlot": 2,
+    "expectedDeliveriesPerDay": 8,
+    "proof": "Vercel production logs 2026-11-05 14:46, 22:45 and 2026-11-06 02:45, 10:45 UTC"
+  },
+  "automationsUpdated": [
+    {
+      "id": "6ae1c6edc0e8819191fab7996fbea20d",
+      "role": "read-only SNS post URL and 2-networks-per-video-slot monitor",
+      "enabled": true,
+      "schedulePreserved": true
+    },
+    {
+      "id": "6ae1bfa8355481919cde5ba51177dc03",
+      "role": "next-day four original video scripts and 07zodiac exactly 3-channel reservation only",
+      "enabled": true,
+      "schedulePreserved": true
+    },
+    {
+      "id": "6adc5ebc26a88191b20bb4645d7b8ebf",
+      "role": "7 lifestyle photo slots only, no video posts, media size <5MB and MIME preflight, do not backfill ERROR",
+      "enabled": true,
+      "schedulePreserved": true
+    }
+  ],
+  "existingPublishedPostsUntouched": true,
+  "backdatedErrorPostsNotReposted": true,
+  "errorsToday": [
+    {
+      "hour": "01",
+      "network": "threads",
+      "metricoolId": 417611728,
+      "status": "ERROR",
+      "reason": "Media container not created by unknown cause",
+      "reposted": false
+    },
+    {
+      "hour": "13",
+      "network": "threads",
+      "metricoolId": 417612153,
+      "status": "ERROR",
+      "reason": "Media container not created by unknown cause",
+      "reposted": false
+    },
+    {
+      "hour": "16",
+      "network": "facebook",
+      "metricoolId": 417612238,
+      "status": "ERROR",
+      "reason": "Photo source 10.99 MB > Facebook photo max 10MB; can't read files",
+      "reposted": false
+    }
+  ],
+  "futureMediaModifiedInPlace": [
+    {
+      "day": "2026-11-06",
+      "hour": "22",
+      "network": "threads",
+      "oldId": 417612631,
+      "newId": 418835749,
+      "uuidPreserved": true,
+      "sourceFile": "Sealing_a_parcel_while_booking_shipping_on_a_laptop.jpg",
+      "sourceBytes": 3032346,
+      "rights": "CC BY 2.0",
+      "provider": "PENDING",
+      "autoPublish": true
+    },
+    {
+      "day": "2026-11-07",
+      "hour": "01",
+      "network": "facebook",
+      "oldId": 417612842,
+      "newId": 418833307,
+      "uuidPreserved": true,
+      "sourceFile": "Person_reading_a_book.jpg",
+      "sourceBytes": 351000,
+      "rights": "CC BY 2.0",
+      "provider": "PENDING",
+      "autoPublish": true
+    },
+    {
+      "day": "2026-11-07",
+      "hour": "04",
+      "network": "instagram",
+      "oldId": 417612889,
+      "newId": 418833671,
+      "uuidPreserved": true,
+      "sourceFile": "Lamp_on_a_bedside_table.JPG",
+      "sourceBytes": 1550000,
+      "rights": "CC BY-SA 4.0",
+      "provider": "PENDING",
+      "autoPublish": true
+    },
+    {
+      "day": "2026-11-07",
+      "hour": "16",
+      "network": "instagram",
+      "oldId": 417613208,
+      "newId": 418833743,
+      "uuidPreserved": true,
+      "sourceFile": "Best_Thank_You_Card_Ever,_from_a_young_visitor_(14907988086).jpg",
+      "sourceBytes": 1510000,
+      "rights": "CC BY 2.0",
+      "provider": "PENDING",
+      "autoPublish": true
+    }
+  ],
+  "verifiedReleases": {
+    "tomorrowVideo": "unboda-saju-shorts-20261107 10 assets",
+    "tomorrowZodiac": "unboda-zodiac-20261107 9 assets",
+    "tomorrowLifestyle": "unboda-lifestyle-20261107 8 assets"
+  },
+  "stillOpen": [
+    "11/06 22 Threads actual PUBLISHED+publicUrl not yet verified",
+    "11/07 07 zodiac reservation to be created by 21 KST preparer or backed up at 05; at 20:56 KST not present",
+    "11/07 Vercel video scheduler's two-providers-per-slot actual publication not yet observed",
+    "Existing 11/07 Threads image posts may still have platform container issues; cannot claim resolved just from PENDING",
+    "7-day all-success run must restart after failure"
+  ],
+  "prohibitions": [
+    "No further manual video posts or provider completions while Vercel owns video scheduling",
+    "No blindly retrying ERROR or unknown POST outcomes",
+    "No deletion/republication of already published user content",
+    "No new paid model/API/ads or customer payment/refund database modifications"
+  ],
+  "productionState": "Operating automations changed; Vercel worker itself not redeployed; no proof of impossible duplicates under external systems; fail-closed review and 7-day ongoing verification required"
+}

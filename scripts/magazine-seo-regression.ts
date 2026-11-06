@@ -63,6 +63,30 @@ async function main() {
   assert(rss.includes("<rss version="));
   for(const a of all) assert.equal(rss.includes("/blog/" + a.slug), current.some(z=>z.slug===a.slug));
   assert(!rss.includes("<script"));
+  const entities: Record<string, string> = {amp:"&",lt:"<",gt:">",quot:'"',apos:"'"};
+  const decodeEntities = (text: string) => text.replace(/&(amp|lt|gt|quot|apos);/g,
+    (_, entity: string) => entities[entity]);
+  const rssItems = [...rss.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(match => match[1]);
+  assert.equal(rssItems.length, Math.min(current.length, 30));
+  for (const article of current.slice(0, 30)) {
+    const item = rssItems.find(text => text.includes(`<link>${SITE_ORIGIN}/blog/${article.slug}</link>`));
+    assert(item, `published RSS item missing: ${article.slug}`);
+    const description = item.match(/<description>([\s\S]*?)<\/description>/)?.[1];
+    assert(description, "RSS needs full public article content");
+    assert(!description.includes("<"), "HTML must stay encoded inside the XML description");
+    const html = decodeEntities(description);
+    const plainText = decodeEntities(html.replace(/<[^>]*>/g, " "));
+    for (const text of [article.description, article.lead, article.keyPoint,
+      ...article.sections.flatMap(section => [section.heading, ...section.paragraphs])]) {
+      assert(plainText.includes(text), `RSS omitted public article text: ${article.slug}`);
+    }
+    assert(plainText.includes("AI를 활용한 내용 제작·정리가 포함될 수 있습니다."),
+      "syndicated content must retain the public AI disclosure");
+    assert(html.includes(`href="${SITE_ORIGIN}${article.relatedHref}"`),
+      "RSS service links must resolve to the canonical site");
+    assert(item.includes(`<pubDate>${new Date(article.publishedAt).toUTCString()}</pubDate>`),
+      "RSS must preserve original publication dates");
+  }
   const home=readFileSync("app/components/HomeExperience.tsx","utf8");
   assert(home.includes('href="/blog"') && home.includes("매거진"),
     "all homepage states need a direct magazine entry");

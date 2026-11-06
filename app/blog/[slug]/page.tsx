@@ -54,6 +54,7 @@ export default async function MagazineArticlePage({params}:PageProps) {
       <div className="mt-5 flex flex-wrap gap-3 text-xs text-slate-500">
         <span>작성: 운보다</span>
         <time dateTime={article.publishedAt}>{new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",year:"numeric",month:"long",day:"numeric"}).format(new Date(article.publishedAt))}</time>
+        {article.updatedAt !== article.publishedAt && <span>수정: <time dateTime={article.updatedAt}>{new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",year:"numeric",month:"long",day:"numeric"}).format(new Date(article.updatedAt))}</time></span>}
       </div>
       <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-[1.5rem] bg-[#ebedf7]">
         <Image src={article.cover} alt={article.coverAlt} fill priority sizes="(max-width:900px) 100vw, 900px" className="object-cover"/>

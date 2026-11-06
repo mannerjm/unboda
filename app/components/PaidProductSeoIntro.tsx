@@ -1,4 +1,5 @@
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
+import Link from "next/link";
 import { getPaidProductSeoGuide } from "@/app/lib/paidProductSeo";
 import PublicBreadcrumbs from "./PublicBreadcrumbs";
 
@@ -42,6 +43,24 @@ export default function PaidProductSeoIntro({ product }: { product: PremiumProdu
           </ul>
         </div>
       </div>
+
+      {guide.example ? <section className="mt-6 rounded-2xl border border-[#e3e6ef] bg-[#fafbfe] p-5" aria-labelledby="public-reading-example-heading">
+        <h2 id="public-reading-example-heading" className="text-base font-black text-[#25214b]">이런 상황에서 어떻게 읽나요?</h2>
+        <p className="mt-2 text-xs leading-6 text-slate-500">아래는 활용 방법을 설명하는 가상의 예시입니다. 개인의 실제 분석 결과는 아닙니다.</p>
+        <p className="mt-3 text-[15px] font-semibold leading-7 text-slate-800">“{guide.example.situation}”</p>
+        <p className="mt-3 text-sm leading-7 text-slate-700">{guide.example.reading}</p>
+        <h3 className="mt-4 text-sm font-bold text-[#25214b]">읽고 나서 해볼 일</h3>
+        <p className="mt-2 text-sm leading-7 text-slate-700">{guide.example.nextStep}</p>
+      </section> : null}
+
+      {guide.relatedArticles.length > 0 ? <nav className="mt-6" aria-label="분석 전에 읽어볼 글">
+        <h2 className="text-base font-black text-[#25214b]">분석 전에 읽어볼 글</h2>
+        <ul className="mt-3 space-y-2 text-sm leading-7">
+          {guide.relatedArticles.map(article => <li key={article.href}>
+            <Link href={article.href} className="font-semibold text-[#5e4bd1] underline decoration-[#d8d3ff] underline-offset-4 hover:text-[#373069]">{article.title}</Link>
+          </li>)}
+        </ul>
+      </nav> : null}
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-2xl text-xs leading-6 text-slate-500">

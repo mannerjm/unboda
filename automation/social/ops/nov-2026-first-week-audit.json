@@ -354,10 +354,10 @@
     },
     {
       "date": "2026-11-06",
-      "publishedWithUrl": 12,
+      "publishedWithUrl": 14,
       "expected": 18,
       "status": "INCOMPLETE",
-      "lastCheckedAt": "2026-11-06T19:11:02+09:00",
+      "lastCheckedAt": "2026-11-06T20:37:19+09:00",
       "providerEvidence": [
         {
           "kind": "video",
@@ -466,6 +466,24 @@
           "status": "PUBLISHED",
           "publicUrl": "https://www.instagram.com/p/DfZWWhKiIgL/",
           "checkedAtKst": "2026-11-06T19:11:02+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T20:00:00+09:00",
+          "network": "facebook",
+          "metricoolPostId": "417611091",
+          "status": "PUBLISHED",
+          "publicUrl": "https://facebook.com/reel/1566809815476992",
+          "checkedAtKst": "2026-11-06T20:37:19+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T20:00:00+09:00",
+          "network": "tiktok",
+          "metricoolPostId": "417611091",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.tiktok.com/@unboda.kr/video/7705012933155425557",
+          "checkedAtKst": "2026-11-06T20:37:19+09:00"
         }
       ],
       "providerIssues": [
@@ -526,6 +544,26 @@
           "publicUrl": "https://www.tiktok.com/@unboda.kr/video/7704888378948324629",
           "classification": "UNEXPECTED_EXTRA_VIDEO",
           "detail": "Additional published video outside approved 4x2 provider rotation; investigate source and idempotency without repost."
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T20:00:00+09:00",
+          "network": "instagram",
+          "metricoolPostId": "418765259",
+          "providerStatus": "PUBLISHED",
+          "publicUrl": "https://www.instagram.com/reel/DfZdU7MlVly/",
+          "classification": "UNEXPECTED_EXTRA_VIDEO",
+          "detail": "Additional published video outside approved 4x2 rotation; inspect Vercel idempotency and source claims; do not repost or delete."
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-06T20:00:00+09:00",
+          "network": "youtube",
+          "metricoolPostId": "418765284",
+          "providerStatus": "PUBLISHED",
+          "publicUrl": "https://www.youtube.com/shorts/6DJDT-IA_XE",
+          "classification": "UNEXPECTED_EXTRA_VIDEO",
+          "detail": "Additional published video outside approved 4x2 rotation; inspect Vercel idempotency and source claims; do not repost or delete."
         }
       ]
     },

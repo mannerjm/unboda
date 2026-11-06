@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "preparedAtKst": "2026-11-06 21:30",
+  "brandId": "7377653",
+  "fromKst": "2026-11-07",
+  "toKst": "2026-11-13",
+  "countDays": 7,
+  "target": {
+    "dailyPlatforms": 18,
+    "totalPlatforms": 126,
+    "zodiac": {
+      "hour": "07",
+      "providers": [
+        "instagram",
+        "facebook",
+        "threads"
+      ],
+      "expected": 3
+    },
+    "video": {
+      "hours": [
+        "00",
+        "08",
+        "12",
+        "20"
+      ],
+      "providersPerSlot": 2,
+      "expected": 8,
+      "noExtraProviders": true
+    },
+    "lifestyle": {
+      "hours": [
+        "01",
+        "04",
+        "10",
+        "13",
+        "16",
+        "19",
+        "22"
+      ],
+      "providersPerSlot": 1,
+      "expected": 7
+    }
+  },
+  "scheduledAutomations": {
+    "nightly7DayAudit": {
+      "id": "6adc55fb3248819190da30514a3012e7",
+      "enabled": true,
+      "scheduleKst": "23:35",
+      "ical": "DTSTART:20261107T233500 / RRULE:FREQ=DAILY;COUNT=7",
+      "access": "read-only",
+      "dailyReport": true
+    },
+    "anomalyWatcher": {
+      "id": "6ae1c6edc0e8819191fab7996fbea20d",
+      "enabled": true,
+      "schedule": "13 scans each day",
+      "access": "read-only"
+    },
+    "videoSourceAndZodiac": {
+      "id": "6ae1bfa8355481919cde5ba51177dc03",
+      "enabled": true,
+      "canScheduleVideo": false
+    },
+    "lifestyleSourceAndPosts": {
+      "id": "6adc5ebc26a88191b20bb4645d7b8ebf",
+      "enabled": true,
+      "canScheduleVideo": false
+    },
+    "stagingHistoricalSync": {
+      "id": "6ae0a259da2481918a0f8cfa866f6a95",
+      "enabled": true,
+      "canScheduleVideo": false
+    }
+  },
+  "vercel": {
+    "projectName": "unboda-social-worker",
+    "projectId": "prj_RyQvXNzNDpbHyUulparzelfSbD5R",
+    "productionDeployment": "dpl_FQSmiDpaR75T3adSMYFHjQTmZpcF",
+    "currentSocialVideoNetworksConfig": "rotation",
+    "videoCronUtc": "45 2,10,14,22 * * *",
+    "videoCronKst": [
+      "11:45",
+      "19:45",
+      "23:45",
+      "07:45"
+    ],
+    "videoPublishExclusiveOwner": true,
+    "observedEachCronPicksTwoNetworks": true,
+    "atomicProviderClaimPresent": true,
+    "globalCrossProviderTotalCapInsideWorkerConfirmed": false,
+    "sourceControlLimitation": "Worker deployment is file-based, not Git-linked; production source was not replaced or redeployed; no claim of global two-provider hardcap at server layer."
+  },
+  "publicProof": "provider.status == PUBLISHED with nonempty provider.publicUrl; use official own-channel publishing records as independent fallback, do not infer from absent Metricool planner record",
+  "qualityGates": [
+    "real purchasable product mapping",
+    "unique four videos with voice/ASR QA",
+    "life photo matches actual topic",
+    "JPEG/PNG and platform file size preflight",
+    "Threads <=500 characters, 450 target",
+    "no duplicate or extra 3rd video channel"
+  ],
+  "verificationState": "NOT_STARTED",
+  "knownPreviousDayFailure": "2026-11-06: 3 lifestyle ERROR, 6 additional video provider posts, excluded from streak",
+  "alreadyVerifiedFor20261107": {
+    "videoRelease": "unboda-saju-shorts-20261107, 10 assets",
+    "zodiacRelease": "unboda-zodiac-20261107, 9 assets",
+    "zodiacMetricoolPostId": 418848081,
+    "zodiacState": "PENDING",
+    "lifestyleReservations": 7,
+    "videoReservationsAt20261106_21h": 0,
+    "videoSchedulingExpected": "as each video slot nears via Vercel cron",
+    "notYetPublished": true
+  },
+  "days": [
+    {
+      "date": "2026-11-07",
+      "zodiacPublished": 0,
+      "videoPublished": 0,
+      "lifestylePublished": 0,
+      "videoExtra": 0,
+      "unknown": true,
+      "evidenceState": "NOT_CHECKED_YET"
+    },
+    {
+      "date": "2026-11-08",
+      "zodiacPublished": 0,
+      "videoPublished": 0,
+      "lifestylePublished": 0,
+      "videoExtra": 0,
+      "unknown": true,
+      "evidenceState": "NOT_CHECKED_YET"
+    },
+    {
+      "date": "2026-11-09",
+      "zodiacPublished": 0,
+      "videoPublished": 0,
+      "lifestylePublished": 0,
+      "videoExtra": 0,
+      "unknown": true,
+      "evidenceState": "NOT_CHECKED_YET"
+    },
+    {
+      "date": "2026-11-10",
+      "zodiacPublished": 0,
+      "videoPublished": 0,
+      "lifestylePublished": 0,
+      "videoExtra": 0,
+      "unknown": true,
+      "evidenceState": "NOT_CHECKED_YET"
+    },
+    {
+      "date": "2026-11-11",
+      "zodiacPublished": 0,
+      "videoPublished": 0,
+      "lifestylePublished": 0,
+      "videoExtra": 0,
+      "unknown": true,
+      "evidenceState": "NOT_CHECKED_YET"
+    },
+    {
+      "date": "2026-11-12",
+      "zodiacPublished": 0,
+      "videoPublished": 0,
+      "lifestylePublished": 0,
+      "videoExtra": 0,
+      "unknown": true,
+      "evidenceState": "NOT_CHECKED_YET"
+    },
+    {
+      "date": "2026-11-13",
+      "zodiacPublished": 0,
+      "videoPublished": 0,
+      "lifestylePublished": 0,
+      "videoExtra": 0,
+      "unknown": true,
+      "evidenceState": "NOT_CHECKED_YET"
+    }
+  ],
+  "safety": {
+    "existingContentUntouched": true,
+    "noBackfill": true,
+    "noPaidCredits": true,
+    "noPaymentsOrCustomerDataMutated": true
+  }
+}

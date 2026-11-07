@@ -578,10 +578,10 @@
     },
     {
       "date": "2026-11-07",
-      "publishedWithUrl": 7,
+      "publishedWithUrl": 9,
       "expected": 18,
       "status": "INCOMPLETE",
-      "lastCheckedAt": "2026-11-07T07:39:13+09:00",
+      "lastCheckedAt": "2026-11-07T09:06:28+09:00",
       "providerEvidence": [
         {
           "kind": "video",
@@ -645,6 +645,24 @@
           "status": "PUBLISHED",
           "publicUrl": "https://www.threads.com/@unboda.kr/post/Dfao6Xriu8D",
           "checkedAtKst": "2026-11-07T07:39:13+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-07T08:00:00+09:00",
+          "network": "youtube",
+          "metricoolPostId": "419493835",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.youtube.com/shorts/2-rZKO0mVjs",
+          "checkedAtKst": "2026-11-07T09:06:28+09:00"
+        },
+        {
+          "kind": "video",
+          "slotKst": "2026-11-07T08:00:00+09:00",
+          "network": "tiktok",
+          "metricoolPostId": "419493855",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.tiktok.com/@unboda.kr/video/7705197832470400276",
+          "checkedAtKst": "2026-11-07T09:06:28+09:00"
         }
       ]
     },

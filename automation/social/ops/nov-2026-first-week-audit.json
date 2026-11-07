@@ -578,10 +578,10 @@
     },
     {
       "date": "2026-11-07",
-      "publishedWithUrl": 13,
+      "publishedWithUrl": 14,
       "expected": 18,
       "status": "INCOMPLETE",
-      "lastCheckedAt": "2026-11-07T13:06:15+09:00",
+      "lastCheckedAt": "2026-11-07T17:30:50+09:00",
       "providerEvidence": [
         {
           "kind": "video",
@@ -699,6 +699,15 @@
           "status": "PUBLISHED",
           "publicUrl": "https://www.youtube.com/shorts/L1oD0WYYvH8",
           "checkedAtKst": "2026-11-07T13:06:15+09:00"
+        },
+        {
+          "kind": "lifestyle",
+          "slotKst": "2026-11-07T16:00:00+09:00",
+          "network": "instagram",
+          "metricoolPostId": "418833743",
+          "status": "PUBLISHED",
+          "publicUrl": "https://www.instagram.com/p/DfbmU_9jUEE/",
+          "checkedAtKst": "2026-11-07T17:30:50+09:00"
         }
       ]
     },

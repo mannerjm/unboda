@@ -1,0 +1,78 @@
+name: UNBODA licensed real-photo candidate intake (NO SOCIAL POST)
+# Candidate photos are NEVER publication-approved by this workflow.
+on:
+  schedule:
+    - cron: '25 11 * * *' # 20:25 KST, after next-day editorial readiness
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/social/commons-photo-candidates.py'
+      - '.github/workflows/unboda-lifestyle-photo-candidates.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/social/commons-photo-candidates.py'
+      - '.github/workflows/unboda-lifestyle-photo-candidates.yml'
+permissions:
+  contents: read
+concurrency:
+  group: unboda-lifestyle-photo-candidates
+  cancel-in-progress: false
+jobs:
+  offline-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-cache-dir Pillow==11.3.0
+      - name: Check rights, image type, image size and perceptual duplicate logic
+        run: python scripts/social/commons-photo-candidates.py --self-test
+  candidate-intake:
+    if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: offline-gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: main-source
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: test/social-automation-safety-poc-20261023
+          path: source-briefs
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-cache-dir Pillow==11.3.0
+      - name: Download next-day photo candidates with provenance; never publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          STAMP="$(echo "$DAY" | tr -d '-')"
+          test -f "source-briefs/automation/social/lifestyle-pilot/daily-images/$STAMP.json"
+          python main-source/scripts/social/commons-photo-candidates.py \
+            --brief "source-briefs/automation/social/lifestyle-pilot/daily-images/$STAMP.json" \
+            --date "$DAY" --output photo-candidates
+          python - <<'PY'
+          import json
+          m=json.load(open("photo-candidates/candidate-manifest.json"))
+          assert len(m["photos"])==7
+          assert m["photoReadyForSnsPosting"] is False
+          assert m["publicationAllowed"] is False
+          assert m["actualVisualSceneInspected"] is False
+          assert all(not x["imageVisuallyInspected"] for x in m["photos"])
+          print("SEVEN_CANDIDATE_PHOTOS_NOT_SOCIAL_POSTABLE")
+          PY
+      - name: Store licensed candidates privately for automated visual QA development
+        uses: actions/upload-artifact@v4
+        with:
+          name: unboda-photo-candidates-UNAPPROVED
+          path: photo-candidates/
+          if-no-files-found: error
+          retention-days: 3

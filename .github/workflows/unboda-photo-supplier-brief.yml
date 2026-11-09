@@ -1,0 +1,58 @@
+name: UNBODA real-photo supplier 21-slot brief (NO MEDIA INTAKE, NO SNS)
+on:
+  schedule:
+    - cron: '10 9 * * *' # 18:10 KST
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/social/photo-supplier-21pack.py'
+      - 'scripts/social/lifestyle-photo-scenes.json'
+      - '.github/workflows/unboda-photo-supplier-brief.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/social/photo-supplier-21pack.py'
+      - 'scripts/social/lifestyle-photo-scenes.json'
+      - '.github/workflows/unboda-photo-supplier-brief.yml'
+permissions:
+  contents: read
+concurrency:
+  group: unboda-photo-supplier-brief-readonly
+  cancel-in-progress: false
+jobs:
+  prepare-brief:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify all 21 shot instructions are unique time slots, and never publication approved
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/social/photo-supplier-21pack.py
+          python scripts/social/photo-supplier-21pack.py --self-test
+      - name: Prepare 21 real-photograph shot requests for the next three KST days
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          python scripts/social/photo-supplier-21pack.py --date "$TARGET" --output photo-supplier-21pack.json
+          python - <<'PY'
+          import json
+          d=json.load(open('photo-supplier-21pack.json'))
+          assert d['targetSlots']==21 and len(d['shots'])==21
+          assert all(s['photoAcquired'] is False and s['publicationAllowed'] is False for s in d['shots'])
+          assert d['snsRequestsAttempted']==0
+          print('21_SIGNED_LICENSE_SUPPLY_REQUESTS_ONLY_NO_PHOTO_ACQUIRED')
+          PY
+      - name: Save only generic shot requests; never photo, proof or credentials
+        uses: actions/upload-artifact@v4
+        with:
+          name: unboda-real-photo-supplier-21day-buffer-brief
+          path: photo-supplier-21pack.json
+          retention-days: 3
+          if-no-files-found: error

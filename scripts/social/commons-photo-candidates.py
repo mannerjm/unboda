@@ -213,6 +213,41 @@ def openverse_verified_commons_pages(query):
   out.append(page)
  return sorted(out,key=lambda p:names.index(p["title"]))
 
+
+# Topic categories are from Wikimedia itself, never a substitute for pixel QA.
+COMMONS_SCENE_CATEGORIES={
+ "01":[("books","Category:Books"),("notebook","Category:Notebooks")],
+ "04":[("bedroom","Category:Bedrooms"),("bedside-lamp","Category:Bedside lamps")],
+ "10":[("office-desk","Category:Office desks"),("meeting","Category:Meeting rooms")],
+ "13":[("shopping-basket","Category:Shopping baskets"),
+       ("shopping-basket","Category:Shopping carts"),
+       ("receipt","Category:Shop checks"),("receipt","Category:Cash registers")],
+ "16":[("coffee-meetup","Category:Cups of coffee"),
+       ("coffee-meetup","Category:Coffee cups")],
+ "19":[("set-table","Category:Dining tables"),
+       ("home-kitchen","Category:Kitchens")],
+ "22":[("checklist","Category:Shopping lists"),
+       ("planner","Category:Calendars"),("tidy-desk","Category:Desks")]
+}
+def commons_category_files(category):
+ if not re.fullmatch(r"Category:[A-Za-z0-9 _-]{4,100}",category):
+  raise RuntimeError("UNAPPROVED_COMMONS_CATEGORY")
+ query={
+  "action":"query","format":"json","generator":"categorymembers",
+  "gcmtitle":category,"gcmtype":"file","gcmlimit":"50",
+  "prop":"imageinfo","iiprop":"url|size|mime|extmetadata",
+  "iiextmetadatafilter":"LicenseShortName|LicenseUrl|Artist|Credit|ImageDescription",
+  "iiurlwidth":"1080"
+ }
+ _,raw=get("https://"+HOST+"/w/api.php?"+urllib.parse.urlencode(query),4_000_000)
+ data=json.loads(raw)
+ if "error" in data:raise RuntimeError("COMMONS_CATEGORY_QUERY_FAILED")
+ pages=data.get("query",{}).get("pages") or {}
+ if not isinstance(pages,dict):raise RuntimeError("COMMONS_CATEGORY_BAD_PAGES")
+ return sorted((p for p in pages.values() if p.get("ns")==6 and
+    p.get("title","").startswith("File:") and p.get("imageinfo")),
+    key=lambda p:p["title"])
+
 def convert_to_photo_jpeg(raw):
  Image.MAX_IMAGE_PIXELS=35_000_000
  with Image.open(io.BytesIO(raw)) as im:
@@ -249,7 +284,7 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
  rejected={}
  found=[]
  seen_pages=set()
- def accept(page):
+ def accept(page,category_scene=None,category=None):
   name=page.get("title","")
   if name in seen_pages:return
   seen_pages.add(name)
@@ -263,6 +298,9 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
    rejected["license"]=rejected.get("license",0)+1
    return
   scene_matches=matching_photo_scenes(slot,name,rights["description"])
+  if category_scene and category in (cat for sid,cat in COMMONS_SCENE_CATEGORIES[slot]
+       if sid==category_scene) and category_scene not in scene_matches:
+   scene_matches.append(category_scene)
   if not scene_matches:
    rejected["subject_metadata"]=rejected.get("subject_metadata",0)+1
    return
@@ -286,6 +324,7 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
    "originalUrl":info.get("url",""),"downloadedThumbnailUrl":media,
    "sha256":sha,"phash":phash,"bytes":len(photo),"width":1080,"height":1350,
    "rights":rights,"cameraExif":camera[:90],"sceneCandidates":scene_matches,
+   "commonsTopicCategoryEvidence":category,
    "photoCandidateOnly":True,"imageVisuallyInspected":False,
    "sceneMatchVerified":False,"publicationAllowed":False
   }
@@ -301,6 +340,17 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
    pages=search_commons(phrase,page_offset)
    for page in pages:
     accept(page)
+    if len(found)>=max_candidates:return found
+ # Wikimedia-verified category membership provides candidate discovery only.
+ # Final scene approval still requires both CLIP and BLIP on actual photo pixels.
+ if len(found)<3:
+  for scene_id,category in COMMONS_SCENE_CATEGORIES[slot]:
+   try:pages=commons_category_files(category)
+   except Exception as exc:
+    print("COMMONS_CATEGORY_DISCOVERY_UNAVAILABLE",slot,category,type(exc).__name__,file=sys.stderr)
+    continue
+   for page in pages:
+    accept(page,category_scene=scene_id,category=category)
     if len(found)>=max_candidates:return found
  # Openverse is used ONLY to discover matching Wikimedia Commons JPG pages.
  # All license and pixel checks still happen through Wikimedia's own API.
@@ -417,6 +467,8 @@ def selftest():
  assert commons_title_from_landing_page("https://evil.example/wiki/File:Sample_photo.jpg") is None
  assert commons_title_from_landing_page("https://commons.wikimedia.org/wiki/File:vector.svg") is None
  assert commons_title_from_landing_page("http://commons.wikimedia.org/wiki/File:Sample_photo.jpg") is None
+ assert len(COMMONS_SCENE_CATEGORIES)==7
+ assert all(sid in [s["id"] for s in SCENE_CATALOG[h]["scenes"]] for h,entries in COMMONS_SCENE_CATEGORIES.items() for sid,cat in entries)
  assert len(SCENE_CATALOG)==7
  assert all(len(x["scenes"])==3 for x in SCENE_CATALOG.values())
  assert matching_photo_scenes("13","A grocery supermarket shopping aisle with food shelves","")

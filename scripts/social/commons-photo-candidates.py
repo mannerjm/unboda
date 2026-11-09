@@ -33,7 +33,11 @@ ALLOWED={
  "CC BY 4.0": "https://creativecommons.org/licenses/by/4.0/",
  "CC BY-SA 4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
  "CC BY-SA 3.0": "https://creativecommons.org/licenses/by-sa/3.0/",
- "CC BY 3.0": "https://creativecommons.org/licenses/by/3.0/"
+ "CC BY-SA 2.5": "https://creativecommons.org/licenses/by-sa/2.5/",
+ "CC BY-SA 2.0": "https://creativecommons.org/licenses/by-sa/2.0/",
+ "CC BY 3.0": "https://creativecommons.org/licenses/by/3.0/",
+ "CC BY 2.5": "https://creativecommons.org/licenses/by/2.5/",
+ "CC BY 2.0": "https://creativecommons.org/licenses/by/2.0/"
 }
 BAD_NAME=re.compile(r"(?:illustration|painting|drawing|render|diagram|cartoon|vector|logo|poster|screenshot|watermark|svg)",re.I)
 def plain(value):
@@ -246,12 +250,21 @@ def run(brief,target,history_dir,output):
  days=(__import__('datetime').date.fromisoformat(target)-
        __import__('datetime').date(2026,11,10)).days
  items=[]
+ missing=[]
  for story in source["stories"]:
-  if story["hourKst"] not in SLOTS:raise RuntimeError("BAD_LIFESTYLE_SLOT")
+  hour=story.get("hourKst")
+  if hour not in SLOTS:raise RuntimeError("BAD_LIFESTYLE_SLOT")
   query=story.get("photoSearchQuery","")
   if not re.fullmatch(r"[a-zA-Z ]{15,120}",query):
    raise RuntimeError("UNREVIEWED_REMOTE_PHOTO_QUERY")
-  pool=choose_photos(query,history+items,story["hourKst"],(days%5)*40)
+  try:
+   pool=choose_photos(query,history+items,hour,(days%5)*40)
+  except RuntimeError as err:
+   if not str(err).startswith("NO_LICENSED_UNDUPLICATED_REAL_PHOTO_CANDIDATE"):
+    raise
+   print("CANDIDATE_POOL_MISSING_SAFE_FAIL",hour,file=sys.stderr)
+   missing.append({"hourKst":hour,"reason":"NO_APPROVED_LICENSED_TOPIC_PHOTO"})
+   continue
   for i,(photo,record) in enumerate(pool):
    filename="candidate-"+record["hourKst"]+"-"+str(i+1)+".jpg"
    (output/filename).write_bytes(photo)
@@ -263,6 +276,7 @@ def run(brief,target,history_dir,output):
  manifest={
   "schemaVersion":1,"brand":"UNBODA","dateKst":target,"photos":items,
   "candidatePoolSize":len(items),"distinctHourSlots":len(set(x["hourKst"] for x in items)),
+  "missingSlots":missing,"collectionComplete":not missing,
   "rightsMachineChecked":True,"sizeAndMimeChecked":True,
   "actualVisualSceneInspected":False,"photoReadyForSnsPosting":False,
   "publicationAllowed":False,"state":"SEVEN_CANDIDATES_REQUIRE_PIXEL_SCENE_QA",
@@ -276,6 +290,11 @@ def selftest():
  assert license_result({"extmetadata":{"LicenseShortName":{"value":"All rights reserved"}}}) is None
  assert license_result({"extmetadata":{"LicenseShortName":{"value":"CC BY 4.0"}}}) is None
  assert license_result({"extmetadata":{"LicenseShortName":{"value":"CC0"}}})["license"]=="CC0"
+ assert license_result({"extmetadata":{"LicenseShortName":{"value":"CC BY-SA 2.0"},
+   "LicenseUrl":{"value":"https://creativecommons.org/licenses/by-sa/2.0/"},
+   "Artist":{"value":"Example photographer"}}})["shareAlikeAdaptationRequired"] is True
+ assert license_result({"extmetadata":{"LicenseShortName":{"value":"CC BY-NC 4.0"},
+   "Artist":{"value":"Photographer"}}}) is None
  x=Image.new("RGB",(1400,1600),(200,130,95))
  d=ImageDraw.Draw(x)
  for i in range(1800):

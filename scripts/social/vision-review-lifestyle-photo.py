@@ -50,9 +50,10 @@ def inspect(manifest_path,out_path):
  photos=data.get("photos")
  if data.get("photoReadyForSnsPosting") is not False or \
     data.get("publicationAllowed") is not False or \
-    not isinstance(photos,list) or not 7<=len(photos)<=56 or \
-    {p.get("hourKst") for p in photos}!=set(SLOTS) or \
-    any(sum(x["hourKst"]==h for x in photos)>8 for h in SLOTS):
+    not isinstance(photos,list) or not 0<=len(photos)<=56 or \
+    not {p.get("hourKst") for p in photos}.issubset(set(SLOTS)) or \
+    any(sum(x["hourKst"]==h for x in photos)>8 for h in SLOTS) or \
+    (len({p.get("hourKst") for p in photos})<7 and data.get("collectionComplete") is not False):
   raise RuntimeError("CANDIDATE_POOLS_NOT_HARD_BLOCKED_OR_INVALID_SEVEN_SLOTS")
  from transformers import CLIPModel,CLIPProcessor
  import torch
@@ -80,7 +81,14 @@ def inspect(manifest_path,out_path):
     "source":p["sourcePage"],"candidateSha256":p["sha256"],
     "modelMargin":margin,"rawLogits":[round(float(v),3) for v in scores],
     "automatedSceneMatch":passed,"state":reason})
-  if not ranked:raise RuntimeError("PHOTO_CANDIDATE_SLOT_EMPTY:"+hour)
+  if not ranked:
+   records.append({
+    "hourKst":hour,"bestCandidateFile":None,"candidateSha256":None,
+    "positivePhotoVsNegativesMargin":None,"automatedSceneMatch":False,
+    "state":"NO_LICENSED_PHOTO_CANDIDATE","consideredPhotoCandidates":0,
+    "humanVisualReviewed":False,"socialPublicationApproved":False,
+    "candidateScores":[]})
+   continue
   # Only actual pixel similarity may determine which photo is the best match.
   ranked.sort(key=lambda r:r["modelMargin"],reverse=True)
   best=ranked[0]
@@ -99,6 +107,8 @@ def inspect(manifest_path,out_path):
   "photoReviewCount":len(records),"photoCandidatesScored":len(photos),
   "automatedSceneMatchCount":sum(int(r["automatedSceneMatch"]) for r in records),
   "allAutomatedSceneMatches":all(r["automatedSceneMatch"] for r in records),
+  "missingLicensedPhotoSlots":[r["hourKst"] for r in records if r["consideredPhotoCandidates"]==0],
+  "collectionComplete":data.get("collectionComplete") is True,
   "wholeSocial90DayCoverageVerified":False,
   "rightsMetadataAutomaticallyChecked":data.get("rightsMachineChecked") is True,
   "publicationAllowed":False,"photoReadyForSnsPosting":False,

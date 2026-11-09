@@ -54,13 +54,33 @@ def inspect(brief,raw,vision,second,first_party_catalog,image_dir,output_dir,dat
      a.get("automatedSceneMatch") is not True or \
      b.get("blipSceneMatch") is not True:
    fail("UNREVIEWED_SLOT:"+hour)
-  if a.get("bestSceneId")!=article.get("sceneId") or \
-     b.get("sceneId")!=article.get("sceneId"):
+  if b.get("sceneId")!=article.get("sceneId"):
    fail("PHOTO_FIRST_TEXT_AND_IMAGE_MISMATCH:"+hour)
   selected=next((x for x in raw.get("photos",[]) if
-      x.get("hourKst")==hour and x.get("file")==a.get("bestCandidateFile") and
-      x.get("sha256")==a.get("candidateSha256") and
+      x.get("hourKst")==hour and x.get("file")==b.get("bestCandidateFile",
+         a.get("bestCandidateFile")) and
       x.get("sha256")==b.get("candidateSha256")),None)
+  # BLIP can approve a lower-ranked candidate after the CLIP winner fails
+  # its independent caption. The final media must still be explicitly present
+  # in the original CLIP-ranked, scene-approved pixel inspection.
+  ranked=a.get("candidateScores")
+  if isinstance(ranked,list):
+   same_clipped=any(
+    item.get("candidateFile")==b.get("bestCandidateFile") and
+    item.get("candidateSha256")==b.get("candidateSha256") and
+    item.get("automatedSceneMatch") is True and
+    any(v.get("sceneId")==b.get("sceneId") and v.get("passed") is True
+        for v in item.get("sceneModelCandidates",[]))
+    for item in ranked if isinstance(item,dict))
+  else:
+   # Older offline regression fixtures do not include the CLIP ranked pool.
+   # They can ONLY use the exact first CLIP winner, never an alternate.
+   same_clipped=(a.get("bestSceneId")==b.get("sceneId") and
+                 a.get("candidateSha256")==b.get("candidateSha256") and
+                 a.get("bestCandidateFile")==b.get("bestCandidateFile",
+                                                a.get("bestCandidateFile")))
+  if not same_clipped:
+   fail("ALTERNATE_PHOTO_NOT_APPROVED_BY_CLIP_SCENE:"+hour)
   if not selected or article.get("photoSha256")!=selected.get("sha256") or \
       article.get("photoFile")!=selected.get("file") or \
       article.get("photoSceneModelVerified") is not True:

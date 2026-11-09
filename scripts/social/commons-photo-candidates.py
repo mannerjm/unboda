@@ -19,7 +19,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageDraw
 
 HOST="commons.wikimedia.org"
 MEDIA_HOST="upload.wikimedia.org"
@@ -59,6 +59,10 @@ def get(url,limit=MAX_DOWNLOAD):
  for attempt in range(3):
   try:
    with urllib.request.urlopen(request,timeout=25) as res:
+    # urllib may follow redirects; verify the final destination too.
+    final=urllib.parse.urlparse(res.geturl())
+    if final.scheme!="https" or final.hostname not in (HOST,MEDIA_HOST):
+     raise RuntimeError("REMOTE_REDIRECT_NOT_ALLOWLISTED")
     mime=res.headers.get("content-type","").split(";",1)[0].strip().lower()
     if mime not in ("application/json","image/jpeg","image/pjpeg"):
      raise RuntimeError("INVALID_REMOTE_MEDIA_TYPE:"+mime)
@@ -200,6 +204,11 @@ def selftest():
  assert license_result({"extmetadata":{"LicenseShortName":{"value":"CC BY 4.0"}}}) is None
  assert license_result({"extmetadata":{"LicenseShortName":{"value":"CC0"}}})["license"]=="CC0"
  x=Image.new("RGB",(1400,1600),(200,130,95))
+ d=ImageDraw.Draw(x)
+ for i in range(1800):
+  d.line(((i*37)%1400,(i*71)%1600,
+          (i*113+59)%1400,(i*29+227)%1600),
+         fill=((i*47)%256,(i*73)%256,(i*31)%256),width=3)
  o=io.BytesIO();x.save(o,format="JPEG",quality=90)
  raw,sha,phash,camera=convert_to_photo_jpeg(o.getvalue())
  assert raw[:2]==b"\xff\xd8" and len(sha)==64 and len(phash)==16

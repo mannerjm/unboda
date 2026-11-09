@@ -1,0 +1,74 @@
+name: UNBODA private licensed photo bank 3-day intake audit (NO SNS)
+# Only server-side staging metadata and private photo/evidence bytes are read.
+# No SNS publishing, no public links, no Supabase/Metricool writes.
+on:
+  schedule:
+    - cron: '05 12 * * *' # 21:05 KST daily
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/social/verify-private-licensed-photo-buffer.py'
+      - '.github/workflows/unboda-private-photo-bank-buffer.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/social/verify-private-licensed-photo-buffer.py'
+      - '.github/workflows/unboda-private-photo-bank-buffer.yml'
+permissions:
+  contents: read
+concurrency:
+  group: unboda-private-licensed-photo-bank-readonly
+  cancel-in-progress: false
+jobs:
+  offline-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned image verification library
+        run: python -m pip install --no-cache-dir Pillow==11.3.0
+      - name: Verify signed-rights, JPEG hash, duplication and fail-closed 2/3 day contract
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/social/verify-private-licensed-photo-buffer.py
+          python scripts/social/verify-private-licensed-photo-buffer.py --self-test
+  staging-private-readonly-audit:
+    if: >
+      github.repository == 'mannerjm/unboda' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    needs: offline-gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      UNBODA_STAGING_SERVICE_ROLE_KEY: ${{ secrets.UNBODA_STAGING_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-cache-dir Pillow==11.3.0
+      - name: Read ONLY staging private photos and rights proof for tomorrow through day three
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${UNBODA_STAGING_SERVICE_ROLE_KEY:-}" ]; then
+            echo "STAGING_PHOTO_BANK_SECRET_NOT_CONFIGURED_NO_SNS_POST" >&2
+            exit 1
+          fi
+          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          python scripts/social/verify-private-licensed-photo-buffer.py \
+            --start-date "$DAY" --days 3 --out photo-bank-readiness.json
+      - name: Store redacted audit summary only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unboda-private-photo-three-day-readiness
+          path: photo-bank-readiness.json
+          if-no-files-found: ignore
+          retention-days: 3

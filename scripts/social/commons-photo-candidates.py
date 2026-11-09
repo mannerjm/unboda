@@ -28,6 +28,8 @@ HOST="commons.wikimedia.org"
 OPENVERSE_HOST="api.openverse.org"
 MEDIA_HOST="upload.wikimedia.org"
 USER_AGENT="UNBODAOriginalPhotoRightsAudit/1.0 (+https://unboda.kr)"
+# One upstream 401/403/429 stops Openverse for this execution; never evade limits.
+OPENVERSE_PAUSED_STATUS=None
 MAX_DOWNLOAD=16_000_000
 MAX_OUTPUT=4_900_000
 SLOTS=("01","04","10","13","16","19","22")
@@ -141,6 +143,10 @@ def get(url,limit=MAX_DOWNLOAD):
     blob=res.read(limit+1)
     if not blob or len(blob)>limit:raise RuntimeError("REMOTE_FILE_TOO_LARGE")
     return mime,blob
+  except urllib.error.HTTPError as e:
+   # Auth and throttling are terminal for this request, not transient retries.
+   if e.code in (401,403,429) or attempt==2:raise
+   time.sleep(3*(attempt+1))
   except (TimeoutError,urllib.error.URLError) as e:
    if attempt==2:raise
    time.sleep(3*(attempt+1))
@@ -221,32 +227,46 @@ COMMONS_SCENE_CATEGORIES={
  "10":[("office-desk","Category:Office desks"),("meeting","Category:Meeting rooms")],
  "13":[("shopping-basket","Category:Shopping baskets"),
        ("shopping-basket","Category:Shopping carts"),
+       ("grocery-shelf","Category:Supermarket shelves"),
+       ("grocery-shelf","Category:Supermarket aisles"),
        ("receipt","Category:Shop checks"),("receipt","Category:Cash registers")],
- "16":[("coffee-meetup","Category:Cups of coffee"),
+ "16":[("friends-cafe","Category:People in conversation"),
+       ("coffee-meetup","Category:Cups of coffee"),
        ("coffee-meetup","Category:Coffee cups")],
  "19":[("set-table","Category:Dining tables"),
        ("home-kitchen","Category:Kitchens")],
  "22":[("checklist","Category:Shopping lists"),
+       ("checklist","Category:To do lists"),
+       ("checklist","Category:Checklists"),
        ("planner","Category:Calendars"),("tidy-desk","Category:Desks")]
 }
 def commons_category_files(category):
  if not re.fullmatch(r"Category:[A-Za-z0-9 _-]{4,100}",category):
   raise RuntimeError("UNAPPROVED_COMMONS_CATEGORY")
- query={
-  "action":"query","format":"json","generator":"categorymembers",
-  "gcmtitle":category,"gcmtype":"file","gcmlimit":"50",
-  "prop":"imageinfo","iiprop":"url|size|mime|extmetadata",
-  "iiextmetadatafilter":"LicenseShortName|LicenseUrl|Artist|Credit|ImageDescription",
-  "iiurlwidth":"1080"
- }
- _,raw=get("https://"+HOST+"/w/api.php?"+urllib.parse.urlencode(query),4_000_000)
- data=json.loads(raw)
- if "error" in data:raise RuntimeError("COMMONS_CATEGORY_QUERY_FAILED")
- pages=data.get("query",{}).get("pages") or {}
- if not isinstance(pages,dict):raise RuntimeError("COMMONS_CATEGORY_BAD_PAGES")
- return sorted((p for p in pages.values() if p.get("ns")==6 and
-    p.get("title","").startswith("File:") and p.get("imageinfo")),
-    key=lambda p:p["title"])
+ pages_by_title={}
+ cursor=None
+ # Categorymembers is paginated. Scan at most 2 pages (100 entries) through
+ # Wikimedia's official API; all items still need rights and pixel QA.
+ for _ in range(2):
+  query={
+   "action":"query","format":"json","generator":"categorymembers",
+   "gcmtitle":category,"gcmtype":"file","gcmlimit":"50",
+   "prop":"imageinfo","iiprop":"url|size|mime|extmetadata",
+   "iiextmetadatafilter":"LicenseShortName|LicenseUrl|Artist|Credit|ImageDescription",
+   "iiurlwidth":"1080"
+  }
+  if cursor:query["gcmcontinue"]=cursor
+  _,raw=get("https://"+HOST+"/w/api.php?"+urllib.parse.urlencode(query),4_000_000)
+  data=json.loads(raw)
+  if "error" in data:raise RuntimeError("COMMONS_CATEGORY_QUERY_FAILED")
+  pages=data.get("query",{}).get("pages") or {}
+  if not isinstance(pages,dict):raise RuntimeError("COMMONS_CATEGORY_BAD_PAGES")
+  for page in pages.values():
+   if page.get("ns")==6 and page.get("title","").startswith("File:") and page.get("imageinfo"):
+    pages_by_title[page["title"]]=page
+  cursor=(data.get("continue") or {}).get("gcmcontinue")
+  if not cursor:break
+ return sorted(pages_by_title.values(),key=lambda page:page["title"])
 
 def convert_to_photo_jpeg(raw):
  Image.MAX_IMAGE_PIXELS=35_000_000
@@ -281,6 +301,7 @@ def convert_to_photo_jpeg(raw):
 def near_duplicate(a,b):
  return (int(a,16)^int(b,16)).bit_count()<=6
 def choose_photos(query,history,slot,offset,max_candidates=8):
+ global OPENVERSE_PAUSED_STATUS
  rejected={}
  found=[]
  seen_pages=set()
@@ -357,15 +378,18 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
  # Openverse is used ONLY to discover matching Wikimedia Commons JPG pages.
  # All license and pixel checks still happen through Wikimedia's own API.
  # Do not scrape Openverse, bypass rate-limits or fetch arbitrary hosts.
- if len(found)<3:
+ if len(found)<3 and OPENVERSE_PAUSED_STATUS is None:
   for scene in SCENE_CATALOG[slot]["scenes"]:
    try:
     pages=openverse_verified_commons_pages(scene["queries"][0])
    except Exception as exc:
     print("OPENVERSE_DISCOVERY_NOT_AVAILABLE",slot,type(exc).__name__,
           getattr(exc,"code","NO_STATUS"),file=sys.stderr)
-    # Explicitly fail closed on rate limits; never switch to unsafe sources.
-    if isinstance(exc,urllib.error.HTTPError) and exc.code==429:break
+    # Never hammer a rejected or rate-limited API; all later slots use Commons only.
+    if isinstance(exc,urllib.error.HTTPError) and exc.code in (401,403,429):
+     OPENVERSE_PAUSED_STATUS=exc.code
+     print("OPENVERSE_SUSPENDED_FOR_THIS_RUN",exc.code,file=sys.stderr)
+     break
     continue
    for page in pages:
     accept(page)
@@ -473,6 +497,9 @@ def selftest():
  assert commons_title_from_landing_page("https://commons.wikimedia.org/wiki/File:vector.svg") is None
  assert commons_title_from_landing_page("http://commons.wikimedia.org/wiki/File:Sample_photo.jpg") is None
  assert len(COMMONS_SCENE_CATEGORIES)==7
+ assert ("grocery-shelf","Category:Supermarket shelves") in COMMONS_SCENE_CATEGORIES["13"]
+ assert ("friends-cafe","Category:People in conversation") in COMMONS_SCENE_CATEGORIES["16"]
+ assert ("checklist","Category:To do lists") in COMMONS_SCENE_CATEGORIES["22"]
  assert all(sid in [s["id"] for s in SCENE_CATALOG[h]["scenes"]] for h,entries in COMMONS_SCENE_CATEGORIES.items() for sid,cat in entries)
  assert len(SCENE_CATALOG)==7
  assert all(len(x["scenes"])==3 for x in SCENE_CATALOG.values())

@@ -66,7 +66,9 @@ jobs:
           python - <<'PY'
           import json
           m=json.load(open("photo-candidates/candidate-manifest.json"))
-          assert len(m["photos"])==7
+          assert 7 <= len(m["photos"]) <= 56
+          assert {p["hourKst"] for p in m["photos"]} == {"01","04","10","13","16","19","22"}
+          assert m["distinctHourSlots"] == 7
           assert m["photoReadyForSnsPosting"] is False
           assert m["publicationAllowed"] is False
           assert m["actualVisualSceneInspected"] is False
@@ -98,6 +100,7 @@ jobs:
           import json
           x=json.load(open('photo-candidates/vision-review.json'))
           assert x['photoReviewCount']==7
+          assert 7 <= x['photoCandidatesScored'] <= 56
           assert x['publicationAllowed'] is False
           assert x['photoReadyForSnsPosting'] is False
           assert x['wholeSocial90DayCoverageVerified'] is False

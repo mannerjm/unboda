@@ -348,7 +348,8 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
   for scene_id,category in COMMONS_SCENE_CATEGORIES[slot]:
    try:pages=commons_category_files(category)
    except Exception as exc:
-    print("COMMONS_CATEGORY_DISCOVERY_UNAVAILABLE",slot,category,type(exc).__name__,file=sys.stderr)
+    print("COMMONS_CATEGORY_DISCOVERY_UNAVAILABLE",slot,category,
+          type(exc).__name__,getattr(exc,"code","NO_STATUS"),file=sys.stderr)
     continue
    for page in pages:
     accept(page,category_scene=scene_id,category=category)
@@ -362,7 +363,7 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
     pages=openverse_verified_commons_pages(scene["queries"][0])
    except Exception as exc:
     print("OPENVERSE_DISCOVERY_NOT_AVAILABLE",slot,type(exc).__name__,
-          file=sys.stderr)
+          getattr(exc,"code","NO_STATUS"),file=sys.stderr)
     # Explicitly fail closed on rate limits; never switch to unsafe sources.
     if isinstance(exc,urllib.error.HTTPError) and exc.code==429:break
     continue
@@ -406,7 +407,10 @@ def run(brief,target,history_dir,output):
   except RuntimeError as err:
    if not str(err).startswith("NO_LICENSED_UNDUPLICATED_REAL_PHOTO_CANDIDATE"):
     raise
-   print("CANDIDATE_POOL_MISSING_SAFE_FAIL",hour,file=sys.stderr)
+   # Only aggregate rejection counts (license, candidate title, bytes,
+   # pixel format, old hash). Never log actual private photo bytes.
+   print("CANDIDATE_POOL_MISSING_SAFE_FAIL",hour,str(err)[:1600],
+         file=sys.stderr)
    missing.append({"hourKst":hour,"reason":"NO_APPROVED_LICENSED_TOPIC_PHOTO"})
    continue
   for i,(photo,record) in enumerate(pool):

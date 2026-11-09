@@ -1,50 +1,50 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-travel-budget-talk-awkward-20261107",
-  "topicKey": "saju-travel-budget-talk-awkward-20261107",
+  "id": "unboda-saju-friendship-relationship-talk-0-0-20261110",
+  "topicKey": "saju-friendship-relationship-talk-0-0-20261110",
   "sajuCategory": "compatibility",
   "visualStyle": "relationship-coral",
   "visualMotif": "relationship-talk",
-  "situation": "점심에 연인과 여행 경비 얘기를 하다 서운해진 순간",
-  "hook": "점심에 연인과 여행 경비 얘기를 하다 서운해진 순간. 어떻게 말할까요?",
-  "theme": "연인과 여행 경비 이야기에서 서로의 기대와 궁합 차이를 느끼는 상황. 운보다의 연인·배우자 궁합 분석 분석은 두 사람의 관계 강점과 갈등·회복 방식.",
-  "thumbnailTitle": "연인 대화 경비가 서운해?",
+  "situation": "연인과 대화하다 서운함을 느낀 저녁",
+  "hook": "연인과 대화하다 서운함을 느낀 저녁. 뭘 먼저 볼까요?",
+  "theme": "연인과 대화하다 서운함을 느낀 저녁에서 실제 생활 선택을 살피는 내용. 두 사람의 관계 강점과 갈등·회복 방식",
+  "thumbnailTitle": "관계 대화 다 서운함을 느낀 저녁",
   "narrationDraft": [
-    "점심에 연인과 여행 경비 얘기를 하다 서운해진 순간. 어떻게 말할까요?",
-    "사주 궁합에서는 연인 사이의 기대와 비용 대화 차이를 돌아봐요.",
-    "여행 경비를 교통비와 식비로 나눠 적고 서로의 예산을 확인해 보세요.",
-    "운보다 무료 사주 조회 후 연인·배우자 궁합 분석을 살펴보세요."
+    "연인과 대화하다 서운함을 느낀 저녁. 뭘 먼저 볼까요?",
+    "사주 궁합에서는 사람마다 다른 대화 방식과 마음을 돌아보는 참고예요.",
+    "서로의 대화에서 엇갈린 순간을 적고 다른 표현을 한 가지 생각해 보세요.",
+    "운보다 무료 사주 조회 후 내 선택과 생활 흐름도 차분하게 살펴보세요."
   ],
   "visualConcepts": [
-    "첫 장면에서 연인 두 사람의 여행 경비 대화 말풍선을 실제 그림으로 보여주고 주제별 사물을 움직이는 화면",
-    "두 번째 장면에서 연인 두 사람의 여행 경비 대화 말풍선의 강조 위치가 달라지며 사주 성향은 참고임을 설명하는 화면",
-    "세 번째 장면에서 연인 두 사람의 여행 경비 대화 말풍선을 정리하고 실천 표시가 차례로 추가되는 화면",
-    "마지막 장면에서 연인 두 사람의 여행 경비 대화 말풍선과 운보다 무료 사주 조회 https://unboda.kr를 연결하는 화면"
+    "첫 장면에서 연인과 대화하다 서운함을 느낀 저녁 상황과 관계 대화, 대화을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "두 번째 장면에서 연인과 대화하다 서운함을 느낀 저녁 상황과 관계 대화, 대화을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "세 번째 장면에서 연인과 대화하다 서운함을 느낀 저녁 상황과 관계 대화, 대화을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "마지막 장면에서 연인과 대화하다 서운함을 느낀 저녁 상황과 관계 대화, 대화을 실제 주제 그림으로 보여주고 움직이는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "연인 대화",
-        "경비가 서운해?"
+        "관계 대화",
+        "다 서운함을 느낀 저녁"
       ],
-      "subline": "두 사람의 여행 대화",
+      "subline": "관계 대화 돌아보기",
       "illustration": "message"
     },
     {
       "headline": [
-        "사주 궁합",
+        "사주로 보는",
         "성향 참고"
       ],
-      "subline": "서로 다른 기대 돌아보기",
-      "illustration": "rest"
+      "subline": "지금 상황 돌아보기",
+      "illustration": "notes"
     },
     {
       "headline": [
         "작은 실천",
         "지금 해봐요"
       ],
-      "subline": "교통비와 식비 나누기",
-      "illustration": "clock"
+      "subline": "나의 기준 점검하기",
+      "illustration": "rest"
     },
     {
       "headline": [
@@ -52,10 +52,10 @@
         "무료로 살펴봐"
       ],
       "subline": "운보다 무료 사주 · 연인·배우자 궁합 분석",
-      "illustration": "notes"
+      "illustration": "clock"
     }
   ],
-  "targetDateKst": "20261107",
+  "targetDateKst": "20261110",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
@@ -66,7 +66,7 @@
   "productType": "compatibility",
   "landingPath": "/special-analysis/compatibility/romantic",
   "contentGoal": "compatibility-conversion",
-  "productProblem": "연인과 여행 경비 이야기에서 서로의 기대와 궁합 차이를 느끼는 상황",
+  "productProblem": "연인 관련 연인과 대화하다 서운함을 느낀 저녁 상황을 돌아보고 점검",
   "productValue": "두 사람의 관계 강점과 갈등·회복 방식",
   "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 연인·배우자 궁합 분석 https://unboda.kr/special-analysis/compatibility/romantic"
 }

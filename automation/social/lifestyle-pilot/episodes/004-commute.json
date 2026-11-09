@@ -1,41 +1,41 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-morning-overlapping-tasks-20261107",
-  "topicKey": "saju-morning-overlapping-tasks-20261107",
+  "id": "unboda-saju-commute-work-checklist-0-0-20261110",
+  "topicKey": "saju-commute-work-checklist-0-0-20261110",
   "sajuCategory": "career",
   "visualStyle": "commute-sunrise",
   "visualMotif": "work-checklist",
-  "situation": "아침 업무 일정 두 개가 겹쳐 당황한 순간",
-  "hook": "아침 업무 일정 두 개가 겹쳐 당황한 순간. 뭘 먼저 할까요?",
-  "theme": "아침에 업무 일정이 겹쳐 과부하를 느끼는 상황. 운보다의 업무 과부하 회복 분석 분석은 업무에서 소진을 만드는 패턴과 지속 가능한 업무 경계를 점검.",
-  "thumbnailTitle": "업무 일정 서로 겹친다면?",
+  "situation": "업무 일정이 겹쳐 우선순위가 헷갈린 아침",
+  "hook": "업무 일정이 겹쳐 우선순위가 헷갈린 아침. 뭘 먼저 볼까요?",
+  "theme": "업무 일정이 겹쳐 우선순위가 헷갈린 아침에서 실제 생활 선택을 살피는 내용. 업무에서 소진을 만드는 패턴과 지속 가능한 업무 경계를 점검",
+  "thumbnailTitle": "업무 계획 우선순위가 헷갈린 아침",
   "narrationDraft": [
-    "아침 업무 일정 두 개가 겹쳐 당황한 순간. 뭘 먼저 할까요?",
-    "사주 직업 관점에서 업무 과부하와 내 회복 방식을 살펴보는 참고예요.",
-    "해야 할 일을 시간별로 나눠 적고 급한 순서부터 하나씩 확인해 보세요.",
-    "운보다 무료 사주 조회 후 업무 과부하 회복 분석을 살펴보세요."
+    "업무 일정이 겹쳐 우선순위가 헷갈린 아침. 뭘 먼저 볼까요?",
+    "사주 직업 관점에서 업무 흐름과 일의 우선순위를 돌아보는 참고예요.",
+    "업무 시간을 먼저 나눠 적고 가장 필요한 확인 질문 한 개를 준비해 보세요.",
+    "운보다 무료 사주 조회 후 내 선택과 생활 흐름도 차분하게 살펴보세요."
   ],
   "visualConcepts": [
-    "첫 장면에서 사무실 업무 체크리스트와 업무 시간표가 겹친 모습을 실제 그림으로 보여주고 주제별 사물을 움직이는 화면",
-    "두 번째 장면에서 사무실 업무 체크리스트와 업무 시간표가 겹친 모습의 강조 위치가 달라지며 사주 성향은 참고임을 설명하는 화면",
-    "세 번째 장면에서 사무실 업무 체크리스트와 업무 시간표가 겹친 모습을 정리하고 실천 표시가 차례로 추가되는 화면",
-    "마지막 장면에서 사무실 업무 체크리스트와 업무 시간표가 겹친 모습과 운보다 무료 사주 조회 https://unboda.kr를 연결하는 화면"
+    "첫 장면에서 업무 일정이 겹쳐 우선순위가 헷갈린 아침 상황과 업무 계획, 업무을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "두 번째 장면에서 업무 일정이 겹쳐 우선순위가 헷갈린 아침 상황과 업무 계획, 업무을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "세 번째 장면에서 업무 일정이 겹쳐 우선순위가 헷갈린 아침 상황과 업무 계획, 업무을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "마지막 장면에서 업무 일정이 겹쳐 우선순위가 헷갈린 아침 상황과 업무 계획, 업무을 실제 주제 그림으로 보여주고 움직이는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "업무 일정",
-        "서로 겹친다면?"
+        "업무 계획",
+        "우선순위가 헷갈린 아침"
       ],
-      "subline": "업무 체크리스트",
+      "subline": "업무 계획 돌아보기",
       "illustration": "clock"
     },
     {
       "headline": [
-        "사주 직업",
+        "사주로 보는",
         "성향 참고"
       ],
-      "subline": "업무 습관 돌아보기",
+      "subline": "지금 상황 돌아보기",
       "illustration": "message"
     },
     {
@@ -43,7 +43,7 @@
         "작은 실천",
         "지금 해봐요"
       ],
-      "subline": "시간별로 나눠 확인",
+      "subline": "나의 기준 점검하기",
       "illustration": "notes"
     },
     {
@@ -55,7 +55,7 @@
       "illustration": "rest"
     }
   ],
-  "targetDateKst": "20261107",
+  "targetDateKst": "20261110",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
@@ -66,7 +66,7 @@
   "productType": "premium",
   "landingPath": "/paid-analysis/career-workload-recovery",
   "contentGoal": "premium-conversion",
-  "productProblem": "아침에 업무 일정이 겹쳐 과부하를 느끼는 상황",
+  "productProblem": "일정 관련 업무 일정이 겹쳐 우선순위가 헷갈린 아침 상황을 돌아보고 점검",
   "productValue": "업무에서 소진을 만드는 패턴과 지속 가능한 업무 경계를 점검",
   "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 업무 과부하 회복 분석 https://unboda.kr/paid-analysis/career-workload-recovery"
 }

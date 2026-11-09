@@ -78,7 +78,7 @@ def check_bytes(photo, evidence, asset):
         fail("UNREADABLE_REAL_JPEG_REQUIRED")
 
 def asset_is_eligible(asset, target):
-    if (asset.get("qa_status") == "REJECTED" or
+    if (asset.get("qa_status") != "DUAL_QA_PASS" or
             asset.get("rights_basis") not in BASIS or
             asset.get("commercial_social_rights") is not True or
             asset.get("ai_quality_inspection_rights") is not True or
@@ -114,7 +114,7 @@ def audit(start_date, days, assets, assignments, history, fetch_binary):
     # This is only staging's own use history; it is NOT complete Metricool history.
     historic = [h for h in history if
                 isdate(h.get("slot_date")) and
-                first - dt.timedelta(days=90) <= dt.date.fromisoformat(h["slot_date"]) < first]
+                first - dt.timedelta(days=90) <= dt.date.fromisoformat(h["slot_date"]) <= first + dt.timedelta(days=days - 1)]
     if len(history) >= 1000:
         fail("INCOMPLETE_90_DAY_STAGING_PAGE")
     issues, coverage = [], []
@@ -128,7 +128,7 @@ def audit(start_date, days, assets, assignments, history, fetch_binary):
                 continue
             assignment = slot[0]
             asset = by_id.get(assignment.get("asset_id"))
-            if not asset or assignment.get("review_state") == "REJECTED" or not asset_is_eligible(asset, day):
+            if not asset or assignment.get("review_state") not in ("RESERVED", "DUAL_QA_PASS") or not asset_is_eligible(asset, day):
                 issues.append({"dateKst": day, "hourKst": hour, "reason": "RIGHTS_OR_ASSET_NOT_APPROVED"})
                 continue
             if asset["scene_id"] not in {s["id"] for s in SCENES[hour]["scenes"]}:
@@ -224,7 +224,7 @@ def selftest():
         rights_basis="BRAND_OWNED", commercial_social_rights=True,
         ai_quality_inspection_rights=True, rights_valid_from="2026-11-01",
         rights_valid_until=None, rights_holder="Mock rights holder",
-        credit_line="Mock photographer", scene_id="notebook", qa_status="PENDING"
+        credit_line="Mock photographer", scene_id="notebook", qa_status="DUAL_QA_PASS"
     )
     check_bytes(blob, proof, asset)
     def fake_get(path, limit):
@@ -233,6 +233,15 @@ def selftest():
                     "asset_id": "test-photo", "review_state": "RESERVED"}]
     r = audit("2026-11-10", 3, [asset], assignments, [], fake_get)
     assert r["expectedSlots"] == 21 and r["verifiedPrivateMediaAndProof"] == 1
+    asset["qa_status"] = "PENDING"
+    pending = audit("2026-11-10", 3, [asset], assignments, [], fake_get)
+    assert pending["verifiedPrivateMediaAndProof"] == 0
+    assert pending["issues"][0]["reason"] == "RIGHTS_OR_ASSET_NOT_APPROVED"
+    asset["qa_status"] = "DUAL_QA_PASS"
+    assignments[0]["review_state"] = "AWAITING_DUAL_QA"
+    waiting = audit("2026-11-10", 3, [asset], assignments, [], fake_get)
+    assert waiting["verifiedPrivateMediaAndProof"] == 0
+    assignments[0]["review_state"] = "RESERVED"
     assert len(r["issues"]) == 20 and r["photoReadyForSnsPosting"] is False
     assert r["independentClipBlipVerified"] is False
     old = asset["photo_sha256"]
@@ -247,6 +256,10 @@ def selftest():
     r = audit("2026-11-10", 2, [asset], assignments,
               [{"slot_date": "2026-11-01", "media_sha256": old}], fake_get)
     assert r["verifiedPrivateMediaAndProof"] == 0
+    # A same-day already-used photo must be treated as reused as well.
+    same = audit("2026-11-10", 2, [asset], assignments,
+                 [{"slot_date": "2026-11-10", "media_sha256": old}], fake_get)
+    assert same["verifiedPrivateMediaAndProof"] == 0
     # A stale source outside this time window is never counted as a future slot.
     empty = audit("2026-11-11", 3, [asset], assignments, [], fake_get)
     assert empty["verifiedPrivateMediaAndProof"] == 0

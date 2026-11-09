@@ -1,0 +1,82 @@
+name: UNBODA missing next-day video SOURCE self-recovery (ONE BUILD, NO SNS)
+# Two-stage recovery: normal producer has 3 scheduled attempts. This last
+# attempt runs only if tomorrow's 10-asset video release is absent AND no
+# earlier source build/dispatch is running or successful. Never post to SNS.
+on:
+  schedule:
+    - cron: '55 12 * * *' # 21:55 KST, ahead of 23:45 KST video publish worker
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/social/decide-one-shot-video-source-recovery.cjs'
+      - '.github/workflows/unboda-video-source-one-shot-recovery.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/social/decide-one-shot-video-source-recovery.cjs'
+      - '.github/workflows/unboda-video-source-one-shot-recovery.yml'
+permissions:
+  contents: read
+concurrency:
+  group: unboda-video-source-single-recovery
+  cancel-in-progress: false
+jobs:
+  offline-invariants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: No duplicate source recovery, no rewriting old releases, no late dispatch
+        run: |
+          set -euo pipefail
+          node --check scripts/social/decide-one-shot-video-source-recovery.cjs
+          node scripts/social/decide-one-shot-video-source-recovery.cjs
+  one-attempt-source-recovery:
+    if: >
+      github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    needs: offline-invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check immutable future source and dispatch at most one source build
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {decision}=require('./scripts/social/decide-one-shot-video-source-recovery.cjs');
+            const owner='mannerjm',repo='unboda';
+            const now=Date.now();
+            const local=new Date(now+9*3600000).toISOString().slice(0,10);
+            const date=new Date(Date.parse(local+'T00:00:00Z')+86400000).toISOString().slice(0,10).replaceAll('-','');
+            const tag='unboda-saju-shorts-'+date;
+            let release=null;
+            try {
+              const got=await github.rest.repos.getReleaseByTag({owner,repo,tag});
+              release=got.data;
+            } catch(err) {if(err.status!==404)throw err;}
+            const workflow_id='unboda-video-autonomous-build.yml';
+            const response=await github.rest.actions.listWorkflowRuns({owner,repo,workflow_id,per_page:100});
+            const runs=response.data?.workflow_runs;
+            if(!Array.isArray(runs))throw Error('VIDEO_WORKFLOW_HISTORY_NOT_READABLE');
+            const start=Date.parse(local+'T00:00:00Z')-9*3600000;
+            const completeHistory=runs.length<100||runs.some(x=>Date.parse(x.created_at)<start);
+            const choice=decision({now,release,runs,completeHistory});
+            core.info('UNBODA_VIDEO_SOURCE_RECOVERY '+choice.action+' '+choice.reason+' '+choice.target+' NO_SNS_POST');
+            if(choice.target!==date)throw Error('TARGET_DATE_MISMATCH');
+            if(choice.action==='BLOCK')throw Error(choice.reason);
+            if(choice.action!=='DISPATCH_ONCE')return;
+            // No retry after any ambiguous GitHub dispatch result; the video
+            // build workflow has its own 10-asset release uniqueness checks.
+            await github.rest.actions.createWorkflowDispatch({owner,repo,workflow_id,ref:'main'});
+            core.info('ONE_NEXT_DAY_VIDEO_SOURCE_BUILD_DISPATCHED_NO_SNS_POST '+date);

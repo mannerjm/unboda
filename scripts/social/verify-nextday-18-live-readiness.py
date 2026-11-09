@@ -82,9 +82,15 @@ def release_assets(date,topic,fetch_json=get_json):
     wanted=({"zodiac":{f"unboda-{date}-{i:02}.png" for i in range(1,8)}|{"caption.txt","zodiac-manifest.json"},
              "video":{n+e for n in ("00-midnight","08-commute","12-friendship","20-afterwork") for e in (".mp4",".jpg")}|{"manifest.json","automated-voice-quality-receipt.json"},
              "photo":{f"photo-{h}.jpg" for h in LIFESTYLE_HOURS}|{"manifest.json"}})[topic]
+    def real_asset_minimum(name):
+        if name.endswith(".mp4"):return 500_000
+        if name.endswith(".png") or name.endswith(".jpg"):return 20_000
+        if name.endswith("caption.txt"):return 100
+        if name.endswith(".json"):return 200
+        return 10**12
     valid=(set(names)==wanted and len(names)==len(wanted) and
-        all(isinstance(a,dict) and isinstance(a.get("size"),int) and a["size"]>800
-            for a in rows))
+        all(isinstance(a,dict) and isinstance(a.get("size"),int) and
+            a["size"]>=real_asset_minimum(a.get("name","")) for a in rows))
     return {"state":"SOURCE_METADATA_PRESENT" if valid else "INCOMPLETE_OR_INVALID_SOURCE",
             "assets":len(rows),"tag":tag,"filesVerified":False,
             "requiredCount":len(wanted),
@@ -208,10 +214,21 @@ def summarize(date, releases, readback, now=None):
 def self_test():
     date="2026-11-10"
     assert valid_date(date) and not valid_date("2026-11-31")
-    assert release_assets(date,"video",lambda u:{
-        "tag_name":"unboda-saju-shorts-20261110","draft":False,
-        "assets":[{"name":n+e,"size":100000} for n in ("00-midnight","08-commute","12-friendship","20-afterwork")
-          for e in (".mp4",".jpg")]+[{"name":"manifest.json","size":1000},{"name":"automated-voice-quality-receipt.json","size":1000}]})["state"]=="SOURCE_METADATA_PRESENT"
+    video_release={"tag_name":"unboda-saju-shorts-20261110","draft":False,
+        "assets":[{"name":n+e,"size":1_100_000 if e==".mp4" else 220_000}
+          for n in ("00-midnight","08-commute","12-friendship","20-afterwork")
+          for e in (".mp4",".jpg")]+
+          [{"name":"manifest.json","size":4800},
+           {"name":"automated-voice-quality-receipt.json","size":5400}]}
+    assert release_assets(date,"video",lambda u:video_release)["state"]=="SOURCE_METADATA_PRESENT"
+    zodiac_release={"tag_name":"unboda-zodiac-20261110","draft":False,
+        "assets":[{"name":f"unboda-2026-11-10-{i:02}.png","size":100_000}
+           for i in range(1,8)]+[{"name":"caption.txt","size":695},
+            {"name":"zodiac-manifest.json","size":29_803}]}
+    assert release_assets(date,"zodiac",lambda u:zodiac_release)["state"]=="SOURCE_METADATA_PRESENT"
+    bad_video={**video_release,"assets":[{**x,"size":1000} if x["name"]=="00-midnight.mp4" else x
+                                     for x in video_release["assets"]]}
+    assert release_assets(date,"video",lambda u:bad_video)["state"]=="INCOMPLETE_OR_INVALID_SOURCE"
     baseline={x:{"state":"SOURCE_METADATA_PRESENT"} for x in ("video","zodiac","photo")}
     instant=dt.datetime(2026,11,9,21,30,tzinfo=KST)
     assert summarize(date,baseline,{"complete":False,"reason":"NO_KEY"},instant)["status"]=="BLOCKED_GAPS_REQUIRE_ACTION"

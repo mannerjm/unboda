@@ -46,3 +46,10 @@ Replace used images with seven fresh rights-proven real photos each day, keep 21
 - Nightly workflow unboda-private-photo-bank-allocate.yml runs at 20:45 KST, before the 21:05 private-photo-readiness audit, and requires a protected staging-only GitHub Actions secret UNBODA_STAGING_SERVICE_ROLE_KEY. Without that secret or enough independently approved genuine photographs it fails closed and writes nothing.
 - Offline CI tests use *synthetic fixtures only* to exercise 21-slot planning, never to claim real-photo approval.
 - This allocator is NOT a substitute for the full 90-day Metricool scheduled/published history, legal review, independent model evidence, immutable public media hosting, live Supabase claims, or exact published URL. The user-visible 18-per-day SNS autopublishing remains disabled until the separate end-to-end launch gates pass.
+
+## Additional fail-closed audit checks
+- A photo bank asset is eligible for the 3-day *private buffer audit* **only** after its metadata QA state equals DUAL_QA_PASS; PENDING or REJECTED never counts toward 21 ready photographs even if rights flags are set.
+- A time assignment with AWAITING_DUAL_QA or REJECTED must not be counted as a ready slot. Existing assignments are immutable and remain untouched; a previously incomplete slot blocks completion rather than being silently overwritten.
+- The allocation planner rejects pre-existing assignments outside the exact three-day KST window, invalid slot hours, and a photo assigned more than once. This prevents accidentally accepting a full plan based on unrelated/stale rows.
+- The private buffer audit checks date-matched staging media reuse including the current and future planned dates, not only dates earlier than tomorrow. It still does not claim whole-provider 90-day SNS coverage.
+- CI fixture approval is simulated solely for deterministic tests; no real photograph, image rights, CLIP/BLIP record, or public post has been approved by this change.

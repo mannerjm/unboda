@@ -5,12 +5,16 @@ on:
     paths:
       - "scripts/social/lifestyle-one-shot-scheduler.mjs"
       - "scripts/social/lifestyle-one-shot-scheduler.test.mjs"
+      - "scripts/social/lifestyle-supabase-claim-store.mjs"
+      - "scripts/social/lifestyle-supabase-claim-store.test.mjs"
       - ".github/workflows/unboda-lifestyle-one-shot-contract.yml"
   push:
     branches: [main]
     paths:
       - "scripts/social/lifestyle-one-shot-scheduler.mjs"
       - "scripts/social/lifestyle-one-shot-scheduler.test.mjs"
+      - "scripts/social/lifestyle-supabase-claim-store.mjs"
+      - "scripts/social/lifestyle-supabase-claim-store.test.mjs"
       - ".github/workflows/unboda-lifestyle-one-shot-contract.yml"
   workflow_dispatch:
 permissions:
@@ -30,4 +34,5 @@ jobs:
           set -euo pipefail
           node --check scripts/social/lifestyle-one-shot-scheduler.mjs
           node --test scripts/social/lifestyle-one-shot-scheduler.test.mjs
+          node --test scripts/social/lifestyle-supabase-claim-store.test.mjs
           echo "ONE_SHOT_CONTRACT_PASSED_NO_EXTERNAL_PROVIDER_WRITE"

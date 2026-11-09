@@ -91,3 +91,42 @@ test("next 90 days retain distinct date-scoped title/topic keys with photo-first
  }
  assert.equal(keys.size,630);
 });
+
+
+test("BLIP-selected alternate real photo only passes when CLIP independently approved the same scene",()=>{
+ const f=fixture(),hour="16",base=f.review.photos.find(x=>x.hourKst===hour);
+ const original=f.manifest.photos.find(x=>x.hourKst===hour);
+ const alternative={...original,file:"backup-16.jpg",sha256:"e".repeat(64),phash:"e".repeat(16)};
+ f.manifest.photos.push(alternative);
+ base.candidateScores=[
+  {candidateFile:original.file,candidateSha256:original.sha256,automatedSceneMatch:true,
+   sceneModelCandidates:[{sceneId:base.bestSceneId,passed:true}]},
+  {candidateFile:alternative.file,candidateSha256:alternative.sha256,automatedSceneMatch:true,
+   sceneModelCandidates:[{sceneId:base.bestSceneId,passed:true}]}
+ ];
+ // All other six slots have a matching first model and second model proof.
+ for(const x of f.review.photos.filter(x=>x.hourKst!==hour)){
+  x.candidateScores=[{candidateFile:x.bestCandidateFile,
+    candidateSha256:x.candidateSha256,automatedSceneMatch:true,
+    sceneModelCandidates:[{sceneId:x.bestSceneId,passed:true}]}];
+ }
+ const independent={dateKst:f.dateKst,publicationAllowed:false,
+  photos:f.review.photos.map(x=>({
+   hourKst:x.hourKst,blipSceneMatch:true,sceneId:x.bestSceneId,
+   bestCandidateFile:x.hourKst===hour?alternative.file:x.bestCandidateFile,
+   candidateSha256:x.hourKst===hour?alternative.sha256:x.candidateSha256,
+   independentSceneChecks:[{model:"clip",pass:true},{model:"blip",pass:true}]
+  }))};
+ const ok=preparePhotoFirstEditorial({...f,independent});
+ assert.equal(ok.generatedPhotoAnchoredStories,7);
+ assert.equal(ok.stories.find(x=>x.hourKst===hour).photoSha256,alternative.sha256);
+ assert(ok.stories.every(s=>s.independentSceneVerified===true));
+ assert.equal(ok.publicationAllowed,false);
+ // No metadata-only swap: missing CLIP scene proof blocks even if BLIP says pass.
+ base.candidateScores[1].sceneModelCandidates[0].passed=false;
+ const blocked=preparePhotoFirstEditorial({...f,independent});
+ assert.equal(blocked.generatedPhotoAnchoredStories,6);
+ assert(blocked.unresolved.some(x=>x.hourKst===hour));
+ independent.publicationAllowed=true;
+ assert.throws(()=>preparePhotoFirstEditorial({...f,independent}),/SECOND_MODEL_REPORT_INCOMPLETE_OR_UNSAFE/);
+});

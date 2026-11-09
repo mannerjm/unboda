@@ -12,6 +12,7 @@ import hashlib
 import html
 import io
 import json
+import json
 import pathlib
 import re
 import sys
@@ -20,6 +21,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from PIL import Image, ImageOps, ImageDraw
+
+SCENE_CATALOG=json.loads((pathlib.Path(__file__).parent/"lifestyle-photo-scenes.json").read_text(encoding="utf-8"))["slots"]
 
 HOST="commons.wikimedia.org"
 MEDIA_HOST="upload.wikimedia.org"
@@ -105,12 +108,18 @@ OBVIOUSLY_WRONG=re.compile(
  r"(?:college|university|map of|atlas|manuscript|old photograph|antique|"
  r"nineteenth century|historical book|book cover|studio portrait|family portrait|"
  r"newspaper clipping|botanical notebook|museum collection|184[0-9]|18[0-9][0-9])",re.I)
-def subject_evidence(slot,name,description):
- if slot not in SCENE_WORD_PAIRS:return False
+def matching_photo_scenes(slot,name,description):
+ if slot not in SCENE_CATALOG:return []
  label=plain(name+" "+description).lower()
- if OBVIOUSLY_WRONG.search(label):return False
- first,second=SCENE_WORD_PAIRS[slot]
- return bool(re.search(first,label,re.I) and re.search(second,label,re.I))
+ if OBVIOUSLY_WRONG.search(label):return []
+ out=[]
+ for scene in SCENE_CATALOG[slot]["scenes"]:
+  one,two=scene["titleTokens"]
+  if re.search(one,label,re.I) and re.search(two,label,re.I):
+   out.append(scene["id"])
+ return out
+def subject_evidence(slot,name,description):
+ return bool(matching_photo_scenes(slot,name,description))
 
 def get(url,limit=MAX_DOWNLOAD):
  parts=urllib.parse.urlparse(url)
@@ -192,11 +201,10 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
  # Try broad but topic-bound terms, never switching to an unrelated motif.
  words=query.split()
  queries=list(dict.fromkeys([
-  query,
-  *TOPIC_SEARCH_VARIANTS.get(slot,[]),
-  " ".join(words[:2]),
-  words[0]+" photograph",
-  words[0]
+  # Photos drive copy: try several commercially usable real-life contexts
+  # for each paid product instead of insisting on one rare literal object.
+  *[q for sc in SCENE_CATALOG[slot]["scenes"] for q in sc["queries"]],
+  query," ".join(words[:2])
  ]))
  # No blind re-use of the same first-page image each morning.
  offsets=list(dict.fromkeys([offset,0,40]))
@@ -219,7 +227,8 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
     if not rights:
      rejected["license"]=rejected.get("license",0)+1
      continue
-    if not subject_evidence(slot,name,rights["description"]):
+    scene_matches=matching_photo_scenes(slot,name,rights["description"])
+    if not scene_matches:
      rejected["subject_metadata"]=rejected.get("subject_metadata",0)+1
      continue
     media=info.get("thumburl") or info.get("url","")
@@ -243,6 +252,7 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
      "originalUrl":info.get("url",""),"downloadedThumbnailUrl":media,
      "sha256":sha,"phash":phash,"bytes":len(photo),"width":1080,"height":1350,
      "rights":rights,"cameraExif":camera[:90],
+     "sceneCandidates":scene_matches,
      "photoCandidateOnly":True,"imageVisuallyInspected":False,
      "sceneMatchVerified":False,"publicationAllowed":False
     }
@@ -344,6 +354,13 @@ def selftest():
  assert not subject_evidence("13","A grocery store with no labels mentioned","")
  assert not subject_evidence("19","Family outside at a beach","")
  assert len(TOPIC_SEARCH_VARIANTS)==7
+ assert len(SCENE_CATALOG)==7
+ assert all(len(x["scenes"])==3 for x in SCENE_CATALOG.values())
+ assert matching_photo_scenes("13","A grocery supermarket shopping aisle with food shelves","")
+ assert matching_photo_scenes("10","Office laptop on work desk","")
+ assert matching_photo_scenes("19","Home kitchen with sink and cooking tools","")
+ assert not matching_photo_scenes("19","A family group studio portrait","")
+ assert not matching_photo_scenes("13","A beach sunset landscape","")
  print("PHOTO_SOURCE_OFFLINE_RIGHTS_MEDIA_AND_DEDUP_GATES_PASSED")
 if __name__=="__main__":
  ap=argparse.ArgumentParser()

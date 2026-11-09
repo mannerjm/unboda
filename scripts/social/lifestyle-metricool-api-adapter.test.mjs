@@ -69,6 +69,17 @@ test("one POST with exact provider, image, KST date and autoPublish",async()=>{
  assert(!("instagramData" in body));
  assert.equal(await a.verifyScheduled(post,m.posts[0],result),true);
 });
+test("a PENDING post with the wrong media never confirms an exact reservation",async()=>{
+ const m=mkMock(),a=adapter(m);
+ const result={id:912345};
+ const accidental={id:912345,publicationDate:{dateTime:"2026-11-10T13:00:00"},
+  text:post.caption,autoPublish:true,draft:false,
+  media:["https://github.com/mannerjm/unboda/releases/download/unboda-lifestyle-photo-20261110/photo-22.jpg"],
+  providers:[{network:"facebook",status:"PENDING"}]};
+ assert.equal(await a.verifyScheduled(post,accidental,result),false);
+ accidental.media=[post.mediaUrl];
+ assert.equal(await a.verifyScheduled(post,accidental,result),true);
+});
 test("published only after status PUBLISHED AND real public URL",async()=>{
  const m=mkMock([{
   id:123,publicationDate:{dateTime:"2026-11-10T13:00:00"},

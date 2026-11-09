@@ -33,12 +33,20 @@ def plan(start_date, candidates, existing, recent, published):
     if (len(candidates) >= 300 or len(existing) > 21 or
         len(recent) >= 1000 or len(published) >= 1000):
         fail("TRUNCATED_CANDIDATE_OR_HISTORY_PAGE")
+    first = dt.date.fromisoformat(start_date)
+    valid_days = {(first + dt.timedelta(days=offset)).isoformat() for offset in range(3)}
     by_slot = {}
+    existing_asset_ids = set()
     for a in existing:
+        if not isinstance(a, dict):
+            fail("INVALID_PREEXISTING_RECORD")
         key = (a.get("date_kst"), a.get("hour_kst"))
-        if key in by_slot:
-            fail("DUPLICATE_PREASSIGNED_SLOT")
+        if key[0] not in valid_days or key[1] not in bank.HOURS:
+            fail("OUT_OF_WINDOW_OR_INVALID_EXISTING_SLOT")
+        if key in by_slot or a.get("asset_id") in existing_asset_ids:
+            fail("DUPLICATE_PREASSIGNED_SLOT_OR_ASSET")
         by_slot[key] = a
+        existing_asset_ids.add(a.get("asset_id"))
     historical_hashes = set()
     historical_phashes = []
     for item in recent + published:
@@ -48,7 +56,7 @@ def plan(start_date, candidates, existing, recent, published):
             fail("UNKNOWN_PAST_HASH_BLOCKS_ASSIGNMENT")
         historical_hashes.add(sha)
         historical_phashes.append(phash)
-    existing_ids = {a.get("asset_id") for a in existing}
+    existing_ids = existing_asset_ids
     candidate_ids = set()
     for candidate in candidates:
         asset_id = candidate.get("id")
@@ -66,8 +74,8 @@ def plan(start_date, candidates, existing, recent, published):
         for hour in bank.HOURS:
             slot = by_slot.get((day, hour))
             if slot is not None:
-                if slot.get("review_state") == "REJECTED":
-                    warnings.append((day, hour, "PREEXISTING_REJECTED_NO_REPLACEMENT"))
+                if slot.get("review_state") not in ("RESERVED", "DUAL_QA_PASS"):
+                    warnings.append((day, hour, "PREEXISTING_SLOT_NOT_QA_READY_NO_REPLACEMENT"))
                 # Never alter/delete/reclaim a slot that was previously attempted.
                 continue
             matches = []
@@ -206,6 +214,16 @@ def selftest():
     x2 = plan(date, valid, [x["newAssignments"][0]], [], [])
     assert x2["state"] == "THREE_DAY_ASSIGNMENT_PLAN_COMPLETE_NOT_PUBLISHED"
     assert len(x2["newAssignments"]) == 20
+    waiting = [{**x["newAssignments"][0], "review_state": "AWAITING_DUAL_QA"}]
+    assert plan(date, valid, waiting, [], [])["state"] == "BLOCKED_NO_PARTIAL_ASSIGNMENT"
+    def expect_block(rows):
+        try:
+            plan(date, valid, rows, [], [])
+        except RuntimeError:
+            return
+        raise AssertionError("Rejected invalid preexisting slot should block")
+    expect_block([{**x["newAssignments"][0], "date_kst": "2026-11-18"}])
+    expect_block([x["newAssignments"][0], {**x["newAssignments"][1], "asset_id": x["newAssignments"][0]["asset_id"]}])
     valid[1]["qa_status"] = "PENDING"
     x3 = plan(date, valid, [], [], [])
     assert x3["state"] == "BLOCKED_NO_PARTIAL_ASSIGNMENT"

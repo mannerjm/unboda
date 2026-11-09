@@ -12,6 +12,10 @@ import json
 import pathlib
 import sys
 from PIL import Image
+SCENE_CATALOG=json.loads((pathlib.Path(__file__).parent/"lifestyle-photo-scenes.json").read_text(encoding="utf-8"))["slots"]
+SCENE_BY_ID={h:{v["id"]:v for v in cfg["scenes"]} for h,cfg in SCENE_CATALOG.items()}
+REAL_SCENE_NEGATIVE="a real photograph of a car driving on a highway"
+ILLUSTRATION_NEGATIVE="a colorful flat digital vector illustration of an object"
 MODEL_ID="openai/clip-vit-base-patch32"
 REVISION="aba0d2990c5c81a51290b5e895dda8237b39e0be"
 SLOTS={
@@ -70,22 +74,41 @@ def inspect(manifest_path,out_path):
    raw=file.read_bytes()
    if hashlib.sha256(raw).hexdigest()!=p.get("sha256"):
     raise RuntimeError("MEDIA_CHANGED_AFTER_RIGHTS_QA:"+hour)
+   allowed_scenes=p.get("sceneCandidates",[])
+   if not allowed_scenes or not set(allowed_scenes).issubset(set(SCENE_BY_ID[hour])):
+    raise RuntimeError("PHOTO_MUST_HAVE_VERIFIABLE_SCENE_EVIDENCE:"+hour)
    with Image.open(file) as im:
     if im.format!="JPEG" or im.size!=(1080,1350):
      raise RuntimeError("MEDIA_PIXEL_FORMAT_CHANGED:"+hour)
-    inputs=processor(text=list(SLOTS[hour]),images=im.convert("RGB"),
+    pixels=im.convert("RGB")
+   variants=[]
+   # Each potential caption scene is checked against actual pixels separately,
+   # not by pretending an unrelated scene is visible in the photograph.
+   for scene_id in allowed_scenes:
+    scene=SCENE_BY_ID[hour][scene_id]
+    prompts=[scene["positive"],REAL_SCENE_NEGATIVE,ILLUSTRATION_NEGATIVE]
+    inputs=processor(text=prompts,images=pixels,
                      return_tensors="pt",padding=True)
-   with torch.no_grad():scores=model(**inputs).logits_per_image[0].tolist()
-   passed,reason,margin=classify(scores)
+    with torch.no_grad():scores=model(**inputs).logits_per_image[0].tolist()
+    passed,reason,margin=classify(scores)
+    variants.append({"sceneId":scene_id,"passed":passed,
+       "reason":reason,"margin":margin,
+       "logits":[round(float(v),3) for v in scores]})
+   variants.sort(key=lambda x:x["margin"],reverse=True)
+   winner=variants[0]
    ranked.append({"hourKst":hour,"candidateFile":p["file"],
     "source":p["sourcePage"],"candidateSha256":p["sha256"],
-    "modelMargin":margin,"rawLogits":[round(float(v),3) for v in scores],
-    "automatedSceneMatch":passed,"state":reason})
+    "modelMargin":winner["margin"],"rawLogits":winner["logits"],
+    "bestSceneId":winner["sceneId"],
+    "photoSubjectKo":SCENE_BY_ID[hour][winner["sceneId"]]["subjectKo"],
+    "automatedSceneMatch":winner["passed"],"state":winner["reason"],
+    "sceneModelCandidates":variants})
   if not ranked:
    records.append({
     "hourKst":hour,"bestCandidateFile":None,"candidateSha256":None,
     "positivePhotoVsNegativesMargin":None,"automatedSceneMatch":False,
-    "state":"NO_LICENSED_PHOTO_CANDIDATE","consideredPhotoCandidates":0,
+    "state":"NO_LICENSED_PHOTO_CANDIDATE","bestSceneId":None,
+    "consideredPhotoCandidates":0,
     "humanVisualReviewed":False,"socialPublicationApproved":False,
     "candidateScores":[]})
    continue
@@ -95,6 +118,8 @@ def inspect(manifest_path,out_path):
   records.append({
    "hourKst":hour,"bestCandidateFile":best["candidateFile"],
    "source":best["source"],"candidateSha256":best["candidateSha256"],
+   "bestSceneId":best["bestSceneId"],
+   "photoSubjectKo":best["photoSubjectKo"],
    "pixelModel":MODEL_ID,"modelRevision":REVISION,
    "positivePhotoVsNegativesMargin":best["modelMargin"],
    "automatedSceneMatch":best["automatedSceneMatch"],"state":best["state"],
@@ -127,6 +152,9 @@ def selftest():
  assert not classify([9.0,11.0,2.0])[0]
  assert not classify([1.0,2.0])[0]
  assert len(SLOTS)==7
+ assert len(SCENE_CATALOG)==7 and all(len(x)==3 for x in SCENE_BY_ID.values())
+ assert SCENE_BY_ID["13"]["grocery-shelf"]["subjectKo"]
+ assert SCENE_BY_ID["19"]["set-table"]["positive"].startswith("a real")
  # CLIP alone MUST NOT be considered human scene review or legal clearance.
  assert classify([25.0,5.0,2.0])[0] is True
  assert all(len(v)==3 for v in SLOTS.values())

@@ -1,0 +1,349 @@
+{
+  "schemaVersion": 1,
+  "description": "Licensed genuine photographs first; scene-confirmed Korean editorial later. All images remain candidates until full human/dual-model and historic checks.",
+  "slots": {
+    "10": {
+      "motif": "work",
+      "productId": "career-workplace-adaptation",
+      "theme": "직장 적응",
+      "scenes": [
+        {
+          "id": "office-desk",
+          "labelKo": "업무용 책상",
+          "subjectKo": "업무를 준비하는 책상",
+          "positive": "a real color photograph of an office desk with a laptop and paper notes",
+          "queries": [
+            "office desk laptop papers",
+            "work desk computer notes"
+          ],
+          "titleTokens": [
+            "office|work|desk",
+            "laptop|computer|document|paper|notes"
+          ]
+        },
+        {
+          "id": "meeting",
+          "labelKo": "회의실과 협업",
+          "subjectKo": "회의를 준비하는 공간",
+          "positive": "a real color photograph of a modern conference meeting room and conference table",
+          "queries": [
+            "meeting room conference table",
+            "office meeting chairs table"
+          ],
+          "titleTokens": [
+            "meeting|conference",
+            "room|table|chairs|office"
+          ]
+        },
+        {
+          "id": "work-calendar",
+          "labelKo": "업무 일정표",
+          "subjectKo": "일정을 확인하는 순간",
+          "positive": "a real color photograph of a paper desk calendar in a workplace",
+          "queries": [
+            "desk calendar office",
+            "calendar paper planner desk"
+          ],
+          "titleTokens": [
+            "calendar|planner|schedule",
+            "desk|office|date|paper"
+          ]
+        }
+      ]
+    },
+    "13": {
+      "motif": "budget",
+      "productId": "money-saving-discipline",
+      "theme": "예산 관리",
+      "scenes": [
+        {
+          "id": "grocery-shelf",
+          "labelKo": "마트 진열대",
+          "subjectKo": "장을 보기 전 상품을 둘러보는 순간",
+          "positive": "a real color photograph of grocery store shelves stocked with food products",
+          "queries": [
+            "grocery store shelves food",
+            "supermarket shopping aisle"
+          ],
+          "titleTokens": [
+            "grocery|supermarket|market|store",
+            "shelf|shelves|aisle|food|shopping|produce"
+          ]
+        },
+        {
+          "id": "shopping-basket",
+          "labelKo": "장보기 바구니",
+          "subjectKo": "장보기 물품을 고르는 순간",
+          "positive": "a real color photograph of a shopping basket with groceries in a supermarket",
+          "queries": [
+            "shopping basket groceries",
+            "grocery basket supermarket"
+          ],
+          "titleTokens": [
+            "shopping|grocery|basket|cart",
+            "basket|cart|produce|vegetables|fruit"
+          ]
+        },
+        {
+          "id": "receipt",
+          "labelKo": "영수증과 계산",
+          "subjectKo": "구매 금액을 다시 확인하는 순간",
+          "positive": "a real color photograph of a shopping receipt next to a calculator",
+          "queries": [
+            "grocery receipt wallet",
+            "receipt shopping calculator"
+          ],
+          "titleTokens": [
+            "receipt|cash register|checkout|bill",
+            "shopping|cash|receipt|payment|calculator|shop"
+          ]
+        }
+      ]
+    },
+    "16": {
+      "motif": "friendship",
+      "productId": "relationship-friendship",
+      "theme": "친구 관계",
+      "scenes": [
+        {
+          "id": "friends-cafe",
+          "labelKo": "카페에서 나누는 대화",
+          "subjectKo": "친구를 만나 대화를 나누는 순간",
+          "positive": "a real color photograph of two friends chatting across a cafe table",
+          "queries": [
+            "friends chatting cafe",
+            "two friends talking coffee"
+          ],
+          "titleTokens": [
+            "friend|people|chat|conversation",
+            "cafe|coffee|talk|discussion"
+          ]
+        },
+        {
+          "id": "coffee-meetup",
+          "labelKo": "카페의 커피잔",
+          "subjectKo": "친구와의 약속을 떠올리는 카페 시간",
+          "positive": "a real color photograph of two cups of coffee on a cafe table",
+          "queries": [
+            "two cups coffee table",
+            "coffee mugs cafe table"
+          ],
+          "titleTokens": [
+            "coffee|cafe|cup",
+            "table|mug|coffee shop"
+          ]
+        },
+        {
+          "id": "phone-on-table",
+          "labelKo": "연락을 기다리는 휴대폰",
+          "subjectKo": "연락할 시간을 정하는 순간",
+          "positive": "a real color photograph of a smartphone placed face down on a table",
+          "queries": [
+            "smartphone on desk",
+            "phone face down table"
+          ],
+          "titleTokens": [
+            "smartphone|mobile phone|cell phone",
+            "table|desk|phone|mobile|smartphone"
+          ]
+        }
+      ]
+    },
+    "19": {
+      "motif": "family",
+      "productId": "relationship-family-role",
+      "theme": "가족 역할",
+      "scenes": [
+        {
+          "id": "family-meal",
+          "labelKo": "함께하는 가족 식사",
+          "subjectKo": "가족이 식사하는 시간",
+          "positive": "a real color photograph of family members eating dinner at a dining table",
+          "queries": [
+            "family eating dinner",
+            "family dining table meal"
+          ],
+          "titleTokens": [
+            "family|parents|children",
+            "dinner|eating|meal|table|dining"
+          ]
+        },
+        {
+          "id": "set-table",
+          "labelKo": "준비된 식탁",
+          "subjectKo": "식탁을 차리고 정리하는 순간",
+          "positive": "a real color photograph of a dining table set with plates and food for a meal",
+          "queries": [
+            "dinner table set plates",
+            "dining table food plates"
+          ],
+          "titleTokens": [
+            "dining|dinner|table",
+            "plate|food|meal|dinner|dining"
+          ]
+        },
+        {
+          "id": "home-kitchen",
+          "labelKo": "집안의 주방",
+          "subjectKo": "가족의 집안일을 나눠 생각하는 순간",
+          "positive": "a real color photograph of a clean home kitchen with a sink and cooking utensils",
+          "queries": [
+            "home kitchen sink",
+            "home kitchen cooking utensils"
+          ],
+          "titleTokens": [
+            "kitchen|home kitchen",
+            "sink|cooking|utensil|counter"
+          ]
+        }
+      ]
+    },
+    "22": {
+      "motif": "routine",
+      "productId": "health-habit-continuity",
+      "theme": "생활 습관",
+      "scenes": [
+        {
+          "id": "checklist",
+          "labelKo": "체크리스트와 펜",
+          "subjectKo": "할 일을 하나씩 확인하는 순간",
+          "positive": "a real color photograph of a handwritten checklist with check marks and a pen",
+          "queries": [
+            "checklist pen paper",
+            "to do list notebook pen"
+          ],
+          "titleTokens": [
+            "checklist|to do list|task list",
+            "pen|paper|writing|list|check|notebook"
+          ]
+        },
+        {
+          "id": "tidy-desk",
+          "labelKo": "정리된 책상",
+          "subjectKo": "하루의 정리 습관을 되돌아보는 시간",
+          "positive": "a real color photograph of a neatly organized writing desk with stationery",
+          "queries": [
+            "tidy organized desk",
+            "organized workspace stationary"
+          ],
+          "titleTokens": [
+            "desk|workspace|workstation",
+            "tidy|organized|stationery|clean"
+          ]
+        },
+        {
+          "id": "planner",
+          "labelKo": "일정 정리 노트",
+          "subjectKo": "다음 날의 준비 순서를 정하는 시간",
+          "positive": "a real color photograph of an open daily planner calendar on a desk",
+          "queries": [
+            "daily planner open desk",
+            "paper planner notebook"
+          ],
+          "titleTokens": [
+            "planner|schedule|calendar",
+            "daily|paper|desk|writing|planner"
+          ]
+        }
+      ]
+    },
+    "01": {
+      "motif": "learning",
+      "productId": "study-learning-strategy",
+      "theme": "공부 습관",
+      "scenes": [
+        {
+          "id": "notebook",
+          "labelKo": "수첩과 메모",
+          "subjectKo": "수첩에 적힌 메모",
+          "positive": "a real color photograph of a handwritten notebook and a pen on a desk",
+          "queries": [
+            "notebook pen desk",
+            "handwritten notes notebook"
+          ],
+          "titleTokens": [
+            "notebook|notepad|journal",
+            "pen|notes|desk|handwriting|writing"
+          ]
+        },
+        {
+          "id": "books",
+          "labelKo": "책과 독서",
+          "subjectKo": "책을 읽는 시간",
+          "positive": "a real color photograph of an open book on a desk",
+          "queries": [
+            "open book reading desk",
+            "book pages reading"
+          ],
+          "titleTokens": [
+            "book|reading",
+            "open|page|desk|read"
+          ]
+        },
+        {
+          "id": "study-desk",
+          "labelKo": "공부하는 책상",
+          "subjectKo": "공부 도구를 정리한 책상",
+          "positive": "a real color photograph of a study desk with books and pencils",
+          "queries": [
+            "study desk pencil books",
+            "school supplies stationery"
+          ],
+          "titleTokens": [
+            "desk|study|stationery",
+            "book|pen|pencil|writing|learning|study"
+          ]
+        }
+      ]
+    },
+    "04": {
+      "motif": "sleep",
+      "productId": "health-sleep-rhythm",
+      "theme": "수면 리듬",
+      "scenes": [
+        {
+          "id": "bedroom",
+          "labelKo": "침실과 침대",
+          "subjectKo": "잠자리를 정리한 침실",
+          "positive": "a real color photograph of a quiet bedroom with a bed and pillows",
+          "queries": [
+            "bedroom pillow bed",
+            "cozy bedroom interior"
+          ],
+          "titleTokens": [
+            "bedroom|bed|sleeping",
+            "bed|pillow|blanket|duvet|linen|room"
+          ]
+        },
+        {
+          "id": "bedside-lamp",
+          "labelKo": "침대 옆 조명",
+          "subjectKo": "침대 옆 작은 조명",
+          "positive": "a real color photograph of a glowing bedside lamp next to a bed",
+          "queries": [
+            "bedside lamp night",
+            "nightstand lamp bed"
+          ],
+          "titleTokens": [
+            "lamp|bedside|nightstand",
+            "light|bed|night|lamp|bedside"
+          ]
+        },
+        {
+          "id": "morning-curtains",
+          "labelKo": "창가의 아침 빛",
+          "subjectKo": "창가로 들어오는 아침 빛",
+          "positive": "a real color photograph of morning sunlight shining through bedroom curtains",
+          "queries": [
+            "morning sunlight bedroom curtain",
+            "sunlight through window curtain"
+          ],
+          "titleTokens": [
+            "morning|sunlight|window|curtain",
+            "bedroom|window|curtain|light|sunrise"
+          ]
+        }
+      ]
+    }
+  }
+}

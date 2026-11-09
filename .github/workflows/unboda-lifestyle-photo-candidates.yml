@@ -8,12 +8,18 @@ on:
     paths:
       - 'scripts/social/commons-photo-candidates.py'
       - 'scripts/social/vision-review-lifestyle-photo.py'
+      - 'scripts/social/lifestyle-photo-scenes.json'
+      - 'scripts/social/lifestyle-photo-first-editorial.mjs'
+      - 'scripts/social/lifestyle-photo-first-editorial.test.mjs'
       - '.github/workflows/unboda-lifestyle-photo-candidates.yml'
   push:
     branches: [main]
     paths:
       - 'scripts/social/commons-photo-candidates.py'
       - 'scripts/social/vision-review-lifestyle-photo.py'
+      - 'scripts/social/lifestyle-photo-scenes.json'
+      - 'scripts/social/lifestyle-photo-first-editorial.mjs'
+      - 'scripts/social/lifestyle-photo-first-editorial.test.mjs'
       - '.github/workflows/unboda-lifestyle-photo-candidates.yml'
 permissions:
   contents: read
@@ -29,7 +35,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - run: python -m pip install --no-cache-dir Pillow==11.3.0
+      - name: Verify 90-day no-repeat article template and photo-to-copy exact scene
+        run: node --test scripts/social/lifestyle-photo-first-editorial.test.mjs
       - name: Check rights, image type, image size and perceptual duplicate logic
         run: python scripts/social/commons-photo-candidates.py --self-test
       - name: Verify that image model checks cannot authorize publication
@@ -110,6 +121,29 @@ jobs:
           assert x['wholeSocial90DayCoverageVerified'] is False
           print('CLIP_SCENE_REVIEW_DONE_BUT_SOCIAL_PUBLISHING_REMAINS_BLOCKED')
           PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Write honest photo-driven stories from checked visual scenes
+        shell: bash
+        run: |
+          set -euo pipefail
+          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          STAMP="$(echo "$DAY" | tr -d '-')"
+          node main-source/scripts/social/lifestyle-photo-first-editorial.mjs \
+            --date="$DAY" \
+            --editorial="source-briefs/automation/social/lifestyle-pilot/daily-images/$STAMP.json" \
+            --manifest="photo-candidates/candidate-manifest.json" \
+            --review="photo-candidates/vision-review.json" \
+            --catalog="main-source/automation/social/saleable-product-catalog.json" \
+            --output="photo-candidates/photo-first-editorial.json"
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('photo-candidates/photo-first-editorial.json'));
+          if(r.publicationAllowed!==false||r.photoReadyForSnsPosting!==false||
+             r.snsRequestsAttempted!==0)throw Error('UNSAFE_PHOTO_FIRST_PUBLICATION_OVERRIDE');
+          console.log('PHOTO_FIRST_EDITORIAL_DRAFT_ONLY',r.generatedPhotoAnchoredStories,'OF 7');
+          NODE
       - name: Store licensed candidates privately for automated visual QA development
         uses: actions/upload-artifact@v4
         with:

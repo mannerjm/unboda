@@ -247,6 +247,9 @@ def selftest():
     r = audit("2026-11-10", 2, [asset], assignments,
               [{"slot_date": "2026-11-01", "media_sha256": old}], fake_get)
     assert r["verifiedPrivateMediaAndProof"] == 0
+    # A stale source outside this time window is never counted as a future slot.
+    empty = audit("2026-11-11", 3, [asset], assignments, [], fake_get)
+    assert empty["verifiedPrivateMediaAndProof"] == 0
     print("PASS_PRIVATE_PHOTO_BANK_TWO_TO_THREE_DAY_INTEGRITY_AND_FAIL_CLOSED_NO_POST")
 
 def main():
@@ -267,14 +270,23 @@ def main():
     if not key or len(key) < 20:
         fail("STAGING_ONLY_SERVER_KEY_NOT_CONFIGURED")
     until = (dt.date.fromisoformat(a.start_date) + dt.timedelta(days=a.days - 1)).isoformat()
-    assets = api_json("unboda_social_licensed_photo_assets", key,
-                      {"select": "*", "limit": "300"})
     assignments = api_json("unboda_social_photo_bank_assignments", key,
                       {"select": "*",
                        "and": "(date_kst.gte." + a.start_date + ",date_kst.lte." + until + ")",
                        "limit": "100"})
-    # Direct range syntax: also fail if a query unexpectedly loses date bounds.
-    assignments = [x for x in assignments if a.start_date <= x.get("date_kst", "") <= until]
+    if not isinstance(assignments, list) or len(assignments) > 21:
+        fail("INVALID_THREE_DAY_ASSIGNMENT_PAGE")
+    # Read the 0..21 assets needed for these dates, not every asset since launch.
+    # Reading an unbounded asset catalogue would fail after ~42 days at 7/day.
+    ids = {x.get("asset_id") for x in assignments if isinstance(x, dict)}
+    if len(ids) > 21 or any(not isinstance(x, str) or
+        not re.fullmatch(r"[0-9a-f-]{36}", x) for x in ids):
+        fail("INVALID_ASSIGNMENT_UUID")
+    assets = (api_json("unboda_social_licensed_photo_assets", key,
+                        {"select": "*", "id": "in.(" + ",".join(sorted(ids)) + ")",
+                         "limit": "25"}) if ids else [])
+    if not isinstance(assets, list) or len(assets) != len(ids):
+        fail("SCOPED_PRIVATE_ASSET_LOOKUP_INCOMPLETE")
     history_from = (dt.date.fromisoformat(a.start_date) - dt.timedelta(days=90)).isoformat()
     history = api_json("unboda_social_lifestyle_media_usage", key,
                       {"select": "media_sha256,image_phash,slot_date",

@@ -155,10 +155,13 @@ def summarize(date, releases, readback, now=None):
         if len(rows)==0:return {"status":"NOT_RESERVED" if future else "NOT_VERIFIED_PUBLISHED","count":0,"required":expected}
         if len(rows)!=1:return {"status":"DUPLICATE_OR_CONFLICT","count":0,"required":expected}
         x=rows[0]
+        media_required={"zodiac":7,"lifestyle":1,"video":1}[label]
+        media_ok=x["mediaCount"]==media_required
         if future:
-            okay=x["status"]=="PENDING" and x["draft"] is False and x["autoPublish"] is True
+            okay=(x["status"]=="PENDING" and x["draft"] is False
+                  and x["autoPublish"] is True and media_ok)
         else:
-            okay=x["publishedUrlVerified"]
+            okay=x["publishedUrlVerified"] and media_ok
         return {"status":("PENDING_NOT_PUBLISHED" if future else "PUBLISHED_WITH_URL") if okay else
                 "UNVERIFIED_PROVIDER_STATE","count":int(okay),"required":expected,
                 "postId":x["id"],"providerStatus":x["status"]}

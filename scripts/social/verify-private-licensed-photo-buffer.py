@@ -108,8 +108,8 @@ def audit(start_date, days, assets, assignments, history, fetch_binary):
         fail("INVALID_START_OR_BUFFER_WINDOW")
     first = dt.date.fromisoformat(start_date)
     by_id = {x["id"]: x for x in assets if isinstance(x, dict) and x.get("id")}
-    if len(by_id) != len(assets) or len(assignments) > 21:
-        fail("DUPLICATE_BANK_RECORDS_OR_OVERSIZED_INPUT")
+    if len(by_id) != len(assets) or len(assets) >= 300 or len(assignments) > 21:
+        fail("DUPLICATE_BANK_RECORDS_OR_POSSIBLY_TRUNCATED_INPUT")
     seen_shas, seen_phashes = set(), []
     # This is only staging's own use history; it is NOT complete Metricool history.
     historic = [h for h in history if
@@ -174,7 +174,8 @@ def api_json(path, key, params):
     req = urllib.request.Request(u, headers={"apikey": key, "Authorization": "Bearer " + key,
         "Accept": "application/json"}, method="GET")
     with urllib.request.urlopen(req, timeout=20) as resp:
-        if resp.geturl().split("/")[2] != HOST or resp.status != 200:
+        parsed = urllib.parse.urlparse(resp.geturl())
+        if parsed.scheme != "https" or parsed.hostname != HOST or resp.status != 200:
             fail("STAGING_API_REDIRECT_OR_STATUS")
         return json.loads(resp.read(1_500_000))
 
@@ -186,7 +187,8 @@ def private_blob(path, key, limit):
     req = urllib.request.Request(uri, headers={"apikey": key, "Authorization": "Bearer " + key},
                                   method="GET")
     with urllib.request.urlopen(req, timeout=25) as resp:
-        if urllib.parse.urlparse(resp.geturl()).hostname != HOST or resp.status != 200:
+        parsed = urllib.parse.urlparse(resp.geturl())
+        if parsed.scheme != "https" or parsed.hostname != HOST or resp.status != 200:
             fail("UNAPPROVED_PRIVATE_STORAGE_RESPONSE")
         raw = resp.read(limit + 1)
         if len(raw) > limit:
@@ -262,8 +264,9 @@ def main():
     assets = api_json("unboda_social_licensed_photo_assets", key,
                       {"select": "*", "limit": "300"})
     assignments = api_json("unboda_social_photo_bank_assignments", key,
-                      {"select": "*", "date_kst": "gte." + a.start_date,
-                       "and": "(date_kst.lte." + until + ")", "limit": "100"})
+                      {"select": "*",
+                       "and": "(date_kst.gte." + a.start_date + ",date_kst.lte." + until + ")",
+                       "limit": "100"})
     # Direct range syntax: also fail if a query unexpectedly loses date bounds.
     assignments = [x for x in assignments if a.start_date <= x.get("date_kst", "") <= until]
     history_from = (dt.date.fromisoformat(a.start_date) - dt.timedelta(days=90)).isoformat()

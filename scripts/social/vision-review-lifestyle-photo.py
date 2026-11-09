@@ -102,7 +102,11 @@ def inspect(manifest_path,out_path):
   "wholeSocial90DayCoverageVerified":False,
   "rightsMetadataAutomaticallyChecked":data.get("rightsMachineChecked") is True,
   "publicationAllowed":False,"photoReadyForSnsPosting":False,
-  "state":"QA_ONLY_NOT_READY_TO_AUTO_PUBLISH","photos":records}
+  "state":"QA_ONLY_NOT_READY_TO_AUTO_PUBLISH",
+  "sceneModelMayFalsePositive":True,
+  "humanVisualReviewRequiredForPublishing":True,
+  "sensitiveReceiptPrivacyReviewRequired":True,
+  "photos":records}
  pathlib.Path(out_path).write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
  print("UNBODA_PHOTO_PIXEL_QA_ONLY_NO_SOCIAL_POST",result["dateKst"],
        result["automatedSceneMatchCount"],"/7",len(photos),"candidates tested")
@@ -113,6 +117,8 @@ def selftest():
  assert not classify([9.0,11.0,2.0])[0]
  assert not classify([1.0,2.0])[0]
  assert len(SLOTS)==7
+ # CLIP alone MUST NOT be considered human scene review or legal clearance.
+ assert classify([25.0,5.0,2.0])[0] is True
  assert all(len(v)==3 for v in SLOTS.values())
  print("PASS_PIXEL_GATE_CONTRACT_NO_FALSE_PUBLISH_SUCCESS")
 if __name__=="__main__":

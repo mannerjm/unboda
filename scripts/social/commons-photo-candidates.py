@@ -57,8 +57,18 @@ def license_result(item):
   return None
  if name.startswith("CC BY") and not(meta.get("Artist") and meta.get("LicenseUrl")):
   return None
- if name.startswith("CC BY") and not meta["LicenseUrl"].startswith(ALLOWED[name]):
-  return None
+ if name.startswith("CC BY"):
+  # Commons may report the same CC license over HTTP or without its
+  # optional trailing slash. Normalize only exact Creative Commons
+  # license URLs; never broaden to NC/ND or lookalike domains.
+  supplied=urllib.parse.urlparse(meta["LicenseUrl"])
+  approved=urllib.parse.urlparse(ALLOWED[name])
+  if supplied.scheme not in ("http","https") or \
+     supplied.hostname!="creativecommons.org" or \
+     supplied.username or supplied.password or supplied.port or \
+     supplied.query or supplied.fragment or \
+     supplied.path.rstrip("/")!=approved.path.rstrip("/"):
+   return None
  return {"license":name,"licenseUrl":ALLOWED[name],
   "artist":meta.get("Artist","")[:150],
   "credit":meta.get("Credit","")[:150],
@@ -370,7 +380,10 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
     if len(found)>=max_candidates:return found
  # Wikimedia-verified category membership provides candidate discovery only.
  # Final scene approval still requires both CLIP and BLIP on actual photo pixels.
- if len(found)<3:
+ # Most slots need a pool, not merely one photo. The first CLIP winner
+ # may fail independent BLIP, so search subject categories until we have
+ # up to eight separate licensed original photos per slot.
+ if len(found)<max_candidates:
   for scene_id,category in COMMONS_SCENE_CATEGORIES[slot]:
    try:pages=commons_category_files(category)
    except Exception as exc:
@@ -472,6 +485,19 @@ def selftest():
    "Artist":{"value":"Example photographer"}}})["shareAlikeAdaptationRequired"] is True
  assert license_result({"extmetadata":{"LicenseShortName":{"value":"CC BY-NC 4.0"},
    "Artist":{"value":"Photographer"}}}) is None
+ # Legitimate Commons metadata is not always https or slash-terminated.
+ for url in ("http://creativecommons.org/licenses/by/4.0",
+             "https://creativecommons.org/licenses/by/4.0/"):
+  row={"extmetadata":{"LicenseShortName":{"value":"CC BY 4.0"},
+    "Artist":{"value":"Example photographer"},"LicenseUrl":{"value":url}}}
+  assert license_result(row)["license"]=="CC BY 4.0"
+ # Reject spoofed hosts, unrelated legal documents and noncommercial terms.
+ for url in ("https://creativecommons.org.evil.test/licenses/by/4.0",
+             "https://creativecommons.org/licenses/by-nc/4.0",
+             "https://creativecommons.org/licenses/by/4.0-extra",
+             "https://creativecommons.org/licenses/by/4.0/?override=yes"):
+  assert license_result({"extmetadata":{"LicenseShortName":{"value":"CC BY 4.0"},
+    "Artist":{"value":"Example"},"LicenseUrl":{"value":url}}}) is None
  x=Image.new("RGB",(1400,1600),(200,130,95))
  d=ImageDraw.Draw(x)
  for i in range(1800):

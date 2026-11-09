@@ -24,7 +24,7 @@ PRIVACY_FIRST = {
     # Pictures depicting people need separate likeness release if identifiable.
     "16": ("phone-on-table", "coffee-meetup", "friends-cafe"),
     "19": ("set-table", "home-kitchen", "family-meal"),
-    "22": ("checklist", "tidy-desk", "planner"),
+    "22": ("laundry-machine", "tidy-desk", "planner"),
 }
 RIGHTS_REQUIREMENTS = [
     "Commercial SNS marketing/advertising, including paid promotion and reuse across Instagram, Facebook, Threads, YouTube and TikTok",

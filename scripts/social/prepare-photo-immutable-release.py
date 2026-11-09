@@ -191,6 +191,45 @@ def selftest():
   valid=inspect(brief,raw,vision,second,catalog,src,out,day)
   assert valid["assetCount"]==7 and valid["publicationAllowed"] is False
   assert len(list(out.glob("photo-*.jpg")))==7
+  # If the top CLIP photo fails BLIP but a second independently approved
+  # candidate matches, host the second photo only when its exact CLIP pixel
+  # SHA and scene are explicitly present in the original ranked QA proof.
+  i=3
+  initial=raw["photos"][i]
+  alternate_file=src/"candidate-13-second.jpg"
+  im=Image.new("RGB",(1080,1350),(67,155,105))
+  pen=ImageDraw.Draw(im)
+  for k in range(260):
+   pen.line((k*21%1080,k*17%1350,k*49%1080,k*23%1350),
+            fill=((k*33)%256,(k*47)%256,(k*59)%256),width=3)
+  im.save(alternate_file,format="JPEG",quality=88)
+  alt_hash=hashlib.sha256(alternate_file.read_bytes()).hexdigest()
+  alt={**initial,"file":alternate_file.name,"sha256":alt_hash,"phash":"f"*16}
+  raw["photos"].append(alt)
+  first=vision["photos"][i]
+  first["candidateScores"]=[
+    {"candidateFile":initial["file"],"candidateSha256":initial["sha256"],
+     "automatedSceneMatch":True,
+     "sceneModelCandidates":[{"sceneId":first["bestSceneId"],"passed":True}]},
+    {"candidateFile":alternate_file.name,"candidateSha256":alt_hash,
+     "automatedSceneMatch":True,
+     "sceneModelCandidates":[{"sceneId":first["bestSceneId"],"passed":True}]}
+  ]
+  second["photos"][i].update({"bestCandidateFile":alternate_file.name,
+                               "candidateSha256":alt_hash})
+  brief["stories"][i].update({"photoFile":alternate_file.name,"photoSha256":alt_hash})
+  alternative=inspect(brief,raw,vision,second,catalog,src,root/"alternate",day)
+  assert alternative["assets"][i]["sha256"]==alt_hash
+  first["candidateScores"][1]["sceneModelCandidates"][0]["passed"]=False
+  try:
+   inspect(brief,raw,vision,second,catalog,src,root/"unverified-alternate",day)
+   raise AssertionError("Unverified alternate image passed")
+  except RuntimeError as e:assert "ALTERNATE_PHOTO_NOT_APPROVED" in str(e)
+  raw["photos"].pop()
+  first.pop("candidateScores")
+  second["photos"][i].pop("bestCandidateFile")
+  second["photos"][i]["candidateSha256"]=initial["sha256"]
+  brief["stories"][i].update({"photoFile":initial["file"],"photoSha256":initial["sha256"]})
   second["photos"][3]["blipSceneMatch"]=False
   try:
    inspect(brief,raw,vision,second,catalog,src,root/"bad",day)

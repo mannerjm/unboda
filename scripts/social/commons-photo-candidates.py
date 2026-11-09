@@ -89,9 +89,12 @@ def search_commons(q,offset):
  url="https://"+HOST+"/w/api.php?"+urllib.parse.urlencode(params)
  _,raw=get(url,2_000_000)
  data=json.loads(raw)
- if not isinstance(data.get("query",{}).get("pages"),dict):
-  raise RuntimeError("COMMONS_QUERY_MISSING_PAGES")
- return sorted(data["query"]["pages"].values(),key=lambda p:p.get("index",999))
+ if "error" in data:
+  raise RuntimeError("COMMONS_API_ERROR:"+str(data["error"].get("code","UNKNOWN")))
+ pages=data.get("query",{}).get("pages")
+ if pages is None:return []
+ if not isinstance(pages,dict):raise RuntimeError("COMMONS_QUERY_PAGES_INVALID")
+ return sorted(pages.values(),key=lambda p:p.get("index",999))
 def convert_to_photo_jpeg(raw):
  Image.MAX_IMAGE_PIXELS=35_000_000
  with Image.open(io.BytesIO(raw)) as im:

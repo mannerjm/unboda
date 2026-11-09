@@ -69,15 +69,38 @@ SCENE_WORD_PAIRS={
        r"lamp|bedside|pillow|blanket|duvet|bed linen"),
  "10":(r"presentation|conference|meeting|chart|graph|whiteboard|business slides",
        r"document|chart|graph|screen|whiteboard|meeting|presentation"),
- "13":(r"receipt|cash register|till slip|shop bill",
-       r"wallet|calculator|payment|card|shopping|cash register|supermarket"),
- "16":(r"friends talking|friends chatting|people talking|group discussion|conversation|chatting",
-       r"talk|chat|discussion|conversation|meeting|cafe|social"),
- "19":(r"family dining|family dinner|family meal|family eating|dinner table",
+ "13":(r"receipt|cash register|till slip|shop bill|price tag|price label|checkout|shopping cart",
+       r"wallet|calculator|payment|card|shopping|cash register|supermarket|grocery|shop|price"),
+ "16":(r"friends talking|friends chatting|people talking|group discussion|conversation|chatting|friends",
+       r"talk|chat|discussion|conversation|meeting|cafe|coffee|social"),
+ "19":(r"family dining|family dinner|family meal|family eating|dinner table|family",
        r"dining|dinner|meal|table|eating|lunch|kitchen"),
  "22":(r"checklist|to.do list|task list|planner notebook|planning notes",
        r"paper|pen|pencil|notebook|desk|writing|marked|task|list"),
 }
+
+# Curated equivalent REAL-LIFE photographic contexts. Search variations remain
+# inside the same everyday topic; none of them removes license/pixel approval.
+TOPIC_SEARCH_VARIANTS={
+ "01":["handwritten notes notebook", "person writing a notebook",
+       "notepad pen desk", "study notes handwriting"],
+ "04":["bedroom bedside lamp", "bedroom pillows blanket",
+       "bedroom interior night lamp", "bed with pillow lamp"],
+ "10":["meeting presentation screen", "business meeting charts",
+       "presentation whiteboard room", "office chart presentation"],
+ "13":["shopping receipt", "price tags supermarket", "shop checkout register",
+       "grocery shopping prices", "receipt wallet payment",
+       "cash register with receipt", "sale price label"],
+ "16":["friends talking at cafe", "friends chatting over coffee",
+       "two people conversation coffee", "people talking cafe",
+       "friends conversation", "friends at a table talking"],
+ "19":["family dining at home", "family dinner table",
+       "family eating dinner", "parents children dinner",
+       "family meal kitchen", "family at dining table"],
+ "22":["handwritten checklist", "to do list notebook pen",
+       "paper checklist desk", "planning notebook writing"]
+}
+
 OBVIOUSLY_WRONG=re.compile(
  r"(?:college|university|map of|atlas|manuscript|old photograph|antique|"
  r"nineteenth century|historical book|book cover|studio portrait|family portrait|"
@@ -170,12 +193,13 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
  words=query.split()
  queries=list(dict.fromkeys([
   query,
+  *TOPIC_SEARCH_VARIANTS.get(slot,[]),
   " ".join(words[:2]),
   words[0]+" photograph",
   words[0]
  ]))
  # No blind re-use of the same first-page image each morning.
- offsets=list(dict.fromkeys([offset,0,40,80,120]))
+ offsets=list(dict.fromkeys([offset,0,40]))
  seen_pages=set()
  for phrase in queries:
   for page_offset in offsets:
@@ -315,6 +339,11 @@ def selftest():
  assert subject_evidence("04","Cozy bedroom with a bed, pillow, and bedside lamp","")
  assert subject_evidence("13","Supermarket shopping receipt and debit card","")
  assert subject_evidence("19","Family dining at a dinner table","")
+ assert subject_evidence("13","Shopping price tags at grocery checkout","")
+ assert subject_evidence("16","Friends talking in coffee cafe","")
+ assert not subject_evidence("13","A grocery store with no labels mentioned","")
+ assert not subject_evidence("19","Family outside at a beach","")
+ assert len(TOPIC_SEARCH_VARIANTS)==7
  print("PHOTO_SOURCE_OFFLINE_RIGHTS_MEDIA_AND_DEDUP_GATES_PASSED")
 if __name__=="__main__":
  ap=argparse.ArgumentParser()

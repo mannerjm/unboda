@@ -99,11 +99,25 @@ function build(date){
   const lifeSituation=context+', '+s.location+'에서 "'+obj+'"을 살피다가 '+problem;
   const p=products.get(s.product);
   assert(p,'MISSING_SALEABLE_PRODUCT:'+s.product);
+  // The product signal must appear in what visitors actually read,
+  // not merely in invisible metadata or a destination URL.
+  const intro={
+   'study-learning-strategy':'공부 방법을 돌아보면서 ',
+   'health-sleep-rhythm':'수면 리듬을 살피면서 ',
+   'career-workplace-adaptation':'직장 업무를 준비하면서 ',
+   'money-saving-discipline':'저축과 예산을 생각하면서 ',
+   'relationship-friendship':'친구 관계를 돌아보면서 ',
+   'relationship-family-role':'가족 역할을 나누면서 ',
+   'health-habit-continuity':'생활 습관을 돌아보면서 '
+  }[s.product];
+  assert(intro&&p.signals.some(word=>intro.includes(word)),
+    'NO_REAL_PAID_PRODUCT_SIGNAL_IN_EDITORIAL');
+  const advice=intro+action;
   const topicKey='lifestyle-'+s.motif+'-'+ix+'-'+date.replaceAll('-','');
   assert(!used.has(topicKey));used.add(topicKey);
   const story={
    hourKst:s.hour,visualMotif:s.motif,topicCategory:s.category,
-   label:s.label,title,advice:action,lifeSituation,
+   label:s.label,title,advice,lifeSituation,
    visualAnchors:s.anchors,sceneVariant:(ix+n)%5,topicKey,
    productId:p.id,productTitle:p.title,productCategory:p.category,
    productType:p.productType,landingPath:p.landingPath,

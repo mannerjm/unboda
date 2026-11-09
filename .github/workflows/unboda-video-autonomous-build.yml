@@ -6,7 +6,9 @@ name: UNBODA 4 daily Korean shorts build, independent ASR QA and publishable rel
 # Failed-job reruns alone reuse the earlier preflight SHA and cannot apply that fix.
 on:
   schedule:
-    - cron: '13 8 * * *' # 17:13 KST, prepare the FOLLOWING day's four videos
+    - cron: '13 8 * * *' # 17:13 KST, primary next-day render
+    - cron: '13 9 * * *' # 18:13 KST, immutable-release guarded backup
+    - cron: '13 11 * * *' # 20:13 KST, final backup before 23:45 KST worker
   workflow_dispatch:
   push:
     paths:

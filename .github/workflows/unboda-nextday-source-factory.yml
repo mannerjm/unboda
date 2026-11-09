@@ -33,6 +33,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Prove bounded 112-day editorial rotation, script timing and no repeats
+        shell: bash
+        run: |
+          set -euo pipefail
+          node main-source/scripts/social/prepare-next-day-videos.mjs \
+            --self-test=true --staging=staging \
+            --catalog=main-source/automation/social/saleable-product-catalog.json
       - name: Create new next-day product-specific sources
         shell: bash
         run: |

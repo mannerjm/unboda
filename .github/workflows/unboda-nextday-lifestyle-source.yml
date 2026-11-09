@@ -43,32 +43,32 @@ jobs:
           node main-source/scripts/social/prepare-next-day-lifestyle.mjs \
             --self-test=true --staging=staging \
             --catalog=main-source/automation/social/saleable-product-catalog.json
-      - name: Prepare tomorrow and day-after product-specific seven-slot briefs
+      - name: Prepare three future days of product-specific seven-slot briefs
         shell: bash
         run: |
           set -euo pipefail
-          for n in 1 2; do
+          for n in 1 2 3; do
             TARGET="$(TZ=Asia/Seoul date -d "+$n day" +%Y-%m-%d)"
             node main-source/scripts/social/prepare-next-day-lifestyle.mjs \
               --target="$TARGET" --staging=staging \
               --catalog=main-source/automation/social/saleable-product-catalog.json
           done
-      - name: Validate exact seven real-for-sale product references on both days
+      - name: Validate exact seven real-for-sale product references on all three days
         working-directory: main-source
         shell: bash
         run: |
           set -euo pipefail
-          for n in 1 2; do
+          for n in 1 2 3; do
             STAMP="$(TZ=Asia/Seoul date -d "+$n day" +%Y%m%d)"
             node scripts/social-saleable-product-guard.mjs --lifestyle \
               "../staging/automation/social/lifestyle-pilot/daily-images/$STAMP.json"
           done
-      - name: Verify immutability and prevent photo approval by editorial work
+      - name: Verify three-day immutability and prevent photo approval by editorial work
         working-directory: staging
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          for(let n=1;n<=2;n++){
+          for(let n=1;n<=3;n++){
             const d=new Date(Date.now()+9*3600000+n*86400000).toISOString().slice(0,10);
             const f='automation/social/lifestyle-pilot/daily-images/'+d.replaceAll('-','')+'.json';
             const source=JSON.parse(fs.readFileSync(f,'utf8'));
@@ -78,7 +78,7 @@ jobs:
                new Set(source.stories.map(s=>s.topicKey)).size!==7)
               throw Error('LIFESTYLE_SOURCE_NOT_READY_OR_PHOTO_GATE_BYPASSED:'+d);
           }
-          console.log('TWO_DAYS_SEVEN_SOURCE_READINESS_VERIFIED_NO_POSTS');
+          console.log('THREE_DAYS_SEVEN_SOURCE_READINESS_VERIFIED_NO_POSTS');
           NODE
       - name: Commit only validated future source JSON (not public posts)
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -87,14 +87,14 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for n in 1 2; do
+          for n in 1 2 3; do
             STAMP="$(TZ=Asia/Seoul date -d "+$n day" +%Y%m%d)"
             git add -- "automation/social/lifestyle-pilot/daily-images/$STAMP.json"
           done
           if git diff --cached --quiet; then
-            echo "TWO_FUTURE_EDITORIAL_DAYS_ALREADY_EXIST"
+            echo "THREE_FUTURE_EDITORIAL_DAYS_ALREADY_EXIST"
             exit 0
           fi
           git commit -m "chore(social): prepare seven lifestyle subjects for next two days"
           git push origin HEAD:test/social-automation-safety-poc-20261023
-          echo "TWO_DAY_LIFESTYLE_EDITORIAL_SOURCE_STORED_NO_SNS_UPLOAD"
+          echo "THREE_DAY_LIFESTYLE_EDITORIAL_SOURCE_STORED_NO_SNS_UPLOAD"

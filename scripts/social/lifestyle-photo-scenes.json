@@ -209,18 +209,19 @@
       "theme": "생활 습관",
       "scenes": [
         {
-          "id": "checklist",
-          "labelKo": "체크리스트와 펜",
-          "subjectKo": "할 일을 하나씩 확인하는 순간",
-          "positive": "a real color photograph of a handwritten checklist with check marks and a pen",
+          "id": "laundry-machine",
+          "labelKo": "세탁기와 생활 정리",
+          "subjectKo": "세탁물을 확인하며 집안일을 정리하는 순간",
+          "positive": "a real color photograph of a household washing machine in a laundry room",
           "queries": [
-            "handwritten checklist pen paper",
-            "shopping list note paper pen",
-            "to do list with check marks"
+            "washing machine home laundry",
+            "laundry washing machine inside home",
+            "washing machine and laundry basket",
+            "washing machine front loading room"
           ],
           "titleTokens": [
-            "checklist|to do list|task list",
-            "pen|paper|writing|list|check|notebook"
+            "washing machine|washing machines|washer|laundry",
+            "machine|washer|laundry|clothes|room"
           ]
         },
         {

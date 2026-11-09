@@ -175,7 +175,7 @@ def commons_title_from_landing_page(url):
    return None
   if not re.search(r"\.jpe?g$",raw,re.I) or len(raw)>250:
    return None
-  return raw
+  return raw.replace("_"," ")
  except (TypeError,ValueError):return None
 
 def openverse_verified_commons_pages(query):
@@ -413,7 +413,7 @@ def selftest():
  assert not subject_evidence("13","A grocery store with no labels mentioned","")
  assert not subject_evidence("19","Family outside at a beach","")
  assert len(TOPIC_SEARCH_VARIANTS)==7
- assert commons_title_from_landing_page("https://commons.wikimedia.org/wiki/File:Sample_photo.jpg")=="File:Sample_photo.jpg"
+ assert commons_title_from_landing_page("https://commons.wikimedia.org/wiki/File:Sample_photo.jpg")=="File:Sample photo.jpg"
  assert commons_title_from_landing_page("https://evil.example/wiki/File:Sample_photo.jpg") is None
  assert commons_title_from_landing_page("https://commons.wikimedia.org/wiki/File:vector.svg") is None
  assert commons_title_from_landing_page("http://commons.wikimedia.org/wiki/File:Sample_photo.jpg") is None

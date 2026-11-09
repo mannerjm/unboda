@@ -119,8 +119,9 @@ def convert_to_photo_jpeg(raw):
   return blob,hashlib.sha256(blob).hexdigest(),f"{perceptual:016x}",camera.strip()
 def near_duplicate(a,b):
  return (int(a,16)^int(b,16)).bit_count()<=6
-def choose_photo(query,history,slot,offset):
+def choose_photos(query,history,slot,offset,max_candidates=8):
  rejected={}
+ found=[]
  # MediaWiki full-text search may treat many words as AND, returning no photos.
  # Try broad but topic-bound terms, never switching to an unrelated motif.
  words=query.split()
@@ -163,11 +164,11 @@ def choose_photo(query,history,slot,offset):
      continue
     if any(row.get("sha256")==sha or (
         isinstance(row.get("phash"),str) and len(row["phash"])==16 and
-        near_duplicate(phash,row["phash"])) for row in history):
+        near_duplicate(phash,row["phash"])) for row in history+[x[1] for x in found]):
      rejected["duplicate"]=rejected.get("duplicate",0)+1
      continue
     # Search terms and license metadata alone NEVER verify visible objects.
-    return photo,{
+    record={
      "hourKst":slot,"sourceName":name,"sourcePage":info.get("descriptionurl",""),
      "originalUrl":info.get("url",""),"downloadedThumbnailUrl":media,
      "sha256":sha,"phash":phash,"bytes":len(photo),"width":1080,"height":1350,
@@ -175,8 +176,12 @@ def choose_photo(query,history,slot,offset):
      "photoCandidateOnly":True,"imageVisuallyInspected":False,
      "sceneMatchVerified":False,"publicationAllowed":False
     }
+    found.append((photo,record))
+    if len(found)>=max_candidates:return found
+ if found:return found
  raise RuntimeError("NO_LICENSED_UNDUPLICATED_REAL_PHOTO_CANDIDATE:"+slot+
                     ":"+json.dumps(rejected,ensure_ascii=False))
+
 
 def load_history(d):
  rows=[]
@@ -204,15 +209,18 @@ def run(brief,target,history_dir,output):
   query=story.get("photoSearchQuery","")
   if not re.fullmatch(r"[a-zA-Z ]{15,120}",query):
    raise RuntimeError("UNREVIEWED_REMOTE_PHOTO_QUERY")
-  photo,record=choose_photo(query,history+items,story["hourKst"],(days%5)*40)
-  filename="candidate-"+record["hourKst"]+".jpg"
-  (output/filename).write_bytes(photo)
-  record["file"]=filename
-  record["photoMustDepict"]=story.get("photoMustDepict",[])
-  record["dateKst"]=target
-  items.append(record)
+  pool=choose_photos(query,history+items,story["hourKst"],(days%5)*40)
+  for i,(photo,record) in enumerate(pool):
+   filename="candidate-"+record["hourKst"]+"-"+str(i+1)+".jpg"
+   (output/filename).write_bytes(photo)
+   record["file"]=filename
+   record["poolIndex"]=i+1
+   record["photoMustDepict"]=story.get("photoMustDepict",[])
+   record["dateKst"]=target
+   items.append(record)
  manifest={
   "schemaVersion":1,"brand":"UNBODA","dateKst":target,"photos":items,
+  "candidatePoolSize":len(items),"distinctHourSlots":len(set(x["hourKst"] for x in items)),
   "rightsMachineChecked":True,"sizeAndMimeChecked":True,
   "actualVisualSceneInspected":False,"photoReadyForSnsPosting":False,
   "publicationAllowed":False,"state":"SEVEN_CANDIDATES_REQUIRE_PIXEL_SCENE_QA",
@@ -220,7 +228,8 @@ def run(brief,target,history_dir,output):
  }
  (output/"candidate-manifest.json").write_text(
   json.dumps(manifest,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
- print("COMMONS_SEVEN_PHOTO_CANDIDATES_RIGHTS_AND_FORMAT_VERIFIED_NOT_FOR_PUBLICATION",target)
+ print("COMMONS_SEVEN_PHOTO_POOLS_RIGHTS_AND_FORMAT_VERIFIED_NOT_FOR_PUBLICATION",target,
+       len(items),"candidates in 7 slots")
 def selftest():
  assert license_result({"extmetadata":{"LicenseShortName":{"value":"All rights reserved"}}}) is None
  assert license_result({"extmetadata":{"LicenseShortName":{"value":"CC BY 4.0"}}}) is None

@@ -8,11 +8,13 @@ on:
   pull_request:
     paths:
       - 'scripts/social/verify-private-licensed-photo-buffer.py'
+      - 'scripts/social/intake-private-licensed-photo.py'
       - '.github/workflows/unboda-private-photo-bank-buffer.yml'
   push:
     branches: [main]
     paths:
       - 'scripts/social/verify-private-licensed-photo-buffer.py'
+      - 'scripts/social/intake-private-licensed-photo.py'
       - '.github/workflows/unboda-private-photo-bank-buffer.yml'
 permissions:
   contents: read
@@ -33,8 +35,9 @@ jobs:
       - name: Verify signed-rights, JPEG hash, duplication and fail-closed 2/3 day contract
         run: |
           set -euo pipefail
-          python -m py_compile scripts/social/verify-private-licensed-photo-buffer.py
+          python -m py_compile scripts/social/verify-private-licensed-photo-buffer.py scripts/social/intake-private-licensed-photo.py
           python scripts/social/verify-private-licensed-photo-buffer.py --self-test
+          python scripts/social/intake-private-licensed-photo.py --self-test
   staging-private-readonly-audit:
     if: >
       github.repository == 'mannerjm/unboda' &&

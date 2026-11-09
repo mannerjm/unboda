@@ -105,16 +105,20 @@ TOPIC_SEARCH_VARIANTS={
  "10":["meeting presentation screen", "business meeting charts",
        "presentation whiteboard room", "office chart presentation"],
  "13":["shopping receipt", "price tags supermarket", "shop checkout register",
-       "grocery shopping prices", "receipt wallet payment",
-       "cash register with receipt", "sale price label"],
+       "grocery shopping prices", "money coins calculator desk",
+       "wallet cash coins on table", "calculator and coins",
+       "coins for savings", "piggy bank money", "sale price label"],
  "16":["friends talking at cafe", "friends chatting over coffee",
        "two people conversation coffee", "people talking cafe",
-       "friends conversation", "friends at a table talking"],
+       "friends conversation", "friends at a table talking",
+       "cup of coffee on table", "coffee mug table", "mobile phone desk"],
  "19":["family dining at home", "family dinner table",
        "family eating dinner", "parents children dinner",
        "family meal kitchen", "family at dining table"],
  "22":["handwritten checklist", "to do list notebook pen",
-       "paper checklist desk", "planning notebook writing"]
+       "paper checklist desk", "planning notebook writing",
+       "neatly organized desk stationery", "desk stationery pens notebook",
+       "open planner on desk", "clean work desk notebook"]
 }
 
 OBVIOUSLY_WRONG=re.compile(
@@ -239,17 +243,25 @@ COMMONS_SCENE_CATEGORIES={
        ("shopping-basket","Category:Shopping carts"),
        ("grocery-shelf","Category:Supermarket shelves"),
        ("grocery-shelf","Category:Supermarket aisles"),
-       ("receipt","Category:Shop checks"),("receipt","Category:Cash registers")],
+       ("budget-calculator","Category:Coins"),
+       ("budget-calculator","Category:Wallets"),
+       ("budget-calculator","Category:Calculators"),
+       ("budget-calculator","Category:Piggy banks")],
  "16":[("friends-cafe","Category:People in conversation"),
        ("coffee-meetup","Category:Cups of coffee"),
        ("coffee-meetup","Category:Coffee cups"),
-       ("phone-on-table","Category:Mobile phones")],
+       ("phone-on-table","Category:Mobile phones"),
+       ("phone-on-table","Category:Smartphones")],
  "19":[("set-table","Category:Dining tables"),
        ("home-kitchen","Category:Kitchens")],
  "22":[("checklist","Category:Shopping lists"),
        ("checklist","Category:To do lists"),
        ("checklist","Category:Checklists"),
-       ("planner","Category:Calendars"),("tidy-desk","Category:Desks")]
+       ("planner","Category:Calendars"),
+       ("planner","Category:Notebooks"),
+       ("tidy-desk","Category:Desks"),
+       ("tidy-desk","Category:Office desks"),
+       ("tidy-desk","Category:Stationery")]
 }
 def commons_category_files(category):
  if not re.fullmatch(r"Category:[A-Za-z0-9 _-]{4,100}",category):
@@ -532,6 +544,8 @@ def selftest():
  assert commons_title_from_landing_page("http://commons.wikimedia.org/wiki/File:Sample_photo.jpg") is None
  assert len(COMMONS_SCENE_CATEGORIES)==7
  assert ("grocery-shelf","Category:Supermarket shelves") in COMMONS_SCENE_CATEGORIES["13"]
+ assert ("budget-calculator","Category:Coins") in COMMONS_SCENE_CATEGORIES["13"]
+ assert ("tidy-desk","Category:Stationery") in COMMONS_SCENE_CATEGORIES["22"]
  assert ("friends-cafe","Category:People in conversation") in COMMONS_SCENE_CATEGORIES["16"]
  assert ("checklist","Category:To do lists") in COMMONS_SCENE_CATEGORIES["22"]
  assert all(sid in [s["id"] for s in SCENE_CATALOG[h]["scenes"]] for h,entries in COMMONS_SCENE_CATEGORIES.items() for sid,cat in entries)

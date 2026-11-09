@@ -82,7 +82,8 @@ function build(date){
   const problem=s.questions[(ix*5+n*2)%s.questions.length];
   const action=s.actions[(ix+n*3)%s.actions.length];
   const title=obj+' — '+problem;
-  const lifeSituation=s.location+'에서 "'+obj+'"을 살피다가 '+problem;
+  // Avoid a shared location prefix: it artificially inflates 90-day similarity.
+  const lifeSituation='"'+obj+'"을 살펴보다가 '+problem;
   const p=products.get(s.product);
   assert(p,'MISSING_SALEABLE_PRODUCT:'+s.product);
   const topicKey='lifestyle-'+s.motif+'-'+ix+'-'+date.replaceAll('-','');

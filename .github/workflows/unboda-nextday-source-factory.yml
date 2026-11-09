@@ -1,0 +1,109 @@
+name: UNBODA next-day 4 video source factory and quality gate
+# This workflow never creates a Metricool post or approves an unverified video.
+on:
+  schedule:
+    - cron: '20 5,6,7 * * *' # 14:20 / 15:20 / 16:20 Asia/Seoul
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/social/prepare-next-day-videos.mjs'
+      - '.github/workflows/unboda-nextday-source-factory.yml'
+  pull_request:
+    paths:
+      - 'scripts/social/prepare-next-day-videos.mjs'
+      - '.github/workflows/unboda-nextday-source-factory.yml'
+permissions:
+  contents: write
+concurrency:
+  group: unboda-nextday-four-source-refresh
+  cancel-in-progress: false
+jobs:
+  prepare:
+    if: github.repository == 'mannerjm/unboda'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout producer code
+        uses: actions/checkout@v4
+        with:
+          path: main-source
+          persist-credentials: false
+      - name: Checkout existing renderer/source staging branch
+        uses: actions/checkout@v4
+        with:
+          ref: test/social-automation-safety-poc-20261023
+          path: staging
+          persist-credentials: ${{ github.event_name != 'pull_request' }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove bounded 112-day editorial rotation, script timing and no repeats
+        shell: bash
+        run: |
+          set -euo pipefail
+          node main-source/scripts/social/prepare-next-day-videos.mjs \
+            --self-test=true --staging=staging \
+            --catalog=main-source/automation/social/saleable-product-catalog.json
+      - name: Create new next-day product-specific sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          echo "TARGET=$TARGET" >> "$GITHUB_ENV"
+          node main-source/scripts/social/prepare-next-day-videos.mjs \
+            --target="$TARGET" \
+            --staging=staging \
+            --catalog=main-source/automation/social/saleable-product-catalog.json
+      - name: Validate current launch saleable product mapping
+        working-directory: main-source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/social-saleable-product-guard.mjs --video \
+            ../staging/automation/social/lifestyle-pilot/episodes/003-midnight.json \
+            ../staging/automation/social/lifestyle-pilot/episodes/004-commute.json \
+            ../staging/automation/social/lifestyle-pilot/episodes/005-friendship.json \
+            ../staging/automation/social/lifestyle-pilot/episodes/002-afterwork.json
+      - name: Check video editorial quality, four storyboards and scene renderability
+        working-directory: staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test automation/social/lifestyle-pilot/brand-video-guard.test.mjs
+          node --test automation/social/lifestyle-pilot/topic-visual-guard.test.mjs
+          node --test automation/social/lifestyle-pilot/four-daily-private-validator.test.mjs
+          node automation/social/lifestyle-pilot/four-daily-private-validator.mjs
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const names=['003-midnight','004-commute','005-friendship','002-afterwork'];
+          const date=process.env.TARGET.replaceAll('-','');
+          const sources=names.map(n=>JSON.parse(fs.readFileSync(
+            'automation/social/lifestyle-pilot/episodes/'+n+'.json','utf8')));
+          if(sources.some(s=>s.targetDateKst!==date||!s.topicKey.endsWith(date)||
+             s.automatedPublicationAllowed!==false)||
+             new Set(sources.map(s=>s.productId)).size!==4||
+             new Set(sources.map(s=>s.scenes[0].illustration)).size!==4||
+             new Set(sources.map(s=>s.visualMotif)).size!==4)
+            throw Error('NEXTDAY_SOURCE_DATE_OR_FOUR_UNIQUE_STORIES_FAILED');
+          console.log('NEXTDAY_FOUR_SOURCES_QA_PASSED '+date);
+          NODE
+      - name: Commit only reviewed source changes; no blind retry
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        working-directory: staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- automation/social/lifestyle-pilot/episodes/003-midnight.json \
+            automation/social/lifestyle-pilot/episodes/004-commute.json \
+            automation/social/lifestyle-pilot/episodes/005-friendship.json \
+            automation/social/lifestyle-pilot/episodes/002-afterwork.json
+          if git diff --cached --quiet; then
+            echo "ALREADY_PREPARED_NO_DUPLICATE_COMMIT $TARGET"
+            exit 0
+          fi
+          git commit -m "chore(social): generate reviewed briefs for $TARGET"
+          git push origin HEAD:test/social-automation-safety-poc-20261023
+          echo "FOUR_NEXT_DAY_VIDEO_SOURCES_SAVED $TARGET"

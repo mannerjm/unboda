@@ -85,17 +85,19 @@
           ]
         },
         {
-          "id": "receipt",
-          "labelKo": "영수증과 계산",
-          "subjectKo": "구매 금액을 다시 확인하는 순간",
-          "positive": "a real color photograph of a shopping receipt next to a calculator",
+          "id": "budget-calculator",
+          "labelKo": "지출을 계산하는 책상",
+          "subjectKo": "현금과 계산기를 살피는 순간",
+          "positive": "a real color photograph of coins beside a calculator or wallet on a desk",
           "queries": [
-            "grocery receipt wallet",
-            "receipt shopping calculator"
+            "calculator coins money desk",
+            "wallet and cash coins",
+            "coins and calculator on table",
+            "small pile of coins on desk"
           ],
           "titleTokens": [
-            "receipt|cash register|checkout|bill",
-            "shopping|cash|receipt|payment|calculator|shop"
+            "coins?|money|cash|wallet|calculator|piggy bank",
+            "coins?|money|cash|wallet|calculator|table|desk"
           ]
         }
       ]
@@ -121,30 +123,33 @@
         },
         {
           "id": "coffee-meetup",
-          "labelKo": "카페의 커피잔",
-          "subjectKo": "친구와의 약속을 떠올리는 카페 시간",
-          "positive": "a real color photograph of two cups of coffee on a cafe table",
+          "labelKo": "카페에서 떠올리는 친구",
+          "subjectKo": "커피를 마시며 친구와의 연락을 떠올리는 시간",
+          "positive": "a real color photograph of a cup of coffee on a cafe table",
           "queries": [
-            "two cups coffee table",
-            "coffee mugs cafe table"
+            "cup of coffee on table",
+            "coffee mug cafe table",
+            "coffee cup sitting on desk",
+            "coffee beverage in cup on table"
           ],
           "titleTokens": [
-            "coffee|cafe|cup",
-            "table|mug|coffee shop"
+            "coffee|cafe|cup|mug",
+            "coffee|cup|cafe|mug|table"
           ]
         },
         {
           "id": "phone-on-table",
           "labelKo": "연락을 기다리는 휴대폰",
           "subjectKo": "연락할 시간을 정하는 순간",
-          "positive": "a real color photograph of a smartphone placed face down on a table",
+          "positive": "a real color photograph of a smartphone resting on a desk or table",
           "queries": [
-            "smartphone on desk",
-            "phone face down table"
+            "smartphone lying on a table",
+            "mobile phone on desk",
+            "smartphone on wooden table"
           ],
           "titleTokens": [
-            "smartphone|mobile phone|cell phone",
-            "table|desk|phone|mobile|smartphone"
+            "smartphone|mobile phone|cell phone|phone",
+            "table|desk|phone|smartphone|mobile"
           ]
         }
       ]
@@ -209,8 +214,9 @@
           "subjectKo": "할 일을 하나씩 확인하는 순간",
           "positive": "a real color photograph of a handwritten checklist with check marks and a pen",
           "queries": [
-            "checklist pen paper",
-            "to do list notebook pen"
+            "handwritten checklist pen paper",
+            "shopping list note paper pen",
+            "to do list with check marks"
           ],
           "titleTokens": [
             "checklist|to do list|task list",
@@ -223,8 +229,10 @@
           "subjectKo": "하루의 정리 습관을 되돌아보는 시간",
           "positive": "a real color photograph of a neatly organized writing desk with stationery",
           "queries": [
-            "tidy organized desk",
-            "organized workspace stationary"
+            "organized desk stationery pen notebook",
+            "tidy writing desk and pencils",
+            "clean home desk workspace",
+            "neatly arranged stationery on desk"
           ],
           "titleTokens": [
             "desk|workspace|workstation",
@@ -237,8 +245,9 @@
           "subjectKo": "다음 날의 준비 순서를 정하는 시간",
           "positive": "a real color photograph of an open daily planner calendar on a desk",
           "queries": [
-            "daily planner open desk",
-            "paper planner notebook"
+            "open planner on desk with pen",
+            "paper daily planner calendar desk",
+            "notebook calendar pen stationery"
           ],
           "titleTokens": [
             "planner|schedule|calendar",

@@ -18,7 +18,7 @@
           ],
           "titleTokens": [
             "office|work|desk",
-            "desk|laptop|computer|document|paper|office"
+            "laptop|computer|document|paper|notes"
           ]
         },
         {
@@ -32,7 +32,7 @@
           ],
           "titleTokens": [
             "meeting|conference",
-            "room|table|meeting|chairs|office"
+            "room|table|chairs|office"
           ]
         },
         {
@@ -46,7 +46,7 @@
           ],
           "titleTokens": [
             "calendar|planner|schedule",
-            "desk|office|date|paper|calendar"
+            "desk|office|date|paper"
           ]
         }
       ]
@@ -116,7 +116,7 @@
           ],
           "titleTokens": [
             "friend|people|chat|conversation",
-            "cafe|coffee|talk|chat|friend|conversation"
+            "cafe|coffee|talk|discussion"
           ]
         },
         {
@@ -130,7 +130,7 @@
           ],
           "titleTokens": [
             "coffee|cafe|cup",
-            "table|coffee|cafe|cup|mug"
+            "table|mug|coffee shop"
           ]
         },
         {
@@ -193,7 +193,7 @@
           ],
           "titleTokens": [
             "kitchen|home kitchen",
-            "sink|cooking|utensil|home|counter"
+            "sink|cooking|utensil|counter"
           ]
         }
       ]
@@ -228,7 +228,7 @@
           ],
           "titleTokens": [
             "desk|workspace|workstation",
-            "tidy|organized|stationery|clean|desk"
+            "tidy|organized|stationery|clean"
           ]
         },
         {
@@ -277,7 +277,7 @@
           ],
           "titleTokens": [
             "book|reading",
-            "open|page|desk|read|book"
+            "open|page|desk|read"
           ]
         },
         {

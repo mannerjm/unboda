@@ -47,11 +47,6 @@ jobs:
         with:
           path: main-source
           persist-credentials: false
-      - uses: actions/checkout@v4
-        with:
-          ref: test/social-automation-safety-poc-20261023
-          path: prepared-editorial
-          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -129,7 +124,25 @@ jobs:
               echo "EXISTING_PHOTO_RELEASE_PARTIAL_OR_WRONG_COUNT_STOP" >&2
               exit 1
             fi
-            echo "IMMUTABLE_PHOTO_RELEASE_ALREADY_PRESENT_NO_DUPLICATE_UPLOAD"
+            mkdir -p existing-photo-release
+            gh release download "$TAG" --repo mannerjm/unboda \
+              --dir existing-photo-release
+            python - <<'PY'
+            import pathlib,json,hashlib
+            fresh=pathlib.Path('approved-photo-hosting')
+            old=pathlib.Path('existing-photo-release')
+            a=json.loads((fresh/'photo-rights-manifest.json').read_text())
+            b=json.loads((old/'photo-rights-manifest.json').read_text())
+            if a!=b:
+              raise SystemExit('IMMUTABLE_PHOTO_MANIFEST_ALREADY_EXISTS_WITH_DIFFERENT_SOURCE')
+            for item in a['assets']:
+              media=old/item['file']
+              if not media.is_file() or hashlib.sha256(media.read_bytes()).hexdigest()!=item['sha256']:
+                raise SystemExit('EXISTING_PHOTO_RELEASE_MEDIA_MISMATCH')
+            if len(list(old.iterdir()))!=8:
+              raise SystemExit('EXISTING_PHOTO_RELEASE_UNEXPECTED_ASSET')
+            print('EXISTING_IMMUTABLE_PHOTO_RELEASE_VERIFIED_AND_LEFT_UNCHANGED')
+            PY
             exit 0
           fi
           gh release create "$TAG" approved-photo-hosting/* \

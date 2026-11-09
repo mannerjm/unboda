@@ -1,0 +1,159 @@
+name: UNBODA 7-photo immutable licensed hosting (NO SNS POST)
+on:
+  pull_request:
+    paths:
+      - "scripts/social/prepare-photo-immutable-release.py"
+      - ".github/workflows/unboda-approved-photo-hosting.yml"
+  workflow_run:
+    workflows:
+      - "UNBODA licensed real-photo candidate intake (NO SOCIAL POST)"
+    types: [completed]
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: unboda-immutable-photo-pack-by-date
+  cancel-in-progress: false
+jobs:
+  guard-tests:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-cache-dir Pillow==11.3.0
+      - name: Verify positive seven-JPEG package and failure conditions
+        run: python scripts/social/prepare-photo-immutable-release.py --self-test
+  immutable-media-release:
+    if: >
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == 'mannerjm/unboda' &&
+      (github.event.workflow_run.event == 'schedule' ||
+       github.event.workflow_run.event == 'push' ||
+       github.event.workflow_run.event == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: main-source
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-cache-dir Pillow==11.3.0
+      - name: Verify trusted main-branch source run and download its immutable QA artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUN_ID="${{ github.event.workflow_run.id }}"
+          gh api "repos/mannerjm/unboda/actions/runs/$RUN_ID" \
+            --jq '[.head_repository.full_name,.head_branch,.event,.conclusion]|join("|")' \
+            | grep -Eq '^mannerjm/unboda\|main\|(push|schedule|workflow_dispatch)\|success$'
+          gh run download "$RUN_ID" --repo mannerjm/unboda \
+            --name unboda-photo-candidates-UNAPPROVED \
+            --dir photo-candidates
+          test -s photo-candidates/photo-first-editorial.json
+          test -s photo-candidates/independent-review.json
+      - name: Require actual seven-photo dual-model and copyright verification
+        id: pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          DAY="$(python - <<'PY'
+          import json
+          x=json.load(open('photo-candidates/candidate-manifest.json'))
+          print(x["dateKst"])
+          PY
+          )"
+          KST_TODAY="$(TZ=Asia/Seoul date +%Y-%m-%d)"
+          KST_MAX="$(TZ=Asia/Seoul date -d '+2 days' +%Y-%m-%d)"
+          if [[ "$DAY" < "$KST_TODAY" || "$DAY" > "$KST_MAX" ]]; then
+            echo "PHOTO_DATE_PAST_OR_OUT_OF_ROLLING_BUFFER" >&2
+            exit 1
+          fi
+          STAMP="$(echo "$DAY" | tr -d '-')"
+          node --check main-source/scripts/social/lifestyle-photo-first-editorial.mjs
+          python main-source/scripts/social/prepare-photo-immutable-release.py \
+            --date "$DAY" --photos-dir photo-candidates \
+            --brief photo-candidates/photo-first-editorial.json \
+            --manifest photo-candidates/candidate-manifest.json \
+            --vision photo-candidates/vision-review.json \
+            --independent photo-candidates/independent-review.json \
+            --catalog main-source/automation/social/saleable-product-catalog.json \
+            --out approved-photo-hosting
+          echo "tag=unboda-lifestyle-photo-$STAMP" >> "$GITHUB_OUTPUT"
+          python - <<'PY'
+          import pathlib,json,hashlib
+          from PIL import Image
+          p=pathlib.Path('approved-photo-hosting')
+          x=json.loads((p/'photo-rights-manifest.json').read_text())
+          assert x["assetCount"]==7
+          assert not x["publicationAllowed"]
+          assert not x["photoReadyForSnsPosting"]
+          assert not x["wholeSocial90DayCoverageVerified"]
+          assert len({a["sha256"] for a in x["assets"]})==7
+          for a in x["assets"]:
+            im=p/a["file"]
+            assert im.is_file()
+            assert hashlib.sha256(im.read_bytes()).hexdigest()==a["sha256"]
+            with Image.open(im) as f:
+              assert f.format=='JPEG' and f.size==(1080,1350)
+          print('SEVEN_DUAL_REVIEWED_JPEG_MEDIA_HOST_READY_NO_SNS_ACTION')
+          PY
+      - name: Host only immutable and independently verified media, never a social post
+        env:
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.pack.outputs.tag }}"
+          if gh release view "$TAG" --repo mannerjm/unboda >/dev/null 2>&1; then
+            COUNT="$(gh release view "$TAG" --repo mannerjm/unboda \
+              --json assets --jq '.assets|length')"
+            if [ "$COUNT" != "8" ]; then
+              echo "EXISTING_PHOTO_RELEASE_PARTIAL_OR_WRONG_COUNT_STOP" >&2
+              exit 1
+            fi
+            mkdir -p existing-photo-release
+            gh release download "$TAG" --repo mannerjm/unboda \
+              --dir existing-photo-release
+            python - <<'PY'
+            import pathlib,json,hashlib
+            fresh=pathlib.Path('approved-photo-hosting')
+            old=pathlib.Path('existing-photo-release')
+            a=json.loads((fresh/'photo-rights-manifest.json').read_text())
+            b=json.loads((old/'photo-rights-manifest.json').read_text())
+            if a!=b:
+              raise SystemExit('IMMUTABLE_PHOTO_MANIFEST_ALREADY_EXISTS_WITH_DIFFERENT_SOURCE')
+            for item in a['assets']:
+              media=old/item['file']
+              if not media.is_file() or hashlib.sha256(media.read_bytes()).hexdigest()!=item['sha256']:
+                raise SystemExit('EXISTING_PHOTO_RELEASE_MEDIA_MISMATCH')
+            if len(list(old.iterdir()))!=8:
+              raise SystemExit('EXISTING_PHOTO_RELEASE_UNEXPECTED_ASSET')
+            print('EXISTING_IMMUTABLE_PHOTO_RELEASE_VERIFIED_AND_LEFT_UNCHANGED')
+            PY
+            exit 0
+          fi
+          gh release create "$TAG" approved-photo-hosting/* \
+            --repo mannerjm/unboda --target "$RELEASE_SHA" \
+            --title "운보다 검수 완료 실사 사진 $TAG" \
+            --notes "Seven rights-verified, dual-image-model reviewed genuine photographs. Public file hosting only. SNS posting and publishing approval are NOT granted. Attribution/license/source data in photo-rights-manifest.json." \
+            --prerelease
+          COUNT="$(gh release view "$TAG" --repo mannerjm/unboda \
+            --json assets --jq '.assets|length')"
+          if [ "$COUNT" != "8" ]; then
+            echo "PHOTO_RELEASE_ASSET_COUNT_FAIL_CLOSED" >&2
+            exit 1
+          fi
+          echo "LICENSED_7_PHOTO_SOURCE_HOSTED_NO_METRICOOL_POST_CREATED"

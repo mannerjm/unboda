@@ -7,6 +7,8 @@ on:
       - "scripts/social/lifestyle-one-shot-scheduler.test.mjs"
       - "scripts/social/lifestyle-supabase-claim-store.mjs"
       - "scripts/social/lifestyle-supabase-claim-store.test.mjs"
+      - "scripts/social/lifestyle-metricool-api-adapter.mjs"
+      - "scripts/social/lifestyle-metricool-api-adapter.test.mjs"
       - ".github/workflows/unboda-lifestyle-one-shot-contract.yml"
   push:
     branches: [main]
@@ -15,6 +17,8 @@ on:
       - "scripts/social/lifestyle-one-shot-scheduler.test.mjs"
       - "scripts/social/lifestyle-supabase-claim-store.mjs"
       - "scripts/social/lifestyle-supabase-claim-store.test.mjs"
+      - "scripts/social/lifestyle-metricool-api-adapter.mjs"
+      - "scripts/social/lifestyle-metricool-api-adapter.test.mjs"
       - ".github/workflows/unboda-lifestyle-one-shot-contract.yml"
   workflow_dispatch:
 permissions:
@@ -35,4 +39,5 @@ jobs:
           node --check scripts/social/lifestyle-one-shot-scheduler.mjs
           node --test scripts/social/lifestyle-one-shot-scheduler.test.mjs
           node --test scripts/social/lifestyle-supabase-claim-store.test.mjs
+          node --test scripts/social/lifestyle-metricool-api-adapter.test.mjs
           echo "ONE_SHOT_CONTRACT_PASSED_NO_EXTERNAL_PROVIDER_WRITE"

@@ -24,3 +24,17 @@
 
 ## Daily operational goal
 Replace used images with seven fresh rights-proven real photos each day, keep 21 verified-photo candidates reserved for three future days, and alert on any shortage. Do not claim unlimited unattended publishing until the 7-consecutive-day 18/18 public URL checks pass.
+
+## Safe onboarding tool (staging-only, never SNS)
+- Script: scripts/social/intake-private-licensed-photo.py. Its default mode validates a LOCAL genuine 1080x1350 JPEG, exact SHA-256/pHash, and a private PDF/JSON licensing proof; **no network writes**. Synthetic CI fixtures do not qualify as photography.
+- Input is a private local JSON manifest, **never committed to GitHub**. Required keys: photoFile, proofFile, sceneId, rightsBasis (BRAND_OWNED / COMMISSIONED / CONTRACT_LICENSED), rightsHolder, creditLine, rightsValidFrom. Optional rightsValidUntil. All paths refer to private local files.
+- Example private local manifest (replace all example data on a protected operator computer):
+  
+      {"photoFile":"/private/owned-photo.jpg","proofFile":"/private/signed-permission.pdf","sceneId":"notebook","rightsBasis":"BRAND_OWNED","rightsHolder":"Verified owner","creditLine":"Photo credit","rightsValidFrom":"2026-11-09"}
+
+- Local verification: python scripts/social/intake-private-licensed-photo.py --manifest /private/photo-intake.json
+- After explicit authorization, put the **staging** service-role secret in the machine's protected environment as UNBODA_STAGING_SERVICE_ROLE_KEY; run python scripts/social/intake-private-licensed-photo.py --manifest /private/photo-intake.json --stage
+- The --stage operation performs one no-upsert private photo upload, one private rights-proof upload, byte-for-byte readback, a single staging metadata insert and a final readback. Network ambiguity, duplicate SHA, missing proof, bad dates/format, wrong source, or mismatched bytes **halt**; no blind retry or cleanup that could delete previously written data.
+- Every new row is forced to **qa_status=PENDING, commercial_social_rights=false, ai_quality_inspection_rights=false**. A trusted reviewer must separately verify the actual commercial rights, AI image inspection permissions, people/property privacy, scene semantics, and expiration before approving metadata; still no provider scheduling until the independent CLIP/BLIP + 90-day provider history + production claim gates pass.
+- The staging PRIVATE bucket permits JPG, JSON, PDF rights evidence; do not make it publicly readable. The uploader never touches the live Supabase project.
+- Future supplier/stock-feed integration requires explicit contractual consent and credentials; do not put third-party photos into this intake path based on a URL alone.

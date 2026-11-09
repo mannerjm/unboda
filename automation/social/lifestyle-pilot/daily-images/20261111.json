@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 2,
+  "dateKst": "2026-11-11",
+  "brand": "UNBODA",
+  "firstPartyOriginal": true,
+  "notPhotographs": true,
+  "editorialState": "READY_FOR_AUTOMATED_QA_NOT_HUMAN_REVIEWED",
+  "photoPostingApproved": false,
+  "stories": [
+    {
+      "hourKst": "01",
+      "visualMotif": "journal",
+      "topicCategory": "self-understanding",
+      "label": "수첩과 메모",
+      "title": "처음 접한 개념 설명 — 예시를 떠올리기 힘들 때",
+      "advice": "공부 방법을 돌아보면서 어제 적은 메모와 오늘의 내용을 나란히 놓고 차이를 기록해 보세요.",
+      "lifeSituation": "새로운 일을 앞두고 잠깐 멈춰 본 순간, 수첩을 펼친 책상에서 \"처음 접한 개념 설명\"을 살피다가 예시를 떠올리기 힘들 때",
+      "visualAnchors": [
+        "수첩",
+        "메모"
+      ],
+      "sceneVariant": 1,
+      "topicKey": "lifestyle-journal-1-20261111",
+      "productId": "study-learning-strategy",
+      "productTitle": "학습 전략 분석",
+      "productCategory": "growth",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/study-learning-strategy",
+      "contentGoal": "premium-conversion",
+      "productProblem": "공부 관련 처음 접한 개념 설명이 중요한 생활 상황을 점검",
+      "productValue": "노력을 이해와 활용으로 바꾸는 학습 구조를 점검",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 학습 전략 분석 https://unboda.kr/paid-analysis/study-learning-strategy",
+      "photoSearchQuery": "notebook notes writing study photograph",
+      "photoMustDepict": [
+        "수첩",
+        "메모"
+      ]
+    },
+    {
+      "hourKst": "04",
+      "visualMotif": "bedroom",
+      "topicCategory": "self-understanding",
+      "label": "침실 조명과 이불",
+      "title": "잠들기 전 마신 물 — 기록하는 것을 미루게 될 때",
+      "advice": "수면 리듬을 살피면서 나에게 편안한 이불과 조명 조건을 기록하고 다음 날 다시 살펴보세요.",
+      "lifeSituation": "시간이 부족하다고 느껴 기준을 다시 세운 날, 침실에서 잠자리를 정리하던 때에서 \"잠들기 전 마신 물\"을 살피다가 기록하는 것을 미루게 될 때",
+      "visualAnchors": [
+        "이불",
+        "조명"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "lifestyle-bedroom-1-20261111",
+      "productId": "health-sleep-rhythm",
+      "productTitle": "수면 리듬 점검 분석",
+      "productCategory": "health",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/health-sleep-rhythm",
+      "contentGoal": "premium-conversion",
+      "productProblem": "수면 관련 잠들기 전 마신 물이 중요한 생활 상황을 점검",
+      "productValue": "수면 습관을 진단하지 않고 관찰 가능한 리듬과 다음날 회복 신호를 점검",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 수면 리듬 점검 분석 https://unboda.kr/paid-analysis/health-sleep-rhythm",
+      "photoSearchQuery": "bedroom lamp pillow bed photograph",
+      "photoMustDepict": [
+        "이불",
+        "조명"
+      ]
+    },
+    {
+      "hourKst": "10",
+      "visualMotif": "presentation",
+      "topicCategory": "career",
+      "label": "업무 발표 자료",
+      "title": "회의 발표의 첫 화면 — 확인할 담당자가 헷갈릴 때",
+      "advice": "직장 업무를 준비하면서 업무 문서를 중요한 순서대로 나눠 놓고 동료에게 확인할 점을 적어 보세요.",
+      "lifeSituation": "반복되던 습관을 조금 바꾸기로 한 날, 회의 자료를 확인하는 업무 시간에서 \"회의 발표의 첫 화면\"을 살피다가 확인할 담당자가 헷갈릴 때",
+      "visualAnchors": [
+        "업무 자료",
+        "표"
+      ],
+      "sceneVariant": 3,
+      "topicKey": "lifestyle-presentation-1-20261111",
+      "productId": "career-workplace-adaptation",
+      "productTitle": "직장 적응 분석",
+      "productCategory": "career",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/career-workplace-adaptation",
+      "contentGoal": "premium-conversion",
+      "productProblem": "직장 관련 회의 발표의 첫 화면이 중요한 생활 상황을 점검",
+      "productValue": "현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 직장 적응 분석 https://unboda.kr/paid-analysis/career-workplace-adaptation",
+      "photoSearchQuery": "office business meeting presentation chart photograph",
+      "photoMustDepict": [
+        "업무 자료",
+        "표"
+      ]
+    },
+    {
+      "hourKst": "13",
+      "visualMotif": "receipt",
+      "topicCategory": "money",
+      "label": "영수증과 가계부",
+      "title": "지출을 적어 둔 메모 — 예산과 차이가 느껴질 때",
+      "advice": "저축과 예산을 생각하면서 영수증에서 반복되는 항목을 표시하고 다음 장보기 예산과 비교해 보세요.",
+      "lifeSituation": "일상에서 예상 못 한 질문이 생겼던 날, 구매 기록을 정리하는 책상에서 \"지출을 적어 둔 메모\"을 살피다가 예산과 차이가 느껴질 때",
+      "visualAnchors": [
+        "영수증",
+        "카드"
+      ],
+      "sceneVariant": 4,
+      "topicKey": "lifestyle-receipt-1-20261111",
+      "productId": "money-saving-discipline",
+      "productTitle": "저축과 자산 관리 습관",
+      "productCategory": "money",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/money-saving-discipline",
+      "contentGoal": "premium-conversion",
+      "productProblem": "저축 관련 지출을 적어 둔 메모이 중요한 생활 상황을 점검",
+      "productValue": "저축·예산 기준을 유지하고 반복 가능한 관리 루틴을 재설정하는 방법을 분석",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 저축과 자산 관리 습관 https://unboda.kr/paid-analysis/money-saving-discipline",
+      "photoSearchQuery": "shopping receipt calculator wallet photograph",
+      "photoMustDepict": [
+        "영수증",
+        "카드"
+      ]
+    },
+    {
+      "hourKst": "16",
+      "visualMotif": "dialogue",
+      "topicCategory": "compatibility",
+      "label": "친구와 연락하기",
+      "title": "답장에 담긴 짧은 표현 — 서로의 기대가 다르게 느껴질 때",
+      "advice": "친구 관계를 돌아보면서 친구의 이야기를 먼저 읽고 내가 공감한 부분을 짧게 말해 보세요.",
+      "lifeSituation": "오래 미뤄 둔 선택을 다시 살펴보던 때, 친구와 연락한 뒤 휴대폰을 보던 순간에서 \"답장에 담긴 짧은 표현\"을 살피다가 서로의 기대가 다르게 느껴질 때",
+      "visualAnchors": [
+        "친구",
+        "대화"
+      ],
+      "sceneVariant": 0,
+      "topicKey": "lifestyle-dialogue-1-20261111",
+      "productId": "relationship-friendship",
+      "productTitle": "친구 관계 분석",
+      "productCategory": "social",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/relationship-friendship",
+      "contentGoal": "premium-conversion",
+      "productProblem": "친구 관련 답장에 담긴 짧은 표현이 중요한 생활 상황을 점검",
+      "productValue": "친구 관계의 상호성·신뢰·감정 노동을 점검하고 재조정 기준을 만듭니다.",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 친구 관계 분석 https://unboda.kr/paid-analysis/relationship-friendship",
+      "photoSearchQuery": "friends talking cafe smartphone conversation photograph",
+      "photoMustDepict": [
+        "친구",
+        "대화"
+      ]
+    },
+    {
+      "hourKst": "19",
+      "visualMotif": "family",
+      "topicCategory": "family",
+      "label": "가족 식탁과 달력",
+      "title": "집에서 돌아가며 하는 일 — 할 일을 자꾸 미루게 될 때",
+      "advice": "가족 역할을 나누면서 식탁에서 서로의 가능한 시간을 묻고 공용 일정을 차분히 정해 보세요.",
+      "lifeSituation": "오늘 바뀐 계획을 다시 확인하던 순간, 가족이 모여 앉은 식탁에서 \"집에서 돌아가며 하는 일\"을 살피다가 할 일을 자꾸 미루게 될 때",
+      "visualAnchors": [
+        "식탁",
+        "달력"
+      ],
+      "sceneVariant": 1,
+      "topicKey": "lifestyle-family-1-20261111",
+      "productId": "relationship-family-role",
+      "productTitle": "가족 역할 경계 분석",
+      "productCategory": "social",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/relationship-family-role",
+      "contentGoal": "premium-conversion",
+      "productProblem": "가족 관련 집에서 돌아가며 하는 일이 중요한 생활 상황을 점검",
+      "productValue": "가족 역할 기대와 반복 부담을 조정하는 관찰 기준을 분석",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 가족 역할 경계 분석 https://unboda.kr/paid-analysis/relationship-family-role",
+      "photoSearchQuery": "family dinner table home meal photograph",
+      "photoMustDepict": [
+        "식탁",
+        "달력"
+      ]
+    },
+    {
+      "hourKst": "22",
+      "visualMotif": "checklist",
+      "topicCategory": "self-understanding",
+      "label": "하루 끝의 체크리스트",
+      "title": "내일 아침의 준비 시간 — 반복하는 것이 지루하게 느껴질 때",
+      "advice": "생활 습관을 돌아보면서 다음 날 준비 목록을 미리 적고 빠진 물건이 없는지 살펴보세요.",
+      "lifeSituation": "내일을 준비하다 잠깐 생각에 잠긴 밤, 다음 날 준비물을 펼쳐 둔 책상에서 \"내일 아침의 준비 시간\"을 살피다가 반복하는 것이 지루하게 느껴질 때",
+      "visualAnchors": [
+        "체크리스트",
+        "표시"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "lifestyle-checklist-1-20261111",
+      "productId": "health-habit-continuity",
+      "productTitle": "생활 습관 유지 분석",
+      "productCategory": "health",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/health-habit-continuity",
+      "contentGoal": "premium-conversion",
+      "productProblem": "습관 관련 내일 아침의 준비 시간이 중요한 생활 상황을 점검",
+      "productValue": "건강 지원 습관이 무너지는 조건과 재시작 기준을 점검",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 생활 습관 유지 분석 https://unboda.kr/paid-analysis/health-habit-continuity",
+      "photoSearchQuery": "checklist notepad pen desk planning photograph",
+      "photoMustDepict": [
+        "체크리스트",
+        "표시"
+      ]
+    }
+  ]
+}

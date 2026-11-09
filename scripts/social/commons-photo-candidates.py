@@ -25,6 +25,7 @@ from PIL import Image, ImageOps, ImageDraw
 SCENE_CATALOG=json.loads((pathlib.Path(__file__).parent/"lifestyle-photo-scenes.json").read_text(encoding="utf-8"))["slots"]
 
 HOST="commons.wikimedia.org"
+OPENVERSE_HOST="api.openverse.org"
 MEDIA_HOST="upload.wikimedia.org"
 USER_AGENT="UNBODAOriginalPhotoRightsAudit/1.0 (+https://unboda.kr)"
 MAX_DOWNLOAD=16_000_000
@@ -123,7 +124,7 @@ def subject_evidence(slot,name,description):
 
 def get(url,limit=MAX_DOWNLOAD):
  parts=urllib.parse.urlparse(url)
- if parts.scheme!="https" or parts.hostname not in (HOST,MEDIA_HOST):
+ if parts.scheme!="https" or parts.hostname not in (HOST,MEDIA_HOST,OPENVERSE_HOST):
   raise RuntimeError("REMOTE_ORIGIN_NOT_ALLOWLISTED")
  request=urllib.request.Request(url,headers={
   "User-Agent":USER_AGENT,"Accept":"image/jpeg,application/json"})
@@ -132,7 +133,7 @@ def get(url,limit=MAX_DOWNLOAD):
    with urllib.request.urlopen(request,timeout=25) as res:
     # urllib may follow redirects; verify the final destination too.
     final=urllib.parse.urlparse(res.geturl())
-    if final.scheme!="https" or final.hostname not in (HOST,MEDIA_HOST):
+    if final.scheme!="https" or final.hostname not in (HOST,MEDIA_HOST,OPENVERSE_HOST):
      raise RuntimeError("REMOTE_REDIRECT_NOT_ALLOWLISTED")
     mime=res.headers.get("content-type","").split(";",1)[0].strip().lower()
     if mime not in ("application/json","image/jpeg","image/pjpeg"):
@@ -162,6 +163,56 @@ def search_commons(q,offset):
  if pages is None:return []
  if not isinstance(pages,dict):raise RuntimeError("COMMONS_QUERY_PAGES_INVALID")
  return sorted(pages.values(),key=lambda p:p.get("index",999))
+
+def commons_title_from_landing_page(url):
+ """Only names of original Wikimedia Commons JPGs may cross provider boundary."""
+ try:
+  u=urllib.parse.urlparse(str(url))
+  if u.scheme!="https" or u.hostname!=HOST or not u.path.startswith("/wiki/File:"):
+   return None
+  raw=urllib.parse.unquote(u.path[len("/wiki/"):])
+  if not raw.startswith("File:") or "/" in raw or ".." in raw:
+   return None
+  if not re.search(r"\.jpe?g$",raw,re.I) or len(raw)>250:
+   return None
+  return raw.replace("_"," ")
+ except (TypeError,ValueError):return None
+
+def openverse_verified_commons_pages(query):
+ """Discovery only; Wikimedia file API re-verifies license and exact bytes."""
+ params={
+  "q":query,"source":"wikimedia","license":"by,by-sa,cc0,pdm",
+  "page_size":"30","page":"1","mature":"false","filter_dead":"true"
+ }
+ url="https://"+OPENVERSE_HOST+"/v1/images/?"+urllib.parse.urlencode(params)
+ _,payload=get(url,3_000_000)
+ data=json.loads(payload)
+ if not isinstance(data.get("results"),list):
+  raise RuntimeError("OPENVERSE_NON_LIST_RESPONSE")
+ names=[]
+ for row in data["results"]:
+  if row.get("source")!="wikimedia":continue
+  name=commons_title_from_landing_page(row.get("foreign_landing_url"))
+  if name and name not in names:names.append(name)
+ if not names:return []
+ q={
+  "action":"query","format":"json","titles":"|".join(names[:25]),
+  "prop":"imageinfo","iiprop":"url|size|mime|extmetadata",
+  "iiextmetadatafilter":"LicenseShortName|LicenseUrl|Artist|Credit|ImageDescription",
+  "iiurlwidth":"1080"
+ }
+ _,blob=get("https://"+HOST+"/w/api.php?"+urllib.parse.urlencode(q),3_000_000)
+ d=json.loads(blob)
+ if "error" in d:raise RuntimeError("COMMONS_FILE_METADATA_REVALIDATION_FAILED")
+ pages=d.get("query",{}).get("pages",{})
+ if not isinstance(pages,dict):return []
+ out=[]
+ for page in pages.values():
+  if page.get("missing") is not None or not page.get("imageinfo"):continue
+  if page.get("title") not in names:continue
+  out.append(page)
+ return sorted(out,key=lambda p:names.index(p["title"]))
+
 def convert_to_photo_jpeg(raw):
  Image.MAX_IMAGE_PIXELS=35_000_000
  with Image.open(io.BytesIO(raw)) as im:
@@ -197,71 +248,79 @@ def near_duplicate(a,b):
 def choose_photos(query,history,slot,offset,max_candidates=8):
  rejected={}
  found=[]
- # MediaWiki full-text search may treat many words as AND, returning no photos.
- # Try broad but topic-bound terms, never switching to an unrelated motif.
+ seen_pages=set()
+ def accept(page):
+  name=page.get("title","")
+  if name in seen_pages:return
+  seen_pages.add(name)
+  if BAD_NAME.search(name) or not re.search(r"\.jpe?g$",name,re.I):
+   rejected["filename"]=rejected.get("filename",0)+1
+   return
+  info=(page.get("imageinfo") or [None])[0]
+  if not info or info.get("mime")!="image/jpeg":return
+  rights=license_result(info)
+  if not rights:
+   rejected["license"]=rejected.get("license",0)+1
+   return
+  scene_matches=matching_photo_scenes(slot,name,rights["description"])
+  if not scene_matches:
+   rejected["subject_metadata"]=rejected.get("subject_metadata",0)+1
+   return
+  media=info.get("thumburl") or info.get("url","")
+  parsed=urllib.parse.urlparse(media)
+  if parsed.scheme!="https" or parsed.hostname!=MEDIA_HOST:return
+  try:
+   mime,raw=get(media)
+   if mime not in ("image/jpeg","image/pjpeg"):return
+   photo,sha,phash,camera=convert_to_photo_jpeg(raw)
+  except Exception:
+   rejected["media"]=rejected.get("media",0)+1
+   return
+  if any(row.get("sha256")==sha or (
+      isinstance(row.get("phash"),str) and len(row["phash"])==16 and
+      near_duplicate(phash,row["phash"])) for row in history+[x[1] for x in found]):
+   rejected["duplicate"]=rejected.get("duplicate",0)+1
+   return
+  record={
+   "hourKst":slot,"sourceName":name,"sourcePage":info.get("descriptionurl",""),
+   "originalUrl":info.get("url",""),"downloadedThumbnailUrl":media,
+   "sha256":sha,"phash":phash,"bytes":len(photo),"width":1080,"height":1350,
+   "rights":rights,"cameraExif":camera[:90],"sceneCandidates":scene_matches,
+   "photoCandidateOnly":True,"imageVisuallyInspected":False,
+   "sceneMatchVerified":False,"publicationAllowed":False
+  }
+  found.append((photo,record))
  words=query.split()
- queries=list(dict.fromkeys([
-  # Photos drive copy: try several commercially usable real-life contexts
-  # for each paid product instead of insisting on one rare literal object.
+ phrases=list(dict.fromkeys([
   *[q for sc in SCENE_CATALOG[slot]["scenes"] for q in sc["queries"]],
   query," ".join(words[:2])
  ]))
- # No blind re-use of the same first-page image each morning.
  offsets=list(dict.fromkeys([offset,0,40]))
- seen_pages=set()
- for phrase in queries:
+ for phrase in phrases:
   for page_offset in offsets:
    pages=search_commons(phrase,page_offset)
    for page in pages:
-    name=page.get("title","")
-    if name in seen_pages:continue
-    seen_pages.add(name)
-    if BAD_NAME.search(name) or not re.search(r"\.jpe?g$",name,re.I):
-     rejected["filename"]=rejected.get("filename",0)+1
-     continue
-    infos=page.get("imageinfo") or []
-    if not infos:continue
-    info=infos[0]
-    if info.get("mime")!="image/jpeg":continue
-    rights=license_result(info)
-    if not rights:
-     rejected["license"]=rejected.get("license",0)+1
-     continue
-    scene_matches=matching_photo_scenes(slot,name,rights["description"])
-    if not scene_matches:
-     rejected["subject_metadata"]=rejected.get("subject_metadata",0)+1
-     continue
-    media=info.get("thumburl") or info.get("url","")
-    parsed=urllib.parse.urlparse(media)
-    if parsed.scheme!="https" or parsed.hostname!=MEDIA_HOST:continue
-    try:
-     mime,raw=get(media)
-     if mime not in ("image/jpeg","image/pjpeg"):continue
-     photo,sha,phash,camera=convert_to_photo_jpeg(raw)
-    except Exception:
-     rejected["media"]=rejected.get("media",0)+1
-     continue
-    if any(row.get("sha256")==sha or (
-        isinstance(row.get("phash"),str) and len(row["phash"])==16 and
-        near_duplicate(phash,row["phash"])) for row in history+[x[1] for x in found]):
-     rejected["duplicate"]=rejected.get("duplicate",0)+1
-     continue
-    # Search terms and license metadata alone NEVER verify visible objects.
-    record={
-     "hourKst":slot,"sourceName":name,"sourcePage":info.get("descriptionurl",""),
-     "originalUrl":info.get("url",""),"downloadedThumbnailUrl":media,
-     "sha256":sha,"phash":phash,"bytes":len(photo),"width":1080,"height":1350,
-     "rights":rights,"cameraExif":camera[:90],
-     "sceneCandidates":scene_matches,
-     "photoCandidateOnly":True,"imageVisuallyInspected":False,
-     "sceneMatchVerified":False,"publicationAllowed":False
-    }
-    found.append((photo,record))
+    accept(page)
+    if len(found)>=max_candidates:return found
+ # Openverse is used ONLY to discover matching Wikimedia Commons JPG pages.
+ # All license and pixel checks still happen through Wikimedia's own API.
+ # Do not scrape Openverse, bypass rate-limits or fetch arbitrary hosts.
+ if len(found)<3:
+  for scene in SCENE_CATALOG[slot]["scenes"]:
+   try:
+    pages=openverse_verified_commons_pages(scene["queries"][0])
+   except Exception as exc:
+    print("OPENVERSE_DISCOVERY_NOT_AVAILABLE",slot,type(exc).__name__,
+          file=sys.stderr)
+    # Explicitly fail closed on rate limits; never switch to unsafe sources.
+    if isinstance(exc,urllib.error.HTTPError) and exc.code==429:break
+    continue
+   for page in pages:
+    accept(page)
     if len(found)>=max_candidates:return found
  if found:return found
  raise RuntimeError("NO_LICENSED_UNDUPLICATED_REAL_PHOTO_CANDIDATE:"+slot+
                     ":"+json.dumps(rejected,ensure_ascii=False))
-
 
 def load_history(d):
  rows=[]
@@ -354,6 +413,10 @@ def selftest():
  assert not subject_evidence("13","A grocery store with no labels mentioned","")
  assert not subject_evidence("19","Family outside at a beach","")
  assert len(TOPIC_SEARCH_VARIANTS)==7
+ assert commons_title_from_landing_page("https://commons.wikimedia.org/wiki/File:Sample_photo.jpg")=="File:Sample photo.jpg"
+ assert commons_title_from_landing_page("https://evil.example/wiki/File:Sample_photo.jpg") is None
+ assert commons_title_from_landing_page("https://commons.wikimedia.org/wiki/File:vector.svg") is None
+ assert commons_title_from_landing_page("http://commons.wikimedia.org/wiki/File:Sample_photo.jpg") is None
  assert len(SCENE_CATALOG)==7
  assert all(len(x["scenes"])==3 for x in SCENE_CATALOG.values())
  assert matching_photo_scenes("13","A grocery supermarket shopping aisle with food shelves","")

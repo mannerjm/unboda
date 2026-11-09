@@ -136,9 +136,11 @@ function generate(day){
   const old=JSON.parse(fs.readFileSync(briefFile,'utf8'));
   const illustrations=['rest','clock','message','notes'];
   const pics=illustrations.map((_,j)=>illustrations[(j+gi+i)%4]);
-  const title=(visible.label+' '+situation.slice(-12)).slice(0,25);
+  // Never slice Korean words in half: Shorts/Reels first-frame titles are sales-critical.
+  const title=situation.length<=26?situation:situation.split(' ').slice(-4).join(' ');
+  assert(title.length>=5 && title.length<=26,'UNREADABLE_THUMBNAIL_TITLE');
   const scenes=[
-   {headline:[visible.label,situation.slice(-12)],subline:visible.label+' 돌아보기',illustration:pics[0]},
+   {headline:[visible.label,situation.split(' ').slice(-2).join(' ')],subline:visible.label+' 돌아보기',illustration:pics[0]},
    {headline:['사주로 보는','성향 참고'],subline:'지금 상황 돌아보기',illustration:pics[1]},
    {headline:['작은 실천','지금 해봐요'],subline:'나의 기준 점검하기',illustration:pics[2]},
    {headline:['내 사주도','무료로 살펴봐'],subline:'운보다 무료 사주 · '+p.title,illustration:pics[3]}

@@ -38,6 +38,9 @@ function validateBatch(batch){
  for(const post of batch.prepared){
   if(post.dateKst!==batch.dateKst||SLOT_NETWORKS[post.hourKst]!==post.network||
       !ALLOWED_NETWORKS.has(post.network)||!post.photoSha256?.match(/^[a-f0-9]{64}$/)||
+      !/^[a-f0-9]{16}$/.test(post.photoPhash??"")||
+      !post.photoSourcePage?.startsWith("https://commons.wikimedia.org/")||
+      typeof post.photoAttribution!=="string"||
       !post.mediaUrl?.startsWith("https://")||!post.caption||post.captionLength>450||
       [...post.caption].length!==post.captionLength||!post.topicKey)
    throw Error("INVALID_PREPARED_POST_OR_NETWORK");
@@ -91,7 +94,9 @@ export async function scheduleSeven({
   try{
    claim=await claimStore.tryClaim({key,dateKst:post.dateKst,
     hourKst:post.hourKst,network:post.network,
-    content:post.caption,mediaSha256:post.photoSha256});
+    content:post.caption,mediaSha256:post.photoSha256,
+    imagePhash:post.photoPhash,sourcePage:post.photoSourcePage,
+    attribution:post.photoAttribution});
   }catch{
    report.results.push({key,state:"CLAIM_DB_UNAVAILABLE_NO_POST"});continue
   }

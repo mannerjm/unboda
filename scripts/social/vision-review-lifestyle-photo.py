@@ -50,9 +50,10 @@ def inspect(manifest_path,out_path):
  photos=data.get("photos")
  if data.get("photoReadyForSnsPosting") is not False or \
     data.get("publicationAllowed") is not False or \
-    not isinstance(photos,list) or len(photos)!=7 or \
-    {p.get("hourKst") for p in photos}!=set(SLOTS):
-  raise RuntimeError("CANDIDATE_NOT_HARD_BLOCKED_OR_INVALID_SEVEN_SLOTS")
+    not isinstance(photos,list) or not 7<=len(photos)<=56 or \
+    {p.get("hourKst") for p in photos}!=set(SLOTS) or \
+    any(sum(x["hourKst"]==h for x in photos)>8 for h in SLOTS):
+  raise RuntimeError("CANDIDATE_POOLS_NOT_HARD_BLOCKED_OR_INVALID_SEVEN_SLOTS")
  from transformers import CLIPModel,CLIPProcessor
  import torch
  model=CLIPModel.from_pretrained(MODEL_ID,revision=REVISION,
@@ -61,38 +62,51 @@ def inspect(manifest_path,out_path):
                                          trust_remote_code=False)
  model.eval()
  records=[]
- for p in photos:
-  file=folder/p["file"]
-  raw=file.read_bytes()
-  if hashlib.sha256(raw).hexdigest()!=p.get("sha256"):
-   raise RuntimeError("MEDIA_CHANGED_AFTER_RIGHTS_QA:"+p.get("hourKst",""))
-  with Image.open(file) as im:
-   if im.format!="JPEG" or im.size!=(1080,1350):
-    raise RuntimeError("MEDIA_PIXEL_FORMAT_CHANGED")
-   prompts=SLOTS[p["hourKst"]]
-   inputs=processor(text=list(prompts),images=im.convert("RGB"),
-                    return_tensors="pt",padding=True)
-  with torch.no_grad():scores=model(**inputs).logits_per_image[0].tolist()
-  passed,reason,margin=classify(scores)
-  records.append({"hourKst":p["hourKst"],"source":p["sourcePage"],
-    "candidateSha256":p["sha256"],"pixelModel":MODEL_ID,
-    "modelRevision":REVISION,"rawLogits":[round(float(v),3) for v in scores],
-    "positivePhotoVsNegativesMargin":margin,
-    "automatedSceneMatch":passed,"state":reason,
-    "humanVisualReviewed":False,"socialPublicationApproved":False})
+ for hour in SLOTS:
+  ranked=[]
+  for p in (x for x in photos if x["hourKst"]==hour):
+   file=folder/p["file"]
+   raw=file.read_bytes()
+   if hashlib.sha256(raw).hexdigest()!=p.get("sha256"):
+    raise RuntimeError("MEDIA_CHANGED_AFTER_RIGHTS_QA:"+hour)
+   with Image.open(file) as im:
+    if im.format!="JPEG" or im.size!=(1080,1350):
+     raise RuntimeError("MEDIA_PIXEL_FORMAT_CHANGED:"+hour)
+    inputs=processor(text=list(SLOTS[hour]),images=im.convert("RGB"),
+                     return_tensors="pt",padding=True)
+   with torch.no_grad():scores=model(**inputs).logits_per_image[0].tolist()
+   passed,reason,margin=classify(scores)
+   ranked.append({"hourKst":hour,"candidateFile":p["file"],
+    "source":p["sourcePage"],"candidateSha256":p["sha256"],
+    "modelMargin":margin,"rawLogits":[round(float(v),3) for v in scores],
+    "automatedSceneMatch":passed,"state":reason})
+  if not ranked:raise RuntimeError("PHOTO_CANDIDATE_SLOT_EMPTY:"+hour)
+  # Only actual pixel similarity may determine which photo is the best match.
+  ranked.sort(key=lambda r:r["modelMargin"],reverse=True)
+  best=ranked[0]
+  records.append({
+   "hourKst":hour,"bestCandidateFile":best["candidateFile"],
+   "source":best["source"],"candidateSha256":best["candidateSha256"],
+   "pixelModel":MODEL_ID,"modelRevision":REVISION,
+   "positivePhotoVsNegativesMargin":best["modelMargin"],
+   "automatedSceneMatch":best["automatedSceneMatch"],"state":best["state"],
+   "consideredPhotoCandidates":len(ranked),
+   "humanVisualReviewed":False,"socialPublicationApproved":False,
+   "candidateScores":ranked
+  })
  result={"schemaVersion":1,"dateKst":data["dateKst"],
   "pixelReviewModel":MODEL_ID,"modelRevision":REVISION,
-  "photoReviewCount":len(records),
+  "photoReviewCount":len(records),"photoCandidatesScored":len(photos),
   "automatedSceneMatchCount":sum(int(r["automatedSceneMatch"]) for r in records),
   "allAutomatedSceneMatches":all(r["automatedSceneMatch"] for r in records),
   "wholeSocial90DayCoverageVerified":False,
   "rightsMetadataAutomaticallyChecked":data.get("rightsMachineChecked") is True,
-  "publicationAllowed":False,
-  "photoReadyForSnsPosting":False,
+  "publicationAllowed":False,"photoReadyForSnsPosting":False,
   "state":"QA_ONLY_NOT_READY_TO_AUTO_PUBLISH","photos":records}
  pathlib.Path(out_path).write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
  print("UNBODA_PHOTO_PIXEL_QA_ONLY_NO_SOCIAL_POST",result["dateKst"],
-       result["automatedSceneMatchCount"],"/7")
+       result["automatedSceneMatchCount"],"/7",len(photos),"candidates tested")
+
 def selftest():
  assert classify([15.0,10.5,11.0])[0]
  assert not classify([12.0,10.0,11.0])[0]

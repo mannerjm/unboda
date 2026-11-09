@@ -128,26 +128,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Write honest photo-driven stories from checked visual scenes
-        shell: bash
-        run: |
-          set -euo pipefail
-          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
-          STAMP="$(echo "$DAY" | tr -d '-')"
-          node main-source/scripts/social/lifestyle-photo-first-editorial.mjs \
-            --date="$DAY" \
-            --editorial="source-briefs/automation/social/lifestyle-pilot/daily-images/$STAMP.json" \
-            --manifest="photo-candidates/candidate-manifest.json" \
-            --review="photo-candidates/vision-review.json" \
-            --catalog="main-source/automation/social/saleable-product-catalog.json" \
-            --output="photo-candidates/photo-first-editorial.json"
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          const r=JSON.parse(fs.readFileSync('photo-candidates/photo-first-editorial.json'));
-          if(r.publicationAllowed!==false||r.photoReadyForSnsPosting!==false||
-             r.snsRequestsAttempted!==0)throw Error('UNSAFE_PHOTO_FIRST_PUBLICATION_OVERRIDE');
-          console.log('PHOTO_FIRST_EDITORIAL_DRAFT_ONLY',r.generatedPhotoAnchoredStories,'OF 7');
-          NODE
       - name: Cache independent BLIP image caption model
         uses: actions/cache@v4
         with:
@@ -170,6 +150,27 @@ jobs:
           assert q['wholeSocial90DayCoverageVerified'] is False
           print('SECOND_IMAGE_MODEL_MATCHES',q['verifiedIndependentSceneCount'],'OF 7')
           PY
+      - name: Write photo-first copy from the actual dual-model approved photograph
+        shell: bash
+        run: |
+          set -euo pipefail
+          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          STAMP="$(echo "$DAY" | tr -d '-')"
+          node main-source/scripts/social/lifestyle-photo-first-editorial.mjs \
+            --date="$DAY" \
+            --editorial="source-briefs/automation/social/lifestyle-pilot/daily-images/$STAMP.json" \
+            --manifest="photo-candidates/candidate-manifest.json" \
+            --review="photo-candidates/vision-review.json" \
+            --independent="photo-candidates/independent-review.json" \
+            --catalog="main-source/automation/social/saleable-product-catalog.json" \
+            --output="photo-candidates/photo-first-editorial.json"
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('photo-candidates/photo-first-editorial.json'));
+          if(r.publicationAllowed!==false||r.photoReadyForSnsPosting!==false||
+             r.snsRequestsAttempted!==0)throw Error('UNSAFE_PHOTO_FIRST_PUBLICATION_OVERRIDE');
+          console.log('PHOTO_FIRST_EDITORIAL_DRAFT_ONLY',r.generatedPhotoAnchoredStories,'OF 7');
+          NODE
       - name: Store licensed candidates privately for automated visual QA development
         uses: actions/upload-artifact@v4
         with:

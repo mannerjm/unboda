@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 2,
+  "dateKst": "2026-11-12",
+  "brand": "UNBODA",
+  "firstPartyOriginal": true,
+  "notPhotographs": true,
+  "editorialState": "READY_FOR_AUTOMATED_QA_NOT_HUMAN_REVIEWED",
+  "photoPostingApproved": false,
+  "stories": [
+    {
+      "hourKst": "01",
+      "visualMotif": "journal",
+      "topicCategory": "self-understanding",
+      "label": "수첩과 메모",
+      "title": "강의에서 적어 둔 핵심 단어 — 다음에 확인할 방법이 막막할 때",
+      "advice": "공부 방법을 돌아보면서 핵심 단어를 한 개 골라 내 말로 풀어 쓰고 예시를 찾아보세요.",
+      "lifeSituation": "반복되던 습관을 조금 바꾸기로 한 날, 수첩을 펼친 책상에서 \"강의에서 적어 둔 핵심 단어\"을 살피다가 다음에 확인할 방법이 막막할 때",
+      "visualAnchors": [
+        "수첩",
+        "메모"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "lifestyle-journal-2-20261112",
+      "productId": "study-learning-strategy",
+      "productTitle": "학습 전략 분석",
+      "productCategory": "growth",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/study-learning-strategy",
+      "contentGoal": "premium-conversion",
+      "productProblem": "공부 관련 강의에서 적어 둔 핵심 단어이 중요한 생활 상황을 점검",
+      "productValue": "노력을 이해와 활용으로 바꾸는 학습 구조를 점검",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 학습 전략 분석 https://unboda.kr/paid-analysis/study-learning-strategy",
+      "photoSearchQuery": "notebook notes writing study photograph",
+      "photoMustDepict": [
+        "수첩",
+        "메모"
+      ]
+    },
+    {
+      "hourKst": "04",
+      "visualMotif": "bedroom",
+      "topicCategory": "self-understanding",
+      "label": "침실 조명과 이불",
+      "title": "베개를 놓는 위치 — 어제와 다른 점이 느껴질 때",
+      "advice": "수면 리듬을 살피면서 잠자기 전 주변 조명과 시간을 확인하고 편안한 조건을 기록해 보세요.",
+      "lifeSituation": "일상에서 예상 못 한 질문이 생겼던 날, 침실에서 잠자리를 정리하던 때에서 \"베개를 놓는 위치\"을 살피다가 어제와 다른 점이 느껴질 때",
+      "visualAnchors": [
+        "이불",
+        "조명"
+      ],
+      "sceneVariant": 3,
+      "topicKey": "lifestyle-bedroom-2-20261112",
+      "productId": "health-sleep-rhythm",
+      "productTitle": "수면 리듬 점검 분석",
+      "productCategory": "health",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/health-sleep-rhythm",
+      "contentGoal": "premium-conversion",
+      "productProblem": "수면 관련 베개를 놓는 위치이 중요한 생활 상황을 점검",
+      "productValue": "수면 습관을 진단하지 않고 관찰 가능한 리듬과 다음날 회복 신호를 점검",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 수면 리듬 점검 분석 https://unboda.kr/paid-analysis/health-sleep-rhythm",
+      "photoSearchQuery": "bedroom lamp pillow bed photograph",
+      "photoMustDepict": [
+        "이불",
+        "조명"
+      ]
+    },
+    {
+      "hourKst": "10",
+      "visualMotif": "presentation",
+      "topicCategory": "career",
+      "label": "업무 발표 자료",
+      "title": "발표에 넣을 비교 항목 — 누락된 자료가 걱정될 때",
+      "advice": "직장 업무를 준비하면서 발표 전 확인할 항목을 세 가지로 줄이고 빠진 부분을 점검해 보세요.",
+      "lifeSituation": "오래 미뤄 둔 선택을 다시 살펴보던 때, 회의 자료를 확인하는 업무 시간에서 \"발표에 넣을 비교 항목\"을 살피다가 누락된 자료가 걱정될 때",
+      "visualAnchors": [
+        "업무 자료",
+        "표"
+      ],
+      "sceneVariant": 4,
+      "topicKey": "lifestyle-presentation-2-20261112",
+      "productId": "career-workplace-adaptation",
+      "productTitle": "직장 적응 분석",
+      "productCategory": "career",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/career-workplace-adaptation",
+      "contentGoal": "premium-conversion",
+      "productProblem": "직장 관련 발표에 넣을 비교 항목이 중요한 생활 상황을 점검",
+      "productValue": "현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 직장 적응 분석 https://unboda.kr/paid-analysis/career-workplace-adaptation",
+      "photoSearchQuery": "office business meeting presentation chart photograph",
+      "photoMustDepict": [
+        "업무 자료",
+        "표"
+      ]
+    },
+    {
+      "hourKst": "13",
+      "visualMotif": "receipt",
+      "topicCategory": "money",
+      "label": "영수증과 가계부",
+      "title": "배달 음식 결제 기록 — 줄일 항목이 잘 보이지 않을 때",
+      "advice": "저축과 예산을 생각하면서 카드 결제 내역을 종류별로 나누어 적고 필요한 지출인지 확인해 보세요.",
+      "lifeSituation": "오늘 바뀐 계획을 다시 확인하던 순간, 구매 기록을 정리하는 책상에서 \"배달 음식 결제 기록\"을 살피다가 줄일 항목이 잘 보이지 않을 때",
+      "visualAnchors": [
+        "영수증",
+        "카드"
+      ],
+      "sceneVariant": 0,
+      "topicKey": "lifestyle-receipt-2-20261112",
+      "productId": "money-saving-discipline",
+      "productTitle": "저축과 자산 관리 습관",
+      "productCategory": "money",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/money-saving-discipline",
+      "contentGoal": "premium-conversion",
+      "productProblem": "저축 관련 배달 음식 결제 기록이 중요한 생활 상황을 점검",
+      "productValue": "저축·예산 기준을 유지하고 반복 가능한 관리 루틴을 재설정하는 방법을 분석",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 저축과 자산 관리 습관 https://unboda.kr/paid-analysis/money-saving-discipline",
+      "photoSearchQuery": "shopping receipt calculator wallet photograph",
+      "photoMustDepict": [
+        "영수증",
+        "카드"
+      ]
+    },
+    {
+      "hourKst": "16",
+      "visualMotif": "dialogue",
+      "topicCategory": "compatibility",
+      "label": "친구와 연락하기",
+      "title": "친구에게 보낸 짧은 메시지 — 고마운 마음을 표현하고 싶을 때",
+      "advice": "친구 관계를 돌아보면서 서로 다른 생각을 바로 단정하지 말고 확인하고 싶은 내용을 정리해 보세요.",
+      "lifeSituation": "내일을 준비하다 잠깐 생각에 잠긴 밤, 친구와 연락한 뒤 휴대폰을 보던 순간에서 \"친구에게 보낸 짧은 메시지\"을 살피다가 고마운 마음을 표현하고 싶을 때",
+      "visualAnchors": [
+        "친구",
+        "대화"
+      ],
+      "sceneVariant": 1,
+      "topicKey": "lifestyle-dialogue-2-20261112",
+      "productId": "relationship-friendship",
+      "productTitle": "친구 관계 분석",
+      "productCategory": "social",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/relationship-friendship",
+      "contentGoal": "premium-conversion",
+      "productProblem": "친구 관련 친구에게 보낸 짧은 메시지이 중요한 생활 상황을 점검",
+      "productValue": "친구 관계의 상호성·신뢰·감정 노동을 점검하고 재조정 기준을 만듭니다.",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 친구 관계 분석 https://unboda.kr/paid-analysis/relationship-friendship",
+      "photoSearchQuery": "friends talking cafe smartphone conversation photograph",
+      "photoMustDepict": [
+        "친구",
+        "대화"
+      ]
+    },
+    {
+      "hourKst": "19",
+      "visualMotif": "family",
+      "topicCategory": "family",
+      "label": "가족 식탁과 달력",
+      "title": "저녁 식사 뒤의 정리 순서 — 의견을 조율하기 어려울 때",
+      "advice": "가족 역할을 나누면서 가족이 자주 쓰는 물건의 위치를 정하고 모두가 볼 수 있게 적어 보세요.",
+      "lifeSituation": "누군가의 조언을 듣고 내 기준을 정리하던 때, 가족이 모여 앉은 식탁에서 \"저녁 식사 뒤의 정리 순서\"을 살피다가 의견을 조율하기 어려울 때",
+      "visualAnchors": [
+        "식탁",
+        "달력"
+      ],
+      "sceneVariant": 2,
+      "topicKey": "lifestyle-family-2-20261112",
+      "productId": "relationship-family-role",
+      "productTitle": "가족 역할 경계 분석",
+      "productCategory": "social",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/relationship-family-role",
+      "contentGoal": "premium-conversion",
+      "productProblem": "가족 관련 저녁 식사 뒤의 정리 순서이 중요한 생활 상황을 점검",
+      "productValue": "가족 역할 기대와 반복 부담을 조정하는 관찰 기준을 분석",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 가족 역할 경계 분석 https://unboda.kr/paid-analysis/relationship-family-role",
+      "photoSearchQuery": "family dinner table home meal photograph",
+      "photoMustDepict": [
+        "식탁",
+        "달력"
+      ]
+    },
+    {
+      "hourKst": "22",
+      "visualMotif": "checklist",
+      "topicCategory": "self-understanding",
+      "label": "하루 끝의 체크리스트",
+      "title": "매일 확인하는 체크리스트 — 하나씩 확인하기 어려울 때",
+      "advice": "생활 습관을 돌아보면서 내일 필요한 항목 세 가지를 체크리스트에 적고 하나씩 확인해 보세요.",
+      "lifeSituation": "말로 설명하기 전 차분히 확인하던 순간, 다음 날 준비물을 펼쳐 둔 책상에서 \"매일 확인하는 체크리스트\"을 살피다가 하나씩 확인하기 어려울 때",
+      "visualAnchors": [
+        "체크리스트",
+        "표시"
+      ],
+      "sceneVariant": 3,
+      "topicKey": "lifestyle-checklist-2-20261112",
+      "productId": "health-habit-continuity",
+      "productTitle": "생활 습관 유지 분석",
+      "productCategory": "health",
+      "productType": "premium",
+      "landingPath": "/paid-analysis/health-habit-continuity",
+      "contentGoal": "premium-conversion",
+      "productProblem": "습관 관련 매일 확인하는 체크리스트이 중요한 생활 상황을 점검",
+      "productValue": "건강 지원 습관이 무너지는 조건과 재시작 기준을 점검",
+      "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 생활 습관 유지 분석 https://unboda.kr/paid-analysis/health-habit-continuity",
+      "photoSearchQuery": "checklist notepad pen desk planning photograph",
+      "photoMustDepict": [
+        "체크리스트",
+        "표시"
+      ]
+    }
+  ]
+}

@@ -74,7 +74,8 @@ export function inspectLifeReadiness({
    block("SECOND_INDEPENDENT_VISUAL_OR_HUMAN_REVIEW_MISSING",hour);
   const photo=(candidates?.photos??[]).find(c=>
    c.hourKst===hour&&c.file===v?.bestCandidateFile&&c.sha256===v?.candidateSha256);
-  if(!photo||!sha(photo.sha256)||photo.width!==1080||photo.height!==1350||
+  if(!photo||!sha(photo.sha256)||!/^[0-9a-f]{16}$/.test(photo.phash??"")||
+     photo.width!==1080||photo.height!==1350||
      !Number.isInteger(photo.bytes)||photo.bytes>=4_900_000||photo.bytes<=10000)
    block("MEDIA_HASH_SIZE_PIXEL_OR_SOURCE_MISMATCH",hour);
   if(!photo?.rights||!REAL_LICENSES.has(photo.rights.license)||!photo.rights.licenseUrl?.startsWith("https://creativecommons.org/"))
@@ -109,7 +110,9 @@ export function inspectLifeReadiness({
    block("LATE_SCHEDULE_WINDOW_NO_RETRY",hour);
   prepared.push({dateKst:date,hourKst:hour,network:PROVIDERS[hour],
     topicKey:s.topicKey,photoSha256:photo?.sha256??null,
-    mediaUrl:mediaItem?.publicUrl??null,caption,captionLength:bytesLen(caption)});
+    photoPhash:photo?.phash??null,photoSourcePage:photo?.sourcePage??null,
+    photoAttribution:credit,mediaUrl:mediaItem?.publicUrl??null,
+    caption,captionLength:bytesLen(caption)});
  }
  if(new Set(prepared.map(p=>p.photoSha256)).size!==7)
   block("PHOTO_REUSE_WITHIN_SAME_DAY");

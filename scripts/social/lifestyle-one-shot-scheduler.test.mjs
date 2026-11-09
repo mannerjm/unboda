@@ -11,6 +11,9 @@ function fixture(){
    const caption="운보다 무료 사주 - "+h;
    return {dateKst:"2026-11-10",hourKst:h,network:nets[i],
     photoSha256:(i+1).toString(16).repeat(64),
+    photoPhash:(i+1).toString(16).repeat(16),
+    photoSourcePage:"https://commons.wikimedia.org/wiki/File:Example.jpg",
+    photoAttribution:"",
     topicKey:"unboda-unique-"+h,caption,captionLength:[...caption].length,
     mediaUrl:"https://unboda.kr/media/lifestyle-"+h+".jpg"}
   })};

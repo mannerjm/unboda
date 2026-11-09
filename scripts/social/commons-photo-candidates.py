@@ -115,8 +115,9 @@ TOPIC_SEARCH_VARIANTS={
  "19":["family dining at home", "family dinner table",
        "family eating dinner", "parents children dinner",
        "family meal kitchen", "family at dining table"],
- "22":["handwritten checklist", "to do list notebook pen",
-       "paper checklist desk", "planning notebook writing",
+ "22":["washing machine in home", "laundry room washing machine",
+       "washing machines appliances", "washing machine clothes",
+       "laundry basket washing", "home washing machine",
        "neatly organized desk stationery", "desk stationery pens notebook",
        "open planner on desk", "clean work desk notebook"]
 }
@@ -254,9 +255,9 @@ COMMONS_SCENE_CATEGORIES={
        ("phone-on-table","Category:Smartphones")],
  "19":[("set-table","Category:Dining tables"),
        ("home-kitchen","Category:Kitchens")],
- "22":[("checklist","Category:Shopping lists"),
-       ("checklist","Category:To do lists"),
-       ("checklist","Category:Checklists"),
+ "22":[("laundry-machine","Category:Washing machines"),
+       ("laundry-machine","Category:Laundry"),
+       ("laundry-machine","Category:Household appliances"),
        ("planner","Category:Calendars"),
        ("planner","Category:Notebooks"),
        ("tidy-desk","Category:Desks"),
@@ -526,6 +527,7 @@ def selftest():
  assert not subject_evidence("19","Sheridan family portrait at a photo studio","")
  assert not subject_evidence("16","Friends College Kaimosi","")
  assert not subject_evidence("22","old history book cover about war","")
+ assert matching_photo_scenes("22","A home washing machine in the laundry room","")
  assert not subject_evidence("01","Botanical notebook,1882 page","")
  assert subject_evidence("04","Cozy bedroom with a bed, pillow, and bedside lamp","")
  assert subject_evidence("13","Supermarket shopping receipt and debit card","")
@@ -547,7 +549,7 @@ def selftest():
  assert ("budget-calculator","Category:Coins") in COMMONS_SCENE_CATEGORIES["13"]
  assert ("tidy-desk","Category:Stationery") in COMMONS_SCENE_CATEGORIES["22"]
  assert ("friends-cafe","Category:People in conversation") in COMMONS_SCENE_CATEGORIES["16"]
- assert ("checklist","Category:To do lists") in COMMONS_SCENE_CATEGORIES["22"]
+ assert ("laundry-machine","Category:Washing machines") in COMMONS_SCENE_CATEGORIES["22"]
  assert all(sid in [s["id"] for s in SCENE_CATALOG[h]["scenes"]] for h,entries in COMMONS_SCENE_CATEGORIES.items() for sid,cat in entries)
  assert len(SCENE_CATALOG)==7
  assert all(len(x["scenes"])==3 for x in SCENE_CATALOG.values())

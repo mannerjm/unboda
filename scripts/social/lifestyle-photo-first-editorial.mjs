@@ -44,10 +44,13 @@ function validDate(s){return /^\d{4}-\d{2}-\d{2}$/.test(s??"")&&!Number.isNaN(Da
 function epoch(s){return Date.parse(s+"T00:00:00Z")}
 function trimmed(s){return typeof s==="string"&&s.trim().length>0}
 function safeScene(hour,id){return SCENES[hour]?.scenes.find(s=>s.id===id)}
-export function preparePhotoFirstEditorial({dateKst,editorial,manifest,review,catalog,usedMedia=[]}){
+export function preparePhotoFirstEditorial({dateKst,editorial,manifest,review,independent=null,catalog,usedMedia=[]}){
  if(!validDate(dateKst)||editorial?.dateKst!==dateKst||
    manifest?.dateKst!==dateKst||review?.dateKst!==dateKst)
   throw Error("PHOTO_FIRST_DATED_SOURCES_NOT_ALIGNED");
+ if(independent && (independent.dateKst!==dateKst||
+   independent.publicationAllowed!==false || !Array.isArray(independent.photos)))
+  throw Error("SECOND_MODEL_REPORT_INCOMPLETE_OR_UNSAFE");
  if(!Array.isArray(editorial.stories)||editorial.stories.length!==7||
     !Array.isArray(manifest.photos)||!Array.isArray(review.photos)||
     !Array.isArray(catalog?.products))
@@ -59,7 +62,25 @@ export function preparePhotoFirstEditorial({dateKst,editorial,manifest,review,ca
  for(const hour of HOURS){
   const previous=editorial.stories.find(s=>s.hourKst===hour);
   if(!previous)throw Error("PHOTO_FIRST_MISSING_HOUR:"+hour);
-  const v=review.photos.find(x=>x.hourKst===hour);
+  const first=review.photos.find(x=>x.hourKst===hour);
+  const second=independent?.photos.find(x=>x.hourKst===hour);
+  // Never rewrite CLIP scores or treat a BLIP caption by itself as a pass.
+  // The alternate file must have been explicitly approved by both models.
+  const firstCandidate=first?.candidateScores?.find(x=>
+   x.candidateFile===second?.bestCandidateFile&&
+   x.candidateSha256===second?.candidateSha256&&
+   x.automatedSceneMatch===true&&
+   x.sceneModelCandidates?.some(y=>y.passed===true&&y.sceneId===second?.sceneId));
+  const secondPassed=second?.blipSceneMatch===true&&
+   Array.isArray(second.independentSceneChecks)&&
+   second.independentSceneChecks.length===2&&
+   second.independentSceneChecks.every(x=>x.pass===true);
+  const v=independent
+   ?(secondPassed&&firstCandidate?{
+      ...first,bestSceneId:second.sceneId,bestCandidateFile:second.bestCandidateFile,
+      candidateSha256:second.candidateSha256,automatedSceneMatch:true
+     }:null)
+   :first;
   const scene=safeScene(hour,v?.bestSceneId);
   const photo=manifest.photos.find(p=>p.hourKst===hour &&
     p.file===v?.bestCandidateFile&&p.sha256===v?.candidateSha256 &&
@@ -102,7 +123,7 @@ export function preparePhotoFirstEditorial({dateKst,editorial,manifest,review,ca
       landingPath:product.landingPath,productCta,caption,captionLength:[...caption].length,
       photoFile:photo.file,photoSha256:photo.sha256,photoPhash:photo.phash,
       photoSourcePage:photo.sourcePage,photoRights:photo.rights,
-      photoSceneModelVerified:true,independentSceneVerified:false,
+      photoSceneModelVerified:true,independentSceneVerified:!!(independent&&secondPassed),
       photoReadyForSnsPosting:false});
     seen.add(photo.sha256);
    }
@@ -122,7 +143,8 @@ const opts=Object.fromEntries(process.argv.slice(2).filter(s=>s.startsWith("--")
 if(opts.editorial&&opts.manifest&&opts.review&&opts.catalog&&opts.output){
  const read=k=>JSON.parse(fs.readFileSync(opts[k],"utf8"));
  const result=preparePhotoFirstEditorial({dateKst:opts.date,editorial:read("editorial"),
-  manifest:read("manifest"),review:read("review"),catalog:read("catalog")});
+  manifest:read("manifest"),review:read("review"),
+  independent:opts.independent?read("independent"):null,catalog:read("catalog")});
  fs.writeFileSync(opts.output,JSON.stringify(result,null,2)+"\n");
  console.log("PHOTO_FIRST_EDITORIAL",result.dateKst,result.generatedPhotoAnchoredStories,
    "OF",result.requiredStories,"PUBLICATION_BLOCKED");

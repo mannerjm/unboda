@@ -30,6 +30,57 @@ def caption_matches(scene,caption):
 def get_scene(hour,scene_id):
  return next((s for s in SCENES.get(hour,{}).get("scenes",[])
    if s["id"]==scene_id),None)
+def select_dual_model_photo(hour,first,photos,caption_for_photo):
+ """Use the first CLIP-approved photo that BLIP ALSO confirms on real pixels.
+
+ No fallback to an unapproved image or to metadata/title-only matches.
+ This fixes discarding all lower-ranked valid candidates on a BLIP failure.
+ """
+ if not isinstance(first,dict) or not isinstance(photos,list):
+  return {"hourKst":hour,"independentSceneChecks":[],
+   "blipCaption":"","blipSceneMatch":False,
+   "state":"FIRST_MODEL_OR_LICENSED_SCENE_NOT_VERIFIED"}
+ ranked=first.get("candidateScores",[])
+ if not isinstance(ranked,list) or len(ranked)>8:
+  raise RuntimeError("UNVERIFIABLE_OR_TOO_MANY_FIRST_MODEL_CANDIDATES")
+ tried=0
+ for item in ranked:
+  if not isinstance(item,dict) or item.get("automatedSceneMatch") is not True:
+   continue
+  photo=next((p for p in photos if isinstance(p,dict) and
+      p.get("hourKst")==hour and p.get("file")==item.get("candidateFile") and
+      p.get("sha256")==item.get("candidateSha256")),None)
+  if not photo or not isinstance(photo.get("sceneCandidates"),list):
+   raise RuntimeError("CLIP_PASSED_PHOTO_MISSING_OR_CHANGED")
+  variants=item.get("sceneModelCandidates")
+  if not isinstance(variants,list):
+   raise RuntimeError("CLIP_SCENE_PROOF_MISSING")
+  scenes=[]
+  for variant in variants:
+   if not isinstance(variant,dict) or variant.get("passed") is not True:
+    continue
+   scene=get_scene(hour,variant.get("sceneId"))
+   if scene and scene["id"] in photo["sceneCandidates"]:
+    scenes.append(scene)
+  if not scenes:
+   raise RuntimeError("CLIP_CANDIDATE_HAS_NO_VERIFIED_SCENE")
+  caption=caption_for_photo(photo)
+  tried+=1
+  for scene in scenes:
+   if caption_matches(scene,caption):
+    return {"hourKst":hour,"sceneId":scene["id"],
+     "candidateSha256":photo["sha256"],"bestCandidateFile":photo["file"],
+     "blipCaption":caption[:180],"blipSceneMatch":True,
+     "candidatesIndependentlyChecked":tried,
+     "independentSceneChecks":[
+       {"model":"openai/clip-vit-base-patch32","pass":True},
+       {"model":MODEL,"pass":True}],
+     "humanVisualReviewed":False,"state":"TWO_MODELS_MATCH"}
+ return {"hourKst":hour,"independentSceneChecks":[],
+  "blipCaption":"","blipSceneMatch":False,
+  "candidatesIndependentlyChecked":tried,
+  "state":"NO_COMMON_SCENE_CONFIRMED_BY_BOTH_MODELS"}
+
 def check(manifest_path,first_review_path,out_path):
  manifest=json.loads(pathlib.Path(manifest_path).read_text())
  review=json.loads(pathlib.Path(first_review_path).read_text())
@@ -47,18 +98,7 @@ def check(manifest_path,first_review_path,out_path):
  model.eval()
  folder=pathlib.Path(manifest_path).parent
  results=[]
- for hour in EXPECTED:
-  original=next((x for x in review.get("photos",[]) if x.get("hourKst")==hour),None)
-  photo=next((p for p in manifest.get("photos",[]) if
-       p.get("hourKst")==hour and p.get("file")==original.get("bestCandidateFile")
-       and p.get("sha256")==original.get("candidateSha256")),
-       None) if original else None
-  scene=get_scene(hour,original.get("bestSceneId")) if original else None
-  if not original or not scene or not photo or original.get("automatedSceneMatch") is not True:
-   results.append({"hourKst":hour,"independentSceneChecks":[],
-      "blipCaption":"","blipSceneMatch":False,
-      "state":"FIRST_MODEL_OR_LICENSED_SCENE_NOT_VERIFIED"})
-   continue
+ def caption_image(photo):
   p=folder/photo["file"]
   raw=p.read_bytes()
   if hashlib.sha256(raw).hexdigest()!=photo.get("sha256"):
@@ -66,23 +106,15 @@ def check(manifest_path,first_review_path,out_path):
   with Image.open(p) as im:
    if im.format!="JPEG" or im.size!=(1080,1350):
     raise RuntimeError("UNEXPECTED_SECOND_REVIEW_PHOTO_FORMAT")
-   im=im.convert("RGB")
-   inputs=processor(images=im,return_tensors="pt")
+   pixels=im.convert("RGB")
+  inputs=processor(images=pixels,return_tensors="pt")
   with torch.no_grad():
    ids=model.generate(**inputs,max_new_tokens=35,num_beams=3)
-  caption=processor.decode(ids[0],skip_special_tokens=True).strip().lower()
-  passed=caption_matches(scene,caption)
-  results.append({"hourKst":hour,"sceneId":scene["id"],
-   "candidateSha256":photo["sha256"],
-   "bestCandidateFile":photo["file"],
-   "blipCaption":caption[:180],
-   "blipSceneMatch":passed,
-   "independentSceneChecks":[
-    {"model":"openai/clip-vit-base-patch32","pass":True},
-    {"model":MODEL,"pass":passed}
-   ],
-   "humanVisualReviewed":False,"state":"TWO_MODELS_MATCH" if passed
-     else "SECOND_MODEL_CAPTION_DOES_NOT_CONFIRM_SCENE"})
+  return processor.decode(ids[0],skip_special_tokens=True).strip().lower()
+ for hour in EXPECTED:
+  original=next((x for x in review.get("photos",[]) if x.get("hourKst")==hour),None)
+  results.append(select_dual_model_photo(hour,original,manifest.get("photos",[]),
+                                        caption_image))
  result={"dateKst":manifest["dateKst"],"schemaVersion":1,
   "secondModel":MODEL,"revision":REVISION,
   "verifiedIndependentSceneCount":sum(x.get("blipSceneMatch") is True for x in results),
@@ -108,7 +140,31 @@ def selftest():
  assert not caption_matches(get_scene("10","office-desk"),
        "an office interior with chairs and a large window")
  assert len(SCENES)==7
- print("PASS_INDEPENDENT_BLIP_SCENE_CAPTION_CONTRACT_NEVER_POST")
+ # Real top-ranked CLIP photo can fail the independent caption, while
+ # the next lower-ranked CLIP candidate can pass. Only the latter is chosen.
+ rank=lambda filename,sha,score: {
+  "candidateFile":filename,"candidateSha256":sha,
+  "automatedSceneMatch":True,
+  "sceneModelCandidates":[{"sceneId":"phone-on-table","passed":True,
+                            "margin":score}]}
+ top=rank("a.jpg","a"*64,7.1)
+ second=rank("b.jpg","b"*64,5.0)
+ imgs=[{"hourKst":"16","file":"a.jpg","sha256":"a"*64,
+        "sceneCandidates":["phone-on-table"]},
+       {"hourKst":"16","file":"b.jpg","sha256":"b"*64,
+        "sceneCandidates":["phone-on-table"]}]
+ first={"candidateScores":[top,second]}
+ def captions(photo):
+  return ("a forest by a river" if photo["file"]=="a.jpg"
+          else "a mobile phone face down on the table")
+ chosen=select_dual_model_photo("16",first,imgs,captions)
+ assert chosen["blipSceneMatch"] and chosen["bestCandidateFile"]=="b.jpg"
+ assert chosen["candidatesIndependentlyChecked"]==2
+ no_match=select_dual_model_photo("16",first,imgs,lambda _: "a forest by a river")
+ assert no_match["blipSceneMatch"] is False
+ assert select_dual_model_photo("13",None,[],lambda _: "photo")["blipSceneMatch"] is False
+ print("PASS_INDEPENDENT_BLIP_ALTERNATIVE_SELECTION_NO_FALSE_PUBLICATION")
+
 if __name__=="__main__":
  parser=argparse.ArgumentParser()
  parser.add_argument("--self-test",action="store_true")

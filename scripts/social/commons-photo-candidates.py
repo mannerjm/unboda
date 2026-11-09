@@ -232,7 +232,8 @@ COMMONS_SCENE_CATEGORIES={
        ("receipt","Category:Shop checks"),("receipt","Category:Cash registers")],
  "16":[("friends-cafe","Category:People in conversation"),
        ("coffee-meetup","Category:Cups of coffee"),
-       ("coffee-meetup","Category:Coffee cups")],
+       ("coffee-meetup","Category:Coffee cups"),
+       ("phone-on-table","Category:Mobile phones")],
  "19":[("set-table","Category:Dining tables"),
        ("home-kitchen","Category:Kitchens")],
  "22":[("checklist","Category:Shopping lists"),
@@ -352,8 +353,12 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
   }
   found.append((photo,record))
  words=query.split()
+ # The slot-specific backup search phrases existed but were never used.
+ # Search these on Wikimedia Commons itself rather than relying on the
+ # Openverse API, which may return 401/429 without an approved key.
  phrases=list(dict.fromkeys([
   *[q for sc in SCENE_CATALOG[slot]["scenes"] for q in sc["queries"]],
+  *TOPIC_SEARCH_VARIANTS[slot],
   query," ".join(words[:2])
  ]))
  offsets=list(dict.fromkeys([offset,0,40]))
@@ -492,6 +497,9 @@ def selftest():
  assert not subject_evidence("13","A grocery store with no labels mentioned","")
  assert not subject_evidence("19","Family outside at a beach","")
  assert len(TOPIC_SEARCH_VARIANTS)==7
+ assert all(len(TOPIC_SEARCH_VARIANTS[h])>=3 for h in SLOTS)
+ assert "price tags supermarket" in TOPIC_SEARCH_VARIANTS["13"]
+ assert "two people conversation coffee" in TOPIC_SEARCH_VARIANTS["16"]
  assert commons_title_from_landing_page("https://commons.wikimedia.org/wiki/File:Sample_photo.jpg")=="File:Sample photo.jpg"
  assert commons_title_from_landing_page("https://evil.example/wiki/File:Sample_photo.jpg") is None
  assert commons_title_from_landing_page("https://commons.wikimedia.org/wiki/File:vector.svg") is None

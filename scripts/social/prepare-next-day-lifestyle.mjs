@@ -82,8 +82,21 @@ function build(date){
   const problem=s.questions[(ix*5+n*2)%s.questions.length];
   const action=s.actions[(ix+n*3)%s.actions.length];
   const title=obj+' — '+problem;
-  // Avoid a shared location prefix: it artificially inflates 90-day similarity.
-  const lifeSituation='"'+obj+'"을 살펴보다가 '+problem;
+  // Contexts describe genuinely different moments rather than stamping a date.
+  const contexts=[
+   '하루를 시작하며 우선순위를 되짚는 때','오늘 바뀐 계획을 다시 확인하던 순간',
+   '평소보다 여유가 없어서 천천히 생각하던 날','새로운 일을 앞두고 잠깐 멈춰 본 순간',
+   '누군가의 조언을 듣고 내 기준을 정리하던 때','기억이 헷갈려 혼자 메모를 확인한 시간',
+   '반복되던 습관을 조금 바꾸기로 한 날','함께할 일을 준비하면서 기록한 순간',
+   '실수하지 않으려고 작은 항목을 점검한 날','오래 미뤄 둔 선택을 다시 살펴보던 때',
+   '익숙했던 방식을 다른 관점으로 생각한 순간','예정에 없던 변화가 생겨 확인한 오후',
+   '내일을 준비하다 잠깐 생각에 잠긴 밤','지난주 기록을 펼쳐 놓고 차이를 살핀 시간',
+   '시간이 부족하다고 느껴 기준을 다시 세운 날','말로 설명하기 전 차분히 확인하던 순간',
+   '조용히 쉬면서 다음 행동을 떠올린 때','일상에서 예상 못 한 질문이 생겼던 날',
+   '평소보다 계획을 작게 나누어 보던 순간'
+  ];
+  const context=contexts[(ix*3+n*11)%contexts.length];
+  const lifeSituation=context+', '+s.location+'에서 "'+obj+'"을 살피다가 '+problem;
   const p=products.get(s.product);
   assert(p,'MISSING_SALEABLE_PRODUCT:'+s.product);
   const topicKey='lifestyle-'+s.motif+'-'+ix+'-'+date.replaceAll('-','');

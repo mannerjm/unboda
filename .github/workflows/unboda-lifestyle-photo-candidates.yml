@@ -7,11 +7,13 @@ on:
   pull_request:
     paths:
       - 'scripts/social/commons-photo-candidates.py'
+      - 'scripts/social/vision-review-lifestyle-photo.py'
       - '.github/workflows/unboda-lifestyle-photo-candidates.yml'
   push:
     branches: [main]
     paths:
       - 'scripts/social/commons-photo-candidates.py'
+      - 'scripts/social/vision-review-lifestyle-photo.py'
       - '.github/workflows/unboda-lifestyle-photo-candidates.yml'
 permissions:
   contents: read
@@ -30,11 +32,13 @@ jobs:
       - run: python -m pip install --no-cache-dir Pillow==11.3.0
       - name: Check rights, image type, image size and perceptual duplicate logic
         run: python scripts/social/commons-photo-candidates.py --self-test
+      - name: Verify that image model checks cannot authorize publication
+        run: python scripts/social/vision-review-lifestyle-photo.py --self-test
   candidate-intake:
     if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: offline-gates
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,6 +72,36 @@ jobs:
           assert m["actualVisualSceneInspected"] is False
           assert all(not x["imageVisuallyInspected"] for x in m["photos"])
           print("SEVEN_CANDIDATE_PHOTOS_NOT_SOCIAL_POSTABLE")
+          PY
+      - name: Cache fixed-version zero-shot vision model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface/hub
+          key: unboda-offline-clip-vit-base-patch32-aba0d299-qa-only
+      - name: Install pinned CPU-only local scene inspection model
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-cache-dir torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install --no-cache-dir transformers==4.45.2 safetensors==0.4.5
+      - name: Review actual pixels before they can become future approved media
+        env:
+          HF_HUB_DISABLE_TELEMETRY: '1'
+          HF_HUB_DISABLE_XET: '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python main-source/scripts/social/vision-review-lifestyle-photo.py \
+            --manifest photo-candidates/candidate-manifest.json \
+            --output photo-candidates/vision-review.json
+          python - <<'PY'
+          import json
+          x=json.load(open('photo-candidates/vision-review.json'))
+          assert x['photoReviewCount']==7
+          assert x['publicationAllowed'] is False
+          assert x['photoReadyForSnsPosting'] is False
+          assert x['wholeSocial90DayCoverageVerified'] is False
+          print('CLIP_SCENE_REVIEW_DONE_BUT_SOCIAL_PUBLISHING_REMAINS_BLOCKED')
           PY
       - name: Store licensed candidates privately for automated visual QA development
         uses: actions/upload-artifact@v4

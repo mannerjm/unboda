@@ -48,6 +48,7 @@ def plan(start_date, candidates, existing, recent, published):
             fail("UNKNOWN_PAST_HASH_BLOCKS_ASSIGNMENT")
         historical_hashes.add(sha)
         historical_phashes.append(phash)
+    existing_ids = {a.get("asset_id") for a in existing}
     candidate_ids = set()
     for candidate in candidates:
         asset_id = candidate.get("id")
@@ -72,7 +73,7 @@ def plan(start_date, candidates, existing, recent, published):
             matches = []
             valid_scenes = {scene["id"] for scene in bank.SCENES[hour]["scenes"]}
             for a in ordered:
-                if a.get("qa_status") != "DUAL_QA_PASS":
+                if a.get("qa_status") != "DUAL_QA_PASS" or a["id"] in existing_ids:
                     continue
                 if not bank.asset_is_eligible(a, day) or a.get("scene_id") not in valid_scenes:
                     continue

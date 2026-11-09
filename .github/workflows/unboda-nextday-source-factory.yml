@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '20 5,6,7 * * *' # 14:20 / 15:20 / 16:20 Asia/Seoul
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/social/prepare-next-day-videos.mjs'
+      - '.github/workflows/unboda-nextday-source-factory.yml'
   pull_request:
     paths:
       - 'scripts/social/prepare-next-day-videos.mjs'

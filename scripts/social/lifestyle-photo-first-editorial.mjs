@@ -11,6 +11,7 @@ import path from "node:path";
 const root=path.dirname(fileURLToPath(import.meta.url));
 const SCENES=JSON.parse(fs.readFileSync(path.join(root,"lifestyle-photo-scenes.json"),"utf8")).slots;
 const HOURS=["01","04","10","13","16","19","22"];
+const editorialAspects=["시작","균형","순서","기록","변화","회복"];
 const questions=[
  "오늘 어디부터 정리할지 망설일 때",
  "익숙한 방식이 잘 맞지 않는다고 느낄 때",
@@ -81,7 +82,8 @@ export function preparePhotoFirstEditorial({dateKst,editorial,manifest,review,ca
   if(!reason){
    const ix=(datesSinceStart*7+Number(hour))%questions.length;
    const ask=questions[ix],action=actions[hour][(datesSinceStart+Number(hour))%3];
-   const title=scene.labelKo+" — "+ask;
+   const aspect=editorialAspects[Math.floor(datesSinceStart/17)%editorialAspects.length];
+   const title=scene.labelKo+" · "+aspect+" — "+ask;
    const lifeSituation=scene.subjectKo+"을(를) 보며 평소 생활을 돌아보는 순간";
    const advice=SCENES[hour].theme+"을 살피면서 "+action;
    const topicKey="photo-first-"+hour+"-"+scene.id+"-"+dateKst.replaceAll("-","");

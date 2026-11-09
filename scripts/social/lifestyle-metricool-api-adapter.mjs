@@ -45,6 +45,18 @@ function statusOf(post,network){
  if(!Array.isArray(providers))return null;
  return providers.find(x=>x?.network===network)||null;
 }
+function publishedUrlMatchesNetwork(value,network){
+ if(typeof value!=="string")return false;
+ try{
+  const u=new URL(value);
+  if(u.protocol!=="https:"||u.username||u.password||u.port||u.pathname==="/")return false;
+  const base=network==="facebook"?"facebook.com":
+    network==="instagram"?"instagram.com":
+    network==="threads"?(u.hostname.endsWith("threads.net")?"threads.net":"threads.com"):null;
+  if(!base)return false;
+  return u.hostname===base||u.hostname.endsWith("."+base);
+ }catch{return false}
+}
 async function parseResponse(response){
  if(!response?.ok)throw Error("METRICOOL_SERVER_REQUEST_REJECTED");
  try{return await response.json()}catch{
@@ -134,16 +146,29 @@ export function createMetricoolLifestyleHttpAdapter({
      actual.providers.filter(q=>q.network===post.network).length===1 &&
      actual.providers.length===1;
   },
-  async verifyActuallyPublished(post){
+  async verifyActuallyPublished(post,expectedPostId){
    checkedSlot(post);
+   // A status at the same KST time is NOT proof that our one-shot booking was
+   // published. Require the previously persisted provider booking id.
+   const expected=idOf({id:expectedPostId});
+   if(!expected)return {verified:false,reason:"EXPECTED_BOOKING_ID_REQUIRED"};
    const state=await this.readSlot(post);
    if(state.complete!==true||state.posts.length!==1)return {verified:false};
    const actual=state.posts[0],provider=statusOf(actual,post.network);
    const url=provider?.publicUrl||actual?.publicUrl;
-   if(provider?.status==="PUBLISHED"&&
-      typeof url==="string"&&/^https:\/\/[^/\s]+\//.test(url))
-    return {verified:true,url,postId:idOf(actual)};
-   return {verified:false,providerStatus:provider?.status??"UNKNOWN"};
+   const media=actual?.media;
+   const originalMediaMatched=Array.isArray(media)&&media.length===1&&
+     media.some(x=>(typeof x==="string"?x:x?.url??x?.mediaUrl)===post.mediaUrl);
+   const exactPost=idOf(actual)===expected &&
+     actual?.publicationDate?.dateTime===post.dateKst+"T"+post.hourKst+":00:00" &&
+     actual?.text===post.caption&&actual?.autoPublish===true&&actual?.draft===false &&
+     Array.isArray(actual?.providers)&&actual.providers.length===1 &&
+     actual.providers[0]?.network===post.network&&originalMediaMatched;
+   if(exactPost&&provider?.status==="PUBLISHED"&&
+      publishedUrlMatchesNetwork(url,post.network))
+    return {verified:true,url,postId:expected};
+   return {verified:false,providerStatus:provider?.status??"UNKNOWN",
+     reason:"POST_ID_TEXT_MEDIA_NETWORK_OR_PUBLIC_URL_UNVERIFIED"};
   }
  };
 }

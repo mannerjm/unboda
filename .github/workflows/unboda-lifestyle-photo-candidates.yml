@@ -2,7 +2,7 @@ name: UNBODA licensed real-photo candidate intake (NO SOCIAL POST)
 # Candidate photos are NEVER publication-approved by this workflow.
 on:
   schedule:
-    - cron: '25 11 * * *' # 20:25 KST, after next-day editorial readiness
+    - cron: '25 11,13 * * *' # 20:25/22:25 KST, retry with same no-publication gates
   workflow_dispatch:
   pull_request:
     paths:
@@ -66,9 +66,13 @@ jobs:
           python - <<'PY'
           import json
           m=json.load(open("photo-candidates/candidate-manifest.json"))
-          assert 7 <= len(m["photos"]) <= 56
-          assert {p["hourKst"] for p in m["photos"]} == {"01","04","10","13","16","19","22"}
-          assert m["distinctHourSlots"] == 7
+          assert 0 <= len(m["photos"]) <= 56
+          assert {p["hourKst"] for p in m["photos"]}.issubset({"01","04","10","13","16","19","22"})
+          assert m["distinctHourSlots"] == len({p["hourKst"] for p in m["photos"]})
+          assert m["collectionComplete"] is (m["distinctHourSlots"] == 7)
+          print("PHOTO_CANDIDATES_PER_SLOT",[sum(p["hourKst"] == h for p in m["photos"])
+            for h in ("01","04","10","13","16","19","22")])
+          print("MISSING_LICENSED_SCENES",m["missingSlots"])
           assert m["photoReadyForSnsPosting"] is False
           assert m["publicationAllowed"] is False
           assert m["actualVisualSceneInspected"] is False
@@ -100,7 +104,7 @@ jobs:
           import json
           x=json.load(open('photo-candidates/vision-review.json'))
           assert x['photoReviewCount']==7
-          assert 7 <= x['photoCandidatesScored'] <= 56
+          assert 0 <= x['photoCandidatesScored'] <= 56
           assert x['publicationAllowed'] is False
           assert x['photoReadyForSnsPosting'] is False
           assert x['wholeSocial90DayCoverageVerified'] is False
@@ -113,3 +117,20 @@ jobs:
           path: photo-candidates/
           if-no-files-found: error
           retention-days: 3
+      - name: Report incomplete photographs as a failed readiness gate for alerts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          m=json.load(open("photo-candidates/candidate-manifest.json"))
+          r=json.load(open("photo-candidates/vision-review.json"))
+          if m.get("photoReadyForSnsPosting") is not False or r.get("publicationAllowed") is not False:
+           raise SystemExit("UNSAFE_PHOTO_PUBLISHING_FLAG")
+          if not m["collectionComplete"] or not r["allAutomatedSceneMatches"]:
+           print("LIFESTYLE_SEVEN_PHOTO_QA_INCOMPLETE")
+           print("missingSlots",r["missingLicensedPhotoSlots"])
+           print("passed",r["automatedSceneMatchCount"],"of 7")
+           raise SystemExit(1)
+          print("PHOTO_SCENE_QA_SEVEN_OF_SEVEN_CANDIDATES_NOT_SOCIAL_PUBLISHED")
+          PY

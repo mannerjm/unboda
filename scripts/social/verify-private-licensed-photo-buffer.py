@@ -168,12 +168,18 @@ def audit(start_date, days, assets, assignments, history, fetch_binary):
         "snsRequestsAttempted": 0,
     }
 
+class RejectRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        fail("STAGING_SIGNED_REQUEST_MUST_NOT_REDIRECT")
+
+NO_REDIRECT_OPENER = urllib.request.build_opener(RejectRedirects())
+
 def api_json(path, key, params):
     query = urllib.parse.urlencode(params, safe=",.*()")
     u = "https://" + HOST + "/rest/v1/" + path + "?" + query
     req = urllib.request.Request(u, headers={"apikey": key, "Authorization": "Bearer " + key,
         "Accept": "application/json"}, method="GET")
-    with urllib.request.urlopen(req, timeout=20) as resp:
+    with NO_REDIRECT_OPENER.open(req, timeout=20) as resp:
         parsed = urllib.parse.urlparse(resp.geturl())
         if parsed.scheme != "https" or parsed.hostname != HOST or resp.status != 200:
             fail("STAGING_API_REDIRECT_OR_STATUS")
@@ -186,7 +192,7 @@ def private_blob(path, key, limit):
            "/".join(urllib.parse.quote(x, safe="") for x in path.split("/")))
     req = urllib.request.Request(uri, headers={"apikey": key, "Authorization": "Bearer " + key},
                                   method="GET")
-    with urllib.request.urlopen(req, timeout=25) as resp:
+    with NO_REDIRECT_OPENER.open(req, timeout=25) as resp:
         parsed = urllib.parse.urlparse(resp.geturl())
         if parsed.scheme != "https" or parsed.hostname != HOST or resp.status != 200:
             fail("UNAPPROVED_PRIVATE_STORAGE_RESPONSE")

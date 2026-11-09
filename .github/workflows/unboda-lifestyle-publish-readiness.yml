@@ -1,0 +1,35 @@
+name: UNBODA lifestyle publisher zero-post readiness gates
+# CI test only: this job has no SNS secrets and cannot publish to Metricool.
+on:
+  pull_request:
+    paths:
+      - "scripts/social/lifestyle-publish-readiness.mjs"
+      - "scripts/social/lifestyle-publish-readiness.test.mjs"
+      - ".github/workflows/unboda-lifestyle-publish-readiness.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/social/lifestyle-publish-readiness.mjs"
+      - "scripts/social/lifestyle-publish-readiness.test.mjs"
+      - ".github/workflows/unboda-lifestyle-publish-readiness.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  no-post-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run negative and positive cases with no SNS credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/social/lifestyle-publish-readiness.mjs
+          node --test scripts/social/lifestyle-publish-readiness.test.mjs
+          echo "NO_SNS_POSTS_CREATED_BY_READINESS_QA"

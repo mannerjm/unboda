@@ -30,7 +30,10 @@ SLOTS=("01","04","10","13","16","19","22")
 ALLOWED={
  "CC0": "https://creativecommons.org/publicdomain/zero/1.0/",
  "Public domain": "https://creativecommons.org/publicdomain/mark/1.0/",
- "CC BY 4.0": "https://creativecommons.org/licenses/by/4.0/"
+ "CC BY 4.0": "https://creativecommons.org/licenses/by/4.0/",
+ "CC BY-SA 4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
+ "CC BY-SA 3.0": "https://creativecommons.org/licenses/by-sa/3.0/",
+ "CC BY 3.0": "https://creativecommons.org/licenses/by/3.0/"
 }
 BAD_NAME=re.compile(r"(?:illustration|painting|drawing|render|diagram|cartoon|vector|logo|poster|screenshot|watermark|svg)",re.I)
 def plain(value):
@@ -42,13 +45,14 @@ def license_result(item):
  name=meta.get("LicenseShortName")
  if name not in ALLOWED:
   return None
- if name=="CC BY 4.0" and not(meta.get("Artist") and meta.get("LicenseUrl")):
+ if name.startswith("CC BY") and not(meta.get("Artist") and meta.get("LicenseUrl")):
   return None
- if name=="CC BY 4.0" and not meta["LicenseUrl"].startswith(ALLOWED[name]):
+ if name.startswith("CC BY") and not meta["LicenseUrl"].startswith(ALLOWED[name]):
   return None
  return {"license":name,"licenseUrl":ALLOWED[name],
   "artist":meta.get("Artist","")[:150],
   "credit":meta.get("Credit","")[:150],
+  "shareAlikeAdaptationRequired":name.startswith("CC BY-SA"),
   "description":meta.get("ImageDescription","")[:300]}
 def get(url,limit=MAX_DOWNLOAD):
  parts=urllib.parse.urlparse(url)
@@ -85,9 +89,12 @@ def search_commons(q,offset):
  url="https://"+HOST+"/w/api.php?"+urllib.parse.urlencode(params)
  _,raw=get(url,2_000_000)
  data=json.loads(raw)
- if not isinstance(data.get("query",{}).get("pages"),dict):
-  raise RuntimeError("COMMONS_QUERY_MISSING_PAGES")
- return sorted(data["query"]["pages"].values(),key=lambda p:p.get("index",999))
+ if "error" in data:
+  raise RuntimeError("COMMONS_API_ERROR:"+str(data["error"].get("code","UNKNOWN")))
+ pages=data.get("query",{}).get("pages")
+ if pages is None:return []
+ if not isinstance(pages,dict):raise RuntimeError("COMMONS_QUERY_PAGES_INVALID")
+ return sorted(pages.values(),key=lambda p:p.get("index",999))
 def convert_to_photo_jpeg(raw):
  Image.MAX_IMAGE_PIXELS=35_000_000
  with Image.open(io.BytesIO(raw)) as im:
@@ -114,48 +121,63 @@ def near_duplicate(a,b):
  return (int(a,16)^int(b,16)).bit_count()<=6
 def choose_photo(query,history,slot,offset):
  rejected={}
- for page in search_commons(query,offset):
-  name=page.get("title","")
-  if BAD_NAME.search(name) or not re.search(r"\.jpe?g$",name,re.I):
-   rejected["filename"]=rejected.get("filename",0)+1
-   continue
-  infos=page.get("imageinfo") or []
-  if not infos:continue
-  info=infos[0]
-  if info.get("mime")!="image/jpeg":
-   continue
-  rights=license_result(info)
-  if not rights:
-   rejected["license"]=rejected.get("license",0)+1
-   continue
-  media=info.get("thumburl") or info.get("url","")
-  parsed=urllib.parse.urlparse(media)
-  if parsed.scheme!="https" or parsed.hostname!=MEDIA_HOST:
-   continue
-  try:
-   mime,raw=get(media)
-   if mime not in ("image/jpeg","image/pjpeg"):continue
-   photo,sha,phash,camera=convert_to_photo_jpeg(raw)
-  except Exception:
-   rejected["media"]=rejected.get("media",0)+1
-   continue
-  if any(row.get("sha256")==sha or (
-      isinstance(row.get("phash"),str) and len(row["phash"])==16 and
-      near_duplicate(phash,row["phash"])) for row in history):
-   rejected["duplicate"]=rejected.get("duplicate",0)+1
-   continue
-  # Metadata and filename do not prove that the image actually depicts
-  # the source story. Never claim visual inspection here.
-  return photo,{
-   "hourKst":slot,"sourceName":name,"sourcePage":info.get("descriptionurl",""),
-   "originalUrl":info.get("url",""),"downloadedThumbnailUrl":media,
-   "sha256":sha,"phash":phash,"bytes":len(photo),"width":1080,"height":1350,
-   "rights":rights,"cameraExif":camera[:90],
-   "photoCandidateOnly":True,"imageVisuallyInspected":False,
-   "sceneMatchVerified":False,"publicationAllowed":False
-  }
+ # MediaWiki full-text search may treat many words as AND, returning no photos.
+ # Try broad but topic-bound terms, never switching to an unrelated motif.
+ words=query.split()
+ queries=list(dict.fromkeys([
+  query,
+  " ".join(words[:2]),
+  words[0]+" photograph",
+  words[0]
+ ]))
+ # No blind re-use of the same first-page image each morning.
+ offsets=list(dict.fromkeys([offset,0,40,80,120]))
+ seen_pages=set()
+ for phrase in queries:
+  for page_offset in offsets:
+   pages=search_commons(phrase,page_offset)
+   for page in pages:
+    name=page.get("title","")
+    if name in seen_pages:continue
+    seen_pages.add(name)
+    if BAD_NAME.search(name) or not re.search(r"\.jpe?g$",name,re.I):
+     rejected["filename"]=rejected.get("filename",0)+1
+     continue
+    infos=page.get("imageinfo") or []
+    if not infos:continue
+    info=infos[0]
+    if info.get("mime")!="image/jpeg":continue
+    rights=license_result(info)
+    if not rights:
+     rejected["license"]=rejected.get("license",0)+1
+     continue
+    media=info.get("thumburl") or info.get("url","")
+    parsed=urllib.parse.urlparse(media)
+    if parsed.scheme!="https" or parsed.hostname!=MEDIA_HOST:continue
+    try:
+     mime,raw=get(media)
+     if mime not in ("image/jpeg","image/pjpeg"):continue
+     photo,sha,phash,camera=convert_to_photo_jpeg(raw)
+    except Exception:
+     rejected["media"]=rejected.get("media",0)+1
+     continue
+    if any(row.get("sha256")==sha or (
+        isinstance(row.get("phash"),str) and len(row["phash"])==16 and
+        near_duplicate(phash,row["phash"])) for row in history):
+     rejected["duplicate"]=rejected.get("duplicate",0)+1
+     continue
+    # Search terms and license metadata alone NEVER verify visible objects.
+    return photo,{
+     "hourKst":slot,"sourceName":name,"sourcePage":info.get("descriptionurl",""),
+     "originalUrl":info.get("url",""),"downloadedThumbnailUrl":media,
+     "sha256":sha,"phash":phash,"bytes":len(photo),"width":1080,"height":1350,
+     "rights":rights,"cameraExif":camera[:90],
+     "photoCandidateOnly":True,"imageVisuallyInspected":False,
+     "sceneMatchVerified":False,"publicationAllowed":False
+    }
  raise RuntimeError("NO_LICENSED_UNDUPLICATED_REAL_PHOTO_CANDIDATE:"+slot+
                     ":"+json.dumps(rejected,ensure_ascii=False))
+
 def load_history(d):
  rows=[]
  if not d:return rows

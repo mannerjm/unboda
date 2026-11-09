@@ -80,17 +80,35 @@ test("a PENDING post with the wrong media never confirms an exact reservation",a
  accidental.media=[post.mediaUrl];
  assert.equal(await a.verifyScheduled(post,accidental,result),true);
 });
-test("published only after status PUBLISHED AND real public URL",async()=>{
+test("PUBLISHED requires exact prior booking id, signed photograph, caption and platform URL",async()=>{
  const m=mkMock([{
   id:123,publicationDate:{dateTime:"2026-11-10T13:00:00"},
+  text:post.caption,media:[post.mediaUrl],autoPublish:true,draft:false,
   providers:[{network:"facebook",status:"PENDING",publicUrl:"https://facebook.com/example/123"}]
  }]);
- let x=await adapter(m).verifyActuallyPublished(post);
+ const a=adapter(m);
+ let x=await a.verifyActuallyPublished(post,123);
  assert.equal(x.verified,false);
  m.posts[0].providers[0].status="PUBLISHED";
- x=await adapter(m).verifyActuallyPublished(post);
+ x=await a.verifyActuallyPublished(post,123);
  assert.equal(x.verified,true);
  assert.equal(x.postId,123);
+ assert.equal((await a.verifyActuallyPublished(post)).verified,false);
+ assert.equal((await a.verifyActuallyPublished(post,999)).verified,false);
+ m.posts[0].media=["https://github.com/mannerjm/unboda/releases/download/unboda-lifestyle-photo-20261110/photo-22.jpg"];
+ assert.equal((await a.verifyActuallyPublished(post,123)).verified,false);
+ m.posts[0].media=[post.mediaUrl];
+ m.posts[0].text="Another brand unrelated post";
+ assert.equal((await a.verifyActuallyPublished(post,123)).verified,false);
+ m.posts[0].text=post.caption;
+ m.posts[0].providers[0].publicUrl="https://unrelated.example.com/unboda/123";
+ assert.equal((await a.verifyActuallyPublished(post,123)).verified,false);
+ m.posts[0].providers[0].publicUrl="https://facebook.com/example/123";
+ m.posts[0].autoPublish=false;
+ assert.equal((await a.verifyActuallyPublished(post,123)).verified,false);
+ m.posts[0].autoPublish=true;
+ m.posts[0].media=[];
+ assert.equal((await a.verifyActuallyPublished(post,123)).verified,false);
 });
 test("provider error response cannot be interpreted as success, no retry",async()=>{
  let count=0;

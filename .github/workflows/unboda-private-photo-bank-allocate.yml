@@ -1,0 +1,68 @@
+name: UNBODA staging private photo 21-slot auto-allocator (NO SNS)
+# Staging DB slot claims only; real photo intake and rights approval are separate.
+on:
+  schedule:
+    - cron: '45 11 * * *' # 20:45 KST; after source briefs, before private 21:05 audit
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/social/allocate-private-photo-buffer.py'
+      - 'scripts/social/verify-private-licensed-photo-buffer.py'
+      - '.github/workflows/unboda-private-photo-bank-allocate.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/social/allocate-private-photo-buffer.py'
+      - 'scripts/social/verify-private-licensed-photo-buffer.py'
+      - '.github/workflows/unboda-private-photo-bank-allocate.yml'
+permissions:
+  contents: read
+concurrency:
+  group: unboda-staging-private-photo-bank-allocation
+  cancel-in-progress: false
+jobs:
+  offline-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-cache-dir Pillow==11.3.0
+      - name: Verify 21-slot mock plan, rights gate, skip reused asset, fail-closed
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/social/allocate-private-photo-buffer.py
+          python scripts/social/allocate-private-photo-buffer.py --self-test
+          python scripts/social/verify-private-licensed-photo-buffer.py --self-test
+  staging-allocate:
+    if: >
+      github.repository == 'mannerjm/unboda' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    needs: offline-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      UNBODA_STAGING_SERVICE_ROLE_KEY: ${{ secrets.UNBODA_STAGING_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --no-cache-dir Pillow==11.3.0
+      - name: Reserve ONLY fully approved private bank assets; never SNS post
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${UNBODA_STAGING_SERVICE_ROLE_KEY:-}" ]; then
+            echo "STAGING_SERVICE_ROLE_SECRET_ABSENT_NO_ALLOCATIONS_NO_SNS_POST" >&2
+            exit 1
+          fi
+          DAY="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          python scripts/social/allocate-private-photo-buffer.py --date "$DAY" --apply-staging

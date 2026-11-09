@@ -286,8 +286,9 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
  seen_pages=set()
  def accept(page,category_scene=None,category=None):
   name=page.get("title","")
-  if name in seen_pages:return
-  seen_pages.add(name)
+  evidence_key=(name,category_scene or "text")
+  if evidence_key in seen_pages:return
+  seen_pages.add(evidence_key)
   if BAD_NAME.search(name) or not re.search(r"\.jpe?g$",name,re.I):
    rejected["filename"]=rejected.get("filename",0)+1
    return

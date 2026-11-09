@@ -125,7 +125,11 @@ export function createMetricoolLifestyleHttpAdapter({
      actual?.draft===false && actual?.autoPublish===true &&
      dateTime===post.dateKst+"T"+post.hourKst+":00:00" &&
      typeof actual?.text==="string" && actual.text===post.caption &&
-     Array.isArray(media) && media.length>0 &&
+     Array.isArray(media) && media.length===1 &&
+     media.some(m=>{
+       const uri=typeof m==="string"?m:m?.url??m?.mediaUrl;
+       return uri===post.mediaUrl;
+     }) &&
      provider?.status==="PENDING" &&
      actual.providers.filter(q=>q.network===post.network).length===1 &&
      actual.providers.length===1;

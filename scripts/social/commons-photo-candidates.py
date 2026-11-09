@@ -54,6 +54,37 @@ def license_result(item):
   "credit":meta.get("Credit","")[:150],
   "shareAlikeAdaptationRequired":name.startswith("CC BY-SA"),
   "description":meta.get("ImageDescription","")[:300]}
+
+# Photographic subject is NOT proven by a high embedding score alone.
+# These deliberately conservative title/description pairs avoid obvious
+# unrelated historical scans, buildings and generic family portraits.
+SCENE_WORD_PAIRS={
+ "01":(r"notebook|notepad|journal|study notes|planner|writing pad",
+       r"handwrit|written|pen|pencil|desk|notes|writing"),
+ "04":(r"bedroom|bedroom interior|bed with|bedside|sleeping room",
+       r"lamp|bedside|pillow|blanket|duvet|bed linen"),
+ "10":(r"presentation|conference|meeting|chart|graph|whiteboard|business slides",
+       r"document|chart|graph|screen|whiteboard|meeting|presentation"),
+ "13":(r"receipt|cash register|till slip|shop bill",
+       r"wallet|calculator|payment|card|shopping|cash register|supermarket"),
+ "16":(r"friends talking|friends chatting|people talking|group discussion|conversation|chatting",
+       r"talk|chat|discussion|conversation|meeting|cafe|social"),
+ "19":(r"family dining|family dinner|family meal|family eating|dinner table",
+       r"dining|dinner|meal|table|eating|lunch|kitchen"),
+ "22":(r"checklist|to.do list|task list|planner notebook|planning notes",
+       r"paper|pen|pencil|notebook|desk|writing|marked|task|list"),
+}
+OBVIOUSLY_WRONG=re.compile(
+ r"(?:college|university|map of|atlas|manuscript|old photograph|antique|"
+ r"nineteenth century|historical book|book cover|studio portrait|family portrait|"
+ r"newspaper clipping|botanical notebook|museum collection|184[0-9]|18[0-9][0-9])",re.I)
+def subject_evidence(slot,name,description):
+ if slot not in SCENE_WORD_PAIRS:return False
+ label=plain(name+" "+description).lower()
+ if OBVIOUSLY_WRONG.search(label):return False
+ first,second=SCENE_WORD_PAIRS[slot]
+ return bool(re.search(first,label,re.I) and re.search(second,label,re.I))
+
 def get(url,limit=MAX_DOWNLOAD):
  parts=urllib.parse.urlparse(url)
  if parts.scheme!="https" or parts.hostname not in (HOST,MEDIA_HOST):
@@ -102,6 +133,14 @@ def convert_to_photo_jpeg(raw):
    raise RuntimeError("NOT_A_SUITABLE_ORIGINAL_JPEG_PHOTO")
   if im.width/im.height>3 or im.height/im.width>3:
    raise RuntimeError("EXTREME_ASPECT_RATIO")
+  # Lifestyle photos must be actual color scenes, not monochrome historic
+  # document scans falsely labeled as a relevant photograph.
+  sample=im.copy()
+  sample.thumbnail((96,96),Image.Resampling.BILINEAR)
+  hsv=sample.convert("RGB").convert("HSV")
+  saturation=[p[1] for p in hsv.getdata()]
+  if sum(v>=35 for v in saturation)/len(saturation)<0.22:
+   raise RuntimeError("NOT_A_COLOR_LIFESTYLE_SCENE")
   exif=im.getexif()
   camera=str(exif.get(271,"")).strip()+" "+str(exif.get(272,"")).strip()
   im=ImageOps.exif_transpose(im).convert("RGB")
@@ -151,6 +190,9 @@ def choose_photos(query,history,slot,offset,max_candidates=8):
     rights=license_result(info)
     if not rights:
      rejected["license"]=rejected.get("license",0)+1
+     continue
+    if not subject_evidence(slot,name,rights["description"]):
+     rejected["subject_metadata"]=rejected.get("subject_metadata",0)+1
      continue
     media=info.get("thumburl") or info.get("url","")
     parsed=urllib.parse.urlparse(media)
@@ -246,6 +288,14 @@ def selftest():
  assert near_duplicate(phash,phash)
  assert not near_duplicate("0000000000000000","ffffffffffffffff")
  assert not metadata({"Artist":{"value":"<a href='x'>Jane</a> Doe"}})["Artist"].startswith("<")
+ assert not subject_evidence("10","Photo of an office interior with wooden chairs","")
+ assert not subject_evidence("19","Sheridan family portrait at a photo studio","")
+ assert not subject_evidence("16","Friends College Kaimosi","")
+ assert not subject_evidence("22","old history book cover about war","")
+ assert not subject_evidence("01","Botanical notebook,1882 page","")
+ assert subject_evidence("04","Cozy bedroom with a bed, pillow, and bedside lamp","")
+ assert subject_evidence("13","Supermarket shopping receipt and debit card","")
+ assert subject_evidence("19","Family dining at a dinner table","")
  print("PHOTO_SOURCE_OFFLINE_RIGHTS_MEDIA_AND_DEDUP_GATES_PASSED")
 if __name__=="__main__":
  ap=argparse.ArgumentParser()

@@ -39,8 +39,10 @@ export function inspectLifeReadiness({
   block("CANDIDATE_MUST_REMAIN_PUBLICATION_BLOCKED");
  if(candidates?.rightsMachineChecked!==true)block("MISSING_LICENSE_VALIDATION");
  if(!catalog?.products?.length)block("PRODUCT_CATALOG_NOT_VERIFIED");
+ const beforeDay=new Date(pointDay(date,"00")-86400000).toISOString().slice(0,10);
+ const coverageStart=new Date(pointDay(date,"00")-90*86400000).toISOString().slice(0,10);
  if(!history?.complete||!isDate(history.checkedFrom)||!isDate(history.checkedThrough)||
-    history.checkedFrom>date||history.checkedThrough<date)
+    history.checkedFrom>coverageStart||history.checkedThrough<beforeDay)
   block("UNVERIFIED_NINETY_DAY_PUBLICATION_HISTORY");
  if(!Array.isArray(history?.media))block("MISSING_PERSISTENT_MEDIA_HISTORY");
  if(!Array.isArray(existing?.posts)||existing?.complete!==true ||existing.dateKst!==date)
@@ -63,7 +65,9 @@ export function inspectLifeReadiness({
   const v=indexed.get(hour);
   if(!v ||v.automatedSceneMatch!==true||!v.bestCandidateFile)block("SCENE_QA_NOT_PASSED",hour);
   const independent=Array.isArray(v?.independentSceneChecks)&&
-   v.independentSceneChecks.length>=2&&v.independentSceneChecks.every(x=>x.pass===true &&
+   v.independentSceneChecks.length>=2&&
+   new Set(v.independentSceneChecks.map(x=>x.model)).size>=2&&
+   v.independentSceneChecks.every(x=>x.pass===true &&
      typeof x.model==="string"&&x.model.length>0);
   if(!independent &&
     !(v?.humanVisualReviewed===true&&v?.visualReviewerId&&v?.visualReviewedAt))

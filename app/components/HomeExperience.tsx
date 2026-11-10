@@ -83,7 +83,7 @@ function FlowVisual() {
     <div className="absolute inset-[15%] motion-safe:animate-[spin_28s_linear_infinite]" aria-hidden="true"><span className="absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#b19dff] shadow-[0_0_16px_5px_rgba(169,145,255,0.48)]" /></div>
     <div className="absolute left-1/2 top-[49%] grid h-22 w-22 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/55 bg-[#6c47d8]/95 text-center shadow-[0_0_36px_rgba(161,139,255,0.26)] backdrop-blur-xl"><div><span className="block text-[9px] font-black tracking-[0.18em] text-[#f1e9ff]">운보다</span><strong className="mt-1 block text-3xl font-black tracking-[-0.08em] text-white">나</strong></div></div>
     <span className="absolute left-[7%] top-[20%] rounded-full border border-[#d8c9fc] bg-white/90 px-3 py-2 text-[10px] font-black text-[#503986] backdrop-blur">흐름</span>
-    <span className="absolute right-[4%] top-[41%] rounded-full border border-white/10 bg-[#111a38]/76 px-3 py-2 text-[10px] font-black text-[#d5d0fb] backdrop-blur">관계</span>
+    <span className="absolute right-[4%] top-[41%] rounded-full border border-[#d8c9fc] bg-white/90 px-3 py-2 text-[10px] font-black text-[#503986] backdrop-blur">관계</span>
     <div className="absolute bottom-[2%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#e6dbff] bg-white/90 px-4 py-2 text-[10px] font-bold text-[#594d76] backdrop-blur">흐름 · 관계 · 선택을 한 장면으로</div>
   </div>;
 }
@@ -129,27 +129,27 @@ function DailyVisitEntry({ state, todayViewed }: { state: LandingState; todayVie
 
 function getPrimaryQuickRoute(state: LandingState) {
   if (state.kind === "guest") {
-    return { icon: "spark" as const, title: "무료 분석", detail: "회원가입 없이 먼저 보기", href: "/guest-saju", tone: "text-[#ff9cae]" };
+    return { icon: "spark" as const, title: "무료 분석", detail: "회원가입 없이 먼저 보기", href: "/guest-saju", tone: "text-[#b63e7b]" };
   }
   if (state.kind === "no_profiles") {
-    return { icon: "spark" as const, title: "내 분석", detail: "분석 대상부터 등록", href: "/mypage", tone: "text-[#ff9cae]" };
+    return { icon: "spark" as const, title: "내 분석", detail: "분석 대상부터 등록", href: "/mypage", tone: "text-[#b63e7b]" };
   }
   if (state.kind === "needs_profile_selection") {
-    return { icon: "spark" as const, title: "내 분석", detail: "분석할 대상 선택", href: "/mypage", tone: "text-[#ff9cae]" };
+    return { icon: "spark" as const, title: "내 분석", detail: "분석할 대상 선택", href: "/mypage", tone: "text-[#b63e7b]" };
   }
   if (state.kind === "analysis_ready") {
-    return { icon: "spark" as const, title: "내 분석", detail: "무료 분석 시작하기", href: "/saju", tone: "text-[#ff9cae]" };
+    return { icon: "spark" as const, title: "내 분석", detail: "무료 분석 시작하기", href: "/saju", tone: "text-[#b63e7b]" };
   }
   if (state.kind === "analysis_in_progress") {
-    return { icon: "spark" as const, title: "내 분석", detail: "분석 준비 상태 보기", href: `/loading?profileId=${state.profileId}`, tone: "text-[#ff9cae]" };
+    return { icon: "spark" as const, title: "내 분석", detail: "분석 준비 상태 보기", href: `/loading?profileId=${state.profileId}`, tone: "text-[#b63e7b]" };
   }
   if (state.kind === "analysis_stale") {
-    return { icon: "spark" as const, title: "내 분석", detail: "최신 기준으로 갱신", href: "/saju", tone: "text-[#ff9cae]" };
+    return { icon: "spark" as const, title: "내 분석", detail: "최신 기준으로 갱신", href: "/saju", tone: "text-[#b63e7b]" };
   }
   if (state.customerStage !== "free_only") {
-    return { icon: "folder" as const, title: "구매한 분석", detail: "내 리포트와 상태 확인", href: "/purchased-analyses", tone: "text-[#f0c57a]" };
+    return { icon: "folder" as const, title: "구매한 분석", detail: "내 리포트와 상태 확인", href: "/purchased-analyses", tone: "text-[#a96b26]" };
   }
-  return { icon: "spark" as const, title: "내 분석", detail: "무료 결과 다시 보기", href: `/result?profileId=${state.profileId}`, tone: "text-[#ff9cae]" };
+  return { icon: "spark" as const, title: "내 분석", detail: "무료 결과 다시 보기", href: `/result?profileId=${state.profileId}`, tone: "text-[#b63e7b]" };
 }
 
 function QuickRoutes({ state }: { state: LandingState }) {
@@ -158,9 +158,9 @@ function QuickRoutes({ state }: { state: LandingState }) {
     : null;
   const routes = [
     getPrimaryQuickRoute(state),
-    { icon: "spark" as const, title: "추천 분석", detail: "나에게 맞는 질문부터", href: profileId ? `/recommendations?profileId=${profileId}` : "/recommendations", tone: "text-[#b7a7ff]" },
-    { icon: "search" as const, title: "심층 분석", detail: "원하는 주제로 직접", href: "/deep-analysis", tone: "text-[#a695ff]" },
-    { icon: "people" as const, title: "두 사람 궁합", detail: "관계의 차이를 함께", href: "/special-analysis/compatibility", tone: "text-[#ff99cc]" },
+    { icon: "spark" as const, title: "추천 분석", detail: "나에게 맞는 질문부터", href: profileId ? `/recommendations?profileId=${profileId}` : "/recommendations", tone: "text-[#6550c5]" },
+    { icon: "search" as const, title: "심층 분석", detail: "원하는 주제로 직접", href: "/deep-analysis", tone: "text-[#7153cf]" },
+    { icon: "people" as const, title: "두 사람 궁합", detail: "관계의 차이를 함께", href: "/special-analysis/compatibility", tone: "text-[#c4489a]" },
   ];
   return <section className="mx-auto mt-2 grid w-full max-w-6xl gap-2.5 sm:grid-cols-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map(route => <Link key={route.title} href={route.href} className={`group flex items-center gap-4 rounded-[1.3rem] p-3.5 transition hover:-translate-y-1 hover:border-[#9a83f4]/60 ${glass}`}><span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#f2edff] ${route.tone}`}><Icon name={route.icon}/></span><span className="min-w-0"><strong className="block text-sm font-black text-[#211940]">{route.title}</strong><span className="mt-1 block text-xs leading-5 text-[#655b7e]">{route.detail}</span></span><Icon name="arrow" className="ml-auto h-4 w-4 shrink-0 text-[#81729f] transition group-hover:translate-x-1 group-hover:text-[#7049e7]"/></Link>)}</section>;
 }

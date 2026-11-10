@@ -198,16 +198,16 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
       : null;
 
   return (
-    <div className="min-h-screen bg-[#f5f7fc] text-[#11162d]">
+    <div className="unboda-detail-theme min-h-screen bg-[#f5f7fc] text-[#11162d]">
       <div className="flex min-h-screen">
-        <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 shrink-0 overflow-y-auto border-r border-white/10 bg-[linear-gradient(180deg,#091127_0%,#0d1530_58%,#15143a_100%)] px-4 py-6 text-white lg:flex lg:flex-col">
+        <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 shrink-0 overflow-y-auto border-r border-[#e9ddf6] bg-[linear-gradient(170deg,#ffffff_0%,#f8f3ff_52%,#efe7ff_100%)] px-4 py-6 text-[#281744] shadow-[8px_0_30px_rgba(111,74,169,0.07)] lg:flex lg:flex-col">
           <div className="mb-10">
-            <Link href="/" className="inline-flex items-center gap-2.5 text-xl font-black tracking-tight text-white"><BrandMark />운보다</Link>
-            <p className="mt-3 text-[11px] leading-5 text-[#8f98b5]">AI 명리 분석 플랫폼</p>
+            <Link href="/" className="inline-flex items-center gap-2.5 text-xl font-black tracking-tight text-[#281744]"><BrandMark />운보다</Link>
+            <p className="mt-3 text-[11px] leading-5 text-[#76688c]">AI 명리 분석 플랫폼</p>
           </div>
 
           <nav aria-label="메인 네비게이션">
-            <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.18em] text-[#66708f]">매일 이용</p>
+            <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.18em] text-[#8a6eb3]">매일 이용</p>
             <div className="space-y-1">
             {resolvedAnalysisNavItems.map((item) => {
               const active = isActivePath(pathname, item.activeHref);
@@ -215,7 +215,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
               return (
                 <div key={item.activeHref}>
                   {item.activeHref === "/saju" || item.activeHref === "/interests" ? (
-                    <p className="mb-3 mt-6 px-3 text-[10px] font-semibold tracking-[0.14em] text-[#7883a4]">
+                    <p className="mb-3 mt-6 px-3 text-[10px] font-semibold tracking-[0.14em] text-[#8a73b1]">
                       {item.activeHref === "/saju" ? "사주 · 분석" : "나의 분석 · 상담"}
                     </p>
                   ) : null}
@@ -224,20 +224,20 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                   href={item.href}
                     className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
                     active
-                      ? "bg-white/[0.10] text-white ring-1 ring-inset ring-[#8171ea]/35"
+                      ? "bg-[linear-gradient(135deg,#f0e6ff,#e3d5ff)] text-[#5a2bad] shadow-[0_5px_15px_rgba(133,82,208,.12)] ring-1 ring-inset ring-[#cab0ef]"
                       : item.activeHref === "/ai-consulting"
-                        ? "bg-[linear-gradient(135deg,rgba(111,92,231,.18),rgba(255,255,255,.05))] text-[#ddd7ff] ring-1 ring-inset ring-[#8171ea]/25 hover:bg-[linear-gradient(135deg,rgba(111,92,231,.28),rgba(255,255,255,.08))] hover:text-white"
-                        : "text-[#aeb6cf] hover:bg-white/[0.06] hover:text-white"
+                        ? "bg-[linear-gradient(135deg,#f4eaff,#ece2ff)] text-[#6833b1] ring-1 ring-inset ring-[#ddc8f6] hover:bg-[#e8d8ff] hover:text-[#4a218a]"
+                        : "text-[#605372] hover:bg-white/80 hover:text-[#6033ad]"
                   }`}
                 >
                   <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.label}</span>
-                  {item.activeHref === "/ai-consulting" ? <span className="ml-auto rounded-full border border-[#8f7cff]/30 bg-[#6f5ce7]/15 px-2 py-0.5 text-[9px] font-black tracking-[0.08em] text-[#c8beff]">이어가기</span> : null}
+                  {item.activeHref === "/ai-consulting" ? <span className="ml-auto rounded-full border border-[#8f7cff]/30 bg-[#eee3ff] px-2 py-0.5 text-[9px] font-black tracking-[0.08em] text-[#7543b4]">이어가기</span> : null}
                 </Link>
                 </div>
               );
             })}
             </div>
-            <p className="mb-3 mt-9 px-3 text-[10px] font-semibold tracking-[0.18em] text-[#66708f]">계정 · 고객지원</p>
+            <p className="mb-3 mt-9 px-3 text-[10px] font-semibold tracking-[0.18em] text-[#8a6eb3]">계정 · 고객지원</p>
             <div className="space-y-1">
               {managementNavItems.map((item) => {
                 const active = isActivePath(pathname, item.href);
@@ -248,8 +248,8 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                     href={item.href}
                     className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
                       active
-                        ? "bg-white/[0.10] text-white ring-1 ring-inset ring-[#8171ea]/35"
-                        : "text-[#aeb6cf] hover:bg-white/[0.06] hover:text-white"
+                        ? "bg-[linear-gradient(135deg,#f0e6ff,#e3d5ff)] text-[#5a2bad] shadow-[0_5px_15px_rgba(133,82,208,.12)] ring-1 ring-inset ring-[#cab0ef]"
+                        : "text-[#605372] hover:bg-white/80 hover:text-[#6033ad]"
                     }`}
                   >
                     <NavIcon icon={item.icon} />{isGuest && item.href === "/mypage" ? <LockIcon /> : null}<span>{item.label}</span>
@@ -258,28 +258,28 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
               })}
             </div>
             {pathname === "/mypage" && isGuest === false && profileId ? (
-              <div className="mx-1 mt-3 flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2.5">
-                <span className="text-xs font-medium text-[#9fa8c4]">AI 질문권</span>
-                <strong className="text-sm text-white">{aiCreditBalanceLabel}</strong>
+              <div className="mx-1 mt-3 flex items-center justify-between rounded-xl border border-[#e3d4f6] bg-white/85 px-3 py-2.5">
+                <span className="text-xs font-medium text-[#716284]">AI 질문권</span>
+                <strong className="text-sm text-[#593098]">{aiCreditBalanceLabel}</strong>
               </div>
             ) : null}
           </nav>
 
-          <div className="mt-auto border-t border-white/10 pt-4">
-            <p className="text-[10px] font-semibold tracking-[0.18em] text-[#6f7896]">SERVICE</p>
-            <p className="mt-2 text-xs leading-5 text-[#919ab7]">
+          <div className="mt-auto border-t border-[#e4d8f2] pt-4">
+            <p className="text-[10px] font-semibold tracking-[0.18em] text-[#8b70ac]">SERVICE</p>
+            <p className="mt-2 text-xs leading-5 text-[#706182]">
               무료 결과를 바탕으로 필요한 분석을 이어서 살펴보세요.
             </p>
           </div>
         </aside>
 
         <div className="min-w-0 flex-1 lg:pl-60">
-          <header className="flex h-14 items-center justify-between border-b border-white/10 bg-[#0b122b] px-5 text-white lg:hidden">
-            <Link href="/" className="inline-flex items-center gap-2 text-lg font-black tracking-tight text-white"><BrandMark />운보다</Link>
+          <header className="flex h-14 items-center justify-between border-b border-[#e4d5f4] bg-white/95 px-5 text-[#281744] lg:hidden">
+            <Link href="/" className="inline-flex items-center gap-2 text-lg font-black tracking-tight text-[#281744]"><BrandMark />운보다</Link>
             {pathname === "/mypage" && isGuest === false && profileId ? (
-              <span className="rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-xs font-semibold text-[#d9dcef]">AI 질문권 {aiCreditBalanceLabel}</span>
+              <span className="rounded-full border border-[#e6d7fa] bg-[#f4ebff] px-3 py-1 text-xs font-semibold text-[#65449b]">AI 질문권 {aiCreditBalanceLabel}</span>
             ) : (
-              <Link href={isGuest === true ? "/auth/login?returnTo=/today" : "/today"} className="rounded-full border border-[#cebaff]/25 bg-[#7560d5]/20 px-3 py-1.5 text-xs font-bold text-[#e9e2ff]">오늘의 운보다</Link>
+              <Link href={isGuest === true ? "/auth/login?returnTo=/today" : "/today"} className="rounded-full border border-[#d6c0f3] bg-[#f2e8ff] px-3 py-1.5 text-xs font-bold text-[#6940a4]">오늘의 운보다</Link>
             )}
           </header>
           <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
@@ -293,7 +293,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
 
       <nav
         aria-label="모바일 네비게이션"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0b122b]/95 text-white backdrop-blur-md lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e0d1f3] bg-white/95 text-[#3c2859] shadow-[0_-8px_28px_rgba(98,65,154,.09)] backdrop-blur-md lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="mx-auto grid max-w-lg grid-cols-7 gap-1 px-2 py-2">
@@ -306,10 +306,10 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                 href={item.href}
                 className={`flex min-h-[56px] flex-col items-center justify-center rounded-xl px-1 py-2 text-[11px] font-semibold transition ${
                   active
-                    ? "bg-[#6f5ce7] text-white shadow-[0_8px_24px_rgba(111,92,231,0.28)]"
+                    ? "bg-[linear-gradient(135deg,#7b4de4,#9c72f2)] text-white shadow-[0_8px_24px_rgba(111,92,231,0.22)]"
                     : item.activeHref === "/ai-consulting"
-                      ? "bg-white/[0.06] text-[#c9c1ff] hover:bg-white/[0.10] hover:text-white"
-                      : "text-[#929bb8] hover:bg-white/[0.07] hover:text-white"
+                      ? "bg-[#f1e8ff] text-[#6842a5] hover:bg-[#e5d8ff] hover:text-[#4f288e]"
+                      : "text-[#6a5c7f] hover:bg-[#f3ecff] hover:text-[#6033ad]"
                 }`}
               >
                     <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.shortLabel ?? item.label}</span>

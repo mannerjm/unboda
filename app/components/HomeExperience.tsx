@@ -44,28 +44,28 @@ function Icon({ name, className = "h-5 w-5" }: { name: IconName; className?: str
   return <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d={paths[name]} /></svg>;
 }
 
-const glass = "border border-white/10 bg-white/[0.055] backdrop-blur-xl shadow-[0_16px_60px_rgba(2,8,30,0.28)]";
+const glass = "border border-[#e3daf4] bg-white/85 backdrop-blur-xl shadow-[0_10px_28px_rgba(73,46,137,0.075)]";
 
 function Header({ state }: { state: LandingState }) {
   const isGuest = state.kind === "guest";
   const accountHref = isGuest ? "/auth/login?returnTo=/" : "/mypage";
   const aiHref = isGuest ? "/auth/login?returnTo=/ai-consulting" : "/ai-consulting";
-  return <header className="relative z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 py-1 text-white lg:flex lg:items-center lg:justify-between lg:gap-3">
+  return <header className="relative z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 border-b border-[#e9e2f5] pb-3 text-[#201943] lg:flex lg:items-center lg:justify-between lg:gap-3">
     <Link href="/" className="flex shrink-0 items-center gap-3 text-xl font-black tracking-[-0.045em]"><BrandMark />운보다</Link>
     <div className="contents lg:flex lg:shrink-0 lg:items-center lg:gap-2">
       <div className="col-span-2 row-start-2 min-w-0 lg:col-auto lg:row-auto"><HomeWeatherLine /></div>
       <div className="col-start-2 row-start-1 flex shrink-0 items-center gap-1 sm:gap-2 lg:col-auto lg:row-auto">
-      <Link href="/blog" className="rounded-full border border-white/15 px-2 py-2 text-[11px] font-bold text-white transition hover:bg-white/10 sm:px-3 sm:py-2.5 sm:text-sm" aria-label="운보다 매거진 읽기">매거진</Link>
-      <Link href={aiHref} className="inline-flex items-center gap-1.5 rounded-full border border-[#927fff]/35 bg-[linear-gradient(135deg,rgba(111,92,231,.9),rgba(141,113,255,.9))] px-2.5 py-2 text-[11px] font-black text-white shadow-[0_0_24px_rgba(111,92,231,.24)] transition hover:-translate-y-0.5 hover:brightness-110 sm:px-4 sm:py-2.5 sm:text-sm"><Icon name="chat" className="h-4 w-4"/>AI 상담</Link>
-      <Link href={accountHref} className="rounded-full border border-white/20 bg-white/10 px-2.5 py-2 text-[11px] font-bold text-white backdrop-blur-xl transition hover:bg-white/15 sm:px-4 sm:py-2.5 sm:text-sm">{isGuest ? "로그인" : "마이페이지"}</Link>
+        <Link href="/blog" className="rounded-full border border-[#ddd6ef] bg-white/75 px-2 py-2 text-[11px] font-bold text-[#352b59] transition hover:bg-[#ede8ff] sm:px-3 sm:py-2.5 sm:text-sm" aria-label="운보다 매거진 읽기">매거진</Link>
+        <Link href={aiHref} className="inline-flex items-center gap-1.5 rounded-full border border-[#927fff]/35 bg-[linear-gradient(135deg,#7554e9,#9168f4)] px-2.5 py-2 text-[11px] font-black text-white shadow-[0_8px_22px_rgba(111,92,231,.22)] transition hover:-translate-y-0.5 hover:brightness-110 sm:px-4 sm:py-2.5 sm:text-sm"><Icon name="chat" className="h-4 w-4"/>AI 상담</Link>
+        <Link href={accountHref} className="rounded-full border border-[#ddd6ef] bg-white/80 px-2.5 py-2 text-[11px] font-bold text-[#352b59] backdrop-blur-xl transition hover:bg-[#ede8ff] sm:px-4 sm:py-2.5 sm:text-sm">{isGuest ? "로그인" : "마이페이지"}</Link>
       </div>
     </div>
   </header>;
 }
 
 function FlowVisual() {
-  return <div className="relative mx-auto mt-2 aspect-square w-full max-w-[25rem] opacity-90 sm:max-w-[27rem] lg:mt-0 lg:max-w-[28.5rem] lg:opacity-[0.86]" aria-label="나를 중심으로 흐름, 관계, 선택이 이어지는 운보다 상징 그래픽">
-    <div className="absolute inset-[14%] rounded-full bg-[radial-gradient(circle_at_center,rgba(204,191,255,.54),rgba(111,88,214,.22)_26%,rgba(30,39,84,.06)_54%,transparent_72%)] blur-md" />
+  return <div className="relative mx-auto aspect-square w-full max-w-[18rem] opacity-95 sm:max-w-[22rem] lg:max-w-[25rem]" aria-label="나를 중심으로 흐름, 관계, 선택이 이어지는 운보다 상징 그래픽">
+    <div className="absolute inset-[14%] rounded-full bg-[radial-gradient(circle_at_center,rgba(218,201,255,.94),rgba(169,147,247,.44)_26%,rgba(237,230,255,.1)_54%,transparent_72%)] blur-md" />
     <svg className="absolute inset-0 h-full w-full" viewBox="0 0 500 500" fill="none" aria-hidden="true">
       <defs>
         <linearGradient id="mysticOrbit" x1="70" y1="90" x2="430" y2="410"><stop stopColor="#8FB4FF"/><stop offset="0.48" stopColor="#A88AFF"/><stop offset="0.78" stopColor="#F79FC5"/><stop offset="1" stopColor="#F5BC73"/></linearGradient>
@@ -73,26 +73,26 @@ function FlowVisual() {
         <linearGradient id="horizonGlow" x1="140" y1="0" x2="360" y2="0"><stop stopColor="#7463D5" stopOpacity="0"/><stop offset="0.5" stopColor="#F7ADD0" stopOpacity="0.72"/><stop offset="1" stopColor="#7463D5" stopOpacity="0"/></linearGradient>
       </defs>
       <ellipse cx="250" cy="245" rx="184" ry="111" transform="rotate(-21 250 245)" stroke="url(#mysticOrbit)" strokeWidth="2.2" strokeLinecap="round" strokeDasharray="2 10"/>
-      <ellipse cx="250" cy="245" rx="145" ry="195" transform="rotate(30 250 245)" stroke="#B8ADFF" strokeOpacity="0.28" strokeWidth="1.4"/>
+      <ellipse cx="250" cy="245" rx="145" ry="195" transform="rotate(30 250 245)" stroke="#B8ADFF" strokeOpacity="0.5" strokeWidth="1.4"/>
       <circle cx="250" cy="245" r="92" fill="url(#moonGlow)"/>
-      <circle cx="250" cy="245" r="48" fill="#111A3A" stroke="#C5B9FF" strokeOpacity="0.62"/>
+      <circle cx="250" cy="245" r="48" fill="#7955D8" stroke="#C5B9FF" strokeOpacity="0.62"/>
       <path d="M137 340H363" stroke="url(#horizonGlow)" strokeWidth="2.4" strokeLinecap="round"/>
       <path d="M205 359C226 347 240 341 250 338C260 341 274 347 295 359" stroke="#F4B1D0" strokeOpacity="0.18" strokeWidth="4" strokeLinecap="round"/>
       <circle cx="390" cy="148" r="13" fill="#8C75FF"/><circle cx="105" cy="286" r="10" fill="#FF9EBF"/><circle cx="326" cy="401" r="7" fill="#FFB76B"/><circle cx="171" cy="104" r="6" fill="#9BC4FF"/>
     </svg>
     <div className="absolute inset-[15%] motion-safe:animate-[spin_28s_linear_infinite]" aria-hidden="true"><span className="absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#b19dff] shadow-[0_0_16px_5px_rgba(169,145,255,0.48)]" /></div>
-    <div className="absolute left-1/2 top-[49%] grid h-22 w-22 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/18 bg-[#0e1635]/90 text-center shadow-[0_0_36px_rgba(161,139,255,0.26)] backdrop-blur-xl"><div><span className="block text-[9px] font-black tracking-[0.18em] text-[#c5bbff]">운보다</span><strong className="mt-1 block text-3xl font-black tracking-[-0.08em] text-white">나</strong></div></div>
-    <span className="absolute left-[7%] top-[20%] rounded-full border border-white/10 bg-[#111a38]/76 px-3 py-2 text-[10px] font-black text-[#d5d0fb] backdrop-blur">흐름</span>
+    <div className="absolute left-1/2 top-[49%] grid h-22 w-22 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/55 bg-[#6c47d8]/95 text-center shadow-[0_0_36px_rgba(161,139,255,0.26)] backdrop-blur-xl"><div><span className="block text-[9px] font-black tracking-[0.18em] text-[#f1e9ff]">운보다</span><strong className="mt-1 block text-3xl font-black tracking-[-0.08em] text-white">나</strong></div></div>
+    <span className="absolute left-[7%] top-[20%] rounded-full border border-[#d8c9fc] bg-white/90 px-3 py-2 text-[10px] font-black text-[#503986] backdrop-blur">흐름</span>
     <span className="absolute right-[4%] top-[41%] rounded-full border border-white/10 bg-[#111a38]/76 px-3 py-2 text-[10px] font-black text-[#d5d0fb] backdrop-blur">관계</span>
-    <div className="absolute bottom-[2%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/8 bg-[#0b132d]/82 px-4 py-2 text-[10px] font-bold text-[#abb1c8] backdrop-blur">흐름 · 관계 · 선택을 한 장면으로</div>
+    <div className="absolute bottom-[2%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#e6dbff] bg-white/90 px-4 py-2 text-[10px] font-bold text-[#594d76] backdrop-blur">흐름 · 관계 · 선택을 한 장면으로</div>
   </div>;
 }
 
 function HeroActions({ state, copy }: { state: LandingState; copy: LandingCopy }) {
   const showDirectFinder = state.kind === "guest" || state.kind === "analysis_ready" || state.kind === "no_profiles" || state.kind === "needs_profile_selection";
-  return <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-    <Link href={copy.primaryHref} className="inline-flex min-h-13 items-center justify-center gap-3 rounded-2xl bg-[linear-gradient(135deg,#795cff,#9d78ff)] px-6 py-3.5 text-sm font-black text-white shadow-[0_0_30px_rgba(126,93,255,0.38)] transition hover:-translate-y-0.5 hover:brightness-110">{copy.primary}<Icon name="arrow" /></Link>
-    {showDirectFinder ? <Link href="/deep-analysis" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/[0.07] px-6 py-3.5 text-sm font-black text-white backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white/10">원하는 분석 바로 찾기<Icon name="search" /></Link> : <Link href={copy.secondaryHref} className="inline-flex min-h-13 items-center justify-center rounded-2xl border border-white/15 bg-white/[0.07] px-6 py-3.5 text-sm font-black text-white backdrop-blur-xl transition hover:bg-white/10">{copy.secondary}</Link>}
+  return <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+    <Link href={copy.primaryHref} className="inline-flex min-h-12 items-center justify-center gap-3 rounded-2xl bg-[linear-gradient(135deg,#795cff,#9d78ff)] px-6 py-3 text-sm font-black text-white shadow-[0_12px_26px_rgba(126,93,255,0.25)] transition hover:-translate-y-0.5 hover:brightness-110">{copy.primary}<Icon name="arrow" /></Link>
+    {showDirectFinder ? <Link href="/deep-analysis" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-[#dfd6f3] bg-white/85 px-5 py-3 text-sm font-black text-[#493574] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-[#eee8ff]">원하는 분석 바로 찾기<Icon name="search" /></Link> : <Link href={copy.secondaryHref} className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[#dfd6f3] bg-white/85 px-5 py-3 text-sm font-black text-[#493574] backdrop-blur-xl transition hover:bg-[#eee8ff]">{copy.secondary}</Link>}
   </div>;
 }
 
@@ -162,7 +162,7 @@ function QuickRoutes({ state }: { state: LandingState }) {
     { icon: "search" as const, title: "심층 분석", detail: "원하는 주제로 직접", href: "/deep-analysis", tone: "text-[#a695ff]" },
     { icon: "people" as const, title: "두 사람 궁합", detail: "관계의 차이를 함께", href: "/special-analysis/compatibility", tone: "text-[#ff99cc]" },
   ];
-  return <section className="mx-auto mt-5 grid w-full max-w-6xl gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map(route => <Link key={route.title} href={route.href} className={`group flex items-center gap-4 rounded-[1.45rem] p-4 transition hover:-translate-y-1 hover:border-[#8d7cff]/35 ${glass}`}><span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/[0.07] ${route.tone}`}><Icon name={route.icon}/></span><span className="min-w-0"><strong className="block text-sm font-black text-white">{route.title}</strong><span className="mt-1 block text-xs leading-5 text-[#9ea5bc]">{route.detail}</span></span><Icon name="arrow" className="ml-auto h-4 w-4 shrink-0 text-[#707997] transition group-hover:translate-x-1 group-hover:text-[#b8a8ff]"/></Link>)}</section>;
+  return <section className="mx-auto mt-2 grid w-full max-w-6xl gap-2.5 sm:grid-cols-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map(route => <Link key={route.title} href={route.href} className={`group flex items-center gap-4 rounded-[1.3rem] p-3.5 transition hover:-translate-y-1 hover:border-[#9a83f4]/60 ${glass}`}><span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#f2edff] ${route.tone}`}><Icon name={route.icon}/></span><span className="min-w-0"><strong className="block text-sm font-black text-[#211940]">{route.title}</strong><span className="mt-1 block text-xs leading-5 text-[#655b7e]">{route.detail}</span></span><Icon name="arrow" className="ml-auto h-4 w-4 shrink-0 text-[#81729f] transition group-hover:translate-x-1 group-hover:text-[#7049e7]"/></Link>)}</section>;
 }
 
 function CardScene({ scene }: { scene: "sunset" | "city" | "wealth" | "growth" | "people" | "path" }) {
@@ -238,16 +238,56 @@ function TrustSection({ state, copy }: { state: LandingState; copy: LandingCopy 
 }
 
 function Footer() {
-  return <footer className="border-t border-white/10 py-7 text-xs text-[#818aa7]"><div className="mx-auto flex w-full max-w-6xl flex-col gap-5 sm:flex-row sm:items-start sm:justify-between"><div className="max-w-3xl space-y-1.5 leading-5"><p className="font-bold text-[#aeb5ca]">운보다 · 참고용 명리 분석 서비스</p><p>상호 운보다 · 대표자 반희 · 사업자등록번호 201-28-96364</p><p>사업장 소재지 충청남도 천안시 서북구 백석4길 12, 10층 1001-B52호(백석동, 거성캐슬B빌딩)</p><p>고객센터 070-4792-8900 · 공식 지원 이메일 support@unboda.kr</p></div><nav className="flex shrink-0 flex-wrap gap-4" aria-label="서비스 및 법적 문서"><Link href="/blog" className="transition hover:text-white">운보다 매거진</Link><Link href="/support" className="transition hover:text-white">고객지원</Link><Link href="/reviews" className="transition hover:text-white">구매 인증 후기</Link><Link href="/trust" className="transition hover:text-white">운보다 이용 원칙</Link><Link href="/terms" className="transition hover:text-white">이용약관</Link><Link href="/privacy" className="transition hover:text-white">개인정보처리방침</Link><Link href="/refund" className="transition hover:text-white">환불정책</Link></nav></div></footer>;
+  return <footer className="mt-3 border-t border-[#e4ddf1] py-3 text-[10px] text-[#6f6682] sm:text-[11px]"><div className="mx-auto flex w-full max-w-6xl flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><div className="max-w-3xl space-y-0.5 leading-4"><p className="font-bold text-[#45385e]">운보다 · 참고용 명리 분석 서비스</p><p>상호 운보다 · 대표자 반희 · 사업자등록번호 201-28-96364</p><p>사업장 소재지 충청남도 천안시 서북구 백석4길 12, 10층 1001-B52호(백석동, 거성캐슬B빌딩)</p><p>고객센터 070-4792-8900 · 공식 지원 이메일 support@unboda.kr</p></div><nav className="flex shrink-0 flex-wrap gap-x-3 gap-y-1.5" aria-label="서비스 및 법적 문서"><Link href="/blog" className="transition hover:text-[#6946cb]">운보다 매거진</Link><Link href="/support" className="transition hover:text-white">고객지원</Link><Link href="/reviews" className="transition hover:text-white">구매 인증 후기</Link><Link href="/trust" className="transition hover:text-white">운보다 이용 원칙</Link><Link href="/terms" className="transition hover:text-white">이용약관</Link><Link href="/privacy" className="transition hover:text-white">개인정보처리방침</Link><Link href="/refund" className="transition hover:text-white">환불정책</Link></nav></div></footer>;
 }
 
 function StarField() {
   return <><div className="pointer-events-none absolute inset-0 opacity-[0.68] [background-image:radial-gradient(circle_at_12%_18%,rgba(255,255,255,.75)_0_1px,transparent_1.5px),radial-gradient(circle_at_78%_14%,rgba(174,159,255,.8)_0_1px,transparent_1.5px),radial-gradient(circle_at_65%_55%,rgba(255,255,255,.45)_0_1px,transparent_1.5px),radial-gradient(circle_at_28%_72%,rgba(130,165,255,.6)_0_1px,transparent_1.5px)] [background-size:210px_190px,260px_230px,180px_170px,300px_280px]"/><div className="pointer-events-none absolute -left-24 top-44 h-80 w-80 rounded-full bg-[#304a8b]/18 blur-3xl"/><div className="pointer-events-none absolute right-[-10%] top-[-4rem] h-[34rem] w-[34rem] rounded-full bg-[#6b4ed6]/15 blur-3xl"/></>;
 }
 
-function HomeShell({ state, copy, todayViewed, returning }: { state: LandingState; copy: LandingCopy; todayViewed: boolean; returning?: ReturningLandingState }) {
+function HomeJourney() {
+  return <section className="mx-auto mt-3 flex w-full max-w-6xl flex-col gap-3 rounded-[1.4rem] border border-[#e3d9f5] bg-white/75 px-5 py-3 shadow-[0_8px_22px_rgba(70,47,137,.045)] md:flex-row md:items-center md:justify-between" aria-label="운보다 이용 흐름">
+    <div className="shrink-0">
+      <p className="text-[11px] font-black tracking-[0.08em] text-[#7a59d9]">운보다 핵심 · 리포트 다음 질문</p>
+      <p className="mt-1 text-sm font-black text-[#261a49]">리포트가 끝이 아니라, 상담이 이어집니다.</p>
+    </div>
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[11px] font-bold text-[#54476f] sm:text-xs">
+      <span className="rounded-full bg-[#eee9ff] px-3 py-2">무료로 확인</span>
+      <Icon name="arrow" className="h-4 w-4 text-[#947dd8]"/>
+      <span className="rounded-full bg-[#eee9ff] px-3 py-2">필요한 분석만 깊게</span>
+      <Icon name="arrow" className="h-4 w-4 text-[#947dd8]"/>
+      <span className="rounded-full bg-[#eee9ff] px-3 py-2">AI 상담으로 계속</span>
+    </div>
+  </section>;
+}
+
+function HomeShell({ state, copy, todayViewed: _todayViewed, returning }: { state: LandingState; copy: LandingCopy; todayViewed: boolean; returning?: ReturningLandingState }) {
   const statusLabel = returning ? returning.kind === "analysis_stale" ? "갱신 필요" : returning.kind === "analysis_in_progress" ? "생성 중" : returning.kind === "analysis_complete" && returning.status === "needs_retry" ? "해석 재생성 필요" : "최신 상태" : null;
-  return <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#070d20_0%,#0b1330_40%,#090f24_100%)] text-white"><StarField/><div className="relative px-5 pb-8 pt-5 sm:px-8 sm:pt-7"><div className="mx-auto w-full max-w-6xl"><Header state={state}/><PwaInstallGuide/><section className="grid min-h-[520px] items-center gap-6 py-7 lg:min-h-[550px] lg:grid-cols-[1fr_0.94fr] lg:gap-10 lg:py-10"><div className="relative z-10">{returning ? <div className="flex flex-wrap items-center gap-2"><span className="rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-black text-white">{returning.profileLabel}</span><span className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-bold text-[#b1b6c9]">{statusLabel}</span></div> : <p className="inline-flex items-center gap-2 rounded-full border border-[#8172e6]/30 bg-[#17183a]/75 px-4 py-2 text-xs font-black tracking-[0.08em] text-[#b3a6ff] shadow-[0_0_25px_rgba(111,86,232,0.15)]"><Icon name="spark" className="h-4 w-4"/>{copy.eyebrow}</p>}<h1 className={`${returning ? "mt-4" : "mt-6"} max-w-[38rem] ${copy.title === "지금 내 운, 어디로 가고 있을까?" ? "text-[clamp(1.75rem,9vw,2.4rem)]" : "text-[2.75rem]"} font-black leading-[1.05] tracking-[-0.065em] text-white sm:text-[4.25rem] lg:text-[4.7rem]`}>{copy.title === "지금 내 운, 어디로 가고 있을까?" ? <><span className="sm:hidden"><span className="block whitespace-nowrap">지금 내 운,</span><span className="block whitespace-nowrap">어디로 가고 있을까?</span></span><span className="hidden sm:inline">{copy.title}</span></> : copy.title}</h1><p className="mt-6 max-w-xl text-[15px] leading-8 text-[#aeb4c9] sm:text-lg">{copy.description}</p><HeroActions state={state} copy={copy}/>{(state.kind === "guest" || state.kind === "analysis_ready" || state.kind === "no_profiles" || state.kind === "needs_profile_selection") && copy.secondary ? <Link href={copy.secondaryHref} className="mt-4 inline-flex text-xs font-bold text-[#969db5] underline decoration-[#59617b] underline-offset-4 transition hover:text-white">{copy.secondary}</Link> : null}{returning ? <Link href="/deep-analysis" className="ml-4 mt-4 inline-flex items-center gap-2 text-xs font-bold text-[#969db5] underline decoration-[#59617b] underline-offset-4 transition hover:text-white">다른 심층 분석 직접 찾기<Icon name="search" className="h-4 w-4"/></Link> : null}</div><FlowVisual/></section><DailyVisitEntry state={state} todayViewed={todayViewed}/><QuickRoutes state={state}/></div></div><div className="relative px-5 sm:px-8"><AiConsultingSection state={state}/><CuriositySection/><CompatibilitySection/><TrustSection state={state} copy={copy}/><Footer/></div></main>;
+  return <main className="relative isolate min-h-[100dvh] overflow-hidden bg-[linear-gradient(135deg,#fffdfd_0%,#f9f7ff_48%,#f0ecff_100%)] text-[#211943]">
+    <div aria-hidden="true" className="pointer-events-none absolute -left-40 top-24 h-[28rem] w-[28rem] rounded-full bg-[#efe5ff]/65 blur-[95px]"/>
+    <div aria-hidden="true" className="pointer-events-none absolute right-[-6rem] top-16 h-[34rem] w-[34rem] rounded-full bg-[#e6dbff]/75 blur-[100px]"/>
+    <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-[1320px] flex-col px-5 pb-1 pt-4 sm:px-8 lg:px-10 lg:pt-5">
+      <Header state={state}/>
+      <PwaInstallGuide/>
+      <section className="grid flex-1 items-center gap-4 py-4 sm:py-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)] lg:gap-5 lg:py-4" aria-label="운보다 무료 사주 시작 및 분석 이어가기">
+        <div className="relative z-10">
+          {returning ? <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-[#d8ccf7] bg-white/85 px-3.5 py-2 text-xs font-black text-[#4d337b]">{returning.profileLabel}</span>
+            <span className="rounded-full border border-[#e5dcf7] bg-[#f4efff] px-3.5 py-2 text-xs font-bold text-[#695b86]">{statusLabel}</span>
+          </div> : <p className="inline-flex items-center gap-2 rounded-full border border-[#e0d4fa] bg-[#f1eaff] px-4 py-2 text-xs font-black tracking-[0.08em] text-[#744ad5]"><Icon name="spark" className="h-4 w-4"/>{copy.eyebrow}</p>}
+          <h1 className={`${returning ? "mt-4" : "mt-5"} max-w-[39rem] text-[clamp(2.05rem,4.1vw,3.7rem)] font-black leading-[1.15] tracking-[-0.065em] text-[#221742]`}>{copy.title === "지금 내 운, 어디로 가고 있을까?" ? <><span className="sm:hidden"><span className="block whitespace-nowrap">지금 내 운,</span><span className="block whitespace-nowrap">어디로 가고 있을까?</span></span><span className="hidden sm:inline">{copy.title}</span></> : copy.title}</h1>
+          <p className="mt-4 max-w-xl text-[14px] leading-7 text-[#5c5372] sm:text-[16px]">{copy.description}</p>
+          <HeroActions state={state} copy={copy}/>
+          {(state.kind === "guest" || state.kind === "analysis_ready" || state.kind === "no_profiles" || state.kind === "needs_profile_selection") && copy.secondary ? <Link href={copy.secondaryHref} className="mt-3 inline-flex text-xs font-bold text-[#74658f] underline decoration-[#b6a7d6] underline-offset-4 transition hover:text-[#6c45d3]">{copy.secondary}</Link> : null}
+          {returning ? <Link href="/deep-analysis" className="ml-4 mt-3 inline-flex items-center gap-2 text-xs font-bold text-[#74658f] underline decoration-[#b6a7d6] underline-offset-4 transition hover:text-[#6c45d3]">다른 심층 분석 직접 찾기<Icon name="search" className="h-4 w-4"/></Link> : null}
+        </div>
+        <div className="relative mx-auto hidden w-full max-w-[26rem] sm:block"><FlowVisual/></div>
+      </section>
+      <QuickRoutes state={state}/>
+      <HomeJourney/>
+      <Footer/>
+    </div>
+  </main>;
 }
 
 function NewHome({ state, copy, todayViewed }: { state: LandingState; copy: LandingCopy; todayViewed: boolean }) { return <HomeShell state={state} copy={copy} todayViewed={todayViewed}/>; }

@@ -93,6 +93,13 @@ async function main() {
   const magazineHome=readFileSync("app/blog/page.tsx","utf8");
   assert(magazineHome.includes("bg-[radial-gradient(ellipse_at_50%_0%,#ffffff_0%,#faf5ff_48%,#f0e8ff_100%)]"), "magazine index must use the approved light palette");
   assert(!magazineHome.includes("bg-[#0e1733]") && !magazineHome.includes("bg-[#151c3e]"), "magazine index old navy surfaces must not return");
+
+  const magazineHeader=magazineHome.slice(magazineHome.indexOf("<header"),magazineHome.indexOf("</header>"));
+  assert(magazineHeader.includes('href="/blog" aria-current="page"'), "keep the current Magazine tab");
+  assert(!magazineHeader.includes('href="/guest-saju"') && !magazineHeader.includes('href="/special-analysis/compatibility"'), "hide extra free-saju and compatibility links only in the magazine index header");
+  assert(!magazineHome.includes("<footer") && !magazineHome.includes('href="/trust"') && !magazineHome.includes('href="/blog/rss.xml"'), "remove the bottom magazine link row without removing the RSS endpoint");
+  assert(magazineHome.includes('href="/guest-saju" className="shrink-0') && magazineHome.includes('href="/" className="text-lg font-extrabold'), "keep free-saju promotion and logo home navigation");
+
   const detail=readFileSync("app/blog/[slug]/page.tsx","utf8");
   assert(detail.includes("notFound()") && detail.includes("generateMetadata"));
   assert(detail.includes("bg-[radial-gradient(ellipse_at_50%_0%,#ffffff_0%,#faf5ff_48%,#f0e8ff_100%)]"), "magazine article must use the same light palette");

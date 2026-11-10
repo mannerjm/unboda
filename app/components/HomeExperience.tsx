@@ -50,49 +50,34 @@ function Header({ state }: { state: LandingState }) {
   const isGuest = state.kind === "guest";
   const accountHref = isGuest ? "/auth/login?returnTo=/" : "/mypage";
   const aiHref = isGuest ? "/auth/login?returnTo=/ai-consulting" : "/ai-consulting";
-  return <header className="relative z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 border-b border-[#e9e2f5] pb-3 text-[#201943] lg:flex lg:items-center lg:justify-between lg:gap-3">
-    <Link href="/" className="flex shrink-0 items-center gap-3 text-xl font-black tracking-[-0.045em]"><BrandMark />운보다</Link>
-    <div className="contents lg:flex lg:shrink-0 lg:items-center lg:gap-2">
+  return <header className="relative z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 border-b border-[#eadff8]/85 pb-3.5 text-[#201943] lg:flex lg:items-center lg:justify-between lg:gap-4">
+    <Link href="/" className="flex shrink-0 items-center gap-3 text-[1.35rem] font-black tracking-[-0.055em] text-[#241443] transition hover:opacity-85">
+      <BrandMark />운보다
+    </Link>
+    <div className="contents lg:flex lg:shrink-0 lg:items-center lg:gap-2.5">
       <div className="col-span-2 row-start-2 min-w-0 lg:col-auto lg:row-auto"><HomeWeatherLine /></div>
-      <div className="col-start-2 row-start-1 flex shrink-0 items-center gap-1 sm:gap-2 lg:col-auto lg:row-auto">
-        <Link href="/blog" className="rounded-full border border-[#ddd6ef] bg-white/75 px-2 py-2 text-[11px] font-bold text-[#352b59] transition hover:bg-[#ede8ff] sm:px-3 sm:py-2.5 sm:text-sm" aria-label="운보다 매거진 읽기">매거진</Link>
-        <Link href={aiHref} className="inline-flex items-center gap-1.5 rounded-full border border-[#927fff]/35 bg-[linear-gradient(135deg,#7554e9,#9168f4)] px-2.5 py-2 text-[11px] font-black text-white shadow-[0_8px_22px_rgba(111,92,231,.22)] transition hover:-translate-y-0.5 hover:brightness-110 sm:px-4 sm:py-2.5 sm:text-sm"><Icon name="chat" className="h-4 w-4"/>AI 상담</Link>
-        <Link href={accountHref} className="rounded-full border border-[#ddd6ef] bg-white/80 px-2.5 py-2 text-[11px] font-bold text-[#352b59] backdrop-blur-xl transition hover:bg-[#ede8ff] sm:px-4 sm:py-2.5 sm:text-sm">{isGuest ? "로그인" : "마이페이지"}</Link>
+      <div className="col-start-2 row-start-1 flex shrink-0 items-center gap-1.5 sm:gap-2 lg:col-auto lg:row-auto">
+        <Link href="/blog" className="rounded-full border border-[#e2d6f7] bg-white/80 px-3 py-2.5 text-xs font-bold text-[#31254e] shadow-[0_4px_12px_rgba(102,64,157,.05)] transition hover:border-[#ba99f0] hover:bg-[#f9f4ff] sm:px-4 sm:text-sm" aria-label="운보다 매거진 읽기">매거진</Link>
+        <Link href={aiHref} className="inline-flex items-center gap-1.5 rounded-full border border-[#ae83ff] bg-[linear-gradient(135deg,#ac4be9,#7534d6_72%,#803ce9)] px-3.5 py-2.5 text-xs font-black text-white shadow-[0_8px_24px_rgba(120,60,213,.3)] transition hover:-translate-y-0.5 hover:brightness-110 sm:px-5 sm:text-sm"><Icon name="chat" className="h-4 w-4"/>AI 상담</Link>
+        <Link href={accountHref} className="rounded-full border border-[#e2d6f7] bg-white/80 px-3 py-2.5 text-xs font-bold text-[#31254e] shadow-[0_4px_12px_rgba(102,64,157,.05)] backdrop-blur-xl transition hover:border-[#ba99f0] hover:bg-[#f9f4ff] sm:px-5 sm:text-sm">{isGuest ? "로그인" : "마이페이지"}</Link>
       </div>
     </div>
   </header>;
 }
 
 function FlowVisual() {
-  return <div className="relative mx-auto aspect-square w-full max-w-[16rem] opacity-95 sm:max-w-[19rem] lg:max-w-[21.5rem]" aria-label="나를 중심으로 흐름, 관계, 선택이 이어지는 운보다 상징 그래픽">
-    <div className="absolute inset-[14%] rounded-full bg-[radial-gradient(circle_at_center,rgba(218,201,255,.94),rgba(169,147,247,.44)_26%,rgba(237,230,255,.1)_54%,transparent_72%)] blur-md" />
-    <svg className="absolute inset-0 h-full w-full" viewBox="0 0 500 500" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="mysticOrbit" x1="70" y1="90" x2="430" y2="410"><stop stopColor="#8FB4FF"/><stop offset="0.48" stopColor="#A88AFF"/><stop offset="0.78" stopColor="#F79FC5"/><stop offset="1" stopColor="#F5BC73"/></linearGradient>
-        <radialGradient id="moonGlow"><stop stopColor="#FFF9FF"/><stop offset="0.2" stopColor="#D8CDFF"/><stop offset="0.52" stopColor="#806CE2" stopOpacity="0.62"/><stop offset="1" stopColor="#51459B" stopOpacity="0"/></radialGradient>
-        <linearGradient id="horizonGlow" x1="140" y1="0" x2="360" y2="0"><stop stopColor="#7463D5" stopOpacity="0"/><stop offset="0.5" stopColor="#F7ADD0" stopOpacity="0.72"/><stop offset="1" stopColor="#7463D5" stopOpacity="0"/></linearGradient>
-      </defs>
-      <ellipse cx="250" cy="245" rx="184" ry="111" transform="rotate(-21 250 245)" stroke="url(#mysticOrbit)" strokeWidth="2.2" strokeLinecap="round" strokeDasharray="2 10"/>
-      <ellipse cx="250" cy="245" rx="145" ry="195" transform="rotate(30 250 245)" stroke="#B8ADFF" strokeOpacity="0.5" strokeWidth="1.4"/>
-      <circle cx="250" cy="245" r="92" fill="url(#moonGlow)"/>
-      <circle cx="250" cy="245" r="48" fill="#7955D8" stroke="#C5B9FF" strokeOpacity="0.62"/>
-      <path d="M137 340H363" stroke="url(#horizonGlow)" strokeWidth="2.4" strokeLinecap="round"/>
-      <path d="M205 359C226 347 240 341 250 338C260 341 274 347 295 359" stroke="#F4B1D0" strokeOpacity="0.18" strokeWidth="4" strokeLinecap="round"/>
-      <circle cx="390" cy="148" r="13" fill="#8C75FF"/><circle cx="105" cy="286" r="10" fill="#FF9EBF"/><circle cx="326" cy="401" r="7" fill="#FFB76B"/><circle cx="171" cy="104" r="6" fill="#9BC4FF"/>
-    </svg>
-    <div className="absolute inset-[15%] motion-safe:animate-[spin_28s_linear_infinite]" aria-hidden="true"><span className="absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#b19dff] shadow-[0_0_16px_5px_rgba(169,145,255,0.48)]" /></div>
-    <div className="absolute left-1/2 top-[49%] grid h-22 w-22 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/55 bg-[#6c47d8]/95 text-center shadow-[0_0_36px_rgba(161,139,255,0.26)] backdrop-blur-xl"><div><span className="block text-[9px] font-black tracking-[0.18em] text-[#f1e9ff]">운보다</span><strong className="mt-1 block text-3xl font-black tracking-[-0.08em] text-white">나</strong></div></div>
-    <span className="absolute left-[7%] top-[20%] rounded-full border border-[#d8c9fc] bg-white/90 px-3 py-2 text-[10px] font-black text-[#503986] backdrop-blur">흐름</span>
-    <span className="absolute right-[4%] top-[41%] rounded-full border border-[#d8c9fc] bg-white/90 px-3 py-2 text-[10px] font-black text-[#503986] backdrop-blur">관계</span>
-    <div className="absolute bottom-[2%] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#e6dbff] bg-white/90 px-4 py-2 text-[10px] font-bold text-[#594d76] backdrop-blur">흐름 · 관계 · 선택을 한 장면으로</div>
+  return <div className="relative mx-auto aspect-[780/630] w-full max-w-[31rem] opacity-100 lg:max-w-[38rem]" role="img" aria-label="나를 중심으로 흐름, 관계, 선택이 이어지는 운보다의 빛나는 행성">
+    <div aria-hidden="true" className="pointer-events-none absolute inset-[5%] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(207,170,255,.35),rgba(240,226,255,.1)_49%,transparent_73%)] blur-[18px]" />
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-contain bg-center bg-no-repeat drop-shadow-[0_22px_33px_rgba(145,85,208,.10)]" style={{ backgroundImage: "url('/home-premium-orbit.svg')" }} />
+    <span aria-hidden="true" className="pointer-events-none absolute inset-[13%] rounded-full border border-[#e3cbff]/25 motion-safe:animate-[spin_28s_linear_infinite]" />
   </div>;
 }
 
 function HeroActions({ state, copy }: { state: LandingState; copy: LandingCopy }) {
   const showDirectFinder = state.kind === "guest" || state.kind === "analysis_ready" || state.kind === "no_profiles" || state.kind === "needs_profile_selection";
-  return <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
-    <Link href={copy.primaryHref} className="inline-flex min-h-14 w-full min-w-[13rem] items-center justify-center gap-3 rounded-2xl bg-[linear-gradient(135deg,#795cff,#9d78ff)] px-8 py-3.5 text-base font-black text-white shadow-[0_14px_32px_rgba(126,93,255,0.30)] transition hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#cab8ff] focus-visible:ring-offset-2 sm:w-auto">{copy.primary}<Icon name="arrow" /></Link>
-    {showDirectFinder ? <Link href="/deep-analysis" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-[#dfd6f3] bg-white/85 px-5 py-3 text-sm font-black text-[#493574] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-[#eee8ff]">원하는 분석 바로 찾기<Icon name="search" /></Link> : <Link href={copy.secondaryHref} className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[#dfd6f3] bg-white/85 px-5 py-3 text-sm font-black text-[#493574] backdrop-blur-xl transition hover:bg-[#eee8ff]">{copy.secondary}</Link>}
+  return <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+    <Link href={copy.primaryHref} className="inline-flex min-h-14 w-full min-w-[13rem] items-center justify-center gap-3 rounded-[1.3rem] border border-[#b98bfd] bg-[linear-gradient(135deg,#795cff,#9d78ff)] px-9 py-3.5 text-base font-black text-white shadow-[0_14px_32px_rgba(126,62,219,.30),inset_0_2px_0_rgba(255,255,255,.33)] transition hover:-translate-y-1 hover:brightness-110 hover:shadow-[0_20px_38px_rgba(126,62,219,.33)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#cab8ff] focus-visible:ring-offset-2 sm:w-auto">{copy.primary}<Icon name="arrow" className="h-5 w-5"/></Link>
+    {showDirectFinder ? <Link href="/deep-analysis" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.3rem] border border-[#ded1f4] bg-white/75 px-6 py-3.5 text-sm font-black text-[#4a2f73] shadow-[0_6px_16px_rgba(114,68,182,.07)] backdrop-blur-xl transition hover:-translate-y-1 hover:bg-[#f7efff]">원하는 분석 바로 찾기<Icon name="search" /></Link> : <Link href={copy.secondaryHref} className="inline-flex min-h-14 items-center justify-center rounded-[1.3rem] border border-[#ded1f4] bg-white/75 px-6 py-3.5 text-sm font-black text-[#4a2f73] shadow-[0_6px_16px_rgba(114,68,182,.07)] backdrop-blur-xl transition hover:-translate-y-1 hover:bg-[#f7efff]">{copy.secondary}</Link>}
   </div>;
 }
 
@@ -162,7 +147,12 @@ function QuickRoutes({ state }: { state: LandingState }) {
     { icon: "search" as const, title: "심층 분석", detail: "원하는 주제로 직접", href: "/deep-analysis", tone: "text-[#7153cf]" },
     { icon: "people" as const, title: "두 사람 궁합", detail: "관계의 차이를 함께", href: "/special-analysis/compatibility", tone: "text-[#c4489a]" },
   ];
-  return <section className="mx-auto mt-2 grid w-full max-w-6xl gap-2.5 sm:grid-cols-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map(route => <Link key={route.title} href={route.href} className={`group flex items-center gap-3.5 rounded-[1.3rem] px-4 py-3.5 transition hover:-translate-y-1 hover:border-[#9172e7] hover:shadow-[0_15px_30px_rgba(94,66,169,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8564e8] focus-visible:ring-offset-2 ${glass}`}><span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#ece4ff] ${route.tone}`}><Icon name={route.icon}/></span><span className="min-w-0"><strong className="block text-[15px] font-black text-[#211940]">{route.title}</strong><span className="mt-1 block text-[13px] leading-5 text-[#55496c]">{route.detail}</span></span><Icon name="arrow" className="ml-auto h-4 w-4 shrink-0 text-[#765ab2] transition group-hover:translate-x-1 group-hover:text-[#7049e7]"/></Link>)}</section>;
+  return <section className="relative z-10 mx-auto mt-1 grid w-full max-w-[1460px] gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map((route, index) => <Link key={route.title} href={route.href} className="group relative flex min-h-[7.65rem] items-center gap-2.5 overflow-hidden rounded-[1.6rem] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,.97),rgba(252,245,255,.94)_70%,rgba(238,226,255,.95))] px-2.5 py-3 pr-4 shadow-[0_10px_23px_rgba(101,65,174,.13),0_2px_5px_rgba(118,78,187,.06)] ring-1 ring-[#e9daf9]/70 transition duration-300 hover:-translate-y-1.5 hover:border-[#d7b8ff] hover:shadow-[0_19px_35px_rgba(111,73,186,.20)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#ab87f5]">
+    <span aria-hidden="true" className="pointer-events-none absolute -left-9 -top-9 h-32 w-32 rounded-full bg-[#f1e4ff]/60 blur-xl"/>
+    <span aria-hidden="true" className="relative h-[6.1rem] w-[6.1rem] shrink-0 bg-contain bg-center bg-no-repeat transition duration-300 group-hover:scale-105 sm:h-[6.35rem] sm:w-[6.35rem]" style={{ backgroundImage: `url('/home-route-art-${index + 1}.svg')` }} />
+    <span className="relative min-w-0 flex-1"><strong className="block text-[16px] font-black tracking-[-0.035em] text-[#251648] sm:text-[17px]">{route.title}</strong><span className="mt-1.5 block text-[12px] leading-5 text-[#5f5175] sm:text-[13px]">{route.detail}</span></span>
+    <Icon name="arrow" className="relative h-4 w-4 shrink-0 text-[#8959d4] transition group-hover:translate-x-1.5"/>
+  </Link>)}</section>;
 }
 
 function CardScene({ scene }: { scene: "sunset" | "city" | "wealth" | "growth" | "people" | "path" }) {
@@ -183,7 +173,7 @@ function CuriositySection() {
     { icon:"relation" as const,label:"관계",question:"왜 같은 관계 문제가 반복되는 걸까?",accent:"from-[#513a82]/52 via-[#2f2857]/38 to-[#111833]", scene:"people" as const, href:"/deep-analysis?category=social" },
     { icon:"calendar" as const,label:"앞으로의 흐름",question:"지금부터 무엇이 달라지고 언제 움직일까?",accent:"from-[#70415f]/52 via-[#352843]/38 to-[#111833]", scene:"path" as const, href:"/deep-analysis?mode=period" },
   ];
-  return <section className="relative mx-auto w-full max-w-6xl py-16 sm:py-20"><div className="pointer-events-none absolute -left-32 top-16 h-80 w-80 rounded-full bg-[#274b84]/10 blur-3xl"/><div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div className="max-w-2xl"><p className="text-xs font-black tracking-[0.16em] text-[#9988ff]">지금 마음에 걸리는 것</p><h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-white sm:text-4xl">요즘, 어떤 게 가장 궁금하세요?</h2><p className="mt-4 text-sm leading-7 text-[#9da5bd] sm:text-base">상품 이름을 먼저 알 필요는 없어요. 마음에 걸리는 질문에서 시작하면 관련 분석을 직접 찾아볼 수 있어요.</p></div><p className="hidden rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-xs font-bold text-[#aeb3c6] sm:block">하나만 골라도 괜찮아요</p></div><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map(item => <Link key={item.label} href={item.href} className={`group relative min-h-44 overflow-hidden rounded-[1.8rem] border border-white/10 bg-gradient-to-br ${item.accent} p-6 shadow-[0_16px_48px_rgba(0,0,0,0.22)] transition hover:-translate-y-1.5 hover:border-[#a491ff]/40 hover:shadow-[0_22px_60px_rgba(0,0,0,0.32)]`}><CardScene scene={item.scene}/><div className="relative flex items-center justify-between"><span className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-[#0d1530]/48 text-[#ddd6ff] backdrop-blur"><Icon name={item.icon}/></span><Icon name="arrow" className="h-4 w-4 text-[#7e86a3] transition group-hover:translate-x-1 group-hover:text-white"/></div><div className="relative mt-6"><p className="text-xs font-black tracking-[0.12em] text-[#b6adea]">{item.label}</p><p className="mt-2 max-w-[18rem] text-lg font-black leading-7 tracking-[-0.025em] text-white">{item.question}</p></div></Link>)}</div></section>;
+  return <section className="relative mx-auto w-full max-w-6xl py-16 sm:py-20"><div className="pointer-events-none absolute -left-32 top-16 h-80 w-80 rounded-full bg-[#274b84]/10 blur-3xl"/><div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div className="max-w-2xl"><p className="text-xs font-black tracking-[0.16em] text-[#9988ff]">지금 마음에 걸리는 것</p><h2 className="mt-3 text-3xl font-black tracking-[-0.045em] text-white sm:text-4xl">요즘, 어떤 게 가장 궁금하세요?</h2><p className="mt-4 text-sm leading-7 text-[#9da5bd] sm:text-base">상품 이름을 먼저 알 필요는 없어요. 마음에 걸리는 질문에서 시작하면 관련 분석을 직접 찾아볼 수 있어요.</p></div><p className="hidden rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-xs font-bold text-[#aeb3c6] sm:block">하나만 골라도 괜찮아요</p></div><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map(item => <Link key={item.label} href={item.href} className={`group relative min-h-44 overflow-hidden rounded-[1.8rem] border border-white/10 bg-gradient-to-br ${item.accent} p-6 shadow-[0_16px_48px_rgba(0,0,0,0.22)] transition hover:-translate-y-1.5 hover:border-[#a491ff]/40 hover:shadow-[0_22px_60px_rgba(0,0,0,0.32)]`}><CardScene scene={item.scene}/><div className="relative flex items-center justify-between"><span className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-[#0d1530]/48 text-[#ddd6ff] backdrop-blur"><Icon name={item.icon}/></span><Icon name="arrow" className="h-4 w-4 text-[#7e86a3] transition group-hover:translate-x-1 group-hover:text-[#7137ba]"/></div><div className="relative mt-6"><p className="text-xs font-black tracking-[0.12em] text-[#b6adea]">{item.label}</p><p className="mt-2 max-w-[18rem] text-lg font-black leading-7 tracking-[-0.025em] text-white">{item.question}</p></div></Link>)}</div></section>;
 }
 
 function CompatibilityVisual() {
@@ -238,7 +228,7 @@ function TrustSection({ state, copy }: { state: LandingState; copy: LandingCopy 
 }
 
 function Footer() {
-  return <footer className="mt-3 border-t border-[#e4ddf1] py-3 text-[10px] text-[#6f6682] sm:text-[11px]"><div className="mx-auto flex w-full max-w-6xl flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><div className="max-w-3xl space-y-0.5 leading-4"><p className="font-bold text-[#45385e]">운보다 · 참고용 명리 분석 서비스</p><p>상호 운보다 · 대표자 반희 · 사업자등록번호 201-28-96364</p><p>사업장 소재지 충청남도 천안시 서북구 백석4길 12, 10층 1001-B52호(백석동, 거성캐슬B빌딩)</p><p>고객센터 070-4792-8900 · 공식 지원 이메일 support@unboda.kr</p></div><nav className="flex shrink-0 flex-wrap gap-x-3 gap-y-1.5" aria-label="서비스 및 법적 문서"><Link href="/blog" className="transition hover:text-[#6946cb]">운보다 매거진</Link><Link href="/support" className="transition hover:text-white">고객지원</Link><Link href="/reviews" className="transition hover:text-white">구매 인증 후기</Link><Link href="/trust" className="transition hover:text-white">운보다 이용 원칙</Link><Link href="/terms" className="transition hover:text-white">이용약관</Link><Link href="/privacy" className="transition hover:text-white">개인정보처리방침</Link><Link href="/refund" className="transition hover:text-white">환불정책</Link></nav></div></footer>;
+  return <footer className="mt-3 border-t border-[#e4ddf1] py-3 text-[10px] text-[#6f6682] sm:text-[11px]"><div className="mx-auto flex w-full max-w-6xl flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><div className="max-w-3xl space-y-0.5 leading-4"><p className="font-bold text-[#45385e]">운보다 · 참고용 명리 분석 서비스</p><p>상호 운보다 · 대표자 반희 · 사업자등록번호 201-28-96364</p><p>사업장 소재지 충청남도 천안시 서북구 백석4길 12, 10층 1001-B52호(백석동, 거성캐슬B빌딩)</p><p>고객센터 070-4792-8900 · 공식 지원 이메일 support@unboda.kr</p></div><nav className="flex shrink-0 flex-wrap gap-x-3 gap-y-1.5" aria-label="서비스 및 법적 문서"><Link href="/blog" className="transition hover:text-[#6946cb]">운보다 매거진</Link><Link href="/support" className="transition hover:text-[#7137ba]">고객지원</Link><Link href="/reviews" className="transition hover:text-[#7137ba]">구매 인증 후기</Link><Link href="/trust" className="transition hover:text-[#7137ba]">운보다 이용 원칙</Link><Link href="/terms" className="transition hover:text-[#7137ba]">이용약관</Link><Link href="/privacy" className="transition hover:text-[#7137ba]">개인정보처리방침</Link><Link href="/refund" className="transition hover:text-[#7137ba]">환불정책</Link></nav></div></footer>;
 }
 
 function StarField() {
@@ -246,17 +236,17 @@ function StarField() {
 }
 
 function HomeJourney() {
-  return <section className="mx-auto mt-3 flex w-full max-w-6xl flex-col gap-3 rounded-[1.4rem] border border-[#e3d9f5] bg-white/75 px-5 py-3 shadow-[0_8px_22px_rgba(70,47,137,.045)] md:flex-row md:items-center md:justify-between" aria-label="운보다 이용 흐름">
+  return <section className="relative z-10 mx-auto mt-4 flex w-full max-w-[1460px] flex-col gap-3 rounded-[1.55rem] border border-white/90 bg-white/75 px-5 py-3.5 shadow-[0_12px_26px_rgba(109,73,166,.10)] ring-1 ring-[#e9ddf5] backdrop-blur-lg md:flex-row md:items-center md:justify-between" aria-label="운보다 이용 흐름">
     <div className="shrink-0">
-      <p className="text-[11px] font-black tracking-[0.08em] text-[#7a59d9]">운보다 핵심 · 리포트 다음 질문</p>
-      <p className="mt-1 text-sm font-black text-[#261a49]">리포트가 끝이 아니라, 상담이 이어집니다.</p>
+      <p className="text-[11px] font-black tracking-[0.065em] text-[#8a43d4]">운보다 핵심 · 리포트 다음 질문</p>
+      <p className="mt-1 text-[15px] font-black tracking-[-0.035em] text-[#291642] sm:text-[17px]">리포트가 끝이 아니라, 상담이 이어집니다.</p>
     </div>
-    <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[11px] font-bold text-[#54476f] sm:text-xs">
-      <span className="rounded-full bg-[#eee9ff] px-3 py-2">무료로 확인</span>
-      <Icon name="arrow" className="h-4 w-4 text-[#947dd8]"/>
-      <span className="rounded-full bg-[#eee9ff] px-3 py-2">필요한 분석만 깊게</span>
-      <Icon name="arrow" className="h-4 w-4 text-[#947dd8]"/>
-      <span className="rounded-full bg-[#eee9ff] px-3 py-2">AI 상담으로 계속</span>
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs font-bold text-[#4d2d7f] sm:text-[13px]">
+      <span className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(140deg,#f4e9ff,#eee9ff)] px-3.5 py-2"><Icon name="spark" className="h-4 w-4 text-[#963be3]"/>무료로 확인</span>
+      <Icon name="arrow" className="h-4 w-4 text-[#a176d9]"/>
+      <span className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(140deg,#f4e9ff,#eee9ff)] px-3.5 py-2"><Icon name="search" className="h-4 w-4 text-[#963be3]"/>필요한 분석만 깊게</span>
+      <Icon name="arrow" className="h-4 w-4 text-[#a176d9]"/>
+      <span className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(140deg,#f4e9ff,#eee9ff)] px-3.5 py-2"><Icon name="chat" className="h-4 w-4 text-[#963be3]"/>AI 상담으로 계속</span>
     </div>
   </section>;
 }
@@ -264,24 +254,27 @@ function HomeJourney() {
 function HomeShell({ state, copy, todayViewed: _todayViewed, returning }: { state: LandingState; copy: LandingCopy; todayViewed: boolean; returning?: ReturningLandingState }) {
   const statusLabel = returning ? returning.kind === "analysis_stale" ? "갱신 필요" : returning.kind === "analysis_in_progress" ? "생성 중" : returning.kind === "analysis_complete" && returning.status === "needs_retry" ? "해석 재생성 필요" : "최신 상태" : null;
   return <main className="relative isolate min-h-[100dvh] overflow-hidden bg-[linear-gradient(135deg,#fffdfd_0%,#f9f7ff_48%,#f0ecff_100%)] text-[#211943]">
-    <div aria-hidden="true" className="pointer-events-none absolute -left-40 top-24 h-[28rem] w-[28rem] rounded-full bg-[#efe5ff]/65 blur-[95px]"/>
-    <div aria-hidden="true" className="pointer-events-none absolute right-[-6rem] top-16 h-[34rem] w-[34rem] rounded-full bg-[#e6dbff]/75 blur-[100px]"/>
-    <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-[1320px] flex-col px-5 pb-1 pt-4 sm:px-8 lg:px-10 lg:pt-5">
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_77%_37%,rgba(221,189,255,.56),transparent_42%),radial-gradient(ellipse_at_22%_74%,rgba(232,213,255,.48),transparent_45%)]" />
+    <div aria-hidden="true" className="pointer-events-none absolute -right-[8rem] top-[4rem] h-[33rem] w-[33rem] rounded-full bg-[#eedbff]/48 blur-[100px]"/>
+    <div aria-hidden="true" className="pointer-events-none absolute left-0 right-0 top-[40%] h-[30rem] bg-contain bg-bottom bg-no-repeat opacity-80" style={{backgroundImage:"url('/home-lavender-waves.svg')"}} />
+    <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-[1510px] flex-col px-5 pb-1 pt-4 sm:px-8 lg:px-10 lg:pt-5">
       <Header state={state}/>
       <PwaInstallGuide/>
-      <section className="grid flex-1 items-center gap-4 py-4 sm:py-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)] lg:gap-5 lg:py-4" aria-label="운보다 무료 사주 시작 및 분석 이어가기">
+      <section className="relative grid flex-1 items-center gap-3 py-3 sm:py-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:gap-6 lg:py-2" aria-label="운보다 무료 사주 시작 및 분석 이어가기">
         <div className="relative z-10">
           {returning ? <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-[#d8ccf7] bg-white/85 px-3.5 py-2 text-xs font-black text-[#4d337b]">{returning.profileLabel}</span>
-            <span className="rounded-full border border-[#e5dcf7] bg-[#f4efff] px-3.5 py-2 text-xs font-bold text-[#695b86]">{statusLabel}</span>
-          </div> : <p className="inline-flex items-center gap-2 rounded-full border border-[#e0d4fa] bg-[#f1eaff] px-4 py-2 text-xs font-black tracking-[0.08em] text-[#744ad5]"><Icon name="spark" className="h-4 w-4"/>{copy.eyebrow}</p>}
-          <h1 className={`${returning ? "mt-4" : "mt-5"} max-w-[39rem] text-[clamp(2.05rem,4.1vw,3.7rem)] font-black leading-[1.15] tracking-[-0.065em] text-[#221742]`}>{copy.title === "지금 내 운, 어디로 가고 있을까?" ? <><span className="sm:hidden"><span className="block whitespace-nowrap">지금 내 운,</span><span className="block whitespace-nowrap">어디로 가고 있을까?</span></span><span className="hidden sm:inline">{copy.title}</span></> : copy.title}</h1>
-          <p className="mt-4 max-w-xl text-[14px] leading-7 text-[#5c5372] sm:text-[16px]">{copy.description}</p>
+            <span className="rounded-full border border-[#e0cafa] bg-white/85 px-4 py-2 text-xs font-black text-[#6734ab] shadow-[0_5px_18px_rgba(118,65,184,.08)]">{returning.profileLabel}</span>
+            <span className="rounded-full border border-[#ead9fc] bg-[#f0e4ff] px-4 py-2 text-xs font-bold text-[#6c4799]">{statusLabel}</span>
+          </div> : <p className="inline-flex items-center gap-2 rounded-full border border-[#e8d5f9] bg-[#f1e6ff] px-4 py-2 text-xs font-black tracking-[0.08em] text-[#843cce]"><Icon name="spark" className="h-4 w-4"/>{copy.eyebrow}</p>}
+          <div aria-hidden="true" className="pointer-events-none absolute -right-2 top-14 hidden text-4xl text-[#f4b850] lg:block">✦</div>
+          <h1 className={`${returning ? "mt-5" : "mt-5"} max-w-[44rem] bg-[linear-gradient(105deg,#28143f_12%,#342058_54%,#8737ce_100%)] bg-clip-text text-[clamp(2.25rem,4.35vw,4.6rem)] font-black leading-[1.11] tracking-[-0.068em] text-transparent`}>{copy.title === "지금 내 운, 어디로 가고 있을까?" ? <><span className="sm:hidden"><span className="block whitespace-nowrap">지금 내 운,</span><span className="block whitespace-nowrap">어디로 가고 있을까?</span></span><span className="hidden sm:inline">{copy.title}</span></> : copy.title}</h1>
+          <div aria-hidden="true" className="mt-2 h-[6px] w-40 -rotate-2 rounded-full bg-[linear-gradient(90deg,rgba(167,97,235,0),rgba(190,118,244,.56),rgba(167,97,235,0))] sm:ml-24"/>
+          <p className="mt-4 max-w-xl text-[14px] leading-7 text-[#5d506f] sm:text-[16px]">{copy.description}</p>
           <HeroActions state={state} copy={copy}/>
-          {(state.kind === "guest" || state.kind === "analysis_ready" || state.kind === "no_profiles" || state.kind === "needs_profile_selection") && copy.secondary ? <Link href={copy.secondaryHref} className="mt-3 inline-flex text-xs font-bold text-[#74658f] underline decoration-[#b6a7d6] underline-offset-4 transition hover:text-[#6c45d3]">{copy.secondary}</Link> : null}
-          {returning ? <Link href="/deep-analysis" className="ml-4 mt-3 inline-flex items-center gap-2 text-xs font-bold text-[#74658f] underline decoration-[#b6a7d6] underline-offset-4 transition hover:text-[#6c45d3]">다른 심층 분석 직접 찾기<Icon name="search" className="h-4 w-4"/></Link> : null}
+          {(state.kind === "guest" || state.kind === "analysis_ready" || state.kind === "no_profiles" || state.kind === "needs_profile_selection") && copy.secondary ? <Link href={copy.secondaryHref} className="mt-3 inline-flex text-xs font-bold text-[#79628d] underline decoration-[#bca5db] underline-offset-4 transition hover:text-[#6c45d3]">{copy.secondary}</Link> : null}
+          {returning ? <Link href="/deep-analysis" className="ml-4 mt-3 inline-flex items-center gap-2 text-xs font-bold text-[#79628d] underline decoration-[#bca5db] underline-offset-4 transition hover:text-[#6c45d3]">다른 심층 분석 직접 찾기<Icon name="search" className="h-4 w-4"/></Link> : null}
         </div>
-        <div className="relative mx-auto hidden w-full max-w-[23rem] sm:block"><FlowVisual/></div>
+        <div className="relative mx-auto hidden w-full max-w-[35rem] md:block"><FlowVisual/></div>
       </section>
       <QuickRoutes state={state}/>
       <HomeJourney/>

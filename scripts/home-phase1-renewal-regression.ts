@@ -63,7 +63,7 @@ for (const copy of [
   "두 사람의 흐름",
   "리포트 다음 질문",
   "운보다 이용 흐름",
-  "흐름 · 관계 · 선택을 한 장면으로",
+  "home-premium-orbit.svg",
   "서로 다른 두 흐름이 만나는 지점",
   "지금 내 흐름에서 시작해볼까요?",
 ]) {
@@ -133,15 +133,32 @@ assert(heroActions.includes('{copy.primary}'), "primary action label must remain
 assert(heroActions.includes('min-h-14 w-full min-w-[13rem]'), "existing main action should be larger and more visible");
 assert(heroActions.includes('text-base font-black'), "existing main action typography must have improved hierarchy");
 assert(heroActions.includes('href={copy.secondaryHref}'), "customer secondary action route must remain unchanged");
-assert(flowVisual.includes('lg:max-w-[21.5rem]'), "right orbit should be modestly reduced");
-assert(renderedHome.includes('max-w-[23rem] sm:block'), "right graphic container should be reduced");
+assert(flowVisual.includes('lg:max-w-[38rem]') && flowVisual.includes("home-premium-orbit.svg"), "homepage must use the approved premium luminous orbit illustration");
+assert(renderedHome.includes('max-w-[35rem] md:block'), "right hero artwork must have the approved enlarged presentation");
 assert(quickRoutes.includes('getPrimaryQuickRoute(state)'), "state-aware route selection preserved");
 for (const text of ['"추천 분석"', '"심층 분석"', '"두 사람 궁합"']) {
   assert(quickRoutes.includes(text), `all original discovery routes must be present: ${text}`);
 }
-assert(quickRoutes.includes('bg-[#ece4ff]'), "navigation icon surface must have stronger contrast");
-assert(quickRoutes.includes('text-[15px] font-black'), "navigation title readability must improve");
-assert(quickRoutes.includes('text-[13px] leading-5 text-[#55496c]'), "navigation description readability must improve");
+assert(quickRoutes.includes('home-route-art-') && quickRoutes.includes('bg-contain bg-center'), "four routes must use new original 3D-style illustrations");
+assert(quickRoutes.includes('text-[16px] font-black'), "navigation title hierarchy must support premium artwork");
+assert(quickRoutes.includes('leading-5 text-[#5f5175]'), "navigation details must remain legible on pale surfaces");
 assert(!renderedHome.includes('<DailyVisitEntry'), "Today card must remain hidden from main, /today detail retained");
+
+// Visible home artwork must be actual versioned assets, not a static mockup.
+for (const filename of [
+  "home-premium-orbit.svg",
+  "home-lavender-waves.svg",
+  "home-route-art-1.svg",
+  "home-route-art-2.svg",
+  "home-route-art-3.svg",
+  "home-route-art-4.svg",
+]) {
+  const svg = readFileSync(`public/${filename}`, "utf8");
+  assert(svg.startsWith("<svg") && svg.includes("</svg>"), `invalid versioned SVG asset: ${filename}`);
+  assert(!svg.includes("<script") && !svg.includes("http://www.w3.org/1999/xhtml"), `unsafe SVG markup: ${filename}`);
+}
+assert(renderedHome.includes("home-lavender-waves.svg"), "lavender horizon must appear in hero scene");
+assert(renderedHome.includes("copy.primary") === false || heroActions.includes("{copy.primary}"), "state-controlled primary label remains unchanged");
+assert(renderedHome.includes("getLandingState") === false, "do not move customer-state logic into styling layer");
 
 console.log("Home Modern Mystic final balance regression passed ✓");

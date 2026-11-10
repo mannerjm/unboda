@@ -18,8 +18,6 @@ export default function MagazineHome() {
         <Link href="/" className="text-lg font-extrabold tracking-tight text-[#4b267e]">운보다</Link>
         <nav className="flex gap-4 text-sm font-semibold" aria-label="매거진 메뉴">
           <Link href="/blog" aria-current="page" className="rounded-full bg-[#f1e5ff] px-3 py-2 text-[#7140b8]">매거진</Link>
-          <Link href="/guest-saju" className="transition hover:text-[#8550d0]">무료 사주</Link>
-          <Link href="/special-analysis/compatibility" className="hidden transition hover:text-[#8550d0] sm:inline">궁합</Link>
         </nav>
       </div>
     </header>
@@ -57,6 +55,5 @@ export default function MagazineHome() {
       </div>
       <p className="mt-6 text-xs leading-6 text-[#786988]">운보다 매거진은 전통 명리를 문화적 관점으로 설명하는 공개 정보 콘텐츠입니다. 개인의 미래나 건강·금전적 결과를 보장하지 않습니다.</p>
     </section>
-    <footer className="border-t border-[#e6d8f4] bg-white/70 px-5 py-6 text-center text-xs text-[#786988]"><Link href="/">운보다 홈</Link> · <Link href="/trust">서비스 이용 원칙</Link> · <Link href="/blog/rss.xml">RSS</Link></footer>
   </main>;
 }

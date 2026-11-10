@@ -38,7 +38,7 @@ export default function MysticLoadingScreen({
         </div>
 
         <p className="mt-3 text-xs font-black tracking-[0.16em] text-[#8b4acb] sm:mt-4">{eyebrow}</p>
-        <h1 className="mt-3 text-2xl font-black leading-snug tracking-[-0.04em] sm:text-3xl">{title}</h1>
+        <h1 className="mt-3 max-w-[26ch] break-keep text-balance text-2xl font-black leading-snug tracking-[-0.04em] sm:text-3xl">{title}</h1>
         <p className="mt-3 max-w-md text-sm leading-6 text-[#59466f] sm:text-base sm:leading-7">{description}</p>
 
         <div className="mt-5 grid w-full gap-2 sm:grid-cols-3">

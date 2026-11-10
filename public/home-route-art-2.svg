@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" aria-hidden="true"><defs>
+<linearGradient id="violet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff6ff"/><stop offset=".42" stop-color="#cfa7ff"/><stop offset="1" stop-color="#8b59de"/></linearGradient>
+<linearGradient id="pearl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".48" stop-color="#ede6ff"/><stop offset="1" stop-color="#b49be9"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#fffdd8"/><stop offset=".42" stop-color="#f6cc6a"/><stop offset=".78" stop-color="#d99637"/><stop offset="1" stop-color="#ffebad"/></linearGradient>
+<linearGradient id="rose" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff4ff"/><stop offset=".26" stop-color="#fbace7"/><stop offset=".72" stop-color="#db61cc"/><stop offset="1" stop-color="#aa3cac"/></linearGradient>
+<linearGradient id="deep" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d1afff"/><stop offset=".65" stop-color="#8856dd"/><stop offset="1" stop-color="#5c29b3"/></linearGradient>
+<filter id="s" x="-70%" y="-90%" width="260%" height="290%"><feDropShadow dx="0" dy="9" stdDeviation="8" flood-color="#8154c4" flood-opacity=".23"/></filter>
+<filter id="gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="11"/></filter>
+</defs><ellipse cx="83" cy="102" rx="67" ry="12" fill="#c8a2f1" opacity=".34" filter="url(#gl)"/><g filter="url(#s)">
+<path d="M25 73 75 49 131 71 77 97Z" fill="#9170d9" stroke="#cdb5fa" stroke-width="2"/>
+<path d="M25 73 77 97 77 106 25 82Z" fill="url(#deep)"/>
+<path d="M77 97 131 71 131 81 77 106Z" fill="#7046c4"/>
+<path d="M32 56 80 33 135 54 80 83Z" fill="#ad81ef" stroke="#eadcff" stroke-width="2"/>
+<path d="M32 56 80 82 80 91 32 65Z" fill="#8f62dc"/><path d="M80 82 135 54 135 63 80 91Z" fill="#794acb"/>
+<path d="M27 37 76 13 132 37 79 64Z" fill="url(#pearl)" stroke="#decaff" stroke-width="2.5"/>
+<path d="M27 37 79 64 79 72 27 46Z" fill="#baa2f3"/><path d="M79 64 132 37 132 46 79 72Z" fill="#9671df"/>
+<path d="m79 20 9 15 16 8-16 7-9 12-8-12-17-7 17-8Z" fill="url(#violet)"/>
+</g><path d="m129 13 4.2 12 12 4.2-12 4.2-4.2 12-4.2-12-12-4.2 12-4.2Z" fill="url(#gold)"/><path d="m145 49 2.2 7 7 2.2-7 2.2-2.2 7-2.2-7-7-2.2 7-2.2Z" fill="#b36ce8" opacity=".8"/></svg>

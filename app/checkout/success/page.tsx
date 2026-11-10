@@ -25,17 +25,17 @@ function PaidReportPaymentConfirmation({ errorMessage }: { errorMessage?: string
   const failed = Boolean(errorMessage);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-5 py-10 text-[#11162d] sm:px-8">
+    <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_72%_14%,#ebddff_0%,#faf7ff_49%,#fffefe_100%)] px-5 py-10 text-[#281744] sm:px-8">
       <section
         aria-labelledby="paid-report-payment-heading"
-        className="w-full max-w-xl overflow-hidden rounded-[2rem] border border-[#dce1ef] bg-white shadow-[0_18px_55px_rgba(33,40,83,0.09)]"
+        className="w-full max-w-xl overflow-hidden rounded-[2rem] border border-[#e3d4f7] bg-white shadow-[0_22px_60px_rgba(111,70,176,.14)]"
       >
-        <div className="bg-[linear-gradient(135deg,#111734,#282052)] px-7 py-5 text-white sm:px-9">
-          <p className="text-xs font-black tracking-[0.16em] text-[#c9c3ff]">운보다 · 유료 리포트</p>
+        <div className="bg-[linear-gradient(135deg,#7850e8,#a56df1)] px-7 py-5 text-white sm:px-9">
+          <p className="text-xs font-black tracking-[0.16em] text-[#f5eaff]">운보다 · 유료 리포트</p>
           <p className="mt-1 text-sm text-slate-200">카드 결제 확인</p>
         </div>
         <div className="px-7 py-9 text-center sm:px-9 sm:py-11" role={failed ? "alert" : "status"}>
-          <div aria-hidden="true" className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#f3f1ff] text-[#6f5ce7]">
+          <div aria-hidden="true" className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#f3f1ff] text-[#8152cb]">
             {failed ? (
               <span className="text-3xl font-bold">!</span>
             ) : (

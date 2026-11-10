@@ -28,29 +28,29 @@ export default async function DeepAnalysisPage({ searchParams }: { searchParams?
   const catalogContent = (
       <main className="min-h-screen bg-[#f5f7fc] px-5 py-7 text-stone-900 sm:px-8 sm:py-9">
         <div className="mx-auto w-full max-w-6xl">
-          <section className="relative overflow-hidden rounded-[2rem] border border-[#6f65ba]/20 bg-[linear-gradient(135deg,#0a1128_0%,#111735_48%,#1b1738_100%)] px-6 py-8 text-white shadow-[0_24px_70px_rgba(23,24,55,0.18)] sm:px-9 sm:py-10 lg:px-11">
+          <section className="relative overflow-hidden rounded-[2rem] border border-[#e0d0f7] bg-[radial-gradient(circle_at_85%_12%,rgba(206,170,255,.45),transparent_36%),linear-gradient(130deg,#fffefe_0%,#f8f0ff_65%,#eae0ff_100%)] px-6 py-8 text-[#281744] shadow-[0_18px_48px_rgba(113,75,171,.11)] sm:px-9 sm:py-10 lg:px-11">
             <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#7759db]/20 blur-3xl" />
             <div className="pointer-events-none absolute bottom-[-8rem] left-[18%] h-56 w-56 rounded-full bg-[#d36e9c]/10 blur-3xl" />
             <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
               <div className="max-w-3xl">
-                <p className="text-xs font-black tracking-[0.16em] text-[#a999ff]">원하는 분석 바로 찾기</p>
+                <p className="text-xs font-black tracking-[0.16em] text-[#8551ca]">원하는 분석 바로 찾기</p>
                 <h1 className="mt-3 text-3xl font-black leading-tight tracking-[-0.05em] sm:text-4xl lg:text-[2.8rem]">
                   상품 이름보다,<br className="hidden sm:block" /> 지금 궁금한 질문부터 골라보세요.
                 </h1>
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-[#b4bad0] sm:text-base">
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-[#655476] sm:text-base">
                   주제나 시간 범위를 고르면 실제 고민에 가까운 질문부터 보여드려요. 필요한 분석만 자세히 확인할 수 있습니다.
                 </p>
               </div>
               {activeProfile ? (
-                <div className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-3 backdrop-blur-xl">
-                  <p className="text-[10px] font-black tracking-[0.14em] text-[#9f98c7]">현재 분석 대상</p>
-                  <p className="mt-1 text-sm font-black text-white">{activeProfile.label}</p>
-                  <Link href={`/recommendations?profileId=${activeProfile.id}`} className="mt-2 inline-flex text-xs font-bold text-[#cfc8ff] underline decoration-[#8176bb] underline-offset-4">
+                <div className="rounded-2xl border border-[#ded0f5] bg-white/80 px-4 py-3 shadow-sm backdrop-blur-xl">
+                  <p className="text-[10px] font-black tracking-[0.14em] text-[#7b59aa]">현재 분석 대상</p>
+                  <p className="mt-1 text-sm font-black text-[#311a56]">{activeProfile.label}</p>
+                  <Link href={`/recommendations?profileId=${activeProfile.id}`} className="mt-2 inline-flex text-xs font-bold text-[#6c39b3] underline decoration-[#ad8cde] underline-offset-4">
                     내 사주 기반 추천 보기
                   </Link>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-xs leading-5 text-[#aeb5cb]">
+                <div className="rounded-2xl border border-[#e5d6f6] bg-white/80 px-4 py-3 text-xs leading-5 text-[#665675]">
                   직접 둘러보기는 로그인 없이도 가능합니다.
                 </div>
               )}

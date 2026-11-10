@@ -161,8 +161,8 @@ assert(account.includes('fetch("/api/account/status"') && account.includes('fetc
 assert(admin.includes("getAdminGrowthDashboard") && admin.includes("getAdminRefundClosureDashboard"), "admin dashboard data behavior must remain intact");
 assert(adminSupport.includes("listSupportRequestsForOperator"), "admin support data behavior must remain intact");
 
-assert(shell.includes("linear-gradient(180deg,#091127_0%,#0d1530_58%,#15143a_100%)"), "desktop shell must use the Modern Mystic navy navigation");
-assert(shell.includes('bg-[#6f5ce7]'), "mobile active navigation must use the violet brand accent");
+assert(shell.includes("linear-gradient(170deg,#ffffff_0%,#f8f3ff_52%,#efe7ff_100%)"), "desktop detail sidebar must match the approved premium lavender/white homepage");
+assert(shell.includes("linear-gradient(135deg,#7b4de4,#9c72f2)"), "mobile active navigation must retain a visible violet brand accent");
 assert(shell.includes('bg-[#f5f7fc]'), "shell content canvas must use cool white");
 
 assert(guestSaju.includes("먼저, 나의 흐름부터"), "guest free-saju must use the renewed entry narrative");
@@ -190,5 +190,44 @@ assert(!compatibility.includes("#fbf6ed") && !compatibility.includes("#dfd3c1"),
 assert(paidDetail.includes('bg-[#f5f7fc]'), "paid product detail must use cool canvas");
 assert(checkout.includes('bg-[#f5f7fc]'), "checkout must use cool canvas");
 assert(checkout.includes("js.tosspayments.com/v2/standard"), "Toss checkout integration must remain intact");
+
+
+/* Premium detail visual regression only. Functional contracts above remain in force. */
+const css = read("app/globals.css");
+const premiumLoader = read("app/components/MysticLoadingScreen.tsx");
+const aiPortfolio = read("app/ai-consulting/AiConsultingPortfolioClient.tsx");
+const paidReport = read("app/paid-analysis/[productId]/PaidAnalysisV4Report.tsx");
+const paidCompatibility = read("app/components/CompatibilityPaidReportView.tsx");
+const checkoutSuccess = read("app/checkout/success/page.tsx");
+const mainLanding = read("app/components/HomeExperience.tsx");
+assert(shell.includes("unboda-detail-theme"), "AppShell detail theme must be opt-in, not global");
+assert(css.includes("UNBODA DETAIL VISUAL THEME") && css.includes(".unboda-detail-theme"),
+  "shared detail colors should use premium white-lavender tokens");
+assert(!mainLanding.includes("unboda-detail-theme"), "the approved homepage must remain visually unchanged");
+assert(guestSaju.includes("unboda-standalone-theme") && guestSaju.includes("bg-[radial-gradient(ellipse_at_75%_10%"),
+  "guest free-saju form must use the premium light canvas");
+assert(guestSaju.includes('fetch("/api/guest-free-analysis/start"') &&
+       guestSaju.includes('router.push("/guest-loading")') &&
+       guestSaju.includes("age14OrOlderConfirmed"),
+  "guest free generation and age gates must not change for visual styling");
+assert(premiumLoader.includes('asSection ? "section" : "main"') &&
+       premiumLoader.includes("showAnimation") &&
+       premiumLoader.includes("{title}") && premiumLoader.includes("{description}") &&
+       premiumLoader.includes("rounded-[2.25rem]"),
+  "shared paid/free loading keeps exact copy and animated/stopped states");
+assert(checkoutSuccess.includes('fetch(`/api/orders/${encodeURIComponent(orderId)}/confirm-payment`') &&
+       checkoutSuccess.includes('router.replace(') &&
+       checkoutSuccess.includes("radial-gradient(circle_at_72%_14%"),
+  "checkout approval UI must preserve server payment confirmation and redirects");
+assert(aiPortfolio.includes('onSubmit={submitQuestion}') &&
+       aiPortfolio.includes("data-ai-composer=") &&
+       aiPortfolio.includes("bg-[radial-gradient(circle_at_82%_18%"),
+  "AI 상담 questions and conversation history remain wired into visually polished UI");
+assert(paidReport.includes("detail.conclusion.headline") &&
+       paidReport.includes("bg-[linear-gradient(160deg,#fffefe_0%,#faf6ff_45%,#f0eaff_100%)]"),
+  "premium report content must remain bound to existing detail data");
+assert(paidCompatibility.includes("report.relationshipCore.headline") &&
+       paidCompatibility.includes("border-[#e1d3f5]"),
+  "compatibility report remains actual data-backed while styled");
 
 console.log("Visual system phase 3.5 regression passed ✓");

@@ -18,10 +18,10 @@ export default async function SpecialAnalysisPage() {
     <AppShell activeProfileId={activeProfile?.id}>
       <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
         <div className="mx-auto w-full max-w-5xl">
-          <header className="relative overflow-hidden rounded-[2rem] border border-[#35375f] bg-[radial-gradient(circle_at_top_right,rgba(132,111,241,0.22),transparent_34%),linear-gradient(145deg,#0b1025_0%,#151938_55%,#211b46_100%)] px-6 py-8 text-white shadow-[0_22px_60px_rgba(24,29,67,0.14)] sm:px-8 sm:py-10">
-            <p className="text-xs font-semibold tracking-[0.16em] text-[#b9b2f6]">SPECIAL ANALYSIS</p>
-            <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">전문 분석</h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-200">
+          <header className="relative overflow-hidden rounded-[2rem] border border-[#e0d0f7] bg-[radial-gradient(circle_at_85%_15%,rgba(198,159,255,.45),transparent_36%),linear-gradient(135deg,#ffffff_0%,#f8f0ff_65%,#e9dfff_100%)] px-6 py-8 text-[#281744] shadow-[0_18px_48px_rgba(110,72,170,.12)] sm:px-8 sm:py-10">
+            <p className="text-xs font-semibold tracking-[0.16em] text-[#8b50ce]">SPECIAL ANALYSIS</p>
+            <h1 className="mt-2 text-3xl font-bold text-[#281744] sm:text-4xl">전문 분석</h1>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-[#685a7b]">
               한 사람의 운세를 넘어, 두 사람의 관계와 중요한 시기처럼 더 구체적인 주제를 깊이 살펴봅니다.
             </p>
           </header>

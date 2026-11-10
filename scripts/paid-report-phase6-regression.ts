@@ -69,7 +69,7 @@ for (const [name, source] of reportSurfaces) {
 }
 
 assert(
-  v4.includes("bg-[linear-gradient(180deg,#f7f7fb_0%,#f1f2f7_42%,#f6f7fb_100%)]")
+  v4.includes("bg-[linear-gradient(160deg,#fffefe_0%,#faf6ff_45%,#f0eaff_100%)]")
     && v4.includes("bg-[radial-gradient(circle_at_82%_14%"),
   "V4 report must use the premium cool reading canvas and hero treatment",
 );
@@ -149,7 +149,7 @@ for (const [name, source] of [
     `${name} must keep the premium dark action-guide treatment`,
   );
   assert(
-    source.includes("shadow-[0_30px_90px_rgba(31,28,72,0.14)]"),
+    source.includes(name === "pair compatibility report" ? "shadow-[0_25px_75px_rgba(111,74,171,.13)]" : "shadow-[0_30px_90px_rgba(31,28,72,0.14)]"),
     `${name} must keep the elevated premium report surface`,
   );
 }

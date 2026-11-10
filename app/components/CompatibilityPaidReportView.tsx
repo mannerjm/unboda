@@ -42,7 +42,7 @@ function PointList({ points }: { points: readonly string[] }) {
 
 function SummaryTile({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
   return (
-    <article className="relative overflow-hidden rounded-[1.55rem] border border-[#e1e2ed] bg-[linear-gradient(145deg,#ffffff_0%,#f8f8fc_100%)] p-5 shadow-[0_12px_28px_rgba(35,39,78,0.045)] sm:p-6">
+    <article className="relative overflow-hidden rounded-[1.55rem] border border-[#e4d8f5] bg-[linear-gradient(145deg,#ffffff_0%,#f9f3ff_100%)] p-5 shadow-[0_12px_28px_rgba(35,39,78,0.045)] sm:p-6">
       <p className="text-xs font-extrabold tracking-[0.14em] text-[#6f5ce7]">{eyebrow}</p>
       <h4 className="mt-3 text-base font-extrabold leading-7 text-[#11162d]">{title}</h4>
       <p className="mt-2 text-[15px] leading-7 text-slate-700">{body}</p>
@@ -97,7 +97,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
 
   return (
     <div className="relative mx-auto mt-8 w-full max-w-5xl">
-      <article className="overflow-hidden rounded-[2.25rem] border border-[#d8d9e6] bg-[linear-gradient(180deg,#ffffff_0%,#f8f8fc_100%)] shadow-[0_30px_90px_rgba(31,28,72,0.14)] ring-1 ring-white/80">
+      <article className="overflow-hidden rounded-[2.25rem] border border-[#e1d3f5] bg-[linear-gradient(180deg,#ffffff_0%,#f8f3ff_100%)] shadow-[0_25px_75px_rgba(111,74,171,.13)] ring-1 ring-white/80">
         <header className="relative overflow-hidden border-b border-[#332d65] bg-[radial-gradient(circle_at_84%_16%,rgba(155,139,255,0.36),transparent_27%),radial-gradient(circle_at_12%_92%,rgba(104,86,216,0.24),transparent_30%),linear-gradient(145deg,#17172f_0%,#242047_48%,#18192f_100%)] px-6 py-9 text-white sm:px-10 sm:py-12">
           <div aria-hidden="true" className="absolute -right-12 -top-20 h-72 w-72 rounded-full border border-white/10" />
           <div aria-hidden="true" className="absolute right-12 top-10 h-36 w-36 rounded-full border border-white/[0.06]" />

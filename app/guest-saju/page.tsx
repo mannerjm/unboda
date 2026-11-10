@@ -80,21 +80,21 @@ export default function GuestSajuPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:py-12">
+    <main className="unboda-standalone-theme min-h-screen bg-[radial-gradient(ellipse_at_75%_10%,#f0e3ff_0%,#faf7ff_48%,#fffdfd_100%)] px-5 py-8 text-[#281744] sm:py-12">
       <div className="mx-auto w-full max-w-3xl">
         <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-[#59617b] transition hover:text-[#11162d]">
           ← 운보다 홈으로
         </Link>
 
-        <section className="relative mt-5 overflow-hidden rounded-[2.2rem] border border-[#7064b8]/20 bg-[linear-gradient(135deg,#091127_0%,#111735_55%,#21183d_100%)] px-6 py-8 text-white shadow-[0_24px_70px_rgba(23,24,55,0.16)] sm:px-9 sm:py-10">
+        <section className="relative mt-5 overflow-hidden rounded-[2.2rem] border border-[#dfcff8] bg-[radial-gradient(circle_at_88%_22%,rgba(201,166,255,.55),transparent_36%),linear-gradient(125deg,#ffffff_4%,#f8f1ff_66%,#e9dfff_100%)] px-6 py-8 text-[#281744] shadow-[0_18px_48px_rgba(115,76,173,0.12)] sm:px-9 sm:py-10">
           <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[#765de7]/25 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-28 left-[14%] h-52 w-52 rounded-full bg-[#e56b9b]/12 blur-3xl" />
           <div className="relative max-w-2xl">
-            <p className="text-xs font-black tracking-[0.16em] text-[#b0a2ff]">무료 분석부터 시작</p>
+            <p className="text-xs font-black tracking-[0.16em] text-[#8452d2]">무료 분석부터 시작</p>
             <h1 className="mt-3 text-3xl font-black leading-tight tracking-[-0.05em] sm:text-4xl">
               먼저, 나의 흐름부터<br className="hidden sm:block" /> 확인해볼까요?
             </h1>
-            <p className="mt-4 text-sm leading-7 text-[#b7bdd1] sm:text-base">
+            <p className="mt-4 text-sm leading-7 text-[#685a7b] sm:text-base">
               로그인 없이 출생 정보를 입력하면 사주 구조와 현재 흐름을 무료로 확인할 수 있어요.
               결과에서 궁금한 질문이 생기면 그때 더 깊은 분석으로 이어가면 됩니다.
             </p>
@@ -102,7 +102,7 @@ export default function GuestSajuPage() {
         </section>
 
         {hasSavedResult ? (
-          <section className="mt-6 rounded-[1.6rem] border border-[#dfe3ef] bg-white p-6 shadow-[0_14px_40px_rgba(32,38,72,0.06)]">
+          <section className="mt-6 rounded-[1.6rem] border border-[#e3d4f5] bg-white/95 p-6 shadow-[0_16px_38px_rgba(109,68,176,.09)]">
             <p className="text-xs font-black tracking-[0.14em] text-[#7768c7]">저장된 무료 결과</p>
             <h2 className="mt-2 text-lg font-black">
               {savedResultNeedsRetry
@@ -116,7 +116,7 @@ export default function GuestSajuPage() {
             </p>
             <Link
               href="/guest-result"
-              className="mt-4 inline-flex rounded-xl bg-[#111735] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#1d254c]"
+              className="mt-4 inline-flex rounded-xl bg-[linear-gradient(135deg,#7b4fe7,#9b6af1)] px-5 py-3 text-sm font-bold text-white shadow-[0_8px_18px_rgba(117,75,194,.19)] transition hover:brightness-110"
             >
               {savedResultNeedsRetry ? "저장된 결과 열고 AI 해석 다시 생성하기" : "저장된 결과 다시 보기"}
             </Link>
@@ -125,7 +125,7 @@ export default function GuestSajuPage() {
         ) : null}
 
         <form
-          className="mt-6 min-w-0 space-y-5 rounded-[2rem] border border-[#dfe3ef] bg-white p-6 shadow-[0_20px_55px_rgba(32,38,72,0.07)] sm:p-8"
+          className="mt-6 min-w-0 space-y-5 rounded-[2rem] border border-[#e3d4f5] bg-white/95 p-6 shadow-[0_20px_55px_rgba(109,68,176,.11)] sm:p-8"
           onSubmit={(event) => { event.preventDefault(); void submit(); }}
         >
           <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#e7eaf2] pb-5">
@@ -201,7 +201,7 @@ export default function GuestSajuPage() {
             <p className="mt-1 pl-8 text-xs leading-5 text-[#7b8299]">서비스 이용자 기준이며, 분석 대상의 나이와는 다릅니다.</p>
           </div>
           {error ? <p id="guest-analysis-error" role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
-          <button type="submit" disabled={isSubmitting} className="w-full rounded-xl bg-[linear-gradient(135deg,#6f5ce7,#8d68ef)] px-5 py-4 font-black text-white shadow-[0_12px_28px_rgba(111,92,231,0.22)] transition hover:brightness-105 disabled:opacity-55">{isSubmitting ? "무료 분석 중..." : "무료로 내 흐름 보기"}</button>
+          <button type="submit" disabled={isSubmitting} className="w-full rounded-xl bg-[linear-gradient(135deg,#7c4ce9,#a56ef2)] px-5 py-4 font-black text-white shadow-[0_12px_28px_rgba(115,72,212,0.25)] transition hover:brightness-105 disabled:opacity-55">{isSubmitting ? "무료 분석 중..." : "무료로 내 흐름 보기"}</button>
         </form>
       </div>
     </main>

@@ -83,7 +83,7 @@ assert(
   overview.includes('section className="mt-8 grid gap-5 lg:auto-rows-fr lg:grid-cols-3"'),
   "all compatibility cards must share equal-height desktop grid rows",
 );
-const unifiedCardClass = 'group flex min-h-[270px] flex-col rounded-[28px] border border-[#dfe3ef] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md';
+const unifiedCardClass = 'group flex min-h-[270px] flex-col rounded-[28px] border border-[#e3d4f5] bg-[linear-gradient(145deg,#ffffff,#f8f0ff)] p-6 shadow-[0_9px_25px_rgba(106,73,165,.09)] transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md';
 assert(
   overview.split(unifiedCardClass).length - 1 === 5,
   "all five compatibility cards must share the same card sizing and surface treatment",

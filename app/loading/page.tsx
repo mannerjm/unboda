@@ -87,7 +87,7 @@ export default function LoadingPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#0b122b]" />
+        <div className="min-h-screen bg-[linear-gradient(145deg,#fffefe,#f5efff)]" />
       }
     >
       <LoadingPageContent />

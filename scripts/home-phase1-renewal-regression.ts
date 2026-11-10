@@ -124,4 +124,24 @@ for (const forbidden of ["requestPayment", "markOrderPaid", "grantEntitlement", 
   assert(!home.includes(forbidden), `home visual renewal must not embed commercial runtime logic: ${forbidden}`);
 }
 
+
+const heroActions = home.slice(home.indexOf("function HeroActions("), home.indexOf("function DailyVisitEntry("));
+const flowVisual = home.slice(home.indexOf("function FlowVisual("), home.indexOf("function HeroActions("));
+const quickRoutes = home.slice(home.indexOf("function QuickRoutes("), home.indexOf("function CardScene("));
+assert(heroActions.includes('href={copy.primaryHref}'), "primary action route must remain state-driven");
+assert(heroActions.includes('{copy.primary}'), "primary action label must remain exactly state-driven");
+assert(heroActions.includes('min-h-14 w-full min-w-[13rem]'), "existing main action should be larger and more visible");
+assert(heroActions.includes('text-base font-black'), "existing main action typography must have improved hierarchy");
+assert(heroActions.includes('href={copy.secondaryHref}'), "customer secondary action route must remain unchanged");
+assert(flowVisual.includes('lg:max-w-[21.5rem]'), "right orbit should be modestly reduced");
+assert(renderedHome.includes('max-w-[23rem] sm:block'), "right graphic container should be reduced");
+assert(quickRoutes.includes('getPrimaryQuickRoute(state)'), "state-aware route selection preserved");
+for (const text of ['"추천 분석"', '"심층 분석"', '"두 사람 궁합"']) {
+  assert(quickRoutes.includes(text), `all original discovery routes must be present: ${text}`);
+}
+assert(quickRoutes.includes('bg-[#ece4ff]'), "navigation icon surface must have stronger contrast");
+assert(quickRoutes.includes('text-[15px] font-black'), "navigation title readability must improve");
+assert(quickRoutes.includes('text-[13px] leading-5 text-[#55496c]'), "navigation description readability must improve");
+assert(!renderedHome.includes('<DailyVisitEntry'), "Today card must remain hidden from main, /today detail retained");
+
 console.log("Home Modern Mystic final balance regression passed ✓");

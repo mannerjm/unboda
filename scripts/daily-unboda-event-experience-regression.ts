@@ -15,9 +15,10 @@ for (const cue of [
   "오늘 한 가지만 기억하세요.",
 ]) assert(today.includes(cue), `missing daily visit experience element: ${cue}`);
 
-assert(today.includes("bg-[linear-gradient(180deg,#070d20_0%,#0b1330_48%,#090f24_100%)]"));
-assert(today.includes("radial-gradient(circle_at_12%_18%") && home.includes("radial-gradient(circle_at_12%_18%"), "daily detail should share home night-sky art direction");
-assert(today.includes("bg-[#f7e0af]") && home.includes("bg-[#f7e0af]"), "daily CTA should share home gold event accent");
+assert(today.includes("bg-[radial-gradient(ellipse_at_50%_0%,#ffffff_0%,#f9f3ff_42%,#eee6ff_100%)]"), "daily must match the approved white-lavender homepage palette");
+assert(today.includes("radial-gradient(circle_at_12%_18%") && today.includes("bg-white/90"), "daily detail should use subtle lavender orbital accents and readable pale cards");
+assert(today.includes("bg-[linear-gradient(135deg,#8853dc,#6b3fc2)]") && home.includes("bg-[linear-gradient(135deg,#ac4be9,#7534d6_72%,#803ce9)]"), "daily call-to-action must use the homepage purple accent");
+assert(!today.includes("bg-[linear-gradient(180deg,#070d20") && !today.includes("text-[#e5e7f2]"), "old dark-mode daily canvas and copy must not return");
 assert(today.includes("sm:") && today.includes("md:grid-cols-[1fr_16rem]"), "event card must work in narrow and wide layouts");
 assert(today.includes("focus-visible:outline") && today.includes('aria-labelledby="today-action"'), "action and keyboard accessibility must remain");
 assert(today.indexOf("{reading.topic}") < today.indexOf("{reading.flow}") && today.indexOf("{reading.flow}") < today.indexOf("{reading.action}"), "single daily topic, flow and practical action remain in original order");

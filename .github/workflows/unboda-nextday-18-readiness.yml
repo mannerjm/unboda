@@ -1,9 +1,7 @@
 name: UNBODA next-day 18-slot source and SNS reservation early warning (READ ONLY)
 # This workflow NEVER POSTs to Metricool or changes any existing automation.
 on:
-  schedule:
-    - cron: '40 12 * * *' # 21:40 KST: early source/provider inventory
-    - cron: '45 13 * * *' # 22:45 KST: re-check after nextday photo-intake
+  # Paused scheduled lifestyle content/photo workflows per user request 2026-11-10.
   workflow_dispatch:
   pull_request:
     paths:
@@ -39,7 +37,7 @@ jobs:
     if: >
       github.repository == 'mannerjm/unboda' &&
       github.ref == 'refs/heads/main' &&
-      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push')
+      github.event_name == 'workflow_dispatch'
     needs: offline-invariants
     runs-on: ubuntu-latest
     timeout-minutes: 6

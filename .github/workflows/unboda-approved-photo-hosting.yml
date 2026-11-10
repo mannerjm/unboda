@@ -4,10 +4,7 @@ on:
     paths:
       - "scripts/social/prepare-photo-immutable-release.py"
       - ".github/workflows/unboda-approved-photo-hosting.yml"
-  workflow_run:
-    workflows:
-      - "UNBODA licensed real-photo candidate intake (NO SOCIAL POST)"
-    types: [completed]
+  workflow_dispatch: # photo publishing paused; manual tests only
 permissions:
   contents: write
   actions: read

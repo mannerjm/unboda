@@ -1,0 +1,134 @@
+name: UNBODA daily 13KST 12-star horoscope carousel source (NO SNS POST)
+on:
+  schedule:
+    - cron: '31 11 * * *' # 20:31 KST: build tomorrow's 5-page horoscope
+    - cron: '10 19 * * *' # 04:10 KST: today's safety backup
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/daily-constellation/**'
+      - '.github/workflows/unboda-daily-constellation-1300.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/daily-constellation/**'
+      - '.github/workflows/unboda-daily-constellation-1300.yml'
+permissions:
+  contents: write
+concurrency:
+  group: unboda-daily-constellation-media-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  offline-original-asset-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Korean and zodiac glyph fonts and pinned renderer
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk fonts-dejavu-core
+          python -m pip install --no-cache-dir Pillow==11.3.0
+      - name: Render and verify 12 different date-specific horoscope texts and all 5 original images
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/daily-constellation/render.py
+          python scripts/daily-constellation/render.py --self-test
+  render-and-host:
+    if: >
+      github.repository == 'mannerjm/unboda' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push')
+    needs: offline-original-asset-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TZ: Asia/Seoul
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Resolve exact KST date and skip existing immutable release
+        id: date
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event.schedule }}" = "10 19 * * *" ]; then
+            TARGET="$(TZ=Asia/Seoul date +%Y-%m-%d)"
+          else
+            TARGET="$(TZ=Asia/Seoul date -d tomorrow +%Y-%m-%d)"
+          fi
+          TAG="unboda-constellation-$(echo "$TARGET" | tr -d '-')"
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if gh release view "$TAG" --repo mannerjm/unboda >/dev/null 2>&1; then
+            ASSETS="$(gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length')"
+            if [ "$ASSETS" != "7" ]; then
+              echo "EXISTING_IMMUTABLE_RELEASE_INCOMPLETE_BLOCKED" >&2
+              exit 1
+            fi
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "ALREADY_HOSTED_NO_DUPLICATE: $TAG"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install exact Korean fonts and renderer
+        if: steps.date.outputs.skip != 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk fonts-dejavu-core
+          python -m pip install --no-cache-dir Pillow==11.3.0
+      - name: Render five original date-scoped images and separate text
+        if: steps.date.outputs.skip != 'true'
+        run: |
+          python scripts/daily-constellation/render.py --date "${{ steps.date.outputs.target }}" --out release-constellation
+      - name: Verify five 1080x1350 PNG, hashes, signs, date, caption and unique day text
+        if: steps.date.outputs.skip != 'true'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import datetime as dt,hashlib,json,pathlib
+          from PIL import Image
+          root=pathlib.Path('release-constellation')
+          data=json.loads((root/'constellation-manifest.json').read_text(encoding='utf8'))
+          assert len(data['images'])==5 and len(data['signs'])==12
+          assert len(set(s['name'] for s in data['signs']))==12
+          assert len(set(s['text'] for s in data['signs']))==12
+          assert data['publicationHourKst']=='13:00'
+          assert data['generalEntertainmentOnly'] is True
+          assert data['dateKst']==dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).date().isoformat() or data['dateKst']==(dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).date()+dt.timedelta(days=1)).isoformat()
+          files=set(p.name for p in root.iterdir())
+          assert files=={'caption.txt','constellation-manifest.json'}|set(p['name'] for p in data['images'])
+          for p in data['images']:
+            raw=(root/p['name']).read_bytes()
+            assert Image.open(root/p['name']).size==(1080,1350)
+            assert 20000<len(raw)<6500000
+            assert hashlib.sha256(raw).hexdigest()==p['sha256']
+          assert len((root/'caption.txt').read_text(encoding='utf8'))<451
+          print("FIVE_ORIGINAL_CAROUSEL_ASSETS_CONTENT_AND_HASH_VERIFIED")
+          PY
+      - name: Publish immutable daily artwork release for SNS scheduler
+        if: steps.date.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.date.outputs.tag }}"
+          if gh release view "$TAG" --repo mannerjm/unboda >/dev/null 2>&1; then
+            echo "RELEASE_ALREADY_EXISTS_DO_NOT_OVERWRITE" >&2
+            exit 1
+          fi
+          gh release create "$TAG" release-constellation/* --repo mannerjm/unboda             --target "${{ github.sha }}"             --title "운보다 12별자리 운세 ${{ steps.date.outputs.target }}"             --notes "Original 5-image 12 tropical sun-sign general reflection; not personal saju or guaranteed prediction."             --prerelease
+          gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length' | grep -qx 7
+          echo "FIVE_DAILY_12STAR_SOURCE_IMAGES_HOSTED_NO_SNS_POST"

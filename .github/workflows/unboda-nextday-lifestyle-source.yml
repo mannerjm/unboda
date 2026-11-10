@@ -2,8 +2,7 @@ name: UNBODA next-day seven lifestyle editorial source factory
 # Source JSON only. Photo licensing and visually inspected media are separate gates.
 # No Metricool posting / no unreviewed images are ever released by this workflow.
 on:
-  schedule:
-    - cron: '20 8,9,10 * * *' # 17:20 / 18:20 / 19:20 KST
+  # Paused scheduled lifestyle content/photo workflows per user request 2026-11-10.
   workflow_dispatch:
   push:
     branches: [main]
@@ -21,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   generate:
-    if: github.repository == 'mannerjm/unboda'
+    if: github.repository == 'mannerjm/unboda' && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request')
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:

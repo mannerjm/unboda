@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" aria-hidden="true"><defs>
+<linearGradient id="violet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff6ff"/><stop offset=".42" stop-color="#cfa7ff"/><stop offset="1" stop-color="#8b59de"/></linearGradient>
+<linearGradient id="pearl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".48" stop-color="#ede6ff"/><stop offset="1" stop-color="#b49be9"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#fffdd8"/><stop offset=".42" stop-color="#f6cc6a"/><stop offset=".78" stop-color="#d99637"/><stop offset="1" stop-color="#ffebad"/></linearGradient>
+<linearGradient id="rose" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff4ff"/><stop offset=".26" stop-color="#fbace7"/><stop offset=".72" stop-color="#db61cc"/><stop offset="1" stop-color="#aa3cac"/></linearGradient>
+<linearGradient id="deep" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d1afff"/><stop offset=".65" stop-color="#8856dd"/><stop offset="1" stop-color="#5c29b3"/></linearGradient>
+<filter id="s" x="-70%" y="-90%" width="260%" height="290%"><feDropShadow dx="0" dy="9" stdDeviation="8" flood-color="#8154c4" flood-opacity=".23"/></filter>
+<filter id="gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="11"/></filter>
+</defs><ellipse cx="82" cy="104" rx="70" ry="11" fill="#d59cdd" opacity=".36" filter="url(#gl)"/><g filter="url(#s)">
+<ellipse cx="80" cy="63" rx="72" ry="25" transform="rotate(-23 80 63)" stroke="url(#gold)" stroke-width="7"/>
+<path d="M77 95 28 53C4 31 18 6 41 9c12 1 20 10 25 17C78 4 100 3 115 15c20 17 12 37-5 55Z" fill="url(#rose)" stroke="#ffe3fb" stroke-width="3"/>
+<path d="M50 24c-17-9-30 2-29 16" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".67"/>
+<path d="M105 98 60 55C39 35 54 14 74 16c14 1 23 11 29 20 16-18 37-14 43 2 10 23-13 41-27 54Z" fill="url(#deep)" stroke="#f3d9ff" stroke-width="2.5"/>
+<path d="M77 35c-9-9-18-4-19 4" stroke="#fff" stroke-width="4" opacity=".60" stroke-linecap="round"/>
+</g><path d="m129 13 4.2 12 12 4.2-12 4.2-4.2 12-4.2-12-12-4.2 12-4.2Z" fill="url(#gold)"/><path d="m145 49 2.2 7 7 2.2-7 2.2-2.2 7-2.2-7-7-2.2 7-2.2Z" fill="#b36ce8" opacity=".8"/></svg>

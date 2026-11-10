@@ -64,7 +64,7 @@ assert(!guidePage.includes("redirect(") && !guidePage.includes("PaidCompatibilit
   "public guide must not perform authentication or expose any personalized analysis");
 
 const hub = readFileSync("app/special-analysis/compatibility/page.tsx", "utf8");
-assert(hub.includes("getCompatibilityPublicGuidePath(slug)"), "public hub must link all seven guide pages");
+assert(!hub.includes("compatibility-public-guides-heading") && !hub.includes("COMPATIBILITY_GUIDE_SLUGS") && !hub.includes("로그인 전에 7가지 궁합을 비교해 보세요"), "comparison hub must not render the redundant seven-guide panel; public guide URLs remain indexed through the sitemap");
 for (const protectedRoute of [
   "/special-analysis/compatibility/romantic",
   "/special-analysis/compatibility/workplace",

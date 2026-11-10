@@ -90,8 +90,14 @@ async function main() {
   const home=readFileSync("app/components/HomeExperience.tsx","utf8");
   assert(home.includes('href="/blog"') && home.includes("매거진"),
     "all homepage states need a direct magazine entry");
+  const magazineHome=readFileSync("app/blog/page.tsx","utf8");
+  assert(magazineHome.includes("bg-[radial-gradient(ellipse_at_50%_0%,#ffffff_0%,#faf5ff_48%,#f0e8ff_100%)]"), "magazine index must use the approved light palette");
+  assert(!magazineHome.includes("bg-[#0e1733]") && !magazineHome.includes("bg-[#151c3e]"), "magazine index old navy surfaces must not return");
   const detail=readFileSync("app/blog/[slug]/page.tsx","utf8");
   assert(detail.includes("notFound()") && detail.includes("generateMetadata"));
+  assert(detail.includes("bg-[radial-gradient(ellipse_at_50%_0%,#ffffff_0%,#faf5ff_48%,#f0e8ff_100%)]"), "magazine article must use the same light palette");
+  assert(!detail.includes("bg-[#0e1733]") && !detail.includes("bg-[#171c43]"), "magazine article must not retain the old navy surfaces");
+
   assert(detail.includes('"@type":"BlogPosting"'));
   const middleware=readFileSync("middleware.ts","utf8");
   assert(middleware.includes('pathname === "/blog"') &&

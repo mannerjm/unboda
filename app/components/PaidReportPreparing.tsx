@@ -61,26 +61,26 @@ export default function PaidReportPreparing({
         ? ["구매 정보 확인", "관계 해석 정리", "리포트 저장"]
         : ["구매 정보 확인", "분석 내용 정리", "리포트 저장"]}
     >
-      <div className="rounded-2xl border border-white/15 bg-white/[0.07] px-4 py-4 text-sm leading-7 text-[#d9ddef]">
+      <div className="rounded-2xl border border-[#e4d4f6] bg-[#f7f1ff] px-4 py-3.5 text-left text-sm leading-6 text-[#514064] shadow-[0_6px_16px_rgba(100,67,166,.06)] sm:px-5">
         {!failed ? (
           <>
-            <p className="font-bold text-white">예상 소요 시간: 약 30초~1분</p>
+            <p className="font-bold text-[#31204d]">예상 소요 시간: 약 30초~1분</p>
             <p>실제 생성 시간은 분석 내용과 시스템 상황에 따라 달라질 수 있습니다.</p>
             {delayed ? (
-              <p className="mt-2 font-semibold text-[#d8ccff]">예상보다 오래 걸리고 있어요. 구매 내역에서 상태를 다시 확인할 수 있습니다.</p>
+              <p className="mt-2 font-semibold text-[#6b3bb5]">예상보다 오래 걸리고 있어요. 구매 내역에서 상태를 다시 확인할 수 있습니다.</p>
             ) : null}
           </>
         ) : (
           <p>결제한 상품을 다시 구매할 필요는 없습니다.</p>
         )}
         {stage === "generating" || failed ? (
-          <p className="mt-3">이 화면을 닫아도 구매 내역은 보존됩니다. 구매한 분석에서 생성 상태와 결과를 다시 확인할 수 있습니다.</p>
+          <p className="mt-2.5">이 화면을 닫아도 구매 내역은 보존됩니다. 구매한 분석에서 생성 상태와 결과를 다시 확인할 수 있습니다.</p>
         ) : (
-          <p className="mt-3">결제 확인이 끝나면 별도 버튼 없이 리포트 준비 화면으로 이어집니다.</p>
+          <p className="mt-2.5">결제 확인이 끝나면 별도 버튼 없이 리포트 준비 화면으로 이어집니다.</p>
         )}
       </div>
       {stage === "generating" || failed ? (
-        <Link href="/purchased-analyses" className="mt-5 inline-flex justify-center rounded-xl border border-white/20 bg-white px-5 py-3 text-sm font-bold text-[#11162d] transition hover:bg-[#f1eeff]">
+        <Link href="/purchased-analyses" className="mt-3 inline-flex min-h-11 items-center justify-center rounded-xl border border-[#cdb0f1] bg-white px-5 py-2.5 text-sm font-bold text-[#593194] shadow-[0_6px_16px_rgba(110,73,178,.09)] transition hover:border-[#a784df] hover:bg-[#eee2ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8653d5]">
           구매한 분석으로 이동
         </Link>
       ) : null}

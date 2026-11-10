@@ -123,4 +123,31 @@ for (const state of ["none", "generating"] as const) {
 assert(recommendation.includes("리포트 준비 화면 보기") && catalogDetail.includes("리포트 준비 화면 보기"), "recommendations and premium catalog must link pending purchases to waiting screen");
 assert(library.includes("리포트 준비 화면 보기") && library.includes("recentReportHref"), "purchase library must expose all pending exact-edition reports");
 
+
+// Contrast regression: the light shared loader must never reuse text-white
+// and low-contrast pale text from the former dark paid-waiting panel.
+const waitingVisual = read("app/components/MysticLoadingScreen.tsx");
+const guestFreeLoading = read("app/guest-loading/page.tsx");
+const memberFreeLoading = read("app/loading/page.tsx");
+assert(commonWaiting.includes("text-[#514064]") &&
+       commonWaiting.includes("font-bold text-[#31204d]") &&
+       commonWaiting.includes("border-[#e4d4f6] bg-[#f7f1ff]"),
+  "paid waiting duration, explanation and preservation notice must be readable on the pale background");
+assert(!commonWaiting.includes("text-[#d9ddef]") && !commonWaiting.includes('font-bold text-white'),
+  "do not restore the old near-invisible dark-theme paid waiting text");
+assert(commonWaiting.includes('href="/purchased-analyses"') &&
+       commonWaiting.includes("text-[#593194]") &&
+       commonWaiting.includes("min-h-11"),
+  "purchased-analysis recovery link must retain destination, contrast and tap target");
+assert(waitingVisual.includes("px-4 py-5 text-center sm:px-6 sm:py-8") &&
+       waitingVisual.includes("bg-white/85 px-5 py-6") &&
+       waitingVisual.includes("text-[#574270]"),
+  "shared loader must remain compact and readable on small desktop/mobile viewports");
+assert(guestFreeLoading.includes('fetch("/api/guest-free-analysis/generate"') &&
+       guestFreeLoading.includes('router.replace("/guest-result")') &&
+       guestFreeLoading.includes("<MysticLoadingScreen") &&
+       memberFreeLoading.includes('fetch("/api/analyze"') &&
+       memberFreeLoading.includes("<MysticLoadingScreen"),
+  "guest/member free loading routes must preserve generation and redirect behavior");
+
 console.log("unified-paid-report-waiting-regression: PASS");

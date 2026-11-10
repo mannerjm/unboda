@@ -180,4 +180,22 @@ assert(quickRoutes.includes('min-h-[8.4rem]') && quickRoutes.includes('sm:h-[7.1
 assert(quickRoutes.includes('sm:text-[18px]') && quickRoutes.includes('focus-visible:ring-4'),
   "legible premium navigation titles and keyboard focus must remain");
 
+
+// Final scene-only polish: golden orbit/reflection and glossy cards with intact routes.
+const premiumOrbit = readFileSync("public/home-premium-orbit.svg", "utf8");
+assert(premiumOrbit.includes('id="goldTrail"') && premiumOrbit.includes('id="stageLight"'),
+  "premium hero must have the gold orbital highlight and reflected light");
+assert(premiumOrbit.includes('filter="url(#goldGlow)"') && premiumOrbit.includes('stroke="url(#goldTrail)"'),
+  "orbital glow must be a real artwork feature, not an inert decoration claim");
+assert(premiumOrbit.includes('<text x="390" y="363"') && premiumOrbit.includes('>나</text>'),
+  "original centered self symbol remains legible");
+assert(quickRoutes.includes("pointer-events-none absolute inset-x-3 top-0 h-[45%]"),
+  "four homepage cards must have premium specular sheen");
+assert(quickRoutes.includes('getPrimaryQuickRoute(state)') && quickRoutes.includes('href={route.href}'),
+  "premium card styling must not modify their dynamic destination URLs");
+assert(renderedHome.includes('lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)]'),
+  "desktop layout should balance readable state-specific copy with artwork");
+assert(heroActions.includes('href={copy.primaryHref}') && heroActions.includes('{copy.primary}'),
+  "all states preserve original primary action label and destination");
+
 console.log("Home Modern Mystic final balance regression passed ✓");

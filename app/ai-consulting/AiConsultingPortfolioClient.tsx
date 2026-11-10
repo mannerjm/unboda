@@ -649,44 +649,44 @@ export default function AiConsultingPortfolioClient({
         ) : null}
 
         {!isLoading && portfolio && (portfolio.previousAnalysesExcluded ?? 0) > 0 && !focusAnalysis ? (
-          <section className="mt-4 rounded-2xl border border-[#dce1ef] bg-white px-5 py-4 text-sm leading-6 text-slate-700 shadow-sm">
+          <section className="mt-4 rounded-2xl border border-[#e4d5f6] bg-white px-5 py-4 text-sm leading-6 text-slate-700 shadow-[0_10px_26px_rgba(104,67,168,.08)]">
             <p className="font-bold text-[#11162d]">출생정보 변경 전 리포트 {(portfolio.previousAnalysesExcluded ?? 0)}개는 자동 상담 범위에서 제외되어 있습니다.</p>
             <p className="mt-1">이전 리포트와 상담 기록은 그대로 보관됩니다. 보유 분석 목록에는 모두 표시하며, 해당 리포트에서 상담으로 들어가면 같은 구매 당시 정보 기준으로 이어갈 수 있습니다.</p>
           </section>
         ) : null}
 
-        <header className="relative mt-5 overflow-hidden rounded-[2rem] border border-[#35375f] bg-[radial-gradient(circle_at_82%_20%,rgba(113,89,233,0.26),transparent_28%),radial-gradient(circle_at_18%_85%,rgba(79,146,224,0.14),transparent_30%),linear-gradient(145deg,#0b1025_0%,#171a3d_58%,#24204d_100%)] p-6 text-white shadow-[0_22px_60px_rgba(24,29,67,0.14)] sm:p-8">
-          <p className="text-xs font-black tracking-[0.16em] text-[#b9b2f6]">UNBODA AI CONSULTING</p>
+        <header className="relative mt-5 overflow-hidden rounded-[2rem] border border-[#e1d0f9] bg-[radial-gradient(circle_at_82%_18%,rgba(208,166,255,.47),transparent_35%),linear-gradient(145deg,#ffffff_0%,#f9f1ff_60%,#eae0ff_100%)] p-6 text-[#281744] shadow-[0_20px_55px_rgba(111,72,177,.12)] sm:p-8">
+          <p className="text-xs font-black tracking-[0.16em] text-[#8850ce]">UNBODA AI CONSULTING</p>
           <h1 className="mt-3 text-2xl font-black tracking-[-0.035em] sm:text-3xl">나를 기억하는 AI 운세 상담</h1>
-          <p className="mt-3 max-w-3xl text-[15px] leading-7 text-slate-200">
+          <p className="mt-3 max-w-3xl text-[15px] leading-7 text-[#665876]">
             지난 상담을 이어가거나 새로운 고민을 질문해 보세요. 새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다.
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-4">
-              <p className="text-xs font-bold tracking-[0.12em] text-[#c9c3ff]">현재 연결된 상담 분석</p>
+            <div className="rounded-2xl border border-[#e0d0f7] bg-white/80 px-4 py-4 shadow-[0_8px_22px_rgba(105,65,165,.07)]">
+              <p className="text-xs font-bold tracking-[0.12em] text-[#8152ba]">현재 연결된 상담 분석</p>
               <p className="mt-2 text-xl font-black">
                 {portfolio ? `${portfolio.analyses.length}개 분석` : "확인 중"}
               </p>
-              <p className="mt-1 text-sm leading-6 text-slate-300">
+              <p className="mt-1 text-sm leading-6 text-[#665779]">
                 구매한 분석 총 {ownedAnalyses.length}개 · {focusAnalysis && focusAnalysis.profileInputVersion !== "current"
                   ? "현재는 같은 구매 당시 출생 정보 기준으로 상담합니다."
                   : "출생 정보가 다른 시기의 해석은 섞지 않습니다."}
               </p>
             </div>
-            <div className="rounded-2xl border border-white/15 bg-white/[0.11] px-5 py-4 sm:min-w-56">
-              <p className="text-xs font-bold tracking-[0.12em] text-slate-300">공용 질문권</p>
+            <div className="rounded-2xl border border-[#e0d0f7] bg-white/85 px-5 py-4 shadow-[0_8px_22px_rgba(105,65,165,.07)] sm:min-w-56">
+              <p className="text-xs font-bold tracking-[0.12em] text-[#7859a0]">공용 질문권</p>
               <p className="mt-1 text-3xl font-black" aria-live="polite">
                 {portfolio ? portfolio.questionsRemaining : "—"}
-                <span className="ml-1 text-sm font-semibold text-slate-300">회 남음</span>
+                <span className="ml-1 text-sm font-semibold text-[#67537d]">회 남음</span>
               </p>
-              <p className="mt-1 text-xs text-slate-300">모든 보유 분석에서 함께 사용</p>
+              <p className="mt-1 text-xs text-[#746283]">모든 보유 분석에서 함께 사용</p>
               {creditPurchaseHref && !isPreview && portfolio?.analyses.length && portfolio.questionsRemaining > 0 ? (
                 <Link href={creditPurchaseHref} className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-black text-[#211b52] transition hover:bg-[#eeeaff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                   {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 안내 보기 →"}
                 </Link>
               ) : null}
-              {!creditCheckoutEnabled && !isPreview ? <p className="mt-2 text-xs text-slate-300">현재 질문권 결제 준비 중</p> : null}
+              {!creditCheckoutEnabled && !isPreview ? <p className="mt-2 text-xs text-[#746283]">현재 질문권 결제 준비 중</p> : null}
             </div>
           </div>
         </header>

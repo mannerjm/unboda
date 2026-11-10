@@ -147,10 +147,10 @@ function QuickRoutes({ state }: { state: LandingState }) {
     { icon: "search" as const, title: "심층 분석", detail: "원하는 주제로 직접", href: "/deep-analysis", tone: "text-[#7153cf]" },
     { icon: "people" as const, title: "두 사람 궁합", detail: "관계의 차이를 함께", href: "/special-analysis/compatibility", tone: "text-[#c4489a]" },
   ];
-  return <section className="relative z-10 mx-auto mt-1 grid w-full max-w-[1460px] gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map((route, index) => <Link key={route.title} href={route.href} className="group relative flex min-h-[7.65rem] items-center gap-2.5 overflow-hidden rounded-[1.6rem] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,.97),rgba(252,245,255,.94)_70%,rgba(238,226,255,.95))] px-2.5 py-3 pr-4 shadow-[0_10px_23px_rgba(101,65,174,.13),0_2px_5px_rgba(118,78,187,.06)] ring-1 ring-[#e9daf9]/70 transition duration-300 hover:-translate-y-1.5 hover:border-[#d7b8ff] hover:shadow-[0_19px_35px_rgba(111,73,186,.20)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#ab87f5]">
-    <span aria-hidden="true" className="pointer-events-none absolute -left-9 -top-9 h-32 w-32 rounded-full bg-[#f1e4ff]/60 blur-xl"/>
-    <span aria-hidden="true" className="relative h-[6.1rem] w-[6.1rem] shrink-0 bg-contain bg-center bg-no-repeat transition duration-300 group-hover:scale-105 sm:h-[6.35rem] sm:w-[6.35rem]" style={{ backgroundImage: `url('/home-route-art-${index + 1}.svg')` }} />
-    <span className="relative min-w-0 flex-1"><strong className="block text-[16px] font-black tracking-[-0.035em] text-[#251648] sm:text-[17px]">{route.title}</strong><span className="mt-1.5 block text-[12px] leading-5 text-[#5f5175] sm:text-[13px]">{route.detail}</span></span>
+  return <section className="relative z-10 mx-auto mt-1 grid w-full max-w-[1460px] gap-3.5 sm:grid-cols-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map((route, index) => <Link key={route.title} href={route.href} className="group relative flex min-h-[8.4rem] items-center gap-2.5 overflow-hidden rounded-[1.6rem] border border-[#eadbf9] bg-[linear-gradient(145deg,#ffffff_8%,#fdfaff_60%,#f0e4ff_100%)] px-3 py-3.5 pr-3.5 shadow-[0_12px_26px_rgba(101,65,174,.14),0_3px_7px_rgba(118,78,187,.07),inset_0_2px_0_rgba(255,255,255,.92)] ring-1 ring-white/80 transition duration-300 hover:-translate-y-1.5 hover:border-[#c5a3f6] hover:shadow-[0_22px_36px_rgba(111,73,186,.21)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#ab87f5]">
+    <span aria-hidden="true" className="pointer-events-none absolute -left-9 -top-9 h-36 w-36 rounded-full bg-[#eee1ff]/75 blur-2xl"/>
+    <span aria-hidden="true" className="relative h-[6.9rem] w-[6.9rem] shrink-0 bg-contain bg-center bg-no-repeat drop-shadow-[0_9px_11px_rgba(120,71,195,.16)] transition duration-300 group-hover:scale-110 sm:h-[7.15rem] sm:w-[7.15rem]" style={{ backgroundImage: `url('/home-route-art-${index + 1}.svg')` }} />
+    <span className="relative min-w-0 flex-1"><strong className="block text-[16px] font-black tracking-[-0.035em] text-[#251648] sm:text-[18px]">{route.title}</strong><span className="mt-1.5 block text-[12px] leading-5 text-[#5f5175] sm:text-[13px]">{route.detail}</span></span>
     <Icon name="arrow" className="relative h-4 w-4 shrink-0 text-[#8959d4] transition group-hover:translate-x-1.5"/>
   </Link>)}</section>;
 }
@@ -253,6 +253,8 @@ function HomeJourney() {
 
 function HomeShell({ state, copy, todayViewed: _todayViewed, returning }: { state: LandingState; copy: LandingCopy; todayViewed: boolean; returning?: ReturningLandingState }) {
   const statusLabel = returning ? returning.kind === "analysis_stale" ? "갱신 필요" : returning.kind === "analysis_in_progress" ? "생성 중" : returning.kind === "analysis_complete" && returning.status === "needs_retry" ? "해석 재생성 필요" : "최신 상태" : null;
+  // Only the visual line break changes. Both spans concatenate to the original copy.title.
+  const titleBreak = copy.title === "최신 흐름으로 다시 이어볼까요?" ? copy.title.indexOf(" 다시 ") : -1;
   return <main className="relative isolate min-h-[100dvh] overflow-hidden bg-[linear-gradient(135deg,#fffdfd_0%,#f9f7ff_48%,#f0ecff_100%)] text-[#211943]">
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_77%_37%,rgba(221,189,255,.56),transparent_42%),radial-gradient(ellipse_at_22%_74%,rgba(232,213,255,.48),transparent_45%)]" />
     <div aria-hidden="true" className="pointer-events-none absolute -right-[8rem] top-[4rem] h-[33rem] w-[33rem] rounded-full bg-[#eedbff]/48 blur-[100px]"/>
@@ -267,14 +269,17 @@ function HomeShell({ state, copy, todayViewed: _todayViewed, returning }: { stat
             <span className="rounded-full border border-[#ead9fc] bg-[#f0e4ff] px-4 py-2 text-xs font-bold text-[#6c4799]">{statusLabel}</span>
           </div> : <p className="inline-flex items-center gap-2 rounded-full border border-[#e8d5f9] bg-[#f1e6ff] px-4 py-2 text-xs font-black tracking-[0.08em] text-[#843cce]"><Icon name="spark" className="h-4 w-4"/>{copy.eyebrow}</p>}
           <div aria-hidden="true" className="pointer-events-none absolute -right-2 top-14 hidden text-4xl text-[#f4b850] lg:block">✦</div>
-          <h1 className={`${returning ? "mt-5" : "mt-5"} max-w-[44rem] bg-[linear-gradient(105deg,#28143f_12%,#342058_54%,#8737ce_100%)] bg-clip-text text-[clamp(2.25rem,4.35vw,4.6rem)] font-black leading-[1.11] tracking-[-0.068em] text-transparent`}>{copy.title === "지금 내 운, 어디로 가고 있을까?" ? <><span className="sm:hidden"><span className="block whitespace-nowrap">지금 내 운,</span><span className="block whitespace-nowrap">어디로 가고 있을까?</span></span><span className="hidden sm:inline">{copy.title}</span></> : copy.title}</h1>
+          <h1 className={`${returning ? "mt-5" : "mt-5"} max-w-[44rem] break-keep text-balance bg-[linear-gradient(105deg,#28143f_12%,#342058_54%,#8737ce_100%)] bg-clip-text text-[clamp(2.25rem,3.6vw,3.75rem)] font-black leading-[1.16] tracking-[-0.068em] text-transparent`}>{titleBreak >= 0 ? <>
+            <span className="block text-[#28143f]">{copy.title.slice(0, titleBreak)}</span>
+            <span className="block bg-[linear-gradient(95deg,#8734e5_0%,#6630c6_70%,#4c248e_100%)] bg-clip-text text-transparent">{copy.title.slice(titleBreak)}</span>
+          </> : copy.title === "지금 내 운, 어디로 가고 있을까?" ? <><span className="sm:hidden"><span className="block whitespace-nowrap">지금 내 운,</span><span className="block whitespace-nowrap">어디로 가고 있을까?</span></span><span className="hidden sm:inline">{copy.title}</span></> : copy.title}</h1>
           <div aria-hidden="true" className="mt-2 h-[6px] w-40 -rotate-2 rounded-full bg-[linear-gradient(90deg,rgba(167,97,235,0),rgba(190,118,244,.56),rgba(167,97,235,0))] sm:ml-24"/>
           <p className="mt-4 max-w-xl text-[14px] leading-7 text-[#5d506f] sm:text-[16px]">{copy.description}</p>
           <HeroActions state={state} copy={copy}/>
           {(state.kind === "guest" || state.kind === "analysis_ready" || state.kind === "no_profiles" || state.kind === "needs_profile_selection") && copy.secondary ? <Link href={copy.secondaryHref} className="mt-3 inline-flex text-xs font-bold text-[#79628d] underline decoration-[#bca5db] underline-offset-4 transition hover:text-[#6c45d3]">{copy.secondary}</Link> : null}
           {returning ? <Link href="/deep-analysis" className="ml-4 mt-3 inline-flex items-center gap-2 text-xs font-bold text-[#79628d] underline decoration-[#bca5db] underline-offset-4 transition hover:text-[#6c45d3]">다른 심층 분석 직접 찾기<Icon name="search" className="h-4 w-4"/></Link> : null}
         </div>
-        <div className="relative mx-auto hidden w-full max-w-[35rem] md:block"><FlowVisual/></div>
+        <div className="relative mx-auto hidden w-full max-w-[35rem] md:block lg:-translate-y-3"><FlowVisual/></div>
       </section>
       <QuickRoutes state={state}/>
       <HomeJourney/>

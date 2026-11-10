@@ -62,7 +62,7 @@ function ReadingCard({
   body: string;
 }) {
   return (
-    <article className="group relative overflow-hidden rounded-[1.65rem] border border-white/80 bg-white/90 p-5 shadow-[0_14px_36px_rgba(31,36,77,0.07)] ring-1 ring-[#e7e8f2]">
+    <article className="group relative overflow-hidden rounded-[1.65rem] border border-[#eadffa] bg-[linear-gradient(145deg,#ffffff,#fbf7ff)] p-5 shadow-[0_14px_36px_rgba(111,74,171,.10)] ring-1 ring-white/90">
       <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#7662e8_0%,#b7aef7_48%,transparent_100%)] opacity-70" />
       <div className="relative">
         <p className="text-xs font-bold tracking-[0.12em] text-[#7065aa]">{eyebrow}</p>
@@ -106,12 +106,12 @@ export default function PaidAnalysisV4Report({
   const firstAction = detail.action[0];
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#f7f7fb_0%,#f1f2f7_42%,#f6f7fb_100%)] text-[#11162d]">
+    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(160deg,#fffefe_0%,#faf6ff_45%,#f0eaff_100%)] text-[#281744]">
       <div className="pointer-events-none absolute left-[-12rem] top-[-8rem] h-96 w-96 rounded-full bg-[#b9aff9]/15 blur-3xl" />
       <div className="pointer-events-none absolute right-[-10rem] top-[24rem] h-80 w-80 rounded-full bg-[#d9d4fb]/20 blur-3xl" />
 
       <div className="mx-auto max-w-5xl px-4 py-7 sm:px-8 sm:py-9">
-        <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 rounded-[1.35rem] border border-white/80 bg-white/72 px-4 py-3 shadow-[0_10px_30px_rgba(35,39,78,0.04)] backdrop-blur sm:px-5">
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 rounded-[1.35rem] border border-[#e6d8f5] bg-white/90 px-4 py-3 shadow-[0_12px_30px_rgba(105,68,170,.09)] backdrop-blur sm:px-5">
           <div>
             <p className="text-xs font-bold tracking-[0.18em] text-[#6f5ce7]">PREMIUM REPORT</p>
             <h1 className="mt-1.5 text-2xl font-black tracking-[-0.03em] text-[#11162d] sm:text-3xl">{analysisType}</h1>

@@ -69,7 +69,7 @@ for (const [name, source] of reportSurfaces) {
 }
 
 assert(
-  v4.includes("bg-[linear-gradient(180deg,#f7f7fb_0%,#f1f2f7_42%,#f6f7fb_100%)]")
+  v4.includes("bg-[linear-gradient(160deg,#fffefe_0%,#faf6ff_45%,#f0eaff_100%)]")
     && v4.includes("bg-[radial-gradient(circle_at_82%_14%"),
   "V4 report must use the premium cool reading canvas and hero treatment",
 );

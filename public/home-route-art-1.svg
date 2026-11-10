@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" aria-hidden="true"><defs>
+<linearGradient id="violet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff6ff"/><stop offset=".42" stop-color="#cfa7ff"/><stop offset="1" stop-color="#8b59de"/></linearGradient>
+<linearGradient id="pearl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".48" stop-color="#ede6ff"/><stop offset="1" stop-color="#b49be9"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#fffdd8"/><stop offset=".42" stop-color="#f6cc6a"/><stop offset=".78" stop-color="#d99637"/><stop offset="1" stop-color="#ffebad"/></linearGradient>
+<linearGradient id="rose" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff4ff"/><stop offset=".26" stop-color="#fbace7"/><stop offset=".72" stop-color="#db61cc"/><stop offset="1" stop-color="#aa3cac"/></linearGradient>
+<linearGradient id="deep" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d1afff"/><stop offset=".65" stop-color="#8856dd"/><stop offset="1" stop-color="#5c29b3"/></linearGradient>
+<filter id="s" x="-70%" y="-90%" width="260%" height="290%"><feDropShadow dx="0" dy="9" stdDeviation="8" flood-color="#8154c4" flood-opacity=".23"/></filter>
+<filter id="gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="11"/></filter>
+</defs><ellipse cx="75" cy="103" rx="60" ry="12" fill="#c8a2f1" opacity=".4" filter="url(#gl)"/><g filter="url(#s)" transform="rotate(-9 76 59)">
+<path d="M28 15C53 18 84 16 118 17v75C90 88 60 93 29 89Z" fill="url(#pearl)" stroke="#9d70de" stroke-width="2"/>
+<path d="M34 16C52 19 86 16 116 18V88C83 85 55 88 34 88Z" fill="#fbf5ff" opacity=".78"/>
+<path d="M35 24V79" stroke="#cfb8ef" stroke-width="2"/><path d="M111 25V82" stroke="#cfb8ef" stroke-width="2"/>
+<path d="M27 14c-5 1-9 8-9 15 0 8 3 14 8 15 6 0 11-7 11-15 0-9-5-16-10-15Z" fill="url(#gold)"/>
+<path d="M117 14c-5 0-9 7-9 15 0 9 4 15 10 15 5 0 8-7 8-15 0-8-4-16-9-15Z" fill="url(#gold)"/>
+<path d="M28 83c-6 0-10 5-10 12 0 7 5 11 10 11 6 0 9-5 9-12 0-8-4-11-9-11Z" fill="url(#gold)"/>
+<path d="M118 83c-6 0-9 5-9 12 0 7 4 11 9 11 5 0 9-5 9-12 0-8-4-11-9-11Z" fill="url(#gold)"/>
+<text x="75" y="68" font-family="Noto Serif CJK KR,serif" font-size="30" font-weight="800" fill="#7240bf" text-anchor="middle">四柱</text>
+</g><path d="m129 13 4.2 12 12 4.2-12 4.2-4.2 12-4.2-12-12-4.2 12-4.2Z" fill="url(#gold)"/><path d="m145 49 2.2 7 7 2.2-7 2.2-2.2 7-2.2-7-7-2.2 7-2.2Z" fill="#b36ce8" opacity=".8"/></svg>

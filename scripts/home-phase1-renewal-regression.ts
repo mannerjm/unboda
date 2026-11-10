@@ -161,4 +161,23 @@ assert(renderedHome.includes("home-lavender-waves.svg"), "lavender horizon must 
 assert(renderedHome.includes("copy.primary") === false || heroActions.includes("{copy.primary}"), "state-controlled primary label remains unchanged");
 assert(renderedHome.includes("getLandingState") === false, "do not move customer-state logic into styling layer");
 
+
+// Final visual polish guard: old stroke-only SVG paths must never paint a black/gray fill.
+const waveSvg = readFileSync("public/home-lavender-waves.svg", "utf8");
+assert((waveSvg.match(/fill="none" stroke=/g) ?? []).length === 2,
+  "lavender horizon must explicitly disable default black fill on both decorative wave strokes");
+assert(!/stroke="url\(#r\)"[^>]*\/>/.test(waveSvg.replace(/fill="none" stroke="url\(#r\)"[^>]*\/>/, "")),
+  "the wave accent must never use the implicit black default fill");
+// A visual line break must concatenate to the *exact* original state-supplied title.
+assert(renderedHome.includes('copy.title === "최신 흐름으로 다시 이어볼까요?"'),
+  "only the existing returning-home copy is eligible for the two-line visual styling");
+assert(renderedHome.includes('copy.title.slice(0, titleBreak)') && renderedHome.includes('copy.title.slice(titleBreak)'),
+  "existing customer wording must be split for styling only, never paraphrased");
+assert(renderedHome.includes('text-[clamp(2.25rem,3.6vw,3.75rem)]'),
+  "desktop headline must fit its allotted column without splitting a Korean word");
+assert(quickRoutes.includes('min-h-[8.4rem]') && quickRoutes.includes('sm:h-[7.15rem]'),
+  "premium navigation art and cards should be noticeably more spacious");
+assert(quickRoutes.includes('sm:text-[18px]') && quickRoutes.includes('focus-visible:ring-4'),
+  "legible premium navigation titles and keyboard focus must remain");
+
 console.log("Home Modern Mystic final balance regression passed ✓");

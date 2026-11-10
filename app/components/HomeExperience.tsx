@@ -52,7 +52,7 @@ function Header({ state }: { state: LandingState }) {
   const aiHref = isGuest ? "/auth/login?returnTo=/ai-consulting" : "/ai-consulting";
   return <header className="relative z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 border-b border-[#eadff8]/85 pb-3.5 text-[#201943] lg:flex lg:items-center lg:justify-between lg:gap-4">
     <Link href="/" className="flex shrink-0 items-center gap-3 text-[1.35rem] font-black tracking-[-0.055em] text-[#241443] transition hover:opacity-85">
-      <span className="grid h-11 w-11 place-items-center rounded-[1.05rem] bg-[linear-gradient(140deg,#fbd3df,#a658e9_59%,#7541df)] shadow-[0_10px_21px_rgba(122,74,201,.2)]"><BrandMark /></span>운보다
+      <BrandMark />운보다
     </Link>
     <div className="contents lg:flex lg:shrink-0 lg:items-center lg:gap-2.5">
       <div className="col-span-2 row-start-2 min-w-0 lg:col-auto lg:row-auto"><HomeWeatherLine /></div>

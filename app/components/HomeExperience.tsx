@@ -67,8 +67,8 @@ function Header({ state }: { state: LandingState }) {
 
 function FlowVisual() {
   return <div className="relative mx-auto aspect-[780/630] w-full max-w-[31rem] opacity-100 lg:max-w-[38rem]" role="img" aria-label="나를 중심으로 흐름, 관계, 선택이 이어지는 운보다의 빛나는 행성">
-    <div aria-hidden="true" className="pointer-events-none absolute inset-[5%] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(207,170,255,.35),rgba(240,226,255,.1)_49%,transparent_73%)] blur-[18px]" />
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-contain bg-center bg-no-repeat drop-shadow-[0_22px_33px_rgba(145,85,208,.10)]" style={{ backgroundImage: "url('/home-premium-orbit.svg')" }} />
+    <div aria-hidden="true" className="pointer-events-none absolute inset-[5%] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(233,192,255,.52),rgba(248,221,255,.18)_49%,transparent_73%)] blur-[22px]" />
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-contain bg-center bg-no-repeat drop-shadow-[0_18px_28px_rgba(145,85,208,.13)]" style={{ backgroundImage: "url('/home-premium-orbit.svg')" }} />
     <span aria-hidden="true" className="pointer-events-none absolute inset-[13%] rounded-full border border-[#e3cbff]/25 motion-safe:animate-[spin_28s_linear_infinite]" />
   </div>;
 }
@@ -147,7 +147,9 @@ function QuickRoutes({ state }: { state: LandingState }) {
     { icon: "search" as const, title: "심층 분석", detail: "원하는 주제로 직접", href: "/deep-analysis", tone: "text-[#7153cf]" },
     { icon: "people" as const, title: "두 사람 궁합", detail: "관계의 차이를 함께", href: "/special-analysis/compatibility", tone: "text-[#c4489a]" },
   ];
-  return <section className="relative z-10 mx-auto mt-1 grid w-full max-w-[1460px] gap-3.5 sm:grid-cols-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map((route, index) => <Link key={route.title} href={route.href} className="group relative flex min-h-[8.4rem] items-center gap-2.5 overflow-hidden rounded-[1.6rem] border border-[#eadbf9] bg-[linear-gradient(145deg,#ffffff_8%,#fdfaff_60%,#f0e4ff_100%)] px-3 py-3.5 pr-3.5 shadow-[0_12px_26px_rgba(101,65,174,.14),0_3px_7px_rgba(118,78,187,.07),inset_0_2px_0_rgba(255,255,255,.92)] ring-1 ring-white/80 transition duration-300 hover:-translate-y-1.5 hover:border-[#c5a3f6] hover:shadow-[0_22px_36px_rgba(111,73,186,.21)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#ab87f5]">
+  return <section className="relative z-10 mx-auto mt-1 grid w-full max-w-[1460px] gap-3.5 sm:grid-cols-2 lg:-mt-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map((route, index) => <Link key={route.title} href={route.href} className="group relative flex min-h-[8.4rem] items-center gap-2.5 overflow-hidden rounded-[1.6rem] border border-[#eadbf9] bg-[linear-gradient(145deg,#ffffff_4%,#fffafd_42%,#efe3ff_100%)] px-3 py-3.5 pr-3.5 shadow-[0_13px_28px_rgba(101,65,174,.16),0_3px_8px_rgba(118,78,187,.08),inset_0_2px_0_rgba(255,255,255,.96)] ring-1 ring-white/80 transition duration-300 hover:-translate-y-1.5 hover:border-[#c5a3f6] hover:shadow-[0_21px_36px_rgba(111,73,186,.20)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#ab87f5]">
+    <span aria-hidden="true" className="pointer-events-none absolute inset-x-3 top-0 h-[45%] rounded-b-[1.2rem] bg-[linear-gradient(112deg,rgba(255,255,255,.91)_0%,rgba(255,255,255,.44)_48%,rgba(221,191,255,.16)_100%)] opacity-85 transition duration-300 group-hover:opacity-100"/>
+    <span aria-hidden="true" className="pointer-events-none absolute inset-x-8 top-px h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.94),transparent)]"/>
     <span aria-hidden="true" className="pointer-events-none absolute -left-9 -top-9 h-36 w-36 rounded-full bg-[#eee1ff]/75 blur-2xl"/>
     <span aria-hidden="true" className="relative h-[6.9rem] w-[6.9rem] shrink-0 bg-contain bg-center bg-no-repeat drop-shadow-[0_9px_11px_rgba(120,71,195,.16)] transition duration-300 group-hover:scale-110 sm:h-[7.15rem] sm:w-[7.15rem]" style={{ backgroundImage: `url('/home-route-art-${index + 1}.svg')` }} />
     <span className="relative min-w-0 flex-1"><strong className="block text-[16px] font-black tracking-[-0.035em] text-[#251648] sm:text-[18px]">{route.title}</strong><span className="mt-1.5 block text-[12px] leading-5 text-[#5f5175] sm:text-[13px]">{route.detail}</span></span>
@@ -262,7 +264,7 @@ function HomeShell({ state, copy, todayViewed: _todayViewed, returning }: { stat
     <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-[1510px] flex-col px-5 pb-1 pt-4 sm:px-8 lg:px-10 lg:pt-5">
       <Header state={state}/>
       <PwaInstallGuide/>
-      <section className="relative grid flex-1 items-center gap-3 py-3 sm:py-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:gap-6 lg:py-2" aria-label="운보다 무료 사주 시작 및 분석 이어가기">
+      <section className="relative grid flex-1 items-center gap-3 py-3 sm:py-4 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)] lg:gap-4 lg:py-1" aria-label="운보다 무료 사주 시작 및 분석 이어가기">
         <div className="relative z-10">
           {returning ? <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-[#e0cafa] bg-white/85 px-4 py-2 text-xs font-black text-[#6734ab] shadow-[0_5px_18px_rgba(118,65,184,.08)]">{returning.profileLabel}</span>
@@ -279,7 +281,7 @@ function HomeShell({ state, copy, todayViewed: _todayViewed, returning }: { stat
           {(state.kind === "guest" || state.kind === "analysis_ready" || state.kind === "no_profiles" || state.kind === "needs_profile_selection") && copy.secondary ? <Link href={copy.secondaryHref} className="mt-3 inline-flex text-xs font-bold text-[#79628d] underline decoration-[#bca5db] underline-offset-4 transition hover:text-[#6c45d3]">{copy.secondary}</Link> : null}
           {returning ? <Link href="/deep-analysis" className="ml-4 mt-3 inline-flex items-center gap-2 text-xs font-bold text-[#79628d] underline decoration-[#bca5db] underline-offset-4 transition hover:text-[#6c45d3]">다른 심층 분석 직접 찾기<Icon name="search" className="h-4 w-4"/></Link> : null}
         </div>
-        <div className="relative mx-auto hidden w-full max-w-[35rem] md:block lg:-translate-y-3"><FlowVisual/></div>
+        <div className="relative mx-auto hidden w-full max-w-[35rem] md:block lg:-translate-y-4"><FlowVisual/></div>
       </section>
       <QuickRoutes state={state}/>
       <HomeJourney/>

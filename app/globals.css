@@ -65,3 +65,50 @@ body {
 .grid.grid-cols-4.gap-2.sm\:gap-4 .text-white\/75 {
   color: rgb(255 255 255 / 0.92);
 }
+
+
+/*
+ * UNBODA DETAIL VISUAL THEME (presentation-only).
+ * Opt-in on the AppShell. The landing page / is intentionally excluded.
+ * Existing routes, server-validated status, inputs, and report contents are
+ * unaffected; these selectors cover only known pale UI surfaces.
+ * Keep financial warnings (amber/red) and darker evidence panels untouched.
+ */
+.unboda-detail-theme {
+  --unboda-detail-violet: #7c4ce5;
+  --unboda-detail-ink: #281744;
+  --unboda-detail-border: #e6d9f6;
+  --unboda-detail-glow: 0 14px 38px rgba(100, 64, 165, .075);
+  background: linear-gradient(145deg,#fffdfd 0%,#f9f6ff 38%,#f1ebfc 100%);
+  color: var(--unboda-detail-ink);
+}
+.unboda-detail-theme :is(main,section,article,div)[class*="bg-[#f5f7fc]"] {
+  background: linear-gradient(145deg,#fffefe 0%,#faf7ff 50%,#f3edff 100%);
+}
+.unboda-detail-theme :is(main,section,article,div)[class*="bg-[#f7f8fc]"],
+.unboda-detail-theme :is(main,section,article,div)[class*="bg-[#f9faff]"],
+.unboda-detail-theme :is(main,section,article,div)[class*="bg-[#fafbff]"] {
+  background-color: #faf6ff;
+}
+.unboda-detail-theme :is(section,article,div)[class*="border-[#dce1ef]"][class*="bg-white"],
+.unboda-detail-theme :is(section,article,div)[class*="border-[#dfe3ef]"][class*="bg-white"] {
+  border-color: #e5d9f5;
+  box-shadow: var(--unboda-detail-glow);
+}
+.unboda-detail-theme :is(a,button)[class*="bg-[#6f5ce7]"]:not(:disabled) {
+  background: linear-gradient(135deg,#754be1,#9868ef);
+  box-shadow: 0 9px 20px rgba(114, 70, 201, .16);
+}
+.unboda-detail-theme :is(input,select,textarea)[class*="bg-[#fbfcff]"],
+.unboda-detail-theme :is(input,select,textarea)[class*="bg-[#f3f4f9]"] {
+  background: #fff;
+  border-color: #dfd2f0;
+}
+.unboda-detail-theme :is(input,select,textarea):focus-visible {
+  outline-color: #8d62e6;
+}
+@media (prefers-reduced-motion: reduce) {
+  .unboda-detail-theme :is(a,button) {
+    transition-duration: 0.01ms;
+  }
+}

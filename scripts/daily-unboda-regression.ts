@@ -97,12 +97,13 @@ for (const scope of ["DAILY_COPY_VERSION", "userId", "profile.id", "fingerprint"
 }
 assert(server.includes("revalidate: 86400"));
 assert(!server.includes("listUserProfiles(") && !server.includes("getCurrentUser("), "auth and profile checks must remain outside cache");
-assert(home.includes("<DailyVisitEntry state={state} todayViewed={todayViewed}/>") && home.includes("매일 무료"));
+const homeRendered = home.slice(home.indexOf("function HomeShell("), home.indexOf("function NewHome("));
+assert(!homeRendered.includes("<DailyVisitEntry"), "daily entry must be hidden from the redesigned homepage; /today remains available via the sidebar");
 const homeDailyEntry = home.slice(home.indexOf("function DailyVisitEntry("), home.indexOf("function QuickRoutes("));
 const homeQuickRoutes = home.slice(home.indexOf("function QuickRoutes("), home.indexOf("function CardScene("));
 assert(homeDailyEntry.includes("선택한 분석 대상의 사주를 바탕으로"), "home daily copy must match the currently selected profile");
 assert(homeDailyEntry.includes("오늘 새로운 흐름이 열렸어요") && homeDailyEntry.includes("오늘의 흐름을 확인했어요") && homeDailyEntry.includes("오늘 내용 다시보기"), "home daily card must adapt to unread/read state without changing its layout");
-assert(homeQuickRoutes.includes('className="mx-auto mt-5 grid w-full max-w-6xl'), "home shortcut cards need a visible 20px gap below the daily card");
+assert(homeQuickRoutes.includes('className="mx-auto mt-2 grid w-full max-w-6xl'), "home shortcut cards must remain visible in the compact one-screen layout");
 const todayTopic = page.indexOf('id="today-topic"');
 const todayFlow = page.indexOf("{reading.flow}");
 const todayAction = page.indexOf("{reading.action}");

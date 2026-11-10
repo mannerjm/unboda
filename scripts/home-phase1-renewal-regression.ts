@@ -51,7 +51,7 @@ assert(home.includes('"/ai-consulting"') && home.includes("AI 상담 바로 이�
 assert(!home.includes('aria-label="주요 메뉴"'), "home header must not duplicate discovery categories already available in the main content");
 assert(home.includes("AI 상담") && home.includes("마이페이지") && home.includes("로그인"), "simplified home header must preserve AI consulting and account actions");
 assert(home.includes("이전 상담 기록") && home.includes("직접 저장한 기억"), "home must explain continuity through prior consultation and explicit saved memory");
-assert(home.indexOf("<AiConsultingSection state={state}/>") < home.indexOf("<CuriositySection/>"), "AI consulting differentiation must appear before lower discovery sections");
+assert(home.includes("function HomeJourney("), "compact layout uses the existing consulting differentiation");
 
 for (const copy of [
   "원하는 분석 바로 찾기",
@@ -79,31 +79,45 @@ for (const legacyEnglishEyebrow of [
   assert(!home.includes(legacyEnglishEyebrow), `home must avoid template-like English eyebrow: ${legacyEnglishEyebrow}`);
 }
 
-assert(home.includes("motion-safe:animate-[spin_28s_linear_infinite]"), "home brand flow graphic must include restrained motion with reduced-motion safety");
-assert(home.includes("lg:max-w-[28.5rem] lg:opacity-[0.86]"), "hero artwork must stay visually subordinate to the primary copy on large screens");
-assert(!home.includes("['선택','bottom-[14%]"), "hero must avoid three competing floating labels after visual simplification");
-assert(home.includes("bg-[linear-gradient(180deg,#070d20_0%,#0b1330_40%,#090f24_100%)]"), "Modern Mystic home must keep the deep navy brand canvas");
-assert(home.includes("radial-gradient(circle_at_12%_18%"), "Modern Mystic home must keep the lightweight star field without heavy media assets");
-assert(home.includes("opacity-[0.68]"), "star field must remain restrained enough for long-page readability");
-assert(home.includes("bg-[linear-gradient(135deg,#795cff,#9d78ff)]"), "primary action must retain the Modern Mystic violet emphasis");
-assert(home.includes("backdrop-blur-xl"), "Modern Mystic cards must retain the glass surface language");
-assert(home.includes("function CardScene"), "curiosity cards must include category-specific atmospheric scenes");
-for (const sceneCue of ["peopleFlow", "F3C779", "7FE0C7", "9bb4ff66"]) {
-  assert(home.includes(sceneCue), `curiosity scenes must keep distinct semantic visual cue: ${sceneCue}`);
-}
-assert(home.includes("function CompatibilityVisual"), "compatibility section must use the dedicated two-flow visual rather than generic rings");
-assert(home.includes("bg-[linear-gradient(135deg,#1b1d3b_0%,#25172f_45%,#171d3b_100%)]"), "compatibility section must introduce a warmer violet-rose temperature shift");
-assert(home.includes("linear-gradient(135deg,#0c1330_0%,#17163b_48%,#21184a_100%)"), "AI consulting section must retain a distinct cooler blue-violet temperature with stronger violet emphasis");
-assert(home.includes("bg-[linear-gradient(90deg,transparent,#8f7cff55,#ff9db555,#8f7cff55,transparent)]"), "journey section must render as a connected flow rather than a plain table");
-assert(home.includes("<TrustSection state={state} copy={copy}/>"), "closing journey CTA must preserve the current landing-state primary destination and stage-aware message");
-assert(home.includes("무료 분석") && home.includes("심층 분석") && home.includes("두 사람 궁합"), "home must keep the free-first path while exposing direct exploration");
-assert(home.includes('"추천 분석"') && home.includes('"내 분석"') && home.includes('"구매한 분석"'), "four shortcuts must evolve from free/member analysis to purchased library without duplicating daily or AI entries");
-const quickRoutes = home.slice(home.indexOf("function QuickRoutes("), home.indexOf("function CardScene("));
-assert(!quickRoutes.includes('"AI 상담"') && !quickRoutes.includes('"오늘의 운보다"'), "quick routes must not duplicate the fixed header AI entry or daily card");
-assert(quickRoutes.includes('title: "추천 분석"') && quickRoutes.includes('title: "심층 분석"') && quickRoutes.includes('title: "두 사람 궁합"'), "three discovery shortcuts remain stable across member stages");
-assert(home.includes('"무료로 확인"') && home.includes('"필요한 분석만 깊게"') && home.includes('"AI 상담으로 계속"'), "closing flow must explain the same three-step product model in plain language");
-assert(home.includes("운보다 · 참고용 명리 분석 서비스"), "legal footer identity must remain on the renewed home");
-assert(home.includes("사업자등록번호 201-28-96364"), "business registration footer must remain on the renewed home");
+// The new design must be a bright, compact home presentation, not a new state machine.
+const renderedHome = home.slice(home.indexOf("function HomeShell("), home.indexOf("function NewHome("));
+assert(renderedHome.includes('min-h-[100dvh]'), "home must use a viewport-height desktop-first shell");
+assert(renderedHome.includes('bg-[linear-gradient(135deg,#fffdfd_0%,#f9f7ff_48%,#f0ecff_100%)]'), "home canvas must be light white-lavender");
+for (const cue of [
+  "<Header state={state}/>",
+  "<HeroActions state={state} copy={copy}/>",
+  "<FlowVisual/>",
+  "<QuickRoutes state={state}/>",
+  "<HomeJourney/>",
+  "<Footer/>",
+  "{copy.title}",
+  "{copy.description}",
+  "{returning.profileLabel}",
+  "{statusLabel}",
+  'href={copy.secondaryHref}',
+]) assert(renderedHome.includes(cue), `unchanged state and route must remain in compact layout: ${cue}`);
+for (const removedFromHomepage of [
+  "<DailyVisitEntry",
+  "<AiConsultingSection",
+  "<CuriositySection",
+  "<CompatibilitySection",
+  "<TrustSection",
+]) assert(!renderedHome.includes(removedFromHomepage), `long old section must not appear on compact homepage: ${removedFromHomepage}`);
+assert(home.includes("function DailyVisitEntry("), "daily display component is left untouched; /today detail is still independent");
+assert(home.includes("function HomeJourney("), "three-step service explanation remains visible");
+assert(home.includes("리포트가 끝이 아니라, 상담이 이어집니다."), "core continuity explanation remains");
+assert(home.includes("무료로 확인") && home.includes("필요한 분석만 깊게") && home.includes("AI 상담으로 계속"), "free to analysis to ongoing counseling must remain clear");
+assert(home.includes("motion-safe:animate-[spin_28s_linear_infinite]"), "existing brand visual keeps reduced-motion-safe animation");
+assert(home.includes("bg-[linear-gradient(135deg,#795cff,#9d78ff)]"), "primary action retains violet emphasis");
+assert(home.includes("backdrop-blur-xl"), "compact cards keep a soft branded surface");
+assert(home.includes("function CardScene"), "existing lower discovery presentation remains untouched internally, even when not rendered on compact home");
+assert(home.includes("function CompatibilityVisual"), "existing compatibility visual remains untouched internally");
+assert(home.includes('href="/special-analysis/compatibility"'), "compatibility destination remains usable");
+assert(home.includes('href="/deep-analysis"'), "deep analysis destination remains usable");
+assert(home.includes("<Link href={aiHref}") && home.includes("<Link href={accountHref}"), "AI chat and account routes unchanged");
+assert(home.includes("운보다 · 참고용 명리 분석 서비스"), "existing legal footer kept");
+assert(home.includes("사업자등록번호 201-28-96364"), "business footer retained");
+assert(home.includes("support@unboda.kr"), "support contact retained");
 assert(home.includes("support@unboda.kr"), "support contact must remain on the renewed home");
 
 for (const forbidden of ["requestPayment", "markOrderPaid", "grantEntitlement", "generatePaidReport"] ) {

@@ -647,23 +647,23 @@ async function retryMainAnalysis() {
     <AppShell activeProfileId={currentProfileId}>
       <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-stone-900 sm:py-12">
         <div className="mx-auto w-full max-w-6xl">
-        <header className="relative mb-8 overflow-hidden rounded-[2.2rem] border border-[#7166b8]/20 bg-[linear-gradient(135deg,#0a1128_0%,#111735_52%,#21183d_100%)] px-6 py-8 text-white shadow-[0_24px_70px_rgba(23,24,55,0.16)] sm:px-9 sm:py-10">
+        <header className="relative mb-8 overflow-hidden rounded-[2.2rem] border border-[#e2d3f8] bg-[radial-gradient(circle_at_84%_20%,rgba(207,169,255,.46),transparent_33%),linear-gradient(140deg,#ffffff_0%,#f9f2ff_60%,#eae0ff_100%)] px-6 py-8 text-[#281744] shadow-[0_18px_50px_rgba(111,73,171,.13)] sm:px-9 sm:py-10">
           <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-[#7759db]/20 blur-3xl" />
           <div className="pointer-events-none absolute bottom-[-7rem] left-[18%] h-52 w-52 rounded-full bg-[#d36e9c]/10 blur-3xl" />
           <div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <p className="text-xs font-black tracking-[0.16em] text-[#aa9cff]">무료 분석 결과</p>
+              <p className="text-xs font-black tracking-[0.16em] text-[#8950d0]">무료 분석 결과</p>
               <h1 className="mt-3 text-3xl font-black leading-tight tracking-[-0.05em] sm:text-4xl lg:text-[2.8rem]">
                 지금 내 흐름을 읽는<br className="hidden sm:block" /> 첫 번째 리포트
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-[#b7bdd1] sm:text-base">
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-[#665779] sm:text-base">
                 출생 정보와 명리 계산 결과를 바탕으로 핵심 구조부터 현재 흐름까지 차근차근 살펴봐요.
                 궁금한 부분이 생기면 결과 아래의 다음 질문으로 이어갈 수 있습니다.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 lg:max-w-xs lg:justify-end">
-              <span className="rounded-full border border-white/12 bg-white/[0.07] px-4 py-2 text-xs font-bold text-[#ddd9ee]">{profileLabel}</span>
-              <span className="rounded-full border border-white/12 bg-white/[0.05] px-4 py-2 text-xs font-bold text-[#b7bdd1]">무료 결과 · 참고용 분석</span>
+              <span className="rounded-full border border-[#e0cef7] bg-white/80 px-4 py-2 text-xs font-bold text-[#644398]">{profileLabel}</span>
+              <span className="rounded-full border border-[#e0cef7] bg-white/80 px-4 py-2 text-xs font-bold text-[#68577d]">무료 결과 · 참고용 분석</span>
             </div>
           </div>
         </header>

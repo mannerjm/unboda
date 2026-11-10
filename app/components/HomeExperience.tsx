@@ -44,7 +44,7 @@ function Icon({ name, className = "h-5 w-5" }: { name: IconName; className?: str
   return <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d={paths[name]} /></svg>;
 }
 
-const glass = "border border-[#e3daf4] bg-white/85 backdrop-blur-xl shadow-[0_10px_28px_rgba(73,46,137,0.075)]";
+const glass = "border border-[#d9caef] bg-white/95 backdrop-blur-xl shadow-[0_10px_28px_rgba(73,46,137,0.095)]";
 
 function Header({ state }: { state: LandingState }) {
   const isGuest = state.kind === "guest";
@@ -64,7 +64,7 @@ function Header({ state }: { state: LandingState }) {
 }
 
 function FlowVisual() {
-  return <div className="relative mx-auto aspect-square w-full max-w-[18rem] opacity-95 sm:max-w-[22rem] lg:max-w-[25rem]" aria-label="나를 중심으로 흐름, 관계, 선택이 이어지는 운보다 상징 그래픽">
+  return <div className="relative mx-auto aspect-square w-full max-w-[16rem] opacity-95 sm:max-w-[19rem] lg:max-w-[21.5rem]" aria-label="나를 중심으로 흐름, 관계, 선택이 이어지는 운보다 상징 그래픽">
     <div className="absolute inset-[14%] rounded-full bg-[radial-gradient(circle_at_center,rgba(218,201,255,.94),rgba(169,147,247,.44)_26%,rgba(237,230,255,.1)_54%,transparent_72%)] blur-md" />
     <svg className="absolute inset-0 h-full w-full" viewBox="0 0 500 500" fill="none" aria-hidden="true">
       <defs>
@@ -91,7 +91,7 @@ function FlowVisual() {
 function HeroActions({ state, copy }: { state: LandingState; copy: LandingCopy }) {
   const showDirectFinder = state.kind === "guest" || state.kind === "analysis_ready" || state.kind === "no_profiles" || state.kind === "needs_profile_selection";
   return <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
-    <Link href={copy.primaryHref} className="inline-flex min-h-12 items-center justify-center gap-3 rounded-2xl bg-[linear-gradient(135deg,#795cff,#9d78ff)] px-6 py-3 text-sm font-black text-white shadow-[0_12px_26px_rgba(126,93,255,0.25)] transition hover:-translate-y-0.5 hover:brightness-110">{copy.primary}<Icon name="arrow" /></Link>
+    <Link href={copy.primaryHref} className="inline-flex min-h-14 w-full min-w-[13rem] items-center justify-center gap-3 rounded-2xl bg-[linear-gradient(135deg,#795cff,#9d78ff)] px-8 py-3.5 text-base font-black text-white shadow-[0_14px_32px_rgba(126,93,255,0.30)] transition hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#cab8ff] focus-visible:ring-offset-2 sm:w-auto">{copy.primary}<Icon name="arrow" /></Link>
     {showDirectFinder ? <Link href="/deep-analysis" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-[#dfd6f3] bg-white/85 px-5 py-3 text-sm font-black text-[#493574] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-[#eee8ff]">원하는 분석 바로 찾기<Icon name="search" /></Link> : <Link href={copy.secondaryHref} className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[#dfd6f3] bg-white/85 px-5 py-3 text-sm font-black text-[#493574] backdrop-blur-xl transition hover:bg-[#eee8ff]">{copy.secondary}</Link>}
   </div>;
 }
@@ -162,7 +162,7 @@ function QuickRoutes({ state }: { state: LandingState }) {
     { icon: "search" as const, title: "심층 분석", detail: "원하는 주제로 직접", href: "/deep-analysis", tone: "text-[#7153cf]" },
     { icon: "people" as const, title: "두 사람 궁합", detail: "관계의 차이를 함께", href: "/special-analysis/compatibility", tone: "text-[#c4489a]" },
   ];
-  return <section className="mx-auto mt-2 grid w-full max-w-6xl gap-2.5 sm:grid-cols-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map(route => <Link key={route.title} href={route.href} className={`group flex items-center gap-4 rounded-[1.3rem] p-3.5 transition hover:-translate-y-1 hover:border-[#9a83f4]/60 ${glass}`}><span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#f2edff] ${route.tone}`}><Icon name={route.icon}/></span><span className="min-w-0"><strong className="block text-sm font-black text-[#211940]">{route.title}</strong><span className="mt-1 block text-xs leading-5 text-[#655b7e]">{route.detail}</span></span><Icon name="arrow" className="ml-auto h-4 w-4 shrink-0 text-[#81729f] transition group-hover:translate-x-1 group-hover:text-[#7049e7]"/></Link>)}</section>;
+  return <section className="mx-auto mt-2 grid w-full max-w-6xl gap-2.5 sm:grid-cols-2 lg:grid-cols-4" aria-label="운보다 주요 진입 경로">{routes.map(route => <Link key={route.title} href={route.href} className={`group flex items-center gap-3.5 rounded-[1.3rem] px-4 py-3.5 transition hover:-translate-y-1 hover:border-[#9172e7] hover:shadow-[0_15px_30px_rgba(94,66,169,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8564e8] focus-visible:ring-offset-2 ${glass}`}><span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#ece4ff] ${route.tone}`}><Icon name={route.icon}/></span><span className="min-w-0"><strong className="block text-[15px] font-black text-[#211940]">{route.title}</strong><span className="mt-1 block text-[13px] leading-5 text-[#55496c]">{route.detail}</span></span><Icon name="arrow" className="ml-auto h-4 w-4 shrink-0 text-[#765ab2] transition group-hover:translate-x-1 group-hover:text-[#7049e7]"/></Link>)}</section>;
 }
 
 function CardScene({ scene }: { scene: "sunset" | "city" | "wealth" | "growth" | "people" | "path" }) {
@@ -281,7 +281,7 @@ function HomeShell({ state, copy, todayViewed: _todayViewed, returning }: { stat
           {(state.kind === "guest" || state.kind === "analysis_ready" || state.kind === "no_profiles" || state.kind === "needs_profile_selection") && copy.secondary ? <Link href={copy.secondaryHref} className="mt-3 inline-flex text-xs font-bold text-[#74658f] underline decoration-[#b6a7d6] underline-offset-4 transition hover:text-[#6c45d3]">{copy.secondary}</Link> : null}
           {returning ? <Link href="/deep-analysis" className="ml-4 mt-3 inline-flex items-center gap-2 text-xs font-bold text-[#74658f] underline decoration-[#b6a7d6] underline-offset-4 transition hover:text-[#6c45d3]">다른 심층 분석 직접 찾기<Icon name="search" className="h-4 w-4"/></Link> : null}
         </div>
-        <div className="relative mx-auto hidden w-full max-w-[26rem] sm:block"><FlowVisual/></div>
+        <div className="relative mx-auto hidden w-full max-w-[23rem] sm:block"><FlowVisual/></div>
       </section>
       <QuickRoutes state={state}/>
       <HomeJourney/>

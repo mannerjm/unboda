@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 330" preserveAspectRatio="none" aria-hidden="true">
+<defs><linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff" stop-opacity="0"/><stop offset=".39" stop-color="#faf5ff" stop-opacity=".53"/><stop offset=".82" stop-color="#dfccff" stop-opacity=".66"/><stop offset="1" stop-color="#e8d9ff" stop-opacity=".26"/></linearGradient>
+<linearGradient id="r" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#e8d5ff"/><stop offset=".50" stop-color="#fff"/><stop offset="1" stop-color="#c5aff3"/></linearGradient>
+<filter id="b"><feGaussianBlur stdDeviation="14"/></filter></defs>
+<path d="M0 168C104 95 166 158 255 172C347 188 409 86 501 107C608 131 671 168 751 143C849 111 902 189 1002 167C1090 147 1194 81 1284 115C1380 149 1517 171 1700 78V330H0Z" fill="url(#h)" opacity=".77"/>
+<path d="M0 233C120 186 230 227 330 219C420 210 523 157 617 170C744 188 818 225 929 204C1034 182 1119 202 1223 180C1368 150 1491 203 1700 143" stroke="url(#r)" stroke-width="3" opacity=".65"/>
+<path d="M0 268C170 235 271 283 403 263C530 245 601 221 749 249C881 274 1037 228 1159 247C1271 262 1503 239 1700 209" stroke="#fff" stroke-width="5" opacity=".66" filter="url(#b)"/>
+<g fill="#f9cc77" opacity=".72"><circle cx="140" cy="119" r="3"/><circle cx="497" cy="74" r="2"/><circle cx="1491" cy="114" r="4"/></g></svg>

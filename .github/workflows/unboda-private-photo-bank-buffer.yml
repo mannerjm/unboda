@@ -2,8 +2,7 @@ name: UNBODA private licensed photo bank 3-day intake audit (NO SNS)
 # Only server-side staging metadata and private photo/evidence bytes are read.
 # No SNS publishing, no public links, no Supabase/Metricool writes.
 on:
-  schedule:
-    - cron: '05 12 * * *' # 21:05 KST daily
+  # Paused scheduled lifestyle content/photo workflows per user request 2026-11-10.
   workflow_dispatch:
   pull_request:
     paths:

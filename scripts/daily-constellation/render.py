@@ -130,61 +130,53 @@ def draw_logo(draw,x,y,size=43,light=True):
     draw.text((x,y),"운보다",font=bfont(size,True),fill=WHITE if light else PURPLE)
     draw.text((x+size*3.0,y-13),"✦",font=bfont(27,False,True),fill=GOLD)
 def cover(data):
+    """Premium clean zodiac artwork with true brand URL, no fake browser UI."""
     day=dt.date.fromisoformat(data["dateKst"])
     im=make_background(day,0);d=ImageDraw.Draw(im)
-    d.rounded_rectangle((65,90,1015,1240),radius=67,fill="#FEFCFA",
-        outline="#150A38",width=8)
-    d.line((65,204,1015,204),fill=PURPLE,width=5)
-    d.text((115,117),"UNBODA.CO.KR",font=bfont(33,True),fill=PURPLE)
-    d.text((830,117),"—  □  ×",font=bfont(34),fill=PURPLE)
-    draw_logo(d,118,242,67,False)
-    center_text(d,(540,420),f"{day.month}월 {day.day}일",bfont(115,True),"#111115")
-    center_text(d,(540,590),"별자리 운세",bfont(106,True),PURPLE)
-    d.rounded_rectangle((200,755,880,846),radius=44,fill=CYAN)
-    center_text(d,(540,769),"매일 오후 1시 업로드",bfont(43,True),"#0D1837")
-    center_text(d,(540,925),"양자리부터 물고기자리까지",bfont(43,True),"#211449")
-    center_text(d,(540,988),"오늘의 흐름을 만나보세요",bfont(35),"#463764")
-    d.arc((175,1044,905,1510),181,356,fill="#BEB0EF",width=6)
-    for j,s in enumerate(data["signs"][:8]):
-        angle=j*3.14159/7
-        import math
-        xx=int(540+310*math.cos(angle+3.14159))
-        yy=int(1272-190*math.sin(angle))
-        if 170<xx<945 and 1030<yy<1230:
-            center_text(d,(xx,yy),s["glyph"],bfont(38,symbol=True),PURPLE)
-    center_text(d,(540,1278),"●  ○  ○  ○  ○",bfont(26,symbol=True),SOFT)
+    d.text((76,80),"운보다",font=bfont(63,True),fill=WHITE)
+    d.text((792,107),"unboda.kr",font=bfont(28,True),fill=SOFT)
+    d.line((76,177,1004,177),fill="#7864A7",width=3)
+    d.rounded_rectangle((59,233,1021,1067),radius=58,fill="#FAF8FF")
+    d.rounded_rectangle((114,298,515,380),radius=40,fill="#EEE6FD")
+    d.text((153,312),f"{day.month}월 {day.day}일 · 오후 1시",font=bfont(37,True),fill=PURPLE)
+    d.text((109,450),"오늘의 12별자리",font=bfont(84,True),fill=PURPLE)
+    d.text((114,592),"일상에 필요한 작은 힌트",font=bfont(46,True),fill="#45356B")
+    d.text((114,672),"나에게 맞는 이야기를 찾아보세요",font=bfont(33),fill="#65567D")
+    for idx,star in enumerate(data["signs"][:4]):
+        x=135+idx*212
+        d.rounded_rectangle((x,786,x+180,952),radius=36,fill="#E8DDF9")
+        center_text(d,(x+90,800),star["glyph"],bfont(100,symbol=True),PURPLE)
+    d.text((117,998),"5장 넘기며 확인하기",font=bfont(31,True),fill=PURPLE)
+    center_text(d,(540,1162),"재미와 자기성찰을 위한 오늘의 운세",bfont(34),WHITE)
+    center_text(d,(540,1223),"운보다 무료 사주 · unboda.kr",bfont(30,True),SOFT)
     return im
+
 def inner(data,page):
     if page not in range(1,5):raise ValueError("FOUR_SIGN_PAGES_REQUIRED")
     day=dt.date.fromisoformat(data["dateKst"])
     im=make_background(day,page);d=ImageDraw.Draw(im)
-    d.rounded_rectangle((47,75,1033,1262),radius=44,outline="#AA8CDE",width=3)
-    d.rounded_rectangle((47,75,1033,183),radius=42,fill="#FFFDFB")
-    d.rectangle((47,130,1033,185),fill="#FFFDFB")
-    d.text((80,97),"UNBODA.CO.KR",font=bfont(29,True),fill=PURPLE)
-    draw_logo(d,450,91,48,False)
-    d.text((855,98),"—  □  ×",font=bfont(31),fill=PURPLE)
+    d.text((65,64),"운보다",font=bfont(58,True),fill=WHITE)
+    d.text((768,83),"unboda.kr",font=bfont(29,True),fill=SOFT)
+    d.text((65,143),f"{day.month}월 {day.day}일 · 오늘의 별자리",font=bfont(34,True),fill="#C5F4EF")
     signs=data["signs"][(page-1)*3:page*3]
+    assert len(signs)==3
     for i,s in enumerate(signs):
-        y=210+i*336
-        d.ellipse((80,y+41,291,y+252),fill="#5A449A",outline="#7E67BC",width=3)
-        center_text(d,(185,y+79),s["glyph"],bfont(102,symbol=True),WHITE)
-        center_text(d,(184,y+255),"오늘의 행운 소품",bfont(23),SOFT)
-        center_text(d,(184,y+291),s["luckyItem"],bfont(27,True),WHITE)
-        d.text((334,y+39),s["name"],font=bfont(52,True),fill=CYAN)
-        d.text((340,y+110),s["dateRange"],font=bfont(31),fill="#A7F7F6")
-        lines=wrapped(d,s["text"],bfont(34),657,4)
-        if len(lines)>4:raise RuntimeError("TEXT_OVERLAP")
+        y=227+i*316
+        d.rounded_rectangle((60,y+9,1022,y+296),radius=35,fill="#170B3C")
+        d.rounded_rectangle((60,y,1022,y+287),radius=35,fill="#FAF8FF")
+        d.ellipse((91,y+40,249,y+198),fill="#E7DBF8")
+        center_text(d,(170,y+47),s["glyph"],bfont(100,symbol=True),PURPLE)
+        center_text(d,(170,y+206),"행운 소품",bfont(24,True),"#7661A0")
+        center_text(d,(170,y+239),s["luckyItem"],bfont(26,True),PURPLE)
+        d.text((284,y+27),s["name"],font=bfont(51,True),fill=PURPLE)
+        d.text((287,y+99),s["dateRange"],font=bfont(29),fill="#6B5E83")
+        lines=wrapped(d,s["text"],bfont(35),690,3)
         for j,line in enumerate(lines):
-            d.text((340,y+166+j*47),line,font=bfont(34),fill=WHITE)
-        if i<2:d.line((80,y+332,1000,y+332),fill="#A992D7",width=2)
-    # Pagination deliberately outside reading rows.
-    d.rounded_rectangle((400,1236,680,1295),radius=30,fill="#251050")
-    for i in range(5):
-        x=461+i*39;r=8
-        d.ellipse((x-r,1265-r,x+r,1265+r),
-                  fill=WHITE if i==page else "#7766B2")
+            d.text((286,y+152+j*41),line,font=bfont(35),fill="#32264D")
+    center_text(d,(540,1212),f"{page} / 4  ·  별자리별 생활 조언",bfont(30,True),SOFT)
+    center_text(d,(540,1263),"자기성찰을 위한 참고 콘텐츠 · unboda.kr",bfont(25),SOFT)
     return im
+
 def render(day,out):
     output=pathlib.Path(out)
     output.mkdir(parents=True,exist_ok=True)
@@ -228,6 +220,14 @@ def self_test():
             assert Image.open(path).size==SIZE
             assert hashlib.sha256(path.read_bytes()).hexdigest()==item["sha256"]
         assert len(pathlib.Path(t,"caption.txt").read_text())<451
+        for page in range(2,6):
+            with Image.open(pathlib.Path(t,f"unboda-{day.isoformat()}-{page:02}.png")) as pic:
+                assert pic.getpixel((976,254)) == (250,248,255), "MOBILE_CARD_FRAME_MISSING"
+        import inspect
+        visual_source=inspect.getsource(cover)+inspect.getsource(inner)
+        assert "UNBODA.CO.KR" not in visual_source and "□" not in visual_source
+        assert "1278" not in visual_source, "DUPLICATED_CAROUSEL_PAGINATION"
+
     print("PASS_12_DISTINCT_DAILY_SIGNS_5_ORIGINAL_BRANDED_PNGS_NO_SNS_POST")
 def main():
     p=argparse.ArgumentParser()

@@ -161,17 +161,44 @@ for (const [id, title] of Object.entries(studyThumbnailLabels)) {
     `The study thumbnail must show its distinct short title for ${id}`,
   );
 }
-assert(storefront.includes('thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id]'),
-  "Thumbnail titles must be keyed by actual product ID, not a shared category label");
+assert(storefront.includes('thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id] ?? BUSINESS_THUMBNAIL_TITLES[product.id]'),
+  "Product titles must be mapped by canonical study/business IDs instead of generic category art");
 assert(storefront.includes('pointer-events-none absolute inset-0 z-10')
-  && storefront.includes('bg-gradient-to-t from-black/80 via-black/25 to-black/20')
+  && storefront.includes('bg-gradient-to-t from-black/85 via-black/20 to-transparent')
   && storefront.includes('line-clamp-2 text-[17px] font-extrabold'),
-  "Overlay should remain click-through, high-contrast and readable within the thumbnail");
+  "Overlay should show only a readable, click-through item title over the photograph");
+assert(!storefront.includes('>학업·성장운</span>'),
+  "Do not put the redundant category name on study or business thumbnails");
 assert(storefront.includes('{getReadablePaidQuestion(product.id,question??product.title)}')
   && storefront.includes('onClick={()=>onSelectProduct(product.id)}')
   && storefront.includes('<PremiumProductDetail'),
   "Overlay must not replace official question text, product selection or purchase detail flow");
-assert(storefront.includes('top-8 z-20') && storefront.includes('top-[58px] z-20'),
-  "Recommendation and purchased-state badges must not obstruct the photo title");
+assert(storefront.includes('top-1.5 z-20') && storefront.includes('top-8 z-20'),
+  "Recommendation/purchase badges should remain readable at the top, away from overlay titles");
+
+
+const businessThumbnailLabels: Record<string,string> = {
+  "business-startup-readiness": "창업 준비",
+  "business-expansion-control": "사업 확장",
+  "business-client-relationship": "고객 관계",
+  "business-team-management": "팀 운영",
+};
+const launchBusinessProductIds = new Set(
+  groupTopicCatalogProductsByCategory().find((group) => group.category === "business")?.products.map((product) => product.id) ?? []
+);
+assert(launchBusinessProductIds.size === 4, "Launch business category must keep its original four products");
+for (const [id, label] of Object.entries(businessThumbnailLabels)) {
+  assert(launchBusinessProductIds.has(id), `Business image target must be a real launched product: ${id}`);
+  assert(storefront.includes(`"${id}": "${label}"`), `Business product must display distinct short title: ${id}`);
+  assert(photoRegistry.includes(`"${id}":`) && photoRegistry.includes(`src: "/images/premium/${id}.jpg"`),
+    `Business product must map to its own self-hosted licensed photo: ${id}`);
+  const photo = statSync(`public/images/premium/${id}.jpg`);
+  assert(photo.size > 7000 && photo.size < 180000,
+    `Business photo must be real, compressed and present: ${id}`);
+}
+assert(storefront.includes('line-clamp-2 text-[16px] font-extrabold leading-[1.4]'),
+  "Study and business question titles must use the same approved 16px size");
+assert(storefront.includes('onClick={()=>onSelectProduct(product.id)}') && storefront.includes('<PremiumProductDetail'),
+  "Business photo and overlay must never replace existing product detail, report or checkout entry");
 
 console.log("Deep-analysis phase 2 discovery regression passed ✓");

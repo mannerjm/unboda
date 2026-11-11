@@ -26,20 +26,16 @@ export default async function DeepAnalysisPage({ searchParams }: { searchParams?
   const initialMode = getSingleParam(params.mode) === "period" ? "period" : "topic";
 
   const catalogContent = (
-      <main className="min-h-screen bg-[#f5f7fc] px-5 py-7 text-stone-900 sm:px-8 sm:py-9">
+      <main className="min-h-screen bg-[radial-gradient(ellipse_at_50%_0%,#ffffff_0%,#faf5ff_55%,#efe6ff_100%)] px-5 py-6 text-[#281744] sm:px-8 sm:py-7">
         <div className="mx-auto w-full max-w-6xl">
-          <section className="relative overflow-hidden rounded-[2rem] border border-[#e0d0f7] bg-[radial-gradient(circle_at_85%_12%,rgba(206,170,255,.45),transparent_36%),linear-gradient(130deg,#fffefe_0%,#f8f0ff_65%,#eae0ff_100%)] px-6 py-8 text-[#281744] shadow-[0_18px_48px_rgba(113,75,171,.11)] sm:px-9 sm:py-10 lg:px-11">
+          <section className="relative overflow-hidden rounded-[2rem] border border-[#e0d0f7] bg-[radial-gradient(circle_at_85%_12%,rgba(206,170,255,.45),transparent_36%),linear-gradient(130deg,#fffefe_0%,#f8f0ff_65%,#eae0ff_100%)] px-6 py-5 text-[#281744] shadow-[0_18px_48px_rgba(113,75,171,.11)] sm:px-8 sm:py-6">
             <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#7759db]/20 blur-3xl" />
             <div className="pointer-events-none absolute bottom-[-8rem] left-[18%] h-56 w-56 rounded-full bg-[#d36e9c]/10 blur-3xl" />
-            <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div className="relative grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
               <div className="max-w-3xl">
                 <p className="text-xs font-black tracking-[0.16em] text-[#8551ca]">원하는 분석 바로 찾기</p>
-                <h1 className="mt-3 text-3xl font-black leading-tight tracking-[-0.05em] sm:text-4xl lg:text-[2.8rem]">
-                  상품 이름보다,<br className="hidden sm:block" /> 지금 궁금한 질문부터 골라보세요.
-                </h1>
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-[#655476] sm:text-base">
-                  주제나 시간 범위를 고르면 실제 고민에 가까운 질문부터 보여드려요. 필요한 분석만 자세히 확인할 수 있습니다.
-                </p>
+                <h1 className="mt-2 text-3xl font-black leading-tight tracking-[-0.05em] sm:text-4xl">어떤 운이 궁금하세요?</h1>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-[#655476]">주제별 상품은 사진과 제목으로, 기간별 상품은 바로 상세 내용으로 살펴보세요.</p>
               </div>
               {activeProfile ? (
                 <div className="rounded-2xl border border-[#ded0f5] bg-white/80 px-4 py-3 shadow-sm backdrop-blur-xl">

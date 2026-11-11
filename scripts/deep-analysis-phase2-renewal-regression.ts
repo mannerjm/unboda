@@ -229,4 +229,37 @@ assert(storefront.includes('line-clamp-2 text-[16px] font-extrabold leading-[1.4
 assert(storefront.includes('onClick={()=>onSelectProduct(product.id)}') && storefront.includes('<PremiumProductDetail'),
   "Health thumbnails may not modify purchase, report or AI consultation navigation");
 
+
+const moneyThumbnailLabels: Readonly<Record<string,string>> = {
+  "wealth": "재물 흐름",
+  "money-wealth-accumulation": "돈 모으기",
+  "money-leak-risk": "새는 돈 점검",
+  "money-saving-discipline": "저축 습관",
+  "money-income-stability": "수입 안정",
+  "money-debt-repayment": "상환 부담",
+  "money-emergency-buffer": "비상자금",
+  "money-shared-finance": "공동 재정",
+  "money-contract-commitment": "계약 전 점검",
+  "money-spending-decision": "큰 지출 판단",
+};
+const launchedMoneyIds = new Set(
+  groupTopicCatalogProductsByCategory().find((group) => group.category === "money")?.products.map((product) => product.id) ?? []
+);
+assert(launchedMoneyIds.size === 10, "Money category must retain all ten launched products, including legacy wealth");
+for(const [id,label] of Object.entries(moneyThumbnailLabels)) {
+  assert(launchedMoneyIds.has(id), `Money thumbnail must target a launched product: ${id}`);
+  assert(storefront.includes(`"${id}": "${label}"`), `Money card must show its distinct short thumbnail title: ${id}`);
+  assert(photoRegistry.includes(`"${id}":`) && photoRegistry.includes(`src: "/images/premium/${id}.jpg"`),
+    `Money product photo must be hosted and keyed by exact product ID: ${id}`);
+  const picture = statSync(`public/images/premium/${id}.jpg`);
+  assert(picture.size > 7000 && picture.size < 180000, `Money photo missing or abnormally sized: ${id}`);
+}
+assert(storefront.includes('MONEY_THUMBNAIL_TITLES[product.id]'),
+  "Money category must use the existing short photo title overlay, not generic category artwork");
+assert(storefront.includes('line-clamp-2 text-[16px] font-extrabold leading-[1.4]'),
+  "All money question titles must retain the 16px approved readable text size");
+assert(storefront.includes('onClick={()=>onSelectProduct(product.id)}') && storefront.includes('<PremiumProductDetail'),
+  "Money thumbnail changes must not replace existing exact product detail, entitlement or purchase routes");
+assert(!storefront.includes('>재물운</span>'), "Money thumbnails should not add redundant top category text");
+
 console.log("Deep-analysis phase 2 discovery regression passed ✓");

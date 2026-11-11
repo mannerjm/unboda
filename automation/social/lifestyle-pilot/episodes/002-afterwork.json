@@ -1,34 +1,34 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-afterwork-expense-ledger-0-0-20261110",
-  "topicKey": "saju-afterwork-expense-ledger-0-0-20261110",
+  "id": "unboda-saju-afterwork-savings-goal-0-0-20261112",
+  "topicKey": "saju-afterwork-savings-goal-0-0-20261112",
   "sajuCategory": "money",
   "visualStyle": "finance-emerald",
-  "visualMotif": "expense-ledger",
-  "situation": "저녁에 지출 가계부를 다시 확인한 날",
-  "hook": "저녁에 지출 가계부를 다시 확인한 날. 뭘 먼저 볼까요?",
-  "theme": "저녁에 지출 가계부를 다시 확인한 날에서 실제 생활 선택을 살피는 내용. 지출·계약·공동 부담에서 손실 노출이 커지는 구조와 위험 감소 기준을 분석",
-  "thumbnailTitle": "저녁에 지출 가계부를 다시 확인한 날",
+  "visualMotif": "savings-goal",
+  "situation": "저축 목표 금액을 다시 적어 본 밤",
+  "hook": "저축 목표 금액을 다시 적어 본 밤. 뭘 먼저 볼까요?",
+  "theme": "저축 목표 금액을 다시 적어 본 밤에서 실제 생활 선택을 살피는 내용. 저축·예산 기준을 유지하고 반복 가능한 관리 루틴을 재설정하는 방법을 분석",
+  "thumbnailTitle": "저축 목표 금액을 다시 적어 본 밤",
   "narrationDraft": [
-    "저녁에 지출 가계부를 다시 확인한 날. 뭘 먼저 볼까요?",
+    "저축 목표 금액을 다시 적어 본 밤. 뭘 먼저 볼까요?",
     "사주 재물운은 내 지출 기준과 생활 속 소비 습관을 살펴보는 참고예요.",
     "지난달의 기록과 오늘의 지출을 나란히 놓고 바뀐 조건을 비교해 보세요.",
     "운보다 무료 사주 조회 후 내 선택과 생활 흐름도 차분하게 살펴보세요."
   ],
   "visualConcepts": [
-    "첫 장면에서 저녁에 지출 가계부를 다시 확인한 날 상황과 지출 점검, 가계부을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "두 번째 장면에서 저녁에 지출 가계부를 다시 확인한 날 상황과 지출 점검, 가계부을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "세 번째 장면에서 저녁에 지출 가계부를 다시 확인한 날 상황과 지출 점검, 가계부을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "마지막 장면에서 저녁에 지출 가계부를 다시 확인한 날 상황과 지출 점검, 가계부을 실제 주제 그림으로 보여주고 움직이는 화면"
+    "첫 장면에서 저축 목표 금액을 다시 적어 본 밤 상황과 저축 목표, 저축을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "두 번째 장면에서 저축 목표 금액을 다시 적어 본 밤 상황과 저축 목표, 저축을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "세 번째 장면에서 저축 목표 금액을 다시 적어 본 밤 상황과 저축 목표, 저축을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "마지막 장면에서 저축 목표 금액을 다시 적어 본 밤 상황과 저축 목표, 저축을 실제 주제 그림으로 보여주고 움직이는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "지출 점검",
-        "가계부를 다시 확인한 날"
+        "저축 목표",
+        "본 밤"
       ],
-      "subline": "지출 점검 돌아보기",
-      "illustration": "notes"
+      "subline": "저축 목표 돌아보기",
+      "illustration": "clock"
     },
     {
       "headline": [
@@ -36,7 +36,7 @@
         "성향 참고"
       ],
       "subline": "지금 상황 돌아보기",
-      "illustration": "rest"
+      "illustration": "message"
     },
     {
       "headline": [
@@ -44,29 +44,29 @@
         "지금 해봐요"
       ],
       "subline": "나의 기준 점검하기",
-      "illustration": "clock"
+      "illustration": "notes"
     },
     {
       "headline": [
         "내 사주도",
         "무료로 살펴봐"
       ],
-      "subline": "운보다 무료 사주 · 돈이 새는 구조와 손실 위험",
-      "illustration": "message"
+      "subline": "운보다 무료 사주 · 저축과 자산 관리 습관",
+      "illustration": "rest"
     }
   ],
-  "targetDateKst": "20261110",
+  "targetDateKst": "20261112",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "productId": "money-leak-risk",
-  "productTitle": "돈이 새는 구조와 손실 위험",
+  "productId": "money-saving-discipline",
+  "productTitle": "저축과 자산 관리 습관",
   "productCategory": "money",
   "productType": "premium",
-  "landingPath": "/paid-analysis/money-leak-risk",
+  "landingPath": "/paid-analysis/money-saving-discipline",
   "contentGoal": "premium-conversion",
-  "productProblem": "지출 관련 저녁에 지출 가계부를 다시 확인한 날 상황을 돌아보고 점검",
-  "productValue": "지출·계약·공동 부담에서 손실 노출이 커지는 구조와 위험 감소 기준을 분석",
-  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 돈이 새는 구조와 손실 위험 https://unboda.kr/paid-analysis/money-leak-risk"
+  "productProblem": "저축 관련 저축 목표 금액을 다시 적어 본 밤 상황을 돌아보고 점검",
+  "productValue": "저축·예산 기준을 유지하고 반복 가능한 관리 루틴을 재설정하는 방법을 분석",
+  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 저축과 자산 관리 습관 https://unboda.kr/paid-analysis/money-saving-discipline"
 }

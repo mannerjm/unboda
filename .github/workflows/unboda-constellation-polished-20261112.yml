@@ -1,0 +1,62 @@
+name: UNBODA 2026-11-12 corrected constellation artwork source only
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/unboda-constellation-polished-20261112.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: unboda-constellation-polished-20261112
+  cancel-in-progress: false
+jobs:
+  verified-assets:
+    if: github.repository == 'mannerjm/unboda' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      TZ: Asia/Seoul
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned renderer and fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk fonts-dejavu-core
+          python -m pip install --no-cache-dir Pillow==11.3.0
+      - name: Render and visually test fixed 2026-11-12 artwork
+        run: |
+          set -euo pipefail
+          python scripts/daily-constellation/render.py --self-test
+          python scripts/daily-constellation/render.py --date 2026-11-12 --out release-polished
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import json,hashlib
+          root=Path('release-polished')
+          data=json.loads((root/'constellation-manifest.json').read_text())
+          assert data['dateKst']=='2026-11-12' and len(data['signs'])==12 and len(data['images'])==5
+          for it in data['images']:
+              raw=(root/it['name']).read_bytes()
+              assert len(raw)>20000 and hashlib.sha256(raw).hexdigest()==it['sha256']
+              with Image.open(root/it['name']) as im:assert im.size==(1080,1350)
+          print('POLISHED_20261112_ALL_FIVE_IMAGES_VALIDATED')
+          PY
+      - name: Publish separate immutable correction release, no SNS POST
+        run: |
+          set -euo pipefail
+          TAG="unboda-constellation-polished-20261112"
+          if gh release view "$TAG" --repo mannerjm/unboda >/dev/null 2>&1; then
+            echo "CORRECTED_RELEASE_EXISTS_SKIP"; exit 0
+          fi
+          gh release create "$TAG" release-polished/* --repo mannerjm/unboda \
+            --target "${{ github.sha }}" --title "운보다 별자리 11월 12일 · 수정 디자인" \
+            --notes "New original 5-card design; date-accurate and pixel-tested. NO SNS POST." --prerelease
+          test "$(gh release view "$TAG" --repo mannerjm/unboda --json assets --jq '.assets|length')" = 7
+          echo "CORRECTED_20261112_RELEASE_READY"

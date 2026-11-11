@@ -211,7 +211,7 @@ export default function PremiumCatalogMarketplace({
       <aside className="hidden self-start rounded-[1.4rem] border border-[#e7d8f8] bg-[#faf7ff] p-3 shadow-[0_10px_35px_rgba(113,71,173,.06)] md:block" aria-label="심층 분석 카테고리">
         <p className="px-3 pb-2 text-[11px] font-black tracking-wider text-[#8d69b7]">주제별 분석</p>
         <div className="space-y-1">
-          {topicGroups.map(group=><button key={group.category} type="button" aria-pressed={mode==="topic"&&currentGroup.category===group.category} onClick={()=>chooseTopic(group.category)} className={menuClass(mode==="topic"&&currentGroup.category===group.category)}>
+          {topicGroups.map(group=><button key={group.category} type="button" aria-pressed={mode==="topic"&&currentGroup?.category===group.category} onClick={()=>chooseTopic(group.category)} className={menuClass(mode==="topic"&&currentGroup?.category===group.category)}>
             <span>{group.label}</span><span className="text-[10px] opacity-65">{group.products.length}</span>
           </button>)}
         </div>
@@ -226,7 +226,7 @@ export default function PremiumCatalogMarketplace({
         <div className="mb-4 md:hidden" aria-label="모바일 심층분석 카테고리">
           <p className="mb-2 text-xs font-black text-[#69449c]">주제별 분석</p>
           <div className="flex gap-2 overflow-x-auto pb-3">
-            {topicGroups.map(group=><button key={group.category} type="button" aria-pressed={mode==="topic"&&currentGroup.category===group.category} onClick={()=>chooseTopic(group.category)} className={"shrink-0 rounded-full border px-3.5 py-2 text-xs font-bold "+(mode==="topic"&&currentGroup.category===group.category?"border-[#ad84e8] bg-[#edddff] text-[#542d91]":"border-[#e5d7f5] bg-white text-[#756384]")}>{group.label}</button>)}
+            {topicGroups.map(group=><button key={group.category} type="button" aria-pressed={mode==="topic"&&currentGroup?.category===group.category} onClick={()=>chooseTopic(group.category)} className={"shrink-0 rounded-full border px-3.5 py-2 text-xs font-bold "+(mode==="topic"&&currentGroup?.category===group.category?"border-[#ad84e8] bg-[#edddff] text-[#542d91]":"border-[#e5d7f5] bg-white text-[#756384]")}>{group.label}</button>)}
           </div>
           <p className="mb-2 mt-1 text-xs font-black text-[#69449c]">기간별 분석</p>
           <div className="flex gap-2 overflow-x-auto pb-2">
@@ -242,7 +242,7 @@ export default function PremiumCatalogMarketplace({
             </div>
             <div className="grid gap-4 bg-[linear-gradient(130deg,#ffffff,#f8f0ff)] p-5 sm:grid-cols-[180px_1fr] sm:items-center sm:p-6">
               <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-white/80 shadow-[0_10px_25px_rgba(107,75,163,.13)]">
-                <CatalogArt category={isPeriod?"period":currentGroup.category} seed={selected.id} wide/>
+                <CatalogArt category={isPeriod?"period":(currentGroup?.category??"period")} seed={selected.id} wide/>
               </div>
               <div>
                 <p className="text-xs font-bold text-[#8b57bf]">{isPeriod?"기간별":"주제별"} · 심층분석</p>

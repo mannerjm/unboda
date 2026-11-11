@@ -217,9 +217,9 @@ export const PREMIUM_PRODUCT_PHOTOS: Readonly<Record<string, PremiumProductPhoto
     sourcePage: "https://www.pexels.com/photo/a-couple-walking-while-holding-hands-8551496/",
   },
   "relationship-long-distance": {
-    src: "/images/premium/relationship-long-distance.jpg",
-    alt: "각자의 스마트폰으로 장거리 연락을 나누는 연인",
-    sourcePage: "https://www.pexels.com/photo/city-man-couple-hands-6415617/",
+    src: "/images/premium/relationship-long-distance-v2.jpg",
+    alt: "카페에서 스마트폰 화면 속 상대방과 영상통화하는 남성",
+    sourcePage: "https://www.pexels.com/photo/video-call-conversation-in-london-cafe-setting-30021852/",
   },
   "relationship-unrequited": {
     src: "/images/premium/relationship-unrequited.jpg",

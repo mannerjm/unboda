@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import Image from "next/image";
+import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import type { PremiumCatalogCategoryGroup } from "@/app/lib/premiumCatalog";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import type { PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
@@ -164,6 +166,25 @@ function CatalogArt({category,seed,wide=false}:{category:string;seed:string;wide
   );
 }
 
+/** Replaces shared icon art with product-meaningful photography where vetted imagery exists.
+ * A failed remote asset gracefully falls back to the original first-party art. */
+function ProductArtwork({category,productId,wide=false}: {category:string;productId:string;wide?:boolean}) {
+  const photo=PREMIUM_PRODUCT_PHOTOS[productId];
+  const [photoUnavailable,setPhotoUnavailable]=useState(false);
+  useEffect(()=>{setPhotoUnavailable(false);},[productId]);
+  if(!photo || photoUnavailable) return <CatalogArt category={category} seed={productId} wide={wide}/>;
+  return <Image
+    src={photo.src}
+    alt={photo.alt}
+    fill
+    unoptimized
+    sizes={wide?"(max-width: 640px) 90vw, 180px":"(max-width: 640px) 116px, 132px"}
+    className="object-cover object-center"
+    loading="lazy"
+    onError={()=>setPhotoUnavailable(true)}
+  />;
+}
+
 type ReviewSummary = {count:number;averageRating:number|null};
 const reviewCache=new Map<string,ReviewSummary|null>();
 function VerifiedRating({productId}:{productId:string}) {
@@ -225,8 +246,8 @@ export default function PremiumCatalogMarketplace({
               <span className="text-xs font-semibold text-[#9a88aa]">{isPeriod?"기간별 분석":currentGroup?.label}</span>
             </div>
             <div className="grid gap-4 bg-[linear-gradient(130deg,#ffffff,#f8f0ff)] p-5 sm:grid-cols-[180px_1fr] sm:items-center sm:p-6">
-              <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-white/80 shadow-[0_10px_25px_rgba(107,75,163,.13)]">
-                <CatalogArt category={isPeriod?"period":(currentGroup?.category??"period")} seed={selected.id} wide/>
+              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-white/80 shadow-[0_10px_25px_rgba(107,75,163,.13)]">
+                <ProductArtwork category={isPeriod?"period":(currentGroup?.category??"period")} productId={selected.id} wide/>
               </div>
               <div>
                 <p className="text-xs font-bold text-[#8b57bf]">{isPeriod?"기간별":"주제별"} · 심층분석</p>
@@ -265,7 +286,7 @@ export default function PremiumCatalogMarketplace({
                 const state=stateByProductId.get(product.id)??"not_purchased";
                 return <button key={product.id} type="button" onClick={()=>onSelectProduct(product.id)} className="group grid min-h-[148px] grid-cols-[116px_minmax(0,1fr)] gap-3 rounded-[1.3rem] border border-[#eadff5] bg-white p-3 text-left shadow-[0_9px_25px_rgba(110,76,165,.07)] transition hover:-translate-y-0.5 hover:border-[#c49be8] hover:shadow-[0_14px_30px_rgba(110,76,165,.14)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#9164d1] sm:grid-cols-[132px_minmax(0,1fr)]" aria-label={product.title+" 상세 정보 보기"}>
                   <div className="relative min-h-[122px] overflow-hidden rounded-xl bg-[#f8f1ff]">
-                    <CatalogArt category={currentGroup.category} seed={product.id}/>
+                    <ProductArtwork category={currentGroup.category} productId={product.id}/>
                     {recommendedIdSet.has(product.id)?<span className="absolute left-1.5 top-1.5 rounded-md bg-[#6c3ab7] px-1.5 py-1 text-[9px] font-bold text-white shadow">내 추천</span>:null}
                     {state!=="not_purchased"?<span className="absolute bottom-1.5 left-1.5 rounded-md bg-white/95 px-1.5 py-1 text-[9px] font-bold text-[#5b4481]">{STATUS[state]}</span>:null}
                   </div>

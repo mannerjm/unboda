@@ -262,4 +262,37 @@ assert(storefront.includes('onClick={()=>onSelectProduct(product.id)}') && store
   "Money thumbnail changes must not replace existing exact product detail, entitlement or purchase routes");
 assert(!storefront.includes('>재물운</span>'), "Money thumbnails should not add redundant top category text");
 
+
+const careerThumbnailLabels: Readonly<Record<string,string>> = {
+  "career": "직업 방향",
+  "career-job-change": "이직 고민",
+  "career-job-fit": "업무 적성",
+  "career-specialization": "전문성 강화",
+  "career-promotion-readiness": "승진 준비",
+  "career-workplace-adaptation": "직장 적응",
+  "career-leadership-readiness": "리더십 역량",
+  "career-freelance-transition": "프리랜서 전환",
+  "career-workload-recovery": "업무 과부하",
+  "career-workplace-relationships": "직장 관계",
+};
+const launchedCareerIds = new Set(
+  groupTopicCatalogProductsByCategory().find((group) => group.category === "career")?.products.map((product) => product.id) ?? []
+);
+assert(launchedCareerIds.size === 10, "Career must retain ten launched products including legacy career");
+for (const [id,label] of Object.entries(careerThumbnailLabels)) {
+  assert(launchedCareerIds.has(id), `Career image must target a real launched product: ${id}`);
+  assert(storefront.includes(`"${id}": "${label}"`), `Career card needs its own title: ${id}`);
+  assert(photoRegistry.includes(`"${id}":`) && photoRegistry.includes(`src: "/images/premium/${id}.jpg"`),
+    `Career card must serve a separate first-party photo for ${id}`);
+  const file = statSync(`public/images/premium/${id}.jpg`);
+  assert(file.size > 7000 && file.size < 180000, `Career JPEG is missing, empty, or too large: ${id}`);
+}
+assert(storefront.includes('CAREER_THUMBNAIL_TITLES[product.id]'),
+  "Career labels must use original product IDs and existing product-specific photo overlay");
+assert(storefront.includes('line-clamp-2 text-[16px] font-extrabold leading-[1.4]'),
+  "Do not change approved 16px question-style product title typography");
+assert(storefront.includes('onClick={()=>onSelectProduct(product.id)}') && storefront.includes('<PremiumProductDetail'),
+  "Do not change canonical product selection, paid report or AI consultation navigation");
+assert(!storefront.includes('>직업운</span>'), "Career photo must not show a redundant category chip");
+
 console.log("Deep-analysis phase 2 discovery regression passed ✓");

@@ -36,4 +36,24 @@ export const PREMIUM_PRODUCT_PHOTOS: Readonly<Record<string, PremiumProductPhoto
     alt: "빨간 리본으로 묶인 여러 장의 증서가 책상 위에 놓인 모습",
     sourcePage: "https://www.pexels.com/photo/close-up-photo-of-diploma-7942430/",
   },
+  "business-startup-readiness": {
+    src: "/images/premium/business-startup-readiness.jpg",
+    alt: "창업 계획을 세우며 노트북과 자료를 정리하는 창업 준비자",
+    sourcePage: "https://www.pexels.com/photo/a-man-looking-at-a-website-on-the-internet-7309483/",
+  },
+  "business-expansion-control": {
+    src: "/images/premium/business-expansion-control.jpg",
+    alt: "사업 성장 그래프를 보며 확장 계획을 논의하는 직장인들",
+    sourcePage: "https://www.pexels.com/photo/business-partners-having-a-meeting-at-the-office-7433898/",
+  },
+  "business-client-relationship": {
+    src: "/images/premium/business-client-relationship.jpg",
+    alt: "고객과 계약을 논의하며 악수하는 업무 미팅",
+    sourcePage: "https://www.pexels.com/photo/people-shaking-their-hands-in-close-deal-business-contract-8112180/",
+  },
+  "business-team-management": {
+    src: "/images/premium/business-team-management.jpg",
+    alt: "팀원들이 모여 함께 업무 계획을 논의하는 회의 장면",
+    sourcePage: "https://www.pexels.com/photo/a-team-brainstorming-together-7495549/",
+  },
 };

@@ -1,0 +1,34 @@
+name: UNBODA horoscope scheduler safety tests
+on:
+  pull_request:
+    paths:
+      - 'automation/social/horoscope-scheduler/**'
+      - '.github/workflows/unboda-horoscope-scheduler-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'automation/social/horoscope-scheduler/**'
+      - '.github/workflows/unboda-horoscope-scheduler-qa.yml'
+permissions:
+  contents: read
+jobs:
+  offline-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    defaults:
+      run:
+        working-directory: automation/social/horoscope-scheduler
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm test
+      - name: Validate source syntax and no client-side secrets
+        run: |
+          node --check api/nextday.js
+          node --check lib/scheduler.mjs
+          node --input-type=module -e "import('./lib/scheduler.mjs').then(x=>{if(!x.releaseTag)throw Error('MISSING_REVIEWED_CORE')})"

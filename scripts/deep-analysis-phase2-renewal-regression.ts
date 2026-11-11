@@ -295,4 +295,33 @@ assert(storefront.includes('onClick={()=>onSelectProduct(product.id)}') && store
   "Do not change canonical product selection, paid report or AI consultation navigation");
 assert(!storefront.includes('>직업운</span>'), "Career photo must not show a redundant category chip");
 
+
+const socialThumbnailLabels: Readonly<Record<string,string>> = {
+  "relationship-friendship": "친구 관계",
+  "relationship-family-role": "가족 역할",
+  "social-helper": "도움과 신뢰",
+  "social-conflict": "대인 갈등",
+  "social-network-expansion": "새 인맥 만들기",
+};
+const launchedSocialIds = new Set(
+  groupTopicCatalogProductsByCategory().find((group) => group.category === "social")?.products.map((p) => p.id) ?? [],
+);
+assert(launchedSocialIds.size === 5, "Social category must keep its five existing launched products");
+for (const [id,title] of Object.entries(socialThumbnailLabels)) {
+  assert(launchedSocialIds.has(id), `Photo must map to actual launched social product: ${id}`);
+  assert(storefront.includes(`"${id}": "${title}"`),
+    `Social card must show an individual short Korean photo label: ${id}`);
+  assert(photoRegistry.includes(`"${id}":`) && photoRegistry.includes(`src: "/images/premium/${id}.jpg"`),
+    `Social photo must use its own first-party JPEG: ${id}`);
+  const photo = statSync(`public/images/premium/${id}.jpg`);
+  assert(photo.size > 7000 && photo.size < 180000, `Social photo must exist and remain optimized: ${id}`);
+}
+assert(storefront.includes('SOCIAL_THUMBNAIL_TITLES[product.id]'),
+  "Social labels must reuse the existing clickable photo overlay, not a generic icon");
+assert(storefront.includes('line-clamp-2 text-[16px] font-extrabold leading-[1.4]'),
+  "Keep the approved 16px official question title separate from the photo label");
+assert(storefront.includes('onClick={()=>onSelectProduct(product.id)}') && storefront.includes('<PremiumProductDetail'),
+  "Photo-only update must not alter product selection, checkout or report detail routes");
+assert(!storefront.includes('>대인관계운</span>'), "No redundant social category word inside photographs");
+
 console.log("Deep-analysis phase 2 discovery regression passed ✓");

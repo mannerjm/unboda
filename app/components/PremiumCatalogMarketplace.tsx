@@ -77,6 +77,18 @@ const MONEY_THUMBNAIL_TITLES: Readonly<Record<string,string>> = {
   "money-contract-commitment": "계약 전 점검",
   "money-spending-decision": "큰 지출 판단",
 };
+const CAREER_THUMBNAIL_TITLES: Readonly<Record<string,string>> = {
+  "career": "직업 방향",
+  "career-job-change": "이직 고민",
+  "career-job-fit": "업무 적성",
+  "career-specialization": "전문성 강화",
+  "career-promotion-readiness": "승진 준비",
+  "career-workplace-adaptation": "직장 적응",
+  "career-leadership-readiness": "리더십 역량",
+  "career-freelance-transition": "프리랜서 전환",
+  "career-workload-recovery": "업무 과부하",
+  "career-workplace-relationships": "직장 관계",
+};
 
 function money(productId:string) {
   return getProductPricing(productId).amount.toLocaleString("ko-KR") + "원";
@@ -318,7 +330,7 @@ export default function PremiumCatalogMarketplace({
                 const config=getPaidAnalysisTopicConfig(product.id);
                 const question=config?.purchaseDecision?.decisionQuestion;
                 const state=stateByProductId.get(product.id)??"not_purchased";
-                const thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id] ?? BUSINESS_THUMBNAIL_TITLES[product.id] ?? HEALTH_THUMBNAIL_TITLES[product.id] ?? MONEY_THUMBNAIL_TITLES[product.id];
+                const thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id] ?? BUSINESS_THUMBNAIL_TITLES[product.id] ?? HEALTH_THUMBNAIL_TITLES[product.id] ?? MONEY_THUMBNAIL_TITLES[product.id] ?? CAREER_THUMBNAIL_TITLES[product.id];
                 return <button key={product.id} type="button" onClick={()=>onSelectProduct(product.id)} className="group grid min-h-[148px] grid-cols-[116px_minmax(0,1fr)] gap-3 rounded-[1.3rem] border border-[#eadff5] bg-white p-3 text-left shadow-[0_9px_25px_rgba(110,76,165,.07)] transition hover:-translate-y-0.5 hover:border-[#c49be8] hover:shadow-[0_14px_30px_rgba(110,76,165,.14)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#9164d1] sm:grid-cols-[132px_minmax(0,1fr)]" aria-label={product.title+" 상세 정보 보기"}>
                   <div className="relative min-h-[122px] overflow-hidden rounded-xl bg-[#f8f1ff]">
                     <ProductArtwork category={currentGroup.category} productId={product.id}/>

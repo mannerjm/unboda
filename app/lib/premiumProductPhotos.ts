@@ -136,4 +136,54 @@ export const PREMIUM_PRODUCT_PHOTOS: Readonly<Record<string, PremiumProductPhoto
     alt: "신용카드를 들고 온라인 구매 여부를 고민하는 사람",
     sourcePage: "https://www.pexels.com/photo/pensive-ethnic-shopper-with-debit-card-and-laptop-on-bed-6347709/",
   },
+  "career": {
+    src: "/images/premium/career.jpg",
+    alt: "팀원들이 업무 계획과 책임을 논의하는 직장 회의 장면",
+    sourcePage: "https://www.pexels.com/photo/employees-having-a-meeting-at-the-office-7433835/",
+  },
+  "career-job-change": {
+    src: "/images/premium/career-job-change.jpg",
+    alt: "지원자가 담당자와 면접을 진행하며 이직 기회를 살펴보는 모습",
+    sourcePage: "https://www.pexels.com/photo/professional-man-interviewing-an-applicant-5668863/",
+  },
+  "career-job-fit": {
+    src: "/images/premium/career-job-fit.jpg",
+    alt: "사무실에서 서류를 검토하며 자신의 업무에 집중하는 직장인",
+    sourcePage: "https://www.pexels.com/photo/man-working-on-laptop-in-an-office-9052865/",
+  },
+  "career-specialization": {
+    src: "/images/premium/career-specialization.jpg",
+    alt: "전문 기술을 배우기 위해 책과 자료를 공부하는 사람",
+    sourcePage: "https://www.pexels.com/photo/close-up-shot-of-a-person-studying-8553892/",
+  },
+  "career-promotion-readiness": {
+    src: "/images/premium/career-promotion-readiness.jpg",
+    alt: "성과 그래프를 함께 검토하며 다음 역할을 준비하는 장면",
+    sourcePage: "https://www.pexels.com/photo/close-up-photo-person-pointing-at-a-statistical-graph-in-a-clipboard-6592681/",
+  },
+  "career-workplace-adaptation": {
+    src: "/images/premium/career-workplace-adaptation.jpg",
+    alt: "새로운 직장 환경에서 동료들과 협업하는 직원들의 모습",
+    sourcePage: "https://www.pexels.com/photo/coworkers-at-meeting-in-office-6147027/",
+  },
+  "career-leadership-readiness": {
+    src: "/images/premium/career-leadership-readiness.jpg",
+    alt: "화이트보드 앞에서 회의를 이끌며 의견을 설명하는 리더",
+    sourcePage: "https://www.pexels.com/photo/a-man-in-gray-suit-talking-while-pointing-on-whiteboard-8124371/",
+  },
+  "career-freelance-transition": {
+    src: "/images/premium/career-freelance-transition.jpg",
+    alt: "집에서 노트북으로 독립 업무를 수행하는 프리랜서",
+    sourcePage: "https://www.pexels.com/photo/asian-freelancer-working-at-home-4333571/",
+  },
+  "career-workload-recovery": {
+    src: "/images/premium/career-workload-recovery.jpg",
+    alt: "서류가 쌓인 사무실에서 피로를 느끼는 직장인",
+    sourcePage: "https://www.pexels.com/photo/exhausted-employee-in-front-of-laptop-6837637/",
+  },
+  "career-workplace-relationships": {
+    src: "/images/premium/career-workplace-relationships.jpg",
+    alt: "직장 동료들이 협력해 의견을 나누는 업무 회의 장면",
+    sourcePage: "https://www.pexels.com/photo/colleagues-discussing-ideas-while-in-the-office-7792868/",
+  },
 };

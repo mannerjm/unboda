@@ -56,4 +56,34 @@ export const PREMIUM_PRODUCT_PHOTOS: Readonly<Record<string, PremiumProductPhoto
     alt: "팀원들이 모여 함께 업무 계획을 논의하는 회의 장면",
     sourcePage: "https://www.pexels.com/photo/a-team-brainstorming-together-7495549/",
   },
+  "health-energy-recovery": {
+    src: "/images/premium/health-energy-recovery.jpg",
+    alt: "따뜻한 차를 마시며 휴식을 취하고 에너지를 회복하는 여성",
+    sourcePage: "https://www.pexels.com/photo/woman-enjoying-tea-in-a-bedroom-8329906/",
+  },
+  "health-sleep-rhythm": {
+    src: "/images/premium/health-sleep-rhythm.jpg",
+    alt: "알람 시계가 놓인 침실에서 편안히 잠든 여성",
+    sourcePage: "https://www.pexels.com/photo/young-female-sleeping-on-bed-in-morning-7622514/",
+  },
+  "health-stress-regulation": {
+    src: "/images/premium/health-stress-regulation.jpg",
+    alt: "차분한 환경에서 명상하며 스트레스 반응을 조절하는 여성",
+    sourcePage: "https://www.pexels.com/photo/photo-of-a-woman-meditating-8032834/",
+  },
+  "health-burnout-risk": {
+    src: "/images/premium/health-burnout-risk.jpg",
+    alt: "업무에 지쳐 노트북 앞에서 머리를 쉬고 있는 직장인",
+    sourcePage: "https://www.pexels.com/photo/overworked-employee-lying-in-front-of-laptop-6837644/",
+  },
+  "health-habit-continuity": {
+    src: "/images/premium/health-habit-continuity.jpg",
+    alt: "물 섭취량과 일상 습관을 기록하며 생활 관리를 계획하는 손",
+    sourcePage: "https://www.pexels.com/photo/nutritionist-filling-in-nutrition-plan-8844562/",
+  },
+  "health-body-signal-review": {
+    src: "/images/premium/health-body-signal-review.jpg",
+    alt: "집에서 스트레칭하며 몸의 변화를 살피는 여성",
+    sourcePage: "https://www.pexels.com/photo/woman-doing-yoga-at-home-8173431/",
+  },
 };

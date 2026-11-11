@@ -324,4 +324,43 @@ assert(storefront.includes('onClick={()=>onSelectProduct(product.id)}') && store
   "Photo-only update must not alter product selection, checkout or report detail routes");
 assert(!storefront.includes('>대인관계운</span>'), "No redundant social category word inside photographs");
 
+
+const relationshipThumbnailLabels: Readonly<Record<string,string>> = {
+  "relationship": "연애·관계",
+  "relationship-long-distance": "장거리 연애",
+  "relationship-unrequited": "짝사랑 고민",
+  "relationship-current": "현재 관계",
+  "relationship-new-connection": "새 인연 만나기",
+  "relationship-marriage": "결혼 준비",
+  "relationship-partner-pattern": "상대 선택",
+  "relationship-conflict": "연애 갈등",
+  "relationship-boundary": "거리 조절",
+  "relationship-reunion": "재회 판단",
+  "relationship-intimacy": "친밀감 속도",
+};
+const launchedRelationshipIds = new Set(
+  groupTopicCatalogProductsByCategory()
+    .find((group) => group.category === "relationship")?.products.map((p) => p.id) ?? [],
+);
+assert(launchedRelationshipIds.size === 11,
+  "Relationship category must retain eleven launched products including legacy relationship");
+for (const [id,title] of Object.entries(relationshipThumbnailLabels)) {
+  assert(launchedRelationshipIds.has(id), `Relationship photo must target launched product: ${id}`);
+  assert(storefront.includes(`"${id}": "${title}"`),
+    `Each relationship thumbnail must show its own short Korean title: ${id}`);
+  assert(photoRegistry.includes(`"${id}":`)
+    && photoRegistry.includes(`src: "/images/premium/${id}.jpg"`),
+    `Relationship photo must use a distinct first-party image tied to product ID: ${id}`);
+  const photo = statSync(`public/images/premium/${id}.jpg`);
+  assert(photo.size > 7000 && photo.size < 180000,
+    `Relationship photo must be present, optimized and non-empty: ${id}`);
+}
+assert(storefront.includes("RELATIONSHIP_THUMBNAIL_TITLES[product.id]"),
+  "Relationship images must reuse the approved photo title overlay");
+assert(storefront.includes('line-clamp-2 text-[16px] font-extrabold leading-[1.4]'),
+  "Keep the existing canonical 16px question title outside the image");
+assert(storefront.includes('onClick={()=>onSelectProduct(product.id)}') && storefront.includes('<PremiumProductDetail'),
+  "Keep exact product selection, payment, report and AI consultation entry paths");
+assert(!storefront.includes('>연애운</span>'), "No redundant category label inside relationship photos");
+
 console.log("Deep-analysis phase 2 discovery regression passed ✓");

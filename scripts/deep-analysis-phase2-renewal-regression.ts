@@ -145,4 +145,33 @@ assert(photoRegistry.includes('sourcePage: "https://www.pexels.com/photo/close-u
 assert(photoRegistry.includes('alt: "빨간 리본으로 묶인 여러 장의 증서가 책상 위에 놓인 모습"'),
   "Credential photo needs meaningful alternative text");
 
+
+// The four launched study product photos have their own short, high-contrast
+// thumbnail titles. This is display-only; the official question and product
+// detail continue to use canonical registry IDs and text.
+const studyThumbnailLabels: Record<string, string> = {
+  "study-learning-strategy": "공부법 찾기",
+  "study-exam-preparation": "시험 준비",
+  "study-focus-routine": "집중 루틴",
+  "study-credential-decision": "자격증 도전",
+};
+for (const [id, title] of Object.entries(studyThumbnailLabels)) {
+  assert(
+    storefront.includes(`"${id}": "${title}"`),
+    `The study thumbnail must show its distinct short title for ${id}`,
+  );
+}
+assert(storefront.includes('thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id]'),
+  "Thumbnail titles must be keyed by actual product ID, not a shared category label");
+assert(storefront.includes('pointer-events-none absolute inset-0 z-10')
+  && storefront.includes('bg-gradient-to-t from-black/80 via-black/25 to-black/20')
+  && storefront.includes('line-clamp-2 text-[17px] font-extrabold'),
+  "Overlay should remain click-through, high-contrast and readable within the thumbnail");
+assert(storefront.includes('{getReadablePaidQuestion(product.id,question??product.title)}')
+  && storefront.includes('onClick={()=>onSelectProduct(product.id)}')
+  && storefront.includes('<PremiumProductDetail'),
+  "Overlay must not replace official question text, product selection or purchase detail flow");
+assert(storefront.includes('top-8 z-20') && storefront.includes('top-[58px] z-20'),
+  "Recommendation and purchased-state badges must not obstruct the photo title");
+
 console.log("Deep-analysis phase 2 discovery regression passed ✓");

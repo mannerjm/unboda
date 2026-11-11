@@ -96,6 +96,19 @@ const SOCIAL_THUMBNAIL_TITLES: Readonly<Record<string,string>> = {
   "social-conflict": "대인 갈등",
   "social-network-expansion": "새 인맥 만들기",
 };
+const RELATIONSHIP_THUMBNAIL_TITLES: Readonly<Record<string,string>> = {
+  "relationship": "연애·관계",
+  "relationship-long-distance": "장거리 연애",
+  "relationship-unrequited": "짝사랑 고민",
+  "relationship-current": "현재 관계",
+  "relationship-new-connection": "새 인연 만나기",
+  "relationship-marriage": "결혼 준비",
+  "relationship-partner-pattern": "상대 선택",
+  "relationship-conflict": "연애 갈등",
+  "relationship-boundary": "거리 조절",
+  "relationship-reunion": "재회 판단",
+  "relationship-intimacy": "친밀감 속도",
+};
 
 function money(productId:string) {
   return getProductPricing(productId).amount.toLocaleString("ko-KR") + "원";
@@ -337,7 +350,7 @@ export default function PremiumCatalogMarketplace({
                 const config=getPaidAnalysisTopicConfig(product.id);
                 const question=config?.purchaseDecision?.decisionQuestion;
                 const state=stateByProductId.get(product.id)??"not_purchased";
-                const thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id] ?? BUSINESS_THUMBNAIL_TITLES[product.id] ?? HEALTH_THUMBNAIL_TITLES[product.id] ?? MONEY_THUMBNAIL_TITLES[product.id] ?? CAREER_THUMBNAIL_TITLES[product.id] ?? SOCIAL_THUMBNAIL_TITLES[product.id];
+                const thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id] ?? BUSINESS_THUMBNAIL_TITLES[product.id] ?? HEALTH_THUMBNAIL_TITLES[product.id] ?? MONEY_THUMBNAIL_TITLES[product.id] ?? CAREER_THUMBNAIL_TITLES[product.id] ?? SOCIAL_THUMBNAIL_TITLES[product.id] ?? RELATIONSHIP_THUMBNAIL_TITLES[product.id];
                 return <button key={product.id} type="button" onClick={()=>onSelectProduct(product.id)} className="group grid min-h-[148px] grid-cols-[116px_minmax(0,1fr)] gap-3 rounded-[1.3rem] border border-[#eadff5] bg-white p-3 text-left shadow-[0_9px_25px_rgba(110,76,165,.07)] transition hover:-translate-y-0.5 hover:border-[#c49be8] hover:shadow-[0_14px_30px_rgba(110,76,165,.14)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#9164d1] sm:grid-cols-[132px_minmax(0,1fr)]" aria-label={product.title+" 상세 정보 보기"}>
                   <div className="relative min-h-[122px] overflow-hidden rounded-xl bg-[#f8f1ff]">
                     <ProductArtwork category={currentGroup.category} productId={product.id}/>

@@ -348,10 +348,11 @@ for (const [id,title] of Object.entries(relationshipThumbnailLabels)) {
   assert(launchedRelationshipIds.has(id), `Relationship photo must target launched product: ${id}`);
   assert(storefront.includes(`"${id}": "${title}"`),
     `Each relationship thumbnail must show its own short Korean title: ${id}`);
+  const imageStem = id === "relationship-long-distance" ? "relationship-long-distance-v2" : id;
   assert(photoRegistry.includes(`"${id}":`)
-    && photoRegistry.includes(`src: "/images/premium/${id}.jpg"`),
+    && photoRegistry.includes(`src: "/images/premium/${imageStem}.jpg"`),
     `Relationship photo must use a distinct first-party image tied to product ID: ${id}`);
-  const photo = statSync(`public/images/premium/${id}.jpg`);
+  const photo = statSync(`public/images/premium/${imageStem}.jpg`);
   assert(photo.size > 7000 && photo.size < 180000,
     `Relationship photo must be present, optimized and non-empty: ${id}`);
 }

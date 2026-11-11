@@ -180,7 +180,7 @@ assert(!result.includes("#f6f4ef"), "free result must not use the warm phase-3 c
 assert(result.includes("restoreStoredResult") && result.includes("calculateWeightedElements") && result.includes("calculateSeun"), "free-result calculation/restoration contracts must remain present");
 
 assert(recommendations.includes('bg-[#f5f7fc]'), "recommendation page must use cool reading canvas");
-assert(deep.includes('bg-[#f5f7fc]'), "deep-analysis discovery must use cool reading canvas");
+assert(deep.includes('bg-[radial-gradient(ellipse_at_50%_0%,#ffffff_0%,#faf5ff_55%,#efe6ff_100%)]') && !deep.includes("#f6f4ef"), "deep-analysis storefront must use the approved white/lavender brand canvas, never the legacy beige one");
 
 assert(login.includes('bg-[#f5f7fc]') && signup.includes('bg-[#f5f7fc]'), "auth entry screens must use cool canvas");
 assert(login.includes("signInWithPassword"), "login auth behavior must remain intact");

@@ -6,6 +6,7 @@ import { getPaidAnalysisTopicConfig } from "../app/lib/paidAnalysisTopicConfig";
 const page = readFileSync("app/deep-analysis/page.tsx", "utf8");
 const catalog = readFileSync("app/components/PremiumCatalogSection.tsx", "utf8");
 const storefront = readFileSync("app/components/PremiumCatalogMarketplace.tsx", "utf8");
+const shell = readFileSync("app/components/AppShell.tsx", "utf8");
 
 for (const preserved of [
   "getCurrentUser",
@@ -82,5 +83,33 @@ assert(storefront.includes("stateByProductId.get(selected.id)") && storefront.in
   "storefront details must preserve edition ownership, report state, and saved state");
 assert(!storefront.includes("requestPayment") && !storefront.includes("grantEntitlement"),
   "storefront cannot implement its own financial or permission logic");
+
+
+// Customer request: global sidebar is the only desktop category list.
+// Topic selection goes directly to the selected topic's product cards;
+// period selection goes directly to the existing product detail.
+for (const category of ["growth", "business", "health", "money", "career", "social", "relationship"]) {
+  assert(shell.includes(`category: "${category}"`), `global sidebar must retain topic category ${category}`);
+}
+for (const product of listPeriodCatalogProducts()) {
+  assert(shell.includes(`productId: "${product.id}"`), `global sidebar must link directly to period product ${product.id}`);
+}
+assert(shell.includes('item.activeHref === "/deep-analysis" && isDeepCatalog')
+  && shell.includes('href={deepCatalogHref("topic", category)}')
+  && shell.includes('href={deepCatalogHref("period", productId)}'),
+  "global deep-analysis sidebar must expose direct topic and period navigation under the existing item");
+assert(shell.includes('profileId ? `&profileId=${encodeURIComponent(profileId)}`'),
+  "category and period navigation must preserve the analysis profile context");
+assert(!storefront.includes("<aside") && !storefront.includes('md:grid-cols-[166px_minmax(0,1fr)]'),
+  "the deep-analysis body must not render a second desktop category menu");
+assert(storefront.includes('grid-cols-[116px_minmax(0,1fr)]') && storefront.includes('currentGroup.products.map'),
+  "topic selection should reveal compact illustrated product cards immediately");
+assert(storefront.includes("lg:hidden") && storefront.includes("choosePeriod(product.id)"),
+  "mobile users must still reach topic and period choices without a desktop sidebar");
+assert(page.includes('initialProductId={initialProductId}') && page.includes('initialMode === "period"')
+  && page.includes('key={`${initialMode}:${initialCategory ?? ""}:${initialProductId ?? ""}`}'),
+  "deep-link changes must remount the correct topic or period detail instead of retaining stale catalog state");
+assert(catalog.includes('periodProducts.some((product) => product.id === initialProductId)'),
+  "only existing period products can open directly from URL");
 
 console.log("Deep-analysis phase 2 discovery regression passed ✓");

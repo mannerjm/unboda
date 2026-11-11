@@ -86,4 +86,54 @@ export const PREMIUM_PRODUCT_PHOTOS: Readonly<Record<string, PremiumProductPhoto
     alt: "집에서 스트레칭하며 몸의 변화를 살피는 여성",
     sourcePage: "https://www.pexels.com/photo/woman-doing-yoga-at-home-8173431/",
   },
+  "wealth": {
+    src: "/images/premium/wealth.jpg",
+    alt: "전체적인 재물 흐름을 보여주는 여러 층의 금색과 은색 동전",
+    sourcePage: "https://www.pexels.com/photo/stacks-of-silver-and-gold-coins-in-close-up-photography-10531120/",
+  },
+  "money-wealth-accumulation": {
+    src: "/images/premium/money-wealth-accumulation.jpg",
+    alt: "동전을 모은 유리병 안에서 새싹이 자라는 장면",
+    sourcePage: "https://www.pexels.com/photo/close-up-shot-of-a-jar-with-coins-9755390/",
+  },
+  "money-leak-risk": {
+    src: "/images/premium/money-leak-risk.jpg",
+    alt: "동전과 가계부를 앞에 두고 머리를 짚으며 지출을 고민하는 사람",
+    sourcePage: "https://www.pexels.com/photo/crop-pondering-man-analyzing-expenses-and-taking-notes-7063765/",
+  },
+  "money-saving-discipline": {
+    src: "/images/premium/money-saving-discipline.jpg",
+    alt: "계산기와 가계부, 현금으로 한 달 예산을 정리한 책상",
+    sourcePage: "https://www.pexels.com/photo/white-notebook-on-the-table-5466798/",
+  },
+  "money-income-stability": {
+    src: "/images/premium/money-income-stability.jpg",
+    alt: "계산기 옆에서 들어온 수입을 세어보는 손",
+    sourcePage: "https://www.pexels.com/photo/close-up-photo-of-a-person-counting-bank-notes-6266445/",
+  },
+  "money-debt-repayment": {
+    src: "/images/premium/money-debt-repayment.jpg",
+    alt: "납부서류를 확인하며 재정 부담을 고민하는 두 사람",
+    sourcePage: "https://www.pexels.com/photo/a-couple-having-a-conversation-6964350/",
+  },
+  "money-emergency-buffer": {
+    src: "/images/premium/money-emergency-buffer.jpg",
+    alt: "만일의 상황에 대비해 현금을 유리병에 모아두는 손",
+    sourcePage: "https://www.pexels.com/photo/close-up-shot-of-a-person-saving-money-in-the-glass-jar-7680483/",
+  },
+  "money-shared-finance": {
+    src: "/images/premium/money-shared-finance.jpg",
+    alt: "가계부와 청구서를 함께 확인하며 공동 지출을 논의하는 커플",
+    sourcePage: "https://www.pexels.com/photo/couple-looking-at-their-bills-6964105/",
+  },
+  "money-contract-commitment": {
+    src: "/images/premium/money-contract-commitment.jpg",
+    alt: "펜으로 계약서에 서명하는 손을 가까이에서 촬영한 장면",
+    sourcePage: "https://www.pexels.com/photo/a-person-signing-a-contract-8815849/",
+  },
+  "money-spending-decision": {
+    src: "/images/premium/money-spending-decision.jpg",
+    alt: "신용카드를 들고 온라인 구매 여부를 고민하는 사람",
+    sourcePage: "https://www.pexels.com/photo/pensive-ethnic-shopper-with-debit-card-and-laptop-on-bed-6347709/",
+  },
 };

@@ -65,6 +65,18 @@ const HEALTH_THUMBNAIL_TITLES: Readonly<Record<string,string>> = {
   "health-habit-continuity": "생활 습관",
   "health-body-signal-review": "몸의 신호",
 };
+const MONEY_THUMBNAIL_TITLES: Readonly<Record<string,string>> = {
+  "wealth": "재물 흐름",
+  "money-wealth-accumulation": "돈 모으기",
+  "money-leak-risk": "새는 돈 점검",
+  "money-saving-discipline": "저축 습관",
+  "money-income-stability": "수입 안정",
+  "money-debt-repayment": "상환 부담",
+  "money-emergency-buffer": "비상자금",
+  "money-shared-finance": "공동 재정",
+  "money-contract-commitment": "계약 전 점검",
+  "money-spending-decision": "큰 지출 판단",
+};
 
 function money(productId:string) {
   return getProductPricing(productId).amount.toLocaleString("ko-KR") + "원";
@@ -306,7 +318,7 @@ export default function PremiumCatalogMarketplace({
                 const config=getPaidAnalysisTopicConfig(product.id);
                 const question=config?.purchaseDecision?.decisionQuestion;
                 const state=stateByProductId.get(product.id)??"not_purchased";
-                const thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id] ?? BUSINESS_THUMBNAIL_TITLES[product.id] ?? HEALTH_THUMBNAIL_TITLES[product.id];
+                const thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id] ?? BUSINESS_THUMBNAIL_TITLES[product.id] ?? HEALTH_THUMBNAIL_TITLES[product.id] ?? MONEY_THUMBNAIL_TITLES[product.id];
                 return <button key={product.id} type="button" onClick={()=>onSelectProduct(product.id)} className="group grid min-h-[148px] grid-cols-[116px_minmax(0,1fr)] gap-3 rounded-[1.3rem] border border-[#eadff5] bg-white p-3 text-left shadow-[0_9px_25px_rgba(110,76,165,.07)] transition hover:-translate-y-0.5 hover:border-[#c49be8] hover:shadow-[0_14px_30px_rgba(110,76,165,.14)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#9164d1] sm:grid-cols-[132px_minmax(0,1fr)]" aria-label={product.title+" 상세 정보 보기"}>
                   <div className="relative min-h-[122px] overflow-hidden rounded-xl bg-[#f8f1ff]">
                     <ProductArtwork category={currentGroup.category} productId={product.id}/>

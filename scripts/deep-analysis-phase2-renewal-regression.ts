@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { groupTopicCatalogProductsByCategory, listPeriodCatalogProducts } from "../app/lib/premiumCatalog";
 import { getPaidAnalysisTopicConfig } from "../app/lib/paidAnalysisTopicConfig";
 
@@ -111,5 +111,32 @@ assert(page.includes('initialProductId={initialProductId}') && page.includes('in
   "deep-link changes must remount the correct topic or period detail instead of retaining stale catalog state");
 assert(catalog.includes('periodProducts.some((product) => product.id === initialProductId)'),
   "only existing period products can open directly from URL");
+
+
+const photoRegistry = readFileSync("app/lib/premiumProductPhotos.ts", "utf8");
+const growthPhotoProductIds = [
+  "study-learning-strategy",
+  "study-exam-preparation",
+  "study-focus-routine",
+  "study-credential-decision",
+];
+const growthCatalogIds = new Set(
+  groupTopicCatalogProductsByCategory().find((group) => group.category === "growth")?.products.map((product) => product.id) ?? []
+);
+for (const id of growthPhotoProductIds) {
+  assert(growthCatalogIds.has(id), `Photographic thumbnail must map to a real launched growth product: ${id}`);
+  assert(photoRegistry.includes(`"${id}":`) && photoRegistry.includes(`src: "/images/premium/${id}.jpg"`),
+    `Each growth product must have its own first-party photograph: ${id}`);
+  const photo = statSync(`public/images/premium/${id}.jpg`);
+  assert(photo.size > 7000 && photo.size < 160000,
+    `Growth photo must be a real compressed thumbnail, not a missing or oversized asset: ${id}`);
+}
+assert(new Set(growthPhotoProductIds).size === 4, "Growth thumbnails must not reuse a product ID");
+assert(storefront.includes("ProductArtwork") && storefront.includes("PREMIUM_PRODUCT_PHOTOS")
+  && storefront.includes("onError={()=>setPhotoUnavailable(true)}")
+  && storefront.includes("<CatalogArt category={category} seed={productId}"),
+  "The list and detail must show product-specific images with safe first-party SVG fallback");
+assert(shell.includes("rounded-lg px-2.5 py-2.5 text-sm font-semibold leading-5"),
+  "Deep-analysis sidebar links must remain readable at 14px");
 
 console.log("Deep-analysis phase 2 discovery regression passed ✓");

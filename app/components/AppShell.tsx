@@ -267,22 +267,22 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                 </Link>
                 {item.activeHref === "/deep-analysis" && isDeepCatalog ? (
                   <div className="mb-3 ml-4 mt-2 space-y-1 border-l border-[#d8c2f1] pl-3" aria-label="심층분석 주제별 및 기간별 메뉴">
-                    <p className="px-2 pb-0.5 pt-1 text-[10px] font-black tracking-wide text-[#9b80b6]">주제별 분석</p>
+                    <p className="px-2 pb-1 pt-1 text-[11px] font-black tracking-wide text-[#8d6aa9]">주제별 분석</p>
                     {deepTopicMenu.map(({ category, label }) => {
                       const selected = selectedDeepMode === "topic" && selectedDeepCategory === category;
                       return (
                         <Link key={category} href={deepCatalogHref("topic", category)} aria-current={selected ? "page" : undefined}
-                          className={`block rounded-lg px-2.5 py-2 text-[12px] font-semibold leading-5 transition ${selected ? "bg-[#e9d9ff] text-[#602ea8]" : "text-[#6b5a80] hover:bg-white/80 hover:text-[#6033ad]"}`}>
+                          className={`block rounded-lg px-2.5 py-2.5 text-sm font-semibold leading-5 transition ${selected ? "bg-[#e9d9ff] text-[#602ea8]" : "text-[#6b5a80] hover:bg-white/80 hover:text-[#6033ad]"}`}>
                           {label}
                         </Link>
                       );
                     })}
-                    <p className="px-2 pb-0.5 pt-3 text-[10px] font-black tracking-wide text-[#9b80b6]">기간별 분석</p>
+                    <p className="px-2 pb-1 pt-3 text-[11px] font-black tracking-wide text-[#8d6aa9]">기간별 분석</p>
                     {deepPeriodMenu.map(({ productId, label }) => {
                       const selected = selectedDeepMode === "period" && selectedDeepProduct === productId;
                       return (
                         <Link key={productId} href={deepCatalogHref("period", productId)} aria-current={selected ? "page" : undefined}
-                          className={`block rounded-lg px-2.5 py-2 text-[12px] font-semibold leading-5 transition ${selected ? "bg-[#e9d9ff] text-[#602ea8]" : "text-[#6b5a80] hover:bg-white/80 hover:text-[#6033ad]"}`}>
+                          className={`block rounded-lg px-2.5 py-2.5 text-sm font-semibold leading-5 transition ${selected ? "bg-[#e9d9ff] text-[#602ea8]" : "text-[#6b5a80] hover:bg-white/80 hover:text-[#6033ad]"}`}>
                           {label}
                         </Link>
                       );

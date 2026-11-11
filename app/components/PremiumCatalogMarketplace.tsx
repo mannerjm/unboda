@@ -51,6 +51,12 @@ const STUDY_THUMBNAIL_TITLES: Readonly<Record<string,string>> = {
   "study-focus-routine": "집중 루틴",
   "study-credential-decision": "자격증 도전",
 };
+const BUSINESS_THUMBNAIL_TITLES: Readonly<Record<string,string>> = {
+  "business-startup-readiness": "창업 준비",
+  "business-expansion-control": "사업 확장",
+  "business-client-relationship": "고객 관계",
+  "business-team-management": "팀 운영",
+};
 
 function money(productId:string) {
   return getProductPricing(productId).amount.toLocaleString("ko-KR") + "원";
@@ -292,18 +298,17 @@ export default function PremiumCatalogMarketplace({
                 const config=getPaidAnalysisTopicConfig(product.id);
                 const question=config?.purchaseDecision?.decisionQuestion;
                 const state=stateByProductId.get(product.id)??"not_purchased";
-                const thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id];
+                const thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id] ?? BUSINESS_THUMBNAIL_TITLES[product.id];
                 return <button key={product.id} type="button" onClick={()=>onSelectProduct(product.id)} className="group grid min-h-[148px] grid-cols-[116px_minmax(0,1fr)] gap-3 rounded-[1.3rem] border border-[#eadff5] bg-white p-3 text-left shadow-[0_9px_25px_rgba(110,76,165,.07)] transition hover:-translate-y-0.5 hover:border-[#c49be8] hover:shadow-[0_14px_30px_rgba(110,76,165,.14)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#9164d1] sm:grid-cols-[132px_minmax(0,1fr)]" aria-label={product.title+" 상세 정보 보기"}>
                   <div className="relative min-h-[122px] overflow-hidden rounded-xl bg-[#f8f1ff]">
                     <ProductArtwork category={currentGroup.category} productId={product.id}/>
                     {thumbnailTitle ? (
                       <>
-                        <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-between bg-gradient-to-t from-black/80 via-black/25 to-black/20 p-2">
-                          <span className="self-start rounded-md bg-black/45 px-1.5 py-1 text-[9px] font-bold leading-none text-white shadow-sm">학업·성장운</span>
+                        <div className="pointer-events-none absolute inset-0 z-10 flex items-end bg-gradient-to-t from-black/85 via-black/20 to-transparent p-2">
                           <span className="line-clamp-2 text-[17px] font-extrabold leading-[1.2] tracking-tight text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.9)]">{thumbnailTitle}</span>
                         </div>
-                        {recommendedIdSet.has(product.id)?<span className="absolute right-1.5 top-8 z-20 rounded-md bg-[#6c3ab7] px-1.5 py-1 text-[9px] font-bold text-white shadow">내 추천</span>:null}
-                        {state!=="not_purchased"?<span className="absolute right-1.5 top-[58px] z-20 rounded-md bg-white/95 px-1.5 py-1 text-[9px] font-bold text-[#5b4481] shadow">{STATUS[state]}</span>:null}
+                        {recommendedIdSet.has(product.id)?<span className="absolute right-1.5 top-1.5 z-20 rounded-md bg-[#6c3ab7] px-1.5 py-1 text-[9px] font-bold text-white shadow">내 추천</span>:null}
+                        {state!=="not_purchased"?<span className="absolute right-1.5 top-8 z-20 rounded-md bg-white/95 px-1.5 py-1 text-[9px] font-bold text-[#5b4481] shadow">{STATUS[state]}</span>:null}
                       </>
                     ) : (
                       <>

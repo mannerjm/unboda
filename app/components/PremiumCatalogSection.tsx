@@ -7,6 +7,7 @@ import { groupTopicCatalogProductsByCategory, listPeriodCatalogProducts } from "
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import { getProductPricing } from "@/app/lib/productPricing";
 import PremiumProductDetail from "@/app/components/PremiumProductDetail";
+import PremiumCatalogMarketplace from "@/app/components/PremiumCatalogMarketplace";
 import type { PaidAnalysisSummary } from "@/app/lib/paidReports/server";
 import { toPremiumAnalysisProductState, type PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
 import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
@@ -192,7 +193,7 @@ export default function PremiumCatalogSection({
     setSelectedProductId(null);
   };
 
-  return (
+  return process.env.NEXT_PUBLIC_PREMIUM_STOREFRONT === "legacy" ? (
     <section id="premium-analysis" className="py-8 sm:py-10">
       <div className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-[0_18px_55px_rgba(28,25,23,0.06)] sm:p-7 lg:p-8">
         <header className="flex flex-col gap-5 border-b border-stone-200 pb-7 lg:flex-row lg:items-end lg:justify-between">
@@ -289,6 +290,21 @@ export default function PremiumCatalogSection({
         )}
       </div>
     </section>
+  ) : (
+    <PremiumCatalogMarketplace
+      topicGroups={topicGroups}
+      periodProducts={periodProducts}
+      mode={mode}
+      onModeChange={switchMode}
+      selectedCategory={selectedCategory}
+      onSelectCategory={(category) => { setSelectedCategory(category); setSelectedProductId(null); }}
+      selectedProductId={selectedProductId}
+      onSelectProduct={setSelectedProductId}
+      profileId={profileId}
+      stateByProductId={stateByProductId}
+      savedProductIds={savedProductIds}
+      recommendedIdSet={recommendedIdSet}
+    />
   );
 }
 

@@ -186,4 +186,29 @@ export const PREMIUM_PRODUCT_PHOTOS: Readonly<Record<string, PremiumProductPhoto
     alt: "직장 동료들이 협력해 의견을 나누는 업무 회의 장면",
     sourcePage: "https://www.pexels.com/photo/colleagues-discussing-ideas-while-in-the-office-7792868/",
   },
+  "relationship-friendship": {
+    src: "/images/premium/relationship-friendship.jpg",
+    alt: "친구 두 명이 야외에서 웃으며 대화하는 모습",
+    sourcePage: "https://www.pexels.com/photo/positive-multiethnic-girlfriends-speaking-and-laughing-outdoors-5537515/",
+  },
+  "relationship-family-role": {
+    src: "/images/premium/relationship-family-role.jpg",
+    alt: "가족 구성원들이 함께 모여 이야기를 나누는 모습",
+    sourcePage: "https://www.pexels.com/photo/a-family-sitting-at-the-table-8525004/",
+  },
+  "social-helper": {
+    src: "/images/premium/social-helper.jpg",
+    alt: "여러 사람이 손을 겹쳐 서로 도움과 신뢰를 표현하는 모습",
+    sourcePage: "https://www.pexels.com/photo/crop-friends-stacking-hands-together-3830752/",
+  },
+  "social-conflict": {
+    src: "/images/premium/social-conflict.jpg",
+    alt: "두 사람이 의견 차이로 진지한 갈등 대화를 나누는 모습",
+    sourcePage: "https://www.pexels.com/photo/unhappy-woman-having-argument-with-crop-female-6382711/",
+  },
+  "social-network-expansion": {
+    src: "/images/premium/social-network-expansion.jpg",
+    alt: "처음 만난 사람들이 모임에서 인사하고 이야기를 나누는 모습",
+    sourcePage: "https://www.pexels.com/photo/people-in-corporate-wear-having-a-discussion-8761637/",
+  },
 };

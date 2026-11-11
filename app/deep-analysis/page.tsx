@@ -24,6 +24,8 @@ export default async function DeepAnalysisPage({ searchParams }: { searchParams?
   const params = searchParams ? await searchParams : {};
   const initialCategory = getSingleParam(params.category);
   const initialMode = getSingleParam(params.mode) === "period" ? "period" : "topic";
+  // Period navigation is a direct product detail link, not a second catalog.
+  const initialProductId = initialMode === "period" ? getSingleParam(params.productId) : undefined;
 
   const catalogContent = (
       <main className="min-h-screen bg-[radial-gradient(ellipse_at_50%_0%,#ffffff_0%,#faf5ff_55%,#efe6ff_100%)] px-5 py-6 text-[#281744] sm:px-8 sm:py-7">
@@ -54,9 +56,11 @@ export default async function DeepAnalysisPage({ searchParams }: { searchParams?
           </section>
 
           <PremiumCatalogSection
+            key={`${initialMode}:${initialCategory ?? ""}:${initialProductId ?? ""}`}
             profileId={activeProfile?.id}
             initialMode={initialMode}
             initialCategory={initialCategory}
+            initialProductId={initialProductId}
           />
           {!activeProfile ? <PaidProductDiscoveryLinks /> : null}
         </div>

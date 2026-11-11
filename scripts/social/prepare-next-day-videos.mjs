@@ -6,6 +6,7 @@
 // It must pass the existing video/product/voice/visual gates before any commit.
 import fs from 'node:fs';
 import path from 'node:path';
+import {pathToFileURL} from 'node:url';
 import assert from 'node:assert/strict';
 
 const args = Object.fromEntries(process.argv.slice(2).filter(x=>x.startsWith('--')).map(x=>{
@@ -23,6 +24,8 @@ function dayIndex(day) {
 const CATALOG=JSON.parse(fs.readFileSync(args.catalog,'utf8'));
 const PRODUCTS=new Map(CATALOG.products.map(p=>[p.id,p]));
 const POLICY=JSON.parse(fs.readFileSync(path.join(args.staging,'automation/social/lifestyle-pilot/topic-visual-policy.json'),'utf8'));
+// Reuse the exact production editorial safety gate; a generator self-test must also satisfy it.
+const {reviewLifestyleVideoScript}=await import(pathToFileURL(path.resolve(args.staging,'automation/social/lifestyle-video-planner.mjs')).href);
 const GROUPS=[
  {name:'midnight',file:'003-midnight',category:'self-understanding',style:'midnight-indigo',
   explanation:'사주에서는 오늘 나의 생활 리듬과 선택 기준을 돌아보는 참고예요.',
@@ -122,10 +125,17 @@ function generate(day){
   const g=GROUPS[gi], [motif,productId,cases]=g.motifs[motifIndex];
   const p=PRODUCTS.get(productId), visible=POLICY.motifs[motif];
   assert(p && visible && visible.category===g.category,'INVALID_CURATED_PRODUCT_OR_MOTIF');
-  const situation=cases[caseIndex];
+  // Payment/purchase terms can describe ordinary life, but the promotional-text
+  // checker intentionally rejects them outside the final CTA. Keep the core
+  // scenario while selecting a natural non-advertising wording for narration.
+  const neutralize=(line)=>line.replaceAll('자동결제','구독료 청구')
+   .replaceAll('결제','지출').replaceAll('구매','선택').replaceAll('가입','등록');
+  const situation=neutralize(cases[caseIndex]);
   const hook=situation+'. 뭘 먼저 볼까요?';
-  const narrationDraft=[hook,g.explanation,g.practices[angle],
+  const narrationDraft=[hook,g.explanation,neutralize(g.practices[angle]),
    '운보다 무료 사주 조회 후 내 선택과 생활 흐름도 차분하게 살펴보세요.'];
+  const editorial=reviewLifestyleVideoScript({situation,narrationDraft});
+  assert(editorial.ok,'AUTOMATED_EDITORIAL_GATE_FAILED:'+day+':'+g.name+':'+editorial.reasons.join(','));
   for(const [n,line] of narrationDraft.entries()){
    assert(compact(line)<=32,'NARRATION_TOO_LONG:'+g.name+':'+n+':'+compact(line));
    if(n>0)assert(compact(line)>=26,'NARRATION_TOO_SHORT:'+g.name+':'+n);

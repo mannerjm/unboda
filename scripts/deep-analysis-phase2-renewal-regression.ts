@@ -201,4 +201,32 @@ assert(storefront.includes('line-clamp-2 text-[16px] font-extrabold leading-[1.4
 assert(storefront.includes('onClick={()=>onSelectProduct(product.id)}') && storefront.includes('<PremiumProductDetail'),
   "Business photo and overlay must never replace existing product detail, report or checkout entry");
 
+
+const healthThumbnailLabels: Readonly<Record<string,string>> = {
+  "health-energy-recovery": "에너지 회복",
+  "health-sleep-rhythm": "수면 리듬",
+  "health-stress-regulation": "스트레스 조절",
+  "health-burnout-risk": "과부하 점검",
+  "health-habit-continuity": "생활 습관",
+  "health-body-signal-review": "몸의 신호",
+};
+const launchedHealthIds = new Set(
+  groupTopicCatalogProductsByCategory().find((group) => group.category === "health")?.products.map((product) => product.id) ?? []
+);
+assert(launchedHealthIds.size === 6, "Health category must retain exactly six launched products");
+for(const [id,label] of Object.entries(healthThumbnailLabels)) {
+  assert(launchedHealthIds.has(id), `Health thumbnail must target an actual product: ${id}`);
+  assert(storefront.includes(`"${id}": "${label}"`), `Health photo must have its own short label: ${id}`);
+  assert(photoRegistry.includes(`"${id}":`) && photoRegistry.includes(`src: "/images/premium/${id}.jpg"`),
+    `Health photo must be self-hosted and associated with its actual product ID: ${id}`);
+  const f = statSync(`public/images/premium/${id}.jpg`);
+  assert(f.size > 7000 && f.size < 180000, `Health photo missing or abnormally sized: ${id}`);
+}
+assert(storefront.includes('HEALTH_THUMBNAIL_TITLES[product.id]'),
+  "Health product must reuse short overlaid titles rather than shared category art");
+assert(storefront.includes('line-clamp-2 text-[16px] font-extrabold leading-[1.4]'),
+  "Study, business and health product question text must share the approved 16px size");
+assert(storefront.includes('onClick={()=>onSelectProduct(product.id)}') && storefront.includes('<PremiumProductDetail'),
+  "Health thumbnails may not modify purchase, report or AI consultation navigation");
+
 console.log("Deep-analysis phase 2 discovery regression passed ✓");

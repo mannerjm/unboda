@@ -5,6 +5,7 @@ import { getPaidAnalysisTopicConfig } from "../app/lib/paidAnalysisTopicConfig";
 
 const page = readFileSync("app/deep-analysis/page.tsx", "utf8");
 const catalog = readFileSync("app/components/PremiumCatalogSection.tsx", "utf8");
+const storefront = readFileSync("app/components/PremiumCatalogMarketplace.tsx", "utf8");
 
 for (const preserved of [
   "getCurrentUser",
@@ -21,7 +22,7 @@ for (const queryContract of ["searchParams", "initialMode", "initialCategory"]) 
 
 for (const customerCopy of [
   "원하는 분석 바로 찾기",
-  "상품 이름보다,",
+  "어떤 운이 궁금하세요?",
   "질문으로 찾는 심층 분석",
   "무엇이 궁금한지부터 선택하세요.",
   "어떤 영역이 마음에 걸리나요?",
@@ -63,5 +64,23 @@ for (const product of periodProducts) {
 for (const forbidden of ["requestPayment", "markOrderPaid", "grantEntitlement", "generatePaidReport"]) {
   assert(!page.includes(forbidden) && !catalog.includes(forbidden), `phase 2 discovery must not embed commercial runtime logic: ${forbidden}`);
 }
+
+
+assert(catalog.includes("PremiumCatalogMarketplace") && catalog.includes('NEXT_PUBLIC_PREMIUM_STOREFRONT === "legacy"'),
+  "the new storefront must render by default while preserving a reversible legacy layout");
+assert(storefront.includes("topicGroups.map") && storefront.includes("periodProducts.map"),
+  "storefront must present all seven topic categories and seven period navigation items");
+assert(storefront.includes("currentGroup.products.map") && storefront.includes("onSelectProduct(product.id)"),
+  "topic category must open its own thumbnail product list before detail");
+assert(storefront.includes("choosePeriod(product.id)") && storefront.includes("<PremiumProductDetail"),
+  "period navigation must open an existing product detail without a second product grid");
+assert(storefront.includes("getProductPricing(productId)") && storefront.includes("getPaidAnalysisTopicConfig"),
+  "storefront must retain product-specific prices and original purchase questions");
+assert(storefront.includes("/api/reviews?productId=") && storefront.includes("summary.count<=0"),
+  "ratings must come only from published purchase-verified reviews and remain absent without reviews");
+assert(storefront.includes("stateByProductId.get(selected.id)") && storefront.includes("savedProductIds.has(selected.id)"),
+  "storefront details must preserve edition ownership, report state, and saved state");
+assert(!storefront.includes("requestPayment") && !storefront.includes("grantEntitlement"),
+  "storefront cannot implement its own financial or permission logic");
 
 console.log("Deep-analysis phase 2 discovery regression passed ✓");

@@ -19,6 +19,7 @@ type PremiumCatalogSectionProps = {
   recommendedProductIds?: readonly string[];
   initialMode?: CatalogMode;
   initialCategory?: string;
+  initialProductId?: string;
 };
 
 type CatalogIconName =
@@ -140,7 +141,8 @@ function formatPrice(productId: string): string {
 }
 
 function resolveInitialCategory(initialCategory: string | undefined, categories: readonly string[]): string | null {
-  return initialCategory && categories.includes(initialCategory) ? initialCategory : null;
+  return initialCategory && categories.includes(initialCategory) ? initialCategory
+    : categories.includes("money") ? "money" : categories[0] ?? null;
 }
 
 export default function PremiumCatalogSection({
@@ -148,6 +150,7 @@ export default function PremiumCatalogSection({
   recommendedProductIds = [],
   initialMode = "topic",
   initialCategory,
+  initialProductId,
 }: PremiumCatalogSectionProps) {
   const topicGroups = useMemo(() => groupTopicCatalogProductsByCategory(), []);
   const periodProducts = useMemo(() => listPeriodCatalogProducts(), []);
@@ -155,7 +158,7 @@ export default function PremiumCatalogSection({
   const recommendedIdSet = useMemo(() => new Set(recommendedProductIds), [recommendedProductIds]);
   const [mode, setMode] = useState<CatalogMode>(initialMode);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(() => initialMode === "topic" ? resolveInitialCategory(initialCategory, categories) : null);
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(() => initialMode === "period" && periodProducts.some((product) => product.id === initialProductId) ? initialProductId! : null);
   const [summaries, setSummaries] = useState<PaidAnalysisSummary[]>([]);
   const [currentOwnedProductIds, setCurrentOwnedProductIds] = useState<ReadonlySet<string>>(new Set());
   const [savedProductIds, setSavedProductIds] = useState<ReadonlySet<string>>(new Set());

@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "regions": [
+    "icn1"
+  ],
+  "crons": [
+    {
+      "path": "/api/nextday",
+      "schedule": "40 13 * * *"
+    },
+    {
+      "path": "/api/nextday",
+      "schedule": "25 14 * * *"
+    }
+  ]
+}

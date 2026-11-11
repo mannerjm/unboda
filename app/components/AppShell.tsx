@@ -45,6 +45,29 @@ const analysisNavItems: NavItem[] = [
   { href: "/ai-consulting", label: "AI 상담", icon: "chat" },
 ];
 
+
+// Navigation-only launch categories. The canonical registry still governs
+// product membership, current edition ownership, pricing and eligibility.
+const deepTopicMenu = [
+  { category: "growth", label: "학업·성장운" },
+  { category: "business", label: "사업운" },
+  { category: "health", label: "건강운" },
+  { category: "money", label: "재물운" },
+  { category: "career", label: "직업운" },
+  { category: "social", label: "대인관계운" },
+  { category: "relationship", label: "연애운" },
+] as const;
+
+const deepPeriodMenu = [
+  { productId: "monthly-current", label: "이번달 운" },
+  { productId: "monthly-next", label: "다음달 운" },
+  { productId: "yearly-current", label: "올해 흐름 종합 분석" },
+  { productId: "annual-next", label: "내년 운" },
+  { productId: "annual-3years", label: "향후 3년 운" },
+  { productId: "daeun-current", label: "대운·10년 흐름" },
+  { productId: "lifetime-overview", label: "평생운" },
+] as const;
+
 const managementNavItems: NavItem[] = [
   { href: "/mypage", label: "마이페이지", icon: "user" },
   { href: "/support", label: "고객지원 센터", icon: "book" },
@@ -161,6 +184,15 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
         ? "/mypage"
         : "/recommendations";
   const deepAnalysisHref = profileId ? `/deep-analysis?profileId=${encodeURIComponent(profileId)}` : "/deep-analysis";
+  const isDeepCatalog = pathname === "/deep-analysis";
+  const selectedDeepMode = searchParams.get("mode") === "period" ? "period" : "topic";
+  const selectedDeepCategory = searchParams.get("category") || "money";
+  const selectedDeepProduct = searchParams.get("productId");
+  const deepCatalogHref = (mode: "topic" | "period", id: string): string => {
+    const key = mode === "topic" ? "category" : "productId";
+    const profilePart = profileId ? `&profileId=${encodeURIComponent(profileId)}` : "";
+    return `/deep-analysis?mode=${mode}&${key}=${encodeURIComponent(id)}${profilePart}`;
+  };
   const navigationHref = (item: NavItem): string => {
     if (isGuest === true) {
       if (item.href === "/saju") return hasGuestResult ? "/guest-result" : "/guest-saju";
@@ -233,6 +265,30 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                   <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.label}</span>
                   {item.activeHref === "/ai-consulting" ? <span className="ml-auto rounded-full border border-[#8f7cff]/30 bg-[#eee3ff] px-2 py-0.5 text-[9px] font-black tracking-[0.08em] text-[#7543b4]">이어가기</span> : null}
                 </Link>
+                {item.activeHref === "/deep-analysis" && isDeepCatalog ? (
+                  <div className="mb-3 ml-4 mt-2 space-y-1 border-l border-[#d8c2f1] pl-3" aria-label="심층분석 주제별 및 기간별 메뉴">
+                    <p className="px-2 pb-0.5 pt-1 text-[10px] font-black tracking-wide text-[#9b80b6]">주제별 분석</p>
+                    {deepTopicMenu.map(({ category, label }) => {
+                      const selected = selectedDeepMode === "topic" && selectedDeepCategory === category;
+                      return (
+                        <Link key={category} href={deepCatalogHref("topic", category)} aria-current={selected ? "page" : undefined}
+                          className={`block rounded-lg px-2.5 py-2 text-[12px] font-semibold leading-5 transition ${selected ? "bg-[#e9d9ff] text-[#602ea8]" : "text-[#6b5a80] hover:bg-white/80 hover:text-[#6033ad]"}`}>
+                          {label}
+                        </Link>
+                      );
+                    })}
+                    <p className="px-2 pb-0.5 pt-3 text-[10px] font-black tracking-wide text-[#9b80b6]">기간별 분석</p>
+                    {deepPeriodMenu.map(({ productId, label }) => {
+                      const selected = selectedDeepMode === "period" && selectedDeepProduct === productId;
+                      return (
+                        <Link key={productId} href={deepCatalogHref("period", productId)} aria-current={selected ? "page" : undefined}
+                          className={`block rounded-lg px-2.5 py-2 text-[12px] font-semibold leading-5 transition ${selected ? "bg-[#e9d9ff] text-[#602ea8]" : "text-[#6b5a80] hover:bg-white/80 hover:text-[#6033ad]"}`}>
+                          {label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ) : null}
                 </div>
               );
             })}

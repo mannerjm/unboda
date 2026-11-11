@@ -205,25 +205,9 @@ export default function PremiumCatalogMarketplace({
     if(mode!=="period")onModeChange("period");
     onSelectProduct(id);
   };
-  const menuClass=(active:boolean)=>"flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#966ad3] "+(active?"bg-[#eee1ff] text-[#6031a4] shadow-sm":"text-[#675778] hover:bg-white hover:text-[#562e85]");
   return <section id="premium-analysis" aria-label="심층분석 상품 찾기" className="py-5 sm:py-7">
-    <div className="grid gap-5 md:grid-cols-[166px_minmax(0,1fr)] lg:grid-cols-[192px_minmax(0,1fr)]">
-      <aside className="hidden self-start rounded-[1.4rem] border border-[#e7d8f8] bg-[#faf7ff] p-3 shadow-[0_10px_35px_rgba(113,71,173,.06)] md:block" aria-label="심층 분석 카테고리">
-        <p className="px-3 pb-2 text-[11px] font-black tracking-wider text-[#8d69b7]">주제별 분석</p>
-        <div className="space-y-1">
-          {topicGroups.map(group=><button key={group.category} type="button" aria-pressed={mode==="topic"&&currentGroup?.category===group.category} onClick={()=>chooseTopic(group.category)} className={menuClass(mode==="topic"&&currentGroup?.category===group.category)}>
-            <span>{group.label}</span><span className="text-[10px] opacity-65">{group.products.length}</span>
-          </button>)}
-        </div>
-        <div className="mx-2 my-4 border-t border-[#e4d5f4]"/>
-        <p className="px-3 pb-2 text-[11px] font-black tracking-wider text-[#8d69b7]">기간별 분석</p>
-        <div className="space-y-1">
-          {periodProducts.map(product=><button key={product.id} type="button" aria-pressed={isPeriod&&selectedProductId===product.id} onClick={()=>choosePeriod(product.id)} className={menuClass(isPeriod&&selectedProductId===product.id)}>{product.title}</button>)}
-        </div>
-      </aside>
-
-      <div className="min-w-0">
-        <div className="mb-4 md:hidden" aria-label="모바일 심층분석 카테고리">
+    <div className="min-w-0">
+        <div className="mb-4 lg:hidden" aria-label="모바일 심층분석 카테고리">
           <p className="mb-2 text-xs font-black text-[#69449c]">주제별 분석</p>
           <div className="flex gap-2 overflow-x-auto pb-3">
             {topicGroups.map(group=><button key={group.category} type="button" aria-pressed={mode==="topic"&&currentGroup?.category===group.category} onClick={()=>chooseTopic(group.category)} className={"shrink-0 rounded-full border px-3.5 py-2 text-xs font-bold "+(mode==="topic"&&currentGroup?.category===group.category?"border-[#ad84e8] bg-[#edddff] text-[#542d91]":"border-[#e5d7f5] bg-white text-[#756384]")}>{group.label}</button>)}
@@ -267,36 +251,32 @@ export default function PremiumCatalogMarketplace({
           </div>
         ) : !isPeriod && currentGroup ? (
           <div>
-            <div className="overflow-hidden rounded-[1.7rem] border border-[#eadcf8] bg-white shadow-[0_12px_35px_rgba(112,69,173,.07)]">
-              <div className="grid sm:grid-cols-[170px_1fr]">
-                <div className="hidden max-h-[155px] sm:block"><CatalogArt category={currentGroup.category} seed={currentGroup.category} wide/></div>
-                <div className="px-5 py-5 sm:px-6">
-                  <p className="text-[11px] font-black tracking-wider text-[#9164bc]">주제별 심층분석</p>
-                  <h2 className="mt-1 text-2xl font-black text-[#2b1646]">{headerTitle}</h2>
-                  <p className="mt-2 text-sm text-[#6c5b7c]">관심 가는 상품을 선택하면 자세한 설명과 구매 정보를 볼 수 있어요.</p>
-                  <span className="mt-3 inline-flex rounded-full bg-[#f1e7fe] px-3 py-1 text-xs font-semibold text-[#7843b2]">{currentGroup.products.length}개 분석 상품</span>
-                </div>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-[#e9dcf5] pb-4">
+              <div>
+                <p className="text-xs font-bold text-[#9265b6]">주제별 심층분석</p>
+                <h2 className="mt-1 text-xl font-black text-[#2b1646]">{headerTitle}</h2>
               </div>
+              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#7148a2]">{currentGroup.products.length}개 상품</span>
             </div>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               {currentGroup.products.map(product=>{
                 const config=getPaidAnalysisTopicConfig(product.id);
                 const question=config?.purchaseDecision?.decisionQuestion;
                 const state=stateByProductId.get(product.id)??"not_purchased";
-                return <button key={product.id} type="button" onClick={()=>onSelectProduct(product.id)} className="group overflow-hidden rounded-[1.45rem] border border-[#eadff5] bg-white text-left shadow-[0_10px_28px_rgba(110,76,165,.07)] transition hover:-translate-y-1 hover:border-[#c49be8] hover:shadow-[0_18px_35px_rgba(110,76,165,.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#9164d1]" aria-label={product.title+" 상세 정보 보기"}>
-                  <div className="relative aspect-[16/10] overflow-hidden bg-[#f8f1ff]">
+                return <button key={product.id} type="button" onClick={()=>onSelectProduct(product.id)} className="group grid min-h-[148px] grid-cols-[116px_minmax(0,1fr)] gap-3 rounded-[1.3rem] border border-[#eadff5] bg-white p-3 text-left shadow-[0_9px_25px_rgba(110,76,165,.07)] transition hover:-translate-y-0.5 hover:border-[#c49be8] hover:shadow-[0_14px_30px_rgba(110,76,165,.14)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#9164d1] sm:grid-cols-[132px_minmax(0,1fr)]" aria-label={product.title+" 상세 정보 보기"}>
+                  <div className="relative min-h-[122px] overflow-hidden rounded-xl bg-[#f8f1ff]">
                     <CatalogArt category={currentGroup.category} seed={product.id}/>
-                    {recommendedIdSet.has(product.id)?<span className="absolute left-3 top-3 rounded-full bg-[#6c3ab7] px-2.5 py-1 text-[10px] font-bold text-white shadow">내 추천</span>:null}
-                    {state!=="not_purchased"?<span className="absolute bottom-3 right-3 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold text-[#5b4481]">{STATUS[state]}</span>:null}
+                    {recommendedIdSet.has(product.id)?<span className="absolute left-1.5 top-1.5 rounded-md bg-[#6c3ab7] px-1.5 py-1 text-[9px] font-bold text-white shadow">내 추천</span>:null}
+                    {state!=="not_purchased"?<span className="absolute bottom-1.5 left-1.5 rounded-md bg-white/95 px-1.5 py-1 text-[9px] font-bold text-[#5b4481]">{STATUS[state]}</span>:null}
                   </div>
-                  <div className="space-y-2 px-4 pb-4 pt-3.5">
-                    <p className="text-[11px] font-semibold text-[#9265b6]">{product.title}</p>
-                    <h3 className="line-clamp-2 min-h-[2.8rem] text-[15px] font-extrabold leading-[1.4] text-[#302044] transition group-hover:text-[#753aba]">{getReadablePaidQuestion(product.id,question??product.title)}</h3>
-                    <div className="flex flex-wrap items-end justify-between gap-2 pt-1">
-                      <div className="flex min-h-5 items-center"><VerifiedRating productId={product.id}/></div>
+                  <div className="flex min-w-0 flex-col gap-1 py-0.5">
+                    <p className="line-clamp-1 text-[11px] font-semibold text-[#9265b6]">{product.title}</p>
+                    <h3 className="line-clamp-2 text-[14px] font-extrabold leading-5 text-[#302044] transition group-hover:text-[#753aba]">{getReadablePaidQuestion(product.id,question??product.title)}</h3>
+                    <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
+                      <VerifiedRating productId={product.id}/>
                       <span className="text-sm font-black text-[#372049]">{money(product.id)}</span>
                     </div>
-                    <p className="border-t border-[#f0e7f6] pt-2 text-xs font-bold text-[#7043ae]">상세 정보 보기 →</p>
+                    <p className="border-t border-[#f0e7f6] pt-1.5 text-[11px] font-bold text-[#7043ae]">상품 상세 보기 →</p>
                   </div>
                 </button>;
               })}
@@ -312,7 +292,6 @@ export default function PremiumCatalogMarketplace({
             </div>
           </div>
         )}
-      </div>
     </div>
   </section>;
 }

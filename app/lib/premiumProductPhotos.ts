@@ -211,4 +211,59 @@ export const PREMIUM_PRODUCT_PHOTOS: Readonly<Record<string, PremiumProductPhoto
     alt: "처음 만난 사람들이 모임에서 인사하고 이야기를 나누는 모습",
     sourcePage: "https://www.pexels.com/photo/people-in-corporate-wear-having-a-discussion-8761637/",
   },
+  "relationship": {
+    src: "/images/premium/relationship.jpg",
+    alt: "푸른 야외 길을 손잡고 걷는 연인",
+    sourcePage: "https://www.pexels.com/photo/a-couple-walking-while-holding-hands-8551496/",
+  },
+  "relationship-long-distance": {
+    src: "/images/premium/relationship-long-distance.jpg",
+    alt: "각자의 스마트폰으로 장거리 연락을 나누는 연인",
+    sourcePage: "https://www.pexels.com/photo/city-man-couple-hands-6415617/",
+  },
+  "relationship-unrequited": {
+    src: "/images/premium/relationship-unrequited.jpg",
+    alt: "창가에 앉아 마음을 정리하듯 조용히 생각하는 여성",
+    sourcePage: "https://www.pexels.com/photo/sad-young-black-woman-sitting-on-windowsill-and-looking-away-pensively-6383159/",
+  },
+  "relationship-current": {
+    src: "/images/premium/relationship-current.jpg",
+    alt: "서로 손을 잡고 진지한 대화를 나누는 연인",
+    sourcePage: "https://www.pexels.com/photo/a-couple-sitting-while-holding-hands-8560414/",
+  },
+  "relationship-new-connection": {
+    src: "/images/premium/relationship-new-connection.jpg",
+    alt: "카페에서 마주 앉아 웃으며 처음 대화를 이어가는 남녀",
+    sourcePage: "https://www.pexels.com/photo/smiling-young-couple-talking-in-cafe-drinking-coffee-together-5910782/",
+  },
+  "relationship-marriage": {
+    src: "/images/premium/relationship-marriage.jpg",
+    alt: "결혼과 장기 관계를 상징하는 서로의 손과 반지",
+    sourcePage: "https://www.pexels.com/photo/couple-wearing-silver-and-gold-diamond-wedding-rings-3912487/",
+  },
+  "relationship-partner-pattern": {
+    src: "/images/premium/relationship-partner-pattern.jpg",
+    alt: "손을 맞잡고 함께 걷는 두 사람의 관계 모습",
+    sourcePage: "https://www.pexels.com/photo/couple-walking-while-holding-hands-7977938/",
+  },
+  "relationship-conflict": {
+    src: "/images/premium/relationship-conflict.jpg",
+    alt: "휴대전화와 관련해 다투며 의견 차이를 보이는 연인",
+    sourcePage: "https://www.pexels.com/photo/a-couple-looking-at-mobile-phone-while-having-an-argument-5617684/",
+  },
+  "relationship-boundary": {
+    src: "/images/premium/relationship-boundary.jpg",
+    alt: "서로 거리를 둔 채 나란히 앉아 생각에 잠긴 연인",
+    sourcePage: "https://www.pexels.com/photo/a-couple-having-a-problem-8559951/",
+  },
+  "relationship-reunion": {
+    src: "/images/premium/relationship-reunion.jpg",
+    alt: "공항에서 다시 만나 반갑게 포옹하는 연인",
+    sourcePage: "https://www.pexels.com/photo/close-up-shot-of-a-couple-hugging-7446967/",
+  },
+  "relationship-intimacy": {
+    src: "/images/premium/relationship-intimacy.jpg",
+    alt: "서로를 바라보며 손을 잡는 연인의 친밀한 순간",
+    sourcePage: "https://www.pexels.com/photo/a-couple-holding-hands-while-looking-at-each-other-5704558/",
+  },
 };

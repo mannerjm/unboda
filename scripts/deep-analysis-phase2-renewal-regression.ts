@@ -138,5 +138,11 @@ assert(storefront.includes("ProductArtwork") && storefront.includes("PREMIUM_PRO
   "The list and detail must show product-specific images with safe first-party SVG fallback");
 assert(shell.includes("rounded-lg px-2.5 py-2.5 text-sm font-semibold leading-5"),
   "Deep-analysis sidebar links must remain readable at 14px");
+assert(storefront.includes('line-clamp-2 text-[16px] font-extrabold leading-[1.4]'),
+  "Deep-analysis product questions must remain legible at 16px without changing card structure");
+assert(photoRegistry.includes('sourcePage: "https://www.pexels.com/photo/close-up-photo-of-diploma-7942430/"'),
+  "Credential product must retain the vetted certificate-focused photo source and attribution");
+assert(photoRegistry.includes('alt: "빨간 리본으로 묶인 여러 장의 증서가 책상 위에 놓인 모습"'),
+  "Credential photo needs meaningful alternative text");
 
 console.log("Deep-analysis phase 2 discovery regression passed ✓");

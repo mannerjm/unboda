@@ -33,7 +33,7 @@ export const PREMIUM_PRODUCT_PHOTOS: Readonly<Record<string, PremiumProductPhoto
   },
   "study-credential-decision": {
     src: "/images/premium/study-credential-decision.jpg",
-    alt: "책상 위에 놓인 자격 증서와 학습 노트를 비교하며 준비를 고민하는 장면",
-    sourcePage: "https://www.pexels.com/photo/diploma-and-notebook-on-a-desk-8112202/",
+    alt: "빨간 리본으로 묶인 여러 장의 증서가 책상 위에 놓인 모습",
+    sourcePage: "https://www.pexels.com/photo/close-up-photo-of-diploma-7942430/",
   },
 };

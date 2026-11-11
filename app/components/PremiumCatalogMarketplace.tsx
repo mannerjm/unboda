@@ -292,7 +292,7 @@ export default function PremiumCatalogMarketplace({
                   </div>
                   <div className="flex min-w-0 flex-col gap-1 py-0.5">
                     <p className="line-clamp-1 text-[11px] font-semibold text-[#9265b6]">{product.title}</p>
-                    <h3 className="line-clamp-2 text-[14px] font-extrabold leading-5 text-[#302044] transition group-hover:text-[#753aba]">{getReadablePaidQuestion(product.id,question??product.title)}</h3>
+                    <h3 className="line-clamp-2 text-[16px] font-extrabold leading-[1.4] text-[#302044] transition group-hover:text-[#753aba]">{getReadablePaidQuestion(product.id,question??product.title)}</h3>
                     <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
                       <VerifiedRating productId={product.id}/>
                       <span className="text-sm font-black text-[#372049]">{money(product.id)}</span>

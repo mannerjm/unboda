@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { PREMIUM_PRODUCT_PHOTOS } from "../app/lib/premiumProductPhotos";
+import { PERIOD_PREMIUM_PRODUCTS } from "../app/lib/premiumProductRegistry";
 import { groupTopicCatalogProductsByCategory, listPeriodCatalogProducts } from "../app/lib/premiumCatalog";
 import { getPaidAnalysisTopicConfig } from "../app/lib/paidAnalysisTopicConfig";
 
@@ -376,7 +377,7 @@ const periodThumbnailLabels = {"monthly-current":"이번달 운","monthly-next":
 
 const imageFingerprints = new Set<string>();
 for (const [productId, shortTitle] of Object.entries(periodThumbnailLabels)) {
-  const item = periodProducts.find((product) => product.id === productId);
+  const item = PERIOD_PREMIUM_PRODUCTS.find((product) => product.id === productId);
   assert(Boolean(item), `Period thumbnail missing canonical product: ${productId}`);
   const photo = PREMIUM_PRODUCT_PHOTOS[productId];
   assert(photo?.src === `/images/premium/period-${productId}.webp`,
@@ -390,6 +391,8 @@ for (const [productId, shortTitle] of Object.entries(periodThumbnailLabels)) {
   assert(storefront.includes(`"${productId}": "${shortTitle}"`),
     `Period thumbnail must use correct matching short title: ${productId}`);
 }
+assert(periodProducts.every((product) => Boolean(PREMIUM_PRODUCT_PHOTOS[product.id])),
+  "Every exposed period product must have a thumbnail without changing Launch availability");
 assert(Object.keys(periodThumbnailLabels).length === 8 && imageFingerprints.size === 8,
   "All eight period artworks must be distinct assets");
 assert(storefront.includes("PERIOD_THUMBNAIL_TITLES[selected.id]")

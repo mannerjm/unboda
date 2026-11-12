@@ -134,6 +134,9 @@ export default async function CompatibilityAnalysisPage() {
                       {product.title}
                     </h2>
                     <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-[#655773]">{product.question}</p>
+                    {product.photoId === "relationship-family-role" ? (
+                      <p className="mt-1 text-[11px] font-semibold leading-4 text-[#7656aa]">부모·자녀 · 형제·자매 · 기타 가족</p>
+                    ) : null}
                     <div className="mt-auto flex flex-wrap items-end justify-between gap-x-2 gap-y-1 border-t border-[#f0e7f5] pt-2">
                       <span className="text-sm font-black text-[#261538]">{product.amount.toLocaleString("ko-KR")}원</span>
                       <span className="text-[11px] font-bold text-[#7750b5] group-hover:underline">상품 상세 보기 →</span>

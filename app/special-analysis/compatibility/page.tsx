@@ -100,7 +100,10 @@ export default async function CompatibilityAnalysisPage() {
                 <Link href="/mypage" className="font-semibold text-[#7350b0] underline underline-offset-4">프로필 변경</Link>
               </>
             ) : (
-              <span>{user ? "실제 분석 시작 전 내 프로필을 선택해 주세요." : "상품은 로그인 없이 볼 수 있으며 분석 시작 시 로그인과 프로필이 필요해요."}</span>
+              <>
+                <span className="font-bold text-[#7651b2]">로그인 없이 둘러보기 가능</span>
+                <span>{user ? "실제 분석 시작 전 내 프로필을 선택해 주세요." : "실제 분석을 시작할 때 로그인과 내 프로필이 필요합니다."}</span>
+              </>
             )}
           </div>
 

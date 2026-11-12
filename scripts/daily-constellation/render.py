@@ -10,17 +10,20 @@ import hashlib
 import json
 import pathlib
 import random
+from functools import lru_cache
 import tempfile
 from PIL import Image, ImageDraw, ImageFont
 
 KST=dt.timezone(dt.timedelta(hours=9))
 SIZE=(1080,1350)
-PURPLE="#2B146A"
-DEEP="#1B1049"
-CYAN="#4DE7E7"
-WHITE="#F8F6FF"
-SOFT="#D2C4EC"
-GOLD="#F6CA76"
+PURPLE="#3B236F"
+DEEP="#281651"
+CYAN="#805CB9"
+WHITE="#FFFFFF"
+SOFT="#77628F"
+GOLD="#D5A35A"
+CHARACTER_ASSET_SHA256="cba26017a66c100c5cf7d257f2e5ff5b9134109b4f49f289fa6d539e34f0014a"
+CHARACTER_ART_VERSION="unboda-lavender-12-original-characters-v1"
 STARS=[
  ("양자리","3월 21일 ~ 4월 19일","♈","불",("메모장","붉은 펜","작은 노트")),
  ("황소자리","4월 20일 ~ 5월 20일","♉","흙",("따뜻한 차","작은 화분","머그컵")),
@@ -92,28 +95,61 @@ def bfont(size,bold=False,symbol=False):
     reg,strong,sym=fonts()
     return ImageFont.truetype(sym if symbol else strong if bold else reg,size)
 def make_background(day,page):
+    """Original Unboda light lavender palette with subtle stars and cloudy corners."""
     w,h=SIZE
     im=Image.new("RGB",SIZE)
-    draw=ImageDraw.Draw(im)
+    d=ImageDraw.Draw(im)
+    start=(247,242,255);end=(227,211,249)
     for y in range(h):
         t=y/(h-1)
-        draw.line((0,y,w,y),fill=(int(46-16*t),int(21-9*t),int(113-28*t)),width=1)
-    seed=int(hashlib.sha256(f"{day}:{page}:stars".encode()).hexdigest()[:16],16)
+        d.line((0,y,w,y),fill=tuple(round(start[i]*(1-t)+end[i]*t) for i in range(3)))
+    d.ellipse((-160,1015,530,1490),fill="#E5D4F8")
+    d.ellipse((525,1130,1210,1510),fill="#DFCCF6")
+    d.ellipse((-220,-210,310,250),fill="#F4EAFF")
+    d.ellipse((790,-220,1310,250),fill="#F0E2FC")
+    seed=int(hashlib.sha256(f"{day}:{page}:lavender".encode()).hexdigest()[:16],16)
     rng=random.Random(seed)
-    for _ in range(53):
-        x=rng.randint(30,1050);y=rng.randint(24,1300)
-        if 70<x<1010 and 210<y<1230:continue
-        r=rng.choice([1,2,2,3,4])
-        draw.ellipse((x-r,y-r,x+r,y+r),fill=GOLD if rng.random()<.25 else "#B39AE9")
-    for k in range(5):
-        x=65+k*15
-        draw.arc((x,1160,320+k*20,1465),180,265,fill="#382276",width=5)
-        draw.arc((750-k*7,1160,1110-k*9,1490),275,360,fill="#382276",width=5)
+    for _ in range(35):
+        x=rng.randint(24,1055);y=rng.randint(30,1320)
+        if 75<x<1005 and 195<y<1160:continue
+        rr=rng.choice([2,2,3,4])
+        d.ellipse((x-rr,y-rr,x+rr,y+rr),fill="#D2B5ED" if rng.random()<.7 else GOLD)
+    for x,y,rad in [(62,186,9),(989,168,10),(1007,1211,9),(102,1266,11),(868,74,9)]:
+        d.line((x-rad,y,x+rad,y),fill=GOLD,width=2)
+        d.line((x,y-rad,x,y+rad),fill=GOLD,width=2)
     return im
+
+@lru_cache(maxsize=1)
+def _character_atlas():
+    p=pathlib.Path(__file__).resolve().parent/"assets"/"zodiac-character-atlas.webp"
+    if not p.is_file():raise RuntimeError("TWELVE_ZODIAC_CHARACTER_ASSET_MISSING")
+    raw=p.read_bytes()
+    if hashlib.sha256(raw).hexdigest()!=CHARACTER_ASSET_SHA256:
+        raise RuntimeError("TWELVE_ZODIAC_CHARACTER_HASH_MISMATCH")
+    sheet=Image.open(p).convert("RGB")
+    if sheet.size!=(560,420):raise RuntimeError("ZODIAC_CHARACTER_ATLAS_DIMENSIONS_INVALID")
+    # Duplicate character tiles or a wrong order must not silently pass visual QA.
+    hashes=[hashlib.sha256(sheet.crop(((i%4)*140,(i//4)*140,
+                   (i%4+1)*140,(i//4+1)*140)).tobytes()).hexdigest()
+            for i in range(12)]
+    if len(set(hashes))!=12:raise RuntimeError("TWELVE_DISTINCT_CHARACTER_ARTWORK_REQUIRED")
+    return sheet
+
+def draw_character(im,sign_index,x,y,size=168):
+    if not (0<=sign_index<12):raise ValueError("INVALID_SIGN_ARTWORK_INDEX")
+    sheet=_character_atlas()
+    box=((sign_index%4)*140,(sign_index//4)*140,
+         (sign_index%4+1)*140,(sign_index//4+1)*140)
+    character=sheet.crop(box).resize((size,size),Image.Resampling.LANCZOS)
+    im.paste(character,(x,y))
+    ImageDraw.Draw(im).ellipse((x+3,y+3,x+size-4,y+size-4),
+        outline="#B998DC",width=3)
+
 def center_text(draw, xy, text, font, fill):
     box=draw.textbbox((0,0),text,font=font)
     x,y=xy
     draw.text((x-(box[2]-box[0])/2,y),text,font=font,fill=fill)
+
 def wrapped(draw,text,font,width,max_lines):
     words=text.split(" ")
     out=[];cur=""
@@ -126,61 +162,79 @@ def wrapped(draw,text,font,width,max_lines):
     if cur:out.append(cur)
     if len(out)>max_lines:raise RuntimeError("HOROSCOPE_TEXT_OVERFLOW:"+str(len(out)))
     return out
-def draw_logo(draw,x,y,size=43,light=True):
+
+def draw_logo(draw,x,y,size=43,light=False):
     draw.text((x,y),"운보다",font=bfont(size,True),fill=WHITE if light else PURPLE)
     draw.text((x+size*3.0,y-13),"✦",font=bfont(27,False,True),fill=GOLD)
+
 def cover(data):
-    """Premium clean zodiac artwork with true brand URL, no fake browser UI."""
     day=dt.date.fromisoformat(data["dateKst"])
     im=make_background(day,0);d=ImageDraw.Draw(im)
-    d.text((76,80),"운보다",font=bfont(63,True),fill=WHITE)
-    d.text((792,107),"unboda.kr",font=bfont(28,True),fill=SOFT)
-    d.line((76,177,1004,177),fill="#7864A7",width=3)
-    d.rounded_rectangle((59,233,1021,1067),radius=58,fill="#FAF8FF")
-    d.rounded_rectangle((114,298,515,380),radius=40,fill="#EEE6FD")
-    d.text((153,312),f"{day.month}월 {day.day}일 · 오후 1시",font=bfont(37,True),fill=PURPLE)
-    d.text((109,450),"오늘의 12별자리",font=bfont(84,True),fill=PURPLE)
-    d.text((114,592),"일상에 필요한 작은 힌트",font=bfont(46,True),fill="#45356B")
-    d.text((114,672),"나에게 맞는 이야기를 찾아보세요",font=bfont(33),fill="#65567D")
-    for idx,star in enumerate(data["signs"][:4]):
-        x=135+idx*212
-        d.rounded_rectangle((x,786,x+180,952),radius=36,fill="#E8DDF9")
-        center_text(d,(x+90,800),star["glyph"],bfont(100,symbol=True),PURPLE)
-    d.text((117,998),"5장 넘기며 확인하기",font=bfont(31,True),fill=PURPLE)
-    center_text(d,(540,1162),"재미와 자기성찰을 위한 오늘의 운세",bfont(34),WHITE)
-    center_text(d,(540,1223),"운보다 무료 사주 · unboda.kr",bfont(30,True),SOFT)
+    draw_logo(d,73,62,59)
+    d.text((814,86),"unboda.kr",font=bfont(29,True),fill=PURPLE)
+    d.line((71,157,1009,157),fill="#CAB4E5",width=3)
+    d.rounded_rectangle((66,230,1014,1161),radius=53,fill="#D6BFEF")
+    d.rounded_rectangle((64,220,1014,1151),radius=53,fill="#FFFCFF",
+                         outline="#D4BFED",width=3)
+    d.rounded_rectangle((132,301,548,380),radius=40,fill="#EBDDFA")
+    d.text((168,314),f"{day.month}월 {day.day}일 · 오후 1시",
+           font=bfont(36,True),fill=PURPLE)
+    d.text((130,442),"오늘의 12별자리",font=bfont(82,True),fill=PURPLE)
+    d.text((134,572),"일상에 필요한 작은 힌트",font=bfont(43,True),fill="#53317E")
+    d.text((134,649),"나에게 맞는 이야기를 찾아보세요",
+           font=bfont(30),fill="#715C8B")
+    for index in range(4):
+        x=126+index*213
+        draw_character(im,index,x,765,169)
+        center_text(d,(x+84,949),data["signs"][index]["name"],
+                    bfont(29,True),PURPLE)
+    d.rounded_rectangle((250,1024,830,1104),radius=39,fill="#E7D9F7")
+    center_text(d,(540,1033),"5장 넘기며 확인하기  ›",bfont(36,True),PURPLE)
+    center_text(d,(540,1221),"운보다 무료 사주 · unboda.kr",bfont(29,True),PURPLE)
     return im
 
 def inner(data,page):
     if page not in range(1,5):raise ValueError("FOUR_SIGN_PAGES_REQUIRED")
     day=dt.date.fromisoformat(data["dateKst"])
     im=make_background(day,page);d=ImageDraw.Draw(im)
-    d.text((65,64),"운보다",font=bfont(58,True),fill=WHITE)
-    d.text((768,83),"unboda.kr",font=bfont(29,True),fill=SOFT)
-    d.text((65,143),f"{day.month}월 {day.day}일 · 오늘의 별자리",font=bfont(34,True),fill="#C5F4EF")
+    draw_logo(d,63,53,52)
+    d.text((790,73),"unboda.kr",font=bfont(29,True),fill=PURPLE)
+    d.line((64,147,1017,147),fill="#C6AEDF",width=3)
+    d.text((64,161),f"{day.month}월 {day.day}일 · 오늘의 별자리",
+           font=bfont(34,True),fill="#7851AD")
+    d.rounded_rectangle((911,159,1023,211),radius=25,fill="#DCC7F2")
+    center_text(d,(969,164),f"{page}/4",bfont(29,True),PURPLE)
     signs=data["signs"][(page-1)*3:page*3]
     assert len(signs)==3
     for i,s in enumerate(signs):
-        y=227+i*316
-        d.rounded_rectangle((60,y+9,1022,y+296),radius=35,fill="#170B3C")
-        d.rounded_rectangle((60,y,1022,y+287),radius=35,fill="#FAF8FF")
-        d.ellipse((91,y+40,249,y+198),fill="#E7DBF8")
-        center_text(d,(170,y+47),s["glyph"],bfont(100,symbol=True),PURPLE)
-        center_text(d,(170,y+206),"행운 소품",bfont(24,True),"#7661A0")
-        center_text(d,(170,y+239),s["luckyItem"],bfont(26,True),PURPLE)
-        d.text((284,y+27),s["name"],font=bfont(51,True),fill=PURPLE)
-        d.text((287,y+99),s["dateRange"],font=bfont(29),fill="#6B5E83")
-        lines=wrapped(d,s["text"],bfont(35),690,3)
+        y=233+i*312
+        d.rounded_rectangle((62,y+8,1017,y+292),radius=39,fill="#D7BFED")
+        d.rounded_rectangle((62,y,1017,y+284),radius=39,fill="#FFFFFF",
+                             outline="#D4BCEB",width=3)
+        draw_character(im,s["id"]-1,100,y+31,168)
+        d.text((103,y+209),"행운 소품",font=bfont(24,True),fill="#8B64B3")
+        lucky=s["luckyItem"]
+        lucky_font=bfont(27 if len(lucky)<=5 else 22,True)
+        center_text(d,(188,y+244),lucky,lucky_font,PURPLE)
+        d.line((282,y+38,282,y+248),fill="#E5D5F5",width=3)
+        d.text((313,y+31),s["name"],font=bfont(54,True),fill=PURPLE)
+        d.text((317,y+100),s["dateRange"],font=bfont(30),fill="#81699E")
+        lines=wrapped(d,s["text"],bfont(34),660,3)
         for j,line in enumerate(lines):
-            d.text((286,y+152+j*41),line,font=bfont(35),fill="#32264D")
-    center_text(d,(540,1212),f"{page} / 4  ·  별자리별 생활 조언",bfont(30,True),SOFT)
-    center_text(d,(540,1263),"자기성찰을 위한 참고 콘텐츠 · unboda.kr",bfont(25),SOFT)
+            d.text((316,y+154+j*41),line,font=bfont(34),fill="#3C2A58")
+        d.text((961,y+27),"✦",font=bfont(28,False,True),fill=GOLD)
+    center_text(d,(540,1205),f"{page} / 4 · 별자리별 생활 조언",
+                bfont(33,True),PURPLE)
+    center_text(d,(540,1260),"자기성찰을 위한 참고 콘텐츠 · unboda.kr",
+                bfont(26),fill="#786392")
     return im
 
 def render(day,out):
     output=pathlib.Path(out)
     output.mkdir(parents=True,exist_ok=True)
     data=make_data(day)
+    data["artworkVersion"]=CHARACTER_ART_VERSION
+    data["characterAssetSha256"]=CHARACTER_ASSET_SHA256
     ims=[cover(data)]+[inner(data,i) for i in range(1,5)]
     meta=[]
     for i,im in enumerate(ims,1):
@@ -220,13 +274,21 @@ def self_test():
             assert Image.open(path).size==SIZE
             assert hashlib.sha256(path.read_bytes()).hexdigest()==item["sha256"]
         assert len(pathlib.Path(t,"caption.txt").read_text())<451
+        # Enforce twelve distinct self-hosted illustrated characters and new lavender canvas.
+        sheet=_character_atlas()
+        assert sheet.size==(560,420)
+        assert x["artworkVersion"]==CHARACTER_ART_VERSION
         for page in range(2,6):
             with Image.open(pathlib.Path(t,f"unboda-{day.isoformat()}-{page:02}.png")) as pic:
-                assert pic.getpixel((976,254)) == (250,248,255), "MOBILE_CARD_FRAME_MISSING"
+                assert pic.getpixel((978,253)) == (255,255,255), "LAVENDER_MOBILE_CARD_MISSING"
+                assert all(channel>=180 for channel in pic.getpixel((10,450))), "DARK_BRAND_BACKGROUND_REGRESSED"
+                avatar=pic.crop((110,270,250,410))
+                assert len(avatar.getcolors(20000) or [])>500,"CHARACTER_ARTWORK_NOT_RENDERED"
         import inspect
         visual_source=inspect.getsource(cover)+inspect.getsource(inner)
         assert "UNBODA.CO.KR" not in visual_source and "□" not in visual_source
         assert "1278" not in visual_source, "DUPLICATED_CAROUSEL_PAGINATION"
+        assert "✦" in visual_source and "draw_character(im" in visual_source
 
     print("PASS_12_DISTINCT_DAILY_SIGNS_5_ORIGINAL_BRANDED_PNGS_NO_SNS_POST")
 def main():

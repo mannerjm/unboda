@@ -110,6 +110,19 @@ const RELATIONSHIP_THUMBNAIL_TITLES: Readonly<Record<string,string>> = {
   "relationship-intimacy": "친밀감 속도",
 };
 
+/** Period storefront artwork uses the same first-party 4:3 photo crop and short label as topic cards. */
+const PERIOD_THUMBNAIL_TITLES: Readonly<Record<string,string>> = {
+  "monthly-current": "이번달 운",
+  "monthly-next": "다음달 운",
+  "yearly-current": "올해 흐름",
+  "annual-next": "내년 운",
+  "annual-3years": "향후 3년",
+  "monthly-12months": "앞으로 12개월",
+  "daeun-current": "10년 흐름",
+  "lifetime-overview": "평생운",
+};
+
+
 function money(productId:string) {
   return getProductPricing(productId).amount.toLocaleString("ko-KR") + "원";
 }
@@ -314,6 +327,13 @@ export default function PremiumCatalogMarketplace({
             <div className="grid gap-4 bg-[linear-gradient(130deg,#ffffff,#f8f0ff)] p-5 sm:grid-cols-[180px_1fr] sm:items-center sm:p-6">
               <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-white/80 shadow-[0_10px_25px_rgba(107,75,163,.13)]">
                 <ProductArtwork category={isPeriod?"period":(currentGroup?.category??"period")} productId={selected.id} wide/>
+                {isPeriod && PERIOD_THUMBNAIL_TITLES[selected.id] ? (
+                  <div className="pointer-events-none absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-black/10 to-transparent p-3">
+                    <span className="text-[17px] font-extrabold leading-tight text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]">
+                      {PERIOD_THUMBNAIL_TITLES[selected.id]}
+                    </span>
+                  </div>
+                ) : null}
               </div>
               <div>
                 <p className="text-xs font-bold text-[#8b57bf]">{isPeriod?"기간별":"주제별"} · 심층분석</p>

@@ -110,7 +110,7 @@ export async function scheduleKind({date,type,fetcher=fetch,token,userId=USER,br
  const body={publicationDate:{dateTime:date+"T"+FIXED_TIME[type],timezone:"Asia/Seoul"},
    text:caption,providers:CHANNELS.map(network=>({network})),media:images.map(n=>ROOT+tag+"/"+n),
    draft:false,autoPublish:true,shortener:false,
-   facebookData:{type:"POST"},instagramData:{type:"POST",isAiGenerated:false},
+   facebookData:{type:"POST"},instagramData:{type:"POST",isAiGenerated:type==="constellation"},
    threadsData:{type:"POST",replyControl:"EVERYONE"}};
  // Claim is intentionally permanent after ambiguous provider response. Never retry.
  const response=await json(await fetcher(query.origin+query.pathname+"?"+new URLSearchParams({userId,blogId:brandId}),

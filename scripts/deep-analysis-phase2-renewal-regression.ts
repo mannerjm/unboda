@@ -365,3 +365,32 @@ assert(storefront.includes('onClick={()=>onSelectProduct(product.id)}') && store
 assert(!storefront.includes('>연애운</span>'), "No redundant category label inside relationship photos");
 
 console.log("Deep-analysis phase 2 discovery regression passed ✓");
+
+
+// Original UNBODA period artwork must cover all eight canonical sales products.
+const { PREMIUM_PRODUCT_PHOTOS } = await import("../app/lib/premiumProductPhotos");
+const periodThumbnailLabels = {"monthly-current":"이번달 운","monthly-next":"다음달 운","yearly-current":"올해 흐름","annual-next":"내년 운","annual-3years":"향후 3년","monthly-12months":"앞으로 12개월","daeun-current":"10년 흐름","lifetime-overview":"평생운"};
+const { createHash } = await import("node:crypto");
+const { readFileSync } = await import("node:fs");
+const imageFingerprints = new Set<string>();
+for (const [productId, shortTitle] of Object.entries(periodThumbnailLabels)) {
+  const item = periodProducts.find((product) => product.id === productId);
+  assert(Boolean(item), `Period thumbnail missing canonical product: ${productId}`);
+  const photo = PREMIUM_PRODUCT_PHOTOS[productId];
+  assert(photo?.src === `/images/premium/period-${productId}.webp`,
+    `Missing first-party period artwork for ${productId}`);
+  assert(Boolean(photo.alt) && photo.sourcePage.includes("UNBODA original"),
+    `Period illustration requires accessible alt text and origin for ${productId}`);
+  const data = readFileSync(`public/images/premium/period-${productId}.webp`);
+  assert(data.length >= 2500 && data.length <= 50000 && data.toString("ascii",0,4)==="RIFF"
+    && data.toString("ascii",8,12)==="WEBP", `Bad period WebP image ${productId}`);
+  imageFingerprints.add(createHash("sha256").update(data).digest("hex"));
+  assert(storefront.includes(`"${productId}": "${shortTitle}"`),
+    `Period thumbnail must use correct matching short title: ${productId}`);
+}
+assert(Object.keys(periodThumbnailLabels).length === 8 && imageFingerprints.size === 8,
+  "All eight period artworks must be distinct assets");
+assert(storefront.includes("PERIOD_THUMBNAIL_TITLES[selected.id]")
+  && storefront.includes('bg-gradient-to-t from-black/80 via-black/10 to-transparent')
+  && storefront.includes('category={isPeriod?"period":(currentGroup?.category??"period")}'),
+  "Existing detailed period card must show readable selected-product artwork without changing purchase flow");

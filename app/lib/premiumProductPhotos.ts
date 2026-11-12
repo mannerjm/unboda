@@ -1,12 +1,13 @@
 /**
- * Curated, licensed photographic thumbnails for individual Launch product IDs.
+ * Curated original and licensed thumbnails for individual Launch product IDs.
  *
  * Keep photo IDs tied to products rather than categories: customers should be
  * able to tell "study method" apart from "exam preparation" at a glance.
- * Photos are licensed and now self-hosted under public/images/premium; the product analysis and
+ * Photos and UNBODA-generated period artworks are self-hosted under public/images/premium; the product analysis and
  * its actual results are not represented by the photographer or models.
  *
- * Pexels license: https://www.pexels.com/license/
+ * Pexels photo license (topic cards): https://www.pexels.com/license/
+ * Period illustrations: original AI-generated for UNBODA, November 12 2026.
  * Copyright / commercial usage: https://help.pexels.com/hc/en-us/articles/360042295214
  */
 export type PremiumProductPhoto = {
@@ -265,5 +266,45 @@ export const PREMIUM_PRODUCT_PHOTOS: Readonly<Record<string, PremiumProductPhoto
     src: "/images/premium/relationship-intimacy.jpg",
     alt: "서로를 바라보며 손을 잡는 연인의 친밀한 순간",
     sourcePage: "https://www.pexels.com/photo/a-couple-holding-hands-while-looking-at-each-other-5704558/",
+  },
+  "monthly-current": {
+    src: "/images/premium/period-monthly-current.webp",
+    alt: "라벤더빛 탁상 달력과 시계로 이번 달의 흐름을 표현한 이미지",
+    sourcePage: "UNBODA original AI-generated artwork (2026-11-12)",
+  },
+  "monthly-next": {
+    src: "/images/premium/period-monthly-next.webp",
+    alt: "두 장의 달력이 넘어가는 라벤더 장면으로 다음 달의 변화를 표현한 이미지",
+    sourcePage: "UNBODA original AI-generated artwork (2026-11-12)",
+  },
+  "yearly-current": {
+    src: "/images/premium/period-yearly-current.webp",
+    alt: "12개월 달력과 부드러운 흐름선으로 올해의 시기를 표현한 이미지",
+    sourcePage: "UNBODA original AI-generated artwork (2026-11-12)",
+  },
+  "annual-next": {
+    src: "/images/premium/period-annual-next.webp",
+    alt: "새해를 맞는 달력과 라벤더빛 일출이 담긴 이미지",
+    sourcePage: "UNBODA original AI-generated artwork (2026-11-12)",
+  },
+  "annual-3years": {
+    src: "/images/premium/period-annual-3years.webp",
+    alt: "1년 차부터 3년 차까지 이어지는 라벤더 캘린더와 흐름선 이미지",
+    sourcePage: "UNBODA original AI-generated artwork (2026-11-12)",
+  },
+  "monthly-12months": {
+    src: "/images/premium/period-monthly-12months.webp",
+    alt: "1월부터 12월까지 펼쳐진 연간 탁상 달력과 시기 흐름 이미지",
+    sourcePage: "UNBODA original AI-generated artwork (2026-11-12)",
+  },
+  "daeun-current": {
+    src: "/images/premium/period-daeun-current.webp",
+    alt: "1년에서 10년까지 연결되는 라벤더 타임라인 그래프 이미지",
+    sourcePage: "UNBODA original AI-generated artwork (2026-11-12)",
+  },
+  "lifetime-overview": {
+    src: "/images/premium/period-lifetime-overview.webp",
+    alt: "긴 시간의 여정을 표현하는 라벤더 책과 모래시계 이미지",
+    sourcePage: "UNBODA original AI-generated artwork (2026-11-12)",
   },
 };

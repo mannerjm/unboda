@@ -238,3 +238,58 @@ test("independently transcribed Korean voice may replace human review without cl
  assert.equal((await loadReleaseVideo({now,fetcher})).reason,
   "COMMERCIAL_VIDEO_RIGHTS_AND_VOICE_REVIEW_NOT_APPROVED");
 });
+
+
+test("3-of-4 rotation schedules exactly three distinct MP4 provider posts and one source claim",async()=>{
+ const chosen=enabledNetworks({SOCIAL_VIDEO_NETWORKS:"rotation"},slot);
+ assert.equal(chosen.length,3);
+ const posts=new Map(),posted=[],seen=[];let claims=0,sourceClaims=0,sourceReserved=false;
+ const rotatingFetch=async(url,opts)=>{
+  const u=new URL(url);seen.push({path:u.pathname,method:opts?.method||"GET"});
+  if(u.hostname==="api.github.com"&&u.pathname.includes("/releases/tags/"))
+   return reply(metadata);
+  if(u.hostname==="github.com"&&u.pathname.endsWith("/manifest.json"))
+   return reply(manifest);
+  if(u.hostname==="github.com"&&u.pathname.endsWith(".mp4"))
+   return reply(Buffer.from(goodMp4));
+  if(u.pathname==="/api/v2/scheduler/posts"&&opts.method==="GET")
+   return reply({data:[]});
+  if(u.pathname==="/api/actions/normalize/image/url"&&opts.method==="GET")
+   return reply({mediaId:"metricool-ready-video-123"});
+  if(u.pathname==="/api/v2/scheduler/posts"&&opts.method==="POST"){
+   const body=JSON.parse(opts.body),network=body.providers?.[0]?.network;
+   assert.equal(chosen.includes(network),true);
+   assert.equal(body.media[0].mediaId,"metricool-ready-video-123");
+   assert.equal(body.publicationDate.dateTime,slot.slotKst);
+   const id=50000+posted.length;
+   posted.push(network);posts.set(id,{id,
+    media:[{mediaId:"metricool-ready-video-123"}],
+    providers:[{network,status:"PENDING"}],
+    publicationDate:{dateTime:slot.slotKst}});
+   return reply({id});
+  }
+  const m=/^\/api\/v2\/scheduler\/posts\/(\d+)$/.exec(u.pathname);
+  if(m&&opts.method==="GET")return reply(posts.get(Number(m[1])));
+  throw Error("Unexpected simulation route: "+u.pathname+" / "+opts.method);
+ };
+ const env3={...env,SOCIAL_VIDEO_NETWORKS:"rotation"};
+ const reserveSlot=async({network})=>{assert.equal(chosen.includes(network),true);claims++;return {state:"FIRST_ATOMIC_CLAIM_GRANTED"};};
+ const reserveSource=async()=>{
+  sourceClaims++;
+  if(sourceReserved)return {state:"ORIGINAL_USED_OR_CLAIM_UNCERTAIN_NO_RETRY"};
+  sourceReserved=true;return {state:"FIRST_ORIGINAL_CLAIM_GRANTED"};
+ };
+ const first=await runVideoPublishCron({now,fetcher:rotatingFetch,env:env3,reserveSlot,reserveSource});
+ assert.equal(first.http,200);
+ assert.equal(first.body.scheduledCount,3);
+ assert.equal(first.body.blockedCount,0);
+ assert.deepEqual(posted,chosen);
+ assert.equal(claims,3);
+ assert.equal(sourceClaims,1);
+ assert.equal(first.body.providerResults.every(r=>r.state==="PROVIDER_VIDEO_ATTACHED_AND_SCHEDULED"),true);
+ const replay=await runVideoPublishCron({now,fetcher:rotatingFetch,env:env3,reserveSlot,reserveSource});
+ assert.equal(replay.http,503);
+ assert.equal(replay.body.reason,"ORIGINAL_USED_OR_CLAIM_UNCERTAIN_NO_REPOST");
+ assert.equal(posted.length,3,"a replay must not post more than three times");
+ assert.equal(claims,3,"no second provider claims after global source conflict");
+});

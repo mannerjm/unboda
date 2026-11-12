@@ -19,7 +19,10 @@ function configOK(env){
   typeof env.METRICOOL_API_TOKEN==="string"&&env.METRICOOL_API_TOKEN.length>20&&
   env.SOCIAL_PUBLISH_ENABLED==="true"&&env.SOCIAL_PAID_GENERATION_ENABLED==="false";
 }
-// Two unique channels per source, rotating which pair receives each time slot.
+// Three unique channels from four supported video platforms per source.
+// Across four daily slots, each provider is included exactly three times.
+// The omitted platform advances each KST day, so every platform also
+// rotates through all time slots on a four-day cycle.
 function enabledNetworks(env,slot){
  const supplied=typeof env.SOCIAL_VIDEO_NETWORKS==="string"?env.SOCIAL_VIDEO_NETWORKS:"instagram";
  if(supplied==="rotation"){
@@ -28,9 +31,9 @@ function enabledNetworks(env,slot){
   if(index<0||!/^[0-9]{8}$/.test(ymd))return null;
   const day=Date.UTC(+ymd.slice(0,4),+ymd.slice(4,6)-1,+ymd.slice(6));
   if(!Number.isFinite(day)||new Date(day).toISOString().slice(0,10).replaceAll("-","")!==ymd)return null;
-  const pairs=[["instagram","facebook"],["youtube","tiktok"],
-               ["instagram","youtube"],["facebook","tiktok"]];
-  return pairs[(Math.floor(day/86400000)+index)%4].slice();
+  const four=["instagram","facebook","youtube","tiktok"];
+  const excluded=(Math.floor(day/86400000)+index)%four.length;
+  return four.filter((_,i)=>i!==excluded);
  }
  const result=supplied.split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
  if(result.length<1||result.length>NETWORKS.length||
@@ -180,7 +183,7 @@ async function runVideoPublishCron({env=process.env,fetcher=fetch,
  if(!configOK(env))return {http:503,body:fail("VIDEO_AUTO_PUBLISH_NOT_ENABLED")};
  const rotation=env.SOCIAL_VIDEO_NETWORKS==="rotation";
  if(rotation&&(typeof reserveSlot!=="function"||typeof reserveSource!=="function"))
-  return {http:503,body:fail("TWO_CHANNEL_ORIGINAL_CLAIM_NOT_CONNECTED")};
+  return {http:503,body:fail("THREE_CHANNEL_ORIGINAL_CLAIM_NOT_CONNECTED")};
  const fixedNetworks=rotation?null:enabledNetworks(env);
  if(!rotation&&(!fixedNetworks||typeof reserveSlot!=="function"))
   return {http:503,body:fail("PROVIDER_LIST_OR_ATOMIC_CLAIM_MISSING")};
@@ -188,7 +191,7 @@ async function runVideoPublishCron({env=process.env,fetcher=fetch,
  if(video.state!=="ONE_KST_VIDEO_PUBLIC_MEDIA_VERIFIED")
   return {http:503,body:fail(video.reason,{slot:video.slot||null})};
  const networks=rotation?enabledNetworks(env,video.slot):fixedNetworks;
- if(!networks||typeof reserveSlot!=="function"||(rotation&&networks.length!==2))
+ if(!networks||typeof reserveSlot!=="function"||(rotation&&networks.length!==3))
   return {http:503,body:fail("PROVIDER_LIST_OR_ATOMIC_CLAIM_MISSING")};
  if(rotation){
   let original;

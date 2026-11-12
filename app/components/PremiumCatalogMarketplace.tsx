@@ -123,6 +123,10 @@ const PERIOD_THUMBNAIL_TITLES: Readonly<Record<string,string>> = {
 };
 
 
+function getKstNextYear(): number {
+  return Number(new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Seoul",year:"numeric"}).format(new Date()))+1;
+}
+
 function money(productId:string) {
   return getProductPricing(productId).amount.toLocaleString("ko-KR") + "원";
 }
@@ -258,7 +262,7 @@ function ProductArtwork({category,productId,wide=false}: {category:string;produc
     fill
     unoptimized
     sizes={wide?"(max-width: 640px) 90vw, 180px":"(max-width: 640px) 116px, 132px"}
-    className="object-cover object-center"
+    className={category==="period" ? "object-contain object-center" : "object-cover object-center"}
     loading="lazy"
     onError={()=>setPhotoUnavailable(true)}
   />;
@@ -297,6 +301,7 @@ export default function PremiumCatalogMarketplace({
     : periodProducts.find(p=>p.id===selectedProductId);
   const isPeriod=mode==="period";
   const headerTitle=isPeriod?"기간별 분석":(currentGroup?.label??"주제별 분석");
+  const nextYear=getKstNextYear();
   const chooseTopic=(category:string)=>{
     if(mode!=="topic")onModeChange("topic");
     onSelectCategory(category);
@@ -324,7 +329,7 @@ export default function PremiumCatalogMarketplace({
               <button type="button" onClick={()=>onSelectProduct(null)} className="rounded-full border border-[#e1d2f4] px-4 py-2 text-xs font-bold text-[#69449e] hover:bg-[#f6efff]">← {isPeriod?"기간 선택":"상품 목록"}</button>
               <span className="text-xs font-semibold text-[#9a88aa]">{isPeriod?"기간별 분석":currentGroup?.label}</span>
             </div>
-            <div className="grid gap-4 bg-[linear-gradient(130deg,#ffffff,#f8f0ff)] p-5 sm:grid-cols-[180px_1fr] sm:items-center sm:p-6">
+            <div className={"grid gap-4 bg-[linear-gradient(130deg,#ffffff,#f8f0ff)] p-5 sm:items-center sm:p-6 "+(isPeriod?"sm:grid-cols-[216px_1fr]":"sm:grid-cols-[180px_1fr]")}>
               <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-white/80 shadow-[0_10px_25px_rgba(107,75,163,.13)]">
                 <ProductArtwork category={isPeriod?"period":(currentGroup?.category??"period")} productId={selected.id} wide/>
                 {isPeriod && PERIOD_THUMBNAIL_TITLES[selected.id] ? (
@@ -333,6 +338,9 @@ export default function PremiumCatalogMarketplace({
                       {PERIOD_THUMBNAIL_TITLES[selected.id]}
                     </span>
                   </div>
+                ) : null}
+                {isPeriod && selected.id==="annual-next" ? (
+                  <span aria-label={"내년 운 연도 "+nextYear+"년"} className="pointer-events-none absolute right-2 top-2 z-20 rounded-lg border border-white/90 bg-white/95 px-2.5 py-1 text-xs font-black tracking-tight text-[#593a82] shadow-[0_3px_10px_rgba(53,33,75,0.15)]">{nextYear}년</span>
                 ) : null}
               </div>
               <div>

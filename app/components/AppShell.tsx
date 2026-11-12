@@ -265,6 +265,17 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                   <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.label}</span>
                   {item.activeHref === "/ai-consulting" ? <span className="ml-auto rounded-full border border-[#8f7cff]/30 bg-[#eee3ff] px-2 py-0.5 text-[9px] font-black tracking-[0.08em] text-[#7543b4]">이어가기</span> : null}
                 </Link>
+                {item.activeHref === "/special-analysis" && pathname.startsWith("/special-analysis") ? (
+                  <div className="mb-3 ml-4 mt-2 space-y-1 border-l border-[#d8c2f1] pl-3" aria-label="전문 분석 하위 메뉴">
+                    <Link
+                      href="/special-analysis/compatibility"
+                      aria-current={pathname.startsWith("/special-analysis/compatibility") ? "page" : undefined}
+                      className={`block rounded-lg px-2.5 py-2.5 text-sm font-semibold leading-5 transition ${pathname.startsWith("/special-analysis/compatibility") ? "bg-[#e9d9ff] text-[#602ea8]" : "text-[#6b5a80] hover:bg-white/80 hover:text-[#6033ad]"}`}
+                    >
+                      궁합
+                    </Link>
+                  </div>
+                ) : null}
                 {item.activeHref === "/deep-analysis" && isDeepCatalog ? (
                   <div className="mb-3 ml-4 mt-2 space-y-1 border-l border-[#d8c2f1] pl-3" aria-label="심층분석 주제별 및 기간별 메뉴">
                     <p className="px-2 pb-1 pt-1 text-[11px] font-black tracking-wide text-[#8d6aa9]">주제별 분석</p>

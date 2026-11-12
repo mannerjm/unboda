@@ -129,7 +129,7 @@ function RecommendationCard({
       <div className="flex items-start gap-4">
         <RecommendationPhoto productId={product.id} primary={primary} />
         <div className="flex min-w-0 flex-1 flex-col self-stretch">
-          <p className="text-[11px] font-extrabold tracking-[0.03em] text-[#7654b5]">
+          <p className="text-xs font-extrabold tracking-[0.03em] text-[#7654b5]">
             {primary ? "01 · 가장 먼저 추천해요" : "0" + (index + 1) + " · 함께 살펴볼 분석"}
           </p>
           <p className="mt-1 text-xs font-semibold leading-5 text-[#7b718b]">{displayTitle}</p>
@@ -311,7 +311,7 @@ function RecommendationDetail({
         <h3 id="recommendation-detail-title" className="mt-2 text-xl font-black leading-8 tracking-[-0.035em] text-[#211737] sm:text-2xl">
           {getReadablePaidQuestion(product.id, decision.decisionQuestion)}
         </h3>
-        <p className="mt-2 text-sm leading-6 text-[#665b75]">{product.description}</p>
+        <p className="mt-2 text-[15px] leading-7 text-slate-700">{product.description}</p>
       </div>
 
       <div className="px-5 py-5 sm:px-7 sm:py-6">

@@ -72,15 +72,16 @@ for (const cardCopy of [
   "getRecommendationQuestion",
   "purchaseDecision.decisionQuestion",
   "내 결과에서 이어지는 질문 3가지",
-  "이번 결과에서 이어지는 질문",
-  "왜 지금 이 질문이 이어졌나요?",
-  "지금 가장 먼저 볼 질문",
-  "다른 방향으로 궁금하다면",
-  "이 질문을 구매하면",
-  "AI 상담에서 이 주제를 이어서 물어볼 수 있습니다.",
-  "이 질문 더 깊게 보기",
+  "가장 먼저 추천해요",
+  "함께 살펴볼 분석",
+  "PREMIUM_PRODUCT_PHOTOS",
+  "RecommendationPhoto",
+  "왜 지금 추천됐나요?",
+  "리포트 구성 자세히 보기",
+  "AI 상담으로 이어갈 수 있어요.",
+  "이 분석 자세히 보기",
 ]) {
-  assert(recommendationCards.includes(cardCopy), `phase 3 question-first recommendation UI missing: ${cardCopy}`);
+  assert(recommendationCards.includes(cardCopy), `phase 3 question-first recommendation UI missing: \${cardCopy}`);
 }
 
 for (const preserved of [

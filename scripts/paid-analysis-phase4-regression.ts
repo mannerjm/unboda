@@ -62,9 +62,14 @@ assert(accessPanel.includes('<PremiumProductDetail product={product} state={stat
 
 assert(catalog.includes("PremiumProductDetail"), "deep-analysis discovery must keep using the shared premium detail");
 assert(recommendations.includes('import PremiumReportValuePreview from "@/app/components/PremiumReportValuePreview"'), "recommendation detail must reuse the shared report preview");
-assert(recommendations.includes('state === "not_purchased" ? <PremiumReportValuePreview product={product} /> : null'), "recommendation detail must show the report preview before purchase");
-assert(recommendations.includes("지금 가장 먼저 볼 질문") && recommendations.includes("다른 방향으로 궁금하다면"), "recommendations must visually prioritize one primary question over two alternatives without changing ranking");
-assert(recommendations.includes("이 질문을 구매하면") && recommendations.includes("AI 상담에서 이 주제를 이어서 물어볼 수 있습니다."), "recommendation detail must explain report storage and continuing AI consultation value");
+assert(recommendations.includes('state === "not_purchased" ? (') && recommendations.includes("리포트 구성 자세히 보기")
+  && recommendations.includes("<PremiumReportValuePreview product={product} />"),
+  "recommendation detail must keep the report preview before purchase, behind a collapsed customer disclosure");
+assert(recommendations.includes("가장 먼저 추천해요") && recommendations.includes("함께 살펴볼 분석")
+  && recommendations.includes("validRecommendations.slice(1)"),
+  "recommendations must visually prioritize one primary question over two alternatives without changing ranking");
+assert(recommendations.includes("개인화 리포트가 보관되고, 완성되면 AI 상담으로 이어갈 수 있어요."),
+  "recommendation detail must explain report storage and continuing AI consultation value");
 assert(catalog.includes('bg-[#f7f8fc]'), "selected catalog detail must sit on the cool Phase 4 surface");
 
 assert(checkoutPage.includes('bg-[#f5f7fc]'), "checkout must keep the cool canvas");

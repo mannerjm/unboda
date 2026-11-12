@@ -120,30 +120,30 @@ function RecommendationsContent({
 }) {
   return (
     <AppShell activeProfileId={guestMode ? null : profileId}>
-      <main className="min-h-screen bg-[#f5f7fc] px-5 py-7 text-stone-900 sm:px-8 sm:py-9">
+      <main className="min-h-screen bg-[linear-gradient(180deg,#faf6ff_0%,#f3edfb_100%)] px-5 py-7 text-[#211737] sm:px-8 sm:py-9">
         <div className="mx-auto w-full max-w-6xl">
-          <header className="relative overflow-hidden rounded-[2rem] border border-[#6f65ba]/20 bg-[linear-gradient(135deg,#0a1128_0%,#111735_52%,#21183d_100%)] px-6 py-8 text-white shadow-[0_24px_70px_rgba(23,24,55,0.16)] sm:px-9 sm:py-10">
-            <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#7759db]/20 blur-3xl" />
-            <div className="pointer-events-none absolute bottom-[-7rem] left-[15%] h-52 w-52 rounded-full bg-[#d36e9c]/10 blur-3xl" />
+          <header className="relative overflow-hidden rounded-[1.7rem] border border-[#e1d6f1] bg-[linear-gradient(115deg,#e9dcfa_0%,#f9f5ff_62%,#fdfbff_100%)] px-6 py-7 text-[#211737] shadow-[0_14px_40px_rgba(87,63,119,0.08)] sm:px-8 sm:py-8">
+            <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#bca5e7]/25 blur-3xl" />
+            <div className="pointer-events-none absolute bottom-[-7rem] left-[15%] h-52 w-52 rounded-full bg-[#dbc7f4]/25 blur-3xl" />
             <div className="relative">
-              <p className="text-xs font-black tracking-[0.16em] text-[#aa9cff]">무료 결과에서 이어보기</p>
-              <h1 className="mt-3 max-w-3xl text-3xl font-black leading-tight tracking-[-0.05em] sm:text-4xl lg:text-[2.8rem]">
-                이번 결과를 보고,<br className="hidden sm:block" /> 무엇이 더 궁금해졌나요?
+              <p className="text-xs font-black tracking-[0.12em] text-[#7351b3]">무료 결과에서 이어보기</p>
+              <h1 className="mt-2 max-w-3xl text-3xl font-black leading-tight tracking-[-0.05em] sm:text-4xl">
+                지금 나에게 필요한<br className="hidden sm:block" /> 분석 3가지
               </h1>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-[#b7bdd1] sm:text-base">
-                무료 분석에서 확인한 흐름을 같은 계산 근거로 이어가되, 상품 이름보다 지금 궁금한 질문을 먼저 보여드려요.
-                세 가지 중 하나를 골라 더 깊게 보거나, 원하는 주제를 직접 찾을 수 있습니다.
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-[#635574] sm:text-[15px]">
+                이번 결과를 보고, 무엇이 더 궁금해졌나요? 무료 분석과 같은 계산 근거로 이어가되,
+                상품 이름보다 지금 궁금한 질문을 먼저 보여드려요.
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <span className="rounded-full border border-white/12 bg-white/[0.07] px-4 py-2 text-xs font-bold text-[#ddd9ee]">
+                <span className="rounded-full border border-[#ddcaef] bg-white/75 px-4 py-2 text-xs font-bold text-[#5d477e]">
                   분석 대상 · {profileLabel}
                 </span>
                 {!guestMode ? (
-                  <Link href={`/deep-analysis?profileId=${profileId}`} className="rounded-full border border-white/14 bg-white/[0.05] px-4 py-2 text-xs font-bold text-white transition hover:bg-white/10">
+                  <Link href={`/deep-analysis?profileId=${profileId}`} className="rounded-full border border-[#d7c4ee] bg-white/75 px-4 py-2 text-xs font-bold text-[#7150a9] transition hover:bg-white">
                     원하는 주제로 직접 찾기 →
                   </Link>
                 ) : (
-                  <Link href="/deep-analysis" className="rounded-full border border-white/14 bg-white/[0.05] px-4 py-2 text-xs font-bold text-white transition hover:bg-white/10">
+                  <Link href="/deep-analysis" className="rounded-full border border-[#d7c4ee] bg-white/75 px-4 py-2 text-xs font-bold text-[#7150a9] transition hover:bg-white">
                     원하는 주제로 직접 찾기 →
                   </Link>
                 )}

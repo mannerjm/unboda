@@ -1,34 +1,34 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-afterwork-savings-goal-0-0-20261112",
-  "topicKey": "saju-afterwork-savings-goal-0-0-20261112",
+  "id": "unboda-saju-afterwork-shopping-choice-0-0-20261113",
+  "topicKey": "saju-afterwork-shopping-choice-0-0-20261113",
   "sajuCategory": "money",
   "visualStyle": "finance-emerald",
-  "visualMotif": "savings-goal",
-  "situation": "저축 목표 금액을 다시 적어 본 밤",
-  "hook": "저축 목표 금액을 다시 적어 본 밤. 뭘 먼저 볼까요?",
-  "theme": "저축 목표 금액을 다시 적어 본 밤에서 실제 생활 선택을 살피는 내용. 저축·예산 기준을 유지하고 반복 가능한 관리 루틴을 재설정하는 방법을 분석",
-  "thumbnailTitle": "저축 목표 금액을 다시 적어 본 밤",
+  "visualMotif": "shopping-choice",
+  "situation": "장바구니에 물건을 오래 담아 둔 밤",
+  "hook": "장바구니에 물건을 오래 담아 둔 밤. 뭘 먼저 볼까요?",
+  "theme": "장바구니에 물건을 오래 담아 둔 밤에서 실제 생활 선택을 살피는 내용. 중요 지출에서 필요·압박·매몰비용을 구분하는 판단 기준을 분석",
+  "thumbnailTitle": "장바구니에 물건을 오래 담아 둔 밤",
   "narrationDraft": [
-    "저축 목표 금액을 다시 적어 본 밤. 뭘 먼저 볼까요?",
+    "장바구니에 물건을 오래 담아 둔 밤. 뭘 먼저 볼까요?",
     "사주 재물운은 내 지출 기준과 생활 속 소비 습관을 살펴보는 참고예요.",
     "지난달의 기록과 오늘의 지출을 나란히 놓고 바뀐 조건을 비교해 보세요.",
     "운보다 무료 사주 조회 후 내 선택과 생활 흐름도 차분하게 살펴보세요."
   ],
   "visualConcepts": [
-    "첫 장면에서 저축 목표 금액을 다시 적어 본 밤 상황과 저축 목표, 저축을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "두 번째 장면에서 저축 목표 금액을 다시 적어 본 밤 상황과 저축 목표, 저축을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "세 번째 장면에서 저축 목표 금액을 다시 적어 본 밤 상황과 저축 목표, 저축을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "마지막 장면에서 저축 목표 금액을 다시 적어 본 밤 상황과 저축 목표, 저축을 실제 주제 그림으로 보여주고 움직이는 화면"
+    "첫 장면에서 장바구니에 물건을 오래 담아 둔 밤 상황과 구매 고민, 구매을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "두 번째 장면에서 장바구니에 물건을 오래 담아 둔 밤 상황과 구매 고민, 구매을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "세 번째 장면에서 장바구니에 물건을 오래 담아 둔 밤 상황과 구매 고민, 구매을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "마지막 장면에서 장바구니에 물건을 오래 담아 둔 밤 상황과 구매 고민, 구매을 실제 주제 그림으로 보여주고 움직이는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "저축 목표",
-        "본 밤"
+        "구매 고민",
+        "둔 밤"
       ],
-      "subline": "저축 목표 돌아보기",
-      "illustration": "clock"
+      "subline": "구매 고민 돌아보기",
+      "illustration": "message"
     },
     {
       "headline": [
@@ -36,7 +36,7 @@
         "성향 참고"
       ],
       "subline": "지금 상황 돌아보기",
-      "illustration": "message"
+      "illustration": "notes"
     },
     {
       "headline": [
@@ -44,29 +44,29 @@
         "지금 해봐요"
       ],
       "subline": "나의 기준 점검하기",
-      "illustration": "notes"
+      "illustration": "rest"
     },
     {
       "headline": [
         "내 사주도",
         "무료로 살펴봐"
       ],
-      "subline": "운보다 무료 사주 · 저축과 자산 관리 습관",
-      "illustration": "rest"
+      "subline": "운보다 무료 사주 · 큰 지출 판단 분석",
+      "illustration": "clock"
     }
   ],
-  "targetDateKst": "20261112",
+  "targetDateKst": "20261113",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "productId": "money-saving-discipline",
-  "productTitle": "저축과 자산 관리 습관",
+  "productId": "money-spending-decision",
+  "productTitle": "큰 지출 판단 분석",
   "productCategory": "money",
   "productType": "premium",
-  "landingPath": "/paid-analysis/money-saving-discipline",
+  "landingPath": "/paid-analysis/money-spending-decision",
   "contentGoal": "premium-conversion",
-  "productProblem": "저축 관련 저축 목표 금액을 다시 적어 본 밤 상황을 돌아보고 점검",
-  "productValue": "저축·예산 기준을 유지하고 반복 가능한 관리 루틴을 재설정하는 방법을 분석",
-  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 저축과 자산 관리 습관 https://unboda.kr/paid-analysis/money-saving-discipline"
+  "productProblem": "구매 관련 장바구니에 물건을 오래 담아 둔 밤 상황을 돌아보고 점검",
+  "productValue": "중요 지출에서 필요·압박·매몰비용을 구분하는 판단 기준을 분석",
+  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 큰 지출 판단 분석 https://unboda.kr/paid-analysis/money-spending-decision"
 }

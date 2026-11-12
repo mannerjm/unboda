@@ -80,14 +80,18 @@ for (const relationBadge of ["연인 관계", "가족 관계", "업무 관계", 
   assert(overview.includes(relationBadge), `compatibility overview must expose relation badge: ${relationBadge}`);
 }
 assert(
-  overview.includes('section className="mt-8 grid gap-5 lg:auto-rows-fr lg:grid-cols-3"'),
-  "all compatibility cards must share equal-height desktop grid rows",
+  overview.includes('className="mt-5 grid gap-3 md:grid-cols-2"')
+    && overview.includes("compatibilityCards.map((product) =>"),
+  "all five canonical compatibility products must share the compact two-column marketplace layout",
 );
-const unifiedCardClass = 'group flex min-h-[270px] flex-col rounded-[28px] border border-[#e3d4f5] bg-[linear-gradient(145deg,#ffffff,#f8f0ff)] p-6 shadow-[0_9px_25px_rgba(106,73,165,.09)] transition hover:-translate-y-0.5 hover:border-[#a99bea] hover:shadow-md';
 assert(
-  overview.split(unifiedCardClass).length - 1 === 5,
-  "all five compatibility cards must share the same card sizing and surface treatment",
+  overview.includes('group flex min-h-[144px] items-stretch')
+    && overview.includes('rounded-[1.4rem] border border-[#e7d9f3]')
+    && overview.includes('text-[16px] font-extrabold leading-[1.4]'),
+  "all compatibility photo cards must share the same compact sizing and accessible title treatment",
 );
+assert(overview.includes("PREMIUM_PRODUCT_PHOTOS[product.photoId]") && overview.includes("<Image"),
+  "compatibility cards must have licensed, locally hosted thematic photographs");
 assert(!overview.includes("min-h-[290px]"), "legacy oversized compatibility cards must be removed");
 assert(!overview.includes(">이용 가능<") && !overview.includes(">가족 궁합 이용 가능<"), "availability badges must be replaced by relation badges");
 for (const route of [

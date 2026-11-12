@@ -380,12 +380,12 @@ for (const [productId, shortTitle] of Object.entries(periodThumbnailLabels)) {
   const item = PERIOD_PREMIUM_PRODUCTS.find((product) => product.id === productId);
   assert(Boolean(item), `Period thumbnail missing canonical product: ${productId}`);
   const photo = PREMIUM_PRODUCT_PHOTOS[productId];
-  assert(photo?.src === `/images/premium/period-${productId}.webp`,
+  assert(photo?.src === `/images/premium/period-${productId}-v2.webp`,
     `Missing first-party period artwork for ${productId}`);
   assert(Boolean(photo.alt) && photo.sourcePage.includes("UNBODA original"),
     `Period illustration requires accessible alt text and origin for ${productId}`);
-  const data = readFileSync(`public/images/premium/period-${productId}.webp`);
-  assert(data.length >= 1900 && data.length <= 50000 && data.toString("ascii",0,4)==="RIFF"
+  const data = readFileSync(`public/images/premium/period-${productId}-v2.webp`);
+  assert(data.length >= 7000 && data.length <= 50000 && data.toString("ascii",0,4)==="RIFF"
     && data.toString("ascii",8,12)==="WEBP", `Bad period WebP image ${productId}`);
   imageFingerprints.add(createHash("sha256").update(data).digest("hex"));
   assert(storefront.includes(`"${productId}": "${shortTitle}"`),
@@ -399,3 +399,22 @@ assert(storefront.includes("PERIOD_THUMBNAIL_TITLES[selected.id]")
   && storefront.includes('bg-gradient-to-t from-black/80 via-black/10 to-transparent')
   && storefront.includes('category={isPeriod?"period":(currentGroup?.category??"period")}'),
   "Existing detailed period card must show readable selected-product artwork without changing purchase flow");
+
+// Period thumbnails are complete, non-cropped calendar scenes (not the older pre-cropped 300x225 variants).
+// The dynamic next-year overlay keeps annual-next accurate past New Year without changing product copy.
+for (const id of Object.keys(periodThumbnailLabels)) {
+  const path = `public/images/premium/period-${id}-v2.webp`;
+  const bytes = readFileSync(path);
+  const magic = bytes.indexOf(Buffer.from([0x9d,0x01,0x2a]));
+  assert(magic>=0, `Period WebP must contain a VP8 image frame: ${id}`);
+  const w = bytes.readUInt16LE(magic+3)&0x3fff;
+  const h = bytes.readUInt16LE(magic+5)&0x3fff;
+  assert(w===600 && h===450, `Period product ${id} must use a fully framed 4:3 artwork, not a pre-cropped small thumbnail; got ${w}x${h}`);
+}
+assert(storefront.includes('category==="period" ? "object-contain object-center" : "object-cover object-center"'),
+  "Period scenes must preserve full artwork without cropping; topic photos must keep existing cover crop");
+assert(storefront.includes('sm:grid-cols-[216px_1fr]') && storefront.includes('sm:grid-cols-[180px_1fr]'),
+  "Period details need a more legible thumbnail without changing topic card layout");
+assert(storefront.includes('new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Seoul",year:"numeric"})')
+  && storefront.includes('selected.id==="annual-next"') && storefront.includes('{nextYear}년'),
+  "Annual-next art must prominently show next KST calendar year (2027 in November 2026) and keep future year rollover correct");

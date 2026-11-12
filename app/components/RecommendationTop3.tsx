@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import { getProductPricing } from "@/app/lib/productPricing";
@@ -23,6 +25,11 @@ type RecommendationTop3Props = {
   guestMode?: boolean;
 };
 
+type CanonicalRecommendation = {
+  recommendation: AnalysisProductRecommendation;
+  product: NonNullable<ReturnType<typeof resolveCanonicalRecommendationProduct>>;
+};
+
 function getReadableRecommendationReason(
   recommendation: AnalysisProductRecommendation | undefined,
 ): string {
@@ -30,12 +37,124 @@ function getReadableRecommendationReason(
     !/^[a-z0-9_-]+:[a-zA-Z0-9_-]+$/.test(reason)
     && !/(fortuneFlowAnalysis|elementAnalysis|elementRelations|health_stress|wealth_risk|relationship_conflict)/.test(reason),
   );
+  return readableReason ?? "무료 결과에서 이 주제와 연결되는 흐름을 살펴볼 수 있어요.";
+}
 
-  return readableReason ?? "무료 결과에서 이 주제와 연결되는 흐름이 확인돼 가장 먼저 살펴볼 질문으로 추천했어요.";
+function getShortRecommendationReason(
+  recommendation: AnalysisProductRecommendation | undefined,
+): string {
+  const reason = getReadableRecommendationReason(recommendation);
+  // Preserve the genuine ranking; do not present raw signal counts or technical
+  // jargon as a consumer-facing promise. Full evidence stays in the disclosure.
+  if (reason.length <= 75 && !/(연·대운|[가-힣]·[가-힣]운|신호\s*\d|[가-힣]\s*\d+건|기준\s*\d|%|element|fortuneFlow)/i.test(reason)) {
+    return reason;
+  }
+  return "무료 분석에서 확인한 흐름과 연결돼 더 자세히 살펴볼 질문이에요.";
 }
 
 function getRecommendationQuestion(productId: string, fallback: string): string {
   return getReadablePaidQuestion(productId, getPaidAnalysisTopicConfig(productId)?.purchaseDecision.decisionQuestion ?? fallback);
+}
+
+function getProductSummary(
+  paidSummaries: readonly PaidAnalysisSummary[],
+  productId: string,
+  profileId: string,
+) {
+  return paidSummaries.find((item) => item.profileId === profileId && item.productId === productId);
+}
+
+function RecommendationPhoto({ productId, primary = false }: { productId: string; primary?: boolean }) {
+  const photo = PREMIUM_PRODUCT_PHOTOS[productId];
+  return (
+    <span
+      className={primary
+        ? "relative block h-32 w-32 shrink-0 overflow-hidden rounded-[1.15rem] bg-[#e6ddf6] sm:h-44 sm:w-44"
+        : "relative block h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-[#e6ddf6] sm:h-28 sm:w-28"}
+    >
+      {photo ? (
+        <Image
+          src={photo.src}
+          alt={photo.alt}
+          fill
+          sizes={primary ? "(max-width: 640px) 128px, 176px" : "(max-width: 640px) 96px, 112px"}
+          className="object-cover"
+        />
+      ) : (
+        <span className="flex h-full w-full items-center justify-center bg-[linear-gradient(145deg,#eee5ff_0%,#ceb7ec_100%)] text-sm font-black text-[#7154a0]">
+          운보다
+        </span>
+      )}
+    </span>
+  );
+}
+
+function RecommendationCard({
+  entry,
+  index,
+  selected,
+  onSelect,
+  profileId,
+  paidSummaries,
+  primary = false,
+}: {
+  entry: CanonicalRecommendation;
+  index: number;
+  selected: boolean;
+  onSelect: () => void;
+  profileId: string;
+  paidSummaries: readonly PaidAnalysisSummary[];
+  primary?: boolean;
+}) {
+  const { recommendation, product } = entry;
+  const state = toPremiumAnalysisProductState(
+    getProductSummary(paidSummaries, product.id, profileId)?.reportStatus,
+  );
+  const href = getPremiumAnalysisHref(product.id, state, profileId);
+  const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
+  const question = getRecommendationQuestion(product.id, product.description);
+  const price = getProductPricing(product.id).amount.toLocaleString("ko-KR") + "원";
+  const selectedStyle = selected
+    ? "border-[#a789e9] bg-[#fcfaff] shadow-[0_12px_30px_rgba(112,76,163,0.10)]"
+    : "border-[#e5daf2] bg-white shadow-[0_10px_28px_rgba(90,60,125,0.055)]";
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      aria-controls="recommendation-selected-detail"
+      className={"group w-full rounded-[1.5rem] border p-4 text-left transition hover:-translate-y-0.5 hover:border-[#a789e9] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8060ca] " + selectedStyle + (primary ? " sm:p-5" : "")}
+    >
+      <div className="flex items-start gap-4">
+        <RecommendationPhoto productId={product.id} primary={primary} />
+        <div className="flex min-w-0 flex-1 flex-col self-stretch">
+          <p className="text-xs font-extrabold tracking-[0.03em] text-[#7654b5]">
+            {primary ? "01 · 가장 먼저 추천해요" : "0" + (index + 1) + " · 함께 살펴볼 분석"}
+          </p>
+          <p className="mt-1 text-xs font-semibold leading-5 text-[#7b718b]">{displayTitle}</p>
+          <h3 className={"mt-2 font-black tracking-[-0.025em] text-[#211737] " + (primary ? "text-lg leading-7 sm:text-xl sm:leading-8" : "text-[15px] leading-6 sm:text-base")}>
+            {question}
+          </h3>
+          <p className={"mt-2 text-xs leading-5 text-[#655a75] " + (primary ? "line-clamp-2 sm:text-sm sm:leading-6" : "line-clamp-2")}>
+            {primary ? product.description : getShortRecommendationReason(recommendation)}
+          </p>
+          <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3">
+            <span className="text-base font-extrabold text-[#211737]">{price}</span>
+            <span className="text-xs font-black text-[#7552b1]">
+              {!href ? "분석 준비 중" : selected ? "선택한 분석 보기 ↓" : "상품 자세히 보기 ↓"}
+            </span>
+          </div>
+        </div>
+      </div>
+      {primary ? (
+        <div className="mt-4 rounded-xl bg-[#f4eefb] px-4 py-3 text-xs leading-5 text-[#594a73] sm:text-sm sm:leading-6">
+          <span className="font-black text-[#6a4ca8]">추천 이유 </span>
+          {getShortRecommendationReason(recommendation)}
+        </div>
+      ) : null}
+    </button>
+  );
 }
 
 export default function RecommendationTop3({
@@ -45,17 +164,17 @@ export default function RecommendationTop3({
   explanation,
   guestMode = false,
 }: RecommendationTop3Props) {
+  // Ranking, evidence, canonical IDs and purchased-report states are unchanged.
   const validRecommendations = recommendations
     .slice(0, 3)
     .map((recommendation) => ({
       recommendation,
       product: resolveCanonicalRecommendationProduct(recommendation.productId),
     }))
-    .filter((entry): entry is { recommendation: AnalysisProductRecommendation; product: NonNullable<typeof entry.product> } => Boolean(entry.product));
+    .filter((entry): entry is CanonicalRecommendation => Boolean(entry.product));
 
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const effectiveSelectedProductId = selectedProductId ?? validRecommendations[0]?.product.id ?? null;
-
   const selectedRecommendation = effectiveSelectedProductId
     ? validRecommendations.find((entry) => entry.product.id === effectiveSelectedProductId)
     : undefined;
@@ -64,113 +183,55 @@ export default function RecommendationTop3({
   );
 
   return (
-    <section className="mt-8" aria-labelledby="recommendation-top3-title">
-      {explanation ? (
-        <div className="mb-7 rounded-[1.6rem] border border-[#dfe3ef] bg-[#f9faff] px-5 py-5 sm:px-6">
-          <p className="text-xs font-black tracking-[0.14em] text-[#7768c7]">내 무료 결과에서 이어지는 이유</p>
-          <p className="mt-3 text-base font-bold leading-7 text-[#11162d]">{explanation.headline}</p>
-          <p className="mt-2 max-w-3xl text-[15px] leading-7 text-slate-700">{explanation.summary}</p>
-        </div>
-      ) : null}
-
+    <section className="mt-7" aria-labelledby="recommendation-top3-title">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-black tracking-[0.14em] text-[#7768c7]">이번 결과에서 이어지는 질문</p>
-          <h2 id="recommendation-top3-title" className="mt-2 text-2xl font-black tracking-[-0.035em] text-[#11162d] sm:text-3xl">내 결과에서 이어지는 질문 3가지</h2>
+          <p className="text-xs font-black tracking-[0.10em] text-[#7552b1]">무료 분석 결과에서 이어보기</p>
+          <h2 id="recommendation-top3-title" className="mt-2 text-2xl font-black tracking-[-0.035em] text-[#201634] sm:text-3xl">내 결과에서 이어지는 질문 3가지</h2>
         </div>
-        <span className="text-xs font-medium text-slate-500">개인 사주 구조와 현재 월 흐름으로 선정</span>
+        <p className="text-xs font-medium text-[#766d85]">무료 분석과 같은 계산 근거로 선정</p>
       </div>
+      <p className="mt-2 text-xs leading-5 text-[#766d85]">
+        추천은 매월 실제 계산 근거로 다시 평가하며, 비슷한 흐름이면 다른 사람과 같은 질문이 나올 수도 있어요.
+      </p>
 
-      <p className="mt-2 text-xs leading-5 text-slate-500">추천은 매월 실제 계산 근거로 다시 평가합니다. 근거가 비슷하면 다른 사람과 같은 질문이 나올 수도 있습니다.</p>
-      <div className="mt-5 grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
-        {validRecommendations[0] ? (() => {
-          const { recommendation, product } = validRecommendations[0];
-          const summary = paidSummaries.find(
-            (item) => item.profileId === profileId && item.productId === product.id,
-          );
-          const state = toPremiumAnalysisProductState(summary?.reportStatus);
-          const href = getPremiumAnalysisHref(product.id, state, profileId);
-          const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
-          const question = getRecommendationQuestion(product.id, product.description);
-          const selected = effectiveSelectedProductId === product.id;
-
-          if (!href) {
-            return (
-              <div className="rounded-[1.6rem] border border-[#d8d3ff] bg-[linear-gradient(145deg,#f8f5ff,#f9faff)] p-6 text-slate-600">
-                <p className="text-xs font-black tracking-[0.12em] text-[#6f5ce7]">지금 가장 먼저 볼 질문 · {displayTitle}</p>
-                <p className="mt-4 text-xl font-black leading-8 text-[#11162d]">{question}</p>
-                <p className="mt-4 text-sm">분석 생성 중</p>
-              </div>
-            );
-          }
-
-          return (
-            <button
-              type="button"
-              aria-pressed={selected}
-              onClick={() => setSelectedProductId(product.id)}
-              className={`group min-h-64 rounded-[1.6rem] border p-6 text-left transition hover:-translate-y-0.5 hover:border-[#8069ec] hover:shadow-[0_18px_38px_rgba(54,45,93,0.10)] ${selected ? "border-[#8069ec] bg-[linear-gradient(145deg,#f8f5ff,#f9faff)] shadow-[0_18px_40px_rgba(78,63,137,0.12)]" : "border-[#d8d3ff] bg-white"}`}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-black tracking-[0.12em] text-[#6f5ce7]">지금 가장 먼저 볼 질문</p>
-                  <p className="mt-2 text-xs font-bold text-slate-500">{displayTitle}</p>
-                </div>
-                <span className="shrink-0 text-sm font-black text-[#11162d]">{getProductPricing(product.id).amount.toLocaleString("ko-KR")}원</span>
-              </div>
-              <p className="mt-6 max-w-2xl text-2xl font-black leading-9 tracking-[-0.03em] text-[#11162d]">{question}</p>
-              <p className="mt-5 max-w-2xl text-[15px] leading-7 text-slate-700">{getReadableRecommendationReason(recommendation)}</p>
-              <p className="mt-6 text-sm font-black text-[#6f5ce7]">{selected ? "아래에서 이 질문을 자세히 보고 있어요" : "이 질문 자세히 보기 →"}</p>
-            </button>
-          );
-        })() : null}
-
-        <div className="rounded-[1.6rem] border border-[#dfe3ef] bg-white p-4 sm:p-5">
-          <p className="text-xs font-black tracking-[0.12em] text-slate-500">다른 방향으로 궁금하다면</p>
-          <div className="mt-3 space-y-3">
-            {validRecommendations.slice(1).map(({ recommendation, product }, offset) => {
-              const index = offset + 1;
-              const summary = paidSummaries.find(
-                (item) => item.profileId === profileId && item.productId === product.id,
-              );
-              const state = toPremiumAnalysisProductState(summary?.reportStatus);
-              const href = getPremiumAnalysisHref(product.id, state, profileId);
-              const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
-              const question = getRecommendationQuestion(product.id, product.description);
-              const selected = effectiveSelectedProductId === product.id;
-
-              if (!href) {
-                return (
-                  <div key={product.id} className="rounded-[1.25rem] border border-[#dce1ef] bg-[#f7f8fc] p-4 text-slate-500">
-                    <p className="text-xs font-black">0{index + 1} · {displayTitle}</p>
-                    <p className="mt-2 text-sm font-bold leading-6">{question}</p>
-                  </div>
-                );
-              }
-
-              return (
-                <button
-                  key={product.id}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => setSelectedProductId(product.id)}
-                  className={`w-full rounded-[1.25rem] border p-4 text-left transition hover:border-[#9282df] hover:bg-[#faf9ff] ${selected ? "border-[#9282df] bg-[#f8f5ff]" : "border-[#dce1ef] bg-white"}`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="text-xs font-black text-[#6f5ce7]">0{index + 1} · {displayTitle}</p>
-                    <span className="shrink-0 text-xs font-bold text-slate-600">{getProductPricing(product.id).amount.toLocaleString("ko-KR")}원</span>
-                  </div>
-                  <p className="mt-3 text-base font-black leading-7 text-[#11162d]">{question}</p>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{getReadableRecommendationReason(recommendation)}</p>
-                </button>
-              );
-            })}
-          </div>
+      {validRecommendations[0] ? (
+        <div className="mt-5">
+          <RecommendationCard
+            entry={validRecommendations[0]}
+            index={0}
+            primary
+            selected={effectiveSelectedProductId === validRecommendations[0].product.id}
+            onSelect={() => setSelectedProductId(validRecommendations[0].product.id)}
+            profileId={profileId}
+            paidSummaries={paidSummaries}
+          />
         </div>
+      ) : null}
+      <div className="mt-3 grid gap-3 md:grid-cols-2">
+        {validRecommendations.slice(1).map((entry, offset) => (
+          <RecommendationCard
+            key={entry.product.id}
+            entry={entry}
+            index={offset + 1}
+            selected={effectiveSelectedProductId === entry.product.id}
+            onSelect={() => setSelectedProductId(entry.product.id)}
+            profileId={profileId}
+            paidSummaries={paidSummaries}
+          />
+        ))}
       </div>
+      {explanation ? (
+        <details className="mt-4 rounded-xl border border-[#e5daf2] bg-white/70 px-4 py-3 text-xs leading-6 text-[#625676]">
+          <summary className="cursor-pointer font-bold text-[#7652ad]">무료 결과에서 추천한 기준 더 보기</summary>
+          <p className="mt-2 font-semibold text-[#241936]">{explanation.headline}</p>
+          <p className="mt-1">{explanation.summary}</p>
+        </details>
+      ) : null}
 
       {effectiveSelectedProductId ? (
         <RecommendationDetail
+          key={effectiveSelectedProductId}
           productId={effectiveSelectedProductId}
           profileId={profileId}
           paidSummaries={paidSummaries}
@@ -225,8 +286,9 @@ function RecommendationDetail({
     }
   }
 
-  const summary = paidSummaries.find((item) => item.profileId === profileId && item.productId === productId);
-  const state = toPremiumAnalysisProductState(summary?.reportStatus);
+  const state = toPremiumAnalysisProductState(
+    getProductSummary(paidSummaries, productId, profileId)?.reportStatus,
+  );
   const href = getPremiumAnalysisHref(product.id, state, profileId);
   const reason = getReadableRecommendationReason(recommendation);
   const displayTitle = getPremiumProductDisplayTitle(product.id, product.title);
@@ -236,64 +298,67 @@ function RecommendationDetail({
     .map(formatTopicExpectedUnderstanding);
 
   return (
-    <section className="mt-5 overflow-hidden rounded-[1.7rem] border border-[#dfe3ef] bg-white shadow-[0_18px_45px_rgba(41,35,27,0.05)]" aria-labelledby="recommendation-detail-title">
-      <div className="bg-[linear-gradient(135deg,#111936,#1c183d_55%,#262041)] px-6 py-6 text-white sm:px-7">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs font-black tracking-[0.14em] text-[#b7a9ff]">{isPrimary ? "가장 먼저 이어볼 질문" : "선택한 다음 질문"}</p>
-          <span className="rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-semibold text-[#d9d5ea]">{displayTitle}</span>
+    <section
+      id="recommendation-selected-detail"
+      className="mt-5 scroll-mt-6 overflow-hidden rounded-[1.5rem] border border-[#e2d7f3] bg-white shadow-[0_15px_35px_rgba(82,61,116,0.07)]"
+      aria-labelledby="recommendation-detail-title"
+    >
+      <div className="bg-[linear-gradient(110deg,#f0e7ff,#faf7ff)] px-5 py-5 sm:px-7">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs font-extrabold tracking-[0.08em] text-[#7652b1]">{isPrimary ? "가장 먼저 이어볼 질문" : "선택한 다음 질문"}</p>
+          <span className="text-xs font-semibold text-[#746886]">{displayTitle}</span>
         </div>
-        <h3 id="recommendation-detail-title" className="mt-3 max-w-3xl text-2xl font-black leading-9 tracking-[-0.03em]">{getReadablePaidQuestion(product.id, decision.decisionQuestion)}</h3>
+        <h3 id="recommendation-detail-title" className="mt-2 text-xl font-black leading-8 tracking-[-0.035em] text-[#211737] sm:text-2xl">
+          {getReadablePaidQuestion(product.id, decision.decisionQuestion)}
+        </h3>
+        <p className="mt-2 text-[15px] leading-7 text-slate-700">{product.description}</p>
       </div>
 
-      <div className="p-6 sm:p-7">
-        <p className="text-[15px] font-medium leading-7 text-slate-700">{product.description}</p>
-        <div className="mt-5 rounded-2xl bg-[#f4f6fb] px-5 py-4">
-          <p className="text-xs font-black text-slate-800">왜 지금 이 질문이 이어졌나요?</p>
-          <p className="mt-2 text-[15px] leading-7 text-slate-700">{reason}</p>
+      <div className="px-5 py-5 sm:px-7 sm:py-6">
+        <div className="rounded-xl bg-[#f8f4fd] px-4 py-3">
+          <p className="text-xs font-black text-[#6e4eab]">왜 지금 추천됐나요?</p>
+          <p className="mt-1 text-sm leading-6 text-[#554864]">{getShortRecommendationReason(recommendation)}</p>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2">
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <DetailList title="이 분석에서 보는 것" items={overviewItems} />
           <DetailList title="분석 후 알 수 있는 것" items={expectedUnderstanding} />
         </div>
 
-        {state === "not_purchased" ? <PremiumReportValuePreview product={product} /> : null}
-
         {state === "not_purchased" ? (
-          <div className="mt-5 rounded-[1.5rem] border border-[#d8d3ff] bg-[linear-gradient(135deg,#f9f8ff_0%,#ffffff_100%)] p-5 sm:p-6">
-            <p className="text-xs font-black tracking-[0.12em] text-[#6f5ce7]">이 질문을 구매하면</p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {[
-                "내 결과를 바탕으로 개인화 심층 리포트가 생성됩니다.",
-                "완성된 결과는 구매한 분석에 계속 보관됩니다.",
-                "리포트가 완성되면 AI 상담에서 이 주제를 이어서 물어볼 수 있습니다.",
-                "리포트를 읽고 남은 질문도 같은 상담에서 계속 이어갈 수 있습니다.",
-              ].map((item) => (
-                <div key={item} className="rounded-xl border border-[#e1e5f0] bg-white px-4 py-3 text-sm leading-6 text-slate-700">{item}</div>
-              ))}
-            </div>
-          </div>
+          <details className="mt-5 rounded-xl border border-[#e4dcf0] bg-[#fcfaff] px-4 py-3">
+            <summary className="cursor-pointer text-sm font-black text-[#6e4eab]">리포트 구성 자세히 보기</summary>
+            <p className="mt-3 text-xs leading-5 text-[#746886]">아래는 리포트 구성 안내이며, 실제 분석 결과는 구매 후 생성됩니다.</p>
+            <PremiumReportValuePreview product={product} />
+            <p className="mt-4 text-xs leading-6 text-[#766887]">추천 근거 참고: {reason}</p>
+          </details>
         ) : null}
 
-        <div className="mt-5 flex flex-col gap-3 border-t border-[#dce1ef] pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <span className="text-base font-black text-[#11162d]">{getProductPricing(productId).amount.toLocaleString("ko-KR")}원</span>
+        <div className="mt-5 flex flex-col gap-3 border-t border-[#e7ddf2] pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-lg font-black text-[#211737]">{getProductPricing(productId).amount.toLocaleString("ko-KR")}원</p>
+            {state === "not_purchased" ? (
+              <p className="mt-1 text-xs leading-5 text-[#746886]">구매 후 개인화 리포트가 보관되고, 완성되면 AI 상담으로 이어갈 수 있어요.</p>
+            ) : (
+              <p className="mt-1 text-xs leading-5 text-[#746886]">구매한 분석의 현재 진행 상태로 연결됩니다.</p>
+            )}
+          </div>
           {guestMode ? (
             <button
               type="button"
               onClick={() => void continueGuestPurchase()}
               disabled={guestIntentPending}
-              className="rounded-xl bg-[#171a3d] px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-[#25213d] disabled:cursor-wait disabled:opacity-60"
+              className="shrink-0 rounded-xl bg-[#7350b6] px-6 py-3 text-center text-sm font-black text-white transition hover:bg-[#60409f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7350b6] disabled:cursor-wait disabled:opacity-60"
             >
-              {guestIntentPending ? "계속 준비 중..." : "이 질문 더 깊게 보기"}
+              {guestIntentPending ? "계속 준비 중..." : "이 분석 자세히 보기 →"}
             </button>
           ) : href ? (
-            <Link href={href} className="rounded-xl bg-[#171a3d] px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-[#25213d]">
-              {state === "not_purchased" ? "이 질문 더 깊게 보기" : state === "none" || state === "generating" ? "리포트 준비 화면 보기" : "리포트 보기"}
+            <Link href={href} className="shrink-0 rounded-xl bg-[#7350b6] px-6 py-3 text-center text-sm font-black text-white transition hover:bg-[#60409f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7350b6]">
+              {state === "not_purchased" ? "이 분석 자세히 보기 →" : state === "none" || state === "generating" ? "리포트 준비 화면 보기 →" : "구매한 리포트 보기 →"}
             </Link>
           ) : null}
         </div>
-        {guestIntentError ? (
-          <p className="mt-3 text-sm font-medium text-red-600">{guestIntentError}</p>
-        ) : null}
+        {guestIntentError ? <p className="mt-3 text-sm font-medium text-red-600">{guestIntentError}</p> : null}
       </div>
     </section>
   );
@@ -301,11 +366,12 @@ function RecommendationDetail({
 
 function DetailList({ title, items }: { title: string; items: readonly string[] }) {
   return (
-    <div className="mt-5">
-      <p className="text-xs font-black text-slate-800">{title}</p>
-      <ul className="mt-2 space-y-2 text-[15px] leading-7 text-slate-700">
+    <div>
+      <p className="text-xs font-black text-[#6e4eab]">{title}</p>
+      <ul className="mt-2 space-y-1.5 text-sm leading-6 text-[#625771]">
         {items.map((item) => <li key={item}>· {item}</li>)}
       </ul>
     </div>
   );
 }
+

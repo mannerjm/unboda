@@ -66,7 +66,10 @@ for (const [name, source] of [
   ["family page", familyPage],
   ["family input page", familyInputPage],
 ] as const) {
-  assert(source.includes('bg-[#f5f7fc]'), `${name} must use the cool service canvas`);
+  assert(name === "compatibility entry"
+    ? source.includes("bg-[linear-gradient(180deg,#fbf7ff_0%,#f2eaff_100%)]")
+    : source.includes('bg-[#f5f7fc]'),
+    `${name} must retain its approved brand canvas`);
 }
 
 assert(compatibilityEntry.includes("연인·배우자 궁합") && compatibilityEntry.includes("가족 궁합"), "compatibility entry must keep both relationship worlds");

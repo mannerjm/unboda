@@ -1,34 +1,34 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-commute-job-interview-0-0-20261113",
-  "topicKey": "saju-commute-job-interview-0-0-20261113",
+  "id": "unboda-saju-commute-work-checklist-1-0-20261114",
+  "topicKey": "saju-commute-work-checklist-1-0-20261114",
   "sajuCategory": "career",
   "visualStyle": "commute-sunrise",
-  "visualMotif": "job-interview",
-  "situation": "면접 질문을 연습하다 막힌 오후",
-  "hook": "면접 질문을 연습하다 막힌 오후. 뭘 먼저 볼까요?",
-  "theme": "면접 질문을 연습하다 막힌 오후에서 실제 생활 선택을 살피는 내용. 현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
-  "thumbnailTitle": "면접 질문을 연습하다 막힌 오후",
+  "visualMotif": "work-checklist",
+  "situation": "업무 메모를 놓쳐 다시 확인한 순간",
+  "hook": "업무 메모를 놓쳐 다시 확인한 순간. 뭘 먼저 볼까요?",
+  "theme": "업무 메모를 놓쳐 다시 확인한 순간에서 실제 생활 선택을 살피는 내용. 업무에서 소진을 만드는 패턴과 지속 가능한 업무 경계를 점검",
+  "thumbnailTitle": "업무 메모를 놓쳐 다시 확인한 순간",
   "narrationDraft": [
-    "면접 질문을 연습하다 막힌 오후. 뭘 먼저 볼까요?",
+    "업무 메모를 놓쳐 다시 확인한 순간. 뭘 먼저 볼까요?",
     "사주 직업 관점에서 업무 흐름과 일의 우선순위를 돌아보는 참고예요.",
     "업무 시간을 먼저 나눠 적고 가장 필요한 확인 질문 한 개를 준비해 보세요.",
     "운보다 무료 사주 조회 후 내 선택과 생활 흐름도 차분하게 살펴보세요."
   ],
   "visualConcepts": [
-    "첫 장면에서 면접 질문을 연습하다 막힌 오후 상황과 면접 준비, 면접을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "두 번째 장면에서 면접 질문을 연습하다 막힌 오후 상황과 면접 준비, 면접을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "세 번째 장면에서 면접 질문을 연습하다 막힌 오후 상황과 면접 준비, 면접을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "마지막 장면에서 면접 질문을 연습하다 막힌 오후 상황과 면접 준비, 면접을 실제 주제 그림으로 보여주고 움직이는 화면"
+    "첫 장면에서 업무 메모를 놓쳐 다시 확인한 순간 상황과 업무 계획, 업무을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "두 번째 장면에서 업무 메모를 놓쳐 다시 확인한 순간 상황과 업무 계획, 업무을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "세 번째 장면에서 업무 메모를 놓쳐 다시 확인한 순간 상황과 업무 계획, 업무을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "마지막 장면에서 업무 메모를 놓쳐 다시 확인한 순간 상황과 업무 계획, 업무을 실제 주제 그림으로 보여주고 움직이는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "면접 준비",
-        "막힌 오후"
+        "업무 계획",
+        "확인한 순간"
       ],
-      "subline": "면접 준비 돌아보기",
-      "illustration": "rest"
+      "subline": "업무 계획 돌아보기",
+      "illustration": "clock"
     },
     {
       "headline": [
@@ -36,7 +36,7 @@
         "성향 참고"
       ],
       "subline": "지금 상황 돌아보기",
-      "illustration": "clock"
+      "illustration": "message"
     },
     {
       "headline": [
@@ -44,29 +44,29 @@
         "지금 해봐요"
       ],
       "subline": "나의 기준 점검하기",
-      "illustration": "message"
+      "illustration": "notes"
     },
     {
       "headline": [
         "내 사주도",
         "무료로 살펴봐"
       ],
-      "subline": "운보다 무료 사주 · 직장 적응 분석",
-      "illustration": "notes"
+      "subline": "운보다 무료 사주 · 업무 과부하 회복 분석",
+      "illustration": "rest"
     }
   ],
-  "targetDateKst": "20261113",
+  "targetDateKst": "20261114",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "productId": "career-workplace-adaptation",
-  "productTitle": "직장 적응 분석",
+  "productId": "career-workload-recovery",
+  "productTitle": "업무 과부하 회복 분석",
   "productCategory": "career",
   "productType": "premium",
-  "landingPath": "/paid-analysis/career-workplace-adaptation",
+  "landingPath": "/paid-analysis/career-workload-recovery",
   "contentGoal": "premium-conversion",
-  "productProblem": "직장 관련 면접 질문을 연습하다 막힌 오후 상황을 돌아보고 점검",
-  "productValue": "현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
-  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 직장 적응 분석 https://unboda.kr/paid-analysis/career-workplace-adaptation"
+  "productProblem": "일정 관련 업무 메모를 놓쳐 다시 확인한 순간 상황을 돌아보고 점검",
+  "productValue": "업무에서 소진을 만드는 패턴과 지속 가능한 업무 경계를 점검",
+  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 업무 과부하 회복 분석 https://unboda.kr/paid-analysis/career-workload-recovery"
 }

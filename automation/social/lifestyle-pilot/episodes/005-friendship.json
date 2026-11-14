@@ -1,34 +1,34 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-friendship-relationship-talk-1-0-20261114",
-  "topicKey": "saju-friendship-relationship-talk-1-0-20261114",
+  "id": "unboda-saju-friendship-message-timing-1-0-20261115",
+  "topicKey": "saju-friendship-message-timing-1-0-20261115",
   "sajuCategory": "compatibility",
   "visualStyle": "relationship-coral",
-  "visualMotif": "relationship-talk",
-  "situation": "배우자와 주말 계획을 정하기 어려운 날",
-  "hook": "배우자와 주말 계획을 정하기 어려운 날. 뭘 먼저 볼까요?",
-  "theme": "배우자와 주말 계획을 정하기 어려운 날에서 실제 생활 선택을 살피는 내용. 두 사람의 관계 강점과 갈등·회복 방식",
-  "thumbnailTitle": "배우자와 주말 계획을 정하기 어려운 날",
+  "visualMotif": "message-timing",
+  "situation": "연락할 시각을 정하지 못해 망설인 밤",
+  "hook": "연락할 시각을 정하지 못해 망설인 밤. 뭘 먼저 볼까요?",
+  "theme": "연락할 시각을 정하지 못해 망설인 밤에서 실제 생활 선택을 살피는 내용. 친구 관계의 상호성·신뢰·감정 노동을 점검하고 재조정 기준을 만듭니다.",
+  "thumbnailTitle": "연락할 시각을 정하지 못해 망설인 밤",
   "narrationDraft": [
-    "배우자와 주말 계획을 정하기 어려운 날. 뭘 먼저 볼까요?",
+    "연락할 시각을 정하지 못해 망설인 밤. 뭘 먼저 볼까요?",
     "사주 궁합에서는 사람마다 다른 대화 방식과 마음을 돌아보는 참고예요.",
     "서로의 대화에서 엇갈린 순간을 적고 다른 표현을 한 가지 생각해 보세요.",
     "운보다 무료 사주 조회 후 내 선택과 생활 흐름도 차분하게 살펴보세요."
   ],
   "visualConcepts": [
-    "첫 장면에서 배우자와 주말 계획을 정하기 어려운 날 상황과 관계 대화, 대화을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "두 번째 장면에서 배우자와 주말 계획을 정하기 어려운 날 상황과 관계 대화, 대화을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "세 번째 장면에서 배우자와 주말 계획을 정하기 어려운 날 상황과 관계 대화, 대화을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "마지막 장면에서 배우자와 주말 계획을 정하기 어려운 날 상황과 관계 대화, 대화을 실제 주제 그림으로 보여주고 움직이는 화면"
+    "첫 장면에서 연락할 시각을 정하지 못해 망설인 밤 상황과 연락 방식, 메시지을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "두 번째 장면에서 연락할 시각을 정하지 못해 망설인 밤 상황과 연락 방식, 메시지을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "세 번째 장면에서 연락할 시각을 정하지 못해 망설인 밤 상황과 연락 방식, 메시지을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "마지막 장면에서 연락할 시각을 정하지 못해 망설인 밤 상황과 연락 방식, 메시지을 실제 주제 그림으로 보여주고 움직이는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "관계 대화",
-        "어려운 날"
+        "연락 방식",
+        "망설인 밤"
       ],
-      "subline": "관계 대화 돌아보기",
-      "illustration": "message"
+      "subline": "연락 방식 돌아보기",
+      "illustration": "notes"
     },
     {
       "headline": [
@@ -36,7 +36,7 @@
         "성향 참고"
       ],
       "subline": "지금 상황 돌아보기",
-      "illustration": "notes"
+      "illustration": "rest"
     },
     {
       "headline": [
@@ -44,29 +44,29 @@
         "지금 해봐요"
       ],
       "subline": "나의 기준 점검하기",
-      "illustration": "rest"
+      "illustration": "clock"
     },
     {
       "headline": [
         "내 사주도",
         "무료로 살펴봐"
       ],
-      "subline": "운보다 무료 사주 · 연인·배우자 궁합 분석",
-      "illustration": "clock"
+      "subline": "운보다 무료 사주 · 친구 관계 분석",
+      "illustration": "message"
     }
   ],
-  "targetDateKst": "20261114",
+  "targetDateKst": "20261115",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "productId": "compatibility-romantic",
-  "productTitle": "연인·배우자 궁합 분석",
-  "productCategory": "compatibility",
-  "productType": "compatibility",
-  "landingPath": "/special-analysis/compatibility/romantic",
-  "contentGoal": "compatibility-conversion",
-  "productProblem": "연인 관련 배우자와 주말 계획을 정하기 어려운 날 상황을 돌아보고 점검",
-  "productValue": "두 사람의 관계 강점과 갈등·회복 방식",
-  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 연인·배우자 궁합 분석 https://unboda.kr/special-analysis/compatibility/romantic"
+  "productId": "relationship-friendship",
+  "productTitle": "친구 관계 분석",
+  "productCategory": "social",
+  "productType": "premium",
+  "landingPath": "/paid-analysis/relationship-friendship",
+  "contentGoal": "premium-conversion",
+  "productProblem": "친구 관련 연락할 시각을 정하지 못해 망설인 밤 상황을 돌아보고 점검",
+  "productValue": "친구 관계의 상호성·신뢰·감정 노동을 점검하고 재조정 기준을 만듭니다.",
+  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 친구 관계 분석 https://unboda.kr/paid-analysis/relationship-friendship"
 }

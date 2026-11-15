@@ -1,34 +1,34 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-commute-meeting-presentation-1-0-20261115",
-  "topicKey": "saju-commute-meeting-presentation-1-0-20261115",
+  "id": "unboda-saju-commute-career-crossroads-1-0-20261116",
+  "topicKey": "saju-commute-career-crossroads-1-0-20261116",
   "sajuCategory": "career",
   "visualStyle": "commute-sunrise",
-  "visualMotif": "meeting-presentation",
-  "situation": "회의에서 숫자 단위를 다시 확인한 순간",
-  "hook": "회의에서 숫자 단위를 다시 확인한 순간. 뭘 먼저 볼까요?",
-  "theme": "회의에서 숫자 단위를 다시 확인한 순간에서 실제 생활 선택을 살피는 내용. 현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
-  "thumbnailTitle": "회의에서 숫자 단위를 다시 확인한 순간",
+  "visualMotif": "career-crossroads",
+  "situation": "직장 동료가 업무 방식 변경을 알린 날",
+  "hook": "직장 동료가 업무 방식 변경을 알린 날. 뭘 먼저 볼까요?",
+  "theme": "직장 동료가 업무 방식 변경을 알린 날에서 실제 생활 선택을 살피는 내용. 현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
+  "thumbnailTitle": "직장 동료가 업무 방식 변경을 알린 날",
   "narrationDraft": [
-    "회의에서 숫자 단위를 다시 확인한 순간. 뭘 먼저 볼까요?",
+    "직장 동료가 업무 방식 변경을 알린 날. 뭘 먼저 볼까요?",
     "사주 직업 관점에서 업무 흐름과 일의 우선순위를 돌아보는 참고예요.",
     "업무 시간을 먼저 나눠 적고 가장 필요한 확인 질문 한 개를 준비해 보세요.",
     "운보다 무료 사주 조회 후 내 선택과 생활 흐름도 차분하게 살펴보세요."
   ],
   "visualConcepts": [
-    "첫 장면에서 회의에서 숫자 단위를 다시 확인한 순간 상황과 회의 발표, 발표을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "두 번째 장면에서 회의에서 숫자 단위를 다시 확인한 순간 상황과 회의 발표, 발표을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "세 번째 장면에서 회의에서 숫자 단위를 다시 확인한 순간 상황과 회의 발표, 발표을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "마지막 장면에서 회의에서 숫자 단위를 다시 확인한 순간 상황과 회의 발표, 발표을 실제 주제 그림으로 보여주고 움직이는 화면"
+    "첫 장면에서 직장 동료가 업무 방식 변경을 알린 날 상황과 이직 고민, 출근을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "두 번째 장면에서 직장 동료가 업무 방식 변경을 알린 날 상황과 이직 고민, 출근을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "세 번째 장면에서 직장 동료가 업무 방식 변경을 알린 날 상황과 이직 고민, 출근을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "마지막 장면에서 직장 동료가 업무 방식 변경을 알린 날 상황과 이직 고민, 출근을 실제 주제 그림으로 보여주고 움직이는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "회의 발표",
-        "확인한 순간"
+        "이직 고민",
+        "알린 날"
       ],
-      "subline": "회의 발표 돌아보기",
-      "illustration": "message"
+      "subline": "이직 고민 돌아보기",
+      "illustration": "notes"
     },
     {
       "headline": [
@@ -36,7 +36,7 @@
         "성향 참고"
       ],
       "subline": "지금 상황 돌아보기",
-      "illustration": "notes"
+      "illustration": "rest"
     },
     {
       "headline": [
@@ -44,7 +44,7 @@
         "지금 해봐요"
       ],
       "subline": "나의 기준 점검하기",
-      "illustration": "rest"
+      "illustration": "clock"
     },
     {
       "headline": [
@@ -52,10 +52,10 @@
         "무료로 살펴봐"
       ],
       "subline": "운보다 무료 사주 · 직장 적응 분석",
-      "illustration": "clock"
+      "illustration": "message"
     }
   ],
-  "targetDateKst": "20261115",
+  "targetDateKst": "20261116",
   "destination": "https://unboda.kr",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
@@ -66,7 +66,7 @@
   "productType": "premium",
   "landingPath": "/paid-analysis/career-workplace-adaptation",
   "contentGoal": "premium-conversion",
-  "productProblem": "직장 관련 회의에서 숫자 단위를 다시 확인한 순간 상황을 돌아보고 점검",
+  "productProblem": "직장 관련 직장 동료가 업무 방식 변경을 알린 날 상황을 돌아보고 점검",
   "productValue": "현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
   "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 직장 적응 분석 https://unboda.kr/paid-analysis/career-workplace-adaptation"
 }

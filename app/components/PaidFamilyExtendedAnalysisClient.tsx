@@ -3,8 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 import CompatibilityReportValuePreview from "@/app/components/CompatibilityReportValuePreview";
+import CompatibilityInterestSaveButton from "@/app/components/CompatibilityInterestSaveButton";
 import type { FamilyOtherRelationshipKind, FamilyOtherRole } from "@/app/lib/familyCompatibilityExtended";
 import {
+  COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID,
   COMPATIBILITY_FAMILY_OTHER_PRODUCT,
   COMPATIBILITY_FAMILY_OTHER_PRODUCT_ID,
   COMPATIBILITY_FAMILY_OTHER_SESSION_KEY,
@@ -156,10 +158,12 @@ function roleOptions(kind: FormState["relationshipKind"]): readonly { value: Fam
   }
 }
 
-export default function PaidFamilyExtendedAnalysisClient({ mode, myProfileLabel, profileId }: {
+export default function PaidFamilyExtendedAnalysisClient({ mode, myProfileLabel, profileId, initialInterestSaved = false, onInterestSaved }: {
   mode: Mode;
   myProfileLabel: string;
   profileId: string;
+  initialInterestSaved?: boolean;
+  onInterestSaved?: () => void;
 }) {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
@@ -311,7 +315,7 @@ export default function PaidFamilyExtendedAnalysisClient({ mode, myProfileLabel,
         <div className="mt-7 overflow-hidden rounded-3xl border border-[#dfe3ef] bg-[linear-gradient(135deg,#f5f6fc_0%,#f9faff_100%)] shadow-sm">
           <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
             <div>
-              <p className="text-[11px] font-bold tracking-[0.16em] text-slate-400">전문 궁합 리포트</p>
+              <p className="text-[11px] font-bold tracking-[0.16em] text-slate-500">구매 전 확인</p>
               <p className="mt-2 text-sm font-semibold text-slate-800">{mode === "siblings" ? "형제·자매" : "기타 가족"} 관계 분석을 결제 후 바로 생성합니다.</p>
               <p className="mt-1 text-xs leading-5 text-slate-500">결제 완료 후 생성된 {evaluationYear}년판 결과는 구매한 분석에서 다시 볼 수 있습니다.</p>
             </div>
@@ -324,6 +328,15 @@ export default function PaidFamilyExtendedAnalysisClient({ mode, myProfileLabel,
 
         <button type="submit" disabled={!canSubmit} className="mt-3 inline-flex w-full items-center justify-center rounded-2xl bg-[#6f5ce7] px-5 py-4 text-sm font-bold text-white shadow-[0_12px_28px_rgba(93,76,209,0.2)] transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none">결제하고 궁합 분석하기</button>
         <p className="mt-3 text-center text-xs leading-5 text-slate-400">결제가 승인되면 분석 생성이 시작되고 구매한 분석에 보관됩니다.</p>
+        <div className="mt-3">
+          <CompatibilityInterestSaveButton
+            productId={COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID}
+            initialSaved={initialInterestSaved}
+            authenticated
+            hasActiveProfile
+            onSaved={onInterestSaved}
+          />
+        </div>
       </div>
     </form>
   );

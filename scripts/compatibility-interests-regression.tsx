@@ -81,9 +81,32 @@ assert.ok(actions.includes("saveCompatibilityInterestAction") && actions.include
 assert.ok(actions.includes("getCompatibilityInterestCard(productId)"),
   "Compatibility server action must reject non-approved IDs before any write");
 assert.ok(page.includes("listUserInterestedAnalysesWithCurrentState") && page.includes("SavedAnalysis[]"));
-assert.ok(catalog.includes("savedProductIds.has(interestId)") && catalog.includes("CompatibilityInterestSaveButton"));
-assert.ok(pair.includes("isProductSaved(user.id, productId)") && pair.includes("CompatibilityInterestSaveButton"));
-assert.ok(family.includes("isProductSaved(user.id, COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID)"));
+assert.ok(!catalog.includes("CompatibilityInterestSaveButton")
+  && !catalog.includes("상품 상세 보기 →")
+  && !catalog.includes("관심 분석에 저장")
+  && catalog.includes("href={product.href}"),
+  "Compatibility photo listings are single-click cards with no extra action links or save buttons");
+assert.ok(pair.includes("isProductSaved(user.id, productId)")
+  && pair.includes("initialInterestSaved={saved}"),
+  "Pair detail must pass saved state to bottom purchase confirmation only");
+assert.ok(family.includes("isProductSaved(user.id, COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID)")
+  && family.includes("initialInterestSaved={saved}"),
+  "Family detail must pass one category bookmark through the relation selector");
+for (const path of [
+  "app/components/PaidCompatibilityAnalysisClient.tsx",
+  "app/components/PaidFamilyParentChildAnalysisClient.tsx",
+  "app/components/PaidFamilyExtendedAnalysisClient.tsx",
+]) {
+  const source = read(path);
+  assert.ok(source.includes("구매 전 확인") && source.includes("<CompatibilityInterestSaveButton"),
+    "The interest save action must be inside the same bottom purchase area: " + path);
+  assert.ok(source.indexOf("<CompatibilityInterestSaveButton") > source.indexOf('type="submit"'),
+    "The bookmark action must follow purchase confirmation, not appear before the product content: " + path);
+}
+assert.ok(!read("app/components/CompatibilityInterestSaveButton.tsx").includes("관심 목록 보기"),
+  "Never create an extra 'interest list' link beside a saved-state label");
+assert.ok(read("app/components/FamilyCompatibilityAnalysisClient.tsx").includes("onInterestSaved={() => setInterestSaved(true)}"),
+  "Saving any family subtype must keep saved state when switching between relatives");
 assert.ok(!actions.includes("partnerLabel") && !service.includes("partner_birth_date"),
   "Interest actions/store must never persist a partner's private details");
 const ddl = read("supabase/migrations/028_profile_scoped_interested_analyses.sql");

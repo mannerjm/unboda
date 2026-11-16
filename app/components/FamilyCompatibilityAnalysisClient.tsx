@@ -33,11 +33,14 @@ const RELATIONSHIP_OPTIONS: readonly FamilyRelationshipOption[] = [
 export default function FamilyCompatibilityAnalysisClient({
   myProfileLabel,
   profileId,
+  initialInterestSaved = false,
 }: {
   myProfileLabel: string;
   profileId: string;
+  initialInterestSaved?: boolean;
 }) {
   const [selectedRelationship, setSelectedRelationship] = useState<FamilyRelationshipType>("parent_child");
+  const [interestSaved, setInterestSaved] = useState(initialInterestSaved);
 
   function selectRelationship(option: FamilyRelationshipOption) {
     setSelectedRelationship(option.value);
@@ -90,17 +93,17 @@ export default function FamilyCompatibilityAnalysisClient({
 
       {selectedRelationship === "parent_child" ? (
         <div data-family-relationship-content="parent_child" className="scroll-mt-6">
-          <PaidFamilyParentChildAnalysisClient myProfileLabel={myProfileLabel} profileId={profileId} />
+          <PaidFamilyParentChildAnalysisClient myProfileLabel={myProfileLabel} profileId={profileId} initialInterestSaved={interestSaved} onInterestSaved={() => setInterestSaved(true)} />
         </div>
       ) : null}
       {selectedRelationship === "siblings" ? (
         <div data-family-relationship-content="siblings" className="scroll-mt-6">
-          <PaidFamilyExtendedAnalysisClient mode="siblings" myProfileLabel={myProfileLabel} profileId={profileId} />
+          <PaidFamilyExtendedAnalysisClient mode="siblings" myProfileLabel={myProfileLabel} profileId={profileId} initialInterestSaved={interestSaved} onInterestSaved={() => setInterestSaved(true)} />
         </div>
       ) : null}
       {selectedRelationship === "other_family" ? (
         <div data-family-relationship-content="other_family" className="scroll-mt-6">
-          <PaidFamilyExtendedAnalysisClient mode="other_family" myProfileLabel={myProfileLabel} profileId={profileId} />
+          <PaidFamilyExtendedAnalysisClient mode="other_family" myProfileLabel={myProfileLabel} profileId={profileId} initialInterestSaved={interestSaved} onInterestSaved={() => setInterestSaved(true)} />
         </div>
       ) : null}
     </div>

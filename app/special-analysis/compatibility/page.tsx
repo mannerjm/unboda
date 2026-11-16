@@ -1,9 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
-import CompatibilityInterestSaveButton from "@/app/components/CompatibilityInterestSaveButton";
-import { COMPATIBILITY_INTEREST_CARDS } from "@/app/lib/interestedAnalyses/compatibilityCatalog";
-import { listUserInterestedAnalyses } from "@/app/lib/interestedAnalyses/server";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
@@ -75,10 +72,6 @@ const compatibilityCards = [
 export default async function CompatibilityAnalysisPage() {
   const user = await getCurrentUser();
   const activeProfile = user ? await getActiveProfile(user.id) : null;
-  const savedProductIds = activeProfile && user
-    ? new Set((await listUserInterestedAnalyses(user.id)).map((record) => record.productId))
-    : new Set<string>();
-
   return (
     <AppShell activeProfileId={activeProfile?.id}>
       <main className="min-h-screen bg-[linear-gradient(180deg,#fbf7ff_0%,#f2eaff_100%)] px-5 py-7 text-[#281744] sm:px-8 sm:py-9">
@@ -116,17 +109,13 @@ export default async function CompatibilityAnalysisPage() {
           <section aria-label="궁합 유형별 분석 상품" className="mt-5 grid gap-3 md:grid-cols-2">
             {compatibilityCards.map((product) => {
               const photo = PREMIUM_PRODUCT_PHOTOS[product.photoId];
-              const interestId = COMPATIBILITY_INTEREST_CARDS.find((card) => card.href === product.href)?.productId;
               return (
-                <article
+                <Link
                   key={product.href}
-                  className="group flex min-h-[144px] items-stretch gap-3 flex-col rounded-[1.4rem] border border-[#e7d9f3] bg-white p-3 shadow-[0_9px_22px_rgba(87,59,119,0.06)] transition hover:-translate-y-0.5 hover:border-[#b98aed] hover:shadow-[0_12px_25px_rgba(105,62,171,0.11)]"
+                  href={product.href}
+                  className="group flex min-h-[144px] items-stretch gap-3 rounded-[1.4rem] border border-[#e7d9f3] bg-white p-3 shadow-[0_9px_22px_rgba(87,59,119,0.06)] transition hover:-translate-y-0.5 hover:border-[#b98aed] hover:shadow-[0_12px_25px_rgba(105,62,171,0.11)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7650ba] sm:gap-4"
+                  aria-label={product.title + " 상세 열기"}
                 >
-                  <Link
-                    href={product.href}
-                    className="flex min-h-[112px] items-stretch gap-3 sm:gap-4"
-                    aria-label={product.title + " 상품 자세히 보기"}
-                  >
                   <div className="relative min-h-[112px] w-[112px] shrink-0 overflow-hidden rounded-xl bg-[#ece4f8] sm:w-[124px]">
                     <Image
                       src={photo.src}
@@ -150,24 +139,11 @@ export default async function CompatibilityAnalysisPage() {
                     {product.photoId === "relationship-family-role" ? (
                       <p className="mt-1 text-[11px] font-semibold leading-4 text-[#7656aa]">부모·자녀 · 형제·자매 · 기타 가족</p>
                     ) : null}
-                    <div className="mt-auto flex flex-wrap items-end justify-between gap-x-2 gap-y-1 border-t border-[#f0e7f5] pt-2">
+                    <div className="mt-auto border-t border-[#f0e7f5] pt-2">
                       <span className="text-sm font-black text-[#261538]">{product.amount.toLocaleString("ko-KR")}원</span>
-                      <span className="text-[11px] font-bold text-[#7750b5] group-hover:underline">상품 상세 보기 →</span>
                     </div>
                   </div>
-                  </Link>
-                  {interestId ? (
-                    <div className="border-t border-[#f0e7f5] pt-2">
-                      <CompatibilityInterestSaveButton
-                        productId={interestId}
-                        initialSaved={savedProductIds.has(interestId)}
-                        authenticated={Boolean(user)}
-                        hasActiveProfile={Boolean(activeProfile)}
-                        compact
-                      />
-                    </div>
-                  ) : null}
-                </article>
+                </Link>
               );
             })}
           </section>

@@ -90,13 +90,10 @@ export default async function CompatibilityAnalysisPage() {
           </header>
 
           <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[#766786]">
-            <Link href="/special-analysis" className="font-bold text-[#7350b0] hover:underline">← 전문 분석</Link>
-            <span aria-hidden="true" className="text-[#c4b5d5]">·</span>
             {activeProfile ? (
               <>
                 <span>현재 분석 대상</span>
                 <strong className="font-bold text-[#3e245e]">{activeProfile.label}</strong>
-                <Link href="/mypage" className="font-semibold text-[#7350b0] underline underline-offset-4">프로필 변경</Link>
               </>
             ) : (
               <>

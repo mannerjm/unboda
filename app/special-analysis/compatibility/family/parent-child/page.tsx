@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import FamilyCompatibilityAnalysisClient from "@/app/components/FamilyCompatibilityAnalysisClient";
-import CompatibilityInterestSaveButton from "@/app/components/CompatibilityInterestSaveButton";
 import { isProductSaved } from "@/app/lib/interestedAnalyses/server";
 import { COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID } from "@/app/lib/specialAnalysisProducts";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
@@ -52,16 +51,8 @@ export default async function ParentChildCompatibilityPage() {
               <Link href="/mypage" className="text-xs underline decoration-[#c4c9d9] underline-offset-4">프로필 변경</Link>
             </div>
           </header>
-          <div className="mt-4 flex justify-end">
-            <CompatibilityInterestSaveButton
-              productId={COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID}
-              initialSaved={saved}
-              authenticated
-              hasActiveProfile
-            />
-          </div>
 
-          <FamilyCompatibilityAnalysisClient myProfileLabel={activeProfile.label} profileId={activeProfile.id} />
+          <FamilyCompatibilityAnalysisClient myProfileLabel={activeProfile.label} profileId={activeProfile.id} initialInterestSaved={saved} />
         </div>
       </main>
     </AppShell>

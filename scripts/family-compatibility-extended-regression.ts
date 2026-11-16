@@ -188,7 +188,7 @@ assert(
   "report preview must explain structure, preserve relationship-specific domains, and avoid presenting sample copy as an actual result",
 );
 assert(!romanticInputClient.includes("결제 후 제공되는 내용") && !parentChildInputClient.includes("결제 후 제공되는 내용") && !inputClient.includes("결제 후 제공되는 내용"), "old flat included-content lists must be replaced by the richer shared preview");
-assert(inputClient.includes("전문 궁합 리포트") && inputClient.includes("결제 금액") && inputClient.includes("NICE 본인확인"), "extended family checkout summary must match the parent-child pre-purchase structure");
+assert(inputClient.includes("구매 전 확인") && inputClient.includes("결제 금액") && inputClient.includes("NICE 본인확인"), "extended family checkout summary must match the parent-child pre-purchase structure");
 assert(inputClient.includes(sharedStorageNotice) && parentChildInputClient.includes(sharedStorageNotice), "all family purchase forms must use the same browser-session privacy notice");
 assert(inputClient.includes("결제가 완료되면 브라우저에 남아 있던 상대방 정보는 자동으로 삭제됩니다."), "family privacy copy must explain post-payment browser cleanup");
 assert(inputClient.includes("구매 리포트는 {evaluationYear}년판으로 고정 저장됩니다."), "family privacy copy must explain fixed purchase-year storage");

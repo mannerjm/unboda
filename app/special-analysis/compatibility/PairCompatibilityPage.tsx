@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import PaidCompatibilityAnalysisClient from "@/app/components/PaidCompatibilityAnalysisClient";
+import CompatibilityInterestSaveButton from "@/app/components/CompatibilityInterestSaveButton";
+import { isProductSaved } from "@/app/lib/interestedAnalyses/server";
 import { getPairCompatibilityConfig } from "@/app/lib/pairCompatibilityConfig";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import type { CompatibilityPairProductId } from "@/app/lib/specialAnalysisProducts";
@@ -37,6 +39,8 @@ export default async function PairCompatibilityPage({
     );
   }
 
+  const saved = await isProductSaved(user.id, productId);
+
   return (
     <AppShell activeProfileId={activeProfile.id}>
       <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
@@ -48,6 +52,14 @@ export default async function PairCompatibilityPage({
               <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">{config.title}</h1>
               <p className="mt-4 text-sm leading-7 text-slate-200">{config.cardDescription}</p>
             </header>
+            <div className="mt-4 flex justify-end">
+              <CompatibilityInterestSaveButton
+                productId={productId}
+                initialSaved={saved}
+                authenticated
+                hasActiveProfile
+              />
+            </div>
           </div>
           <PaidCompatibilityAnalysisClient
             myProfileLabel={activeProfile.label}

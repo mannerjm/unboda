@@ -7,7 +7,8 @@ import {
 } from "@/app/lib/interestedAnalyses/server";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
-import InterestedAnalysesList from "@/app/components/InterestedAnalysesList";
+import InterestedAnalysesList, { type SavedAnalysis } from "@/app/components/InterestedAnalysesList";
+import { getCompatibilityInterestCard } from "@/app/lib/interestedAnalyses/compatibilityCatalog";
 
 export default async function InterestedAnalysesPage() {
   const user = await getCurrentUser();
@@ -41,12 +42,12 @@ export default async function InterestedAnalysesPage() {
   }
 
   const analyses = await listUserInterestedAnalysesWithCurrentState(user.id);
-  const productsWithMetadata = analyses
-    .map(({ record, currentState }) => {
-      const product = getPremiumProduct(record.productId);
-      return product ? { record, product, currentState } : null;
-    })
-    .filter((item): item is NonNullable<typeof item> => item !== null);
+  const productsWithMetadata: SavedAnalysis[] = analyses.flatMap<SavedAnalysis>(({ record, currentState }) => {
+    const compatibility = getCompatibilityInterestCard(record.productId);
+    if (compatibility) return [{ kind: "compatibility", record, compatibility }];
+    const product = getPremiumProduct(record.productId);
+    return product ? [{ kind: "premium", record, product, currentState }] : [];
+  });
 
   return (
     <AppShell activeProfileId={activeProfile.id}>
@@ -56,7 +57,7 @@ export default async function InterestedAnalysesPage() {
             <p className="text-xs font-bold tracking-[0.18em] text-[#6f5ce7]">MY LIBRARY</p>
             <h1 className="mt-2 text-3xl font-black tracking-[-0.03em] text-[#11162d] sm:text-4xl">관심 분석</h1>
             <p className="mt-3 max-w-2xl text-[15px] leading-7 text-slate-700">
-              궁금한 심층 분석을 저장하고, 필요할 때 여기서 다시 살펴보세요.
+              궁금한 심층 분석과 궁합을 저장하고, 필요할 때 여기서 다시 살펴보세요.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-2 text-sm font-bold text-[#5e4bd1]">

@@ -123,11 +123,13 @@ assert(interestedList.includes("아직 저장한 관심 분석이 없어요")
   && interestedList.includes('href="/deep-analysis"')
   && interestedList.includes("심층 분석 둘러보기"),
   "interest empty state must have a clear premium discovery CTA");
-assert(interestedList.includes("최근 저장한 관심 분석")
+assert(!interestedList.includes("최근 저장한 관심 분석")
   && interestedList.includes("전체 관심 분석")
   && interestedList.includes('lg:grid-cols-2')
-  && interestedList.includes("저장 {displayAnalyses.length}개"),
-  "saved interests must render recent and responsive full-library cards");
+  && interestedList.includes("저장 {displayAnalyses.length}개")
+  && interestedList.includes("PREMIUM_PRODUCT_PHOTOS")
+  && interestedList.includes("궁합 상품 저장"),
+  "saved interests must render one deduplicated responsive photo library for deep analysis and compatibility");
 assert(interestedList.includes("removeAnalysisAction(productId)")
   && interestedList.includes("setRemovedIds")
   && interestedList.includes("현재 분석 보유 중")

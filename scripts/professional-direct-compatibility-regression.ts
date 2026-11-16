@@ -10,7 +10,7 @@ const family = readFileSync("app/special-analysis/compatibility/family/parent-ch
 assert(shell.includes('{ href: "/special-analysis", label: "전문 분석"'));
 assert(shell.includes('{ href: "/special-analysis", label: "전문 분석", shortLabel: "전문"'));
 assert.equal(
-  shell.match(/if \\(item\\.href === "\\/special-analysis"\\) return "\\/special-analysis\\/compatibility";/g)?.length,
+  shell.split('if (item.href === "/special-analysis") return "/special-analysis/compatibility";').length - 1,
   2,
   "Desktop/mobile and guest/signed-in links must open the same public catalog directly",
 );

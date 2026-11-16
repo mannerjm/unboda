@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { saveCompatibilityInterestAction } from "@/app/lib/interestedAnalyses/actions";
 
 type Props = {
@@ -19,11 +19,10 @@ export default function CompatibilityInterestSaveButton({
   hasActiveProfile,
   onSaved,
 }: Props) {
-  const [saved, setSaved] = useState(initialSaved);
+  const [savedLocally, setSavedLocally] = useState(false);
+  const saved = initialSaved || savedLocally;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => setSaved(initialSaved), [initialSaved, productId]);
 
   const style = "inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#cfd5e6] bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-[#aaa0f4] hover:bg-[#faf9ff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7752b8] disabled:cursor-default disabled:bg-slate-50 disabled:text-slate-500";
   if (!authenticated) {
@@ -39,7 +38,7 @@ export default function CompatibilityInterestSaveButton({
     setError(null);
     try {
       await saveCompatibilityInterestAction(productId);
-      setSaved(true);
+      setSavedLocally(true);
       onSaved?.();
     } catch {
       setError("저장되지 않았어요. 잠시 후 다시 시도해 주세요.");

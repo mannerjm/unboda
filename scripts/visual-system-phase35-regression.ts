@@ -120,9 +120,9 @@ assert(interests.includes('max-w-5xl') && interests.includes('rounded-[2rem] bor
 assert(interests.includes("현재 분석 대상 · {activeProfile.label}") && interests.includes('href="/mypage"') && interests.includes("프로필 변경"),
   "interest library must preserve the existing active profile source and My Page link");
 assert(interestedList.includes("아직 저장한 관심 분석이 없어요")
-  && interestedList.includes('href="/deep-analysis"')
-  && interestedList.includes("심층 분석 둘러보기"),
-  "interest empty state must have a clear premium discovery CTA");
+  && interestedList.includes("왼쪽 심층 분석 또는 전문 분석 메뉴")
+  && !interestedList.includes("다른 심층 분석 둘러보기"),
+  "interest library must show an informative empty state without unsolicited cross-navigation CTAs");
 assert(!interestedList.includes("최근 저장한 관심 분석")
   && interestedList.includes("전체 관심 분석")
   && interestedList.includes('lg:grid-cols-2')

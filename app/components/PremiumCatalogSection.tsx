@@ -158,7 +158,18 @@ export default function PremiumCatalogSection({
   const recommendedIdSet = useMemo(() => new Set(recommendedProductIds), [recommendedProductIds]);
   const [mode, setMode] = useState<CatalogMode>(initialMode);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(() => initialMode === "topic" ? resolveInitialCategory(initialCategory, categories) : null);
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(() => initialMode === "period" && periodProducts.some((product) => product.id === initialProductId) ? initialProductId! : null);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(() => {
+    if (!initialProductId) return null;
+    if (initialMode === "period") {
+      return periodProducts.some((product) => product.id === initialProductId)
+        ? initialProductId : null;
+    }
+    // Never preselect an unrelated item or an unlisted (non-launch) product.
+    const category = resolveInitialCategory(initialCategory, categories);
+    return topicGroups.some((group) =>
+      group.category === category && group.products.some((product) => product.id === initialProductId))
+      ? initialProductId : null;
+  });
   const [summaries, setSummaries] = useState<PaidAnalysisSummary[]>([]);
   const [currentOwnedProductIds, setCurrentOwnedProductIds] = useState<ReadonlySet<string>>(new Set());
   const [savedProductIds, setSavedProductIds] = useState<ReadonlySet<string>>(new Set());

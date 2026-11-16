@@ -404,7 +404,7 @@ export default function PremiumCatalogMarketplace({
                       <VerifiedRating productId={product.id}/>
                       <span className="text-sm font-black text-[#372049]">{money(product.id)}</span>
                     </div>
-                    <p className="border-t border-[#f0e7f6] pt-1.5 text-[11px] font-bold text-[#7043ae]">상품 상세 보기 →</p>
+                    
                   </div>
                 </button>;
               })}

@@ -128,14 +128,17 @@ assert(!interestedList.includes("최근 저장한 관심 분석")
   && interestedList.includes('lg:grid-cols-2')
   && interestedList.includes("저장 {displayAnalyses.length}개")
   && interestedList.includes("PREMIUM_PRODUCT_PHOTOS")
-  && interestedList.includes("궁합 상품 저장"),
-  "saved interests must render one deduplicated responsive photo library for deep analysis and compatibility");
+  && !interestedList.includes("궁합 상품 저장")
+  && interestedList.includes('"compatibility"'),
+  "saved interests must render one responsive photo library without extra badges");
 assert(interestedList.includes("removeAnalysisAction(productId)")
   && interestedList.includes("setRemovedIds")
-  && interestedList.includes("현재 분석 보유 중")
-  && interestedList.includes("현재 회차 미보유")
-  && interestedList.includes("구매한 분석에서 보기"),
-  "interest redesign must preserve removal, exact-edition ownership and purchased navigation");
+  && interestedList.includes("item.currentState.ownsCurrentEdition")
+  && interestedList.includes('"/purchased-analyses"')
+  && interestedList.includes("분석 자세히 보기")
+  && !interestedList.includes("현재 회차 미보유")
+  && !interestedList.includes("관심 저장됨"),
+  "interest redesign preserves removal and ownership routing with only requested buttons");
 assert(!interestedList.includes("새 회차 구매") && !interestedList.includes("재구매"),
   "interest cards must not silently introduce unapproved repurchase prompts");
 

@@ -37,12 +37,11 @@ assert(hasCanonicalAnalysisInputChanged(legacyProfile, { ...labelOnlyEdit, birth
 assert(hasCanonicalAnalysisInputChanged(legacyProfile, { ...labelOnlyEdit, birthTime: "09:30", birthTimeKnown: true }), "entering a new time must trigger birth-data change detection");
 
 // Both guest desktop and mobile navigation open PUBLIC professional browsing.
-assert(shell.includes('if (item.href === "/special-analysis") return "/special-analysis";'), "guest professional entry must not redirect to login");
+assert(shell.includes('if (item.href === "/special-analysis") return "/special-analysis/compatibility";'), "guest professional navigation must go directly to public compatibility catalog");
 const lockRule = 'item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null';
 assert.equal(shell.split(lockRule).length - 1, 2, "desktop and mobile must not show a lock on public professional browsing");
 assert(shell.includes('return `/auth/login?returnTo=${encodeURIComponent(item.href)}&origin=${guestOrigin}`;'), "other guest-only entries must retain their login boundary");
-assert(special.includes('const user = await getCurrentUser();') && !special.includes('redirect("/auth/login'), "public catalog must not force login");
-assert(special.includes('href="/special-analysis/compatibility"'), "professional page must expose the compatibility product overview");
+assert(special.includes('redirect("/special-analysis/compatibility")') && !special.includes('redirect("/auth/login'), "legacy professional URL must lead directly to the public compatibility catalog");
 assert(compatibility.includes("로그인 없이 둘러보기 가능") && compatibility.includes("/special-analysis/compatibility/romantic"), "guests can see professional categories and products");
 assert(pair.includes('redirect(`/auth/login?returnTo=${entryPath}`)'), "actual pair analysis requires login");
 console.log("guest-professional-discovery-and-profile-birth-ui-regression: PASS");

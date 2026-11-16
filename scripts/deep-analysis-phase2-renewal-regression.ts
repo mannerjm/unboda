@@ -109,7 +109,7 @@ assert(storefront.includes('grid-cols-[116px_minmax(0,1fr)]') && storefront.incl
   "topic selection should reveal compact illustrated product cards immediately");
 assert(storefront.includes("lg:hidden") && storefront.includes("choosePeriod(product.id)"),
   "mobile users must still reach topic and period choices without a desktop sidebar");
-assert(page.includes('initialProductId={initialProductId}') && page.includes('initialMode === "period"')
+assert(page.includes('initialProductId={initialProductId}') && page.includes('const initialProductId = getSingleParam(params.productId);')
   && page.includes('key={`${initialMode}:${initialCategory ?? ""}:${initialProductId ?? ""}`}'),
   "deep-link changes must remount the correct topic or period detail instead of retaining stale catalog state");
 assert(catalog.includes('periodProducts.some((product) => product.id === initialProductId)'),

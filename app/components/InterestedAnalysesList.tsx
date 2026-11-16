@@ -58,9 +58,13 @@ function getSavedCardDetails(item: SavedAnalysis) {
     photoId: item.product.id,
     photoLabel: title,
     price: getProductPricing(item.product.id).amount.toLocaleString("ko-KR"),
+    // A bookmark opens the *same* product detail inside the existing
+    // deep-analysis catalog, not a separate standalone purchase screen.
     href: item.currentState.ownsCurrentEdition
       ? "/purchased-analyses"
-      : "/paid-analysis/" + encodeURIComponent(item.product.id),
+      : "/deep-analysis?mode=" + (item.product.kind === "PERIOD" ? "period" : "topic")
+        + "&category=" + encodeURIComponent(item.product.category)
+        + "&productId=" + encodeURIComponent(item.product.id),
     owned: item.currentState.ownsCurrentEdition,
     compatibility: false,
   };
@@ -106,14 +110,7 @@ export default function InterestedAnalysesList({ analyses, profileId }: Interest
           <p className="mt-3 text-sm leading-7 text-[#6f617e]">
             마음에 드는 심층 분석이나 궁합을 저장하면 여기서 다시 볼 수 있어요.
           </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link href="/deep-analysis" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#7551b7] px-5 text-sm font-bold text-white">
-              심층 분석 둘러보기 →
-            </Link>
-            <Link href="/special-analysis/compatibility" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#d6c7ec] px-5 text-sm font-bold text-[#7551b7]">
-              궁합 분석 둘러보기 →
-            </Link>
-          </div>
+          <p className="mt-4 text-xs text-[#786788]">왼쪽 심층 분석 또는 전문 분석 메뉴에서 관심 있는 상품을 저장할 수 있어요.</p>
         </section>
         <p className="text-center text-xs text-slate-500">관심 분석에 저장하는 것만으로 결제되지 않습니다.</p>
       </div>
@@ -211,11 +208,7 @@ export default function InterestedAnalysesList({ analyses, profileId }: Interest
           선택한 유형에 저장한 분석이 없어요.
         </div>
       )}
-      <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-[#7451ac]">
-        <Link href="/deep-analysis" className="underline underline-offset-4">다른 심층 분석 둘러보기 →</Link>
-        <Link href="/special-analysis/compatibility" className="underline underline-offset-4">궁합 분석 둘러보기 →</Link>
-        <Link href="/purchased-analyses" className="underline underline-offset-4">구매한 분석 보관함 →</Link>
-      </div>
+
     </section>
   );
 }

@@ -200,7 +200,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
       if (item.href === "/deep-analysis") return "/deep-analysis";
       // A guest may browse professional products before choosing an analysis.
       // Product start, login, profile ownership and checkout remain server-gated.
-      if (item.href === "/special-analysis") return "/special-analysis";
+      if (item.href === "/special-analysis") return "/special-analysis/compatibility";
       return `/auth/login?returnTo=${encodeURIComponent(item.href)}&origin=${guestOrigin}`;
     }
 
@@ -209,6 +209,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
     if (item.href === "/saju") return "/saju";
     if (item.href === "/recommendations") return recommendationHref;
     if (item.href === "/deep-analysis") return deepAnalysisHref;
+    if (item.href === "/special-analysis") return "/special-analysis/compatibility";
     return item.href;
   };
   const navigationItems = (items: NavItem[]) => items.map((item) => ({

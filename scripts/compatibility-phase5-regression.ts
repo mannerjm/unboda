@@ -60,7 +60,6 @@ for (const [name, source] of phase5Surfaces) {
 }
 
 for (const [name, source] of [
-  ["special entry", specialEntry],
   ["compatibility entry", compatibilityEntry],
   ["pair page", pairPage],
   ["family page", familyPage],
@@ -72,6 +71,7 @@ for (const [name, source] of [
     `${name} must retain its approved brand canvas`);
 }
 
+assert(specialEntry.includes('redirect("/special-analysis/compatibility")'), "professional entry must skip redundant intro and open public compatibility catalog");
 assert(compatibilityEntry.includes("연인·배우자 궁합") && compatibilityEntry.includes("가족 궁합"), "compatibility entry must keep both relationship worlds");
 assert(compatibilityEntry.includes("COMPATIBILITY_ROMANTIC_PRODUCT.amount") && compatibilityEntry.includes("COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT.amount"), "compatibility entry must keep registry pricing");
 assert(romanticPage.includes("PairCompatibilityPage") && romanticPage.includes("COMPATIBILITY_ROMANTIC_PRODUCT_ID"), "romantic route must bind the romantic product to the shared pair page");

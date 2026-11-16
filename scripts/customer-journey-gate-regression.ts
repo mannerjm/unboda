@@ -37,7 +37,8 @@ assert(aiClient.includes("질문권 구매하기 →") && aiClient.includes("질
 
 assert(!deepAnalysis.includes('redirect("/auth/login'), "deep-analysis discovery must remain publicly browsable");
 assert(!specialAnalysis.includes('redirect("/auth/login'), "special-analysis discovery must remain publicly browsable");
-assert(specialAnalysis.includes("로그인 없이 둘러보기 가능"), "special-analysis discovery must explain the deferred purchase gate");
+assert(specialAnalysis.includes('redirect("/special-analysis/compatibility")'), "professional entry must send guests to the actual public catalog");
+assert(read("app/special-analysis/compatibility/page.tsx").includes("로그인 없이 둘러보기 가능"), "compatibility catalog must explain the deferred purchase gate");
 
 assert(guestTransfer.includes("insert into public.active_profiles") && guestTransfer.includes("free_analysis_results"), "guest free-saju transfer must keep profile activation and stored result continuity");
 

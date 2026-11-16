@@ -1,69 +1,14 @@
-import Link from "next/link";
-import AppShell from "@/app/components/AppShell";
-import { getActiveProfile } from "@/app/lib/profiles/activeServer";
-import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { redirect } from "next/navigation";
 import { buildPublicMetadata } from "@/app/lib/seo";
 
+// Keep the legacy professional-analysis URL working for bookmarks, navigation
+// and discovery links while removing the redundant intermediate hub screen.
 export const metadata = buildPublicMetadata({
   title: "전문 분석",
   description: "한 사람의 운세를 넘어 두 사람의 관계와 중요한 시기처럼 더 구체적인 주제를 살펴보는 운보다 전문 분석입니다.",
   path: "/special-analysis",
 });
 
-export default async function SpecialAnalysisPage() {
-  const user = await getCurrentUser();
-  const activeProfile = user ? await getActiveProfile(user.id) : null;
-
-  return (
-    <AppShell activeProfileId={activeProfile?.id}>
-      <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
-        <div className="mx-auto w-full max-w-5xl">
-          <header className="relative overflow-hidden rounded-[2rem] border border-[#e0d0f7] bg-[radial-gradient(circle_at_85%_15%,rgba(198,159,255,.45),transparent_36%),linear-gradient(135deg,#ffffff_0%,#f8f0ff_65%,#e9dfff_100%)] px-6 py-8 text-[#281744] shadow-[0_18px_48px_rgba(110,72,170,.12)] sm:px-8 sm:py-10">
-            <p className="text-xs font-semibold tracking-[0.16em] text-[#8b50ce]">SPECIAL ANALYSIS</p>
-            <h1 className="mt-2 text-3xl font-bold text-[#281744] sm:text-4xl">전문 분석</h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-[#685a7b]">
-              한 사람의 운세를 넘어, 두 사람의 관계와 중요한 시기처럼 더 구체적인 주제를 깊이 살펴봅니다.
-            </p>
-          </header>
-
-          <section className="mt-8">
-            {activeProfile ? (
-              <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
-                <span>현재 분석 대상</span>
-                <strong className="font-semibold text-[#11162d]">{activeProfile.label}</strong>
-                <Link href="/mypage" className="text-xs underline decoration-[#c4c9d9] underline-offset-4">프로필 변경</Link>
-              </div>
-            ) : (
-              <div className="mb-4 rounded-2xl border border-[#dce1ef] bg-white px-4 py-3 text-sm leading-6 text-slate-600">
-                <strong className="font-bold text-[#11162d]">로그인 없이 둘러보기 가능</strong>
-                <span className="ml-2">상품 정보는 자유롭게 확인할 수 있고, 실제 분석 시작·결제 단계에서 로그인, 분석 프로필, 무료 사주 결과를 확인합니다.</span>
-              </div>
-            )}
-
-            <Link
-              href="/special-analysis/compatibility"
-              className="group block rounded-3xl border border-[#dce1ef] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[#cfd5e6] hover:shadow-md sm:p-8"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-6">
-                <div className="max-w-2xl">
-                  <h2 className="text-2xl font-bold text-[#11162d]">궁합 분석</h2>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    두 사람의 관계 유형에 맞춰 잘 맞는 점, 부딪히기 쉬운 지점, 회복 방식과 현재 관계 흐름을 살펴봅니다.
-                  </p>
-                  <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
-                    <span className="rounded-full bg-[#eef0f6] px-3 py-1.5">관계 유형별 분석</span>
-                    <span className="rounded-full bg-[#eef0f6] px-3 py-1.5">소통·갈등·회복 확인</span>
-                    <span className="rounded-full bg-[#eef0f6] px-3 py-1.5">현재 관계 흐름 함께 확인</span>
-                  </div>
-                </div>
-                <span className="inline-flex shrink-0 items-center rounded-2xl bg-[#6f5ce7] px-4 py-2.5 text-sm font-bold text-white transition group-hover:bg-[#242957]">
-                  궁합 유형 선택하기 →
-                </span>
-              </div>
-            </Link>
-          </section>
-        </div>
-      </main>
-    </AppShell>
-  );
+export default function SpecialAnalysisPage() {
+  redirect("/special-analysis/compatibility");
 }

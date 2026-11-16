@@ -173,21 +173,12 @@ export default function InterestedAnalysesList({ analyses, profileId }: Interest
                     <span className="mt-2 text-sm font-black text-[#221638]">{details.price}원</span>
                   </div>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-[#d9c9f2] bg-[#f7f1ff] px-2.5 py-1 text-xs font-bold text-[#7452ac]">관심 저장됨</span>
-                  {item.kind === "premium" ? (
-                    <span className={"rounded-full px-2.5 py-1 text-xs font-semibold " +
-                      (details.owned ? "bg-emerald-50 text-emerald-700" : "bg-[#f2f3f8] text-[#6b617a]")}>
-                      {details.owned ? "현재 분석 보유 중" : "현재 회차 미보유"}
-                    </span>
-                  ) : <span className="rounded-full bg-[#f4eefb] px-2.5 py-1 text-xs font-semibold text-[#7652ad]">궁합 상품 저장</span>}
-                </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#eee6f5] pt-3">
                   <Link
                     href={details.href}
                     className="inline-flex min-h-10 flex-1 items-center justify-center rounded-xl bg-[#7450b0] px-3 text-center text-xs font-bold text-white transition hover:bg-[#623b9d] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7752b8]"
                   >
-                    {details.owned ? "구매한 분석에서 보기" : "분석 자세히 보기"} →
+                    분석 자세히 보기
                   </Link>
                   <button
                     type="button"

@@ -65,7 +65,11 @@ assert(server.includes("entitlement.profileId !== activeProfile.id"), "active en
 assert(server.includes("resolveAnalysisEditionForOrder") && server.includes("profile: activeProfile"), "current edition must reuse the server-authoritative resolver with the active profile");
 assert(!server.includes(".update(") && !server.includes("analysis_edition_key"), "interest state reads must not persist edition state into interested_analyses");
 assert(page.includes("listUserInterestedAnalysesWithCurrentState"), "/interests must render server-derived current-edition state");
-assert(list.includes("현재 분석 보유 중") && list.includes("현재 회차 미보유") && list.includes("구매한 분석에서 보기"), "interest UI must show owned and not-owned state without a purchase CTA");
+assert(list.includes("item.currentState.ownsCurrentEdition")
+  && list.includes('"/purchased-analyses"')
+  && !list.includes("현재 분석 보유 중") && !list.includes("현재 회차 미보유")
+  && !list.includes("구매한 분석에서 보기"),
+  "Ownership-aware navigation remains while ownership labels stay hidden");
 assert(!list.includes("새 회차 구매") && !list.includes("다시 구매") && !list.includes("재구매"), "interest UI must not introduce repurchase actions");
 
 console.log("interested-analyses-current-edition-regression passed ✓");

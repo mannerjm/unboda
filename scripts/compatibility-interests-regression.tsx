@@ -56,7 +56,9 @@ assert.equal((html.match(/관심 분석에서 제거/g) ?? []).length >= 3, true
 assert.equal((html.match(/분석 자세히 보기/g) ?? []).length, 3, "Premium + compatibility all have entry links");
 assert.ok(html.includes("/special-analysis/compatibility/romantic"));
 assert.ok(html.includes("/special-analysis/compatibility/family/parent-child#family-relationship-selector"));
-assert.ok(html.includes("궁합 상품 저장") && html.includes("현재 회차 미보유"));
+assert.ok(!html.includes("궁합 상품 저장") && !html.includes("현재 회차 미보유")
+  && !html.includes("관심 저장됨") && !html.includes("분석 자세히 보기 →"),
+  "Saved cards must show only detail/remove actions without extra badges or arrows");
 assert.ok(html.includes("19,900원") && html.includes("전체 관심 분석"));
 assert.equal((html.match(/최근 저장한 관심 분석/g) ?? []).length, 0, "No duplicate featured item");
 const save = renderToStaticMarkup(<CompatibilityInterestSaveButton productId={COMPATIBILITY_INTEREST_CARDS[0].productId} initialSaved={false} authenticated hasActiveProfile />);

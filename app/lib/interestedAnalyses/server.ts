@@ -1,4 +1,5 @@
 import { createAdminClient } from "../supabase/admin";
+import { getCompatibilityInterestCard } from "./compatibilityCatalog";
 import { getActiveProfile } from "../profiles/activeServer";
 import {
   getCanonicalPremiumProductId,
@@ -164,7 +165,9 @@ export async function listUserInterestedAnalysesWithCurrentState(
       : [];
     let currentEditionKey: string | null = null;
 
-    if (productId) {
+    // A saved compatibility category does not have a single purchased edition:
+    // ownership is specific to a pair and cannot be inferred from a bookmark.
+    if (productId && !getCompatibilityInterestCard(productId)) {
       try {
         currentEditionKey = (await resolveAnalysisEditionForOrder({
           userId,
@@ -236,16 +239,13 @@ export async function saveInterestedAnalysis(
     throw new Error("알 수 없는 분석입니다.");
   }
 
-  const product = getPremiumProduct(canonicalProductId);
-  if (!product) {
+  // Keep the established premium registry validation, allowing ONLY the five
+  // explicitly listed compatibility categories as additional saveable items.
+  // Never save a partner, birth date, report, or an arbitrary special product.
+  const premiumProduct = getPremiumProduct(canonicalProductId);
+  const compatibilityCard = getCompatibilityInterestCard(canonicalProductId);
+  if (!premiumProduct && !compatibilityCard) {
     throw new Error("알 수 없는 분석입니다.");
-  }
-
-  // Product exists in current registry and is available for new saves
-  // Historical products that are removed from the registry cannot be newly saved,
-  // but this validation happens naturally through getPremiumProduct()
-  if (!product) {
-    throw new Error("이 분석은 현재 저장할 수 없습니다.");
   }
 
   const supabase = createAdminClient();

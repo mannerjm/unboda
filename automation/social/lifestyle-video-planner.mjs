@@ -35,13 +35,17 @@ const FORBIDDEN=/용신|지장간|십성|격국|대운이 바뀌면|당첨 확�
 const PROMOTIONAL=/운보다|unboda(?:\.kr)?|무료\s*(?:사주|운세|분석|상담)|(?:심층|유료)\s*(?:분석|상담)|가입|구매|결제|(?:지금|바로)\s*(?:클릭|확인|신청)|링크\s*(?:클릭|확인)|프로필\s*(?:링크|확인)/i;
 const PRACTICAL=/확인|살펴|돌아보|생각|적어|기록|정리|대화|질문|점검|계산|나눠|준비|비교|시도|한\s*가지/;
 const FIRST_LINE_JARGON=/십성|용신|지장간|일간|일주|상생|상극|천간|지지/;
-export function reviewLifestyleVideoScript({situation,narrationDraft}={}){
+export function reviewLifestyleVideoScript({situation,narrationDraft,editorialFormat}={}){
  const reasons=[];
  const lines=Array.isArray(narrationDraft)?narrationDraft.map(x=>typeof x==="string"?x.trim():""):[];
  if(typeof situation!=="string"||!situation.trim()||lines.length<3||lines.some(x=>!x)){
   return Object.freeze({ok:false,reasons:["INCOMPLETE_LIFESTYLE_SCRIPT"],promotionalSharePercent:0});
  }
- if(!lines[0].includes(situation.trim()))reasons.push("FIRST_LINE_NOT_REAL_LIFE_SCENARIO");
+ const isSajuFirst=["curiosity","empathy","service_demo","difference"].includes(editorialFormat);
+ if(isSajuFirst){
+  if(!/(?:사주|궁합|재물운)/.test(lines[0])||!/[?？]$/.test(lines[0]))
+   reasons.push("FIRST_LINE_NOT_SAJU_CURIOSITY_QUESTION");
+ }else if(!lines[0].includes(situation.trim()))reasons.push("FIRST_LINE_NOT_REAL_LIFE_SCENARIO");
  if(FIRST_LINE_JARGON.test(lines[0]))reasons.push("FIRST_LINE_TOO_TECHNICAL");
  if(FORBIDDEN.test(lines.join(" "))||/무조건|반드시 성공/.test(lines.join(" ")))
   reasons.push("UNSAFE_STORYBOARD_LANGUAGE");

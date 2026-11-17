@@ -3,11 +3,36 @@ import { readFileSync } from "node:fs";
 
 const read = (p: string) => readFileSync(p, "utf8");
 const video = read("scripts/social/prepare-next-day-videos.mjs");
+const coverHooks = JSON.parse(read("scripts/social/video-cover-hooks.json")) as {
+ version: number;
+ hooks: Record<string, string[]>;
+};
 const client = read("app/lib/analytics/marketingClient.ts");
 const form = read("app/guest-saju/page.tsx");
 const loading = read("app/guest-loading/page.tsx");
 const magazine = read("app/lib/magazine.ts");
 const scorecard = read("docs/marketing-30day-scorecard.sql");
+
+assert.equal(coverHooks.version, 1);
+assert.equal(Object.keys(coverHooks.hooks).length, 16, "all 16 visual motifs need mobile-first hooks");
+const distinctCoverLines = new Set<string>();
+for (const [motif, lines] of Object.entries(coverHooks.hooks)) {
+ assert.equal(lines.length, 7, motif + " needs seven situation-matched first frames");
+ for (const line of lines) {
+  assert(line.endsWith("?"), "thumbnail must invite a question: " + line);
+  assert(line.replace(/\s/g,"").length <= 11, "thumbnail must fit mobile safe width: " + line);
+  assert(!distinctCoverLines.has(line), "duplicate first-frame hook within 112 scripts: " + line);
+  distinctCoverLines.add(line);
+ }
+}
+assert.equal(distinctCoverLines.size, 112);
+assert(video.includes("const coverLine=COVER_HOOKS[motif]?.[caseIndex]"));
+assert(video.includes("headline:[visible.label,coverLine]"));
+assert(video.includes("headline:frameCopy.lens") &&
+  video.includes("headline:frameCopy.practice") &&
+  video.includes("headline:frameCopy.close"));
+assert(video.includes("const title=visible.label+' | '+coverLine"), "social title must match thumbnail");
+assert(!video.includes("situation.split(' ').slice(-2)"), "never truncate a Korean sentence mid-thought");
 
 const ctas = [...video.matchAll(/cta:'([^']+)'/g)]
   .map(x => x[1]).filter(x => x.startsWith("운보다 무료 사주"));

@@ -26,6 +26,65 @@ const PRODUCTS=new Map(CATALOG.products.map(p=>[p.id,p]));
 const POLICY=JSON.parse(fs.readFileSync(path.join(args.staging,'automation/social/lifestyle-pilot/topic-visual-policy.json'),'utf8'));
 // Reuse the exact production editorial safety gate; a generator self-test must also satisfy it.
 const {reviewLifestyleVideoScript}=await import(pathToFileURL(path.resolve(args.staging,'automation/social/lifestyle-video-planner.mjs')).href);
+const COVER_HOOKS=JSON.parse(fs.readFileSync(new URL('./video-cover-hooks.json',import.meta.url),'utf8')).hooks;
+const CATEGORY_FRAMES=Object.freeze({
+  "midnight": {
+    "lens": [
+      "사주로 살피는",
+      "나의 생활 성향"
+    ],
+    "practice": [
+      "마음의 신호",
+      "하나씩 기록해요"
+    ],
+    "close": [
+      "내 사주로",
+      "생활 성향 보기"
+    ]
+  },
+  "commute": {
+    "lens": [
+      "사주로 살피는",
+      "내 일하는 방식"
+    ],
+    "practice": [
+      "오늘 할 일",
+      "순서를 정해요"
+    ],
+    "close": [
+      "내 사주로",
+      "직업 성향 보기"
+    ]
+  },
+  "friendship": {
+    "lens": [
+      "사주 궁합으로",
+      "대화 성향 보기"
+    ],
+    "practice": [
+      "서로의 말",
+      "다시 확인해요"
+    ],
+    "close": [
+      "내 사주로",
+      "관계 성향 보기"
+    ]
+  },
+  "afterwork": {
+    "lens": [
+      "사주 재물운으로",
+      "돈을 보는 태도"
+    ],
+    "practice": [
+      "이번 달 지출",
+      "차분히 점검해요"
+    ],
+    "close": [
+      "내 사주로",
+      "재물 성향 보기"
+    ]
+  }
+});
 const GROUPS=[
  {name:'midnight',file:'003-midnight',category:'self-understanding',style:'midnight-indigo',
   explanation:'사주에서는 태어난 정보를 바탕으로 내 감정과 생활 성향을 참고해 봐요.',
@@ -135,6 +194,10 @@ function generate(day){
   const neutralize=(line)=>line.replaceAll('자동결제','구독료 청구')
    .replaceAll('결제','지출').replaceAll('구매','선택').replaceAll('가입','등록');
   const situation=neutralize(cases[caseIndex]);
+  const coverLine=COVER_HOOKS[motif]?.[caseIndex];
+  const frameCopy=CATEGORY_FRAMES[g.name];
+  assert(typeof coverLine==='string'&&coverLine.replace(/\s/g,'').length<=11&&frameCopy,
+    'COVER_HOOK_OR_CATEGORY_FRAMES_MISSING');
   const hook=situation+'. 뭘 먼저 볼까요?';
   const narrationDraft=[hook,g.explanation,neutralize(g.practices[angle]),
    g.cta];
@@ -150,14 +213,15 @@ function generate(day){
   const old=JSON.parse(fs.readFileSync(briefFile,'utf8'));
   const illustrations=['rest','clock','message','notes'];
   const pics=illustrations.map((_,j)=>illustrations[(j+gi+i)%4]);
-  // Never slice Korean words in half: Shorts/Reels first-frame titles are sales-critical.
-  const title=situation.length<=26?situation:situation.split(' ').slice(-4).join(' ');
+  // Keep social media title identical to the topic-specific first-frame hook.
+  // It is not a truncated fragment of a Korean sentence.
+  const title=visible.label+' | '+coverLine;
   assert(title.length>=5 && title.length<=26,'UNREADABLE_THUMBNAIL_TITLE');
   const scenes=[
-   {headline:[visible.label,situation.split(' ').slice(-2).join(' ')],subline:visible.label+' 돌아보기',illustration:pics[0]},
-   {headline:['사주로 보는','성향 참고'],subline:'지금 상황 돌아보기',illustration:pics[1]},
-   {headline:['작은 실천','지금 해봐요'],subline:'나의 기준 점검하기',illustration:pics[2]},
-   {headline:['내 사주도','무료로 살펴봐'],subline:'운보다 무료 사주 · '+p.title,illustration:pics[3]}
+   {headline:[visible.label,coverLine],subline:'나의 고민 · 사주로 돌아보기',illustration:pics[0]},
+   {headline:frameCopy.lens,subline:'태어난 정보를 바탕으로 참고해요',illustration:pics[1]},
+   {headline:frameCopy.practice,subline:'지금 해볼 한 가지를 찾아요',illustration:pics[2]},
+   {headline:frameCopy.close,subline:'운보다 무료 사주 · '+p.title,illustration:pics[3]}
   ];
   const visualConcepts=[0,1,2,3].map((s)=>
    ['첫','두 번째','세 번째','마지막'][s]+' 장면에서 '+situation+' 상황과 '+visible.label+

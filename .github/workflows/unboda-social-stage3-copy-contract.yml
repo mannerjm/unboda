@@ -1,0 +1,27 @@
+name: UNBODA short-form five-channel copy contract (NO PUBLISH)
+on:
+  pull_request:
+    branches: [test/social-automation-safety-poc-20261023]
+    paths:
+      - 'automation/social/cloud-worker/**'
+      - '.github/workflows/unboda-social-stage3-copy-contract.yml'
+  push:
+    branches: [test/social-automation-safety-poc-20261023]
+    paths:
+      - 'automation/social/cloud-worker/**'
+      - '.github/workflows/unboda-social-stage3-copy-contract.yml'
+permissions:
+  contents: read
+jobs:
+  test-worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate captions, provider payloads, no duplicate/unauthorized publish
+        run: node --test automation/social/cloud-worker/test/live-video.test.cjs

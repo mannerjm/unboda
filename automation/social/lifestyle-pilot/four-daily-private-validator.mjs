@@ -47,7 +47,7 @@ export function inspectPrivateFourSlotManifest(manifest,readBrief){
    return fail('DUPLICATE_OR_MISSING_VIDEO_FIRST_FRAME_ART');
   firstFrameArts.add(firstArt);
   const editorial=reviewLifestyleVideoScript(brief);
-  if(!editorial.ok||!brief.narrationDraft[0].startsWith(brief.situation))
+  if(!editorial.ok||(!brief.editorialFormat&&!brief.narrationDraft[0].startsWith(brief.situation)))
    return fail('EDITORIAL_QUALITY_OR_OPENING_INVALID');
   if(openings.some(x=>contentSimilarity(x,brief.narrationDraft[0])>=.74)||
    scenes.some(x=>contentSimilarity(x,brief.narrationDraft.slice(0,3).join(' '))>=.70))

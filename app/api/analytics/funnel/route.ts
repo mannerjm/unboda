@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { recordMarketingEvent, type MarketingEvent } from "@/app/lib/analytics/marketingServer";
 
 const PUBLIC_EVENTS: readonly MarketingEvent[] = [
-  "SITE_PAGE_VIEWED", "FREE_PAGE_VIEWED", "FREE_FORM_STARTED",
+  "SITE_PAGE_VIEWED", "FREE_PAGE_VIEWED", "FREE_CTA_CLICKED", "FREE_FORM_STARTED",
   "FREE_SUBMIT_CLICKED", "FREE_RESULT_VIEWED",
 ];
 

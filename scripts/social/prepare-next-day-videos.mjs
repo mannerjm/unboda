@@ -204,7 +204,7 @@ function generate(day){
   const situation=neutralize(cases[caseIndex]);
   const coverLine=COVER_HOOKS[motif]?.[caseIndex];
   const frameCopy=CATEGORY_FRAMES[g.name];
-  const editorialFormat=STRATEGY.modes[(i+gi)%4];
+  const editorialFormat=STRATEGY.modes[(angle+gi)%4];
   const strategy=STRATEGY.groups[g.name]?.[editorialFormat];
   assert(strategy&&PRACTICE_FRAMES[editorialFormat],'SAJU_FIRST_EDITION_MISSING');
   assert(typeof coverLine==='string'&&coverLine.replace(/\s/g,'').length<=11&&frameCopy,

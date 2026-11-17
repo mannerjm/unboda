@@ -46,8 +46,12 @@ export function ensureMarketingSession(current: Attribution, first: Attribution 
     const existing = readSession();
     const explicitCampaign = (query.get("utm_campaign") ?? "").trim().toLowerCase();
     const campaign = CAMPAIGN.test(explicitCampaign) ? explicitCampaign : null;
-    const newTaggedLanding = Boolean(query.get("utm_source")) && (
-      !existing || existing.current.source !== current.source || existing.campaign !== campaign
+    // Shared carousel URLs use utm_medium + utm_campaign without a per-network
+    // source. A tagged new landing must not inherit an older direct session.
+    const taggedLanding = Boolean(query.get("utm_source") || query.get("utm_medium") || query.get("utm_campaign"));
+    const newTaggedLanding = taggedLanding && (
+      !existing || existing.current.channel !== current.channel ||
+      existing.current.source !== current.source || existing.campaign !== campaign
     );
     const testActivated = query.get("analytics_test") === "1" && existing?.isInternal !== true;
     if (existing && !newTaggedLanding && !testActivated) return;

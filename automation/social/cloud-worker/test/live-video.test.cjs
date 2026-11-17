@@ -3,7 +3,7 @@ const test=require("node:test"),assert=require("node:assert/strict");
 const {createHash}=require("node:crypto");
 const {nextSlotFromCron,loadReleaseVideo}=require("../lib/release-video.cjs");
 const {makeVideoClaim,makeSourceClaim}=require("../lib/video-claim.cjs");
-const {runVideoPublishCron,enabledNetworks}=require("../lib/video-publisher.cjs");
+const {runVideoPublishCron,enabledNetworks,postBody,channelCaption,videoTitle}=require("../lib/video-publisher.cjs");
 const now=Date.parse("2026-10-28T23:45:00+09:00");
 const slot=nextSlotFromCron(now);
 const goodMp4=Buffer.alloc(1800);goodMp4.write("ftyp",4);
@@ -292,4 +292,68 @@ test("3-of-4 rotation schedules exactly three distinct MP4 provider posts and on
  assert.equal(replay.body.reason,"ORIGINAL_USED_OR_CLAIM_UNCERTAIN_NO_REPOST");
  assert.equal(posted.length,3,"a replay must not post more than three times");
  assert.equal(claims,3,"no second provider claims after global source conflict");
+});
+
+test("five SNS captions are distinct, safe and accurate to each destination",()=>{
+ const video={...manifest.videos[0],slot};
+ const networks=["instagram","facebook","threads","tiktok","youtube"];
+ const copies=networks.map(network=>channelCaption(network,video));
+ assert.equal(new Set(copies).size,5,"do not reuse generic copy across networks");
+ for(const [index,network] of networks.entries()){
+  const text=copies[index];
+  assert.match(text,/운보다/);
+  assert.match(text,/무료 사주/);
+  assert.doesNotMatch(text,/#생활꿀팁/);
+  assert.match(text,/#자기이해/);
+  const body=postBody(network,"verified-mp4-media-123",video);
+  assert.equal(body.text,text);
+  assert.equal(body.providers[0].network,network);
+  assert.equal(body.autoPublish,true);
+  assert.equal(body.draft,false);
+ }
+ for(const network of ["facebook","threads"]){
+  const text=channelCaption(network,video);
+  assert.match(text,new RegExp("https://unboda\\.kr/guest-saju\\?utm_source="+network));
+  assert.match(text,/utm_medium=social/);
+  assert.match(text,/utm_campaign=saju_video_self_understanding/);
+ }
+ for(const network of ["instagram","tiktok","youtube"]){
+  const text=channelCaption(network,video);
+  assert.match(text,/프로필/);
+  assert.doesNotMatch(text,/https:\/\//,"nonclickable shortform captions must not promise a direct URL");
+ }
+ assert.match(videoTitle("youtube",video),/#Shorts/);
+ assert.equal(postBody("youtube","verified-mp4",video).youtubeData.title,videoTitle("youtube",video));
+ assert.equal(postBody("tiktok","verified-mp4",video).tiktokData.privacyOption,"PUBLIC_TO_EVERYONE");
+ assert.equal([...(channelCaption("threads",video))].length<=450,true);
+});
+
+test("channel copy distinguishes four original saju story families",()=>{
+ const original=manifest.videos.map(video=>channelCaption("instagram",{...video,slot}));
+ assert.equal(new Set(original).size,4);
+ for(const [index,tag] of ["#자기이해","#직장운","#궁합","#재물운"].entries())
+  assert(original[index].includes(tag));
+});
+
+test("bad topic and oversized Threads captions fail closed before media normalization",async()=>{
+ const video={...manifest.videos[0],slot};
+ assert.throws(()=>channelCaption("instagram",{...video,sajuCategory:"fake"}),/UNVERIFIED_NETWORK/);
+ assert.throws(()=>channelCaption("threads",{...video,caption:"사주 ".repeat(250)}),/NETWORK_CAPTION_NOT_WITHIN_SAFE_LIMIT/);
+ let calls=0;
+ const blocked=await runVideoPublishCron({
+  now,env:{...env,SOCIAL_VIDEO_NETWORKS:"instagram"},
+  fetcher:async(url)=>{
+   calls++;
+   if(url.includes("/releases/tags/"))return reply(metadata);
+   if(url.endsWith("/manifest.json")){
+    const bad=JSON.parse(JSON.stringify(manifest));
+    bad.videos[0].caption="사주 ".repeat(350)+" 운보다 무료 사주 조회";
+    return reply(bad);
+   }
+   if(url.endsWith(".mp4"))return reply(Buffer.from(goodMp4));
+   throw Error("Unapproved network post must never be written");
+  },
+  reserveSlot:async()=>({state:"FIRST_ATOMIC_CLAIM_GRANTED"})
+ });
+ assert.notEqual(blocked.http,200);
 });

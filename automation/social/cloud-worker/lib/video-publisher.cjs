@@ -63,7 +63,7 @@ function channelCaption(network,video){
  const actions={
   instagram:"내 "+topic.label+"이 궁금하다면 프로필의 운보다 무료 사주 링크를 확인해 보세요.",
   facebook:"내 "+topic.label+"을 운보다 무료 사주에서 살펴보기: "+link,
-  threads:"내 "+topic.label+"은 어떨까요? 무료 사주 확인: "+link,
+  threads:"내 "+topic.label+"은 어떨까요? 운보다 무료 사주 확인: "+link,
   tiktok:"내 "+topic.label+"이 궁금하다면 프로필에서 운보다 무료 사주를 찾아보세요.",
   youtube:"내 "+topic.label+"이 궁금하다면 채널 프로필의 운보다 무료 사주 링크를 확인해 보세요."
  };

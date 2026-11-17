@@ -20,7 +20,7 @@ for (const [motif, lines] of Object.entries(coverHooks.hooks)) {
  assert.equal(lines.length, 7, motif + " needs seven situation-matched first frames");
  for (const line of lines) {
   assert(line.endsWith("?"), "thumbnail must invite a question: " + line);
-  assert(line.replace(/\s/g/g,"").length <= 11, "thumbnail must fit mobile safe width: " + line);
+  assert(line.replace(/\s/g,"").length <= 11, "thumbnail must fit mobile safe width: " + line);
   assert(!distinctCoverLines.has(line), "duplicate first-frame hook within 112 scripts: " + line);
   distinctCoverLines.add(line);
  }

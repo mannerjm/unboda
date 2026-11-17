@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { AnalyzeSuccessResponse } from "@/app/lib/analyzeApiTypes";
+import { emitMarketingEvent } from "@/app/lib/analytics/marketingClient";
 import { ResultPageContent, ResultViewerContext, type RetryMainAnalysisResult } from "@/app/result/page";
 
 export default function GuestResultPage() {
@@ -18,6 +19,7 @@ export default function GuestResultPage() {
         const body = await response.json() as { analysis?: AnalyzeSuccessResponse; error?: string };
         if (!response.ok || !body.analysis) throw new Error(body.error ?? "무료 분석 결과를 찾을 수 없습니다.");
         setAnalysis(body.analysis);
+        emitMarketingEvent("FREE_RESULT_VIEWED");
       })
       .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "무료 분석 결과를 불러오지 못했습니다."));
   }, []);

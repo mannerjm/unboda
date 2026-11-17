@@ -76,6 +76,9 @@ async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
     new Set(manifest.videos.map(v=>v.visualStyle)).size!==4)
   return {state:"BLOCKED",reason:"FOUR_SAJU_STYLES_AND_CATEGORIES_NOT_UNIQUE",slot};
  const video=manifest.videos.find(x=>x.hourKst===slot.hourKst);
+ const formats=["curiosity","empathy","service_demo","difference","legacy_lifestyle"];
+ if(video?.editorialFormat!==undefined&&!formats.includes(video.editorialFormat))
+  return {state:"BLOCKED",reason:"INVALID_SOCIAL_CONTENT_FORMAT",slot};
  if(!video||video.sajuCategory===undefined||
     !["self-understanding","career","compatibility","money"].includes(video.sajuCategory)||
     !["midnight-indigo","commute-sunrise","relationship-coral","finance-emerald"].includes(video.visualStyle)||
@@ -124,6 +127,7 @@ async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
  return {state:"ONE_KST_VIDEO_PUBLIC_MEDIA_VERIFIED",
   slot,videoUrl,sha256:video.sha256,bytes:video.bytes,
   title:video.title,caption:video.caption,topicKey:video.topicKey,
+   editorialFormat:video.editorialFormat||"legacy_lifestyle",
    sajuCategory:video.sajuCategory,
   releaseTag:tag,publicationProved:false};
 }

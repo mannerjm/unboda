@@ -18,7 +18,7 @@ const SOURCES: readonly string[] = ["direct","naver","google","daum","bing","kak
 const CAMPAIGN = /^[a-z0-9_-]{1,48}$/;
 export type MarketingBrowserEvent =
   | "SITE_PAGE_VIEWED" | "FREE_PAGE_VIEWED" | "FREE_FORM_STARTED"
-  | "FREE_SUBMIT_CLICKED" | "FREE_RESULT_VIEWED";
+  | "FREE_SUBMIT_CLICKED" | "FREE_RESULT_VIEWED" | "FREE_CTA_CLICKED";
 
 function validAttribution(value: unknown): value is Attribution {
   if (!value || typeof value !== "object") return false;

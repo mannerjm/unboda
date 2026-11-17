@@ -11,7 +11,7 @@ alter table public.service_analytics_events
 create table if not exists public.marketing_funnel_events (
   id bigint generated always as identity primary key,
   event_name text not null check (event_name in (
-    'SITE_PAGE_VIEWED','FREE_PAGE_VIEWED','FREE_FORM_STARTED','FREE_SUBMIT_CLICKED',
+    'SITE_PAGE_VIEWED','FREE_PAGE_VIEWED','FREE_CTA_CLICKED','FREE_FORM_STARTED','FREE_SUBMIT_CLICKED',
     'FREE_ANALYSIS_STARTED','FREE_ANALYSIS_COMPLETED','FREE_ANALYSIS_FAILED','FREE_RESULT_VIEWED'
   )),
   visitor_id uuid not null,

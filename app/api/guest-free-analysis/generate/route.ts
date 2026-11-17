@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { recordServiceAnalyticsEvent } from "@/app/lib/analytics/server";
+import { recordMarketingEvent } from "@/app/lib/analytics/marketingServer";
 import { GUEST_ANALYSIS_COOKIE_NAME, hashGuestAnalysisSecret, parseGuestAnalysisCredential } from "@/app/lib/guestFreeAnalyses/cookie";
 import { completeGuestFreeAnalysis, failGuestFreeAnalysis, getGuestFreeAnalysis, isUsableGuestFreeAnalysis, toGuestAnalyzeProfile } from "@/app/lib/guestFreeAnalyses/server";
 import { buildFreeAnalysisResponse } from "@/app/lib/freeAnalysisPipeline/server";
 
-export async function POST() {
+export async function POST(request: Request) {
   const cookieStore = await cookies();
   const credential = parseGuestAnalysisCredential(cookieStore.get(GUEST_ANALYSIS_COOKIE_NAME)?.value);
   if (!credential) return NextResponse.json({ error: "비회원 분석 결과를 찾을 수 없습니다." }, { status: 404 });
@@ -18,9 +19,11 @@ export async function POST() {
     const content = await buildFreeAnalysisResponse({ profile: toGuestAnalyzeProfile(record.profileInput, record.id) });
     await completeGuestFreeAnalysis(record, content);
     await recordServiceAnalyticsEvent({ eventName: "FREE_ANALYSIS_COMPLETED", actorKind: "guest" });
+    await recordMarketingEvent(request, "FREE_ANALYSIS_COMPLETED");
     return NextResponse.json({ analysis: content });
   } catch (error) {
     await failGuestFreeAnalysis(record);
+    await recordMarketingEvent(request, "FREE_ANALYSIS_FAILED");
     return NextResponse.json({ error: error instanceof Error ? error.message : "무료 분석에 실패했습니다." }, { status: 500 });
   }
 }

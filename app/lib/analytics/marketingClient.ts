@@ -49,7 +49,8 @@ export function ensureMarketingSession(current: Attribution, first: Attribution 
     const newTaggedLanding = Boolean(query.get("utm_source")) && (
       !existing || existing.current.source !== current.source || existing.campaign !== campaign
     );
-    if (existing && !newTaggedLanding) return;
+    const testActivated = query.get("analytics_test") === "1" && existing?.isInternal !== true;
+    if (existing && !newTaggedLanding && !testActivated) return;
     const value: Session = {
       id: crypto.randomUUID(),
       current, first, campaign,

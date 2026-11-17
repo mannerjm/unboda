@@ -31,9 +31,17 @@ export default function GuestSajuPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const hasStartedForm = useRef(false);
   const [error, setError] = useState<string | null>(null);
+  const [generationFailed, setGenerationFailed] = useState(false);
   const [age14OrOlderConfirmed, setAge14OrOlderConfirmed] = useState(false);
   const [hasSavedResult, setHasSavedResult] = useState(false);
   const [savedResultNeedsRetry, setSavedResultNeedsRetry] = useState(false);
+
+  // A failed generator returns to the form with a non-personal error flag.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("analysisError") === "1") {
+      setGenerationFailed(true);
+    }
+  }, []);
 
   // Read-only probe: a saved guest result must never trigger a new generation here.
   useEffect(() => {
@@ -103,6 +111,12 @@ export default function GuestSajuPage() {
             </p>
           </div>
         </section>
+
+        {generationFailed ? (
+          <section role="alert" className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-900">
+            무료 사주 분석을 완료하지 못했습니다. 입력 내용을 다시 확인한 뒤 무료 분석을 시작해 주세요.
+          </section>
+        ) : null}
 
         {hasSavedResult ? (
           <section className="mt-6 rounded-[1.6rem] border border-[#e3d4f5] bg-white/95 p-6 shadow-[0_16px_38px_rgba(109,68,176,.09)]">

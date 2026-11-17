@@ -124,6 +124,7 @@ async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
  return {state:"ONE_KST_VIDEO_PUBLIC_MEDIA_VERIFIED",
   slot,videoUrl,sha256:video.sha256,bytes:video.bytes,
   title:video.title,caption:video.caption,topicKey:video.topicKey,
+   sajuCategory:video.sajuCategory,
   releaseTag:tag,publicationProved:false};
 }
 module.exports={nextSlotFromCron,loadReleaseVideo,isoKst,ymd};

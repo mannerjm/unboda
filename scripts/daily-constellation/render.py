@@ -252,7 +252,7 @@ def render(day,out):
     caption=(f"{day.month}월 {day.day}일 오후 1시, 운보다 오늘의 12별자리 운세 ✨\n\n"
        "양자리부터 물고기자리까지 5장 카드를 넘겨 오늘의 생활 조언과 행운 소품을 확인해 보세요.\n"
        "별자리 운세는 일반적인 재미와 자기성찰을 위한 콘텐츠이며 개인 사주 분석이나 미래 예언이 아닙니다.\n\n"
-       "나를 더 깊이 알고 싶다면 운보다 무료 사주 조회: https://unboda.kr\n"
+       "나를 더 깊이 알고 싶다면 운보다 무료 사주 조회: https://unboda.kr/guest-saju?utm_medium=social&utm_campaign=daily_constellation\n"
        "#운보다 #별자리운세 #오늘의운세 #12별자리 #무료사주")
     if len(caption)>450:raise RuntimeError("THREADS_450_CHARACTER_LIMIT")
     (output/"caption.txt").write_text(caption+"\n",encoding="utf-8")

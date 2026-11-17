@@ -28,9 +28,16 @@ export function inspectSajuBrandEpisode(b){
  // scripts before any expensive TTS download; never speed up >12% unnaturally.
  if(b.narrationDraft.some(line=>line.replace(/\s/g,'').length>32))
   return DENY('KOREAN_NARRATION_SCENE_EXCEEDS_NATURAL_6_9S_BUDGET');
- if(!hook.startsWith(b.situation)||!hook.includes('까'))
+ const sajuFirst=["curiosity","empathy","service_demo","difference"].includes(b.editorialFormat);
+ if(b.editorialFormat&&!sajuFirst)return DENY('UNKNOWN_MARKETING_CONTENT_FORMAT');
+ if(sajuFirst){
+  if(!SAJU.test(hook)||!/[?？]$/.test(hook))
+   return DENY('FIRST_TWO_SECONDS_SAJU_QUESTION_REQUIRED');
+  if(!b.scenes?.[0]?.headline?.join(' ').includes('사주'))
+   return DENY('FIRST_COVER_MUST_SHOW_SAJU');
+ }else if(!hook.startsWith(b.situation)||!hook.includes('까'))
   return DENY('FIRST_TWO_SECONDS_REAL_LIFE_HOOK_REQUIRED');
- if(!SAJU.test(explain)||SAJU.test(hook))
+ if(!SAJU.test(explain)||(!sajuFirst&&SAJU.test(hook)))
   return DENY('SAJU_INTERPRETATION_AFTER_REAL_LIFE_HOOK_REQUIRED');
  if(practical.replace(/\s/g,'').length<28)
   return DENY('PRACTICAL_KOREAN_VOICE_TOO_SHORT_CAUSES_LONG_GAP');
@@ -39,8 +46,10 @@ export function inspectSajuBrandEpisode(b){
  if(!UNBODA.test(cta)||!SAJU.test(cta)||
     !/(?:무료\s*사주|무료\s*조회|무료\s*분석)/.test(cta))
   return DENY('UNBODA_FREE_SAJU_CTA_REQUIRED');
- if(!/^https:\/\/unboda\.kr\/?$/.test(b.destination??''))
+ if(!["https://unboda.kr","https://unboda.kr/guest-saju"].includes(b.destination))
   return DENY('ACTUAL_UNBODA_DOMAIN_REQUIRED');
+ if(sajuFirst&&b.destination!=="https://unboda.kr/guest-saju")
+  return DENY('SAJU_FIRST_NEEDS_DIRECT_FREE_ANALYSIS_DESTINATION');
  const all=[hook,explain,practical,cta].join(' ');
  if(/(?:100%|무조건|확정|반드시\s*성공|절대\s*헤어|당첨\s*보장)/.test(all))
   return DENY('FATE_CERTAINTY_CLAIM_BLOCKED');

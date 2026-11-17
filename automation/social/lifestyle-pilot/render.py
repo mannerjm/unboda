@@ -29,7 +29,7 @@ def verify(brief):
         raise ValueError("UNRELEASED_BRIEF_REQUIRED")
     if brief.get("visualStyle") not in BRAND_PALETTES:
         raise ValueError("VIDEO_SAJU_BRAND_STYLE_REQUIRED")
-    if brief.get("destination")!="https://unboda.kr":
+    if brief.get("destination") not in ("https://unboda.kr","https://unboda.kr/guest-saju"):
         raise ValueError("VIDEO_UNBODA_DESTINATION_REQUIRED")
     narr=brief.get("narrationDraft")
     if not isinstance(narr,list) or len(narr)!=4 or not any(
@@ -40,7 +40,7 @@ def verify(brief):
     lines=brief.get("narrationDraft")
     if not isinstance(lines,list) or len(lines)!=4 or any(not isinstance(x,str) or len(x)<15 or len(x)>100 for x in lines):
         raise ValueError("FOUR_VALID_KOREAN_VOICES_REQUIRED")
-    if not lines[0].startswith(brief.get("situation","")):raise ValueError("REAL_LIFE_OPENING_REQUIRED")
+    if not brief.get("editorialFormat") and not lines[0].startswith(brief.get("situation","")):raise ValueError("REAL_LIFE_OPENING_REQUIRED")
     scenes=brief.get("scenes")
     if not isinstance(scenes,list) or len(scenes)!=4:raise ValueError("FOUR_SCENES_REQUIRED")
     d=ImageDraw.Draw(Image.new("RGB",(W,H)))
@@ -485,7 +485,7 @@ def draw_frame(brief,scene_index,seconds):
     d.line((92,1040,628,1040),fill=(72,91,108),width=2)
     if scene_index==3 and colors:
         d.text((98,1054),"운보다에서 내 사주 살펴보기",font=font(25,True),fill=colors["gold"])
-        d.text((98,1117),"unboda.kr  |  무료 사주 조회",font=font(19),fill=LIGHT)
+        d.text((98,1117),"unboda.kr/guest-saju",font=font(23,True),fill=LIGHT)
     else:
         d.text((98,1061),"사주로 이해하는 나의 일상",font=font(23),fill=MUTED)
     if scene_index!=3 or not colors:d.text((98,1112),f"{scene_index+1:02d} / 04",font=font(19),fill=GOLD)

@@ -213,8 +213,9 @@ function generate(day){
   const old=JSON.parse(fs.readFileSync(briefFile,'utf8'));
   const illustrations=['rest','clock','message','notes'];
   const pics=illustrations.map((_,j)=>illustrations[(j+gi+i)%4]);
-  // Never slice Korean words in half: Shorts/Reels first-frame titles are sales-critical.
-  const title=situation.length<=26?situation:situation.split(' ').slice(-4).join(' ');
+  // Keep social media title identical to the topic-specific first-frame hook.
+  // It is not a truncated fragment of a Korean sentence.
+  const title=visible.label+' | '+coverLine;
   assert(title.length>=5 && title.length<=26,'UNREADABLE_THUMBNAIL_TITLE');
   const scenes=[
    {headline:[visible.label,coverLine],subline:'나의 고민 · 사주로 돌아보기',illustration:pics[0]},

@@ -16,7 +16,7 @@ assert.equal(ctas.length, 4, "daily shorts must have one branded CTA per categor
 assert.equal(new Set(ctas).size, 4, "four shorts need distinct CTAs");
 assert.equal(explain.length, 4, "four shorts need individual saju explanations");
 for (const line of [...ctas, ...explain]) {
-  const n = line.replace(/\\s/g, "").length;
+  const n = line.replace(/\s/g, "").length;
   assert(n >= 26 && n <= 32, "Korean voice scene must be 26-32 nonspace chars: " + line);
 }
 assert(video.includes("g.cta]"), "generated narration must use the category CTA");

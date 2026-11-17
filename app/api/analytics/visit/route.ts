@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { recordDailyVisitor, type AcquisitionChannel, type AcquisitionSource } from "@/app/lib/analytics/server";
 import { recordCustomerJourneyEvent } from "@/app/lib/analytics/customerJourney";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { isInternalAnalyticsRequest } from "@/app/lib/analytics/marketingServer";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ACQUISITION_CHANNELS: readonly AcquisitionChannel[] = ["direct","organic_search","paid_campaign","social","shared_link","referral","other"];
-const ACQUISITION_SOURCES: readonly AcquisitionSource[] = ["direct","naver","google","daum","bing","kakao","instagram","facebook","youtube","x","other"];
+const ACQUISITION_SOURCES: readonly AcquisitionSource[] = ["direct","naver","google","daum","bing","kakao","instagram","facebook","youtube","x","tiktok","threads","other"];
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null) as {
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
     && ACQUISITION_SOURCES.includes(body.acquisitionSource as AcquisitionSource)
     ? body.acquisitionSource as AcquisitionSource : null;
 
+  if (await isInternalAnalyticsRequest(request)) return new NextResponse(null, { status: 204 });
   await recordDailyVisitor({ visitorId, acquisitionChannel, acquisitionSource });
   // A session-derived account visit is needed for first-purchase retention; never trust a body userId.
   // Tracking failures must not prevent a customer from navigating the site.

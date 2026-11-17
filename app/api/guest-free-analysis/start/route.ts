@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { recordServiceAnalyticsEvent } from "@/app/lib/analytics/server";
+import { recordMarketingEvent } from "@/app/lib/analytics/marketingServer";
 import { guestAgeSelfAttestationError, hasGuestAgeSelfAttestation, validateGuestProfileInput } from "@/app/lib/guestFreeAnalyses/input";
 import { createGuestAnalysisCredential, encodeGuestAnalysisCredential, guestAnalysisCookieOptions, hashGuestAnalysisSecret, GUEST_ANALYSIS_COOKIE_NAME } from "@/app/lib/guestFreeAnalyses/cookie";
 import { createGuestFreeAnalysis } from "@/app/lib/guestFreeAnalyses/server";
@@ -16,6 +17,7 @@ export async function POST(request: Request) {
     const credential = createGuestAnalysisCredential(seed);
     const record = await createGuestFreeAnalysis({ secretHash: hashGuestAnalysisSecret(credential.secret), profileInput: validation.value });
     await recordServiceAnalyticsEvent({ eventName: "FREE_ANALYSIS_STARTED", actorKind: "guest" });
+    await recordMarketingEvent(request, "FREE_ANALYSIS_STARTED");
     const response = NextResponse.json({ status: "generating" }, { status: 201 });
     response.cookies.set(GUEST_ANALYSIS_COOKIE_NAME, encodeGuestAnalysisCredential({ ...credential, analysisId: record.id }), guestAnalysisCookieOptions);
     return response;

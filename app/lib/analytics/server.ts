@@ -11,7 +11,7 @@ export type ServiceAnalyticsEventName =
 
 export type ServiceAnalyticsActorKind = "guest" | "member";
 export type AcquisitionChannel = "direct" | "organic_search" | "paid_campaign" | "social" | "shared_link" | "referral" | "other";
-export type AcquisitionSource = "direct" | "naver" | "google" | "daum" | "bing" | "kakao" | "instagram" | "facebook" | "youtube" | "x" | "other";
+export type AcquisitionSource = "direct" | "naver" | "google" | "daum" | "bing" | "kakao" | "instagram" | "facebook" | "youtube" | "x" | "tiktok" | "threads" | "other";
 
 export async function recordServiceAnalyticsEvent(input: {
   eventName: Exclude<ServiceAnalyticsEventName, "VISITOR_DAY">;

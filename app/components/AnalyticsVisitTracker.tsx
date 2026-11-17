@@ -2,12 +2,13 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { ensureMarketingSession, emitMarketingEvent, marketingHeaders } from "@/app/lib/analytics/marketingClient";
 
 const VISITOR_KEY = "unboda.analytics.visitor.v1";
 const ACQUISITION_KEY = "unboda.analytics.acquisition.v1";
 
 type AcquisitionChannel = "direct" | "organic_search" | "paid_campaign" | "social" | "shared_link" | "referral" | "other";
-type AcquisitionSource = "direct" | "naver" | "google" | "daum" | "bing" | "kakao" | "instagram" | "facebook" | "youtube" | "x" | "other";
+type AcquisitionSource = "direct" | "naver" | "google" | "daum" | "bing" | "kakao" | "instagram" | "facebook" | "youtube" | "x" | "tiktok" | "threads" | "other";
 type Acquisition = { channel: AcquisitionChannel; source: AcquisitionSource };
 type VisitorState = { id: string; isNew: boolean };
 
@@ -33,6 +34,8 @@ function sourceFromHost(host: string): AcquisitionSource {
   if (value === "instagram" || value === "instagram.com" || value.endsWith(".instagram.com")) return "instagram";
   if (value === "facebook" || value === "facebook.com" || value.endsWith(".facebook.com")) return "facebook";
   if (value === "youtube" || value === "youtube.com" || value.endsWith(".youtube.com") || value === "youtu.be") return "youtube";
+  if (value === "tiktok" || value === "tiktok.com" || value.endsWith(".tiktok.com")) return "tiktok";
+  if (value === "threads" || value === "threads.net" || value.endsWith(".threads.net") || value === "threads.com" || value.endsWith(".threads.com")) return "threads";
   if (value === "x" || value === "twitter" || value === "x.com" || value.endsWith(".x.com") || value === "twitter.com" || value.endsWith(".twitter.com") || value === "t.co") return "x";
   return "other";
 }
@@ -41,7 +44,7 @@ function isSearchSource(source: AcquisitionSource): boolean {
   return source === "naver" || source === "google" || source === "daum" || source === "bing";
 }
 function isSocialSource(source: AcquisitionSource): boolean {
-  return source === "kakao" || source === "instagram" || source === "facebook" || source === "youtube" || source === "x";
+  return source === "kakao" || source === "instagram" || source === "facebook" || source === "youtube" || source === "x" || source === "tiktok" || source === "threads";
 }
 
 function inferAcquisition(): Acquisition {
@@ -49,7 +52,7 @@ function inferAcquisition(): Acquisition {
   const utmSource = (params.get("utm_source") ?? "").trim().toLowerCase();
   const utmMedium = (params.get("utm_medium") ?? "").trim().toLowerCase();
   const paidSignal = Boolean(
-    params.get("gclid") || params.get("gbraid") || params.get("wbraid") || params.get("fbclid")
+    params.get("gclid") || params.get("gbraid") || params.get("wbraid")
     || /(?:^|[_-])(cpc|ppc|paid|ads?|display|retarget)(?:$|[_-])/.test(utmMedium),
   );
   const shareSignal = /(?:^|[_-])(share|shared)(?:$|[_-])/.test(utmMedium)
@@ -65,6 +68,8 @@ function inferAcquisition(): Acquisition {
     return { channel: "other", source: utmSourceKind };
   }
 
+  // fbclid is a Facebook click identifier, not proof of a paid advertisement.
+  if (params.get("fbclid")) return { channel: "social", source: "facebook" };
   if (!document.referrer) return { channel: "direct", source: "direct" };
   try {
     const referrer = new URL(document.referrer);
@@ -144,9 +149,11 @@ export default function AnalyticsVisitTracker() {
     if (!visitor) return;
     const visitorId = visitor.id;
     const acquisition = getFirstAcquisition(visitor.isNew);
+    ensureMarketingSession(inferAcquisition(), acquisition);
+    const marketing = marketingHeaders();
     void fetch("/api/analytics/visit", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...marketing },
       body: JSON.stringify({
         visitorId,
         acquisitionChannel: acquisition?.channel ?? null,
@@ -156,6 +163,8 @@ export default function AnalyticsVisitTracker() {
     }).catch(() => undefined);
 
     const path = pathname ?? window.location.pathname;
+    emitMarketingEvent("SITE_PAGE_VIEWED");
+    if (path === "/guest-saju") emitMarketingEvent("FREE_PAGE_VIEWED");
     const product = productFromPath(path);
     if (product) {
       const stage: JourneyEvent = product.stage === "checkout" ? "CHECKOUT_VIEWED"
@@ -177,6 +186,7 @@ export default function AnalyticsVisitTracker() {
       if (!(anchor instanceof HTMLAnchorElement)) return;
       const destination = new URL(anchor.href, window.location.href);
       if (destination.origin !== window.location.origin) return;
+      if (destination.pathname === "/guest-saju") emitMarketingEvent("FREE_CTA_CLICKED");
       const product = productFromPath(destination.pathname);
       if (!product || product.stage === "report") return;
       const visitor = getOrCreateVisitor();

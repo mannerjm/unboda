@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { emitMarketingEvent, marketingHeaders } from "@/app/lib/analytics/marketingClient";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ProfileInput, ProfileRelationshipType } from "@/app/lib/profiles/types";
@@ -28,6 +29,7 @@ export default function GuestSajuPage() {
     isLeapMonth: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasStartedForm = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [age14OrOlderConfirmed, setAge14OrOlderConfirmed] = useState(false);
   const [hasSavedResult, setHasSavedResult] = useState(false);
@@ -62,12 +64,13 @@ export default function GuestSajuPage() {
       document.getElementById("guest-age-confirmation")?.focus();
       return;
     }
+    emitMarketingEvent("FREE_SUBMIT_CLICKED");
     setIsSubmitting(true);
     setError(null);
     try {
       const response = await fetch("/api/guest-free-analysis/start", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...marketingHeaders() },
         body: JSON.stringify({ ...input, age14OrOlderConfirmed: true }),
       });
       const body = await response.json() as { error?: string };
@@ -126,6 +129,7 @@ export default function GuestSajuPage() {
 
         <form
           className="mt-6 min-w-0 space-y-5 rounded-[2rem] border border-[#e3d4f5] bg-white/95 p-6 shadow-[0_20px_55px_rgba(109,68,176,.11)] sm:p-8"
+          onChangeCapture={() => { if (!hasStartedForm.current) { hasStartedForm.current = true; emitMarketingEvent("FREE_FORM_STARTED"); } }}
           onSubmit={(event) => { event.preventDefault(); void submit(); }}
         >
           <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#e7eaf2] pb-5">

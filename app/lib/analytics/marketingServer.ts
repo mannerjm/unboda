@@ -5,7 +5,7 @@ import { createAdminClient } from "@/app/lib/supabase/admin";
 
 export type MarketingEvent =
   | "SITE_PAGE_VIEWED" | "FREE_PAGE_VIEWED" | "FREE_FORM_STARTED" | "FREE_SUBMIT_CLICKED"
-  | "FREE_ANALYSIS_STARTED" | "FREE_ANALYSIS_COMPLETED" | "FREE_ANALYSIS_FAILED" | "FREE_RESULT_VIEWED";
+  | "FREE_ANALYSIS_STARTED" | "FREE_ANALYSIS_COMPLETED" | "FREE_ANALYSIS_FAILED" | "FREE_RESULT_VIEWED" | "FREE_CTA_CLICKED";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[a-f0-9]{12}$/i;
 const CHANNELS = ["direct","organic_search","paid_campaign","social","shared_link","referral","other"] as const;

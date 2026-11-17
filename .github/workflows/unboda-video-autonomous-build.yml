@@ -332,6 +332,7 @@ jobs:
               visualMotif:b.visualMotif,topicVisualMatchVerified:true,
               sha256:sha,bytes:movie.length,topicKey:b.topicKey,
               title:b.thumbnailTitle,caption:b.narrationDraft.join(' '),
+              editorialFormat:b.editorialFormat||'legacy_lifestyle',
               sajuCategory:b.sajuCategory,visualStyle:b.visualStyle,
               destination:b.destination,socialPublishingApproved:false});
           }

@@ -274,7 +274,7 @@ def main():
     captions=[f"{date.month}월 {date.day}일, 운보다 12띠 · 60갑자 출생연도별 오늘의 흐름입니다. 오늘의 일진은 {result['dayGanji']}일입니다.",
       "1960년부터 2019년까지 60개 출생연도를 나눠 같은 띠라도 연도의 천간·지지에 따라 서로 다른 생활 조언을 담았어요. 7장 카드를 넘겨 나의 띠와 연도를 찾아보세요.",
       "※ 전통 명리의 일진과 연주를 참고한 일반 콘텐츠입니다. 실제 연주는 입춘 전후 출생에 따라 달라질 수 있으며, 개인 사주 전체를 풀이하거나 미래를 보장하지 않습니다.",
-      "운보다 무료 사주 조회: https://unboda.kr",
+      "운보다 무료 사주 바로 시작: https://unboda.kr/guest-saju?utm_medium=social&utm_campaign=daily_zodiac",
       "#운보다 #60갑자 #띠별운세 #출생연도별운세 #무료사주"]
     (out/"caption.txt").write_text("\n\n".join(captions)+"\n",encoding="utf-8")
     print(json.dumps({"state":"SEVEN_ORIGINAL_60_GANJI_IMAGES_VERIFIED","date":date.isoformat(),

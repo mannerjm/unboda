@@ -40,18 +40,65 @@ function enabledNetworks(env,slot){
     result.some(x=>!NETWORKS.includes(x))||new Set(result).size!==result.length)return null;
  return result;
 }
+// Short-form posts use one verified original MP4 but platform-specific copy.
+// Never imply an Instagram/TikTok/Shorts description URL is clickable.
+// Facebook and Threads get direct, source-tagged free-saju URLs.
+const VIDEO_TOPICS=Object.freeze({
+ "self-understanding":{label:"생활 성향",tag:"#자기이해",campaign:"self_understanding"},
+ career:{label:"직업 성향",tag:"#직장운",campaign:"career"},
+ compatibility:{label:"관계 성향",tag:"#궁합",campaign:"compatibility"},
+ money:{label:"재물 성향",tag:"#재물운",campaign:"money"}
+});
+function channelCaption(network,video){
+ const topic=VIDEO_TOPICS[video.sajuCategory];
+ if(!NETWORKS.includes(network)||!topic||typeof video.caption!=="string")
+  throw Error("UNVERIFIED_NETWORK_OR_SAJU_TOPIC");
+ const main=video.caption.trim();
+ const ctaAt=main.lastIndexOf("운보다 무료 사주 조회");
+ // The last spoken CTA is replaced by one network-appropriate next action,
+ // not pasted twice. The original video narration/audio stays unchanged.
+ const context=ctaAt>0?main.slice(0,ctaAt).trim():main;
+ const link="https://unboda.kr/guest-saju?utm_source="+network+
+  "&utm_medium=social&utm_campaign=saju_video_"+topic.campaign;
+ const actions={
+  instagram:"내 "+topic.label+"이 궁금하다면 프로필의 운보다 무료 사주 링크를 확인해 보세요.",
+  facebook:"내 "+topic.label+"을 운보다 무료 사주에서 살펴보기: "+link,
+  threads:"내 "+topic.label+"은 어떨까요? 운보다 무료 사주 확인: "+link,
+  tiktok:"내 "+topic.label+"이 궁금하다면 프로필에서 운보다 무료 사주를 찾아보세요.",
+  youtube:"내 "+topic.label+"이 궁금하다면 채널 프로필의 운보다 무료 사주 링크를 확인해 보세요."
+ };
+ const hashtags={
+  instagram:"#운보다 #무료사주 "+topic.tag+" #사주릴스",
+  facebook:"#운보다 #무료사주 "+topic.tag,
+  threads:"#운보다 #무료사주 "+topic.tag,
+  tiktok:"#운보다 #무료사주 "+topic.tag+" #사주",
+  youtube:"#운보다 #무료사주 "+topic.tag+" #Shorts"
+ };
+ const text=[context,actions[network],hashtags[network]].join("\n\n");
+ if(text.length>1700||(network==="threads"&&[...text].length>450))
+  throw Error("NETWORK_CAPTION_NOT_WITHIN_SAFE_LIMIT");
+ return text;
+}
+function videoTitle(network,video){
+ const topic=VIDEO_TOPICS[video.sajuCategory];
+ if(!topic||typeof video.title!=="string")throw Error("INVALID_VIDEO_TITLE_TOPIC");
+ const base=video.title.trim();
+ const proposed=network==="youtube"?base+" | "+topic.label+" #Shorts":base;
+ if(proposed.length<5||proposed.length>70)throw Error("NETWORK_VIDEO_TITLE_TOO_LONG");
+ return proposed;
+}
 function postBody(network,mediaId,video){
  const dateTime=video.slot.slotKst;
  const b={publicationDate:{dateTime,timezone:"Asia/Seoul"},
-  text:video.caption+"\n\n#운보다 #생활꿀팁 #shorts",providers:[{network}],
+  text:channelCaption(network,video),providers:[{network}],
   media:[typeof mediaId==="string"&&mediaId.startsWith("https://")?mediaId:{mediaId:String(mediaId)}],autoPublish:true,draft:false,
   saveExternalMediaFiles:true};
  if(network==="instagram")b.instagramData={type:"REEL",autoPublish:true,
    showReelOnFeed:true,isAiGenerated:true};
- if(network==="facebook")b.facebookData={type:"REEL",title:video.title};
+ if(network==="facebook")b.facebookData={type:"REEL",title:videoTitle(network,video)};
  if(network==="youtube")b.youtubeData={type:"short",privacy:"public",
-   madeForKids:false,title:video.title,isAiGeneratedContent:true};
- if(network==="tiktok")b.tiktokData={title:video.title,autoAddMusic:false,
+   madeForKids:false,title:videoTitle(network,video),isAiGeneratedContent:true};
+ if(network==="tiktok")b.tiktokData={title:videoTitle(network,video),autoAddMusic:false,
    privacyOption:"PUBLIC_TO_EVERYONE",commercialContentOwnBrand:true,
    commercialContentThirdParty:false,isAigc:true};
  return b;
@@ -82,6 +129,9 @@ function listedAtSlot(posts,network,video){
   Array.isArray(p?.providers)&&p.providers.some(c=>c.network===network));
 }
 async function postOne({fetcher,token,video,network,reserveSlot}){
+ // Validate platform copy before normalizing media or taking an atomic slot claim.
+ try{postBody(network,"preflight-video",video)}
+ catch{return fail("NETWORK_VIDEO_COPY_NOT_APPROVED",{network})}
  let existing;
  try{
   const read=await request(fetcher,scheduledUrl(video.slot),token);
@@ -245,4 +295,4 @@ function makeVideoHandler({env=process.env,fetcher=fetch,reserveSlot,reserveSour
   return res.end(JSON.stringify(run.body));
  };
 }
-module.exports={runVideoPublishCron,makeVideoHandler,postOne,postBody,enabledNetworks};
+module.exports={runVideoPublishCron,makeVideoHandler,postOne,postBody,channelCaption,videoTitle,enabledNetworks};

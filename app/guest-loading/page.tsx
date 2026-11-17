@@ -4,11 +4,12 @@ import MysticLoadingScreen from "@/app/components/MysticLoadingScreen";
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { marketingHeaders } from "@/app/lib/analytics/marketingClient";
 
 export default function GuestLoadingPage() {
   const router = useRouter();
   useEffect(() => {
-    void fetch("/api/guest-free-analysis/generate", { method: "POST" })
+    void fetch("/api/guest-free-analysis/generate", { method: "POST", headers: marketingHeaders() })
       .then(async (response) => {
         if (!response.ok) throw new Error();
         router.replace("/guest-result");

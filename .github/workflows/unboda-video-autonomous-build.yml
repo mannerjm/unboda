@@ -89,7 +89,7 @@ jobs:
               // AVOID_4S_VOICE_GAPS: fail early before TTS; final waveform QA still decides.
               [1,3].some(i=>typeof x.narrationDraft?.[i]!=='string'||
                 x.narrationDraft[i].replace(/\s/g,'').length<26)||
-              x.destination!=='https://unboda.kr'||
+              !['https://unboda.kr','https://unboda.kr/guest-saju'].includes(x.destination)||
               !x.narrationDraft?.[3]?.includes('운보다 무료 사주 조회'))
              throw Error('NO_FRESH_NEXT_DAY_STORYBOARD:'+file);
            seen.add(x.topicKey);
@@ -332,6 +332,7 @@ jobs:
               visualMotif:b.visualMotif,topicVisualMatchVerified:true,
               sha256:sha,bytes:movie.length,topicKey:b.topicKey,
               title:b.thumbnailTitle,caption:b.narrationDraft.join(' '),
+              editorialFormat:b.editorialFormat||'legacy_lifestyle',
               sajuCategory:b.sajuCategory,visualStyle:b.visualStyle,
               destination:b.destination,socialPublishingApproved:false});
           }

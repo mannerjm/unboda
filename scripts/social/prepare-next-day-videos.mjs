@@ -27,6 +27,14 @@ const POLICY=JSON.parse(fs.readFileSync(path.join(args.staging,'automation/socia
 // Reuse the exact production editorial safety gate; a generator self-test must also satisfy it.
 const {reviewLifestyleVideoScript}=await import(pathToFileURL(path.resolve(args.staging,'automation/social/lifestyle-video-planner.mjs')).href);
 const COVER_HOOKS=JSON.parse(fs.readFileSync(new URL('./video-cover-hooks.json',import.meta.url),'utf8')).hooks;
+const STRATEGY=JSON.parse(fs.readFileSync(new URL('./saju-first-editorial-strategy.json',import.meta.url),'utf8'));
+assert(STRATEGY.modes.length===4 && Object.keys(STRATEGY.groups).length===4,'FOUR_FUNNEL_FORMATS_REQUIRED');
+const PRACTICE_FRAMES=Object.freeze({
+ curiosity:['시간을 몰라도','기본 해석 참고'],
+ empathy:['내 생활 경험과','사주 성향 비교'],
+ service_demo:['출생 정보 입력','무료 결과 확인'],
+ difference:['리포트 다음','AI 상담 이어보기']
+});
 const CATEGORY_FRAMES=Object.freeze({
   "midnight": {
     "lens": [
@@ -196,32 +204,37 @@ function generate(day){
   const situation=neutralize(cases[caseIndex]);
   const coverLine=COVER_HOOKS[motif]?.[caseIndex];
   const frameCopy=CATEGORY_FRAMES[g.name];
+  const editorialFormat=STRATEGY.modes[(angle+gi)%4];
+  const strategy=STRATEGY.groups[g.name]?.[editorialFormat];
+  assert(strategy&&PRACTICE_FRAMES[editorialFormat],'SAJU_FIRST_EDITION_MISSING');
   assert(typeof coverLine==='string'&&coverLine.replace(/\s/g,'').length<=11&&frameCopy,
     'COVER_HOOK_OR_CATEGORY_FRAMES_MISSING');
-  const hook=situation+'. 뭘 먼저 볼까요?';
-  const narrationDraft=[hook,g.explanation,neutralize(g.practices[angle]),
+  // Lead with a saju question, not a general life tip; one of each four
+  // funnel formats is published daily across the four original videos.
+  const hook=strategy.hook;
+  const narrationDraft=[hook,strategy.explanation,STRATEGY.practices[editorialFormat],
    g.cta];
-  const editorial=reviewLifestyleVideoScript({situation,narrationDraft});
+  const editorial=reviewLifestyleVideoScript({situation,narrationDraft,editorialFormat});
   assert(editorial.ok,'AUTOMATED_EDITORIAL_GATE_FAILED:'+day+':'+g.name+':'+editorial.reasons.join(','));
   for(const [n,line] of narrationDraft.entries()){
    assert(compact(line)<=32,'NARRATION_TOO_LONG:'+g.name+':'+n+':'+compact(line));
    if(n>0)assert(compact(line)>=26,'NARRATION_TOO_SHORT:'+g.name+':'+n);
    if(n===2)assert(compact(line)>=28,'PRACTICAL_GAP:'+g.name);
   }
-  assert(hook.includes('까') && !/사주|궁합|재물운/.test(hook),'BAD_OPENING');
+  assert(/사주|궁합|재물운/.test(hook)&&/[?？]$/.test(hook),'SAJU_FIRST_QUESTION_REQUIRED');
   const briefFile=path.join(args.staging,'automation/social/lifestyle-pilot/episodes',g.file+'.json');
   const old=JSON.parse(fs.readFileSync(briefFile,'utf8'));
   const illustrations=['rest','clock','message','notes'];
   const pics=illustrations.map((_,j)=>illustrations[(j+gi+i)%4]);
   // Keep social media title identical to the topic-specific first-frame hook.
   // It is not a truncated fragment of a Korean sentence.
-  const title=visible.label+' | '+coverLine;
+  const title=visible.label+' 사주 | '+strategy.cover;
   assert(title.length>=5 && title.length<=26,'UNREADABLE_THUMBNAIL_TITLE');
   const scenes=[
-   {headline:[visible.label,coverLine],subline:'나의 고민 · 사주로 돌아보기',illustration:pics[0]},
-   {headline:frameCopy.lens,subline:'태어난 정보를 바탕으로 참고해요',illustration:pics[1]},
-   {headline:frameCopy.practice,subline:'지금 해볼 한 가지를 찾아요',illustration:pics[2]},
-   {headline:frameCopy.close,subline:'운보다 무료 사주 · '+p.title,illustration:pics[3]}
+   {headline:[visible.label+' 사주',strategy.cover],subline:coverLine,illustration:pics[0]},
+   {headline:STRATEGY.titles[editorialFormat],subline:'사주로 시작하는 자기이해',illustration:pics[1]},
+   {headline:PRACTICE_FRAMES[editorialFormat],subline:'내 출생 정보로 결과 확인',illustration:pics[2]},
+   {headline:['무료 사주','바로 조회하기'],subline:'운보다 무료 사주 · '+p.title,illustration:pics[3]}
   ];
   const visualConcepts=[0,1,2,3].map((s)=>
    ['첫','두 번째','세 번째','마지막'][s]+' 장면에서 '+situation+' 상황과 '+visible.label+
@@ -229,7 +242,9 @@ function generate(day){
   const next={...old,
    id:'unboda-saju-'+g.name+'-'+motif+'-'+caseIndex+'-'+angle+'-'+stamp,
    topicKey:'saju-'+g.name+'-'+motif+'-'+caseIndex+'-'+angle+'-'+stamp,
-   situation,hook,theme:situation+'에서 실제 생활 선택을 살피는 내용. '+p.analysisValue,
+   situation,hook,editorialFormat,primaryGoal:'free-saju-conversion',
+   destination:'https://unboda.kr/guest-saju',
+   theme:situation+'을 출생 정보에 기반한 전통 사주 해석과 연결. '+p.analysisValue,
    thumbnailTitle:title,visualMotif:motif,visualStyle:g.style,sajuCategory:g.category,
    narrationDraft,visualConcepts,scenes,targetDateKst:stamp,
    automatedPublicationAllowed:false,licenseReviewRequired:true,voiceHumanReviewRequired:true,
@@ -243,6 +258,12 @@ function generate(day){
  }
  assert(new Set(out.map(x=>x.content.topicKey)).size===4);
  assert(new Set(out.map(x=>x.content.productId)).size===4);
+ assert(new Set(out.map(x=>x.content.editorialFormat)).size===4,
+   'DAILY_CURIOSITY_EMPATHY_SERVICE_DEMO_AI_CONTINUATION_REQUIRED');
+ assert(out.every(x=>x.content.destination==='https://unboda.kr/guest-saju' &&
+  x.content.scenes[0].headline[0].includes('사주') &&
+  x.content.scenes[3].headline.join(' ').includes('무료 사주')),
+  'DIRECT_FREE_SAJU_FUNNEL_NOT_VISIBLE');
  assert(new Set(out.map(x=>x.content.scenes[0].illustration)).size===4);
  return out;
 }

@@ -27,13 +27,33 @@ for (const [motif, lines] of Object.entries(coverHooks.hooks)) {
 }
 assert.equal(distinctCoverLines.size, 112);
 assert(video.includes("const coverLine=COVER_HOOKS[motif]?.[caseIndex]"));
-assert(video.includes("headline:[visible.label,coverLine]"));
-assert(video.includes("headline:frameCopy.lens") &&
-  video.includes("headline:frameCopy.practice") &&
-  video.includes("headline:frameCopy.close"));
-assert(video.includes("const title=visible.label+' | '+coverLine"), "social title must match thumbnail");
+assert(video.includes("headline:[visible.label+' 사주',strategy.cover]"));
+assert(video.includes("headline:STRATEGY.titles[editorialFormat]") &&
+  video.includes("headline:PRACTICE_FRAMES[editorialFormat]") &&
+  video.includes("headline:['무료 사주','바로 조회하기']"));
+assert(video.includes("const title=visible.label+' 사주 | '+strategy.cover"), "social title must lead with saju");
 assert(!video.includes("situation.split(' ').slice(-2)"), "never truncate a Korean sentence mid-thought");
 
+const strategy = JSON.parse(read("scripts/social/saju-first-editorial-strategy.json")) as {
+ version: number;
+ modes: string[];
+ groups: Record<string,Record<string,{hook:string;explanation:string;cover:string}>>;
+ practices: Record<string,string>;
+};
+assert.equal(strategy.version,1);
+assert.deepEqual(strategy.modes,["curiosity","empathy","service_demo","difference"]);
+assert.equal(Object.keys(strategy.groups).length,4);
+for(const [g,byMode]of Object.entries(strategy.groups)){
+ assert.equal(Object.keys(byMode).length,4);
+ for(const mode of strategy.modes){
+  const s=byMode[mode];
+  assert(/[?？]$/.test(s.hook)&&/사주|궁합|재물운/.test(s.hook),g+" "+mode+" must open with saju");
+  assert(s.explanation.replace(/\s/g,"").length>=26 && s.explanation.replace(/\s/g,"").length<=32);
+  assert(s.cover.replace(/\s/g,"").length<=11);
+ }
+}
+assert(video.includes("destination:'https://unboda.kr/guest-saju'"));
+assert(video.includes("DAILY_CURIOSITY_EMPATHY_SERVICE_DEMO_AI_CONTINUATION_REQUIRED"));
 const ctas = [...video.matchAll(/cta:'([^']+)'/g)]
   .map(x => x[1]).filter(x => x.startsWith("운보다 무료 사주"));
 const explain = [...video.matchAll(/explanation:'([^']+)'/g)].map(x => x[1]);

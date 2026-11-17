@@ -70,6 +70,18 @@ function inferAcquisition(): Acquisition {
 
   // fbclid is a Facebook click identifier, not proof of a paid advertisement.
   if (params.get("fbclid")) return { channel: "social", source: "facebook" };
+  // One Metricool carousel may publish identical copy to several channels, so the
+  // UTM identifies the social campaign but the source must come from the referrer.
+  // When an in-app browser omits the referrer, record social/other, not direct.
+  if (/(?:^|[_-])social(?:$|[_-])/.test(utmMedium)) {
+    try {
+      const referrer = new URL(document.referrer);
+      const source = sourceFromHost(referrer.hostname);
+      return { channel: "social", source: isSocialSource(source) ? source : "other" };
+    } catch {
+      return { channel: "social", source: "other" };
+    }
+  }
   if (!document.referrer) return { channel: "direct", source: "direct" };
   try {
     const referrer = new URL(document.referrer);

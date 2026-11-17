@@ -58,8 +58,11 @@ function channelCaption(network,video){
  // The last spoken CTA is replaced by one network-appropriate next action,
  // not pasted twice. The original video narration/audio stays unchanged.
  const context=ctaAt>0?main.slice(0,ctaAt).trim():main;
+ const permittedFormats=["curiosity","empathy","service_demo","difference","legacy_lifestyle"];
+ const contentFormat=video.editorialFormat||"legacy_lifestyle";
+ if(!permittedFormats.includes(contentFormat))throw Error("UNREVIEWED_SOCIAL_CONTENT_FORMAT");
  const link="https://unboda.kr/guest-saju?utm_source="+network+
-  "&utm_medium=social&utm_campaign=saju_video_"+topic.campaign;
+  "&utm_medium=social&utm_campaign=saju_video_"+topic.campaign+"_"+contentFormat;
  const actions={
   instagram:"내 "+topic.label+"이 궁금하다면 프로필의 운보다 무료 사주 링크를 확인해 보세요.",
   facebook:"내 "+topic.label+"을 운보다 무료 사주에서 살펴보기: "+link,

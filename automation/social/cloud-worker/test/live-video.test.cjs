@@ -357,3 +357,19 @@ test("bad topic and oversized Threads captions fail closed before media normaliz
  });
  assert.notEqual(blocked.http,200);
 });
+
+test("four content formats use distinct direct-link campaign IDs for Facebook and Threads",()=>{
+ const video={...manifest.videos[0],slot};
+ for(const network of ["facebook","threads"]){
+  const campaigns=new Set();
+  for(const editorialFormat of ["curiosity","empathy","service_demo","difference"]){
+   const copy=channelCaption(network,{...video,editorialFormat});
+   assert(copy.includes("https://unboda.kr/guest-saju?utm_source="+network));
+   assert(copy.includes("utm_campaign=saju_video_self_understanding_"+editorialFormat));
+   campaigns.add(copy.split("utm_campaign=")[1].split(/\s/)[0]);
+  }
+  assert.equal(campaigns.size,4);
+  assert(channelCaption(network,video).includes("saju_video_self_understanding_legacy_lifestyle"));
+ }
+ assert.throws(()=>channelCaption("facebook",{...video,editorialFormat:"unsafe format"}),/UNREVIEWED_SOCIAL_CONTENT_FORMAT/);
+});

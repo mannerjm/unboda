@@ -77,3 +77,16 @@ test('no long Korean scene can enter expensive voice synthesis',()=>{
  assert.equal(inspectSajuBrandEpisode(tooLong).reason,
   'KOREAN_NARRATION_SCENE_EXCEEDS_NATURAL_6_9S_BUDGET');
 });
+
+test('new saju-first funnel opens with explicit saju question and direct free-saju route',()=>{
+ const old=briefs[0];
+ const b={...old,editorialFormat:"curiosity",
+  destination:"https://unboda.kr/guest-saju",
+  narrationDraft:["태어난 시간을 몰라도 사주를 볼 수 있을까요?",...old.narrationDraft.slice(1)],
+  scenes:[{...old.scenes[0],headline:[old.scenes[0].headline[0]+" 사주","시간 몰라도 될까?"]},...old.scenes.slice(1)]};
+ assert.equal(inspectSajuBrandEpisode(b).ok,true,inspectSajuBrandEpisode(b).reason);
+ const bad={...b,destination:"https://unboda.kr"};
+ assert.equal(inspectSajuBrandEpisode(bad).reason,"SAJU_FIRST_NEEDS_DIRECT_FREE_ANALYSIS_DESTINATION");
+ const hidden={...b,scenes:[old.scenes[0],...b.scenes.slice(1)]};
+ assert.equal(inspectSajuBrandEpisode(hidden).reason,"FIRST_COVER_MUST_SHOW_SAJU");
+});

@@ -14,7 +14,7 @@ export default function GuestLoadingPage() {
         if (!response.ok) throw new Error();
         router.replace("/guest-result");
       })
-      .catch(() => router.replace("/guest-saju"));
+      .catch(() => router.replace("/guest-saju?analysisError=1"));
   }, [router]);
   return (
     <MysticLoadingScreen

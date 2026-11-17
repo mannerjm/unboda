@@ -72,7 +72,7 @@ async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
  if(manifest.videos.some(v=>!Object.hasOwn(knownStyles,v.hourKst)||
      v.visualStyle!==knownStyles[v.hourKst]||
      v.sajuCategory!==knownCategories[v.hourKst]||
-     v.destination!=="https://unboda.kr")||
+     !["https://unboda.kr","https://unboda.kr/guest-saju"].includes(v.destination))||
     new Set(manifest.videos.map(v=>v.visualStyle)).size!==4)
   return {state:"BLOCKED",reason:"FOUR_SAJU_STYLES_AND_CATEGORIES_NOT_UNIQUE",slot};
  const video=manifest.videos.find(x=>x.hourKst===slot.hourKst);
@@ -80,7 +80,7 @@ async function loadReleaseVideo({now=Date.now(),fetcher=fetch}={}){
     !["self-understanding","career","compatibility","money"].includes(video.sajuCategory)||
     !["midnight-indigo","commute-sunrise","relationship-coral","finance-emerald"].includes(video.visualStyle)||
     !/운보다/.test(video.caption??"")||!/(사주|궁합|재물운)/.test(video.caption??"")||
-    !/^https:\/\/unboda\.kr\/?$/.test(video.destination??"")||
+    !["https://unboda.kr","https://unboda.kr/guest-saju"].includes(video.destination)||
     !/^[a-f0-9]{64}$/.test(video.sha256||"")||
     video.mp4!==slot.hourKst+"-"+video.name+".mp4"||
     !["midnight","commute","friendship","afterwork"].includes(video.name)||

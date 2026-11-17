@@ -28,7 +28,8 @@ const POLICY=JSON.parse(fs.readFileSync(path.join(args.staging,'automation/socia
 const {reviewLifestyleVideoScript}=await import(pathToFileURL(path.resolve(args.staging,'automation/social/lifestyle-video-planner.mjs')).href);
 const GROUPS=[
  {name:'midnight',file:'003-midnight',category:'self-understanding',style:'midnight-indigo',
-  explanation:'사주에서는 오늘 나의 생활 리듬과 선택 기준을 돌아보는 참고예요.',
+  explanation:'사주에서는 태어난 정보를 바탕으로 내 감정과 생활 성향을 참고해 봐요.',
+  cta:'운보다 무료 사주 조회로 내 생활 성향을 하나씩 천천히 살펴보세요.',
   practices:[
    '오늘의 메모를 먼저 확인하고 다음 행동의 우선순위를 차분하게 적어 보세요.',
    '작은 선택부터 적어 두고 나에게 반복되는 감정의 흐름을 살펴보세요.',
@@ -50,7 +51,8 @@ const GROUPS=[
     '가족 식사 뒤 정리 순서를 정한 밤','가족 대화 중 내 마음을 숨긴 날','가족과 주말 계획을 다시 정한 밤','가족이 바쁜 시간을 서로 묻던 날']]
   ]},
  {name:'commute',file:'004-commute',category:'career',style:'commute-sunrise',
-  explanation:'사주 직업 관점에서 업무 흐름과 일의 우선순위를 돌아보는 참고예요.',
+  explanation:'사주 직업 해석으로 태어난 정보에 따른 일할 때의 성향을 참고해요.',
+  cta:'운보다 무료 사주 조회로 일할 때 내 성향도 차분히 살펴보세요.',
   practices:[
    '업무 시간을 먼저 나눠 적고 가장 필요한 확인 질문 한 개를 준비해 보세요.',
    '겹친 일정을 순서대로 적고 지금 해야 할 한 가지를 차분히 확인해 보세요.',
@@ -72,7 +74,8 @@ const GROUPS=[
     '면접 일정이 바뀌어 준비를 서두른 날','지원서의 경험 설명을 다시 쓰던 밤','면접 장소를 확인하며 긴장한 아침','채용 담당자에게 물어볼 말을 적은 날']]
   ]},
  {name:'friendship',file:'005-friendship',category:'compatibility',style:'relationship-coral',
-  explanation:'사주 궁합에서는 사람마다 다른 대화 방식과 마음을 돌아보는 참고예요.',
+  explanation:'사주 궁합에서는 태어난 정보를 바탕으로 관계의 성향을 참고해요.',
+  cta:'운보다 무료 사주 조회로 관계에서 나의 성향을 차분히 살펴보세요.',
   practices:[
    '서로의 대화에서 엇갈린 순간을 적고 다른 표현을 한 가지 생각해 보세요.',
    '상대의 말을 다시 떠올리고 확인하고 싶은 질문을 차분하게 적어 보세요.',
@@ -94,7 +97,8 @@ const GROUPS=[
     '일정 공유를 놓쳐 동료에게 묻던 날','직장 동료와 업무 시간을 조정한 날','동료와 같은 날짜에 마감을 잡은 순간','일정표에서 협업 시간을 찾던 아침']]
   ]},
  {name:'afterwork',file:'002-afterwork',category:'money',style:'finance-emerald',
-  explanation:'사주 재물운은 내 지출 기준과 생활 속 소비 습관을 살펴보는 참고예요.',
+  explanation:'사주 재물운에서는 태어난 정보를 바탕으로 돈을 대하는 태도를 참고해요.',
+  cta:'운보다 무료 사주 조회로 돈을 대하는 내 성향도 차분히 살펴보세요.',
   practices:[
    '지난달의 기록과 오늘의 지출을 나란히 놓고 바뀐 조건을 비교해 보세요.',
    '영수증과 결제 내역을 나눠 적고 줄일 수 있는 지출 한 가지를 확인해 보세요.',
@@ -133,7 +137,7 @@ function generate(day){
   const situation=neutralize(cases[caseIndex]);
   const hook=situation+'. 뭘 먼저 볼까요?';
   const narrationDraft=[hook,g.explanation,neutralize(g.practices[angle]),
-   '운보다 무료 사주 조회 후 내 선택과 생활 흐름도 차분하게 살펴보세요.'];
+   g.cta];
   const editorial=reviewLifestyleVideoScript({situation,narrationDraft});
   assert(editorial.ok,'AUTOMATED_EDITORIAL_GATE_FAILED:'+day+':'+g.name+':'+editorial.reasons.join(','));
   for(const [n,line] of narrationDraft.entries()){

@@ -1,0 +1,29 @@
+name: UNBODA final video approval direct guest-saju contract (NO PUBLISH)
+on:
+  pull_request:
+    paths:
+      - 'automation/social/lifestyle-pilot/approve-daily-release.py'
+      - 'automation/social/lifestyle-pilot/test_approve_daily_release.py'
+      - '.github/workflows/unboda-final-media-approval-contract.yml'
+  push:
+    branches: [test/social-automation-safety-poc-20261023]
+    paths:
+      - 'automation/social/lifestyle-pilot/approve-daily-release.py'
+      - 'automation/social/lifestyle-pilot/test_approve_daily_release.py'
+      - '.github/workflows/unboda-final-media-approval-contract.yml'
+permissions:
+  contents: read
+jobs:
+  approve-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate direct guest-saju and strict legacy/unknown denial before media processing
+        run: |
+          python -m unittest discover -s automation/social/lifestyle-pilot -p 'test_approve_daily_release.py' -v

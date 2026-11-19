@@ -30,10 +30,19 @@ function decision({now,release,runs,completeHistory=true}){
   if(!Number.isFinite(t))throw Error("UNVERIFIABLE_WORKFLOW_RUN_TIME");
   return t>=start&&t<=now;
  });
- if(recent.some(x=>x.status!=="completed"))return {action:"NOOP",reason:"VIDEO_SOURCE_BUILD_ALREADY_ACTIVE",target:tomorrow};
+ // A failed/stalled GitHub runner can keep an Actions run "in_progress" for
+ // hours, indefinitely suppressing the only backup. Treat only *recently
+ // started* runs as active blockers. Release uniqueness is enforced by the
+ // build's immutable date tag and 10-asset preflight, not by a stuck job.
+ const activeWindowMs=95*60*1000;
+ const freshActive=recent.some(x=>x.status!=="completed" &&
+   now-Date.parse(x.created_at)<activeWindowMs);
+ if(freshActive)return {action:"NOOP",reason:"VIDEO_SOURCE_BUILD_ALREADY_ACTIVE",target:tomorrow};
  if(recent.some(x=>x.event==="workflow_dispatch"))return {action:"BLOCK",reason:"ALREADY_TRIED_ONE_RECOVERY_TODAY",target:tomorrow};
  if(recent.some(x=>x.conclusion==="success"))return {action:"BLOCK",reason:"SUCCESS_WITHOUT_RELEASE_MANUAL_INSPECTION",target:tomorrow};
- return {action:"DISPATCH_ONCE",reason:"NO_NEXT_DAY_MP4_AND_NO_ACTIVE_SOURCE_BUILD",target:tomorrow};
+ const stale=recent.some(x=>x.status!=="completed");
+ return {action:"DISPATCH_ONCE",reason:stale?
+  "STALE_BUILD_NO_RELEASE_SINGLE_DISPATCH":"NO_NEXT_DAY_MP4_AND_NO_ACTIVE_SOURCE_BUILD",target:tomorrow};
 }
 function test(){
  const now=Date.parse("2026-11-09T12:55:00Z");
@@ -44,6 +53,14 @@ function test(){
  if(twice.action!=="BLOCK")throw Error("UNSAFE_RETRY_POSSIBLE");
  const active=decision({now,release:null,runs:[...runs,{created_at:"2026-11-09T12:40:00Z",event:"schedule",status:"in_progress"}]});
  if(active.action!=="NOOP")throw Error("RUNNING_JOB_NOT_PRESERVED");
+ const hung=decision({now,release:null,runs:[...runs,{
+  created_at:"2026-11-09T09:00:00Z",event:"schedule",status:"in_progress"}]});
+ if(hung.action!=="DISPATCH_ONCE"||hung.reason!=="STALE_BUILD_NO_RELEASE_SINGLE_DISPATCH")
+  throw Error("STALLED_GITHUB_RUN_MUST_NOT_BLOCK_SAFE_ONE_SHOT_REPAIR");
+ const recovered=decision({now,release:null,runs:[...runs,{
+  created_at:"2026-11-09T09:00:00Z",event:"schedule",status:"in_progress"},
+  {created_at:"2026-11-09T12:10:00Z",event:"workflow_dispatch",status:"completed",conclusion:"failure"}]});
+ if(recovered.action!=="BLOCK")throw Error("RECOVERY_MUST_BE_AT_MOST_ONCE_PER_DATE");
  const assets=[...expectedNames].map(name=>({name,size:name.endsWith(".mp4")?1200000:100000}));
  const good=decision({now,release:{tag_name:"unboda-saju-shorts-20261110",draft:false,assets},runs});
  if(good.action!=="NOOP"||good.reason!=="RELEASE_COMPLETE")throw Error("EXISTING_VIDEO_ASSETS_NOT_PRESERVED");

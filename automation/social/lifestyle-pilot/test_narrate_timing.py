@@ -8,6 +8,24 @@ class NarrationTimingTests(unittest.TestCase):
   self.assertEqual(narrate.SCENE_STARTS,[0,7.5,15,22.5])
   self.assertGreaterEqual(narrate.START_OFFSET,.2)
   self.assertLessEqual(narrate.START_OFFSET+narrate.LIMIT,7.5-.3)
+ def test_short_saju_first_hook_moves_toward_scene_center_without_voice_overlap(self):
+  # Actual 11/20 midnight clip had 4.68s of silence from the fixed 0.25s
+  # opening. Center a 3.8s hook and a 6.1s explanation; do not lower QA.
+  offset=narrate.scene_voice_offset(3.8)
+  self.assertAlmostEqual(offset,1.85)
+  other=narrate.scene_voice_offset(6.09)
+  self.assertAlmostEqual(other,0.705)
+  # Same estimated voiced timings and internal silence envelopes as the
+  # blocked render: first audible end + new second audible start <4s.
+  first_voice_end=3.18+offset
+  next_voice_start=7.5+other+0.36
+  self.assertLess(next_voice_start-first_voice_end,4.0)
+  for sec in (3.8,5.0,6.09,6.9):
+   start=narrate.scene_voice_offset(sec)
+   self.assertGreaterEqual(start,narrate.START_OFFSET)
+   self.assertLessEqual(start+sec,narrate.SCENE_SECONDS-0.3+1e-6)
+  with self.assertRaisesRegex(RuntimeError,"KOREAN_VOICE_ALIGNMENT_FAILED"):
+   narrate.scene_voice_offset(8.4)
  def test_7_point_38_seconds_can_be_shortened_by_at_most_12_percent(self):
   with tempfile.TemporaryDirectory() as folder:
    p=pathlib.Path(folder)/'voice.wav';p.write_bytes(b'voice')

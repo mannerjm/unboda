@@ -69,24 +69,6 @@ function getDetailPhoto(product: PremiumProductDefinition) {
     ?? PREMIUM_PRODUCT_PHOTOS[fallback[product.category] ?? "lifetime-overview"];
 }
 
-function DetailList({ title, items }: { title: string; items: readonly string[] }) {
-  if (items.length === 0) return null;
-
-  return (
-    <article className="rounded-2xl border border-[#dce1ef] bg-white p-5 shadow-sm">
-      <p className="text-xs font-bold tracking-[0.08em] text-[#6f5ce7]">{title}</p>
-      <ul className="mt-4 space-y-3 text-[15px] leading-7 text-slate-700">
-        {items.map((item) => (
-          <li key={item} className="flex gap-3">
-            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#8b7cf0]" />
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
-    </article>
-  );
-}
-
 function getQuickOverviewItems(product: PremiumProductDefinition): readonly string[] {
   if (product.details?.length) {
     return product.details.slice(0, 3);

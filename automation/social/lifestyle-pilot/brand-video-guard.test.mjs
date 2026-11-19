@@ -27,8 +27,8 @@ test('saju without explicit unboda free entry is a video dead end',()=>{
   '일을 하고 싶을 때 사주를 떠올려 보세요.']};
  assert.equal(inspectSajuBrandEpisode(b).reason,'UNBODA_FREE_SAJU_CTA_REQUIRED');
 });
-test('saju as the first-frame jargon instead of real problem is rejected',()=>{
- const b={...briefs[2],narrationDraft:[
+test('legacy life-first script cannot silently start with saju-first copy',()=>{
+ const b={...briefs[2],editorialFormat:undefined,narrationDraft:[
   '사주 궁합부터 확인해야 하는 점심. 왜 연락이 다를까요?',
   ...briefs[2].narrationDraft.slice(1)]};
  assert.equal(inspectSajuBrandEpisode(b).ok,false);
@@ -64,7 +64,7 @@ test('topic-specific first-frame graphics are mandatory, not just same palette',
  assert.equal(inspectSajuBrandEpisode(generic).reason,
   'STORYBOARD_HAS_NO_MATCHING_VISIBLE_SCENE_OBJECTS');
  const wrongFirst={...briefs[2],scenes:[
-  {...briefs[2].scenes[0],headline:['재물운 이야기','돈이 들어올까?']},
+  {...briefs[2].scenes[0],headline:['재물운 사주','돈이 들어올까?']},
   ...briefs[2].scenes.slice(1)]};
  assert.equal(inspectSajuBrandEpisode(wrongFirst).reason,
   'FIRST_FRAME_HOOK_NOT_MATCHED_TO_VISIBLE_MOTIF');
@@ -87,6 +87,6 @@ test('new saju-first funnel opens with explicit saju question and direct free-sa
  assert.equal(inspectSajuBrandEpisode(b).ok,true,inspectSajuBrandEpisode(b).reason);
  const bad={...b,destination:"https://unboda.kr"};
  assert.equal(inspectSajuBrandEpisode(bad).reason,"SAJU_FIRST_NEEDS_DIRECT_FREE_ANALYSIS_DESTINATION");
- const hidden={...b,scenes:[old.scenes[0],...b.scenes.slice(1)]};
+ const hidden={...b,scenes:[{...old.scenes[0],headline:['일반 생활','상담 궁금해?']},...b.scenes.slice(1)]};
  assert.equal(inspectSajuBrandEpisode(hidden).reason,"FIRST_COVER_MUST_SHOW_SAJU");
 });

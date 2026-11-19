@@ -19,7 +19,7 @@ concurrency:
   # Scheduled backups remain serialized. A new code-fix push may proceed on
   # its own recovery lane instead of waiting behind an unhealthy scheduled run.
   # Both lanes still check the same immutable date-tagged release; never POST.
-  group: unboda-daily-video-media-${{ github.ref }}-${{ github.event_name == 'push' && 'code-repair' || 'scheduled' }}
+  group: unboda-daily-video-media-${{ github.ref }}-${{ github.event_name == 'push' && 'code-repair' || github.event_name == 'workflow_dispatch' && 'one-shot-recovery' || 'scheduled' }}
   cancel-in-progress: false
 jobs:
   preflight:

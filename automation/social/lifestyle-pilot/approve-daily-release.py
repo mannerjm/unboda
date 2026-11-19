@@ -35,6 +35,20 @@ def ffprobe_seconds(mp4):
        "format=duration","-of","default=noprint_wrappers=1:nokey=1",str(mp4)],
        timeout=30,text=True)
     return float(result.strip())
+def verifies_original_landing_destination(video,brief):
+    """Legacy home-page videos remain backward compatible; reviewed saju-first
+    videos must point to the actual free-saju form and agree with the source.
+    Never approve an unreviewed URL or unknown editorial format.
+    """
+    dest=video.get("destination")
+    mode=brief.get("editorialFormat")
+    if dest!=brief.get("destination"):
+        return False
+    if mode in ("curiosity","empathy","service_demo","difference"):
+        return dest=="https://unboda.kr/guest-saju"
+    if mode:
+        return False
+    return dest=="https://unboda.kr"
 def ensure_history_not_reused(brief,date_kst,history):
     for item in history:
         if not isinstance(item,dict):raise ValueError("HISTORY_ENTRY_INVALID")
@@ -87,7 +101,7 @@ def main():
         if (v.get("name")!=name or v.get("mp4")!=movie.name or
            v.get("jpg")!=cover.name or v.get("sajuCategory")!=CATEGORIES[hour] or
            v.get("visualStyle")!=STYLES[hour] or
-           v.get("destination")!="https://unboda.kr"):
+           not verifies_original_landing_destination(v,brief)):
             raise ValueError("EPISODE_BRAND_OR_MEDIA_MISMATCH:"+hour)
         if (brief.get("visualStyle")!=STYLES[hour] or
            brief.get("sajuCategory")!=CATEGORIES[hour] or

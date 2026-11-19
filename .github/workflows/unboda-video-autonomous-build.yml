@@ -142,6 +142,24 @@ jobs:
           fi
           timeout 150s python -m pip install --disable-pip-version-check --quiet 'Pillow==11.3.0'
           python -m unittest discover -s automation/social/lifestyle-pilot -p 'test_*.py' -v
+          # Verify the final archive's exact destination guard BEFORE costly
+          # Korean TTS/4 renders. The 20261120 build rendered 4/4 clips but
+          # the final ASR gate still assumed the old home-page URL.
+          python - <<'PY'
+          import json,runpy,pathlib
+          root=pathlib.Path("automation/social/lifestyle-pilot")
+          approve=runpy.run_path(str(root/"approve-daily-release.py"))
+          checker=approve["verifies_original_landing_destination"]
+          formats=set()
+          for stem in ("003-midnight","004-commute","005-friendship","002-afterwork"):
+              brief=json.loads((root/"episodes"/(stem+".json")).read_text())
+              mode=brief.get("editorialFormat")
+              assert mode in ("curiosity","empathy","service_demo","difference"), (stem,mode)
+              assert checker({"destination":brief["destination"]},brief), stem
+              formats.add(mode)
+          assert len(formats)==4, "ONE_OF_EACH_FOUR_FUNNEL_FORMATS_REQUIRED"
+          print("SAJU_FIRST_FINAL_RELEASE_DIRECT_GUEST_SAJU_CONTRACT_PASS",sorted(formats))
+          PY
   voice-model:
     needs: preflight
     if: needs.preflight.result == 'success' && needs.preflight.outputs.skip_release != 'true'

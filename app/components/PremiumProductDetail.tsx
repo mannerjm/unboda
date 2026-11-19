@@ -174,7 +174,7 @@ export default function PremiumProductDetail({
               {STATUS_LABELS[state]}
             </span>
           </div>
-          <p className="mt-6 text-base font-extrabold text-[#7059b3]">{displayTitle}</p>
+          <p className="mt-6 text-base font-extrabold text-[#7059b3]">PREMIUM ANALYSIS · {displayTitle}</p>
           <h2 id="selected-product-title" className="mt-2 break-keep text-[29px] font-black leading-[1.32] tracking-[-0.045em] text-[#24163d] sm:text-[38px]">
             {readableQuestion}
           </h2>
@@ -210,7 +210,7 @@ export default function PremiumProductDetail({
 
       <div className="bg-white px-5 py-8 sm:px-8 sm:py-10">
         <div className="mb-7 text-center">
-          <span className="inline-flex rounded-full bg-[#f4edff] px-4 py-1.5 text-sm font-extrabold text-[#7550c7]">이 분석으로 살펴볼 내용</span>
+          <span className="inline-flex rounded-full bg-[#f4edff] px-4 py-1.5 text-sm font-extrabold text-[#7550c7]">이 분석을 보고 나면</span>
           <h3 className="mt-3 break-keep text-[25px] font-black leading-snug tracking-[-0.035em] text-[#24163d] sm:text-[32px]">
             무엇을 알 수 있을까요?
           </h3>
@@ -226,7 +226,8 @@ export default function PremiumProductDetail({
         </div>
         {recommendedFor.length ? (
           <div className="mt-8 rounded-[1.6rem] border border-[#e6dbf4] bg-[#fcfaff] px-5 py-6 sm:px-7">
-            <h3 className="break-keep text-[23px] font-black text-[#29193f]">이런 고민이 있다면 살펴보세요</h3>
+            <p className="text-sm font-extrabold text-[#795aca]">이 분석이 필요한 경우</p>
+            <h3 className="mt-2 break-keep text-[23px] font-black text-[#29193f]">이런 고민이 있다면 살펴보세요</h3>
             <ul className="mt-5 space-y-4">
               {recommendedFor.map((item) => (
                 <li key={item} className="flex gap-3 break-keep text-[16px] font-medium leading-8 text-[#51425f]">
@@ -245,6 +246,24 @@ export default function PremiumProductDetail({
             <PremiumReportValuePreview product={product} />
           </details>
         ) : null}
+        <details className="mt-4 rounded-[1.4rem] border border-[#e7e1ee] bg-[#faf9fc] px-5 py-4">
+          <summary className="cursor-pointer text-[16px] font-bold text-[#655587]">
+            분석부터 리포트 보관까지 이용 순서
+          </summary>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {[
+              ["1. 분석 대상 확인", profileId ? "선택한 프로필 기준으로 분석합니다." : "구매 전 분석할 프로필을 선택합니다."],
+              ["2. 개인화 리포트 생성", "결제가 승인되면 개인화 분석 생성을 바로 시작합니다."],
+              ["3. 구매한 분석에 보관", "새 구매 리포트는 결제일부터 12개월 동안 다시 열람할 수 있습니다."],
+            ].map(([title, description]) => (
+              <div key={title} className="rounded-xl border border-[#e7def4] bg-white px-4 py-4">
+                <p className="text-base font-extrabold text-[#342746]">{title}</p>
+                <p className="mt-2 text-[15px] leading-7 text-slate-700">{description}</p>
+              </div>
+            ))}
+          </div>
+        </details>
+
         {state === "not_purchased" ? <ProductReviewSummary productId={product.id} /> : null}
         {state === "not_purchased" ? <TrustPrinciplesCard /> : null}
 

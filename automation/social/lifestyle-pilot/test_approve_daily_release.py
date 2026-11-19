@@ -9,6 +9,19 @@ class TestApprovedDailyRelease(unittest.TestCase):
   self.assertIn('v["voiceHumanReviewed"]=False',source)
   self.assertIn('v["voiceAutomatedQaApproved"]=True',source)
   self.assertIn('if ratio<.82:',source)
+ def test_saju_first_video_requires_exact_free_saju_destination(self):
+  verify=runpy.run_path(str(P))["verifies_original_landing_destination"]
+  for mode in ("curiosity","empathy","service_demo","difference"):
+   new={"editorialFormat":mode,"destination":"https://unboda.kr/guest-saju"}
+   self.assertTrue(verify({"destination":"https://unboda.kr/guest-saju"},new),mode)
+   self.assertFalse(verify({"destination":"https://unboda.kr"},new),mode)
+   self.assertFalse(verify({"destination":"https://evil.example/guest-saju"},new),mode)
+   self.assertFalse(verify({"destination":"https://unboda.kr/guest-saju?redirect=unsafe"},new),mode)
+  legacy={"destination":"https://unboda.kr"}
+  self.assertTrue(verify({"destination":"https://unboda.kr"},legacy))
+  self.assertFalse(verify({"destination":"https://unboda.kr/guest-saju"},legacy))
+  unknown={"editorialFormat":"bypass","destination":"https://unboda.kr/guest-saju"}
+  self.assertFalse(verify({"destination":"https://unboda.kr/guest-saju"},unknown))
  def test_editorial_history_rejects_reused_prior_topics_and_openings(self):
   g=runpy.run_path(str(P))
   prior={"dateKst":"20261029","topicKey":"saju-old-20261029",

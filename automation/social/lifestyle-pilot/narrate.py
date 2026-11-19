@@ -13,6 +13,21 @@ SCENE_STARTS=[0,7.5,15,22.5]
 START_OFFSET=.25
 LIMIT=6.9
 
+def scene_voice_offset(dur):
+    """Center verified Korean narration inside its own visual scene.
+
+    Short first-scene hooks previously started at 0.25s, leaving >4s of
+    silence before scene two; independent audio QA correctly blocked them.
+    Centering (rather than trimming / relaxing QA) keeps all speech aligned
+    to the correct scene and makes the gap shorter.
+    """
+    if not 1.2<=dur<=LIMIT:
+        raise RuntimeError("KOREAN_VOICE_ALIGNMENT_FAILED")
+    offset=max(START_OFFSET,(SCENE_SECONDS-dur)/2)
+    if offset+dur>SCENE_SECONDS-.3+1e-6:
+        raise RuntimeError("VOICE_OVER_RUNS_NEXT_VISUAL_SCENE")
+    return offset
+
 def run(*args,timeout=180):
     return subprocess.run(args,check=True,capture_output=True,text=True,timeout=timeout)
 def duration(p):
@@ -90,9 +105,7 @@ def make_narrated_video(brief_dir,output_dir):
         model.tts_to_file(text,speaker,str(p),speed=1.04)
         dur=validate_audio(p,LIMIT)
         print(f"KOREAN_SCENE_VOICE_TIMING scene={i+1} sec={dur:.2f} allowed={LIMIT:.2f}",flush=True)
-        start=SCENE_STARTS[i]+START_OFFSET
-        if start+dur>SCENE_STARTS[i]+SCENE_SECONDS-.3:
-            raise RuntimeError("VOICE_OVER_RUNS_NEXT_VISUAL_SCENE")
+        start=SCENE_STARTS[i]+scene_voice_offset(dur)
         voices.append(p)
         timing.append({"scene":i+1,"startSeconds":start,"durationSeconds":round(dur,2)})
     stem=folder/"LIFESTYLE_KOREAN_NARRATION.wav"
@@ -100,7 +113,7 @@ def make_narrated_video(brief_dir,output_dir):
     filters=[]
     for i,p in enumerate(voices):
         inputs.extend(["-i",str(p)])
-        ms=round((SCENE_STARTS[i]+START_OFFSET)*1000)
+        ms=round(timing[i]["startSeconds"]*1000)
         filters.append(f"[{i}:a]aresample=48000,adelay={ms}:all=1,apad=whole_dur=30[s{i}]")
     filters.append("[s0][s1][s2][s3]amix=inputs=4:duration=longest:normalize=0,"
                    "atrim=duration=30,aformat=sample_rates=48000:channel_layouts=stereo[a]")

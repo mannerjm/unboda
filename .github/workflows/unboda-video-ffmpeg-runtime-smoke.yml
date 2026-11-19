@@ -1,0 +1,44 @@
+name: UNBODA portable FFmpeg Linux smoke (NO PUBLISH)
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/unboda-video-autonomous-build.yml'
+      - '.github/workflows/unboda-video-ffmpeg-runtime-smoke.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/unboda-video-autonomous-build.yml'
+      - '.github/workflows/unboda-video-ffmpeg-runtime-smoke.yml'
+permissions:
+  contents: read
+jobs:
+  portable-ffmpeg-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download pinned portable FFmpeg and verify H264 encode + ffprobe
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          for item in \
+            ffmpeg:9eac5b2b5076db5ff853a6fa0dcd6b8de7d0cac8481eadda6c47cd935825f1ee \
+            ffprobe:065d3c56926052a76e884c4e4b51b7d95248da9391ab7effdcca6b94ceab98cf; do
+            exe="${item%%:*}"
+            digest="${item##*:}"
+            curl -fsSL --retry 2 --retry-delay 2 --connect-timeout 10 --max-time 150 \
+              "https://github.com/shaka-project/static-ffmpeg-binaries/releases/download/n8.1.2-2/$exe-linux-x64" \
+              -o "$tmp/$exe"
+            echo "$digest  $tmp/$exe" | sha256sum -c -
+            chmod +x "$tmp/$exe"
+          done
+          "$tmp/ffmpeg" -hide_banner -encoders > "$tmp/encoders.txt"
+          grep 'libx264' "$tmp/encoders.txt"
+          "$tmp/ffmpeg" -hide_banner -nostdin -loglevel error -f lavfi -i "color=c=black:s=128x224:r=8" \
+            -t 1 -an -c:v libx264 -pix_fmt yuv420p "$tmp/check.mp4"
+          test -s "$tmp/check.mp4"
+          "$tmp/ffprobe" -hide_banner -v error -show_entries format=duration \
+            -of default=noprint_wrappers=1 "$tmp/check.mp4"
+          echo "PORTABLE_FFMPEG_RUNTIME_AND_H264_SMOKE_OK"

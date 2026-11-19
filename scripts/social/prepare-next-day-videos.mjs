@@ -242,6 +242,8 @@ function generate(day){
     'SAJU_FIRST_COVER_MOTIF_TERM_MISSING:'+motif);
   assert(scenes[0].headline[0].includes('사주'),
     'SAJU_FIRST_COVER_PROMISE_MISSING:'+motif);
+  assert(strategy.cover.replace(/\s/g,'').length<=11,
+    'MOBILE_SAJU_COVER_SECOND_LINE_TOO_LONG:'+motif);
   const visualConcepts=[0,1,2,3].map((s)=>
    ['첫','두 번째','세 번째','마지막'][s]+' 장면에서 '+situation+' 상황과 '+visible.label+
    ', '+visible.visualTerms[0]+'을 실제 주제 그림으로 보여주고 움직이는 화면');

@@ -240,8 +240,10 @@ jobs:
             --out "$UNBODA_OUTPUT"
       - name: Install free Korean speech synthesizer (fixed upstream revision)
         run: |
-          python -m pip install --no-cache-dir 'git+https://github.com/myshell-ai/MeloTTS.git@209145371cff8fc3bd60d7be902ea69cbdb7965a'
-          python -m unidic download
+          # Short stalls should fail safely and let the immutable-release
+          # scheduled backup retry, rather than consuming the only worker.
+          timeout 540s python -m pip install --disable-pip-version-check --no-cache-dir 'git+https://github.com/myshell-ai/MeloTTS.git@209145371cff8fc3bd60d7be902ea69cbdb7965a'
+          timeout 240s python -m unidic download
       - uses: actions/download-artifact@v4
         with:
           name: unboda-licensed-melotts-kr-model

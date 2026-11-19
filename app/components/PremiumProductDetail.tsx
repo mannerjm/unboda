@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
+import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
 import { useEffect, useState } from "react";
 import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
 import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
@@ -49,22 +52,21 @@ function formatPrice(productId: string): string {
   return `${getProductPricing(productId).amount.toLocaleString("ko-KR")}원`;
 }
 
-function DetailList({ title, items }: { title: string; items: readonly string[] }) {
-  if (items.length === 0) return null;
-
-  return (
-    <article className="rounded-2xl border border-[#dce1ef] bg-white p-5 shadow-sm">
-      <p className="text-xs font-bold tracking-[0.08em] text-[#6f5ce7]">{title}</p>
-      <ul className="mt-4 space-y-3 text-[15px] leading-7 text-slate-700">
-        {items.map((item) => (
-          <li key={item} className="flex gap-3">
-            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#8b7cf0]" />
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
-    </article>
-  );
+function getDetailPhoto(product: PremiumProductDefinition) {
+  const fallback: Record<string, string> = {
+    money: "wealth",
+    career: "career",
+    relationship: "relationship",
+    social: "relationship-friendship",
+    health: "health-energy-recovery",
+    business: "business-team-management",
+    growth: "study-learning-strategy",
+    change: "career-job-change",
+    life: "relationship-family-role",
+    period: "monthly-current",
+  };
+  return PREMIUM_PRODUCT_PHOTOS[product.id]
+    ?? PREMIUM_PRODUCT_PHOTOS[fallback[product.category] ?? "lifetime-overview"];
 }
 
 function getQuickOverviewItems(product: PremiumProductDefinition): readonly string[] {
@@ -152,66 +154,116 @@ export default function PremiumProductDetail({
   const expectedUnderstanding = getExpectedUnderstanding(product);
   const outcomeItems = Array.from(new Set([...expectedUnderstanding, ...quickOverviewItems])).slice(0, 4);
   const href = getPremiumAnalysisHref(product.id, state, profileId);
+  const photo = getDetailPhoto(product);
+  const readableQuestion = getReadablePaidQuestion(product.id, displayTitle);
+  const keyPoints = outcomeItems.slice(0, 3);
+
 
   return (
     <section
       className="mt-5 overflow-hidden rounded-[1.8rem] border border-[#d9deed] bg-white shadow-[0_18px_55px_rgba(33,40,83,0.08)]"
       aria-labelledby="selected-product-title"
     >
-      <div className="bg-[radial-gradient(circle_at_top_right,rgba(132,111,241,0.16),transparent_34%),linear-gradient(145deg,#11162d_0%,#171a3d_60%,#242957_100%)] px-5 py-6 text-white sm:px-8 sm:py-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold tracking-[0.18em] text-[#c9c3ff]">PREMIUM ANALYSIS</p>
-            <p className="mt-2 text-xs font-semibold text-slate-300">
-              {isPeriod ? "선택한 기간 분석" : "선택한 분석"}
-            </p>
-          </div>
+      <div className="grid gap-6 bg-[linear-gradient(140deg,#fff9fd_0%,#f4edff_52%,#ede9ff_100%)] px-5 py-7 sm:px-8 sm:py-9 lg:grid-cols-[1.14fr_0.86fr] lg:items-center lg:gap-8">
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`rounded-full border px-3 py-1.5 text-xs font-bold ${STATUS_STYLES[state]}`}>
+            <span className="rounded-full bg-white/90 px-3.5 py-1.5 text-sm font-bold text-[#684fc1]">
+              {isPeriod ? "나의 시기 흐름" : "나에게 맞는 사주 심층 분석"}
+            </span>
+            <span className={`rounded-full border px-3 py-1.5 text-sm font-bold ${STATUS_STYLES[state]}`}>
               {STATUS_LABELS[state]}
             </span>
+          </div>
+          <p className="mt-6 text-base font-extrabold text-[#7059b3]">PREMIUM ANALYSIS · {displayTitle}</p>
+          <h2 id="selected-product-title" className="mt-2 break-keep text-[29px] font-black leading-[1.32] tracking-[-0.045em] text-[#24163d] sm:text-[38px]">
+            {readableQuestion}
+          </h2>
+          <p className="mt-5 break-keep text-[16px] font-medium leading-8 text-[#594a70] sm:text-[17px]">
+            {product.description}
+          </p>
+          <p className="mt-4 break-keep text-sm leading-6 text-[#796b8d]">
+            나의 출생 정보를 바탕으로 해석하는 개인화 리포트입니다. 실제 결과는 분석 후 확인할 수 있어요.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            {href ? (
+              <Link href={href} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#6f4ad3] px-6 py-3 text-[16px] font-extrabold text-white shadow-[0_10px_25px_rgba(111,74,211,0.22)] transition hover:bg-[#5d39bc]">
+                {state === "not_purchased" ? "내 사주로 자세히 알아보기 →" : ACTION_LABELS[state]}
+              </Link>
+            ) : null}
             {onClear ? (
-              <button
-                type="button"
-                onClick={onClear}
-                className="rounded-xl border border-white/20 bg-white/5 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/10"
-              >
+              <button type="button" onClick={onClear} className="rounded-xl border border-[#d7c7f3] bg-white/90 px-4 py-3 text-sm font-bold text-[#6c5d84]">
                 {isPeriod ? "다른 기간 선택" : "다른 분석 선택"}
               </button>
             ) : null}
           </div>
         </div>
-
-        <h2 id="selected-product-title" className="mt-5 max-w-2xl text-3xl font-black leading-tight tracking-[-0.035em] sm:text-4xl">
-          {displayTitle}
-        </h2>
-        <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-slate-200 sm:text-base">
-          {product.description}
-        </p>
-
-        <div className="mt-5 grid gap-2 text-xs text-slate-200 sm:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3">
-            <p className="font-bold text-white">1. 분석 대상 확인</p>
-            <p className="mt-1 leading-5">{profileId ? "선택한 프로필 기준" : "결제 전에 프로필 선택"}</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3">
-            <p className="font-bold text-white">2. 개인화 리포트 생성</p>
-            <p className="mt-1 leading-5">결제 승인 후 즉시 시작</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3">
-            <p className="font-bold text-white">3. 구매한 분석에 보관</p>
-            <p className="mt-1 leading-5">신규 구매 후 12개월 동안 재열람</p>
+        <div className="relative isolate mx-auto w-full max-w-[420px]">
+          <div className="absolute -inset-3 -z-10 rounded-[2.5rem] bg-white/55 blur-sm" />
+          <div className="relative aspect-[4/4.15] overflow-hidden rounded-[2rem] border-[6px] border-white bg-[#e9def7] shadow-[0_18px_45px_rgba(82,52,130,0.16)] sm:aspect-[5/4] lg:aspect-[4/4.5]">
+            <Image src={photo.src} alt={photo.alt} fill sizes="(max-width: 640px) 90vw, (max-width: 1024px) 420px, 390px" className="object-cover" />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#24163d]/80 via-[#24163d]/20 to-transparent px-5 pb-5 pt-16 text-white">
+              <p className="text-sm font-bold">나에게 해당하는 이야기를 확인해 보세요</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-[#f7f8fc] px-4 py-5 sm:px-7 sm:py-7">
-        <div className="grid gap-4 lg:grid-cols-2">
-          <DetailList title={isPeriod ? "이런 때 살펴보세요" : "이 분석이 필요한 경우"} items={recommendedFor} />
-          <DetailList title="이 분석을 보고 나면" items={outcomeItems} />
+      <div className="bg-white px-5 py-8 sm:px-8 sm:py-10">
+        <div className="mb-7 text-center">
+          <span className="inline-flex rounded-full bg-[#f4edff] px-4 py-1.5 text-sm font-extrabold text-[#7550c7]">이 분석을 보고 나면</span>
+          <h3 className="mt-3 break-keep text-[25px] font-black leading-snug tracking-[-0.035em] text-[#24163d] sm:text-[32px]">
+            무엇을 알 수 있을까요?
+          </h3>
+          <p className="mt-2 text-base leading-7 text-slate-600">핵심만 먼저 확인해 보세요.</p>
         </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {keyPoints.map((point, index) => (
+            <article key={`${product.id}-point-${index}`} className="rounded-[1.6rem] border border-[#e9e0f6] bg-[linear-gradient(155deg,#faf7ff_0%,#fffafc_100%)] px-5 py-6 shadow-[0_9px_25px_rgba(115,82,160,0.06)]">
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e7dbff] text-lg font-black text-[#6f4ad3]">0{index + 1}</span>
+              <p className="mt-5 break-keep text-[18px] font-extrabold leading-[1.65] text-[#29203e]">{point}</p>
+            </article>
+          ))}
+        </div>
+        {recommendedFor.length ? (
+          <div className="mt-8 rounded-[1.6rem] border border-[#e6dbf4] bg-[#fcfaff] px-5 py-6 sm:px-7">
+            <p className="text-sm font-extrabold text-[#795aca]">이 분석이 필요한 경우</p>
+            <h3 className="mt-2 break-keep text-[23px] font-black text-[#29193f]">이런 고민이 있다면 살펴보세요</h3>
+            <ul className="mt-5 space-y-4">
+              {recommendedFor.map((item) => (
+                <li key={item} className="flex gap-3 break-keep text-[16px] font-medium leading-8 text-[#51425f]">
+                  <span aria-hidden="true" className="mt-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#ede4ff] text-sm font-bold text-[#734dcc]">✓</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {state === "not_purchased" ? (
+          <details className="group mt-6 rounded-[1.4rem] border border-[#e2dceb] bg-white px-5 py-4">
+            <summary className="cursor-pointer text-[16px] font-bold text-[#5f47ad] marker:text-[#7c64ca]">
+              리포트 구성과 분석 기준 자세히 보기
+            </summary>
+            <PremiumReportValuePreview product={product} />
+          </details>
+        ) : null}
+        <details className="mt-4 rounded-[1.4rem] border border-[#e7e1ee] bg-[#faf9fc] px-5 py-4">
+          <summary className="cursor-pointer text-[16px] font-bold text-[#655587]">
+            분석부터 리포트 보관까지 이용 순서
+          </summary>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {[
+              ["1. 분석 대상 확인", profileId ? "선택한 프로필 기준으로 분석합니다." : "구매 전 분석할 프로필을 선택합니다."],
+              ["2. 개인화 리포트 생성", "결제가 승인되면 개인화 분석 생성을 바로 시작합니다."],
+              ["3. 구매한 분석에 보관", "새 구매 리포트는 결제일부터 12개월 동안 다시 열람할 수 있습니다."],
+            ].map(([title, description]) => (
+              <div key={title} className="rounded-xl border border-[#e7def4] bg-white px-4 py-4">
+                <p className="text-base font-extrabold text-[#342746]">{title}</p>
+                <p className="mt-2 text-[15px] leading-7 text-slate-700">{description}</p>
+              </div>
+            ))}
+          </div>
+        </details>
 
-        {state === "not_purchased" ? <PremiumReportValuePreview product={product} /> : null}
         {state === "not_purchased" ? <ProductReviewSummary productId={product.id} /> : null}
         {state === "not_purchased" ? <TrustPrinciplesCard /> : null}
 

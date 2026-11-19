@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import FamilyCompatibilityAnalysisClient from "@/app/components/FamilyCompatibilityAnalysisClient";
+import CompatibilityDetailHero from "@/app/components/CompatibilityDetailHero";
 import { isProductSaved } from "@/app/lib/interestedAnalyses/server";
 import { COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID } from "@/app/lib/specialAnalysisProducts";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
@@ -39,18 +40,16 @@ export default async function ParentChildCompatibilityPage() {
         <div className="mx-auto w-full max-w-5xl">
           <Link href="/special-analysis/compatibility" className="text-sm font-semibold text-slate-600 underline decoration-[#c4c9d9] underline-offset-4">← 궁합 유형 선택</Link>
 
-          <header className="relative mt-7 overflow-hidden rounded-[2rem] border border-[#35375f] bg-[radial-gradient(circle_at_18%_22%,rgba(112,88,229,0.22),transparent_24%),radial-gradient(circle_at_82%_78%,rgba(83,180,215,0.14),transparent_24%),linear-gradient(145deg,#0b1025_0%,#151938_55%,#211b46_100%)] px-6 py-8 text-white shadow-[0_22px_60px_rgba(24,29,67,0.14)] sm:px-8 sm:py-10">
-            <p className="text-xs font-semibold tracking-[0.16em] text-[#b9b2f6]">전문 분석 · 궁합 · 가족</p>
-            <h1 className="mt-2 text-3xl font-bold tracking-[-0.03em] text-white sm:text-4xl">가족 궁합 분석</h1>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-200">
-              먼저 어떤 가족 관계인지 선택한 뒤 역할과 가족 정보를 입력해 주세요. 선택한 관계에 맞는 분석 기준과 결과 리포트로 이어집니다.
-            </p>
-            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-300">
-              <span>현재 분석 대상</span>
-              <strong className="font-semibold text-white">{activeProfile.label}</strong>
-              <Link href="/mypage" className="text-xs underline decoration-[#c4c9d9] underline-offset-4">프로필 변경</Link>
-            </div>
-          </header>
+          <CompatibilityDetailHero
+            mode="family"
+            title="가족 궁합 분석"
+            description="먼저 어떤 가족 관계인지 선택한 뒤 서로의 역할과 소통 방식을 살펴보세요. 관계마다 다른 기준의 분석 리포트로 이어집니다."
+          />
+          <div className="mt-3 flex flex-wrap items-center gap-2 px-2 text-sm text-[#71647f]">
+            <span>현재 분석 대상</span>
+            <strong className="font-semibold text-[#392954]">{activeProfile.label}</strong>
+            <Link href="/mypage" className="font-semibold text-[#6f4ad3] underline underline-offset-4">프로필 변경</Link>
+          </div>
 
           <FamilyCompatibilityAnalysisClient myProfileLabel={activeProfile.label} profileId={activeProfile.id} initialInterestSaved={saved} />
         </div>

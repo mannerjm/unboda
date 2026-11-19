@@ -1,3 +1,4 @@
+import Image from "next/image";
 import ProductReviewSummary from "@/app/components/ProductReviewSummary";
 import {
   COMPATIBILITY_BUSINESS_PRODUCT_ID,
@@ -17,6 +18,44 @@ type PreviewConfig = Readonly<{
   directionDescription: string;
   domains: readonly string[];
 }>;
+
+const PREVIEW_VISUALS: Record<CompatibilityPreviewMode, { src: string; alt: string; question: string }> = {
+  romantic: {
+    src: "/images/premium/relationship-marriage.jpg",
+    alt: "함께 미래를 이야기하는 연인",
+    question: "우리 두 사람은 서로 어떻게 다를까요?",
+  },
+  workplace: {
+    src: "/images/premium/career-workplace-relationships.jpg",
+    alt: "함께 일하며 소통하는 직장 동료",
+    question: "함께 일할 때 어떤 점이 잘 맞을까요?",
+  },
+  friend: {
+    src: "/images/premium/relationship-friendship.jpg",
+    alt: "서로 대화하며 시간을 보내는 친구들",
+    question: "친구와 더 편안하게 지내려면?",
+  },
+  business: {
+    src: "/images/premium/business-team-management.jpg",
+    alt: "같이 업무를 계획하는 사업팀",
+    question: "동업할 때 역할과 책임은 어떻게 맞출까요?",
+  },
+  parent_child: {
+    src: "/images/premium/relationship-family-role.jpg",
+    alt: "가족 구성원들이 함께 시간을 보내는 장면",
+    question: "부모와 자녀는 무엇을 다르게 느낄까요?",
+  },
+  siblings: {
+    src: "/images/premium/relationship-family-role.jpg",
+    alt: "함께 시간을 보내는 가족",
+    question: "형제자매 사이에서 놓치는 마음은 없을까요?",
+  },
+  other_family: {
+    src: "/images/premium/relationship-family-role.jpg",
+    alt: "서로 이야기를 나누는 가족",
+    question: "가족 안에서 서로에게 바라는 것은 무엇일까요?",
+  },
+};
 
 const REVIEW_PRODUCT_BY_MODE: Record<CompatibilityPreviewMode, string> = {
   romantic: COMPATIBILITY_ROMANTIC_PRODUCT_ID,
@@ -83,6 +122,7 @@ export default function CompatibilityReportValuePreview({
   relationshipLabel?: string | null;
 }) {
   const config = PREVIEW_CONFIG[mode];
+  const visual = PREVIEW_VISUALS[mode];
   const relationshipContext = mode === "other_family" && relationshipLabel
     ? `${relationshipLabel} 관계에 맞는 역할과 거리 기준을 반영합니다.`
     : null;
@@ -93,6 +133,36 @@ export default function CompatibilityReportValuePreview({
       data-compatibility-report-preview={mode}
       className="mt-7 overflow-hidden rounded-[28px] border border-[#dfe3ef] bg-[#f9faff] shadow-[0_12px_36px_rgba(32,38,72,0.06)]"
     >
+      <div className="grid gap-6 bg-[linear-gradient(145deg,#fff6fc_0%,#f1e8ff_100%)] px-5 py-7 sm:px-7 sm:py-8 md:grid-cols-[1.12fr_0.88fr] md:items-center">
+        <div>
+          <p className="text-sm font-extrabold text-[#7550c7]">나와 상대방의 사주를 함께 보는 궁합 분석</p>
+          <h3 className="mt-3 break-keep text-[26px] font-black leading-[1.35] tracking-[-0.04em] text-[#28163f] sm:text-[32px]">{visual.question}</h3>
+          <p className="mt-4 break-keep text-[16px] leading-8 text-[#5d4f6e]">{config.directionDescription}</p>
+          <p className="mt-3 text-sm font-semibold text-[#7550c7]">{evaluationYear}년판 · 두 사람의 실제 결과는 결제 후 확인</p>
+        </div>
+        <div className="relative mx-auto aspect-[5/4] w-full max-w-[320px] overflow-hidden rounded-[1.7rem] border-[5px] border-white bg-[#e9dff8] shadow-[0_12px_32px_rgba(74,43,117,.14)]">
+          <Image src={visual.src} alt={visual.alt} fill sizes="(max-width: 640px) 80vw, 320px" className="object-cover" />
+        </div>
+      </div>
+
+      <div className="px-5 py-7 sm:px-7">
+        <p className="text-center text-sm font-extrabold text-[#7652c5]">이 궁합으로 살펴볼 세 가지</p>
+        <h3 className="mt-2 break-keep text-center text-[24px] font-black text-[#26183f] sm:text-[29px]">무엇을 이해할 수 있을까요?</h3>
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          {config.domains.slice(0, 3).map((domain, index) => (
+            <div key={domain} className="rounded-[1.4rem] border border-[#e9def4] bg-white px-5 py-6 text-center shadow-sm">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#eadfff] text-sm font-black text-[#7152c0]">0{index + 1}</span>
+              <p className="mt-4 break-keep text-[18px] font-extrabold leading-7 text-[#342146]">{domain}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-5 break-keep text-center text-sm leading-6 text-[#746984]">
+          사주를 바탕으로 관계를 돌아보는 참고용 해석이며, 실제 개인별 결과를 미리 보여주는 화면은 아닙니다.
+        </p>
+        {relationshipContext ? <p className="mt-2 text-center text-sm text-[#625674]">{relationshipContext}</p> : null}
+      </div>
+      <details className="mx-5 mb-6 rounded-2xl border border-[#e2d9ee] bg-white px-5 py-4 sm:mx-7">
+        <summary className="cursor-pointer text-[16px] font-extrabold text-[#6549af]">리포트 구성과 자세한 분석 영역 펼쳐보기</summary>
       <div className="border-b border-[#e4e7f1] bg-[linear-gradient(135deg,#f3f1ff_0%,#fbfcff_72%)] px-5 py-5 sm:px-6">
         <p className="text-xs font-bold tracking-[0.14em] text-slate-500">리포트 구성 미리보기</p>
         <h3 className="mt-2 text-lg font-bold tracking-[-0.02em] text-[#11162d]">{config.headline}</h3>
@@ -152,6 +222,7 @@ export default function CompatibilityReportValuePreview({
           실제 문장은 입력한 두 사람의 계산 결과에 따라 달라집니다. 완성된 {evaluationYear}년판 리포트는 결제 후 구매한 분석에서 다시 볼 수 있습니다.
         </p>
       </div>
+      </details>
     </section>
     <ProductReviewSummary productId={REVIEW_PRODUCT_BY_MODE[mode]} />
     </>

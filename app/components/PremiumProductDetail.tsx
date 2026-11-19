@@ -124,7 +124,6 @@ export default function PremiumProductDetail({
   product,
   state,
   profileId,
-  onClear,
   isSaved = false,
 }: PremiumProductDetailProps) {
   const [savedState, setSavedState] = useState(isSaved);
@@ -184,18 +183,6 @@ export default function PremiumProductDetail({
           <p className="mt-4 break-keep text-sm leading-6 text-[#796b8d]">
             나의 출생 정보를 바탕으로 해석하는 개인화 리포트입니다. 실제 결과는 분석 후 확인할 수 있어요.
           </p>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            {href ? (
-              <Link href={href} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#6f4ad3] px-6 py-3 text-[16px] font-extrabold text-white shadow-[0_10px_25px_rgba(111,74,211,0.22)] transition hover:bg-[#5d39bc]">
-                {state === "not_purchased" ? "내 사주로 자세히 알아보기 →" : ACTION_LABELS[state]}
-              </Link>
-            ) : null}
-            {onClear ? (
-              <button type="button" onClick={onClear} className="rounded-xl border border-[#d7c7f3] bg-white/90 px-4 py-3 text-sm font-bold text-[#6c5d84]">
-                {isPeriod ? "다른 기간 선택" : "다른 분석 선택"}
-              </button>
-            ) : null}
-          </div>
         </div>
         <div className="relative isolate mx-auto w-full max-w-[420px]">
           <div className="absolute -inset-3 -z-10 rounded-[2.5rem] bg-white/55 blur-sm" />

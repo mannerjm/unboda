@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import CompatibilityGuideDiscoveryLinks from "../app/components/CompatibilityGuideDiscoveryLinks";
 import sitemap from "../app/sitemap";
 import { SITE_ORIGIN } from "../app/lib/seo";
 import {
@@ -48,8 +51,8 @@ for (const slug of COMPATIBILITY_GUIDE_SLUGS) {
 }
 assert.equal(familyCount, 3);
 assert.equal(titles.size, 7);
-assert.equal(urls.filter((url) => !new URL(url).pathname.startsWith("/blog")).length, 74,
-  "existing 74 SEO URLs must remain while public magazine pages are additive");
+assert.equal(urls.filter((url) => !new URL(url).pathname.startsWith("/blog")).length, 73,
+  "73 canonical SEO URLs must remain while public magazine pages are additive");
 
 const guidePage = readFileSync("app/special-analysis/compatibility/guide/[slug]/page.tsx", "utf8");
 assert(guidePage.includes("generateStaticParams"), "guide should be statically enumerated");
@@ -64,7 +67,13 @@ assert(!guidePage.includes("redirect(") && !guidePage.includes("PaidCompatibilit
   "public guide must not perform authentication or expose any personalized analysis");
 
 const hub = readFileSync("app/special-analysis/compatibility/page.tsx", "utf8");
-assert(!hub.includes("compatibility-public-guides-heading") && !hub.includes("COMPATIBILITY_GUIDE_SLUGS") && !hub.includes("로그인 전에 7가지 궁합을 비교해 보세요"), "comparison hub must not render the redundant seven-guide panel; public guide URLs remain indexed through the sitemap");
+assert(!hub.includes("compatibility-public-guides-heading") && !hub.includes("로그인 전에 7가지 궁합을 비교해 보세요"), "keep the compact catalog without the redundant guide comparison panel");
+assert(hub.includes("<CompatibilityGuideDiscoveryLinks />"), "public catalog must expose guide discovery without changing product entry cards");
+const guideDirectoryHtml = renderToStaticMarkup(createElement(CompatibilityGuideDiscoveryLinks));
+const guideHrefs = [...guideDirectoryHtml.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
+assert.deepEqual(new Set(guideHrefs), paths, "server-rendered links must reach every sitemap guide without JavaScript or login");
+assert.equal(guideHrefs.length, 7, "guide directory must link each guide once");
+assert(guideDirectoryHtml.includes("<details") && guideDirectoryHtml.includes("<summary"), "guide discovery must stay compact and keyboard accessible");
 for (const protectedRoute of [
   "/special-analysis/compatibility/romantic",
   "/special-analysis/compatibility/workplace",
@@ -95,4 +104,4 @@ for (const p of [
 ]) {
   assert(readFileSync(p, "utf8").includes("NOINDEX_METADATA"), `original auth page still noindex: ${p}`);
 }
-console.log("seo-compatibility-public-guides-regression: PASS (7 public guides, 7 unique products, 74 sitemap URLs, existing auth gates protected)");
+console.log("seo-compatibility-public-guides-regression: PASS (7 linked public guides, 7 unique products, 73 canonical sitemap URLs, existing auth gates protected)");

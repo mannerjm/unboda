@@ -250,17 +250,41 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/unboda-shaka-ffmpeg
+          key: unboda-ffmpeg-shaka-n8.1.2-2-ubuntu24-x64-v1
       - name: FFmpeg and Korean fonts
         run: |
-          if command -v ffmpeg >/dev/null 2>&1 && command -v ffprobe >/dev/null 2>&1; then
-            echo "RUNNER_FFMPEG_AND_FFPROBE_ALREADY_PRESENT"
-          elif timeout 100s sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Lock::Timeout=20 install -y -qq ffmpeg; then
-            echo "FFMPEG_INSTALLED_WITH_CACHED_APT_INDEX"
-          else
-            echo "APT_FFMPEG_NOT_INSTALLED_TRY_BOUNDED_REFRESH"
-            timeout 120s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 update -qq
-            timeout 150s sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Lock::Timeout=20 install -y -qq ffmpeg
-          fi
+          set -euo pipefail
+          # Google Shaka's published GPL FFmpeg+FFprobe, Ubuntu 24.04 x64.
+          # Exact release/tag and SHA256s checked before any media processing.
+          bin="$RUNNER_TEMP/unboda-shaka-ffmpeg"
+          mkdir -p "$bin"
+          for item in \
+            ffmpeg:05c6fd8b90601463bacd3e25fefe94fc77b8cf6affecab1bcd1b226741d3272f \
+            ffprobe:2b55ea948bae402d53c517bdadbaff8f480d7f811e93f865a68f21a098b8b5ef; do
+            exe="$(printf '%s' "$item" | cut -d: -f1)"
+            digest="$(printf '%s' "$item" | cut -d: -f2)"
+            if test -s "$bin/$exe" && printf '%s  %s\n' "$digest" "$bin/$exe" | sha256sum -c -; then
+              echo "SHARED_PINNED_FFMPEG_BINARY_CACHE_HIT:$exe"
+            else
+              curl --fail --silent --show-error --location --retry 2 --retry-delay 3 \
+                --connect-timeout 15 --max-time 240 \
+                "https://github.com/shaka-project/static-ffmpeg-binaries/releases/download/n8.1.2-2/$exe-linux-x64-ubuntu-24.04" \
+                --output "$bin/$exe"
+              printf '%s  %s\n' "$digest" "$bin/$exe" | sha256sum -c - || {
+                echo "UNTRUSTED_FFMPEG_BINARY_CHECKSUM" >&2
+                exit 1
+              }
+            fi
+            chmod 0755 "$bin/$exe"
+          done
+          "$bin/ffmpeg" -hide_banner -encoders > "$bin/encoders.txt"
+          grep -q 'libx264' "$bin/encoders.txt" || { echo "FFMPEG_H264_ENCODER_MISSING"; exit 1; }
+          "$bin/ffprobe" -hide_banner -version >/dev/null
+          echo "$bin" >> "$GITHUB_PATH"
+          echo "PINNED_FFMPEG_FFPROBE_SHA256_VERIFIED"
           # Use exact upstream Noto CJK fonts verified by Git blob hash.
           # The font is used on ephemeral runners only; it is NOT a release asset.
           if test -s /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc &&
@@ -440,17 +464,41 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/unboda-shaka-ffmpeg
+          key: unboda-ffmpeg-shaka-n8.1.2-2-ubuntu24-x64-v1
       - name: Install FFmpeg and independent Korean speech ASR
         run: |
-          if dpkg -s ffmpeg >/dev/null 2>&1; then
-            echo "FFMPEG_ALREADY_PRESENT_SKIP_APT_NETWORK"
-          elif timeout 100s sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Lock::Timeout=20 install -y -qq ffmpeg; then
-            echo "FFMPEG_INSTALLED_USING_CACHED_APT_INDEX"
-          else
-            echo "APT_CACHED_INDEX_FAILED_TRY_BOUNDED_REFRESH"
-            timeout 120s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 update -qq
-            timeout 150s sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Lock::Timeout=20 install -y -qq ffmpeg
-          fi
+          set -euo pipefail
+          # Google Shaka's published GPL FFmpeg+FFprobe, Ubuntu 24.04 x64.
+          # Exact release/tag and SHA256s checked before any media processing.
+          bin="$RUNNER_TEMP/unboda-shaka-ffmpeg"
+          mkdir -p "$bin"
+          for item in \
+            ffmpeg:05c6fd8b90601463bacd3e25fefe94fc77b8cf6affecab1bcd1b226741d3272f \
+            ffprobe:2b55ea948bae402d53c517bdadbaff8f480d7f811e93f865a68f21a098b8b5ef; do
+            exe="$(printf '%s' "$item" | cut -d: -f1)"
+            digest="$(printf '%s' "$item" | cut -d: -f2)"
+            if test -s "$bin/$exe" && printf '%s  %s\n' "$digest" "$bin/$exe" | sha256sum -c -; then
+              echo "SHARED_PINNED_FFMPEG_BINARY_CACHE_HIT:$exe"
+            else
+              curl --fail --silent --show-error --location --retry 2 --retry-delay 3 \
+                --connect-timeout 15 --max-time 240 \
+                "https://github.com/shaka-project/static-ffmpeg-binaries/releases/download/n8.1.2-2/$exe-linux-x64-ubuntu-24.04" \
+                --output "$bin/$exe"
+              printf '%s  %s\n' "$digest" "$bin/$exe" | sha256sum -c - || {
+                echo "UNTRUSTED_FFMPEG_BINARY_CHECKSUM" >&2
+                exit 1
+              }
+            fi
+            chmod 0755 "$bin/$exe"
+          done
+          "$bin/ffmpeg" -hide_banner -encoders > "$bin/encoders.txt"
+          grep -q 'libx264' "$bin/encoders.txt" || { echo "FFMPEG_H264_ENCODER_MISSING"; exit 1; }
+          "$bin/ffprobe" -hide_banner -version >/dev/null
+          echo "$bin" >> "$GITHUB_PATH"
+          echo "PINNED_FFMPEG_FFPROBE_SHA256_VERIFIED"
           timeout 270s python -m pip install --no-cache-dir 'faster-whisper==1.2.1'
       - name: Verify four unique rights-safe original MP4s and speech transcript similarity
         run: |

@@ -253,17 +253,17 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/unboda-shaka-ffmpeg
-          key: unboda-ffmpeg-shaka-n8.1.2-2-ubuntu24-x64-v1
+          key: unboda-ffmpeg-shaka-n8.1.2-2-portable-x64-v2
       - name: FFmpeg and Korean fonts
         run: |
           set -euo pipefail
-          # Google Shaka's published GPL FFmpeg+FFprobe, Ubuntu 24.04 x64.
+          # Shaka GPL FFmpeg+FFprobe generic x64 binaries, without Ubuntu24 VAAPI link requirements.
           # Exact release/tag and SHA256s checked before any media processing.
           bin="$RUNNER_TEMP/unboda-shaka-ffmpeg"
           mkdir -p "$bin"
           for item in \
-            ffmpeg:05c6fd8b90601463bacd3e25fefe94fc77b8cf6affecab1bcd1b226741d3272f \
-            ffprobe:2b55ea948bae402d53c517bdadbaff8f480d7f811e93f865a68f21a098b8b5ef; do
+            ffmpeg:9eac5b2b5076db5ff853a6fa0dcd6b8de7d0cac8481eadda6c47cd935825f1ee \
+            ffprobe:065d3c56926052a76e884c4e4b51b7d95248da9391ab7effdcca6b94ceab98cf; do
             exe="$(printf '%s' "$item" | cut -d: -f1)"
             digest="$(printf '%s' "$item" | cut -d: -f2)"
             if test -s "$bin/$exe" && printf '%s  %s\n' "$digest" "$bin/$exe" | sha256sum -c -; then
@@ -271,7 +271,7 @@ jobs:
             else
               curl --fail --silent --show-error --location --retry 2 --retry-delay 3 \
                 --connect-timeout 15 --max-time 240 \
-                "https://github.com/shaka-project/static-ffmpeg-binaries/releases/download/n8.1.2-2/$exe-linux-x64-ubuntu-24.04" \
+                "https://github.com/shaka-project/static-ffmpeg-binaries/releases/download/n8.1.2-2/$exe-linux-x64" \
                 --output "$bin/$exe"
               printf '%s  %s\n' "$digest" "$bin/$exe" | sha256sum -c - || {
                 echo "UNTRUSTED_FFMPEG_BINARY_CHECKSUM" >&2
@@ -467,17 +467,17 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/unboda-shaka-ffmpeg
-          key: unboda-ffmpeg-shaka-n8.1.2-2-ubuntu24-x64-v1
+          key: unboda-ffmpeg-shaka-n8.1.2-2-portable-x64-v2
       - name: Install FFmpeg and independent Korean speech ASR
         run: |
           set -euo pipefail
-          # Google Shaka's published GPL FFmpeg+FFprobe, Ubuntu 24.04 x64.
+          # Shaka GPL FFmpeg+FFprobe generic x64 binaries, without Ubuntu24 VAAPI link requirements.
           # Exact release/tag and SHA256s checked before any media processing.
           bin="$RUNNER_TEMP/unboda-shaka-ffmpeg"
           mkdir -p "$bin"
           for item in \
-            ffmpeg:05c6fd8b90601463bacd3e25fefe94fc77b8cf6affecab1bcd1b226741d3272f \
-            ffprobe:2b55ea948bae402d53c517bdadbaff8f480d7f811e93f865a68f21a098b8b5ef; do
+            ffmpeg:9eac5b2b5076db5ff853a6fa0dcd6b8de7d0cac8481eadda6c47cd935825f1ee \
+            ffprobe:065d3c56926052a76e884c4e4b51b7d95248da9391ab7effdcca6b94ceab98cf; do
             exe="$(printf '%s' "$item" | cut -d: -f1)"
             digest="$(printf '%s' "$item" | cut -d: -f2)"
             if test -s "$bin/$exe" && printf '%s  %s\n' "$digest" "$bin/$exe" | sha256sum -c -; then
@@ -485,7 +485,7 @@ jobs:
             else
               curl --fail --silent --show-error --location --retry 2 --retry-delay 3 \
                 --connect-timeout 15 --max-time 240 \
-                "https://github.com/shaka-project/static-ffmpeg-binaries/releases/download/n8.1.2-2/$exe-linux-x64-ubuntu-24.04" \
+                "https://github.com/shaka-project/static-ffmpeg-binaries/releases/download/n8.1.2-2/$exe-linux-x64" \
                 --output "$bin/$exe"
               printf '%s  %s\n' "$digest" "$bin/$exe" | sha256sum -c - || {
                 echo "UNTRUSTED_FFMPEG_BINARY_CHECKSUM" >&2

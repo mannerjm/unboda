@@ -42,7 +42,7 @@ jobs:
           import {readFileSync} from 'node:fs';
           import {reviewLifestyleVideoScript} from './automation/social/lifestyle-video-planner.mjs';
           const s=JSON.parse(readFileSync('./automation/social/lifestyle-pilot/episodes/002-afterwork.json','utf8'));
-          const q=reviewLifestyleVideoScript({situation:s.situation,narrationDraft:s.narrationDraft});
+          const q=reviewLifestyleVideoScript({situation:s.situation,narrationDraft:s.narrationDraft,editorialFormat:s.editorialFormat});
           if(!q.ok||s.automatedPublicationAllowed!==false)throw Error('EDITORIAL_DRY_RUN_BLOCKED:'+q.reasons.join(','));
           console.log('LIFESTYLE_FIRST_PASS_EDITORIAL_QA_OK_REQUIRES_VERIFIED_90_DAY_LEDGER');
           NODE

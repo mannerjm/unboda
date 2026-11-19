@@ -40,7 +40,19 @@ def verify(brief):
     lines=brief.get("narrationDraft")
     if not isinstance(lines,list) or len(lines)!=4 or any(not isinstance(x,str) or len(x)<15 or len(x)>100 for x in lines):
         raise ValueError("FOUR_VALID_KOREAN_VOICES_REQUIRED")
-    if not brief.get("editorialFormat") and not lines[0].startswith(brief.get("situation","")):raise ValueError("REAL_LIFE_OPENING_REQUIRED")
+    # A saju-first question is the approved new funnel. Do not allow arbitrary
+    # editorialFormat values to bypass the legacy real-situation opening gate.
+    editorial_format=brief.get("editorialFormat")
+    approved_formats=("curiosity","empathy","service_demo","difference")
+    if editorial_format:
+        if editorial_format not in approved_formats:
+            raise ValueError("UNAPPROVED_VIDEO_EDITORIAL_FORMAT")
+        if not any(word in lines[0] for word in ("사주","궁합","재물운")) or not lines[0].endswith(("?","？")):
+            raise ValueError("SAJU_FIRST_QUESTION_REQUIRED")
+        if brief.get("destination")!="https://unboda.kr/guest-saju":
+            raise ValueError("SAJU_FIRST_NEEDS_DIRECT_FREE_ANALYSIS_DESTINATION")
+    elif not lines[0].startswith(brief.get("situation","")):
+        raise ValueError("REAL_LIFE_OPENING_REQUIRED")
     scenes=brief.get("scenes")
     if not isinstance(scenes,list) or len(scenes)!=4:raise ValueError("FOUR_SCENES_REQUIRED")
     d=ImageDraw.Draw(Image.new("RGB",(W,H)))
@@ -55,6 +67,8 @@ def verify(brief):
         for text,f in [(titles[0],font(55,True)),(titles[1],font(55,True)),(caption,font(25))]:
             b=d.textbbox((0,0),text,font=f)
             if b[2]-b[0]>W-120:raise ValueError("HEADLINE_SAFE_WIDTH_OVERFLOW")
+    if editorial_format and "사주" not in " ".join(scenes[0]["headline"]):
+        raise ValueError("FIRST_COVER_MUST_SHOW_SAJU")
     motif=brief.get("visualMotif")
     evidence=VISUAL_MOTIFS.get(motif)
     if not evidence or evidence["category"]!=brief.get("sajuCategory"):

@@ -16,7 +16,10 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: unboda-daily-video-media-${{ github.ref }}
+  # Scheduled backups remain serialized. A new code-fix push may proceed on
+  # its own recovery lane instead of waiting behind an unhealthy scheduled run.
+  # Both lanes still check the same immutable date-tagged release; never POST.
+  group: unboda-daily-video-media-${{ github.ref }}-${{ github.event_name == 'push' && 'code-repair' || 'scheduled' }}
   cancel-in-progress: false
 jobs:
   preflight:
@@ -107,9 +110,9 @@ jobs:
         if: steps.check.outputs.skip_release != 'true'
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq fonts-noto-cjk fontconfig
-          python -m pip install --disable-pip-version-check --quiet 'Pillow==11.3.0'
+          timeout 240s sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=25 -o Acquire::https::Timeout=25 update -qq
+          timeout 240s sudo apt-get -o Dpkg::Lock::Timeout=30 install -y -qq fonts-noto-cjk fontconfig
+          timeout 150s python -m pip install --disable-pip-version-check --quiet 'Pillow==11.3.0'
           python -m unittest discover -s automation/social/lifestyle-pilot -p 'test_*.py' -v
   voice-model:
     needs: preflight
@@ -221,9 +224,9 @@ jobs:
           python-version: '3.10'
       - name: FFmpeg and Korean fonts
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk fontconfig
-          python -m pip install --no-cache-dir 'Pillow==11.3.0'
+          timeout 240s sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=25 -o Acquire::https::Timeout=25 update -qq
+          timeout 240s sudo apt-get -o Dpkg::Lock::Timeout=30 install -y -qq ffmpeg fonts-noto-cjk fontconfig
+          timeout 150s python -m pip install --no-cache-dir 'Pillow==11.3.0'
       - name: Check renderer before work
         run: |
           python -m unittest discover -s automation/social/lifestyle-pilot -p 'test_*.py' -v
@@ -377,9 +380,9 @@ jobs:
           python-version: '3.11'
       - name: Install FFmpeg and independent Korean speech ASR
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
-          python -m pip install --no-cache-dir 'faster-whisper==1.2.1'
+          timeout 240s sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=25 -o Acquire::https::Timeout=25 update -qq
+          timeout 240s sudo apt-get -o Dpkg::Lock::Timeout=30 install -y -qq ffmpeg
+          timeout 270s python -m pip install --no-cache-dir 'faster-whisper==1.2.1'
       - name: Verify four unique rights-safe original MP4s and speech transcript similarity
         run: |
           set -euo pipefail

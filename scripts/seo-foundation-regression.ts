@@ -35,7 +35,6 @@ for (const path of [
   "/",
   "/guest-saju",
   "/deep-analysis",
-  "/special-analysis",
   "/special-analysis/compatibility",
   "/reviews",
   "/trust",
@@ -45,6 +44,7 @@ for (const path of [
 ]) {
   assert(urls.has(`${SITE_ORIGIN}${path}`), `sitemap missing public route: ${path}`);
 }
+assert(!urls.has(`${SITE_ORIGIN}/special-analysis`), "redirect-only legacy hub must not be submitted for indexing");
 
 for (const forbidden of [
   "/admin",
@@ -170,11 +170,11 @@ assert(legalPageSource.includes("<h1") && legalPageSource.includes('href="/"'),
 
 const existingSeoPages = entries.filter((entry) => !new URL(entry.url).pathname.startsWith("/blog"));
 const originalPhaseOneUrls = existingSeoPages.filter((entry) => !new URL(entry.url).pathname.startsWith("/special-analysis/compatibility/guide/"));
-assert.equal(originalPhaseOneUrls.length, 67, "original phase 1 sitemap routes must remain intact");
+assert.equal(originalPhaseOneUrls.length, 66, "57 paid products and 9 canonical public routes must remain intact");
 for (const slug of COMPATIBILITY_GUIDE_SLUGS) {
   assert(urls.has(`${SITE_ORIGIN}${getCompatibilityPublicGuidePath(slug)}`), `public compatibility guide missing: ${slug}`);
 }
-assert.equal(existingSeoPages.length, 74, "existing 57 paid products + 10 public + 7 compatibility sitemap pages must remain intact");
+assert.equal(existingSeoPages.length, 73, "57 paid products + 9 canonical public + 7 compatibility sitemap pages must remain intact");
  
 // The public entry must provide crawlable product links without clicking client-only
 // category buttons. Keep all 57 links scoped to the existing Launch registry.

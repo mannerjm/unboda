@@ -1,0 +1,28 @@
+name: UNBODA Korean narration scene timing unit (NO PUBLISH)
+on:
+  pull_request:
+    paths:
+      - 'automation/social/lifestyle-pilot/narrate.py'
+      - 'automation/social/lifestyle-pilot/test_narrate_timing.py'
+      - '.github/workflows/unboda-korean-voice-timing-unit.yml'
+  push:
+    branches: [test/social-automation-safety-poc-20261023]
+    paths:
+      - 'automation/social/lifestyle-pilot/narrate.py'
+      - 'automation/social/lifestyle-pilot/test_narrate_timing.py'
+      - '.github/workflows/unboda-korean-voice-timing-unit.yml'
+permissions:
+  contents: read
+jobs:
+  test-timing-no-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Confirm scene-center gap fix and strict no-overrun bounds
+        run: python -m unittest discover -s automation/social/lifestyle-pilot -p 'test_narrate_timing.py' -v

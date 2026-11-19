@@ -236,6 +236,14 @@ function generate(day){
    {headline:PRACTICE_FRAMES[editorialFormat],subline:'내 출생 정보로 결과 확인',illustration:pics[2]},
    {headline:['무료 사주','바로 조회하기'],subline:'운보다 무료 사주 · '+p.title,illustration:pics[3]}
   ];
+  // Keep the real situation visible alongside the saju-first question.
+  // The downstream topic-visual guard requires a genuine scene/motif term.
+  assert(visible.situationTerms.some(term=>scenes[0].headline.join(' ').includes(term)),
+    'SAJU_FIRST_COVER_MOTIF_TERM_MISSING:'+motif);
+  assert(scenes[0].headline[0].includes('사주'),
+    'SAJU_FIRST_COVER_PROMISE_MISSING:'+motif);
+  assert(strategy.cover.replace(/\s/g,'').length<=11,
+    'MOBILE_SAJU_COVER_SECOND_LINE_TOO_LONG:'+motif);
   const visualConcepts=[0,1,2,3].map((s)=>
    ['첫','두 번째','세 번째','마지막'][s]+' 장면에서 '+situation+' 상황과 '+visible.label+
    ', '+visible.visualTerms[0]+'을 실제 주제 그림으로 보여주고 움직이는 화면');

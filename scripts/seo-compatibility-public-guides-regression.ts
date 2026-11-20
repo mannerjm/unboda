@@ -68,7 +68,8 @@ assert(!guidePage.includes("redirect(") && !guidePage.includes("PaidCompatibilit
 
 const hub = readFileSync("app/special-analysis/compatibility/page.tsx", "utf8");
 assert(!hub.includes("compatibility-public-guides-heading") && !hub.includes("로그인 전에 7가지 궁합을 비교해 보세요"), "keep the compact catalog without the redundant guide comparison panel");
-assert(hub.includes("<CompatibilityGuideDiscoveryLinks />"), "public catalog must expose guide discovery without changing product entry cards");
+assert(!hub.includes("CompatibilityGuideDiscoveryLinks") && !hub.includes("관계별 궁합 안내 보기"),
+  "customer requested removal of the guide directory from the five-card catalog on all screen sizes");
 const guideDirectoryHtml = renderToStaticMarkup(createElement(CompatibilityGuideDiscoveryLinks));
 const guideHrefs = [...guideDirectoryHtml.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
 assert.deepEqual(new Set(guideHrefs), paths, "server-rendered links must reach every sitemap guide without JavaScript or login");

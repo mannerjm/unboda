@@ -90,12 +90,13 @@ assert(detail.includes("getReadablePaidQuestion(product.id, product.title)")
 assert(detail.includes("PREMIUM_PRODUCT_PHOTOS[product.id]")
   && detail.includes("images.pexels.com/photos/")
   && detail.includes("photo.sourcePage.match")
-  && detail.includes('className="object-contain"')
+  && detail.includes("fit=crop&w=1200&h=900")
+  && detail.includes('className="object-cover object-center"')
   && detail.includes("aspect-[4/3]")
   && detail.includes("onError={() => setPhotoFallback(true)}"),
-  "every launched photo must be natural aspect, high resolution and backed by local fallback");
-assert(!detail.includes("object-cover") && !detail.includes("fixed inset-x"),
-  "detail images or buttons must not crop faces or obstruct customer text");
+  "all 56 nonpilot covers must use a true high-resolution, centered 4:3 crop of their unique Pexels photo, with first-party fallback");
+assert(!detail.includes('className="object-contain"') && !detail.includes("fixed inset-x"),
+  "never shrink portrait sources into blank side margins or obstruct detail text");
 assert.equal((detail.match(/href=\{href\}/g) ?? []).length, 1,
   "one state-aware bottom purchase link per generic detail");
 assert(detail.indexOf('id="customer-purchase-action"') > detail.indexOf("<ProductReviewSummary"),

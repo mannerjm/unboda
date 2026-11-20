@@ -79,8 +79,9 @@ export default function MoneySharedFinancePilotDetail({
   const headlineLead = commaIndex >= 0 ? headline.slice(0, commaIndex + 1) : headline;
   const headlineRest = commaIndex >= 0 ? headline.slice(commaIndex + 1).trim() : "";
   const photo = PREMIUM_PRODUCT_PHOTOS["money-shared-finance"];
-  // Pexels original 3817×2736; local 330×265 stays as fallback only.
-  const originalPhotoUrl = "https://images.pexels.com/photos/6964105/pexels-photo-6964105.jpeg?auto=compress&cs=tinysrgb&w=1200";
+  // Keep the original pilot photo and subject framing, matching the 4:3
+  // high-resolution center crop used across the other 56 detail pages.
+  const originalPhotoUrl = "https://images.pexels.com/photos/6964105/pexels-photo-6964105.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1200&h=900";
   const preview = buildPaidAnalysisV4PreviewModel(product);
 
   const handleSave = async () => {
@@ -140,7 +141,7 @@ export default function MoneySharedFinancePilotDetail({
                 priority
                 onError={() => setPhotoFallback(true)}
                 sizes="(max-width: 640px) 90vw, (max-width: 1024px) 390px, 390px"
-                className="object-contain"
+                className="object-cover object-center"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#261831]/85 via-[#261831]/20 to-transparent px-5 pb-4 pt-14 text-white">
                 <p className="break-keep text-sm font-extrabold leading-6">함께 쓰는 돈, 서로의 기준부터 살펴보세요.</p>

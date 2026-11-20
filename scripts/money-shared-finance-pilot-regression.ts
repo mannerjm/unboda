@@ -21,7 +21,9 @@ assert.equal((shared.match(/product\.id === "money-shared-finance"/g) ?? []).len
   "only the shared-finance product may opt in to this visual pilot");
 assert(shared.includes('import MoneySharedFinancePilotDetail from "@/app/components/MoneySharedFinancePilotDetail"'),
   "shared detail must import the pilot");
-assert(shared.includes('<MoneySharedFinancePilotDetail') && shared.includes('const isPeriod = product.kind === "PERIOD"'),
+assert(shared.includes('<MoneySharedFinancePilotDetail') && shared.includes('<CustomerFirstPremiumDetail')
+  && shared.includes('getLaunchProductIds().includes(product.id)')
+  && shared.includes('const isPeriod = product.kind === "PERIOD"'),
   "the unchanged pilot and nonlaunch fallback stay available");
 assert(shared.includes('<PremiumReportValuePreview') && shared.includes('<ProductReviewSummary'),
   "ordinary product detail report preview and verified reviews must remain");
@@ -77,9 +79,9 @@ assert(!pilot.includes("내 사주로 자세히 알아보기") && !pilot.include
   "redundant hero buttons must not return");
 
 // All launched product details omit the duplicate legacy cover strip.
-assert(marketplace.includes('selected.id !== "money-shared-finance" ? ('),
+assert(marketplace.includes('!LAUNCHED_CUSTOMER_FIRST_IDS.has(selected.id) ? ('),
   "pilot's redundant legacy product banner should be hidden");
-assert(marketplace.includes('selected.id === "money-shared-finance" ? "p-0" : "p-3 sm:p-5"'),
+assert(marketplace.includes('LAUNCHED_CUSTOMER_FIRST_IDS.has(selected.id) ? "p-0" : "p-3 sm:p-5"'),
   "pilot uses edge-to-edge hero while all other details preserve original padding");
 assert(marketplace.includes("<PremiumProductDetail") && marketplace.includes("money(selected.id)"),
   "other products must retain original detail/price header and navigation");
@@ -130,7 +132,7 @@ assert(pilot.includes('onError={() => setPhotoFallback(true)}'), "CDN failure mu
 assert(pilot.includes("🧾") && pilot.includes("💬") && pilot.includes("🔄"),
   "story section must visually distinguish the three worries without a card wall");
 // Four requested polish changes apply ONLY to this single pilot product.
-assert(marketplace.includes('selected.id === "money-shared-finance" ? "상품 목록"'),
+assert(marketplace.includes('LAUNCHED_CUSTOMER_FIRST_IDS.has(selected.id) ? (isPeriod ? "기간 선택" : "상품 목록")'),
   "all launch back buttons must omit the leading arrow");
 assert(marketplace.includes('onClick={()=>onSelectProduct(null)}'),
   "product-list button must still navigate back to the catalog");
@@ -197,14 +199,14 @@ assert(questionLabels.includes('"money-shared-finance": "' + pilotQuestion + '"'
   "exactly one shared readable customer question should be defined for the pilot");
 assert(marketplace.includes("getReadablePaidQuestion(product.id,question??product.title)"),
   "catalog list must read the centrally defined pilot question");
-assert(marketplace.includes('product.id === "money-shared-finance" ? (')
+assert(marketplace.includes('LAUNCHED_CUSTOMER_FIRST_IDS.has(product.id) ? (')
   && marketplace.includes('<h3 className="line-clamp-3 text-[16px] font-extrabold')
   && marketplace.includes('<h3 className="line-clamp-2 text-[16px] font-extrabold'),
   "catalog should show all launched product questions in up to 3 lines");
 assert(pilot.includes('const headline = getReadablePaidQuestion(product.id, product.title)')
   && pilot.includes("{headlineLead}{headlineRest ?"),
   "pilot detail hero must share the catalog question, not duplicate hard-coded copy");
-assert(checkoutPage.includes('premiumProduct?.id === "money-shared-finance"')
+assert(checkoutPage.includes('premiumProduct && getLaunchProductIds().includes(premiumProduct.id)')
   && checkoutPage.includes('getReadablePaidQuestion(premiumProduct.id, premiumProduct.title)')
   && checkoutPage.includes("{checkoutQuestion}"),
   "all launched checkouts show the same readable question as list/detail");

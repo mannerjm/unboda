@@ -25,7 +25,7 @@ export const READABLE_PAID_QUESTIONS: Readonly<Record<string, string>> = {
   "money-income-stability": "수입이 불안정할 때 무엇부터 점검할까요?",
   "money-debt-repayment": "빚을 갚을 때 무엇부터 살펴봐야 할까요?",
   "money-emergency-buffer": "갑자기 돈이 필요할 때 어떻게 대비할까요?",
-  "money-shared-finance": "함께 쓰는 돈을 어떻게 나누고 관리할까요?",
+  "money-shared-finance": "함께 쓰는 돈, 왜 나만 더 부담하는 것 같을까요?",
   "money-contract-commitment": "오래 유지해야 하는 계약, 무엇부터 확인할까요?",
   "money-spending-decision": "큰돈을 쓰기 전에 무엇을 따져봐야 할까요?",
 

@@ -80,6 +80,13 @@ for (const [group, motifs] of Object.entries(motifGroups)) {
  }
 }
 assert.equal(allOpenings.size,448,"all four daily videos need a distinct, situation-specific question across 112 days");
+const differenceExplainers = Object.values(strategy.groups).map(group => group.difference.explanation);
+assert.equal(new Set(differenceExplainers).size, 4, "every topic needs its own saju curiosity explanation");
+for (const line of differenceExplainers) {
+ assert(!/AI\s*상담|유료|리포트\s*뒤/.test(line),
+   "future shorts must build curiosity about free saju before any paid AI consulting pitch");
+ assert(/사주/.test(line), "every second scene must be explicitly tied to saju");
+}
 for(const [g,byMode]of Object.entries(strategy.groups)){
  assert.equal(Object.keys(byMode).length,4);
  for(const mode of strategy.modes){

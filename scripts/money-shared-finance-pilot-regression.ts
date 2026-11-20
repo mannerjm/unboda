@@ -120,13 +120,15 @@ assert(pilot.includes('className="flex min-h-12 w-full items-center') && pilot.i
   && pilot.includes("text-[clamp(1.7rem,5.7vw,2.7rem)]")
   && pilot.includes("sm:grid-cols-2") && pilot.includes("min-w-0"),
   "pilot must keep responsive text and CTA at narrow widths");
-// Same licensed Pexels source, delivered from the original-resolution CDN.
+// Same pilot image and source: a high-resolution, 4:3 cropped photo, never a
+// tiny portrait in a wide frame or an upscaled 330px thumbnail.
 assert(pilot.includes("images.pexels.com/photos/6964105/pexels-photo-6964105.jpeg")
+  && pilot.includes("fit=crop&w=1200&h=900")
   && pilot.includes("photoFallback ? photo.src : originalPhotoUrl")
-  && pilot.includes('className="object-contain"')
+  && pilot.includes('className="object-cover object-center"')
   && pilot.includes("aspect-[4/3]")
-  && !pilot.includes('className="object-cover"'),
-  "pilot photo must not enlarge/crop the old 330px local thumbnail");
+  && !pilot.includes('className="object-contain"'),
+  "established pilot must use the same consistent photo fill and CDN resolution");
 assert(pilot.includes('onError={() => setPhotoFallback(true)}'), "CDN failure must retain local fallback");
 assert(pilot.includes("🧾") && pilot.includes("💬") && pilot.includes("🔄"),
   "story section must visually distinguish the three worries without a card wall");

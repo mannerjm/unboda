@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
-import CompatibilityGuideDiscoveryLinks from "@/app/components/CompatibilityGuideDiscoveryLinks";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
@@ -148,7 +147,6 @@ export default async function CompatibilityAnalysisPage() {
           <p className="mt-5 text-xs leading-6 text-[#837491]">
             각 궁합을 선택하면 관계 유형과 분석할 상대를 확인한 뒤 기존 결제·리포트·AI 상담 경로로 연결됩니다.
           </p>
-          <CompatibilityGuideDiscoveryLinks />
         </div>
       </main>
     </AppShell>

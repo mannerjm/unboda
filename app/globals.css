@@ -112,3 +112,17 @@ body {
     transition-duration: 0.01ms;
   }
 }
+
+
+/*
+ * Shared-finance pilot only: when this selected detail is mounted, skip the
+ * generic catalog discovery banner. This also works for in-page selection
+ * without a productId query parameter and restores the banner on back.
+ * Other catalog items retain the original discovery layout.
+ */
+@supports selector(main:has(section)) {
+  main[data-deep-analysis-page]:has([data-pilot-product="money-shared-finance"])
+    [data-deep-analysis-discovery-banner] {
+    display: none;
+  }
+}

@@ -11,7 +11,6 @@ import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
 import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
 import { buildPaidAnalysisV4PreviewModel } from "@/app/lib/paidAnalysisV4PreviewModel";
 import ProductReviewSummary from "@/app/components/ProductReviewSummary";
-import TrustPrinciplesCard from "@/app/components/TrustPrinciplesCard";
 
 type Props = {
   product: PremiumProductDefinition;
@@ -276,23 +275,7 @@ export default function MoneySharedFinancePilotDetail({
                 <li>새로 구매한 리포트는 결제일부터 12개월 동안 구매한 분석에서 다시 볼 수 있어요.</li>
               </ol>
             </details>
-            {state === "not_purchased" ? (
-              <details className="group rounded-xl border border-[#e5dcef] bg-white px-3 py-2">
-                <summary className="cursor-pointer rounded-lg px-2 py-2 text-sm font-extrabold text-[#644696] transition-colors hover:bg-[#f7f1ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#704ad0]">
-                  운보다 이용 원칙 자세히 보기
-                </summary>
-                <TrustPrinciplesCard compact inlineDetails />
-              </details>
-            ) : null}
           </div>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={savedState || isSaving}
-            className="mt-5 rounded-xl border border-[#d9cbea] bg-white px-4 py-3 text-sm font-bold text-[#654789] transition hover:bg-[#f7f1ff] disabled:cursor-default disabled:opacity-60"
-          >
-            {isSaving ? "저장 중..." : savedState ? "관심 분석에 저장됨" : "관심 분석에 저장"}
-          </button>
         </section>
 
         {state === "not_purchased" ? <ProductReviewSummary productId={product.id} compactWhenEmpty /> : null}
@@ -309,13 +292,23 @@ export default function MoneySharedFinancePilotDetail({
               <p className="text-xs font-semibold text-[#77678a]">공동 재정 경계 분석</p>
               <p className="mt-1 text-2xl font-black text-[#39234f]">{price}</p>
             </div>
-            {href ? (
+            <div className="flex w-full min-w-0 flex-col gap-2">
+              {href ? (
               <Link href={href} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-[#704ad0] px-4 py-3 text-center text-base font-extrabold text-white transition hover:bg-[#5e38bd] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#704ad0]">
                 {ACTION_LABELS[state]}
               </Link>
             ) : (
               <p className="text-sm font-semibold text-[#6d5983]">분석할 프로필을 선택한 뒤 리포트를 확인해 주세요.</p>
-            )}
+              )}
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={savedState || isSaving}
+                className="flex min-h-12 w-full items-center justify-center rounded-xl border border-[#d9cbea] bg-white px-4 py-3 text-center text-sm font-bold text-[#654789] transition hover:bg-[#f7f1ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#704ad0] disabled:cursor-default disabled:opacity-60"
+              >
+                {isSaving ? "저장 중..." : savedState ? "관심 분석에 저장됨" : "관심 분석에 저장"}
+              </button>
+            </div>
           </div>
           {state === "not_purchased" ? (
             <p className="mt-3 break-keep text-xs leading-6 text-[#77698a]">버튼을 누르면 결제 내용을 확인하는 화면으로 이동합니다.</p>

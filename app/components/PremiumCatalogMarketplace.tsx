@@ -324,7 +324,7 @@ export default function PremiumCatalogMarketplace({
         </div>
 
         {selected ? (
-          <div className="overflow-hidden rounded-[1.8rem] border border-[#e7daf8] bg-white shadow-[0_15px_40px_rgba(90,57,152,.08)]">
+          <div data-premium-detail-active="true" className="overflow-hidden rounded-[1.8rem] border border-[#e7daf8] bg-white shadow-[0_15px_40px_rgba(90,57,152,.08)]">
             <div className="flex items-center justify-between gap-3 border-b border-[#f0e8f9] px-5 py-4 sm:px-6">
               <button type="button" onClick={()=>onSelectProduct(null)} className="rounded-full border border-[#e1d2f4] px-4 py-2 text-xs font-bold text-[#69449e] hover:bg-[#f6efff]">{selected.id === "money-shared-finance" ? "상품 목록" : <>← {isPeriod?"기간 선택":"상품 목록"}</>}</button>
               <span className="text-xs font-semibold text-[#9a88aa]">{isPeriod?"기간별 분석":currentGroup?.label}</span>

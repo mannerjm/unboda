@@ -11,6 +11,8 @@ import {
 
 const shell = readFileSync("app/components/AppShell.tsx", "utf8");
 const listing = readFileSync("app/special-analysis/compatibility/page.tsx", "utf8");
+const detailHero = readFileSync("app/components/CompatibilityDetailHero.tsx", "utf8");
+const reportPreview = readFileSync("app/components/CompatibilityReportValuePreview.tsx", "utf8");
 
 assert(shell.includes('item.activeHref === "/special-analysis" && pathname.startsWith("/special-analysis")'), "Professional analysis must expose the submenu on index and child routes");
 assert(shell.includes('href="/special-analysis/compatibility"') && shell.includes("궁합"), "Sidebar must link to the two-character 궁합 submenu");
@@ -39,4 +41,16 @@ assert(listing.includes("compatibilityCards.map(") && listing.includes("<Image")
 assert(listing.includes("md:grid-cols-2") && listing.includes('text-[16px] font-extrabold leading-[1.4]'), "Keep compact two-column, deep-analysis style cards");
 assert(listing.includes('getActiveProfile(') && listing.includes('getCurrentUser('), "Existing auth/profile context must remain");
 assert(listing.includes('href={product.href}') && listing.includes('product.amount.toLocaleString("ko-KR")'), "Actual checkout entry and canonical price must be shown");
-console.log("compatibility photo storefront regression passed: 5 self-hosted photos, 5 canonical entry routes, protected account context");
+assert(!listing.includes("CompatibilityGuideDiscoveryLinks") && !listing.includes("관계별 궁합 안내 보기"),
+  "remove guide directory from compatibility catalog for both desktop and mobile");
+for (const [surface, source] of [["detail hero", detailHero], ["report preview", reportPreview]] as const) {
+  assert(source.includes('src: PREMIUM_PRODUCT_PHOTOS["relationship-current"].src')
+    && source.includes('alt: PREMIUM_PRODUCT_PHOTOS["relationship-current"].alt'),
+    surface + " must use the same canonical photo and alt as the romantic catalog card");
+  assert(!source.includes('src: "/images/premium/relationship-marriage.jpg"'),
+    surface + " must not show a different wedding-ring photo for the romantic product");
+}
+assert(listing.includes('photoId: "relationship-current"')
+  && PREMIUM_PRODUCT_PHOTOS["relationship-current"].src === "/images/premium/relationship-current.jpg",
+  "romantic catalog, detail hero and preview must resolve to one canonical first-party image");
+console.log("compatibility photo storefront regression passed: no catalog guide accordion, same romantic image in catalog/hero/preview, 5 canonical entry routes");

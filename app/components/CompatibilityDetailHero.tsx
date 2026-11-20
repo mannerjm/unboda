@@ -1,11 +1,12 @@
 import Image from "next/image";
+import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 
 type CompatibilityHeroMode = "romantic" | "workplace" | "friend" | "business" | "family";
 
 const HERO_VISUALS: Record<CompatibilityHeroMode, { src: string; alt: string; question: string }> = {
   romantic: {
-    src: "/images/premium/relationship-marriage.jpg",
-    alt: "함께 미래를 이야기하는 연인",
+    src: PREMIUM_PRODUCT_PHOTOS["relationship-current"].src,
+    alt: PREMIUM_PRODUCT_PHOTOS["relationship-current"].alt,
     question: "두 사람은 어떤 부분에서 잘 맞을까요?",
   },
   workplace: {

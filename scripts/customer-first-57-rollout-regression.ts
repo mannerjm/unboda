@@ -102,10 +102,31 @@ assert(detail.indexOf('id="customer-purchase-action"') > detail.indexOf("<Produc
   "one checkout/report entry should be at the very bottom after real reviews");
 assert(!detail.includes('aria-hidden="true">→</span>'),
   "bottom purchase button must be arrow-free");
-assert(detail.includes("TrustPrinciplesCard compact inlineDetails")
-  && detail.includes("ProductReviewSummary productId={product.id} compactWhenEmpty")
+assert(!detail.includes("운보다 이용 원칙 자세히 보기")
+  && !detail.includes("TrustPrinciplesCard")
+  && !pilot.includes("운보다 이용 원칙 자세히 보기"),
+  "hide the redundant trust accordion on all 57 premium detail pages");
+assert(detail.includes("ProductReviewSummary productId={product.id} compactWhenEmpty")
   && detail.includes("saveAnalysisAction(product.id)"),
-  "pilot trust/review/save interaction patterns must carry over");
+  "verified reviews and authoritative interest-saving action must remain");
+for (const [source, ctaId] of [
+  [detail, "customer-purchase-action"],
+  [pilot, "finance-purchase-action"],
+] as const) {
+  const ctaIndex = source.indexOf('id="' + ctaId + '"');
+  assert(ctaIndex > source.indexOf("<ProductReviewSummary"), "bottom purchase must stay after reviews: " + ctaId);
+  assert.equal((source.match(/onClick=\{handleSave\}/g) ?? []).length, 1, "one save action: " + ctaId);
+  assert(!source.slice(0, ctaIndex).includes("onClick={handleSave}"),
+    "save interest must not appear above the final purchase section: " + ctaId);
+  const bottom = source.slice(ctaIndex);
+  assert(bottom.indexOf("{ACTION_LABELS[state]}") >= 0
+    && bottom.indexOf("{ACTION_LABELS[state]}") < bottom.indexOf("onClick={handleSave}"),
+    "outlined save must appear immediately below purchase/report button: " + ctaId);
+  assert(bottom.includes("disabled={savedState || isSaving}")
+    && bottom.includes("관심 분석에 저장됨")
+    && bottom.includes("flex w-full min-w-0 flex-col gap-2"),
+    "save control remains responsive and state-aware: " + ctaId);
+}
 assert(!detail.includes("requestPayment(") && !detail.includes("grantEntitlement("),
   "details must never implement financial or entitlement authority");
 assert.equal((pilot.match(/href=\{href\}/g) ?? []).length, 1,

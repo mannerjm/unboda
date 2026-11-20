@@ -8,6 +8,7 @@ const marketplace = readFileSync("app/components/PremiumCatalogMarketplace.tsx",
 const pricing = readFileSync("app/lib/productPricing.ts", "utf8");
 const previewModel = readFileSync("app/lib/paidAnalysisV4PreviewModel.ts", "utf8");
 const reviews = readFileSync("app/components/ProductReviewSummary.tsx", "utf8");
+const trustCard = readFileSync("app/components/TrustPrinciplesCard.tsx", "utf8");
 const page = readFileSync("app/deep-analysis/page.tsx", "utf8");
 const styles = readFileSync("app/globals.css", "utf8");
 
@@ -125,4 +126,38 @@ assert(pilot.includes("images.pexels.com/photos/6964105/pexels-photo-6964105.jpe
 assert(pilot.includes('onError={() => setPhotoFallback(true)}'), "CDN failure must retain local fallback");
 assert(pilot.includes("🧾") && pilot.includes("💬") && pilot.includes("🔄"),
   "story section must visually distinguish the three worries without a card wall");
+// Four requested polish changes apply ONLY to this single pilot product.
+assert(marketplace.includes('selected.id === "money-shared-finance" ? "상품 목록"'),
+  "pilot product-list button must omit its leading arrow");
+assert(marketplace.includes('onClick={()=>onSelectProduct(null)}'),
+  "product-list button must still navigate back to the catalog");
+assert(marketplace.includes('<>← {isPeriod?"기간 선택":"상품 목록"}</>'),
+  "other product/period detail back buttons must be unchanged");
+
+assert(pilot.includes("<TrustPrinciplesCard compact inlineDetails />"),
+  "pilot trust disclosure must expand full inline rules without another link");
+assert(pilot.includes('cursor-pointer rounded-lg') && pilot.includes("운보다 이용 원칙 자세히 보기"),
+  "trust summary must remain natively keyboard/mouse clickable");
+assert(trustCard.includes("inlineDetails = false") && trustCard.includes("!inlineDetails ? (")
+  && trustCard.includes("!compact || inlineDetails"),
+  "only opted-in trust card must hide its secondary link and show explanations");
+assert(trustCard.includes('href="/trust"'),
+  "ordinary trust cards must keep their original navigation");
+
+assert(reviews.includes('<Link href="/reviews" className="flex flex-wrap items-center'),
+  "the pilot's full empty-review panel must be click/tap navigable");
+assert(reviews.includes("후기 확인") && !reviews.includes("후기 확인 →"),
+  "the pilot review entry must not show the old arrow");
+assert(reviews.includes("summary.count === 0 && compactWhenEmpty")
+  && reviews.includes('summary.reviews.slice(0, 4)'),
+  "verified review data display and opt-in empty state must be intact");
+
+const purchaseArea = pilot.slice(pilot.indexOf('id="finance-purchase-action"'));
+assert(purchaseArea.includes("href={href}") && purchaseArea.includes("{ACTION_LABELS[state]}"),
+  "single bottom purchase must preserve correct state-specific checkout/report navigation");
+assert(!purchaseArea.includes('aria-hidden="true">→</span>'),
+  "the bottom purchase button must have no decorative arrow");
+assert.equal((pilot.match(/href=\{href\}/g) ?? []).length, 1,
+  "there must still be exactly one checkout/report navigation action");
+
 console.log("money-shared-finance-pilot-regression: PASS (one product only; checkout/report/AI unchanged)");

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 type Review = {
   id: string;
@@ -54,16 +55,18 @@ export default function ProductReviewSummary({ productId, compactWhenEmpty = fal
   // Published, purchase-verified reviews still use the unchanged full layout.
   if (summary.count === 0 && compactWhenEmpty) {
     return (
-      <section className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e9e1f3] bg-[#faf8fe] px-4 py-3" aria-label="구매 인증 후기">
-        <div className="min-w-0">
-          <p className="text-sm font-extrabold text-[#39254d]">구매 인증 후기</p>
-          <p className="mt-1 break-keep text-sm leading-6 text-[#786a84]">
-            아직 공개된 후기가 없습니다. 실제 구매 고객의 후기만 보여드립니다.
-          </p>
-        </div>
-        <a href="/reviews" className="shrink-0 text-sm font-bold text-[#6946b1] underline underline-offset-4">
-          후기 확인 →
-        </a>
+      <section className="mt-4" aria-label="구매 인증 후기">
+        <Link href="/reviews" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e9e1f3] bg-[#faf8fe] px-4 py-3 transition-colors hover:border-[#cbb4ea] hover:bg-[#f5effd] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#704ad0]">
+          <div className="min-w-0">
+            <p className="text-sm font-extrabold text-[#39254d]">구매 인증 후기</p>
+            <p className="mt-1 break-keep text-sm leading-6 text-[#786a84]">
+              아직 공개된 후기가 없습니다. 실제 구매 고객의 후기만 보여드립니다.
+            </p>
+          </div>
+          <span className="shrink-0 text-sm font-bold text-[#6946b1] underline underline-offset-4">
+            후기 확인
+          </span>
+        </Link>
       </section>
     );
   }
@@ -84,7 +87,7 @@ export default function ProductReviewSummary({ productId, compactWhenEmpty = fal
         ) : null}
       </div>
       <div className="mt-3">
-        <a href="/reviews" className="text-xs font-bold text-[#5e4bd1] underline underline-offset-4">전체 구매 인증 후기 보기 →</a>
+        <a href="/reviews" className="text-xs font-bold text-[#5e4bd1] underline underline-offset-4">{compactWhenEmpty ? "전체 구매 인증 후기 보기" : "전체 구매 인증 후기 보기 →"}</a>
       </div>
 
       {summary.count === 0 ? (

@@ -29,9 +29,9 @@ export default async function DeepAnalysisPage({ searchParams }: { searchParams?
   const initialProductId = getSingleParam(params.productId);
 
   const catalogContent = (
-      <main className="min-h-screen bg-[radial-gradient(ellipse_at_50%_0%,#ffffff_0%,#faf5ff_55%,#efe6ff_100%)] px-5 py-6 text-[#281744] sm:px-8 sm:py-7">
+      <main data-deep-analysis-page className="min-h-screen bg-[radial-gradient(ellipse_at_50%_0%,#ffffff_0%,#faf5ff_55%,#efe6ff_100%)] px-5 py-6 text-[#281744] sm:px-8 sm:py-7">
         <div className="mx-auto w-full max-w-6xl">
-          <section className="relative overflow-hidden rounded-[2rem] border border-[#e0d0f7] bg-[radial-gradient(circle_at_85%_12%,rgba(206,170,255,.45),transparent_36%),linear-gradient(130deg,#fffefe_0%,#f8f0ff_65%,#eae0ff_100%)] px-6 py-5 text-[#281744] shadow-[0_18px_48px_rgba(113,75,171,.11)] sm:px-8 sm:py-6">
+          <section data-deep-analysis-discovery-banner className="relative overflow-hidden rounded-[2rem] border border-[#e0d0f7] bg-[radial-gradient(circle_at_85%_12%,rgba(206,170,255,.45),transparent_36%),linear-gradient(130deg,#fffefe_0%,#f8f0ff_65%,#eae0ff_100%)] px-6 py-5 text-[#281744] shadow-[0_18px_48px_rgba(113,75,171,.11)] sm:px-8 sm:py-6">
             <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#7759db]/20 blur-3xl" />
             <div className="pointer-events-none absolute bottom-[-8rem] left-[18%] h-56 w-56 rounded-full bg-[#d36e9c]/10 blur-3xl" />
             <div className="relative grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">

@@ -209,9 +209,16 @@ function generate(day){
   assert(strategy&&PRACTICE_FRAMES[editorialFormat],'SAJU_FIRST_EDITION_MISSING');
   assert(typeof coverLine==='string'&&coverLine.replace(/\s/g,'').length<=11&&frameCopy,
     'COVER_HOOK_OR_CATEGORY_FRAMES_MISSING');
-  // Lead with a saju question, not a general life tip; one of each four
-  // funnel formats is published daily across the four original videos.
-  const hook=strategy.hook;
+  // Situation first, then an *open* saju question. Each of the 16 motifs
+  // has seven concrete everyday prompts; each prompt receives four different
+  // saju perspectives over the 112-day rotation. This prevents one generic
+  // voice opener from appearing in many otherwise unrelated videos.
+  const sajuSuffix=STRATEGY.curiositySuffixByGroup?.[g.name]?.[editorialFormat];
+  assert(typeof sajuSuffix==='string' && /사주|궁합|재물운/.test(sajuSuffix),
+    'SAJU_CURIOSITY_SUFFIX_MISSING:'+g.name+':'+editorialFormat);
+  const hook=coverLine+' '+sajuSuffix;
+  assert(compact(hook)>=26 && compact(hook)<=32 &&
+    /[?？]$/.test(hook),'SITUATIONAL_SAJU_OPENING_VOICE_OUT_OF_BOUNDS:'+g.name);
   const narrationDraft=[hook,strategy.explanation,STRATEGY.practices[editorialFormat],
    g.cta];
   const editorial=reviewLifestyleVideoScript({situation,narrationDraft,editorialFormat});
@@ -226,12 +233,12 @@ function generate(day){
   const old=JSON.parse(fs.readFileSync(briefFile,'utf8'));
   const illustrations=['rest','clock','message','notes'];
   const pics=illustrations.map((_,j)=>illustrations[(j+gi+i)%4]);
-  // Keep social media title identical to the topic-specific first-frame hook.
-  // It is not a truncated fragment of a Korean sentence.
-  const title=visible.label+' 사주 | '+strategy.cover;
+  // The headline seen in the first 2 seconds matches the spoken real-life
+  // question; never use a reusable generic slogan as the clickable thumbnail.
+  const title=visible.label+' 사주 | '+coverLine;
   assert(title.length>=5 && title.length<=26,'UNREADABLE_THUMBNAIL_TITLE');
   const scenes=[
-   {headline:[visible.label+' 사주',strategy.cover],subline:coverLine,illustration:pics[0]},
+   {headline:[visible.label+' 사주',coverLine],subline:strategy.cover,illustration:pics[0]},
    {headline:STRATEGY.titles[editorialFormat],subline:'사주로 시작하는 자기이해',illustration:pics[1]},
    {headline:PRACTICE_FRAMES[editorialFormat],subline:'내 출생 정보로 결과 확인',illustration:pics[2]},
    {headline:['무료 사주','바로 조회하기'],subline:'운보다 무료 사주 · '+p.title,illustration:pics[3]}
@@ -242,8 +249,9 @@ function generate(day){
     'SAJU_FIRST_COVER_MOTIF_TERM_MISSING:'+motif);
   assert(scenes[0].headline[0].includes('사주'),
     'SAJU_FIRST_COVER_PROMISE_MISSING:'+motif);
-  assert(strategy.cover.replace(/\s/g,'').length<=11,
-    'MOBILE_SAJU_COVER_SECOND_LINE_TOO_LONG:'+motif);
+  assert(coverLine.replace(/\s/g,'').length<=11 &&
+    title.endsWith(coverLine) && hook.startsWith(coverLine),
+    'MOBILE_SAJU_COVER_AND_SPOKEN_HOOK_MUST_MATCH:'+motif);
   const visualConcepts=[0,1,2,3].map((s)=>
    ['첫','두 번째','세 번째','마지막'][s]+' 장면에서 '+situation+' 상황과 '+visible.label+
    ', '+visible.visualTerms[0]+'을 실제 주제 그림으로 보여주고 움직이는 화면');
@@ -276,7 +284,7 @@ function generate(day){
  return out;
 }
 if(args['self-test']==='true'){
- const seen=new Set();
+ const seen=new Set(),spokenOpenings=new Set(),visualCovers=new Set();
  for(let i=0;i<112;i++){
   const d=new Date(Date.parse('2026-11-10T00:00:00Z')+i*86400000).toISOString().slice(0,10);
   const batch=generate(d);
@@ -285,9 +293,17 @@ if(args['self-test']==='true'){
    const identity=x.sajuCategory+'|'+x.visualMotif+'|'+x.situation+'|'+x.narrationDraft[2];
    assert(!seen.has(identity),'REPEATED_EDITORIAL_WITHIN_112_DAYS:'+identity);
    seen.add(identity);
+   const opening=x.narrationDraft[0];
+   assert(!spokenOpenings.has(opening),'REPEATED_SAJU_CURIOSITY_OPENING:'+opening);
+   spokenOpenings.add(opening);
+   visualCovers.add(x.scenes[0].headline.join(' | '));
+   assert(opening.startsWith(x.scenes[0].headline[1]) &&
+     x.thumbnailTitle.endsWith(x.scenes[0].headline[1]),
+     'FIRST_FRAME_AND_VOICE_NOT_MATCHING_SAJU_CURIOSITY:'+x.topicKey);
   }
  }
- assert(seen.size===448,'EXPECTED_112_DAYS_X_FOUR_DISTINCT_STORIES');
+ assert(seen.size===448 && spokenOpenings.size===448 && visualCovers.size===112,
+   'EXPECTED_448_DISTINCT_OPENING_VOICES_AND_112_UNIQUE_SITUATION_COVERS');
  console.log('PASS_112_DAY_EDITORIAL_ROTATION_448_DISTINCT_SCRIPTS');
  process.exit(0);
 }

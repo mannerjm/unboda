@@ -126,3 +126,20 @@ body {
     display: none;
   }
 }
+
+
+/*
+ * Mobile-only: the public 57-product directory is useful on the catalog, but
+ * duplicates navigation after reading an individual product detail.
+ * Keep all directory HTML/links intact for desktop and public discoverability.
+ * :has() updates immediately when the selected product opens/closes client-side.
+ * Applies to every selected deep-analysis detail, not just the finance pilot.
+ */
+@media (max-width: 639px) {
+  @supports selector(main:has([data-premium-detail-active])) {
+    main[data-deep-analysis-page]:has([data-premium-detail-active])
+      [data-paid-product-directory] {
+      display: none;
+    }
+  }
+}

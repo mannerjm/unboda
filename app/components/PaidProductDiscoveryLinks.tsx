@@ -17,7 +17,7 @@ export default function PaidProductDiscoveryLinks() {
   const periods = listPeriodCatalogProducts();
 
   return (
-    <section aria-labelledby="paid-product-directory-heading" className="mt-6 rounded-[1.5rem] border border-[#e2e4ee] bg-white px-5 py-5 shadow-sm sm:px-7">
+    <section data-paid-product-directory aria-labelledby="paid-product-directory-heading" className="mt-6 rounded-[1.5rem] border border-[#e2e4ee] bg-white px-5 py-5 shadow-sm sm:px-7">
       <details className="group">
         <summary className="cursor-pointer list-none rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7560df] [&::-webkit-details-marker]:hidden">
           <div className="flex items-center justify-between gap-4">

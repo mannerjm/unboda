@@ -11,6 +11,7 @@ const reviews = readFileSync("app/components/ProductReviewSummary.tsx", "utf8");
 const trustCard = readFileSync("app/components/TrustPrinciplesCard.tsx", "utf8");
 const page = readFileSync("app/deep-analysis/page.tsx", "utf8");
 const styles = readFileSync("app/globals.css", "utf8");
+const directory = readFileSync("app/components/PaidProductDiscoveryLinks.tsx", "utf8");
 
 // The pilot must be selected by exactly one canonical launched product ID.
 assert(registry.includes('id: "money-shared-finance"'), "pilot product must remain in launch registry");
@@ -144,7 +145,7 @@ assert(trustCard.includes("inlineDetails = false") && trustCard.includes("!inlin
 assert(trustCard.includes('href="/trust"'),
   "ordinary trust cards must keep their original navigation");
 
-assert(reviews.includes('<Link href="/reviews" className="flex flex-wrap items-center'),
+assert(reviews.includes('<Link href="/reviews" className="group flex flex-wrap items-center'),
   "the pilot's full empty-review panel must be click/tap navigable");
 assert(reviews.includes("후기 확인") && !reviews.includes("후기 확인 →"),
   "the pilot review entry must not show the old arrow");
@@ -159,5 +160,28 @@ assert(!purchaseArea.includes('aria-hidden="true">→</span>'),
   "the bottom purchase button must have no decorative arrow");
 assert.equal((pilot.match(/href=\{href\}/g) ?? []).length, 1,
   "there must still be exactly one checkout/report navigation action");
+
+// User-requested follow-up: the empty review's "후기 확인" is a bordered
+// button-like target; the surrounding Link remains one accessible action.
+assert(reviews.includes('className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-[#d9cbea]'),
+  "pilot review action should have the same outlined button treatment as save-interest");
+assert(reviews.includes('<Link href="/reviews" className="group flex flex-wrap items-center'),
+  "review panel must remain an accessible navigable link, not a nested button");
+assert(!reviews.includes("후기 확인 →"),
+  "pilot review action must remain arrow-free");
+
+// The directory is retained for catalog/desktop/SEO but hidden *only* on mobile
+// when ANY detail is open, including client-side selection after the initial render.
+assert(marketplace.includes('data-premium-detail-active="true"'),
+  "every selected product detail must mark its active state");
+assert(directory.includes('data-paid-product-directory')
+  && directory.includes("57가지 심층 분석을 한눈에 보기"),
+  "public directory must remain intact for list pages and crawler-readable links");
+assert(styles.includes("@media (max-width: 639px)")
+  && styles.includes("main[data-deep-analysis-page]:has([data-premium-detail-active])")
+  && styles.includes("[data-paid-product-directory]"),
+  "directory visibility must be controlled by mobile-only selected-detail CSS");
+assert(styles.includes("display: none;") && page.includes("<PaidProductDiscoveryLinks />"),
+  "desktop/catalog directory must not be deleted or globally disabled");
 
 console.log("money-shared-finance-pilot-regression: PASS (one product only; checkout/report/AI unchanged)");

@@ -114,12 +114,16 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
           <p className="text-xs font-bold tracking-[0.22em] text-[#b9b2f6]">CHECKOUT</p>
           <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="max-w-2xl text-3xl font-black leading-tight tracking-[-0.035em] sm:text-4xl">{displayTitle}</h1>
               {checkoutQuestion ? (
-                <p className="mt-3 max-w-xl break-keep text-base font-semibold leading-7 text-[#e3dcff] sm:text-lg">
-                  {checkoutQuestion}
-                </p>
-              ) : null}
+                <>
+                  <p className="text-sm font-bold leading-6 text-[#d6cafa]">{displayTitle}</p>
+                  <h1 className="mt-2 max-w-2xl break-keep text-[clamp(1.65rem,4.3vw,2.35rem)] font-black leading-[1.28] tracking-[-0.035em] text-white">
+                    {checkoutQuestion}
+                  </h1>
+                </>
+              ) : (
+                <h1 className="max-w-2xl text-3xl font-black leading-tight tracking-[-0.035em] sm:text-4xl">{displayTitle}</h1>
+              )}
               <p className="mt-4 max-w-xl text-sm leading-7 text-slate-200">
                 계정 인증, 분석 대상, 결제 금액을 한 번 더 확인한 뒤 결제를 진행합니다.
               </p>

@@ -54,14 +54,18 @@ for (const required of [
   "금융·법률 자문을 대신하지 않습니다.",
   "심층분석 구매하기",
   "버튼을 누르면 결제 내용을 확인하는 화면으로 이동합니다.",
-  "실제 리포트 구성과 해석 기준 보기",
-  "이 상품은 구매하는 해의 사주 흐름도 참고합니다.",
+  "이 분석에서는 무엇을 알아볼까요?",
+  "구매 후 받을 리포트의 주요 내용을 미리 살펴보세요.",
 ]) {
   assert(pilot.includes(required), "customer-first pilot content missing: " + required);
 }
 
-// One inline, state-aware purchase link: no fixed CTA masking text or duplicate purchase entry.
-assert(pilot.includes('id="finance-purchase-action"'), "the purchase action must be in normal reading flow");
+// One bottom-only state-aware purchase link: no hero CTA, fixed CTA, or duplicate entry.
+assert(pilot.includes('id="finance-purchase-action"'), "the purchase action must remain in normal flow");
+assert(pilot.indexOf('id="finance-purchase-action"') > pilot.indexOf('<ProductReviewSummary'),
+  "the sole payment/report CTA must be after verified reviews at the end of the detail page");
+assert.equal((pilot.match(/id="finance-purchase-action"/g) ?? []).length, 1,
+  "no second purchase CTA container may be added");
 assert(!pilot.includes("fixed inset-x") && !pilot.includes("sticky bottom-"),
   "the pilot must not cover body copy with a floating purchase bar");
 assert.equal((pilot.match(/<Link\b/g) ?? []).length, 1, "pilot must expose exactly one primary CTA");
@@ -94,8 +98,10 @@ assert(previewModel.includes("buildTopicTimeValue(policy)"),
   "the original purchased report edition policy must remain intact");
 assert(!pilot.includes("<PremiumReportValuePreview"),
   "generic technical annual-edition preview must not be displayed in this pilot");
-assert(pilot.includes("구매하는 해의 사주 흐름도 참고합니다."),
-  "plain-language date-policy clarification is required");
+assert(!pilot.includes("연간 운세") && !pilot.includes("아래는 실제 결과가 아니라"),
+  "technical/provocative copy should not reappear in the customer preview");
+assert(pilot.includes("FRIENDLY_REPORT_STEPS") && pilot.includes("내 사주에서 어떤 성향을 살펴볼까요?"),
+  "six preview items must use understandable questions");
 
 // Pilot only: shrinking an empty review must never hide actual verified reviews.
 assert(reviews.includes("compactWhenEmpty = false") && reviews.includes("summary.count === 0 && compactWhenEmpty"),
@@ -105,10 +111,18 @@ assert(reviews.includes("summary.reviews.slice(0, 4)") && reviews.includes('/api
 
 // Responsive/source-level guards: desktop grid only on lg, small viewport has full width
 // CTA, natural document flow and no fixed purchase overlay.
-assert(pilot.includes("sm:flex-1") && pilot.includes("w-full items-center")
+assert(pilot.includes('className="flex min-h-12 w-full items-center') && pilot.includes('sm:grid-cols-[auto_minmax(0,1fr)]')
   && pilot.includes("text-[clamp(1.7rem,5.7vw,2.7rem)]")
   && pilot.includes("sm:grid-cols-2") && pilot.includes("min-w-0"),
   "pilot must keep responsive text and CTA at narrow widths");
+// Same licensed Pexels source, delivered from the original-resolution CDN.
+assert(pilot.includes("images.pexels.com/photos/6964105/pexels-photo-6964105.jpeg")
+  && pilot.includes("photoFallback ? photo.src : originalPhotoUrl")
+  && pilot.includes('className="object-contain"')
+  && pilot.includes("aspect-[4/3]")
+  && !pilot.includes('className="object-cover"'),
+  "pilot photo must not enlarge/crop the old 330px local thumbnail");
+assert(pilot.includes('onError={() => setPhotoFallback(true)}'), "CDN failure must retain local fallback");
 assert(pilot.includes("🧾") && pilot.includes("💬") && pilot.includes("🔄"),
   "story section must visually distinguish the three worries without a card wall");
 console.log("money-shared-finance-pilot-regression: PASS (one product only; checkout/report/AI unchanged)");

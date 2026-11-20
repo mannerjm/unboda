@@ -50,12 +50,12 @@ const INSIGHTS = [
 /** These are customer-facing labels for the EXISTING six-step report contract,
  * not an example of a generated or guaranteed personal result. */
 const FRIENDLY_REPORT_STEPS = [
-  { title: "먼저 확인할 방향", description: "함께 쓰는 돈의 기준을 어디서부터 정리할지 살펴봐요." },
-  { title: "부담이 어긋날 수 있는 상황", description: "결정하는 사람과 실제 비용을 내는 사람이 달라지는 경우를 구분해요." },
-  { title: "왜 이렇게 해석했는지", description: "내 사주에서 참고한 근거를 별도로 설명해요." },
-  { title: "지금 점검할 변화", description: "책임·역할·정산 기준을 다시 살펴볼 시점을 알아봐요." },
-  { title: "현실에서 정리할 약속", description: "누가 결정하고 언제 정산할지 확인할 질문을 정리해요." },
-  { title: "직접 확인해야 할 부분", description: "사주 해석으로 알 수 없는 사실과 추가로 확인할 내용을 구분해요." },
+  { title: "함께 쓰는 돈, 무엇부터 정리할까요?", description: "함께 쓰는 돈의 기준을 어디서부터 정리할지 살펴봐요." },
+  { title: "돈 문제로 부담이 생기는 상황은 무엇일까요?", description: "결정하는 사람과 실제 비용을 내는 사람이 다른 상황을 구분해요." },
+  { title: "내 사주에서 어떤 성향을 살펴볼까요?", description: "나의 돈 관리 성향을 어떤 근거로 해석하는지 살펴봐요." },
+  { title: "지금 다시 확인하면 좋은 부분은 무엇일까요?", description: "책임·역할·정산 기준을 점검할 상황을 살펴봐요." },
+  { title: "서로 어떤 약속을 정하면 좋을까요?", description: "누가 결정하고 언제 정산할지 확인할 질문을 정리해요." },
+  { title: "실제 생활에서 추가로 확인할 것은 무엇일까요?", description: "사주 해석으로 알 수 없는 사실과 직접 확인해야 할 내용을 구분해요." },
 ] as const;
 
 /** One-product storytelling pilot. Purchase/report links use the existing
@@ -68,12 +68,15 @@ export default function MoneySharedFinancePilotDetail({
 }: Props) {
   const [savedState, setSavedState] = useState(isSaved);
   const [isSaving, setIsSaving] = useState(false);
+  const [photoFallback, setPhotoFallback] = useState(false);
 
   useEffect(() => { setSavedState(isSaved); }, [isSaved]);
 
   const href = getPremiumAnalysisHref(product.id, state, profileId);
   const price = getProductPricing(product.id).amount.toLocaleString("ko-KR") + "원";
   const photo = PREMIUM_PRODUCT_PHOTOS["money-shared-finance"];
+  // Pexels original 3817×2736; local 330×265 stays as fallback only.
+  const originalPhotoUrl = "https://images.pexels.com/photos/6964105/pexels-photo-6964105.jpeg?auto=compress&cs=tinysrgb&w=1200";
   const preview = buildPaidAnalysisV4PreviewModel(product);
 
   const handleSave = async () => {
@@ -119,35 +122,21 @@ export default function MoneySharedFinancePilotDetail({
               <span className="font-bold text-[#3a2951]"> 내 사주를 바탕으로 돈을 대하는 성향을 살펴보고,</span>
               함께 쓰는 돈의 기준을 어떻게 정할지 알아보세요.
             </p>
-            <div id="finance-purchase-action" className="mt-6 rounded-2xl border border-[#dfd3f1] bg-white/90 p-3 shadow-[0_9px_28px_rgba(64,41,102,0.08)] sm:flex sm:items-center sm:gap-4">
-              <div className="mb-3 sm:mb-0 sm:min-w-[108px]">
-                <p className="text-xs font-bold text-[#77638c]">{state === "not_purchased" ? "개인화 리포트" : STATUS_LABELS[state]}</p>
-                <p className="mt-1 text-xl font-black text-[#35214c]">{price}</p>
-              </div>
-              {href ? (
-                <Link
-                  href={href}
-                  className="flex min-h-12 w-full items-center justify-center rounded-xl bg-[#704ad0] px-4 py-3 text-center text-sm font-extrabold text-white transition hover:bg-[#5e38bd] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#704ad0] sm:flex-1"
-                >
-                  {state === "not_purchased" ? ACTION_LABELS.not_purchased : ACTION_LABELS[state]} <span className="ml-1" aria-hidden="true">→</span>
-                </Link>
-              ) : (
-                <p className="flex-1 text-sm font-semibold text-[#6d5983]">분석할 프로필을 선택한 뒤 리포트를 확인해 주세요.</p>
-              )}
-            </div>
-            {state === "not_purchased" ? (
-              <p className="mt-2 text-xs leading-5 text-[#796a89]">버튼을 누르면 결제 내용을 확인하는 화면으로 이동합니다.</p>
-            ) : null}
+            <p className="mt-6 text-sm font-bold text-[#6c5687]">
+              개인화 사주 심층 분석 <span aria-hidden="true">·</span> <strong className="text-lg font-black text-[#39224f]">{price}</strong>
+            </p>
           </div>
-          <div className="relative mx-auto w-full max-w-[430px]">
-            <div className="relative aspect-[5/3.9] overflow-hidden rounded-[1.5rem] border-[5px] border-white shadow-[0_16px_38px_rgba(83,54,124,0.18)] lg:aspect-[4/4.2]">
+          <div className="relative mx-auto w-full max-w-[390px]">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] border-[5px] border-white bg-[#f8f1ff] shadow-[0_16px_38px_rgba(83,54,124,0.14)]">
               <Image
-                src={photo.src}
+                src={photoFallback ? photo.src : originalPhotoUrl}
                 alt={photo.alt}
                 fill
+                unoptimized
                 priority
-                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 430px, 400px"
-                className="object-cover"
+                onError={() => setPhotoFallback(true)}
+                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 390px, 390px"
+                className="object-contain"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#261831]/85 via-[#261831]/20 to-transparent px-5 pb-4 pt-14 text-white">
                 <p className="break-keep text-sm font-extrabold leading-6">함께 쓰는 돈, 서로의 기준부터 살펴보세요.</p>
@@ -241,7 +230,7 @@ export default function MoneySharedFinancePilotDetail({
             {state === "not_purchased" ? (
               <details className="rounded-xl border border-[#e5dcef] bg-[#fcfaff] px-4 py-4">
                 <summary className="cursor-pointer text-sm font-extrabold text-[#644696]">
-                  리포트에서 무엇을 확인하나요? (간단히 보기)
+                  구매 후 리포트에서 확인할 내용
                 </summary>
                 <div className="mt-4 space-y-2 text-sm leading-7 text-[#5f5371]">
                   <p>① 내 사주에서 살펴볼 수 있는 돈 관리 성향</p>
@@ -250,15 +239,10 @@ export default function MoneySharedFinancePilotDetail({
                 </div>
                 <details className="mt-4 rounded-lg border border-[#e7e0ef] bg-white px-4 py-3">
                   <summary className="cursor-pointer text-sm font-bold text-[#7658a7]">
-                    실제 리포트 구성과 해석 기준 보기
+                    이 분석에서는 무엇을 알아볼까요?
                   </summary>
-                  <div className="mt-4 rounded-lg bg-[#f7f3ff] px-4 py-3 text-sm leading-7 text-[#655278]">
-                    {preview?.timeValue.badge === "연간 에디션"
-                      ? "이 상품은 구매하는 해의 사주 흐름도 참고합니다. '연간 운세' 상품을 추가 구매한다는 뜻은 아닙니다."
-                      : "선택한 분석에 필요한 사주 흐름을 참고해 해석합니다."}
-                  </div>
                   <p className="mt-4 text-sm leading-7 text-[#645573]">
-                    아래는 실제 결과가 아니라 구매 후 리포트에서 살펴보는 내용의 순서입니다.
+                    구매 후 받을 리포트의 주요 내용을 미리 살펴보세요.
                   </p>
                   {preview ? (
                     <ol className="mt-3 grid gap-x-5 gap-y-4 sm:grid-cols-2">
@@ -274,7 +258,7 @@ export default function MoneySharedFinancePilotDetail({
                     </ol>
                   ) : null}
                   <p className="mt-4 break-keep text-xs leading-6 text-[#81728e]">
-                    자세한 사주 계산 근거는 리포트 생성 후 결과 화면에서 확인할 수 있습니다. 여기에는 개인별 결과를 미리 표시하지 않습니다.
+                    개인별 분석 결과는 결제 후 생성되는 리포트에서 확인할 수 있습니다.
                   </p>
                 </details>
               </details>
@@ -305,6 +289,31 @@ export default function MoneySharedFinancePilotDetail({
         </section>
 
         {state === "not_purchased" ? <ProductReviewSummary productId={product.id} compactWhenEmpty /> : null}
+        {/* Exactly one state-aware purchase/report entry, after all descriptions and reviews. */}
+        <section id="finance-purchase-action" aria-label="공동 재정 경계 분석 구매 및 리포트 확인" className="mb-8 mt-7 rounded-[1.7rem] border border-[#e3d5f4] bg-[linear-gradient(145deg,#fcf8ff_0%,#eee5ff_100%)] p-5 shadow-[0_12px_35px_rgba(75,46,125,0.08)] sm:p-7">
+          <p className="text-xs font-extrabold tracking-wide text-[#865dbe]">
+            {state === "not_purchased" ? "나를 위한 사주 심층 분석" : STATUS_LABELS[state]}
+          </p>
+          <h3 className="mt-2 break-keep text-xl font-black leading-snug text-[#332047] sm:text-2xl">
+            {state === "not_purchased" ? "이제 내 사주로 함께 쓰는 돈의 기준을 살펴볼까요?" : "내 공동 재정 분석 이어보기"}
+          </h3>
+          <div className="mt-5 grid items-center gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-6">
+            <div>
+              <p className="text-xs font-semibold text-[#77678a]">공동 재정 경계 분석</p>
+              <p className="mt-1 text-2xl font-black text-[#39234f]">{price}</p>
+            </div>
+            {href ? (
+              <Link href={href} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-[#704ad0] px-4 py-3 text-center text-base font-extrabold text-white transition hover:bg-[#5e38bd] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#704ad0]">
+                {ACTION_LABELS[state]} <span className="ml-2" aria-hidden="true">→</span>
+              </Link>
+            ) : (
+              <p className="text-sm font-semibold text-[#6d5983]">분석할 프로필을 선택한 뒤 리포트를 확인해 주세요.</p>
+            )}
+          </div>
+          {state === "not_purchased" ? (
+            <p className="mt-3 break-keep text-xs leading-6 text-[#77698a]">버튼을 누르면 결제 내용을 확인하는 화면으로 이동합니다.</p>
+          ) : null}
+        </section>
       </div>
     </section>
   );

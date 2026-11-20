@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import ProductReviewSummary from "@/app/components/ProductReviewSummary";
 import {
   COMPATIBILITY_BUSINESS_PRODUCT_ID,
@@ -21,8 +22,8 @@ type PreviewConfig = Readonly<{
 
 const PREVIEW_VISUALS: Record<CompatibilityPreviewMode, { src: string; alt: string; question: string }> = {
   romantic: {
-    src: "/images/premium/relationship-marriage.jpg",
-    alt: "함께 미래를 이야기하는 연인",
+    src: PREMIUM_PRODUCT_PHOTOS["relationship-current"].src,
+    alt: PREMIUM_PRODUCT_PHOTOS["relationship-current"].alt,
     question: "우리 두 사람은 서로 어떻게 다를까요?",
   },
   workplace: {

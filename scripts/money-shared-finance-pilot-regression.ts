@@ -170,18 +170,19 @@ assert(reviews.includes('<Link href="/reviews" className="group flex flex-wrap i
 assert(!reviews.includes("후기 확인 →"),
   "pilot review action must remain arrow-free");
 
-// The directory is retained for catalog/desktop/SEO but hidden *only* on mobile
-// when ANY detail is open, including client-side selection after the initial render.
-assert(marketplace.includes('data-premium-detail-active="true"'),
-  "every selected product detail must mark its active state");
+// All mobile catalog and detail views must hide the 57-product directory.
+// Desktop public directory links stay accessible, without relying on :has(),
+// user login state, client-side selection or the mobile viewport orientation.
 assert(directory.includes('data-paid-product-directory')
   && directory.includes("57가지 심층 분석을 한눈에 보기"),
-  "public directory must remain intact for list pages and crawler-readable links");
-assert(styles.includes("@media (max-width: 639px)")
-  && styles.includes("main[data-deep-analysis-page]:has([data-premium-detail-active])")
-  && styles.includes("[data-paid-product-directory]"),
-  "directory visibility must be controlled by mobile-only selected-detail CSS");
-assert(styles.includes("display: none;") && page.includes("<PaidProductDiscoveryLinks />"),
-  "desktop/catalog directory must not be deleted or globally disabled");
+  "desktop public product directory and its 57 links must remain intact");
+assert(styles.includes("@media (max-width: 1023px), (hover: none) and (pointer: coarse)")
+  && styles.includes("section[data-paid-product-directory] {")
+  && styles.includes("display: none;"),
+  "the full directory must be hidden across mobile catalog/detail pages and landscape");
+assert(!styles.includes("main[data-deep-analysis-page]:has([data-premium-detail-active])"),
+  "mobile directory visibility must not require a selected product");
+assert(page.includes("<PaidProductDiscoveryLinks />"),
+  "keep server-rendered product directory for desktop users");
 
 console.log("money-shared-finance-pilot-regression: PASS (one product only; checkout/report/AI unchanged)");

@@ -88,8 +88,25 @@ for (const id of [
 ]) assert(compatibilityPreview.includes(id), "compatibility review mapping missing: " + id);
 assert(compatibilityPreview.includes("<ProductReviewSummary"), "all compatibility preview modes must show product-specific verified reviews");
 
-assert(checkout.includes("<TrustPrinciplesCard compact"), "standard/pair/parent-child checkout must show compact trust rules");
-assert(familyCheckout.includes("<TrustPrinciplesCard compact"), "siblings/other-family checkout must show compact trust rules");
+// Checkout is a focused purchase/consent flow: do not duplicate the general
+// trust-principles panel already available elsewhere on the site.
+for (const [name, page] of [["standard/pair/parent-child", checkout], ["siblings/other-family", familyCheckout]] as const) {
+  assert(!page.includes("TrustPrinciplesCard") && !page.includes("운보다 이용 원칙"),
+    name + " checkout must not render the redundant trust-principles card");
+  assert(page.includes("onClick={handlePayment}")
+    && page.includes("acknowledgementRef")
+    && page.includes("requestPayment("),
+    name + " checkout must preserve authorization and payment actions");
+}
+assert(checkout.includes('href="/refund"')
+  && checkout.includes("환불·취소·청약철회 정책 자세히 보기")
+  && checkout.includes("immediateGenerationAcknowledged")
+  && checkout.includes("청약철회가 관련 법령에 따라 제한될 수 있음을 확인했습니다."),
+  "ordinary checkout must retain refund information and explicit legal acknowledgment");
+assert(familyCheckout.includes("checked={acknowledged}")
+  && familyCheckout.includes("setAcknowledged(event.target.checked)")
+  && familyCheckout.includes("disabled={isPaying || !acknowledged}"),
+  "family checkout must retain the existing purchase acknowledgment gate");
 assert(ai.includes("<TrustPrinciplesCard compact"), "AI consulting must disclose trust rules");
 
 for (const report of [standardReport, pairReport, parentReport, siblingReport, otherReport]) {

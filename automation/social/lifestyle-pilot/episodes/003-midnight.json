@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-midnight-mood-journal-2-0-20261120",
-  "topicKey": "saju-midnight-mood-journal-2-0-20261120",
+  "id": "unboda-saju-midnight-family-talk-2-0-20261121",
+  "topicKey": "saju-midnight-family-talk-2-0-20261121",
   "sajuCategory": "self-understanding",
   "visualStyle": "midnight-indigo",
-  "visualMotif": "mood-journal",
-  "situation": "마음이 복잡해 메모를 여러 번 고친 밤",
+  "visualMotif": "family-talk",
+  "situation": "부모와 일정을 정하다 말이 어긋난 저녁",
   "hook": "태어난 시간을 몰라도 사주를 볼 수 있을까요?",
-  "theme": "마음이 복잡해 메모를 여러 번 고친 밤을 출생 정보에 기반한 전통 사주 해석과 연결. 외부 부담이 생활 스트레스 반응으로 커지는 흐름과 조절 순서를 점검",
-  "thumbnailTitle": "감정 일기 사주 | 시간 몰라도 될까?",
+  "theme": "부모와 일정을 정하다 말이 어긋난 저녁을 출생 정보에 기반한 전통 사주 해석과 연결. 외부 부담이 생활 스트레스 반응으로 커지는 흐름과 조절 순서를 점검",
+  "thumbnailTitle": "가족 대화 사주 | 시간 몰라도 될까?",
   "narrationDraft": [
     "태어난 시간을 몰라도 사주를 볼 수 있을까요?",
     "사주는 태어난 해와 달과 날, 시간으로 전통 해석을 살펴봐요.",
@@ -16,19 +16,19 @@
     "운보다 무료 사주 조회로 내 생활 성향을 하나씩 천천히 살펴보세요."
   ],
   "visualConcepts": [
-    "첫 장면에서 마음이 복잡해 메모를 여러 번 고친 밤 상황과 감정 일기, 마음을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "두 번째 장면에서 마음이 복잡해 메모를 여러 번 고친 밤 상황과 감정 일기, 마음을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "세 번째 장면에서 마음이 복잡해 메모를 여러 번 고친 밤 상황과 감정 일기, 마음을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "마지막 장면에서 마음이 복잡해 메모를 여러 번 고친 밤 상황과 감정 일기, 마음을 실제 주제 그림으로 보여주고 움직이는 화면"
+    "첫 장면에서 부모와 일정을 정하다 말이 어긋난 저녁 상황과 가족 대화, 가족을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "두 번째 장면에서 부모와 일정을 정하다 말이 어긋난 저녁 상황과 가족 대화, 가족을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "세 번째 장면에서 부모와 일정을 정하다 말이 어긋난 저녁 상황과 가족 대화, 가족을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "마지막 장면에서 부모와 일정을 정하다 말이 어긋난 저녁 상황과 가족 대화, 가족을 실제 주제 그림으로 보여주고 움직이는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "감정 일기 사주",
+        "가족 대화 사주",
         "시간 몰라도 될까?"
       ],
-      "subline": "메모를 다시 고쳤나요?",
-      "illustration": "message"
+      "subline": "부모님과 엇갈렸나요?",
+      "illustration": "notes"
     },
     {
       "headline": [
@@ -36,7 +36,7 @@
         "내 사주 살펴보기"
       ],
       "subline": "사주로 시작하는 자기이해",
-      "illustration": "notes"
+      "illustration": "rest"
     },
     {
       "headline": [
@@ -44,7 +44,7 @@
         "기본 해석 참고"
       ],
       "subline": "내 출생 정보로 결과 확인",
-      "illustration": "rest"
+      "illustration": "clock"
     },
     {
       "headline": [
@@ -52,10 +52,10 @@
         "바로 조회하기"
       ],
       "subline": "운보다 무료 사주 · 스트레스 반응 조절 분석",
-      "illustration": "clock"
+      "illustration": "message"
     }
   ],
-  "targetDateKst": "20261120",
+  "targetDateKst": "20261121",
   "destination": "https://unboda.kr/guest-saju",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
@@ -66,7 +66,7 @@
   "productType": "premium",
   "landingPath": "/paid-analysis/health-stress-regulation",
   "contentGoal": "premium-conversion",
-  "productProblem": "스트레스 관련 마음이 복잡해 메모를 여러 번 고친 밤 상황을 돌아보고 점검",
+  "productProblem": "스트레스 관련 부모와 일정을 정하다 말이 어긋난 저녁 상황을 돌아보고 점검",
   "productValue": "외부 부담이 생활 스트레스 반응으로 커지는 흐름과 조절 순서를 점검",
   "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 스트레스 반응 조절 분석 https://unboda.kr/paid-analysis/health-stress-regulation",
   "editorialFormat": "curiosity",

@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-commute-career-crossroads-2-0-20261120",
-  "topicKey": "saju-commute-career-crossroads-2-0-20261120",
+  "id": "unboda-saju-commute-job-interview-2-0-20261121",
+  "topicKey": "saju-commute-job-interview-2-0-20261121",
   "sajuCategory": "career",
   "visualStyle": "commute-sunrise",
-  "visualMotif": "career-crossroads",
-  "situation": "회사에서 맡을 일을 다시 정한 순간",
+  "visualMotif": "job-interview",
+  "situation": "지원 이유를 말로 정리하기 어려운 밤",
   "hook": "직장 고민, 내 사주에는 어떤 설명이 있을까요?",
-  "theme": "회사에서 맡을 일을 다시 정한 순간을 출생 정보에 기반한 전통 사주 해석과 연결. 현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
-  "thumbnailTitle": "이직 고민 사주 | 일할 때 내 성향",
+  "theme": "지원 이유를 말로 정리하기 어려운 밤을 출생 정보에 기반한 전통 사주 해석과 연결. 현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
+  "thumbnailTitle": "면접 준비 사주 | 일할 때 내 성향",
   "narrationDraft": [
     "직장 고민, 내 사주에는 어떤 설명이 있을까요?",
     "사주 직업운에서는 일을 대하는 나의 성향을 살펴볼 수 있어요.",
@@ -16,19 +16,19 @@
     "운보다 무료 사주 조회로 일할 때 내 성향도 차분히 살펴보세요."
   ],
   "visualConcepts": [
-    "첫 장면에서 회사에서 맡을 일을 다시 정한 순간 상황과 이직 고민, 출근을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "두 번째 장면에서 회사에서 맡을 일을 다시 정한 순간 상황과 이직 고민, 출근을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "세 번째 장면에서 회사에서 맡을 일을 다시 정한 순간 상황과 이직 고민, 출근을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "마지막 장면에서 회사에서 맡을 일을 다시 정한 순간 상황과 이직 고민, 출근을 실제 주제 그림으로 보여주고 움직이는 화면"
+    "첫 장면에서 지원 이유를 말로 정리하기 어려운 밤 상황과 면접 준비, 면접을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "두 번째 장면에서 지원 이유를 말로 정리하기 어려운 밤 상황과 면접 준비, 면접을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "세 번째 장면에서 지원 이유를 말로 정리하기 어려운 밤 상황과 면접 준비, 면접을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "마지막 장면에서 지원 이유를 말로 정리하기 어려운 밤 상황과 면접 준비, 면접을 실제 주제 그림으로 보여주고 움직이는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "이직 고민 사주",
+        "면접 준비 사주",
         "일할 때 내 성향"
       ],
-      "subline": "맡을 일이 바뀌나요?",
-      "illustration": "notes"
+      "subline": "지원 이유가 막막해요?",
+      "illustration": "rest"
     },
     {
       "headline": [
@@ -36,7 +36,7 @@
         "내 고민과 비교"
       ],
       "subline": "사주로 시작하는 자기이해",
-      "illustration": "rest"
+      "illustration": "clock"
     },
     {
       "headline": [
@@ -44,7 +44,7 @@
         "사주 성향 비교"
       ],
       "subline": "내 출생 정보로 결과 확인",
-      "illustration": "clock"
+      "illustration": "message"
     },
     {
       "headline": [
@@ -52,10 +52,10 @@
         "바로 조회하기"
       ],
       "subline": "운보다 무료 사주 · 직장 적응 분석",
-      "illustration": "message"
+      "illustration": "notes"
     }
   ],
-  "targetDateKst": "20261120",
+  "targetDateKst": "20261121",
   "destination": "https://unboda.kr/guest-saju",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
@@ -66,7 +66,7 @@
   "productType": "premium",
   "landingPath": "/paid-analysis/career-workplace-adaptation",
   "contentGoal": "premium-conversion",
-  "productProblem": "직장 관련 회사에서 맡을 일을 다시 정한 순간 상황을 돌아보고 점검",
+  "productProblem": "직장 관련 지원 이유를 말로 정리하기 어려운 밤 상황을 돌아보고 점검",
   "productValue": "현재 직장 환경에서 역할·소통·기대 조건을 지속 가능하게 조정",
   "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 직장 적응 분석 https://unboda.kr/paid-analysis/career-workplace-adaptation",
   "editorialFormat": "empathy",

@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-afterwork-savings-goal-2-0-20261120",
-  "topicKey": "saju-afterwork-savings-goal-2-0-20261120",
+  "id": "unboda-saju-afterwork-shopping-choice-2-0-20261121",
+  "topicKey": "saju-afterwork-shopping-choice-2-0-20261121",
   "sajuCategory": "money",
   "visualStyle": "finance-emerald",
-  "visualMotif": "savings-goal",
-  "situation": "저축 통장에 남은 금액이 궁금한 때",
+  "visualMotif": "shopping-choice",
+  "situation": "쇼핑 목록을 확인하다 예산을 넘긴 날",
   "hook": "재물운 사주를 보고 궁금증이 남았나요?",
-  "theme": "저축 통장에 남은 금액이 궁금한 때을 출생 정보에 기반한 전통 사주 해석과 연결. 저축·예산 기준을 유지하고 반복 가능한 관리 루틴을 재설정하는 방법을 분석",
-  "thumbnailTitle": "저축 목표 사주 | 재물운 질문 이어서",
+  "theme": "쇼핑 목록을 확인하다 예산을 넘긴 날을 출생 정보에 기반한 전통 사주 해석과 연결. 중요 지출에서 필요·압박·매몰비용을 구분하는 판단 기준을 분석",
+  "thumbnailTitle": "구매 고민 사주 | 재물운 질문 이어서",
   "narrationDraft": [
     "재물운 사주를 보고 궁금증이 남았나요?",
     "사주 리포트 뒤에는 AI 상담으로 궁금한 질문을 이어갈 수 있어요.",
@@ -16,19 +16,19 @@
     "운보다 무료 사주 조회로 돈을 대하는 내 성향도 차분히 살펴보세요."
   ],
   "visualConcepts": [
-    "첫 장면에서 저축 통장에 남은 금액이 궁금한 때 상황과 저축 목표, 저축을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "두 번째 장면에서 저축 통장에 남은 금액이 궁금한 때 상황과 저축 목표, 저축을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "세 번째 장면에서 저축 통장에 남은 금액이 궁금한 때 상황과 저축 목표, 저축을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "마지막 장면에서 저축 통장에 남은 금액이 궁금한 때 상황과 저축 목표, 저축을 실제 주제 그림으로 보여주고 움직이는 화면"
+    "첫 장면에서 쇼핑 목록을 확인하다 예산을 넘긴 날 상황과 구매 고민, 구매을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "두 번째 장면에서 쇼핑 목록을 확인하다 예산을 넘긴 날 상황과 구매 고민, 구매을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "세 번째 장면에서 쇼핑 목록을 확인하다 예산을 넘긴 날 상황과 구매 고민, 구매을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "마지막 장면에서 쇼핑 목록을 확인하다 예산을 넘긴 날 상황과 구매 고민, 구매을 실제 주제 그림으로 보여주고 움직이는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "저축 목표 사주",
+        "구매 고민 사주",
         "재물운 질문 이어서"
       ],
-      "subline": "통장 잔액이 궁금하죠?",
-      "illustration": "clock"
+      "subline": "쇼핑 예산을 넘었죠?",
+      "illustration": "message"
     },
     {
       "headline": [
@@ -36,7 +36,7 @@
         "AI 상담도 이어져요"
       ],
       "subline": "사주로 시작하는 자기이해",
-      "illustration": "message"
+      "illustration": "notes"
     },
     {
       "headline": [
@@ -44,31 +44,31 @@
         "AI 상담 이어보기"
       ],
       "subline": "내 출생 정보로 결과 확인",
-      "illustration": "notes"
+      "illustration": "rest"
     },
     {
       "headline": [
         "무료 사주",
         "바로 조회하기"
       ],
-      "subline": "운보다 무료 사주 · 저축과 자산 관리 습관",
-      "illustration": "rest"
+      "subline": "운보다 무료 사주 · 큰 지출 판단 분석",
+      "illustration": "clock"
     }
   ],
-  "targetDateKst": "20261120",
+  "targetDateKst": "20261121",
   "destination": "https://unboda.kr/guest-saju",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "productId": "money-saving-discipline",
-  "productTitle": "저축과 자산 관리 습관",
+  "productId": "money-spending-decision",
+  "productTitle": "큰 지출 판단 분석",
   "productCategory": "money",
   "productType": "premium",
-  "landingPath": "/paid-analysis/money-saving-discipline",
+  "landingPath": "/paid-analysis/money-spending-decision",
   "contentGoal": "premium-conversion",
-  "productProblem": "저축 관련 저축 통장에 남은 금액이 궁금한 때 상황을 돌아보고 점검",
-  "productValue": "저축·예산 기준을 유지하고 반복 가능한 관리 루틴을 재설정하는 방법을 분석",
-  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 저축과 자산 관리 습관 https://unboda.kr/paid-analysis/money-saving-discipline",
+  "productProblem": "구매 관련 쇼핑 목록을 확인하다 예산을 넘긴 날 상황을 돌아보고 점검",
+  "productValue": "중요 지출에서 필요·압박·매몰비용을 구분하는 판단 기준을 분석",
+  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 큰 지출 판단 분석 https://unboda.kr/paid-analysis/money-spending-decision",
   "editorialFormat": "difference",
   "primaryGoal": "free-saju-conversion"
 }

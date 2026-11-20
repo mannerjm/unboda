@@ -7,6 +7,7 @@ import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import { getProductPricing } from "@/app/lib/productPricing";
+import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
 import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
 import { buildPaidAnalysisV4PreviewModel } from "@/app/lib/paidAnalysisV4PreviewModel";
 import ProductReviewSummary from "@/app/components/ProductReviewSummary";
@@ -74,6 +75,10 @@ export default function MoneySharedFinancePilotDetail({
 
   const href = getPremiumAnalysisHref(product.id, state, profileId);
   const price = getProductPricing(product.id).amount.toLocaleString("ko-KR") + "원";
+  const headline = getReadablePaidQuestion(product.id, product.title);
+  const commaIndex = headline.indexOf(",");
+  const headlineLead = commaIndex >= 0 ? headline.slice(0, commaIndex + 1) : headline;
+  const headlineRest = commaIndex >= 0 ? headline.slice(commaIndex + 1).trim() : "";
   const photo = PREMIUM_PRODUCT_PHOTOS["money-shared-finance"];
   // Pexels original 3817×2736; local 330×265 stays as fallback only.
   const originalPhotoUrl = "https://images.pexels.com/photos/6964105/pexels-photo-6964105.jpeg?auto=compress&cs=tinysrgb&w=1200";
@@ -115,7 +120,7 @@ export default function MoneySharedFinancePilotDetail({
               id="selected-product-title"
               className="mt-5 break-keep text-[clamp(1.7rem,5.7vw,2.7rem)] font-black leading-[1.28] tracking-[-0.05em] text-[#301b4c]"
             >
-              함께 쓰는 돈,<span className="block text-[#7050bf]">왜 나만 더 부담하는 것 같을까요?</span>
+              {headlineLead}{headlineRest ? <span className="block text-[#7050bf]">{headlineRest}</span> : null}
             </h2>
             <p className="mt-4 max-w-[37rem] break-keep text-[15px] font-medium leading-7 text-[#584968] sm:text-base sm:leading-8">
               생활비를 같이 쓰는데도 자꾸 서운한 마음이 드나요?

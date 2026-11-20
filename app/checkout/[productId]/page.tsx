@@ -8,6 +8,7 @@ import { isProfileId } from "@/app/lib/profiles/types";
 import { notFound } from "next/navigation";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
+import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
 import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
 import { resolveAnalysisEditionForOrder } from "@/app/lib/analysisEditionForOrder";
 import { formatAnalysisEditionLabel } from "@/app/lib/analysisEditionLabel";
@@ -52,6 +53,11 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
   const displayTitle = specialProduct
     ? specialProduct.title
     : getPremiumProductDisplayTitle(premiumProduct!.id, premiumProduct!.title);
+  // On this pilot only, repeat the list/detail customer question below
+  // the unchanged official purchase title to reinforce item identity.
+  const checkoutQuestion = premiumProduct?.id === "money-shared-finance"
+    ? getReadablePaidQuestion(premiumProduct.id, premiumProduct.title)
+    : null;
 
   const edition = user && profile && premiumProduct
     ? await resolveAnalysisEditionForOrder({
@@ -109,6 +115,11 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
           <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h1 className="max-w-2xl text-3xl font-black leading-tight tracking-[-0.035em] sm:text-4xl">{displayTitle}</h1>
+              {checkoutQuestion ? (
+                <p className="mt-3 max-w-xl break-keep text-base font-semibold leading-7 text-[#e3dcff] sm:text-lg">
+                  {checkoutQuestion}
+                </p>
+              ) : null}
               <p className="mt-4 max-w-xl text-sm leading-7 text-slate-200">
                 계정 인증, 분석 대상, 결제 금액을 한 번 더 확인한 뒤 결제를 진행합니다.
               </p>

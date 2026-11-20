@@ -8,7 +8,7 @@ import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import { getProductPricing } from "@/app/lib/productPricing";
 import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
-import PremiumReportValuePreview from "@/app/components/PremiumReportValuePreview";
+import { buildPaidAnalysisV4PreviewModel } from "@/app/lib/paidAnalysisV4PreviewModel";
 import ProductReviewSummary from "@/app/components/ProductReviewSummary";
 import TrustPrinciplesCard from "@/app/components/TrustPrinciplesCard";
 
@@ -36,15 +36,26 @@ const ACTION_LABELS: Record<PremiumAnalysisProductState, string> = {
 };
 
 const WORRIES = [
-  { question: "생활비를 함께 쓰는데, 부담은 한쪽으로 쏠리나요?", context: "누가 무엇을 내기로 했는지 애매할 때" },
-  { question: "큰 지출을 결정할 때, 서로의 의견이 엇갈리나요?", context: "결정하는 사람과 비용을 내는 사람이 다를 때" },
-  { question: "수입이 달라졌는데도 예전 약속 그대로인가요?", context: "상황이 바뀐 뒤에도 분담을 다시 정하지 못할 때" },
+  { icon: "🧾", question: "생활비를 함께 쓰는데, 부담은 한쪽으로 쏠리나요?", context: "누가 무엇을 내기로 했는지 애매할 때" },
+  { icon: "💬", question: "큰 지출을 결정할 때, 서로의 의견이 엇갈리나요?", context: "결정하는 사람과 비용을 내는 사람이 다를 때" },
+  { icon: "🔄", question: "수입이 달라졌는데도 예전 약속 그대로인가요?", context: "상황이 바뀐 뒤에도 분담을 다시 정하지 못할 때" },
 ] as const;
 
 const INSIGHTS = [
   { title: "누가 결정하나요?", detail: "함께 쓰는 비용의 결정과 승인 기준" },
   { title: "언제, 누가 부담하나요?", detail: "정산 시점과 실제 비용을 책임지는 기준" },
   { title: "상황이 달라지면 어떻게 하나요?", detail: "수입·역할 변화에 맞춰 다시 합의할 기준" },
+] as const;
+
+/** These are customer-facing labels for the EXISTING six-step report contract,
+ * not an example of a generated or guaranteed personal result. */
+const FRIENDLY_REPORT_STEPS = [
+  { title: "먼저 확인할 방향", description: "함께 쓰는 돈의 기준을 어디서부터 정리할지 살펴봐요." },
+  { title: "부담이 어긋날 수 있는 상황", description: "결정하는 사람과 실제 비용을 내는 사람이 달라지는 경우를 구분해요." },
+  { title: "왜 이렇게 해석했는지", description: "내 사주에서 참고한 근거를 별도로 설명해요." },
+  { title: "지금 점검할 변화", description: "책임·역할·정산 기준을 다시 살펴볼 시점을 알아봐요." },
+  { title: "현실에서 정리할 약속", description: "누가 결정하고 언제 정산할지 확인할 질문을 정리해요." },
+  { title: "직접 확인해야 할 부분", description: "사주 해석으로 알 수 없는 사실과 추가로 확인할 내용을 구분해요." },
 ] as const;
 
 /** One-product storytelling pilot. Purchase/report links use the existing
@@ -63,6 +74,7 @@ export default function MoneySharedFinancePilotDetail({
   const href = getPremiumAnalysisHref(product.id, state, profileId);
   const price = getProductPricing(product.id).amount.toLocaleString("ko-KR") + "원";
   const photo = PREMIUM_PRODUCT_PHOTOS["money-shared-finance"];
+  const preview = buildPaidAnalysisV4PreviewModel(product);
 
   const handleSave = async () => {
     if (savedState || isSaving) return;
@@ -85,7 +97,7 @@ export default function MoneySharedFinancePilotDetail({
     >
       {/* The only checkout/report CTA lives in the normal page flow.
           Unlike the old fixed footer, it never covers the reading content. */}
-      <div className="relative overflow-hidden bg-[linear-gradient(140deg,#fff9fb_0%,#f8f1ff_55%,#ebe3ff_100%)] px-5 py-8 sm:px-9 sm:py-10">
+      <div className="relative overflow-hidden bg-[linear-gradient(140deg,#fff9fb_0%,#f8f1ff_55%,#ebe3ff_100%)] px-4 py-7 sm:px-9 sm:py-10">
         <div className="relative grid items-center gap-7 lg:grid-cols-[1.05fr_0.95fr] lg:gap-9">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -98,7 +110,7 @@ export default function MoneySharedFinancePilotDetail({
             </div>
             <h2
               id="selected-product-title"
-              className="mt-5 break-keep text-[clamp(1.8rem,3.4vw,2.7rem)] font-black leading-[1.28] tracking-[-0.05em] text-[#301b4c]"
+              className="mt-5 break-keep text-[clamp(1.7rem,5.7vw,2.7rem)] font-black leading-[1.28] tracking-[-0.05em] text-[#301b4c]"
             >
               함께 쓰는 돈,<span className="block text-[#7050bf]">왜 나만 더 부담하는 것 같을까요?</span>
             </h2>
@@ -145,7 +157,7 @@ export default function MoneySharedFinancePilotDetail({
         </div>
       </div>
 
-      <div className="px-5 sm:px-9">
+      <div className="px-4 sm:px-9">
         {/* Narrative beats rather than three more repeated card boxes. */}
         <section className="py-11 sm:py-14" aria-labelledby="finance-concerns">
           <p className="text-center text-xs font-extrabold tracking-widest text-[#926bc8]">내 이야기처럼 느껴지는 순간</p>
@@ -154,9 +166,10 @@ export default function MoneySharedFinancePilotDetail({
           </h3>
           <div className="mx-auto mt-7 max-w-[760px] divide-y divide-[#e7def1] border-y border-[#e7def1]">
             {WORRIES.map((item, index) => (
-              <div key={item.question} className="flex gap-4 py-5 sm:gap-6 sm:py-6">
-                <span className="w-10 shrink-0 text-2xl font-black text-[#ae8edb]" aria-hidden="true">0{index + 1}</span>
-                <div>
+              <div key={item.question} className="flex min-w-0 items-start gap-3 py-5 sm:gap-6 sm:py-6">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#e6daf4] bg-[#f7f0ff] text-xl" aria-hidden="true">{item.icon}</div>
+                <div className="min-w-0">
+                  <span className="text-xs font-extrabold tracking-wide text-[#956fc9]">0{index + 1} · 나의 일상</span>
                   <h4 className="break-keep text-lg font-extrabold leading-7 text-[#302044] sm:text-xl">{item.question}</h4>
                   <p className="mt-1.5 break-keep text-sm leading-6 text-[#746581]">{item.context}</p>
                 </div>
@@ -236,8 +249,33 @@ export default function MoneySharedFinancePilotDetail({
                   <p>③ 상황이 바뀔 때 다시 합의할 기준과 점검 순서</p>
                 </div>
                 <details className="mt-4 rounded-lg border border-[#e7e0ef] bg-white px-4 py-3">
-                  <summary className="cursor-pointer text-xs font-bold text-[#7658a7]">전문 분석 항목까지 자세히 보기</summary>
-                  <PremiumReportValuePreview product={product} />
+                  <summary className="cursor-pointer text-sm font-bold text-[#7658a7]">
+                    실제 리포트 구성과 해석 기준 보기
+                  </summary>
+                  <div className="mt-4 rounded-lg bg-[#f7f3ff] px-4 py-3 text-sm leading-7 text-[#655278]">
+                    {preview?.timeValue.badge === "연간 에디션"
+                      ? "이 상품은 구매하는 해의 사주 흐름도 참고합니다. '연간 운세' 상품을 추가 구매한다는 뜻은 아닙니다."
+                      : "선택한 분석에 필요한 사주 흐름을 참고해 해석합니다."}
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-[#645573]">
+                    아래는 실제 결과가 아니라 구매 후 리포트에서 살펴보는 내용의 순서입니다.
+                  </p>
+                  {preview ? (
+                    <ol className="mt-3 grid gap-x-5 gap-y-4 sm:grid-cols-2">
+                      {preview.cards.map((card, index) => {
+                        const step = FRIENDLY_REPORT_STEPS[index];
+                        return (
+                          <li key={card.step} className="min-w-0 border-b border-[#eee5f5] pb-3">
+                            <p className="text-xs font-black text-[#9069c0]">{card.step} · {step?.title ?? card.eyebrow}</p>
+                            <p className="mt-1 break-keep text-sm leading-6 text-[#625471]">{step?.description ?? card.title}</p>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  ) : null}
+                  <p className="mt-4 break-keep text-xs leading-6 text-[#81728e]">
+                    자세한 사주 계산 근거는 리포트 생성 후 결과 화면에서 확인할 수 있습니다. 여기에는 개인별 결과를 미리 표시하지 않습니다.
+                  </p>
                 </details>
               </details>
             ) : null}
@@ -266,7 +304,7 @@ export default function MoneySharedFinancePilotDetail({
           </button>
         </section>
 
-        {state === "not_purchased" ? <ProductReviewSummary productId={product.id} /> : null}
+        {state === "not_purchased" ? <ProductReviewSummary productId={product.id} compactWhenEmpty /> : null}
       </div>
     </section>
   );

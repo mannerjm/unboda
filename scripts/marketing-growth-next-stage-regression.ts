@@ -27,11 +27,17 @@ for (const [motif, lines] of Object.entries(coverHooks.hooks)) {
 }
 assert.equal(distinctCoverLines.size, 112);
 assert(video.includes("const coverLine=COVER_HOOKS[motif]?.[caseIndex]"));
-assert(video.includes("headline:[visible.label+' 사주',strategy.cover]"));
+assert(video.includes("headline:[visible.label+' 사주',coverLine]"),
+  "thumbnail first-frame question must match the daily life situation");
 assert(video.includes("headline:STRATEGY.titles[editorialFormat]") &&
   video.includes("headline:PRACTICE_FRAMES[editorialFormat]") &&
   video.includes("headline:['무료 사주','바로 조회하기']"));
-assert(video.includes("const title=visible.label+' 사주 | '+strategy.cover"), "social title must lead with saju");
+assert(video.includes("const title=visible.label+' 사주 | '+coverLine"),
+  "social title must lead with saju and use the same situation-specific question");
+assert(video.includes("const hook=coverLine+' '+sajuSuffix"),
+  "narration must open with the exact cover question followed by an unanswered saju curiosity cue");
+assert(video.includes("spokenOpenings.size===448") && video.includes("visualCovers.size===112"),
+  "112-day future rotation must verify 448 distinct voice openings and 112 first-frame situations");
 assert(!video.includes("situation.split(' ').slice(-2)"), "never truncate a Korean sentence mid-thought");
 
 const strategy = JSON.parse(read("scripts/social/saju-first-editorial-strategy.json")) as {
@@ -39,10 +45,41 @@ const strategy = JSON.parse(read("scripts/social/saju-first-editorial-strategy.j
  modes: string[];
  groups: Record<string,Record<string,{hook:string;explanation:string;cover:string}>>;
  practices: Record<string,string>;
+ curiositySuffixByGroup: Record<string,Record<string,string>>;
 };
 assert.equal(strategy.version,1);
 assert.deepEqual(strategy.modes,["curiosity","empathy","service_demo","difference"]);
 assert.equal(Object.keys(strategy.groups).length,4);
+assert.deepEqual(new Set(Object.keys(strategy.curiositySuffixByGroup)),
+  new Set(["midnight","commute","friendship","afterwork"]));
+const motifGroups: Record<string,string[]> = {
+ midnight:["sleep-routine","night-checklist","mood-journal","family-talk"],
+ commute:["work-checklist","meeting-presentation","career-crossroads","job-interview"],
+ friendship:["relationship-talk","message-timing","meetup-location","shared-calendar"],
+ afterwork:["expense-ledger","subscription-billing","savings-goal","shopping-choice"],
+};
+const allOpenings=new Set<string>();
+for (const [group, motifs] of Object.entries(motifGroups)) {
+ assert.deepEqual(new Set(Object.keys(strategy.curiositySuffixByGroup[group])),
+   new Set(strategy.modes), group + " needs four distinct voice angles");
+ for (const mode of strategy.modes) {
+  const suffix=strategy.curiositySuffixByGroup[group][mode];
+  assert(/사주|궁합|재물운/.test(suffix) && /[?？]$/.test(suffix),
+    group + " " + mode + " must promise a saju question, not a generic lifestyle tip");
+  for(const motif of motifs){
+   for(const question of coverHooks.hooks[motif]){
+    const voicedQuestion=question+" "+suffix;
+    const n=voicedQuestion.replace(/\s/g,"").length;
+    assert(n>=26&&n<=32,group+" "+mode+" "+motif+" first voice must fit natural Korean 6.9s budget");
+    assert(!/(?:용신|지장간|십성|대운|100%|무조건|당첨|결제|구매|가입)/.test(voicedQuestion),
+      "do not use jargon, financial promises or premature promotional words in curiosity hook");
+    assert(!allOpenings.has(voicedQuestion), "same voice hook must not repeat in 112-day editorial cycle");
+    allOpenings.add(voicedQuestion);
+   }
+  }
+ }
+}
+assert.equal(allOpenings.size,448,"all four daily videos need a distinct, situation-specific question across 112 days");
 for(const [g,byMode]of Object.entries(strategy.groups)){
  assert.equal(Object.keys(byMode).length,4);
  for(const mode of strategy.modes){

@@ -272,9 +272,11 @@ export default function MoneySharedFinancePilotDetail({
               </ol>
             </details>
             {state === "not_purchased" ? (
-              <details className="rounded-xl border border-[#e5dcef] bg-white px-4 py-4">
-                <summary className="cursor-pointer text-sm font-extrabold text-[#644696]">운보다 이용 원칙 자세히 보기</summary>
-                <TrustPrinciplesCard compact />
+              <details className="group rounded-xl border border-[#e5dcef] bg-white px-3 py-2">
+                <summary className="cursor-pointer rounded-lg px-2 py-2 text-sm font-extrabold text-[#644696] transition-colors hover:bg-[#f7f1ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#704ad0]">
+                  운보다 이용 원칙 자세히 보기
+                </summary>
+                <TrustPrinciplesCard compact inlineDetails />
               </details>
             ) : null}
           </div>
@@ -304,7 +306,7 @@ export default function MoneySharedFinancePilotDetail({
             </div>
             {href ? (
               <Link href={href} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-[#704ad0] px-4 py-3 text-center text-base font-extrabold text-white transition hover:bg-[#5e38bd] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#704ad0]">
-                {ACTION_LABELS[state]} <span className="ml-2" aria-hidden="true">→</span>
+                {ACTION_LABELS[state]}
               </Link>
             ) : (
               <p className="text-sm font-semibold text-[#6d5983]">분석할 프로필을 선택한 뒤 리포트를 확인해 주세요.</p>

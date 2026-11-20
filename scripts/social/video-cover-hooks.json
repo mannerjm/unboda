@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "Human-edited concise first-frame questions; seven situations per motif, no split Korean words",
+  "description": "Situation-matched Korean curiosity questions for the first two seconds: distinct across 16 motifs x 7 cases; avoid purchase language in spoken scene.",
   "hooks": {
     "sleep-routine": [
       "또 휴대폰을 켜요?",
@@ -124,7 +124,7 @@
       "이체 날짜를 잊었나요?",
       "구독 해지가 고민돼요?",
       "낯선 청구가 떴나요?",
-      "결제일이 겹치나요?",
+      "청구일이 겹치나요?",
       "이체 금액이 달라요?",
       "구독을 이어갈까요?"
     ],
@@ -139,7 +139,7 @@
     ],
     "shopping-choice": [
       "장바구니가 고민이죠?",
-      "구매 버튼이 망설여져?",
+      "살까 말까 망설여져?",
       "쇼핑 예산을 넘었죠?",
       "후기를 다시 보나요?",
       "가격이 달라졌나요?",

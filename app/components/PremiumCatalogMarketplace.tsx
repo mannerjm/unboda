@@ -6,7 +6,7 @@ import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import type { PremiumCatalogCategoryGroup } from "@/app/lib/premiumCatalog";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import type { PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
-import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
+import { getPaidAnalysisTopicConfig, getLaunchProductIds } from "@/app/lib/paidAnalysisTopicConfig";
 import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
 import { getProductPricing } from "@/app/lib/productPricing";
 import PremiumProductDetail from "@/app/components/PremiumProductDetail";
@@ -126,6 +126,8 @@ const PERIOD_THUMBNAIL_TITLES: Readonly<Record<string,string>> = {
 function getKstNextYear(): number {
   return Number(new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Seoul",year:"numeric"}).format(new Date()))+1;
 }
+
+const LAUNCHED_CUSTOMER_FIRST_IDS = new Set(getLaunchProductIds());
 
 function money(productId:string) {
   return getProductPricing(productId).amount.toLocaleString("ko-KR") + "원";
@@ -326,10 +328,10 @@ export default function PremiumCatalogMarketplace({
         {selected ? (
           <div data-premium-detail-active="true" className="overflow-hidden rounded-[1.8rem] border border-[#e7daf8] bg-white shadow-[0_15px_40px_rgba(90,57,152,.08)]">
             <div className="flex items-center justify-between gap-3 border-b border-[#f0e8f9] px-5 py-4 sm:px-6">
-              <button type="button" onClick={()=>onSelectProduct(null)} className="rounded-full border border-[#e1d2f4] px-4 py-2 text-xs font-bold text-[#69449e] hover:bg-[#f6efff]">{selected.id === "money-shared-finance" ? "상품 목록" : <>← {isPeriod?"기간 선택":"상품 목록"}</>}</button>
+              <button type="button" onClick={()=>onSelectProduct(null)} className="rounded-full border border-[#e1d2f4] px-4 py-2 text-xs font-bold text-[#69449e] hover:bg-[#f6efff]">{LAUNCHED_CUSTOMER_FIRST_IDS.has(selected.id) ? (isPeriod ? "기간 선택" : "상품 목록") : <>← {isPeriod?"기간 선택":"상품 목록"}</>}</button>
               <span className="text-xs font-semibold text-[#9a88aa]">{isPeriod?"기간별 분석":currentGroup?.label}</span>
             </div>
-            {selected.id !== "money-shared-finance" ? (
+            {!LAUNCHED_CUSTOMER_FIRST_IDS.has(selected.id) ? (
             <div className={"grid gap-4 bg-[linear-gradient(130deg,#ffffff,#f8f0ff)] p-5 sm:items-center sm:p-6 "+(isPeriod?"sm:grid-cols-[216px_1fr]":"sm:grid-cols-[180px_1fr]")}>
               <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-white/80 shadow-[0_10px_25px_rgba(107,75,163,.13)]">
                 <ProductArtwork category={isPeriod?"period":(currentGroup?.category??"period")} productId={selected.id} wide/>
@@ -355,7 +357,7 @@ export default function PremiumCatalogMarketplace({
               </div>
             </div>
             ) : null}
-            <div className={selected.id === "money-shared-finance" ? "p-0" : "p-3 sm:p-5"}>
+            <div className={LAUNCHED_CUSTOMER_FIRST_IDS.has(selected.id) ? "p-0" : "p-3 sm:p-5"}>
               <PremiumProductDetail
                 key={selected.id}
                 product={selected}
@@ -401,7 +403,7 @@ export default function PremiumCatalogMarketplace({
                   </div>
                   <div className="flex min-w-0 flex-col gap-1 py-0.5">
                     <p className="line-clamp-1 text-[11px] font-semibold text-[#9265b6]">{product.title}</p>
-                    {product.id === "money-shared-finance" ? (
+                    {LAUNCHED_CUSTOMER_FIRST_IDS.has(product.id) ? (
                       <h3 className="line-clamp-3 text-[16px] font-extrabold leading-[1.4] text-[#302044] transition group-hover:text-[#753aba]">{getReadablePaidQuestion(product.id,question??product.title)}</h3>
                     ) : (
                       <h3 className="line-clamp-2 text-[16px] font-extrabold leading-[1.4] text-[#302044] transition group-hover:text-[#753aba]">{getReadablePaidQuestion(product.id,question??product.title)}</h3>

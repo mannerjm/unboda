@@ -8,10 +8,14 @@ on:
     branches: [main]
     paths:
       - 'scripts/social/prepare-next-day-videos.mjs'
+      - 'scripts/social/saju-first-editorial-strategy.json'
+      - 'scripts/social/video-cover-hooks.json'
       - '.github/workflows/unboda-nextday-source-factory.yml'
   pull_request:
     paths:
       - 'scripts/social/prepare-next-day-videos.mjs'
+      - 'scripts/social/saju-first-editorial-strategy.json'
+      - 'scripts/social/video-cover-hooks.json'
       - '.github/workflows/unboda-nextday-source-factory.yml'
 permissions:
   contents: write

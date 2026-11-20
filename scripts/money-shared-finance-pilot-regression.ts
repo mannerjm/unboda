@@ -35,7 +35,6 @@ for (const required of [
   "saveAnalysisAction(product.id)",
   "buildPaidAnalysisV4PreviewModel(product)",
   "ProductReviewSummary productId={product.id} compactWhenEmpty",
-  "TrustPrinciplesCard compact",
   'state === "not_purchased"',
   "STATUS_LABELS[state]",
   "ACTION_LABELS[state]",
@@ -139,10 +138,8 @@ assert(marketplace.includes('onClick={()=>onSelectProduct(null)}'),
 assert(marketplace.includes('<>← {isPeriod?"기간 선택":"상품 목록"}</>'),
   "other product/period detail back buttons must be unchanged");
 
-assert(pilot.includes("<TrustPrinciplesCard compact inlineDetails />"),
-  "pilot trust disclosure must expand full inline rules without another link");
-assert(pilot.includes('cursor-pointer rounded-lg') && pilot.includes("운보다 이용 원칙 자세히 보기"),
-  "trust summary must remain natively keyboard/mouse clickable");
+assert(!pilot.includes("운보다 이용 원칙 자세히 보기") && !pilot.includes("TrustPrinciplesCard"),
+  "customer request: remove trust accordion from premium detail without changing trust site or service rules");
 assert(trustCard.includes("inlineDetails = false") && trustCard.includes("!inlineDetails ? (")
   && trustCard.includes("!compact || inlineDetails"),
   "only opted-in trust card must hide its secondary link and show explanations");
@@ -158,6 +155,12 @@ assert(reviews.includes("summary.count === 0 && compactWhenEmpty")
   "verified review data display and opt-in empty state must be intact");
 
 const purchaseArea = pilot.slice(pilot.indexOf('id="finance-purchase-action"'));
+assert.equal((pilot.match(/onClick=\{handleSave\}/g) ?? []).length, 1,
+  "pilot must render exactly one save-interest action");
+assert(purchaseArea.indexOf("{ACTION_LABELS[state]}") < purchaseArea.indexOf("onClick={handleSave}"),
+  "save-interest must immediately follow the primary purchase/report link");
+assert(!pilot.slice(0, pilot.indexOf('id="finance-purchase-action"')).includes("onClick={handleSave}"),
+  "save-interest must not appear above reviews or within purchase disclosures");
 assert(purchaseArea.includes("href={href}") && purchaseArea.includes("{ACTION_LABELS[state]}"),
   "single bottom purchase must preserve correct state-specific checkout/report navigation");
 assert(!purchaseArea.includes('aria-hidden="true">→</span>'),

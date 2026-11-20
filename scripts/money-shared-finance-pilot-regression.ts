@@ -209,9 +209,13 @@ assert(checkoutPage.includes('premiumProduct?.id === "money-shared-finance"')
   && checkoutPage.includes("{checkoutQuestion}"),
   "only pilot checkout should show the same readable question as list/detail");
 assert(checkoutPage.includes("getPremiumProductDisplayTitle(premiumProduct!.id, premiumProduct!.title)")
-  && checkoutPage.includes(">{displayTitle}</h1>")
+  && checkoutPage.includes('<p className="text-sm font-bold leading-6 text-[#d6cafa]">{displayTitle}</p>')
+  && checkoutPage.includes('<h1 className="mt-2 max-w-2xl break-keep text-[clamp(1.65rem,4.3vw,2.35rem)]')
+  && checkoutPage.includes('{checkoutQuestion}')
   && checkoutPage.includes('productTitle: displayTitle'),
-  "checkout official product title and payment panel title must not change");
+  "pilot checkout must emphasize the shared question in h1, show smaller official name and keep payment-panel product title");
+assert(checkoutPage.includes('<h1 className="max-w-2xl text-3xl font-black leading-tight tracking-[-0.035em] sm:text-4xl">{displayTitle}</h1>'),
+  "other 56 and special product checkout hero titles must remain unchanged");
 assert(checkoutPage.includes("resolved.amount.toLocaleString")
   && pilot.includes("getProductPricing(product.id).amount"),
   "both checkout and detail must still use existing authoritative pricing");

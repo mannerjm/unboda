@@ -12,6 +12,8 @@ const trustCard = readFileSync("app/components/TrustPrinciplesCard.tsx", "utf8")
 const page = readFileSync("app/deep-analysis/page.tsx", "utf8");
 const styles = readFileSync("app/globals.css", "utf8");
 const directory = readFileSync("app/components/PaidProductDiscoveryLinks.tsx", "utf8");
+const questionLabels = readFileSync("app/lib/premiumQuestionDisplay.ts", "utf8");
+const checkoutPage = readFileSync("app/checkout/[productId]/page.tsx", "utf8");
 
 // The pilot must be selected by exactly one canonical launched product ID.
 assert(registry.includes('id: "money-shared-finance"'), "pilot product must remain in launch registry");
@@ -47,7 +49,7 @@ for (const forbidden of [
 assert(pricing.includes("9900"), "price must continue to originate from pricing registry");
 
 for (const required of [
-  "왜 나만 더 부담하는 것 같을까요?",
+  "getReadablePaidQuestion(product.id, product.title)",
   "혹시 이런 고민을 해본 적 있으신가요?",
   "누가 결정하나요?",
   "언제, 누가 부담하나요?",
@@ -184,5 +186,35 @@ assert(!styles.includes("main[data-deep-analysis-page]:has([data-premium-detail-
   "mobile directory visibility must not require a selected product");
 assert(page.includes("<PaidProductDiscoveryLinks />"),
   "keep server-rendered product directory for desktop users");
+
+// Three-stage title identity. Keep official product title/ID stable while one
+// customer-facing question is shared by the topic card, pilot hero, and checkout.
+const pilotOfficialTitle = "공동 재정 경계 분석";
+const pilotQuestion = "함께 쓰는 돈, 왜 나만 더 부담하는 것 같을까요?";
+assert(registry.includes('id: "money-shared-finance", category: "money", title: "' + pilotOfficialTitle + '"'),
+  "source-of-truth official product name must remain unchanged");
+assert(questionLabels.includes('"money-shared-finance": "' + pilotQuestion + '"'),
+  "exactly one shared readable customer question should be defined for the pilot");
+assert(marketplace.includes("getReadablePaidQuestion(product.id,question??product.title)"),
+  "catalog list must read the centrally defined pilot question");
+assert(marketplace.includes('product.id === "money-shared-finance" ? "line-clamp-3" : "line-clamp-2"'),
+  "catalog should display the longer pilot question without changing other 56 cards");
+assert(pilot.includes('const headline = getReadablePaidQuestion(product.id, product.title)')
+  && pilot.includes("{headlineLead}{headlineRest ?"),
+  "pilot detail hero must share the catalog question, not duplicate hard-coded copy");
+assert(checkoutPage.includes('premiumProduct?.id === "money-shared-finance"')
+  && checkoutPage.includes('getReadablePaidQuestion(premiumProduct.id, premiumProduct.title)')
+  && checkoutPage.includes("{checkoutQuestion}"),
+  "only pilot checkout should show the same readable question as list/detail");
+assert(checkoutPage.includes("getPremiumProductDisplayTitle(premiumProduct!.id, premiumProduct!.title)")
+  && checkoutPage.includes(">{displayTitle}</h1>")
+  && checkoutPage.includes('productTitle: displayTitle'),
+  "checkout official product title and payment panel title must not change");
+assert(checkoutPage.includes("resolved.amount.toLocaleString")
+  && pilot.includes("getProductPricing(product.id).amount"),
+  "both checkout and detail must still use existing authoritative pricing");
+assert(checkoutPage.includes("resolveLaunchPurchasableProduct(productId)")
+  && pilot.includes("getPremiumAnalysisHref(product.id, state, profileId)"),
+  "product identity, canonical checkout and state-aware purchase path must remain intact");
 
 console.log("money-shared-finance-pilot-regression: PASS (one product only; checkout/report/AI unchanged)");

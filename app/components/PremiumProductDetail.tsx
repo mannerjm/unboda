@@ -14,6 +14,8 @@ import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
 import { formatTopicExpectedUnderstanding } from "@/app/lib/purchaseDecisionCopy";
 import PremiumReportValuePreview from "@/app/components/PremiumReportValuePreview";
 import MoneySharedFinancePilotDetail from "@/app/components/MoneySharedFinancePilotDetail";
+import CustomerFirstPremiumDetail from "@/app/components/CustomerFirstPremiumDetail";
+import { getLaunchProductIds } from "@/app/lib/paidAnalysisTopicConfig";
 import ProductReviewSummary from "@/app/components/ProductReviewSummary";
 import TrustPrinciplesCard from "@/app/components/TrustPrinciplesCard";
 
@@ -147,9 +149,18 @@ export default function PremiumProductDetail({
     }
   };
 
-  // A single-item design pilot; all other 56 launch detail pages keep their existing layout.
+  // The established money-shared-finance page remains untouched. All other
+  // launched products get the matching customer-first design with their own data.
   if (product.id === "money-shared-finance") {
     return <MoneySharedFinancePilotDetail
+      product={product}
+      state={state}
+      profileId={profileId}
+      isSaved={isSaved}
+    />;
+  }
+  if (getLaunchProductIds().includes(product.id)) {
+    return <CustomerFirstPremiumDetail
       product={product}
       state={state}
       profileId={profileId}

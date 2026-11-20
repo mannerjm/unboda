@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
+import { getLaunchProductIds } from "@/app/lib/paidAnalysisTopicConfig";
 import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
 import { resolveAnalysisEditionForOrder } from "@/app/lib/analysisEditionForOrder";
 import { formatAnalysisEditionLabel } from "@/app/lib/analysisEditionLabel";
@@ -53,9 +54,9 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
   const displayTitle = specialProduct
     ? specialProduct.title
     : getPremiumProductDisplayTitle(premiumProduct!.id, premiumProduct!.title);
-  // On this pilot only, repeat the list/detail customer question below
-  // the unchanged official purchase title to reinforce item identity.
-  const checkoutQuestion = premiumProduct?.id === "money-shared-finance"
+  // Keep the official payable title/product ID unchanged. All 57 launched
+  // premium products display the same buyer question as list and detail.
+  const checkoutQuestion = premiumProduct && getLaunchProductIds().includes(premiumProduct.id)
     ? getReadablePaidQuestion(premiumProduct.id, premiumProduct.title)
     : null;
 

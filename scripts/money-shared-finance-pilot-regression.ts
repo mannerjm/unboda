@@ -197,8 +197,10 @@ assert(questionLabels.includes('"money-shared-finance": "' + pilotQuestion + '"'
   "exactly one shared readable customer question should be defined for the pilot");
 assert(marketplace.includes("getReadablePaidQuestion(product.id,question??product.title)"),
   "catalog list must read the centrally defined pilot question");
-assert(marketplace.includes('product.id === "money-shared-finance" ? "line-clamp-3" : "line-clamp-2"'),
-  "catalog should display the longer pilot question without changing other 56 cards");
+assert(marketplace.includes('product.id === "money-shared-finance" ? (')
+  && marketplace.includes('<h3 className="line-clamp-3 text-[16px] font-extrabold')
+  && marketplace.includes('<h3 className="line-clamp-2 text-[16px] font-extrabold'),
+  "catalog should show pilot question in 3 lines and preserve legacy 2-line markup for all other products");
 assert(pilot.includes('const headline = getReadablePaidQuestion(product.id, product.title)')
   && pilot.includes("{headlineLead}{headlineRest ?"),
   "pilot detail hero must share the catalog question, not duplicate hard-coded copy");

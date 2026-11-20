@@ -108,12 +108,15 @@ export default function CustomerFirstPremiumDetail({
   const headlineLead = commaIndex >= 0 ? headline.slice(0, commaIndex + 1) : headline;
   const headlineRest = commaIndex >= 0 ? headline.slice(commaIndex + 1).trim() : "";
   const photo = PREMIUM_PRODUCT_PHOTOS[product.id];
-  // The same curated Pexels photograph as its thumbnail, at 1200px; fall back
-  // to existing first-party files when offline. Period artwork stays local.
+  // Every topic photo uses a high-resolution, 4:3 CENTER CROP of its original
+  // licensed Pexels source. The curated list thumbnail was also center-cropped:
+  // reusing that composition prevents portrait originals from looking tiny in
+  // the uniform landscape detail frame. Locally generated period art is 4:3.
+  // The first-party thumbnail is retained only as a network-error fallback.
   const pexelsId = photo.sourcePage.startsWith("https://www.pexels.com/photo/")
     ? photo.sourcePage.match(/-(\d+)\/?$/)?.[1] : undefined;
   const originalPhotoUrl = pexelsId
-    ? "https://images.pexels.com/photos/" + pexelsId + "/pexels-photo-" + pexelsId + ".jpeg?auto=compress&cs=tinysrgb&w=1200"
+    ? "https://images.pexels.com/photos/" + pexelsId + "/pexels-photo-" + pexelsId + ".jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1200&h=900"
     : null;
   const photoSource = originalPhotoUrl && !photoFallback ? originalPhotoUrl : photo.src;
   const preview = buildPaidAnalysisV4PreviewModel(product);
@@ -159,7 +162,7 @@ export default function CustomerFirstPremiumDetail({
             <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] border-[5px] border-white bg-[#f8f1ff] shadow-[0_16px_38px_rgba(83,54,124,0.14)]">
               <Image src={photoSource} alt={photo.alt} fill unoptimized priority
                 onError={() => setPhotoFallback(true)}
-                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 390px, 390px" className="object-contain" />
+                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 390px, 390px" className="object-cover object-center" />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#261831]/85 via-[#261831]/20 to-transparent px-5 pb-4 pt-14 text-white">
                 <p className="break-keep text-sm font-extrabold leading-6">{product.title} · 내 사주에서 살펴볼 기준</p>
               </div>

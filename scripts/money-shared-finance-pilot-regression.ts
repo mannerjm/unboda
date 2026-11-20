@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 const shared = readFileSync("app/components/PremiumProductDetail.tsx", "utf8");
 const pilot = readFileSync("app/components/MoneySharedFinancePilotDetail.tsx", "utf8");
 const registry = readFileSync("app/lib/analysisTopics.ts", "utf8");
+const marketplace = readFileSync("app/components/PremiumCatalogMarketplace.tsx", "utf8");
 const pricing = readFileSync("app/lib/productPricing.ts", "utf8");
 
 // The pilot must be selected by exactly one canonical launched product ID.
@@ -41,18 +42,32 @@ assert(pricing.includes("9900"), "price must continue to originate from pricing 
 
 for (const required of [
   "왜 나만 더 부담하는 것 같을까요?",
-  "혹시 이런 순간이 익숙한가요?",
-  "누가 결정할까요?",
-  "언제, 누가 부담할까요?",
-  "달라진 상황은 어떻게 맞출까요?",
+  "혹시 이런 고민을 해본 적 있으신가요?",
+  "누가 결정하나요?",
+  "언제, 누가 부담하나요?",
+  "상황이 달라지면 어떻게 하나요?",
   "AI 상담은 보유한 리포트 범위와 질문권 등 별도 이용 조건",
   "금융·법률 자문을 대신하지 않습니다.",
-  "내 사주로 분석 시작하기",
+  "심층분석 구매하기",
+  "버튼을 누르면 결제 내용을 확인하는 화면으로 이동합니다.",
+  "전문 분석 항목까지 자세히 보기",
 ]) {
   assert(pilot.includes(required), "customer-first pilot content missing: " + required);
 }
-assert(pilot.includes("fixed inset-x-0 bottom-3"), "pilot needs one persistent, accessible CTA");
+
+// One inline, state-aware purchase link: no fixed CTA masking text or duplicate purchase entry.
+assert(pilot.includes('id="finance-purchase-action"'), "the purchase action must be in normal reading flow");
+assert(!pilot.includes("fixed inset-x") && !pilot.includes("sticky bottom-"),
+  "the pilot must not cover body copy with a floating purchase bar");
 assert.equal((pilot.match(/<Link\b/g) ?? []).length, 1, "pilot must expose exactly one primary CTA");
 assert(!pilot.includes("내 사주로 자세히 알아보기") && !pilot.includes("다른 분석 선택"),
   "redundant hero buttons must not return");
+
+// The shared marketplace duplicate cover/photo/price strip is omitted only for this pilot.
+assert(marketplace.includes('selected.id !== "money-shared-finance" ? ('),
+  "pilot's redundant legacy product banner should be hidden");
+assert(marketplace.includes('selected.id === "money-shared-finance" ? "p-0" : "p-3 sm:p-5"'),
+  "pilot uses edge-to-edge hero while all other details preserve original padding");
+assert(marketplace.includes("<PremiumProductDetail") && marketplace.includes("money(selected.id)"),
+  "other products must retain original detail/price header and navigation");
 console.log("money-shared-finance-pilot-regression: PASS (one product only; checkout/report/AI unchanged)");

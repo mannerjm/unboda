@@ -329,6 +329,7 @@ export default function PremiumCatalogMarketplace({
               <button type="button" onClick={()=>onSelectProduct(null)} className="rounded-full border border-[#e1d2f4] px-4 py-2 text-xs font-bold text-[#69449e] hover:bg-[#f6efff]">← {isPeriod?"기간 선택":"상품 목록"}</button>
               <span className="text-xs font-semibold text-[#9a88aa]">{isPeriod?"기간별 분석":currentGroup?.label}</span>
             </div>
+            {selected.id !== "money-shared-finance" ? (
             <div className={"grid gap-4 bg-[linear-gradient(130deg,#ffffff,#f8f0ff)] p-5 sm:items-center sm:p-6 "+(isPeriod?"sm:grid-cols-[216px_1fr]":"sm:grid-cols-[180px_1fr]")}>
               <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-white/80 shadow-[0_10px_25px_rgba(107,75,163,.13)]">
                 <ProductArtwork category={isPeriod?"period":(currentGroup?.category??"period")} productId={selected.id} wide/>
@@ -353,7 +354,8 @@ export default function PremiumCatalogMarketplace({
                 </div>
               </div>
             </div>
-            <div className="p-3 sm:p-5">
+            ) : null}
+            <div className={selected.id === "money-shared-finance" ? "p-0" : "p-3 sm:p-5"}>
               <PremiumProductDetail
                 key={selected.id}
                 product={selected}

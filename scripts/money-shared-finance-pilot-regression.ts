@@ -22,7 +22,7 @@ assert.equal((shared.match(/product\.id === "money-shared-finance"/g) ?? []).len
 assert(shared.includes('import MoneySharedFinancePilotDetail from "@/app/components/MoneySharedFinancePilotDetail"'),
   "shared detail must import the pilot");
 assert(shared.includes('<MoneySharedFinancePilotDetail') && shared.includes('const isPeriod = product.kind === "PERIOD"'),
-  "all nonpilot detail pages must retain the original shared layout");
+  "the unchanged pilot and nonlaunch fallback stay available");
 assert(shared.includes('<PremiumReportValuePreview') && shared.includes('<ProductReviewSummary'),
   "ordinary product detail report preview and verified reviews must remain");
 
@@ -76,7 +76,7 @@ assert.equal((pilot.match(/<Link\b/g) ?? []).length, 1, "pilot must expose exact
 assert(!pilot.includes("내 사주로 자세히 알아보기") && !pilot.includes("다른 분석 선택"),
   "redundant hero buttons must not return");
 
-// The shared marketplace duplicate cover/photo/price strip is omitted only for this pilot.
+// All launched product details omit the duplicate legacy cover strip.
 assert(marketplace.includes('selected.id !== "money-shared-finance" ? ('),
   "pilot's redundant legacy product banner should be hidden");
 assert(marketplace.includes('selected.id === "money-shared-finance" ? "p-0" : "p-3 sm:p-5"'),
@@ -84,13 +84,13 @@ assert(marketplace.includes('selected.id === "money-shared-finance" ? "p-0" : "p
 assert(marketplace.includes("<PremiumProductDetail") && marketplace.includes("money(selected.id)"),
   "other products must retain original detail/price header and navigation");
 
-// Collapse the broad discovery banner dynamically ONLY when this pilot is open.
+// Hide generic discovery when any launched detail is selected.
 // This must work even when selection is client-side and no productId URL param exists.
 assert(page.includes("data-deep-analysis-page") && page.includes("data-deep-analysis-discovery-banner"),
   "server page should expose isolated banner target");
-assert(styles.includes('main[data-deep-analysis-page]:has([data-pilot-product="money-shared-finance"])')
+assert(styles.includes('main[data-deep-analysis-page]:has([data-premium-detail-active])')
   && styles.includes("[data-deep-analysis-discovery-banner]"),
-  "pilot alone must hide the redundant discover banner; other catalog views retain it");
+  "selected details hide the redundant header, catalog keeps it");
 assert(pilot.includes('data-pilot-product="money-shared-finance"'),
   "pilot needs a unique DOM scope marker");
 
@@ -131,7 +131,7 @@ assert(pilot.includes("🧾") && pilot.includes("💬") && pilot.includes("🔄"
   "story section must visually distinguish the three worries without a card wall");
 // Four requested polish changes apply ONLY to this single pilot product.
 assert(marketplace.includes('selected.id === "money-shared-finance" ? "상품 목록"'),
-  "pilot product-list button must omit its leading arrow");
+  "all launch back buttons must omit the leading arrow");
 assert(marketplace.includes('onClick={()=>onSelectProduct(null)}'),
   "product-list button must still navigate back to the catalog");
 assert(marketplace.includes('<>← {isPeriod?"기간 선택":"상품 목록"}</>'),
@@ -182,8 +182,8 @@ assert(styles.includes("@media (max-width: 1023px), (hover: none) and (pointer: 
   && styles.includes("section[data-paid-product-directory] {")
   && styles.includes("display: none;"),
   "the full directory must be hidden across mobile catalog/detail pages and landscape");
-assert(!styles.includes("main[data-deep-analysis-page]:has([data-premium-detail-active])"),
-  "mobile directory visibility must not require a selected product");
+assert(styles.includes("section[data-paid-product-directory] {"),
+  "mobile directory visibility remains independent of a selected product");
 assert(page.includes("<PaidProductDiscoveryLinks />"),
   "keep server-rendered product directory for desktop users");
 
@@ -200,14 +200,14 @@ assert(marketplace.includes("getReadablePaidQuestion(product.id,question??produc
 assert(marketplace.includes('product.id === "money-shared-finance" ? (')
   && marketplace.includes('<h3 className="line-clamp-3 text-[16px] font-extrabold')
   && marketplace.includes('<h3 className="line-clamp-2 text-[16px] font-extrabold'),
-  "catalog should show pilot question in 3 lines and preserve legacy 2-line markup for all other products");
+  "catalog should show all launched product questions in up to 3 lines");
 assert(pilot.includes('const headline = getReadablePaidQuestion(product.id, product.title)')
   && pilot.includes("{headlineLead}{headlineRest ?"),
   "pilot detail hero must share the catalog question, not duplicate hard-coded copy");
 assert(checkoutPage.includes('premiumProduct?.id === "money-shared-finance"')
   && checkoutPage.includes('getReadablePaidQuestion(premiumProduct.id, premiumProduct.title)')
   && checkoutPage.includes("{checkoutQuestion}"),
-  "only pilot checkout should show the same readable question as list/detail");
+  "all launched checkouts show the same readable question as list/detail");
 assert(checkoutPage.includes("getPremiumProductDisplayTitle(premiumProduct!.id, premiumProduct!.title)")
   && checkoutPage.includes('<p className="text-sm font-bold leading-6 text-[#d6cafa]">{displayTitle}</p>')
   && checkoutPage.includes('<h1 className="mt-2 max-w-2xl break-keep text-[clamp(1.65rem,4.3vw,2.35rem)]')
@@ -223,4 +223,4 @@ assert(checkoutPage.includes("resolveLaunchPurchasableProduct(productId)")
   && pilot.includes("getPremiumAnalysisHref(product.id, state, profileId)"),
   "product identity, canonical checkout and state-aware purchase path must remain intact");
 
-console.log("money-shared-finance-pilot-regression: PASS (one product only; checkout/report/AI unchanged)");
+console.log("money-shared-finance-pilot-regression: PASS (pilot and 57-launch presentation contracts; checkout/report/AI unchanged)");

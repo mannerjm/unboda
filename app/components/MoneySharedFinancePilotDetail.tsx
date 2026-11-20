@@ -177,7 +177,7 @@ export default function MoneySharedFinancePilotDetail({
           </p>
           <div className="mt-7 grid gap-5 border-t border-white/25 pt-7 md:grid-cols-3 md:gap-0">
             {INSIGHTS.map((item, index) => (
-              <div key={item.title} className="md:px-5 md:first:pl-0 md:last:pr-0 md:[&+div]:border-l md:[&+div]:border-white/25">
+              <div key={item.title} className={index === 0 ? "md:pr-5" : "md:border-l md:border-white/25 md:px-5"}>
                 <span className="text-xl font-black text-[#e0c5ff]">0{index + 1}</span>
                 <h4 className="mt-2 break-keep text-lg font-extrabold">{item.title}</h4>
                 <p className="mt-2 break-keep text-sm leading-6 text-[#e9dcf5]">{item.detail}</p>
@@ -202,12 +202,12 @@ export default function MoneySharedFinancePilotDetail({
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#e9dafa] text-sm font-black text-[#7050bc]">1</span>
               <p className="mt-2 font-extrabold text-[#38274d]">내 사주 분석</p>
             </li>
-            <li aria-hidden="true" className="text-2xl font-light text-[#b198d1]">↓ <span className="hidden sm:inline">→</span></li>
+            <li aria-hidden="true" className="text-2xl font-light text-[#b198d1]"><span className="sm:hidden">↓</span><span className="hidden sm:inline">→</span></li>
             <li className="flex-1">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#e9dafa] text-sm font-black text-[#7050bc]">2</span>
               <p className="mt-2 font-extrabold text-[#38274d]">개인화 리포트</p>
             </li>
-            <li aria-hidden="true" className="text-2xl font-light text-[#b198d1]">↓ <span className="hidden sm:inline">→</span></li>
+            <li aria-hidden="true" className="text-2xl font-light text-[#b198d1]"><span className="sm:hidden">↓</span><span className="hidden sm:inline">→</span></li>
             <li className="flex-1">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#e9dafa] text-sm font-black text-[#7050bc]">3</span>
               <p className="mt-2 font-extrabold text-[#38274d]">AI 상담에서 이어가기</p>

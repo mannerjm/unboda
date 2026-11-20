@@ -145,7 +145,7 @@ assert(trustCard.includes("inlineDetails = false") && trustCard.includes("!inlin
 assert(trustCard.includes('href="/trust"'),
   "ordinary trust cards must keep their original navigation");
 
-assert(reviews.includes('<Link href="/reviews" className="flex flex-wrap items-center'),
+assert(reviews.includes('<Link href="/reviews" className="group flex flex-wrap items-center'),
   "the pilot's full empty-review panel must be click/tap navigable");
 assert(reviews.includes("후기 확인") && !reviews.includes("후기 확인 →"),
   "the pilot review entry must not show the old arrow");

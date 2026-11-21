@@ -1,42 +1,42 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-friendship-shared-calendar-2-0-20261121",
-  "topicKey": "saju-friendship-shared-calendar-2-0-20261121",
+  "id": "unboda-saju-friendship-relationship-talk-3-0-20261122",
+  "topicKey": "saju-friendship-relationship-talk-3-0-20261122",
   "sajuCategory": "compatibility",
   "visualStyle": "relationship-coral",
-  "visualMotif": "shared-calendar",
-  "situation": "동료의 휴가 날짜를 잘못 기억한 아침",
-  "hook": "사주에서 관계 성향을 무료로 살펴볼까요?",
-  "theme": "동료의 휴가 날짜를 잘못 기억한 아침을 출생 정보에 기반한 전통 사주 해석과 연결. 동료 사이의 역할 분담·소통·갈등 흐름",
-  "thumbnailTitle": "서로의 일정 사주 | 관계 성향 체험",
+  "visualMotif": "relationship-talk",
+  "situation": "배우자와 함께할 시간을 정하던 오후",
+  "hook": "함께할 시간이 없나요? 내 사주에선 사람 대하는 태도를 어떻게 볼까요?",
+  "theme": "배우자와 함께할 시간을 정하던 오후을 출생 정보에 기반한 전통 사주 해석과 연결. 두 사람의 관계 강점과 갈등·회복 방식",
+  "thumbnailTitle": "관계 대화 사주 | 함께할 시간이 없나요?",
   "narrationDraft": [
-    "사주에서 관계 성향을 무료로 살펴볼까요?",
+    "함께할 시간이 없나요? 내 사주에선 사람 대하는 태도를 어떻게 볼까요?",
     "사주 무료 조회는 출생 정보를 바탕으로 기본 구조와 흐름을 보여줘요.",
     "생년월일과 달력 종류를 입력하고 무료 결과에서 사주 구조를 확인해요.",
     "운보다 무료 사주 조회로 관계에서 나의 성향을 차분히 살펴보세요."
   ],
   "visualConcepts": [
-    "첫 장면에서 동료의 휴가 날짜를 잘못 기억한 아침 상황과 서로의 일정, 달력을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "두 번째 장면에서 동료의 휴가 날짜를 잘못 기억한 아침 상황과 서로의 일정, 달력을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "세 번째 장면에서 동료의 휴가 날짜를 잘못 기억한 아침 상황과 서로의 일정, 달력을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "마지막 장면에서 동료의 휴가 날짜를 잘못 기억한 아침 상황과 서로의 일정, 달력을 실제 주제 그림으로 보여주고 움직이는 화면"
+    "첫 장면에서 배우자와 함께할 시간을 정하던 오후 상황과 관계 대화, 대화을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "두 번째 장면에서 배우자와 함께할 시간을 정하던 오후 상황과 관계 대화, 대화을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "세 번째 장면에서 배우자와 함께할 시간을 정하던 오후 상황과 관계 대화, 대화을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "마지막 장면에서 배우자와 함께할 시간을 정하던 오후 상황과 관계 대화, 대화을 실제 주제 그림으로 보여주고 움직이는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "서로의 일정 사주",
-        "관계 성향 체험"
+        "관계 대화 사주",
+        "함께할 시간이 없나요?"
       ],
-      "subline": "휴가 날짜를 놓쳤나요?",
-      "illustration": "clock"
+      "subline": "관계 성향 체험",
+      "illustration": "message"
     },
     {
       "headline": [
-        "무료 사주 체험",
-        "출생 정보로 시작"
+        "내 사주 확인하기",
+        "생활 속 성향 보기"
       ],
       "subline": "사주로 시작하는 자기이해",
-      "illustration": "message"
+      "illustration": "notes"
     },
     {
       "headline": [
@@ -44,31 +44,31 @@
         "무료 결과 확인"
       ],
       "subline": "내 출생 정보로 결과 확인",
-      "illustration": "notes"
+      "illustration": "rest"
     },
     {
       "headline": [
         "무료 사주",
         "바로 조회하기"
       ],
-      "subline": "운보다 무료 사주 · 직장·동료 궁합 분석",
-      "illustration": "rest"
+      "subline": "운보다 무료 사주 · 연인·배우자 궁합 분석",
+      "illustration": "clock"
     }
   ],
-  "targetDateKst": "20261121",
+  "targetDateKst": "20261122",
   "destination": "https://unboda.kr/guest-saju",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "productId": "compatibility-workplace",
-  "productTitle": "직장·동료 궁합 분석",
+  "productId": "compatibility-romantic",
+  "productTitle": "연인·배우자 궁합 분석",
   "productCategory": "compatibility",
   "productType": "compatibility",
-  "landingPath": "/special-analysis/compatibility/workplace",
+  "landingPath": "/special-analysis/compatibility/romantic",
   "contentGoal": "compatibility-conversion",
-  "productProblem": "동료 관련 동료의 휴가 날짜를 잘못 기억한 아침 상황을 돌아보고 점검",
-  "productValue": "동료 사이의 역할 분담·소통·갈등 흐름",
-  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 직장·동료 궁합 분석 https://unboda.kr/special-analysis/compatibility/workplace",
+  "productProblem": "연인 관련 배우자와 함께할 시간을 정하던 오후 상황을 돌아보고 점검",
+  "productValue": "두 사람의 관계 강점과 갈등·회복 방식",
+  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 연인·배우자 궁합 분석 https://unboda.kr/special-analysis/compatibility/romantic",
   "editorialFormat": "service_demo",
   "primaryGoal": "free-saju-conversion"
 }

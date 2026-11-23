@@ -49,6 +49,13 @@ for (const forbidden of [
 }
 assert(pricing.includes("9900"), "price must continue to originate from pricing registry");
 
+// Wealth teacher placement should follow product artwork, not precede it.
+assert(shared.includes('return <MoneySharedFinancePilotDetail') && !shared.includes('<WealthTeacherCard variant="detail" />\n      <MoneySharedFinancePilotDetail'),
+  "shared-finance detail should not show the teacher before its product hero");
+assert(pilot.includes('<WealthTeacherCard variant="detail" />') && pilot.indexOf('<WealthTeacherCard variant="detail" />') > pilot.indexOf('className="relative grid items-center gap-7'),
+  "shared-finance teacher card should follow the product hero like all wealth product details");
+
+
 for (const required of [
   "getReadablePaidQuestion(product.id, product.title)",
   "혹시 이런 고민을 해본 적 있으신가요?",

@@ -397,7 +397,7 @@ export default function PaidAnalysisV4Report({
             </div>
           </DetailSection>
         </div>
-        {productId && (productId === "wealth" || productId.startsWith("money-")) ? <WealthTeacherCard variant="closing" /> : null}
+        {productId && (productId === "wealth" || productId.startsWith("money-")) ? <WealthTeacherCard variant="closing" conclusion={detail.conclusion.headline} immediateAction={detail.conclusion.immediateAction} /> : null}
       </div>
     </main>
   );

@@ -2,7 +2,15 @@ import Image from "next/image";
 
 type Variant = "list" | "detail" | "report" | "closing";
 
-export default function WealthTeacherCard({ variant }: { variant: Variant }) {
+export default function WealthTeacherCard({
+  variant,
+  conclusion,
+  immediateAction,
+}: {
+  variant: Variant;
+  conclusion?: string;
+  immediateAction?: string;
+}) {
   const isList = variant === "list";
   const isClosing = variant === "closing";
   return (
@@ -14,7 +22,7 @@ export default function WealthTeacherCard({ variant }: { variant: Variant }) {
       <div className="pointer-events-none absolute -right-9 -top-14 h-40 w-40 rounded-full border border-[#c8a66a]/30" />
       <div className="relative flex items-center gap-3 px-4 py-3 sm:gap-5 sm:px-6 sm:py-4">
         <div className={`relative shrink-0 overflow-hidden rounded-2xl border-2 border-[#c8a66a]/60 bg-[#efe4f5] ${isList ? "h-24 w-24 sm:h-28 sm:w-28" : "h-16 w-16 sm:h-20 sm:w-20"}`}>
-          <Image src="/teachers/geumun.svg" alt="짙은 자주색 한복을 입은 금운 선생님" fill sizes={isList ? "112px" : "80px"} className="object-cover" />
+          <Image src="/teachers/geumun-v2.svg" alt="짙은 자주색 한복을 입은 금운 선생님" fill sizes={isList ? "112px" : "80px"} className="object-cover" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-bold tracking-[0.08em] text-[#8966a2]">재물운 전문 선생님</p>
@@ -25,13 +33,19 @@ export default function WealthTeacherCard({ variant }: { variant: Variant }) {
             {isList
               ? "재물운 상품 10종을 주제별로 살펴보세요. 각 상품의 기존 분석 내용은 그대로 제공됩니다."
               : isClosing
-                ? "이번 레포트의 결론과 행동 제안을 다시 확인해 보세요."
+                ? "구매하신 레포트의 핵심 결론을 다시 짚어드립니다."
                 : variant === "report"
                   ? "구매하신 재물운 레포트를 안내합니다."
                   : "이 상품에서 살펴볼 재물운 분석을 안내합니다."}
           </p>
         </div>
       </div>
+      {isClosing && (conclusion || immediateAction) ? (
+        <div className="relative mx-4 mb-4 space-y-3 rounded-xl border border-[#e4d4eb] bg-white/85 px-4 py-4 text-sm leading-7 text-[#463752] sm:mx-6 sm:px-5">
+          {conclusion ? <p><strong className="mr-2 text-[#6d4476]">이번 분석의 결론</strong>{conclusion}</p> : null}
+          {immediateAction ? <p><strong className="mr-2 text-[#6d4476]">실천할 한 가지</strong>{immediateAction}</p> : null}
+        </div>
+      ) : null}
     </section>
   );
 }

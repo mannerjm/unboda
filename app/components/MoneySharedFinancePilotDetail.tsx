@@ -11,6 +11,7 @@ import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
 import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
 import { buildPaidAnalysisV4PreviewModel } from "@/app/lib/paidAnalysisV4PreviewModel";
 import ProductReviewSummary from "@/app/components/ProductReviewSummary";
+import WealthTeacherCard from "@/app/components/WealthTeacherCard";
 
 type Props = {
   product: PremiumProductDefinition;
@@ -152,6 +153,7 @@ export default function MoneySharedFinancePilotDetail({
       </div>
 
       <div className="px-4 sm:px-9">
+        <WealthTeacherCard variant="detail" />
         {/* Narrative beats rather than three more repeated card boxes. */}
         <section className="py-11 sm:py-14" aria-labelledby="finance-concerns">
           <p className="text-center text-xs font-extrabold tracking-widest text-[#926bc8]">내 이야기처럼 느껴지는 순간</p>

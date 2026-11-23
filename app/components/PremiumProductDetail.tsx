@@ -153,15 +153,12 @@ export default function PremiumProductDetail({
   // The established money-shared-finance page remains untouched. All other
   // launched products get the matching customer-first design with their own data.
   if (product.id === "money-shared-finance") {
-    return <>
-      <WealthTeacherCard variant="detail" />
-      <MoneySharedFinancePilotDetail
-        product={product}
-        state={state}
-        profileId={profileId}
-        isSaved={isSaved}
-      />
-    </>;
+    return <MoneySharedFinancePilotDetail
+      product={product}
+      state={state}
+      profileId={profileId}
+      isSaved={isSaved}
+    />;
   }
   if (getLaunchProductIds().includes(product.id)) {
     return <CustomerFirstPremiumDetail

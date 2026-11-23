@@ -55,6 +55,21 @@ assert(v4.includes('conclusion={detail.conclusion.headline}') && v4.includes('im
 assert(wealthTeacher.includes('src="/teachers/geumun-v2.svg"') && wealthTeacherPortrait.includes('viewBox="0 0 256 256"') && wealthTeacherPortrait.includes('data:image/webp;base64,')
   && wealthTeacherPortrait.length > 8000,
   "wealth teacher must use the upgraded high-quality original portrait rather than the 88px thumbnail");
+assert(
+  wealthTeacher.includes('data-wealth-teacher-profile="visible"')
+    && wealthTeacher.includes('profileByVariant')
+    && wealthTeacher.includes('살펴보는 분야')
+    && wealthTeacher.includes('풀이 방식')
+    && wealthTeacher.includes('수입·지출')
+    && wealthTeacher.includes('저축·자산 관리'),
+  "wealth teacher profile must be visible without opening any additional controls",
+);
+assert(
+  !wealthTeacher.includes("<details") && !wealthTeacher.includes("<summary")
+    && !wealthTeacher.includes("가상") && !wealthTeacher.includes("인공지능")
+    && !wealthTeacher.includes("AI"),
+  "wealth teacher profile must remain inline and use approved customer-facing language",
+);
 assert(v4.includes('text-[15px] leading-7 text-slate-700'), "V4 report must keep readable 15px body copy");
 assert(v4.includes('className="mx-auto max-w-5xl px-4 py-7 sm:px-8 sm:py-9"'), "V4 report must keep mobile-aware outer padding");
 assert(v4.includes('className="mt-5 space-y-4"'), "V4 report must keep the tightened section rhythm");

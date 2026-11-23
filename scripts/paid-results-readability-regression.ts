@@ -91,9 +91,10 @@ for (const [name, source] of readabilitySurfaces) {
 assert(v4.includes('conclusion={detail.conclusion.headline}') && v4.includes('immediateAction={detail.conclusion.immediateAction}')
   && wealthTeacher.includes('이번 분석의 결론') && wealthTeacher.includes('실천할 한 가지'),
   "wealth report closing must show existing purchased report conclusion and next action rather than a generic placeholder");
-assert(wealthTeacher.includes('src="/teachers/geumun-v2.svg"') && wealthTeacherPortrait.includes('viewBox="0 0 256 256"') && wealthTeacherPortrait.includes('data:image/webp;base64,')
-  && wealthTeacherPortrait.length > 8000,
-  "wealth teacher must use the upgraded high-quality original portrait rather than the 88px thumbnail");
+assert(wealthTeacher.includes('topic-teachers-seven.webp')
+  && wealthTeacher.includes('backgroundPosition: "0% center"')
+  && topicTeacherPortrait.toString("ascii", 8, 12) === "WEBP",
+  "wealth teacher must use the approved first portrait from the final seven-person set");
 assert(
   wealthTeacher.includes('data-wealth-teacher-profile="visible"')
     && wealthTeacher.includes('profileByVariant')

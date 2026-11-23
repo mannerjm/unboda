@@ -2,6 +2,7 @@ import Link from "next/link";
 import PwaInstallGuide from "./PwaInstallGuide";
 import BrandMark from "./BrandMark";
 import HomeWeatherLine from "./HomeWeatherLine";
+import HomeMarketplaceContent from "./HomeMarketplaceContent";
 
 type LandingState =
   | { kind: "guest" }
@@ -255,36 +256,11 @@ function HomeJourney() {
 
 function HomeShell({ state, copy, todayViewed: _todayViewed, returning }: { state: LandingState; copy: LandingCopy; todayViewed: boolean; returning?: ReturningLandingState }) {
   const statusLabel = returning ? returning.kind === "analysis_stale" ? "갱신 필요" : returning.kind === "analysis_in_progress" ? "생성 중" : returning.kind === "analysis_complete" && returning.status === "needs_retry" ? "해석 재생성 필요" : "최신 상태" : null;
-  // Only the visual line break changes. Both spans concatenate to the original copy.title.
-  const titleBreak = copy.title === "최신 흐름으로 다시 이어볼까요?" ? copy.title.indexOf(" 다시 ") : -1;
-  return <main className="relative isolate min-h-[100dvh] overflow-hidden bg-[linear-gradient(135deg,#fffdfd_0%,#f9f7ff_48%,#f0ecff_100%)] text-[#211943]">
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_77%_37%,rgba(221,189,255,.56),transparent_42%),radial-gradient(ellipse_at_22%_74%,rgba(232,213,255,.48),transparent_45%)]" />
-    <div aria-hidden="true" className="pointer-events-none absolute -right-[8rem] top-[4rem] h-[33rem] w-[33rem] rounded-full bg-[#eedbff]/48 blur-[100px]"/>
-    <div aria-hidden="true" className="pointer-events-none absolute left-0 right-0 top-[40%] h-[30rem] bg-contain bg-bottom bg-no-repeat opacity-80" style={{backgroundImage:"url('/home-lavender-waves.svg')"}} />
-    <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-[1510px] flex-col px-5 pb-1 pt-4 sm:px-8 lg:px-10 lg:pt-5">
+  return <main className="min-h-[100dvh] bg-white text-[#281744]">
+    <div className="mx-auto flex min-h-[100dvh] w-full max-w-[1510px] flex-col px-4 pb-2 pt-3 sm:px-8 lg:px-10 lg:pt-5">
       <Header state={state}/>
       <PwaInstallGuide/>
-      <section className="relative grid flex-1 items-center gap-3 py-3 sm:py-4 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)] lg:gap-4 lg:py-1" aria-label="운보다 무료 사주 시작 및 분석 이어가기">
-        <div className="relative z-10">
-          {returning ? <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-[#e0cafa] bg-white/85 px-4 py-2 text-xs font-black text-[#6734ab] shadow-[0_5px_18px_rgba(118,65,184,.08)]">{returning.profileLabel}</span>
-            <span className="rounded-full border border-[#ead9fc] bg-[#f0e4ff] px-4 py-2 text-xs font-bold text-[#6c4799]">{statusLabel}</span>
-          </div> : <p className="inline-flex items-center gap-2 rounded-full border border-[#e8d5f9] bg-[#f1e6ff] px-4 py-2 text-xs font-black tracking-[0.08em] text-[#843cce]"><Icon name="spark" className="h-4 w-4"/>{copy.eyebrow}</p>}
-          <div aria-hidden="true" className="pointer-events-none absolute -right-2 top-14 hidden text-4xl text-[#f4b850] lg:block">✦</div>
-          <h1 className={`${returning ? "mt-5" : "mt-5"} max-w-[44rem] break-keep text-balance bg-[linear-gradient(105deg,#28143f_12%,#342058_54%,#8737ce_100%)] bg-clip-text text-[clamp(2.25rem,3.6vw,3.75rem)] font-black leading-[1.16] tracking-[-0.068em] text-transparent`}>{titleBreak >= 0 ? <>
-            <span className="block text-[#28143f]">{copy.title.slice(0, titleBreak)}</span>
-            <span className="block bg-[linear-gradient(95deg,#8734e5_0%,#6630c6_70%,#4c248e_100%)] bg-clip-text text-transparent">{copy.title.slice(titleBreak)}</span>
-          </> : copy.title === "지금 내 운, 어디로 가고 있을까?" ? <><span className="sm:hidden"><span className="block whitespace-nowrap">지금 내 운,</span><span className="block whitespace-nowrap">어디로 가고 있을까?</span></span><span className="hidden sm:inline">{copy.title}</span></> : copy.title}</h1>
-          <div aria-hidden="true" className="mt-2 h-[6px] w-40 -rotate-2 rounded-full bg-[linear-gradient(90deg,rgba(167,97,235,0),rgba(190,118,244,.56),rgba(167,97,235,0))] sm:ml-24"/>
-          <p className="mt-4 max-w-xl text-[14px] leading-7 text-[#5d506f] sm:text-[16px]">{copy.description}</p>
-          <HeroActions state={state} copy={copy}/>
-          {(state.kind === "guest" || state.kind === "analysis_ready" || state.kind === "no_profiles" || state.kind === "needs_profile_selection") && copy.secondary ? <Link href={copy.secondaryHref} className="mt-3 inline-flex text-xs font-bold text-[#79628d] underline decoration-[#bca5db] underline-offset-4 transition hover:text-[#6c45d3]">{copy.secondary}</Link> : null}
-          {returning ? <Link href="/deep-analysis" className="ml-4 mt-3 inline-flex items-center gap-2 text-xs font-bold text-[#79628d] underline decoration-[#bca5db] underline-offset-4 transition hover:text-[#6c45d3]">다른 심층 분석 직접 찾기<Icon name="search" className="h-4 w-4"/></Link> : null}
-        </div>
-        <div className="relative mx-auto hidden w-full max-w-[35rem] md:block lg:-translate-y-4"><FlowVisual/></div>
-      </section>
-      <QuickRoutes state={state}/>
-      <HomeJourney/>
+      <HomeMarketplaceContent copy={copy} profileLabel={returning?.profileLabel} statusLabel={statusLabel}/>
       <Footer/>
     </div>
   </main>;

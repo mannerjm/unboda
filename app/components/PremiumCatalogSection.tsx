@@ -3,7 +3,7 @@ import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
 
 import { useEffect, useMemo, useState } from "react";
 import type { ReactElement } from "react";
-import { groupTopicCatalogProductsByCategory, listPeriodCatalogProducts } from "@/app/lib/premiumCatalog";
+import { groupTopicCatalogProductsByCategory, listPeriodCatalogProducts, resolvePremiumCatalogEntry } from "@/app/lib/premiumCatalog";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import { getProductPricing } from "@/app/lib/productPricing";
 import PremiumProductDetail from "@/app/components/PremiumProductDetail";
@@ -140,11 +140,6 @@ function formatPrice(productId: string): string {
   return `${getProductPricing(productId).amount.toLocaleString("ko-KR")}원`;
 }
 
-function resolveInitialCategory(initialCategory: string | undefined, categories: readonly string[]): string | null {
-  return initialCategory && categories.includes(initialCategory) ? initialCategory
-    : categories.includes("money") ? "money" : categories[0] ?? null;
-}
-
 export default function PremiumCatalogSection({
   profileId,
   recommendedProductIds = [],
@@ -154,22 +149,13 @@ export default function PremiumCatalogSection({
 }: PremiumCatalogSectionProps) {
   const topicGroups = useMemo(() => groupTopicCatalogProductsByCategory(), []);
   const periodProducts = useMemo(() => listPeriodCatalogProducts(), []);
-  const categories = useMemo(() => topicGroups.map((group) => group.category), [topicGroups]);
+  const initialSelection = useMemo(() =>
+    resolvePremiumCatalogEntry(initialMode, initialCategory, initialProductId, topicGroups, periodProducts),
+    [initialMode, initialCategory, initialProductId, topicGroups, periodProducts]);
   const recommendedIdSet = useMemo(() => new Set(recommendedProductIds), [recommendedProductIds]);
   const [mode, setMode] = useState<CatalogMode>(initialMode);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(() => initialMode === "topic" ? resolveInitialCategory(initialCategory, categories) : null);
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(() => {
-    if (!initialProductId) return null;
-    if (initialMode === "period") {
-      return periodProducts.some((product) => product.id === initialProductId)
-        ? initialProductId : null;
-    }
-    // Never preselect an unrelated item or an unlisted (non-launch) product.
-    const category = resolveInitialCategory(initialCategory, categories);
-    return topicGroups.some((group) =>
-      group.category === category && group.products.some((product) => product.id === initialProductId))
-      ? initialProductId : null;
-  });
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(() => initialSelection.category);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(() => initialSelection.productId);
   const [summaries, setSummaries] = useState<PaidAnalysisSummary[]>([]);
   const [currentOwnedProductIds, setCurrentOwnedProductIds] = useState<ReadonlySet<string>>(new Set());
   const [savedProductIds, setSavedProductIds] = useState<ReadonlySet<string>>(new Set());

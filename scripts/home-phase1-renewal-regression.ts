@@ -4,6 +4,7 @@ import { getPremiumProduct } from "../app/lib/premiumProductRegistry";
 import { getProductPricing } from "../app/lib/productPricing";
 import { COMPATIBILITY_ROMANTIC_PRODUCT } from "../app/lib/specialAnalysisProducts";
 import { HOME_SALE_CATEGORY_LINKS } from "../app/components/HomeMarketplaceContent";
+import { groupTopicCatalogProductsByCategory, listPeriodCatalogProducts, resolvePremiumCatalogEntry } from "../app/lib/premiumCatalog";
 
 const page = readFileSync("app/page.tsx","utf8");
 const home = readFileSync("app/components/HomeExperience.tsx","utf8");
@@ -55,7 +56,9 @@ assert.deepEqual(HOME_SALE_CATEGORY_LINKS.map(({label,href})=>[label,href]),
  expected.map(([label,href])=>[label,href]),"every category links to its real existing catalog");
 assert(!HOME_SALE_CATEGORY_LINKS.some(x=>(new Set<string>(["무료 분석","무료분석","심층분석"])).has(x.label)),
  "free hero and generic deep-analysis must not be paid topic grid cards");
-assert(market.includes("grid-cols-4") && market.includes("max-w-[35rem]"), "narrow, vertically scrollable, four-column mobile style on PC/mobile");
+assert(market.includes("grid-cols-4") && market.includes("max-w-[35rem] lg:max-w-[40rem]"), "centered mobile-first four-column storefront, slightly wider PC content for readability");
+assert(market.includes("min-h-[94px]") && market.includes("text-[28px]"), "enlarge paid category icon cards and their labels");
+assert(market.includes("sm:w-[116px]") && market.includes("sm:text-[15px]"), "enlarge featured photos and question-first typography");
 assert(market.includes("getPremiumProduct(productId)") && market.includes("getProductPricing(productId)")
  && market.includes('pricing.amount.toLocaleString("ko-KR")')
  && market.includes("COMPATIBILITY_ROMANTIC_PRODUCT.amount"), "prices must come from real checkout registries");
@@ -67,6 +70,33 @@ for (const id of ["study-learning-strategy","money-shared-finance","yearly-curre
  assert(market.includes('"'+id+'"'),"featured product missing "+id);
 }
 assert(COMPATIBILITY_ROMANTIC_PRODUCT.amount===19_900,"romantic compatibility price matches existing purchase contract");
+assert(market.includes('"/deep-analysis?mode=topic&category=" + encodeURIComponent(product.category) + "&productId=" + encodeURIComponent(product.id)'),
+  "featured topic links must carry their actual category, not silently use money fallback");
+assert(market.includes('getReadablePaidQuestion(productId, product.description)'),
+  "featured listing must lead with the customer's real question instead of specialized product name");
+const launchTopicGroups = groupTopicCatalogProductsByCategory();
+const launchPeriodProducts = listPeriodCatalogProducts();
+assert.equal(resolvePremiumCatalogEntry("topic",undefined,"study-learning-strategy").category,"growth",
+  "previous bug: study strategy opened 재물운 because missing category defaulted to money");
+assert.equal(resolvePremiumCatalogEntry("topic",undefined,"study-learning-strategy").productId,"study-learning-strategy",
+  "study strategy must open directly on the correct product detail");
+assert.equal(resolvePremiumCatalogEntry("topic","money","study-learning-strategy").category,"growth",
+  "explicit stale category must not override the product's canonical launch category");
+for (const group of launchTopicGroups) for (const product of group.products) {
+ const selection = resolvePremiumCatalogEntry("topic",undefined,product.id);
+ assert.equal(selection.category,group.category,"all launched deep links must resolve their canonical category: "+product.id);
+ assert.equal(selection.productId,product.id,"all launched deep links must select their product: "+product.id);
+}
+for (const product of launchPeriodProducts) {
+ const selection = resolvePremiumCatalogEntry("period",undefined,product.id);
+ assert.equal(selection.category,null,"period detail must not select a topic category");
+ assert.equal(selection.productId,product.id,"period detail must select requested product: "+product.id);
+}
+assert.equal(resolvePremiumCatalogEntry("topic","health","no-such-launch-product").productId,null,
+  "invalid or non-launch product IDs cannot deep link to a made-up product");
+assert.equal(resolvePremiumCatalogEntry("topic","health","no-such-launch-product").category,"health",
+  "invalid product ID still keeps explicitly selected valid category");
+assert(market.includes('COMPATIBILITY_ROMANTIC_PRODUCT.title'),"compatibility category and product remain unchanged");
 assert(!/★\s*4\.9|이용자\s*[\d,]+\+|50%\s*할인|정가/.test(market),
  "no fabricated popularity, discounts or ratings copied from design artwork");
 for (const forbidden of ["requestPayment(","grantEntitlement(","createAdminClient(","generatePaidReport("])

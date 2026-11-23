@@ -78,3 +78,34 @@ export function groupTopicCatalogProductsByCategory(): readonly PremiumCatalogCa
 
   return groups;
 }
+
+/**
+ * Resolve an incoming product deep link against the actual launch catalog.
+ * An explicit productId wins over an unrelated/stale category query param.
+ * This must be shared by the client catalog and navigation regression tests:
+ * a valid study product must NEVER quietly land in the money category.
+ */
+export function resolvePremiumCatalogEntry(
+  mode: "topic" | "period",
+  category: string | undefined,
+  productId: string | undefined,
+  topicGroups: readonly PremiumCatalogCategoryGroup[] = groupTopicCatalogProductsByCategory(),
+  periodProducts: readonly PremiumProductDefinition[] = listPeriodCatalogProducts(),
+): { category: string | null; productId: string | null } {
+  if (mode === "period") {
+    return { category: null, productId: productId && periodProducts.some(p => p.id === productId) ? productId : null };
+  }
+
+  const matchedGroup = productId
+    ? topicGroups.find(group => group.products.some(product => product.id === productId))
+    : undefined;
+  const resolvedCategory = matchedGroup?.category
+    ?? (category && topicGroups.some(group => group.category === category) ? category : undefined)
+    ?? topicGroups.find(group => group.category === "money")?.category
+    ?? topicGroups[0]?.category
+    ?? null;
+  return {
+    category: resolvedCategory,
+    productId: matchedGroup && productId ? productId : null,
+  };
+}

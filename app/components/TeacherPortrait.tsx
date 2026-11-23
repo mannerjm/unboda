@@ -11,8 +11,10 @@ export type TeacherPortraitName =
 
 type Variant = "list" | "detail" | "report" | "closing";
 
-/** Show the approved portrait with its outfit and original background intact.
- * Individual images are used instead of a cropped-face sprite.
+/**
+ * A single shared portrait for the catalog, detail and report screens.
+ * The image determines the portrait's height: no fixed-height container
+ * or background-size can create unwanted side gaps or crop the outfit.
  */
 export default function TeacherPortrait({
   name,
@@ -31,17 +33,18 @@ export default function TeacherPortrait({
   return (
     <div
       data-teacher-portrait="full"
-      className={`relative shrink-0 self-start overflow-hidden rounded-2xl border shadow-[0_6px_16px_rgba(44,28,50,.09)]
-        ${large ? "h-[172px] w-[94px] sm:h-[214px] sm:w-[136px]" : "h-[151px] w-[82px] sm:h-[190px] sm:w-[120px]"}`}
+      data-portrait-fit="natural"
+      className={`shrink-0 self-start overflow-hidden rounded-2xl border shadow-[0_6px_16px_rgba(44,28,50,.09)] ${large ? "w-[88px] sm:w-[112px]" : "w-[80px] sm:w-[100px]"}`}
       style={{ borderColor: borderColor ?? "#ddcde4", backgroundColor: backgroundColor ?? "#f4eaf7" }}
     >
       <Image
         src={`/teachers/${name}-full-v4.webp`}
         alt={label}
-        fill
+        width={256}
+        height={512}
         priority={large}
-        sizes={large ? "(max-width: 640px) 94px, 136px" : "(max-width: 640px) 82px, 120px"}
-        className="object-contain"
+        sizes={large ? "(max-width: 640px) 88px, 112px" : "(max-width: 640px) 80px, 100px"}
+        className="block h-auto w-full"
       />
     </div>
   );

@@ -42,7 +42,7 @@ assert(detail.includes("3. 구매한 분석에 보관"), "premium detail must ex
 assert(detail.includes("구매 전 확인"), "premium detail must surface a pre-checkout confirmation block");
 assert(detail.includes("이 분석이 필요한 경우") && detail.includes("이 분석을 보고 나면"), "premium detail must lead with customer need and concrete outcomes");
 assert(detail.includes("리포트에서 끝나지 않습니다"), "premium detail must explain that a purchase continues beyond the report");
-assert(detail.includes("AI 상담에서 이 주제를 이어서 물어볼 수 있습니다."), "premium detail must explain the real post-report AI consultation value");
+assert(detail.includes("상담에서 이 주제를 이어서 물어볼 수 있습니다."), "premium detail must explain the real post-report AI consultation value");
 assert(detail.includes('not_purchased: "이 질문 더 깊게 보기"'), "first-purchase CTA must continue the question-first journey");
 assert(!detail.includes("본인·성인 인증"), "generic product detail must not claim every purchase requires adult verification");
 assert(detail.includes("결제가 승인되면 개인화 분석 생성이 바로 시작됩니다."), "premium detail must explain immediate generation before checkout");

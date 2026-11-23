@@ -53,7 +53,7 @@ const expected = [
 assert.equal(HOME_SALE_CATEGORY_LINKS.length,10,"only ten actually purchasable topic categories");
 assert.deepEqual(HOME_SALE_CATEGORY_LINKS.map(({label,href})=>[label,href]),
  expected.map(([label,href])=>[label,href]),"every category links to its real existing catalog");
-assert(!HOME_SALE_CATEGORY_LINKS.some(x=>x.label==="무료 분석"||x.label==="무료분석"||x.label==="심층분석"),
+assert(!HOME_SALE_CATEGORY_LINKS.some(x=>(new Set<string>(["무료 분석","무료분석","심층분석"])).has(x.label)),
  "free hero and generic deep-analysis must not be paid topic grid cards");
 assert(market.includes("grid-cols-4") && market.includes("max-w-[35rem]"), "narrow, vertically scrollable, four-column mobile style on PC/mobile");
 assert(market.includes("getPremiumProduct(productId)") && market.includes("getProductPricing(productId)")

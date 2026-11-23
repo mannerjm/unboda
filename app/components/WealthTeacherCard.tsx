@@ -22,7 +22,7 @@ export default function WealthTeacherCard({
       <div className="pointer-events-none absolute -right-9 -top-14 h-40 w-40 rounded-full border border-[#c8a66a]/30" />
       <div className="relative flex items-center gap-3 px-4 py-3 sm:gap-5 sm:px-6 sm:py-4">
         <div className={`relative shrink-0 overflow-hidden rounded-2xl border-2 border-[#c8a66a]/60 bg-[#efe4f5] ${isList ? "h-24 w-24 sm:h-28 sm:w-28" : "h-16 w-16 sm:h-20 sm:w-20"}`}>
-          <Image src="/teachers/geumun.svg" alt="짙은 자주색 한복을 입은 금운 선생님" fill sizes={isList ? "112px" : "80px"} className="object-cover" />
+          <Image src="/teachers/geumun-v2.svg" alt="짙은 자주색 한복을 입은 금운 선생님" fill sizes={isList ? "112px" : "80px"} className="object-cover" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-bold tracking-[0.08em] text-[#8966a2]">재물운 전문 선생님</p>

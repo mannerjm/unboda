@@ -131,17 +131,17 @@ export default function AiConsultingEntryCard({
   const actionLabel = depleted
     ? hasPreviousConversation
       ? "지난 상담 보기"
-      : "AI 상담 화면 보기"
+      : "상담 화면 보기"
     : hasPreviousConversation
       ? "지난 상담 이어가기"
       : session?.state === "ready"
-        ? "이 리포트로 AI에게 질문하기"
-        : "AI 상담 화면 보기";
+        ? "이 리포트로 상담 선생님에게 질문하기"
+        : "상담 화면 보기";
 
   return (
     <section aria-labelledby="report-ai-consulting-title" className="mx-auto mb-8 mt-5 max-w-4xl px-4 sm:px-8">
       <div className="rounded-[1.75rem] border border-[#d8d3ff] bg-white p-5 shadow-[0_12px_36px_rgba(54,45,112,0.06)] sm:p-7">
-        <p className="text-xs font-bold tracking-[0.08em] text-[#5e4bd1]">리포트에서 끝나지 않습니다 · AI 상담</p>
+        <p className="text-xs font-bold tracking-[0.08em] text-[#5e4bd1]">리포트에서 끝나지 않습니다 · 상담</p>
         <h2 id="report-ai-consulting-title" className="mt-2 text-xl font-black leading-snug text-[#11162d] sm:text-2xl">
           이 분석, 궁금한 점을 바로 물어보세요
         </h2>
@@ -166,7 +166,7 @@ export default function AiConsultingEntryCard({
               {balanceLabel}
             </span>
             {depleted ? (
-              <span className="text-sm leading-6 text-slate-600">새 답변을 받으려면 질문권이 필요해요. AI 상담 화면에서 질문권 상태를 확인할 수 있어요.</span>
+              <span className="text-sm leading-6 text-slate-600">새 답변을 받으려면 질문권이 필요해요. 상담 화면에서 질문권 상태를 확인할 수 있어요.</span>
             ) : consultationStatusStale ? (
               <span className="text-sm leading-6 text-slate-600">상담 연결 상태를 다시 확인하고 있어요.</span>
             ) : null}

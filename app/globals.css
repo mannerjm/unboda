@@ -125,6 +125,14 @@ body {
     [data-deep-analysis-discovery-banner] {
     display: none;
   }
+
+  /* Hide the generic discovery header only for the wealth product list.
+   * The shared header remains visible for other catalog categories.
+   * Selected product details retain the existing rule above. */
+  main[data-deep-analysis-page]:has([data-wealth-teacher="list"])
+    [data-deep-analysis-discovery-banner] {
+    display: none;
+  }
 }
 
 

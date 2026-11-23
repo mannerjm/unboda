@@ -244,6 +244,7 @@ void detail;
   if (v4Detail) {
     return (
       <PaidAnalysisV4Report
+        productId={productId}
         detail={v4Detail}
         analysisType={analysisType}
         evidenceOverride={evidenceOverride}

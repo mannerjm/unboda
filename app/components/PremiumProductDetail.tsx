@@ -18,6 +18,7 @@ import CustomerFirstPremiumDetail from "@/app/components/CustomerFirstPremiumDet
 import { getLaunchProductIds } from "@/app/lib/paidAnalysisTopicConfig";
 import ProductReviewSummary from "@/app/components/ProductReviewSummary";
 import TrustPrinciplesCard from "@/app/components/TrustPrinciplesCard";
+import WealthTeacherCard from "@/app/components/WealthTeacherCard";
 
 type PremiumProductDetailProps = {
   product: PremiumProductDefinition;
@@ -152,12 +153,15 @@ export default function PremiumProductDetail({
   // The established money-shared-finance page remains untouched. All other
   // launched products get the matching customer-first design with their own data.
   if (product.id === "money-shared-finance") {
-    return <MoneySharedFinancePilotDetail
-      product={product}
-      state={state}
-      profileId={profileId}
-      isSaved={isSaved}
-    />;
+    return <>
+      <WealthTeacherCard variant="detail" />
+      <MoneySharedFinancePilotDetail
+        product={product}
+        state={state}
+        profileId={profileId}
+        isSaved={isSaved}
+      />
+    </>;
   }
   if (getLaunchProductIds().includes(product.id)) {
     return <CustomerFirstPremiumDetail
@@ -217,6 +221,7 @@ export default function PremiumProductDetail({
         </div>
       </div>
 
+      {product.category === "money" ? <div className="px-5 sm:px-8"><WealthTeacherCard variant="detail" /></div> : null}
       <div className="bg-white px-5 py-8 sm:px-8 sm:py-10">
         <div className="mb-7 text-center">
           <span className="inline-flex rounded-full bg-[#f4edff] px-4 py-1.5 text-sm font-extrabold text-[#7550c7]">이 분석을 보고 나면</span>
@@ -279,12 +284,12 @@ export default function PremiumProductDetail({
         {state === "not_purchased" ? (
           <section className="mt-5 rounded-[1.5rem] border border-[#d8d3ff] bg-[linear-gradient(135deg,#ffffff_0%,#f4f2ff_100%)] p-5 shadow-sm sm:p-6" aria-label="구매 후 이어지는 가치">
             <p className="text-xs font-bold tracking-[0.13em] text-[#6f5ce7]">리포트에서 끝나지 않습니다</p>
-            <h3 className="mt-2 text-lg font-black text-[#11162d]">구매한 분석은 이후 AI 상담에서도 이어집니다.</h3>
+            <h3 className="mt-2 text-lg font-black text-[#11162d]">구매한 분석은 이후 상담에서도 이어집니다.</h3>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {[
                 "내 결과를 바탕으로 개인화 심층 리포트가 생성됩니다.",
                 "새로 구매하는 리포트는 결제일부터 12개월 동안 구매 보관함에서 다시 열람할 수 있습니다.",
-                "리포트가 완성되면 AI 상담에서 이 주제를 이어서 물어볼 수 있습니다.",
+                "리포트가 완성되면 상담에서 이 주제를 이어서 물어볼 수 있습니다.",
                 "리포트를 읽고 남은 질문도 같은 상담에서 계속 이어갈 수 있습니다.",
               ].map((item) => (
                 <div key={item} className="rounded-xl border border-[#e1e5f0] bg-white px-4 py-3 text-sm leading-6 text-slate-700">{item}</div>

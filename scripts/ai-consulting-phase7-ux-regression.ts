@@ -82,7 +82,7 @@ assert(chat.includes('space-y-4 pb-44 sm:pb-40'), "conversation must reserve spa
 assert(!chat.includes('← {isPreview ? "미리보기 목록으로" : "리포트로 돌아가기"}'), "operator preview must not duplicate the admin preview navigation");
 assert(!chat.includes('남은 질문 {session.questionsRemaining}회'), "mid-page continuation card must not duplicate the primary remaining-question counter");
 
-assert(entry.includes("이 리포트로 AI에게 질문하기"), "report entry must show a clear report-grounded CTA when credits are available");
+assert(entry.includes("이 리포트로 상담 선생님에게 질문하기"), "report entry must show a clear report-grounded CTA when credits are available");
 assert(entry.includes("presentation.productTitle"), "report entry must name the report that grounds consultation");
 assert(entry.includes("presentation.suggestedQuestions.slice(0, 2)"), "report entry must preview only two relevant follow-up questions");
 assert(entry.includes("지난 상담 보기") && entry.includes("지난 상담 이어가기"), "report entry must preserve concise continuation/history actions inside the unified hub");

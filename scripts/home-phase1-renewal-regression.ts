@@ -38,6 +38,16 @@ for (const field of ["{copy.eyebrow}","{copy.title}","{copy.description}","{copy
  assert(market.includes(field),"original login-dependent label/link changed: "+field);
 assert(renderedHome.includes("profileLabel={returning?.profileLabel}") && renderedHome.includes("statusLabel={statusLabel}"),
  "profile and analysis in-progress/stale badge preserved");
+assert(market.includes('mt-3 break-keep text-[13px] leading-[1.8]') && !market.includes('line-clamp-3 text-xs leading-[1.65]'),
+ "free-analysis description must wrap at Korean word boundaries without clipping at three lines");
+assert(market.includes('relative hidden h-24 w-24') && market.includes('sm:grid sm:h-28'),
+ "decorative calendar must not squeeze free-analysis copy on narrow mobile screens");
+const readableFreeCopy = "무료로 내 사주를 먼저 확인해 보세요. 더 궁금한 내용은 심층 분석에서 살펴보고, 구매한 리포트를 바탕으로 AI 상담도 이어갈 수 있어요.";
+assert.equal(page.split(readableFreeCopy).length - 1,2,
+ "both guest and logged-in analysis-ready free-analysis states use the same readable copy");
+assert(page.includes('primaryHref: "/guest-saju"') && page.includes('primaryHref: "/saju"')
+ && page.includes('secondaryHref: "/auth/login?returnTo=/"'),
+ "responsive text improvements must not change guest, logged-in or existing-user routing");
 
 const expected = [
  ["학업성장운","/deep-analysis?mode=topic&category=growth"],

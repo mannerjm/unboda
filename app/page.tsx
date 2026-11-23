@@ -191,7 +191,7 @@ function getLandingCopy(state: LandingState) {
       return {
         eyebrow: "나를 기억하는 AI 운세 상담",
         title: "지금 내 운, 어디로 가고 있을까?",
-        description: "먼저 무료로 현재 흐름을 확인해 보세요. 더 깊은 분석을 구매하면 그 결과를 바탕으로 AI 상담까지 이어집니다.",
+        description: "무료로 내 사주를 먼저 확인해 보세요. 더 궁금한 내용은 심층 분석에서 살펴보고, 구매한 리포트를 바탕으로 AI 상담도 이어갈 수 있어요.",
         primary: "무료로 내 운 보기",
         primaryHref: "/saju",
         secondary: "마이페이지",
@@ -201,7 +201,7 @@ function getLandingCopy(state: LandingState) {
       return {
         eyebrow: "나를 기억하는 AI 운세 상담",
         title: "지금 내 운, 어디로 가고 있을까?",
-        description: "먼저 무료로 현재 흐름을 확인해 보세요. 더 깊은 분석을 구매하면 그 결과를 바탕으로 AI 상담까지 이어집니다.",
+        description: "무료로 내 사주를 먼저 확인해 보세요. 더 궁금한 내용은 심층 분석에서 살펴보고, 구매한 리포트를 바탕으로 AI 상담도 이어갈 수 있어요.",
         primary: "무료로 내 운 보기",
         primaryHref: "/guest-saju",
         secondary: "로그인 / 기존 사용자",

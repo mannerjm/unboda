@@ -121,7 +121,7 @@ function FeaturedProducts() {
 
 function CalendarArt() {
   return (
-    <div aria-hidden="true" className="relative grid h-24 w-24 shrink-0 place-items-center sm:h-28 sm:w-28">
+    <div aria-hidden="true" className="relative hidden h-24 w-24 shrink-0 place-items-center sm:grid sm:h-28 sm:w-28">
       <div className="absolute inset-3 rounded-full bg-[#dab7ff]/50 blur-xl" />
       <div className="relative w-[82px] -rotate-6 overflow-hidden rounded-2xl border-2 border-white bg-white shadow-[0_9px_22px_rgba(109,60,185,.2)] sm:w-[96px]">
         <div className="relative h-6 bg-[linear-gradient(110deg,#c18afa,#8561df)]">
@@ -153,9 +153,9 @@ export default function HomeMarketplaceContent({ copy, profileLabel, statusLabel
                 {statusLabel ? <span className="rounded-full bg-[#e5d1fc] px-2.5 py-1">{statusLabel}</span> : null}
               </div>
             ) : null}
-            <p className="text-[11px] font-black tracking-[-.025em] text-[#8b4bd3]">{copy.eyebrow}</p>
+            <p className="break-keep text-xs font-black leading-[1.5] tracking-[-.025em] text-[#8b4bd3] sm:text-[13px]">{copy.eyebrow}</p>
             <h1 className="mt-2 break-keep text-[clamp(1.45rem,3.5vw,2rem)] font-black leading-[1.28] tracking-[-.052em] text-[#2d174d]">{copy.title}</h1>
-            <p className="mt-2 line-clamp-3 text-xs leading-[1.65] text-[#675779] sm:text-[13px]">{copy.description}</p>
+            <p className="mt-3 break-keep text-[13px] leading-[1.8] tracking-[-.015em] text-[#5b4a73] sm:max-w-[31rem] sm:text-sm">{copy.description}</p>
             <Link href={copy.primaryHref} className="mt-4 inline-flex min-h-12 items-center justify-center rounded-full bg-[linear-gradient(110deg,#9c62f4,#7539d4)] px-5 py-2.5 text-[13px] font-black text-white shadow-[0_7px_18px_rgba(107,57,195,.24)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6d36ba] focus-visible:ring-offset-2 sm:px-6">
               {copy.primary}
             </Link>

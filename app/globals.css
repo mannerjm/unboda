@@ -133,6 +133,13 @@ body {
     [data-deep-analysis-discovery-banner] {
     display: none;
   }
+
+  /* The six other specialist catalogues use their teacher profile as
+   * the first visible introduction. Other page views are unchanged. */
+  main[data-deep-analysis-page]:has([data-topic-teacher-variant="list"])
+    [data-deep-analysis-discovery-banner] {
+    display: none;
+  }
 }
 
 

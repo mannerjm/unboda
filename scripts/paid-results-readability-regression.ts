@@ -16,7 +16,7 @@ const compatibilityPreview = read("app/components/CompatibilityReportValuePrevie
 const recommendations = read("app/components/RecommendationTop3.tsx");
 const premiumDetail = read("app/components/PremiumProductDetail.tsx");
 const wealthTeacher = read("app/components/WealthTeacherCard.tsx");
-const wealthTeacherPortrait = read("public/teachers/geumun.svg");
+const wealthTeacherPortrait = read("public/teachers/geumun-v2.svg");
 const consulting = read("app/paid-analysis/[productId]/report/AiConsultingEntryCard.tsx");
 const preparing = read("app/components/CompatibilityPaidReportPreparing.tsx");
 const sharedPreparing = read("app/components/PaidReportPreparing.tsx");
@@ -52,7 +52,7 @@ for (const [name, source] of readabilitySurfaces) {
 assert(v4.includes('conclusion={detail.conclusion.headline}') && v4.includes('immediateAction={detail.conclusion.immediateAction}')
   && wealthTeacher.includes('이번 분석의 결론') && wealthTeacher.includes('실천할 한 가지'),
   "wealth report closing must show existing purchased report conclusion and next action rather than a generic placeholder");
-assert(wealthTeacherPortrait.includes('viewBox="0 0 256 256"') && wealthTeacherPortrait.includes('data:image/webp;base64,')
+assert(wealthTeacher.includes('src="/teachers/geumun-v2.svg"') && wealthTeacherPortrait.includes('viewBox="0 0 256 256"') && wealthTeacherPortrait.includes('data:image/webp;base64,')
   && wealthTeacherPortrait.length > 8000,
   "wealth teacher must use the upgraded high-quality original portrait rather than the 88px thumbnail");
 assert(v4.includes('text-[15px] leading-7 text-slate-700'), "V4 report must keep readable 15px body copy");

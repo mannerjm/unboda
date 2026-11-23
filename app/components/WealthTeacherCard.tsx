@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 type Variant = "list" | "detail" | "report" | "closing";
 
 const areas = ["수입·지출", "저축·자산 관리", "공동 재정", "계약·고정비"] as const;
@@ -39,15 +37,17 @@ export default function WealthTeacherCard({
       className={`overflow-hidden rounded-[1.35rem] border border-[#dbc6e6] bg-[linear-gradient(110deg,#fffafd_0%,#f4eafb_60%,#f0e2fa_100%)] text-[#322044] shadow-[0_10px_26px_rgba(84,49,115,.07)] ${isList ? "mb-5" : "my-4"}`}
     >
       <div className="flex items-center gap-3 px-4 py-3 sm:gap-5 sm:px-6 sm:py-4">
-        <div className={`relative shrink-0 overflow-hidden rounded-2xl border-2 border-[#c8a66a]/60 bg-[#efe4f5] ${isList ? "h-24 w-24 sm:h-28 sm:w-28" : "h-16 w-16 sm:h-20 sm:w-20"}`}>
-          <Image
-            src="/teachers/geumun-v2.svg"
-            alt="짙은 자주색 한복을 입은 금운 선생님"
-            fill
-            sizes={isList ? "112px" : "80px"}
-            className="object-cover"
-          />
-        </div>
+        <div
+          role="img"
+          aria-label="짙은 자주색 한복을 입은 금운 선생님"
+          className={`shrink-0 overflow-hidden rounded-2xl border-2 border-[#c8a66a]/60 bg-[#efe4f5] ${isList ? "h-24 w-24 sm:h-28 sm:w-28" : "h-16 w-16 sm:h-20 sm:w-20"}`}
+          style={{
+            backgroundImage: "url('/teachers/topic-teachers-seven.webp')",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "700% 100%",
+            backgroundPosition: "0% center",
+          }}
+        />
         <div className="min-w-0 flex-1">
           <p className="text-xs font-bold text-[#745083]">운보다 · 재물운 풀이 담당</p>
           <h2 className={`mt-1 font-black tracking-tight text-[#47244d] ${isList ? "text-lg sm:text-2xl" : "text-base sm:text-xl"}`}>

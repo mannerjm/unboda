@@ -11,6 +11,7 @@ import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
 import { getProductPricing } from "@/app/lib/productPricing";
 import PremiumProductDetail from "@/app/components/PremiumProductDetail";
 import WealthTeacherCard from "@/app/components/WealthTeacherCard";
+import TopicTeacherCard from "@/app/components/TopicTeacherCard";
 
 type Mode = "topic" | "period";
 type Props = {
@@ -372,6 +373,7 @@ export default function PremiumCatalogMarketplace({
         ) : !isPeriod && currentGroup ? (
           <div>
             {currentGroup.category === "money" ? <WealthTeacherCard variant="list" /> : null}
+            {currentGroup.category !== "money" ? <TopicTeacherCard category={currentGroup.category} variant="list" /> : null}
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-[#e9dcf5] pb-4">
               <div>
                 <p className="text-xs font-bold text-[#9265b6]">주제별 심층분석</p>

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { TOPIC_TEACHERS, getTopicTeacher } from "../app/lib/topicTeachers";
 
 function read(path: string): string {
   return readFileSync(path, "utf8");
@@ -20,6 +21,43 @@ const wealthTeacher = read("app/components/WealthTeacherCard.tsx");
 const wealthTeacherPortrait = read("public/teachers/geumun-v2.svg");
 const consulting = read("app/paid-analysis/[productId]/report/AiConsultingEntryCard.tsx");
 const preparing = read("app/components/CompatibilityPaidReportPreparing.tsx");
+const topicTeacherCard = read("app/components/TopicTeacherCard.tsx");
+const topicTeacherCatalog = read("app/components/PremiumCatalogMarketplace.tsx");
+const topicTeacherDetail = read("app/components/CustomerFirstPremiumDetail.tsx");
+const topicTeacherStyles = read("app/globals.css");
+const topicTeacherPortrait = readFileSync("public/teachers/topic-teachers-seven.webp");
+const teacherCategories = ["health", "growth", "social", "career", "business", "relationship"] as const;
+assert.equal(Object.keys(TOPIC_TEACHERS).length, teacherCategories.length,
+  "the six remaining topic categories must each have exactly one specialist");
+assert.deepEqual(teacherCategories.map((category) => TOPIC_TEACHERS[category].portraitIndex), [1, 2, 3, 4, 5, 6],
+  "specialists must use the exact agreed left-to-right portrait ordering");
+assert.equal(new Set(teacherCategories.map((category) => TOPIC_TEACHERS[category].name)).size, 6,
+  "specialist names must not duplicate");
+assert.equal(new Set(teacherCategories.map((category) => TOPIC_TEACHERS[category].accent)).size, 6,
+  "each specialist report theme must have a unique accent");
+assert.equal(getTopicTeacher("money"), null, "wealth teacher must remain on its existing rendering path");
+assert.equal(getTopicTeacher("period"), null, "period-analysis views must not gain a topic teacher");
+assert.equal(topicTeacherPortrait.toString("ascii", 0, 4), "RIFF", "approved portrait must be a real image");
+assert.equal(topicTeacherPortrait.toString("ascii", 8, 12), "WEBP", "approved portrait must have a valid WebP header");
+assert(topicTeacherCard.includes("topic-teachers-seven.webp")
+  && topicTeacherCard.includes('data-topic-teacher-profile="visible"')
+  && !topicTeacherCard.includes("<details") && !topicTeacherCard.includes("가상") && !topicTeacherCard.includes("AI"),
+  "specialists must use the approved artwork and inline accessible profiles without restricted text");
+assert(topicTeacherCatalog.includes('currentGroup.category !== "money" ? <TopicTeacherCard')
+  && topicTeacherCatalog.includes('currentGroup.category === "money" ? <WealthTeacherCard')
+  && topicTeacherDetail.includes('product.category !== "money" ? <TopicTeacherCard')
+  && !topicTeacherDetail.includes('product.category !== "money" ? <WealthTeacherCard'),
+  "catalog and customer-first details must show exactly the category-matching teacher");
+assert(topicTeacherStyles.includes('data-topic-teacher-variant="list"'),
+  "other topic category lists must hide the redundant generic discovery banner");
+assert(v4.includes('getTopicTeacher(productId ? getPremiumProduct(productId)?.category : null)')
+  && v4.includes('data-topic-report-category={teacher?.category}')
+  && v4.includes('data-report-feature="conclusion"')
+  && v4.includes('data-report-feature="action"')
+  && v4.includes('<TopicTeacherCard category={teacher.category} variant="report" />')
+  && v4.includes('<TopicTeacherCard category={teacher.category} variant="closing"'),
+  "the paid V4 report must use one resolved category teacher and themed conclusion and actions");
+
 const sharedPreparing = read("app/components/PaidReportPreparing.tsx");
 
 const readabilitySurfaces = [
@@ -53,9 +91,10 @@ for (const [name, source] of readabilitySurfaces) {
 assert(v4.includes('conclusion={detail.conclusion.headline}') && v4.includes('immediateAction={detail.conclusion.immediateAction}')
   && wealthTeacher.includes('이번 분석의 결론') && wealthTeacher.includes('실천할 한 가지'),
   "wealth report closing must show existing purchased report conclusion and next action rather than a generic placeholder");
-assert(wealthTeacher.includes('src="/teachers/geumun-v2.svg"') && wealthTeacherPortrait.includes('viewBox="0 0 256 256"') && wealthTeacherPortrait.includes('data:image/webp;base64,')
-  && wealthTeacherPortrait.length > 8000,
-  "wealth teacher must use the upgraded high-quality original portrait rather than the 88px thumbnail");
+assert(wealthTeacher.includes('topic-teachers-seven.webp')
+  && wealthTeacher.includes('backgroundPosition: "0% center"')
+  && topicTeacherPortrait.toString("ascii", 8, 12) === "WEBP",
+  "wealth teacher must use the approved first portrait from the final seven-person set");
 assert(
   wealthTeacher.includes('data-wealth-teacher-profile="visible"')
     && wealthTeacher.includes('profileByVariant')

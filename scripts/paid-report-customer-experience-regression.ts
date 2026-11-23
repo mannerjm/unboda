@@ -54,7 +54,7 @@ assert(
 );
 assert(premium.includes("이 판단을 뒷받침하는 근거") && premium.includes("비교적 분명하게 볼 수 있는 부분") && premium.includes("현실에서 추가로 확인해야 할 부분") && premium.includes("이 분석만으로 정할 수 없는 것"), "V4 confidence and evidence UI must read as customer decision support, not an internal model score");
 assert(!premium.includes("신뢰도 {detail.confidence.level}") && !premium.includes("Confidence & Limits"), "customer UI must not expose internal confidence labels as product quality scores");
-assert(consulting.includes("AI 상담 화면 보기") && consulting.includes("남은 질문 0회") && consulting.includes("이 리포트로 AI에게 질문하기") && consulting.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyers must see a concise truthful consultation entry for both zero-credit and ready states");
+assert(consulting.includes("상담 화면 보기") && consulting.includes("남은 질문 0회") && consulting.includes("이 리포트로 상담 선생님에게 질문하기") && consulting.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyers must see a concise truthful consultation entry for both zero-credit and ready states");
 assert(!consulting.includes('(session.state === "credit_required" && !hasPreviousConversation)'), "no-credit state must never hide the consulting entry");
 assert(report.indexOf("<AiConsultingEntryCard") < report.indexOf("<Phase9NextAnalysisSection"), "report-based consultation appears before upsell recommendations");
 assert(report.includes("<ReportCompletionGate") && report.indexOf("<ReportCompletionGate") < report.indexOf("<AiConsultingEntryCard"), "consultation and upsell must stay behind verified report completion");

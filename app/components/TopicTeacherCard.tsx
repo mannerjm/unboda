@@ -1,7 +1,16 @@
 import type { CSSProperties } from "react";
 import { getTopicTeacher } from "@/app/lib/topicTeachers";
+import TeacherPortrait, { type TeacherPortraitName } from "@/app/components/TeacherPortrait";
 
 type CardVariant = "list" | "detail" | "report" | "closing";
+const portraitByCategory = {
+  health: "cheongon",
+  growth: "munseong",
+  social: "ongyeol",
+  career: "dohyeon",
+  business: "taesan",
+  relationship: "yeonhwa",
+} as const satisfies Record<string, TeacherPortraitName>;
 
 export default function TopicTeacherCard({
   category,
@@ -33,27 +42,23 @@ export default function TopicTeacherCard({
       style={{ ...palette, backgroundImage: `linear-gradient(120deg,#fffafd 0%,${teacher.pale} 100%)`, borderColor: teacher.border }}
       className={`overflow-hidden rounded-[1.35rem] border text-[#30203e] shadow-[0_10px_26px_rgba(78,49,115,.06)] ${isList ? "mb-5" : "my-4"}`}
     >
-      <div className="flex items-center gap-3 px-4 py-3 sm:gap-5 sm:px-6 sm:py-4">
-        <div
-          role="img"
-          aria-label={`${teacher.name} 선생님 한복 초상`}
-          className={`shrink-0 overflow-hidden rounded-2xl border-2 bg-white shadow-sm ${isList ? "h-24 w-24 sm:h-28 sm:w-28" : "h-16 w-16 sm:h-20 sm:w-20"}`}
-          style={{
-            borderColor: teacher.border,
-            backgroundImage: "url('/teachers/topic-teachers-seven.webp')",
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "700% 100%",
-            backgroundPosition: `${(teacher.portraitIndex / 6) * 100}% center`,
-          }}
+      <div className="flex items-center gap-3 px-3 py-3 sm:gap-5 sm:px-6 sm:py-5">
+        <TeacherPortrait
+          name={portraitByCategory[teacher.category]}
+          label={`${teacher.name} 선생님, 한복과 배경이 함께 보이는 인물 사진`}
+          variant={variant}
+          borderColor={teacher.border}
+          backgroundColor={teacher.pale}
         />
         <div className="min-w-0 flex-1">
           <p className="text-xs font-bold" style={{ color: teacher.accent }}>운보다 · {teacher.categoryLabel} 풀이 담당</p>
           <h2 className={`mt-1 break-keep font-black tracking-tight ${isList ? "text-lg sm:text-2xl" : "text-base sm:text-xl"}`} style={{ color: teacher.dark }}>
             {isList ? teacher.title : isClosing ? `${teacher.name} 선생님의 마무리` : `${teacher.name} 선생님`}
           </h2>
-          <p className="mt-1 break-keep text-[13px] font-medium leading-5 text-[#54445b] sm:text-[15px] sm:leading-6">
+          <p className="mt-2 break-keep text-[13px] font-medium leading-6 text-[#54445b] sm:text-[15px]">
             {isClosing ? "이번 레포트의 결론과 실천할 내용을 다시 살펴보세요." : variant === "report" ? `구매하신 ${teacher.categoryLabel} 레포트의 중요한 내용을 함께 살펴봅니다.` : teacher.intro}
           </p>
+          {!isClosing ? <p className="mt-3 hidden text-xs leading-5 text-[#6d5d72] sm:block">사주 풀이를 바탕으로, 일상에서 도움이 되는 점검 기준을 안내합니다.</p> : null}
         </div>
       </div>
 

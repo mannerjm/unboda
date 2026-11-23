@@ -31,7 +31,7 @@ export default function WealthTeacherCard({
           </h2>
           <p className="mt-1 break-keep text-xs leading-5 text-[#64526c] sm:text-sm sm:leading-6">
             {isList
-              ? "재물운 상품 10종을 주제별로 살펴보세요. 각 상품의 기존 분석 내용은 그대로 제공됩니다."
+              ? "재물운 상품 10종을 주제별로 살펴보세요."
               : isClosing
                 ? "구매하신 레포트의 핵심 결론을 다시 짚어드립니다."
                 : variant === "report"

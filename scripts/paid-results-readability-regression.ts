@@ -15,6 +15,7 @@ const premiumPreview = read("app/components/PremiumReportValuePreview.tsx");
 const compatibilityPreview = read("app/components/CompatibilityReportValuePreview.tsx");
 const recommendations = read("app/components/RecommendationTop3.tsx");
 const premiumDetail = read("app/components/PremiumProductDetail.tsx");
+const appShell = read("app/components/AppShell.tsx");
 const wealthTeacher = read("app/components/WealthTeacherCard.tsx");
 const wealthTeacherPortrait = read("public/teachers/geumun-v2.svg");
 const consulting = read("app/paid-analysis/[productId]/report/AiConsultingEntryCard.tsx");
@@ -70,6 +71,12 @@ assert(
     && !wealthTeacher.includes("AI"),
   "wealth teacher profile must remain inline and use approved customer-facing language",
 );
+assert(!wealthTeacher.includes('pointer-events-none absolute -right-9 -top-14') && wealthTeacher.includes('areas.map((area)'),
+  "wealth teacher must use compact readable topic chips without the right gold decorative circle");
+assert(wealthTeacher.includes('text-[13px]') && wealthTeacher.includes('sm:text-[15px]'),
+  "wealth profile typography should remain easy to read at a glance");
+assert(appShell.includes('>명리 분석 플랫폼</p>') && !appShell.includes('>AI 명리 분석 플랫폼</p>'),
+  "brand sidebar tagline must omit the requested term");
 assert(v4.includes('text-[15px] leading-7 text-slate-700'), "V4 report must keep readable 15px body copy");
 assert(v4.includes('className="mx-auto max-w-5xl px-4 py-7 sm:px-8 sm:py-9"'), "V4 report must keep mobile-aware outer padding");
 assert(v4.includes('className="mt-5 space-y-4"'), "V4 report must keep the tightened section rhythm");

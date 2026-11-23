@@ -47,15 +47,15 @@ function SaleCategories() {
   return (
     <nav className="mx-auto mt-7 w-full" aria-label="실제 판매하는 사주 분석 주제">
       <h2 className="sr-only">궁금한 분석 주제를 선택하세요</h2>
-      <div className="grid grid-cols-4 gap-x-2 gap-y-3 sm:gap-x-3 sm:gap-y-4">
+      <div className="grid grid-cols-4 gap-x-2.5 gap-y-3 sm:gap-x-3.5 sm:gap-y-4">
         {HOME_SALE_CATEGORY_LINKS.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="group flex min-h-[84px] flex-col items-center justify-center gap-1.5 rounded-[1.15rem] border border-[#f0e8fa] bg-[linear-gradient(160deg,#ffffff_0%,#faf5ff_100%)] px-1 py-2 text-center shadow-[0_3px_12px_rgba(94,58,137,.045)] transition hover:-translate-y-0.5 hover:border-[#d0b5f8] hover:shadow-[0_10px_20px_rgba(109,69,160,.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8755da] focus-visible:ring-offset-2"
+            className="group flex min-h-[94px] flex-col items-center justify-center gap-2 rounded-[1.15rem] sm:min-h-[100px] border border-[#f0e8fa] bg-[linear-gradient(160deg,#ffffff_0%,#faf5ff_100%)] px-1 py-2 text-center shadow-[0_3px_12px_rgba(94,58,137,.045)] transition hover:-translate-y-0.5 hover:border-[#d0b5f8] hover:shadow-[0_10px_20px_rgba(109,69,160,.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8755da] focus-visible:ring-offset-2"
           >
-            <span aria-hidden="true" className="grid h-10 w-10 place-items-center rounded-2xl bg-[#f7efff] text-[25px] leading-none transition group-hover:scale-105 sm:h-11 sm:w-11 sm:text-[27px]">{item.icon}</span>
-            <span className="break-keep text-[11px] font-extrabold leading-[1.35] tracking-[-.055em] text-[#2d194c] sm:text-xs">{item.label}</span>
+            <span aria-hidden="true" className="grid h-11 w-11 place-items-center rounded-2xl bg-[#f7efff] text-[28px] leading-none transition group-hover:scale-105 sm:h-12 sm:w-12 sm:text-[30px]">{item.icon}</span>
+            <span className="break-keep text-xs font-extrabold leading-[1.4] tracking-[-.045em] text-[#2d194c] sm:text-[13px]">{item.label}</span>
           </Link>
         ))}
       </div>
@@ -76,20 +76,20 @@ function FeaturedProducts() {
           if (!product || !photo) return null;
           const pricing = getProductPricing(productId);
           const href = product.kind === "PERIOD"
-            ? "/deep-analysis?mode=period&productId=" + productId
-            : "/deep-analysis?mode=topic&productId=" + productId;
+            ? "/deep-analysis?mode=period&productId=" + encodeURIComponent(product.id)
+            : "/deep-analysis?mode=topic&category=" + encodeURIComponent(product.category) + "&productId=" + encodeURIComponent(product.id);
           return (
             <Link
               key={productId}
               href={href}
-              className="group flex min-h-[88px] items-center gap-3 rounded-[1.15rem] border border-[#ebe1f8] bg-white p-2 shadow-[0_3px_14px_rgba(65,40,110,.06)] transition hover:border-[#c9aff5] hover:bg-[#fdfaff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8755da]"
+              className="group flex min-h-[104px] items-center gap-3 rounded-[1.15rem] border border-[#ebe1f8] bg-white p-2.5 sm:p-3 shadow-[0_3px_14px_rgba(65,40,110,.06)] transition hover:border-[#c9aff5] hover:bg-[#fdfaff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8755da]"
             >
-              <span className="relative h-[72px] w-[88px] shrink-0 overflow-hidden rounded-xl bg-[#f3edfc] sm:w-[94px]">
-                <Image src={photo.src} alt={photo.alt} fill sizes="(max-width: 640px) 88px, 94px" className="object-cover" />
+              <span className="relative h-[82px] w-[100px] shrink-0 overflow-hidden rounded-xl bg-[#f3edfc] sm:h-[92px] sm:w-[116px]">
+                <Image src={photo.src} alt={photo.alt} fill sizes="(max-width: 640px) 100px, 116px" className="object-cover" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[13px] font-black leading-5 tracking-[-.04em] text-[#2b184b] sm:text-sm">{product.title}</span>
-                <span className="mt-0.5 block line-clamp-2 text-[11px] leading-4.5 text-[#766584]">{getReadablePaidQuestion(productId, product.description)}</span>
+                <span className="block line-clamp-2 break-keep text-[13px] font-black leading-[1.45] tracking-[-.04em] text-[#2b184b] sm:text-[15px]">{getReadablePaidQuestion(productId, product.description)}</span>
+                <span className="mt-1 block text-[11px] font-semibold leading-[1.4] text-[#766584] sm:text-xs">{product.title}</span>
               </span>
               <span className="flex shrink-0 flex-col items-end gap-1.5 text-right">
                 <strong className="whitespace-nowrap text-[12px] font-black text-[#6530b2] sm:text-sm">{pricing.amount.toLocaleString("ko-KR")}원</strong>
@@ -100,14 +100,14 @@ function FeaturedProducts() {
         })}
         <Link
           href="/special-analysis/compatibility/romantic"
-          className="group flex min-h-[88px] items-center gap-3 rounded-[1.15rem] border border-[#ebe1f8] bg-white p-2 shadow-[0_3px_14px_rgba(65,40,110,.06)] transition hover:border-[#c9aff5] hover:bg-[#fdfaff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8755da]"
+          className="group flex min-h-[104px] items-center gap-3 rounded-[1.15rem] border border-[#ebe1f8] bg-white p-2.5 sm:p-3 shadow-[0_3px_14px_rgba(65,40,110,.06)] transition hover:border-[#c9aff5] hover:bg-[#fdfaff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8755da]"
         >
-          <span className="relative h-[72px] w-[88px] shrink-0 overflow-hidden rounded-xl bg-[#f3edfc] sm:w-[94px]">
-            <Image src={PREMIUM_PRODUCT_PHOTOS["relationship-current"].src} alt={PREMIUM_PRODUCT_PHOTOS["relationship-current"].alt} fill sizes="(max-width: 640px) 88px, 94px" className="object-cover" />
+          <span className="relative h-[82px] w-[100px] shrink-0 overflow-hidden rounded-xl bg-[#f3edfc] sm:h-[92px] sm:w-[116px]">
+            <Image src={PREMIUM_PRODUCT_PHOTOS["relationship-current"].src} alt={PREMIUM_PRODUCT_PHOTOS["relationship-current"].alt} fill sizes="(max-width: 640px) 100px, 116px" className="object-cover" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[13px] font-black leading-5 tracking-[-.04em] text-[#2b184b] sm:text-sm">{COMPATIBILITY_ROMANTIC_PRODUCT.title}</span>
-            <span className="mt-0.5 block line-clamp-2 text-[11px] leading-4.5 text-[#766584]">두 사람의 대화·갈등·관계 흐름을 함께 살펴봐요.</span>
+            <span className="block line-clamp-2 break-keep text-[13px] font-black leading-[1.45] tracking-[-.04em] text-[#2b184b] sm:text-[15px]">두 사람은 어떤 부분에서 잘 맞을까요?</span>
+            <span className="mt-1 block text-[11px] font-semibold leading-[1.4] text-[#766584] sm:text-xs">{COMPATIBILITY_ROMANTIC_PRODUCT.title}</span>
           </span>
           <span className="flex shrink-0 flex-col items-end gap-1.5 text-right">
             <strong className="whitespace-nowrap text-[12px] font-black text-[#6530b2] sm:text-sm">{COMPATIBILITY_ROMANTIC_PRODUCT.amount.toLocaleString("ko-KR")}원</strong>
@@ -143,8 +143,8 @@ export default function HomeMarketplaceContent({ copy, profileLabel, statusLabel
   statusLabel?: string | null;
 }) {
   return (
-    <div className="mx-auto w-full max-w-[35rem]">
-      <section className="relative mt-5 overflow-hidden rounded-[1.5rem] border border-[#ebe0fb] bg-[linear-gradient(125deg,#faf4ff_0%,#f3e8ff_65%,#f1e5ff_100%)] px-5 py-5 shadow-[0_8px_30px_rgba(105,63,163,.08)] sm:px-7 sm:py-6" aria-label="로그인 상태에 맞는 운보다 분석 시작">
+    <div className="mx-auto w-full max-w-[35rem] lg:max-w-[40rem]">
+      <section className="relative mt-5 overflow-hidden rounded-[1.5rem] border border-[#e6d6fa] bg-[linear-gradient(125deg,#faf4ff_0%,#f3e8ff_65%,#f1e5ff_100%)] px-5 py-6 shadow-[0_10px_32px_rgba(105,63,163,.10)] sm:px-8 sm:py-8" aria-label="로그인 상태에 맞는 운보다 분석 시작">
         <div className="relative z-10 flex items-center gap-3">
           <div className="min-w-0 flex-1">
             {profileLabel ? (
@@ -154,9 +154,9 @@ export default function HomeMarketplaceContent({ copy, profileLabel, statusLabel
               </div>
             ) : null}
             <p className="text-[11px] font-black tracking-[-.025em] text-[#8b4bd3]">{copy.eyebrow}</p>
-            <h1 className="mt-2 break-keep text-[clamp(1.25rem,3.5vw,1.75rem)] font-black leading-[1.3] tracking-[-.052em] text-[#2d174d]">{copy.title}</h1>
-            <p className="mt-2 line-clamp-3 text-[11px] leading-[1.65] text-[#675779] sm:text-xs">{copy.description}</p>
-            <Link href={copy.primaryHref} className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-[linear-gradient(110deg,#9c62f4,#7539d4)] px-5 py-2.5 text-[12px] font-black text-white shadow-[0_7px_18px_rgba(107,57,195,.24)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6d36ba] focus-visible:ring-offset-2 sm:px-6">
+            <h1 className="mt-2 break-keep text-[clamp(1.45rem,3.5vw,2rem)] font-black leading-[1.28] tracking-[-.052em] text-[#2d174d]">{copy.title}</h1>
+            <p className="mt-2 line-clamp-3 text-xs leading-[1.65] text-[#675779] sm:text-[13px]">{copy.description}</p>
+            <Link href={copy.primaryHref} className="mt-4 inline-flex min-h-12 items-center justify-center rounded-full bg-[linear-gradient(110deg,#9c62f4,#7539d4)] px-5 py-2.5 text-[13px] font-black text-white shadow-[0_7px_18px_rgba(107,57,195,.24)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6d36ba] focus-visible:ring-offset-2 sm:px-6">
               {copy.primary}
             </Link>
             <div><Link href={copy.secondaryHref} className="mt-2 inline-block text-[11px] font-semibold text-[#765b92] underline underline-offset-2 hover:text-[#6a35c2]">{copy.secondary}</Link></div>

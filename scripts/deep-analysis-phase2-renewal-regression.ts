@@ -112,8 +112,9 @@ assert(storefront.includes("lg:hidden") && storefront.includes("choosePeriod(pro
 assert(page.includes('initialProductId={initialProductId}') && page.includes('const initialProductId = getSingleParam(params.productId);')
   && page.includes('key={`${initialMode}:${initialCategory ?? ""}:${initialProductId ?? ""}`}'),
   "deep-link changes must remount the correct topic or period detail instead of retaining stale catalog state");
-assert(catalog.includes('periodProducts.some((product) => product.id === initialProductId)'),
-  "only existing period products can open directly from URL");
+assert(catalog.includes("resolvePremiumCatalogEntry(initialMode, initialCategory, initialProductId, topicGroups, periodProducts)")
+    && catalog.includes("initialSelection.productId"),
+  "only launch-visible topic and period products can open directly from URL, including the correct category");
 
 
 const photoRegistry = readFileSync("app/lib/premiumProductPhotos.ts", "utf8");

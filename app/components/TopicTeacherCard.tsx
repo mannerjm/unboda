@@ -59,28 +59,29 @@ export default function TopicTeacherCard({
             {isClosing ? "이번 레포트의 결론과 실천할 내용을 다시 살펴보세요." : variant === "report" ? `구매하신 ${teacher.categoryLabel} 레포트의 중요한 내용을 함께 살펴봅니다.` : teacher.intro}
           </p>
           {!isClosing ? <p className="mt-3 hidden text-xs leading-5 text-[#6d5d72] sm:block">사주 풀이를 바탕으로, 일상에서 도움이 되는 점검 기준을 안내합니다.</p> : null}
+          {!isClosing ? (
+                  <div data-topic-teacher-profile="visible" className="mt-4 space-y-3 border-t pt-3" style={{ borderColor: teacher.border }}>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                      <strong className="shrink-0 text-[13px] font-bold" style={{ color: teacher.accent }}>살펴보는 분야</strong>
+                      <div className="flex flex-wrap gap-1.5">
+                        {teacher.fields.map((field) => (
+                          <span key={field} className="rounded-full border bg-white px-2.5 py-1 text-[13px] font-semibold leading-5 text-[#413749]" style={{ borderColor: teacher.border }}>
+                            {field}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-start gap-x-3 gap-y-1">
+                      <strong className="shrink-0 text-[13px] font-bold" style={{ color: teacher.accent }}>풀이 방식</strong>
+                      <p className="min-w-0 flex-1 basis-[220px] break-keep text-[13px] leading-6 text-[#493c50] sm:text-sm">{teacher.approach}</p>
+                    </div>
+                    {teacher.note ? <p className="text-xs leading-5 text-[#615a65]">{teacher.note}</p> : null}
+                  </div>
+                ) : null}
         </div>
       </div>
 
-      {!isClosing ? (
-        <div data-topic-teacher-profile="visible" className="space-y-3 border-t bg-white/55 px-4 py-3 sm:px-6" style={{ borderColor: teacher.border }}>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <strong className="shrink-0 text-[13px] font-bold" style={{ color: teacher.accent }}>살펴보는 분야</strong>
-            <div className="flex flex-wrap gap-1.5">
-              {teacher.fields.map((field) => (
-                <span key={field} className="rounded-full border bg-white px-2.5 py-1 text-[13px] font-semibold leading-5 text-[#413749]" style={{ borderColor: teacher.border }}>
-                  {field}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="flex flex-wrap items-start gap-x-3 gap-y-1">
-            <strong className="shrink-0 text-[13px] font-bold" style={{ color: teacher.accent }}>풀이 방식</strong>
-            <p className="min-w-0 flex-1 basis-[220px] break-keep text-[13px] leading-6 text-[#493c50] sm:text-sm">{teacher.approach}</p>
-          </div>
-          {teacher.note ? <p className="text-xs leading-5 text-[#615a65]">{teacher.note}</p> : null}
-        </div>
-      ) : (conclusion || immediateAction) ? (
+      {isClosing && (conclusion || immediateAction) ? (
         <div className="mx-4 mb-4 space-y-3 rounded-xl border bg-white/90 px-4 py-4 text-sm leading-7 text-[#463752] sm:mx-6 sm:px-5" style={{ borderColor: teacher.border }}>
           {conclusion ? <p><strong className="mr-2" style={{ color: teacher.accent }}>이번 분석의 결론</strong>{conclusion}</p> : null}
           {immediateAction ? <p><strong className="mr-2" style={{ color: teacher.accent }}>실천할 한 가지</strong>{immediateAction}</p> : null}

@@ -220,11 +220,11 @@ export default function CustomerFirstPremiumDetail({
               분석을 보고도 궁금한 게 남았다면?
             </h3>
             <p className="mt-3 break-keep text-[15px] leading-8 text-[#6a5b79]">
-              나만의 리포트를 확인한 뒤 같은 주제로 AI 상담을 이어갈 수 있어요. 내 사주 분석에서 시작한 이야기를 조금 더 자세히 물어보세요.
+              나만의 리포트를 확인한 뒤 같은 주제로 상담을 이어갈 수 있어요. 내 사주 분석에서 시작한 이야기를 조금 더 자세히 물어보세요.
             </p>
           </div>
           <ol className="mx-auto mt-7 flex max-w-[820px] flex-col items-center gap-3 text-center sm:flex-row sm:justify-center sm:gap-4">
-            {["내 사주 분석", "개인화 리포트", "AI 상담에서 이어가기"].map((title, index) => (
+            {["내 사주 분석", "개인화 리포트", "상담에서 이어가기"].map((title, index) => (
               <li key={title} className="flex-1">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#e9dafa] text-sm font-black text-[#7050bc]">{index + 1}</span>
                 <p className="mt-2 font-extrabold text-[#38274d]">{title}</p>
@@ -232,7 +232,7 @@ export default function CustomerFirstPremiumDetail({
             ))}
           </ol>
           <p className="mt-5 break-keep text-center text-xs leading-6 text-[#83758e]">
-            AI 상담은 보유한 리포트 범위와 질문권 등 별도 이용 조건에 따라 제공됩니다.
+            상담은 보유한 리포트 범위와 질문권 등 별도 이용 조건에 따라 제공됩니다.
           </p>
         </section>
 

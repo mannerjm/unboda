@@ -231,7 +231,7 @@ function TrustSection({ state, copy }: { state: LandingState; copy: LandingCopy 
 }
 
 function Footer() {
-  return <footer className="mt-3 border-t border-[#e4ddf1] py-3 text-[10px] text-[#6f6682] sm:text-[11px]"><div className="mx-auto flex w-full max-w-6xl flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><div className="max-w-3xl space-y-0.5 leading-4"><p className="font-bold text-[#45385e]">운보다 · 참고용 명리 분석 서비스</p><p>상호 운보다 · 대표자 반희 · 사업자등록번호 201-28-96364</p><p>사업장 소재지 충청남도 천안시 서북구 백석4길 12, 10층 1001-B52호(백석동, 거성캐슬B빌딩)</p><p>고객센터 070-4792-8900 · 공식 지원 이메일 support@unboda.kr</p></div><nav className="flex shrink-0 flex-wrap gap-x-3 gap-y-1.5" aria-label="서비스 및 법적 문서"><Link href="/blog" className="transition hover:text-[#6946cb]">운보다 매거진</Link><Link href="/support" className="transition hover:text-[#7137ba]">고객지원</Link><Link href="/reviews" className="transition hover:text-[#7137ba]">구매 인증 후기</Link><Link href="/trust" className="transition hover:text-[#7137ba]">운보다 이용 원칙</Link><Link href="/terms" className="transition hover:text-[#7137ba]">이용약관</Link><Link href="/privacy" className="transition hover:text-[#7137ba]">개인정보처리방침</Link><Link href="/refund" className="transition hover:text-[#7137ba]">환불정책</Link></nav></div></footer>;
+  return <footer className="mt-10 w-full border-t border-[#e7def2] bg-[#f8f5fc] px-4 py-9 text-[10px] text-[#6f6682] sm:px-8 sm:py-11 sm:text-[11px]"><div className="mx-auto flex w-full max-w-6xl flex-col gap-5 sm:flex-row sm:items-start sm:justify-between"><div className="max-w-3xl space-y-0.5 leading-4"><p className="font-bold text-[#45385e]">운보다 · 참고용 명리 분석 서비스</p><p>상호 운보다 · 대표자 반희 · 사업자등록번호 201-28-96364</p><p>사업장 소재지 충청남도 천안시 서북구 백석4길 12, 10층 1001-B52호(백석동, 거성캐슬B빌딩)</p><p>고객센터 070-4792-8900 · 공식 지원 이메일 support@unboda.kr</p></div><nav className="flex shrink-0 flex-wrap gap-x-3 gap-y-1.5" aria-label="서비스 및 법적 문서"><Link href="/blog" className="transition hover:text-[#6946cb]">운보다 매거진</Link><Link href="/support" className="transition hover:text-[#7137ba]">고객지원</Link><Link href="/reviews" className="transition hover:text-[#7137ba]">구매 인증 후기</Link><Link href="/trust" className="transition hover:text-[#7137ba]">운보다 이용 원칙</Link><Link href="/terms" className="transition hover:text-[#7137ba]">이용약관</Link><Link href="/privacy" className="transition hover:text-[#7137ba]">개인정보처리방침</Link><Link href="/refund" className="transition hover:text-[#7137ba]">환불정책</Link></nav></div></footer>;
 }
 
 function StarField() {
@@ -256,13 +256,13 @@ function HomeJourney() {
 
 function HomeShell({ state, copy, todayViewed: _todayViewed, returning }: { state: LandingState; copy: LandingCopy; todayViewed: boolean; returning?: ReturningLandingState }) {
   const statusLabel = returning ? returning.kind === "analysis_stale" ? "갱신 필요" : returning.kind === "analysis_in_progress" ? "생성 중" : returning.kind === "analysis_complete" && returning.status === "needs_retry" ? "해석 재생성 필요" : "최신 상태" : null;
-  return <main className="min-h-[100dvh] bg-white text-[#281744]">
-    <div className="mx-auto flex min-h-[100dvh] w-full max-w-[1510px] flex-col px-4 pb-2 pt-3 sm:px-8 lg:px-10 lg:pt-5">
+  return <main className="flex min-h-[100dvh] flex-col bg-white text-[#281744]">
+    <div className="mx-auto flex w-full max-w-[1510px] flex-1 flex-col px-4 pb-2 pt-3 sm:px-8 lg:px-10 lg:pt-5">
       <Header state={state}/>
       <PwaInstallGuide/>
       <HomeMarketplaceContent copy={copy} profileLabel={returning?.profileLabel} statusLabel={statusLabel}/>
-      <Footer/>
     </div>
+    <Footer/>
   </main>;
 }
 

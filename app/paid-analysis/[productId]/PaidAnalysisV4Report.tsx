@@ -10,6 +10,10 @@ import {
 } from "@/app/lib/paidAnalysisV4CustomerPresentation";
 import PeriodTimelineSection from "./PeriodTimelineSection";
 import WealthTeacherCard from "@/app/components/WealthTeacherCard";
+import TopicTeacherCard from "@/app/components/TopicTeacherCard";
+import { getTopicTeacher } from "@/app/lib/topicTeachers";
+import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
+import type { CSSProperties } from "react";
 
 type PaidAnalysisV4ReportProps = {
   detail: ResolvedPaidAnalysisDetailV4;
@@ -45,8 +49,8 @@ function SectionHeader({
   return (
     <div className="max-w-3xl">
       <div className="flex items-center gap-2.5">
-        <span className={`h-1.5 w-1.5 rounded-full ${tone === "inverse" ? "bg-[#c9c2ff] shadow-[0_0_0_5px_rgba(201,194,255,0.10)]" : "bg-[#7c68ea] shadow-[0_0_0_5px_rgba(124,104,234,0.08)]"}`} />
-        <p className={`text-xs font-bold tracking-[0.16em] ${tone === "inverse" ? "text-[#c9c2ff]" : "text-[#6f5ce7]"}`}>{eyebrow}</p>
+        <span className={`h-1.5 w-1.5 rounded-full ${tone === "inverse" ? "bg-[#c9c2ff] shadow-[0_0_0_5px_rgba(201,194,255,0.10)]" : "bg-[#7c68ea] shadow-[0_0_0_5px_rgba(124,104,234,0.08)]"}`} style={tone === "inverse" ? undefined : { backgroundColor: "var(--topic-report-accent,#7c68ea)" }} />
+        <p className={`text-xs font-bold tracking-[0.16em] ${tone === "inverse" ? "text-[#c9c2ff]" : "text-[#6f5ce7]"}`} style={tone === "inverse" ? undefined : { color: "var(--topic-report-accent,#6f5ce7)" }}>{eyebrow}</p>
       </div>
       <h2 className={`mt-3 text-xl font-black tracking-[-0.025em] sm:text-2xl ${tone === "inverse" ? "text-white" : "text-[#11162d]"}`}>{title}</h2>
       {description ? <p className={`mt-2 max-w-2xl text-[15px] leading-7 ${tone === "inverse" ? "text-slate-300" : "text-slate-600"}`}>{description}</p> : null}
@@ -64,8 +68,8 @@ function ReadingCard({
   body: string;
 }) {
   return (
-    <article className="group relative overflow-hidden rounded-[1.65rem] border border-[#eadffa] bg-[linear-gradient(145deg,#ffffff,#fbf7ff)] p-5 shadow-[0_14px_36px_rgba(111,74,171,.10)] ring-1 ring-white/90">
-      <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#7662e8_0%,#b7aef7_48%,transparent_100%)] opacity-70" />
+    <article className="group relative overflow-hidden rounded-[1.65rem] border border-[#eadffa] bg-[linear-gradient(145deg,#ffffff,#fbf7ff)] p-5 shadow-[0_14px_36px_rgba(111,74,171,.10)] ring-1 ring-white/90" style={{ borderColor: "var(--topic-report-border,#eadffa)", backgroundImage: "linear-gradient(145deg,#ffffff,var(--topic-report-pale,#fbf7ff))" }}>
+      <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#7662e8_0%,#b7aef7_48%,transparent_100%)] opacity-70" style={{ backgroundImage: "linear-gradient(90deg,var(--topic-report-accent,#7662e8),transparent)" }} />
       <div className="relative">
         <p className="text-xs font-bold tracking-[0.12em] text-[#7065aa]">{eyebrow}</p>
         <h3 className="mt-3 text-base font-extrabold leading-7 text-[#11162d]">{title}</h3>
@@ -107,16 +111,27 @@ export default function PaidAnalysisV4Report({
   const firstOpportunity = detail.current.opportunities[0];
   const firstCaution = detail.current.cautions[0];
   const firstAction = detail.action[0];
+  const teacher = getTopicTeacher(productId ? getPremiumProduct(productId)?.category : null);
+  const reportStyle = teacher ? {
+    "--topic-report-accent": teacher.accent,
+    "--topic-report-pale": teacher.pale,
+    "--topic-report-border": teacher.border,
+    backgroundImage: `linear-gradient(160deg,#fffefe 0%,${teacher.pale} 47%,#f0eaff 100%)`,
+  } as CSSProperties : undefined;
+  const darkSectionStyle = teacher ? {
+    borderColor: teacher.dark,
+    backgroundImage: `radial-gradient(circle at 82% 14%,${teacher.accent}77,transparent 35%),linear-gradient(145deg,${teacher.dark} 0%,${teacher.darkEnd} 100%)`,
+  } : undefined;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(160deg,#fffefe_0%,#faf6ff_45%,#f0eaff_100%)] text-[#281744]">
+    <main data-topic-report-category={teacher?.category} style={reportStyle} className="relative min-h-screen overflow-hidden bg-[linear-gradient(160deg,#fffefe_0%,#faf6ff_45%,#f0eaff_100%)] text-[#281744]">
       <div className="pointer-events-none absolute left-[-12rem] top-[-8rem] h-96 w-96 rounded-full bg-[#b9aff9]/15 blur-3xl" />
       <div className="pointer-events-none absolute right-[-10rem] top-[24rem] h-80 w-80 rounded-full bg-[#d9d4fb]/20 blur-3xl" />
 
       <div className="mx-auto max-w-5xl px-4 py-7 sm:px-8 sm:py-9">
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 rounded-[1.35rem] border border-[#e6d8f5] bg-white/90 px-4 py-3 shadow-[0_12px_30px_rgba(105,68,170,.09)] backdrop-blur sm:px-5">
           <div>
-            <p className="text-xs font-bold tracking-[0.18em] text-[#6f5ce7]">PREMIUM REPORT</p>
+            <p className="text-xs font-bold tracking-[0.18em] text-[#6f5ce7]" style={teacher ? { color: teacher.accent } : undefined}>PREMIUM REPORT</p>
             <h1 className="mt-1.5 text-2xl font-black tracking-[-0.03em] text-[#11162d] sm:text-3xl">{analysisType}</h1>
           </div>
           {detail.referencePeriod ? (
@@ -127,8 +142,9 @@ export default function PaidAnalysisV4Report({
         </div>
 
         {productId && (productId === "wealth" || productId.startsWith("money-")) ? <WealthTeacherCard variant="report" /> : null}
+        {teacher ? <TopicTeacherCard category={teacher.category} variant="report" /> : null}
 
-        <section className="relative mt-5 overflow-hidden rounded-[2.25rem] border border-[#332d65] bg-[radial-gradient(circle_at_82%_14%,rgba(155,139,255,0.34),transparent_26%),radial-gradient(circle_at_12%_90%,rgba(104,86,216,0.24),transparent_28%),linear-gradient(145deg,#17172f_0%,#242047_48%,#18192f_100%)] px-5 py-8 text-white shadow-[0_28px_80px_rgba(29,27,68,0.24)] sm:px-9 sm:py-10">
+        <section data-report-feature="conclusion" style={darkSectionStyle} className="relative mt-5 overflow-hidden rounded-[2.25rem] border border-[#332d65] bg-[radial-gradient(circle_at_82%_14%,rgba(155,139,255,0.34),transparent_26%),radial-gradient(circle_at_12%_90%,rgba(104,86,216,0.24),transparent_28%),linear-gradient(145deg,#17172f_0%,#242047_48%,#18192f_100%)] px-5 py-8 text-white shadow-[0_28px_80px_rgba(29,27,68,0.24)] sm:px-9 sm:py-10">
           <div className="pointer-events-none absolute right-[-3rem] top-[-4rem] h-48 w-48 rounded-full border border-white/10" />
           <div className="pointer-events-none absolute right-3 top-3 h-28 w-28 rounded-full border border-white/[0.06]" />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(255,255,255,0.025))]" />
@@ -310,7 +326,7 @@ export default function PaidAnalysisV4Report({
 
           {detail.periodAnalysis ? <PeriodTimelineSection periodAnalysis={detail.periodAnalysis} /> : null}
 
-          <section className="relative overflow-hidden rounded-[2rem] border border-[#2e295c] bg-[radial-gradient(circle_at_top_right,rgba(131,111,239,0.22),transparent_30%),linear-gradient(145deg,#1d1b3d_0%,#292550_100%)] p-5 text-white shadow-[0_24px_60px_rgba(31,28,72,0.18)] sm:p-7">
+          <section data-report-feature="action" style={darkSectionStyle} className="relative overflow-hidden rounded-[2rem] border border-[#2e295c] bg-[radial-gradient(circle_at_top_right,rgba(131,111,239,0.22),transparent_30%),linear-gradient(145deg,#1d1b3d_0%,#292550_100%)] p-5 text-white shadow-[0_24px_60px_rgba(31,28,72,0.18)] sm:p-7">
             <div className="relative">
               <SectionHeader
                 eyebrow="ACTION GUIDE"
@@ -398,6 +414,7 @@ export default function PaidAnalysisV4Report({
           </DetailSection>
         </div>
         {productId && (productId === "wealth" || productId.startsWith("money-")) ? <WealthTeacherCard variant="closing" conclusion={detail.conclusion.headline} immediateAction={detail.conclusion.immediateAction} /> : null}
+        {teacher ? <TopicTeacherCard category={teacher.category} variant="closing" conclusion={detail.conclusion.headline} immediateAction={detail.conclusion.immediateAction} /> : null}
       </div>
     </main>
   );

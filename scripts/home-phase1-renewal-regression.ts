@@ -103,4 +103,19 @@ for (const forbidden of ["requestPayment(","grantEntitlement(","createAdminClien
  assert(!market.includes(forbidden),"presentation must never change commercial permissions: "+forbidden);
 assert(home.includes("운보다 · 참고용 명리 분석 서비스") && home.includes("support@unboda.kr")
  && home.includes("사업자등록번호 201-28-96364"),"business legal identity and footer preserved");
+
+const footerMarkup = home.slice(home.indexOf("function Footer()"),home.indexOf("function StarField()"));
+assert(footerMarkup.includes('bg-[#f8f5fc]') && footerMarkup.includes('border-[#e7def2]')
+ && footerMarkup.includes("w-full"), "PC/mobile footer must have full-width lavender-gray background and soft border");
+assert(renderedHome.includes("</div>\n    <Footer/>\n  </main>"),
+  "legal/footer band must render outside narrow content column, truly full width on desktop");
+for (const requiredLegalPath of ['href="/terms"','href="/privacy"','href="/refund"','href="/support"']) {
+ assert(footerMarkup.includes(requiredLegalPath), "footer must preserve legal/support destination "+requiredLegalPath);
+}
+assert(!("originalAmount" in getProductPricing("study-learning-strategy"))
+  && !("compareAtPrice" in getProductPricing("study-learning-strategy")),
+  "real price registry has no substantiated old price; do not automatically claim a 50% discount");
+assert(!market.includes("50%") && !market.includes("19,800원") && !market.includes("할인가"),
+  "do not show unverified all-products discounts or made-up comparison prices");
+
 console.log("Home mobile-first white topic storefront, canonical prices and login stages: PASS");

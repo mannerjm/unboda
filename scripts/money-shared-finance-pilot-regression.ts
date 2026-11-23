@@ -92,6 +92,9 @@ assert(page.includes("data-deep-analysis-page") && page.includes("data-deep-anal
 assert(styles.includes('main[data-deep-analysis-page]:has([data-premium-detail-active])')
   && styles.includes("[data-deep-analysis-discovery-banner]"),
   "selected details hide the redundant header, catalog keeps it");
+assert(styles.includes('main[data-deep-analysis-page]:has([data-wealth-teacher="list"])')
+  && marketplace.includes('currentGroup.category === "money" ? <WealthTeacherCard variant="list" /> : null'),
+  "only the wealth category listing hides the generic discovery banner while other catalog categories keep it");
 assert(pilot.includes('data-pilot-product="money-shared-finance"'),
   "pilot needs a unique DOM scope marker");
 

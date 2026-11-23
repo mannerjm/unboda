@@ -236,7 +236,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
         <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 shrink-0 overflow-y-auto border-r border-[#e9ddf6] bg-[linear-gradient(170deg,#ffffff_0%,#f8f3ff_52%,#efe7ff_100%)] px-4 py-6 text-[#281744] shadow-[8px_0_30px_rgba(111,74,169,0.07)] lg:flex lg:flex-col">
           <div className="mb-10">
             <Link href="/" className="inline-flex items-center gap-2.5 text-xl font-black tracking-tight text-[#281744]"><BrandMark />운보다</Link>
-            <p className="mt-3 text-[11px] leading-5 text-[#76688c]">AI 명리 분석 플랫폼</p>
+            <p className="mt-3 text-[11px] leading-5 text-[#76688c]">명리 분석 플랫폼</p>
           </div>
 
           <nav aria-label="메인 네비게이션">

@@ -18,6 +18,7 @@ import CustomerFirstPremiumDetail from "@/app/components/CustomerFirstPremiumDet
 import { getLaunchProductIds } from "@/app/lib/paidAnalysisTopicConfig";
 import ProductReviewSummary from "@/app/components/ProductReviewSummary";
 import TrustPrinciplesCard from "@/app/components/TrustPrinciplesCard";
+import WealthTeacherCard from "@/app/components/WealthTeacherCard";
 
 type PremiumProductDetailProps = {
   product: PremiumProductDefinition;
@@ -152,12 +153,15 @@ export default function PremiumProductDetail({
   // The established money-shared-finance page remains untouched. All other
   // launched products get the matching customer-first design with their own data.
   if (product.id === "money-shared-finance") {
-    return <MoneySharedFinancePilotDetail
-      product={product}
-      state={state}
-      profileId={profileId}
-      isSaved={isSaved}
-    />;
+    return <>
+      <WealthTeacherCard variant="detail" />
+      <MoneySharedFinancePilotDetail
+        product={product}
+        state={state}
+        profileId={profileId}
+        isSaved={isSaved}
+      />
+    </>;
   }
   if (getLaunchProductIds().includes(product.id)) {
     return <CustomerFirstPremiumDetail
@@ -217,6 +221,7 @@ export default function PremiumProductDetail({
         </div>
       </div>
 
+      {product.category === "money" ? <div className="px-5 sm:px-8"><WealthTeacherCard variant="detail" /></div> : null}
       <div className="bg-white px-5 py-8 sm:px-8 sm:py-10">
         <div className="mb-7 text-center">
           <span className="inline-flex rounded-full bg-[#f4edff] px-4 py-1.5 text-sm font-extrabold text-[#7550c7]">이 분석을 보고 나면</span>

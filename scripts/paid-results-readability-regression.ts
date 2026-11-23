@@ -33,10 +33,14 @@ for (const name of portraitNames) {
   assert.equal(portrait.toString("ascii", 8, 12), "WEBP", `${name} portrait must be WebP`);
   assert(portrait.byteLength > 2500, `${name} portrait must not be a tiny placeholder`);
 }
-assert(teacherPortraitComponent.includes('className="object-contain"')
+assert(teacherPortraitComponent.includes('className="block h-auto w-full"')
   && teacherPortraitComponent.includes('data-teacher-portrait="full"')
-  && teacherPortraitComponent.includes("-full-v4.webp"),
-  "teacher images must show uncropped individual portrait frames");
+  && teacherPortraitComponent.includes('data-portrait-fit="natural"')
+  && teacherPortraitComponent.includes("-full-v4.webp")
+  && !teacherPortraitComponent.includes("sm:h-[214px]")
+  && !teacherPortraitComponent.includes("sm:h-[190px]")
+  && !teacherPortraitComponent.includes('className="object-contain"'),
+  "all seven individual portraits must fill their own photo frames at their natural aspect ratio, without side bands or clipping");
 const teacherCategories = ["health", "growth", "social", "career", "business", "relationship"] as const;
 assert.equal(Object.keys(TOPIC_TEACHERS).length, teacherCategories.length,
   "the six remaining topic categories must each have exactly one specialist");

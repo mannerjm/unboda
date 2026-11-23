@@ -19,6 +19,7 @@ import { getLaunchProductIds } from "@/app/lib/paidAnalysisTopicConfig";
 import ProductReviewSummary from "@/app/components/ProductReviewSummary";
 import TrustPrinciplesCard from "@/app/components/TrustPrinciplesCard";
 import WealthTeacherCard from "@/app/components/WealthTeacherCard";
+import TopicTeacherCard from "@/app/components/TopicTeacherCard";
 
 type PremiumProductDetailProps = {
   product: PremiumProductDefinition;
@@ -219,6 +220,7 @@ export default function PremiumProductDetail({
       </div>
 
       {product.category === "money" ? <div className="px-5 sm:px-8"><WealthTeacherCard variant="detail" /></div> : null}
+      {product.category !== "money" && !isPeriod ? <div className="px-5 sm:px-8"><TopicTeacherCard category={product.category} variant="detail" /></div> : null}
       <div className="bg-white px-5 py-8 sm:px-8 sm:py-10">
         <div className="mb-7 text-center">
           <span className="inline-flex rounded-full bg-[#f4edff] px-4 py-1.5 text-sm font-extrabold text-[#7550c7]">이 분석을 보고 나면</span>

@@ -25,7 +25,18 @@ const topicTeacherCard = read("app/components/TopicTeacherCard.tsx");
 const topicTeacherCatalog = read("app/components/PremiumCatalogMarketplace.tsx");
 const topicTeacherDetail = read("app/components/CustomerFirstPremiumDetail.tsx");
 const topicTeacherStyles = read("app/globals.css");
-const topicTeacherPortrait = readFileSync("public/teachers/topic-teachers-seven.webp");
+const teacherPortraitComponent = read("app/components/TeacherPortrait.tsx");
+const portraitNames = ["geumun", "cheongon", "munseong", "ongyeol", "dohyeon", "taesan", "yeonhwa"] as const;
+for (const name of portraitNames) {
+  const portrait = readFileSync(`public/teachers/${name}-full-v4.webp`);
+  assert.equal(portrait.toString("ascii", 0, 4), "RIFF", `${name} portrait must be a valid image`);
+  assert.equal(portrait.toString("ascii", 8, 12), "WEBP", `${name} portrait must be WebP`);
+  assert(portrait.byteLength > 2500, `${name} portrait must not be a tiny placeholder`);
+}
+assert(teacherPortraitComponent.includes('className="object-contain"')
+  && teacherPortraitComponent.includes('data-teacher-portrait="full"')
+  && teacherPortraitComponent.includes("-full-v4.webp"),
+  "teacher images must show uncropped individual portrait frames");
 const teacherCategories = ["health", "growth", "social", "career", "business", "relationship"] as const;
 assert.equal(Object.keys(TOPIC_TEACHERS).length, teacherCategories.length,
   "the six remaining topic categories must each have exactly one specialist");
@@ -37,12 +48,12 @@ assert.equal(new Set(teacherCategories.map((category) => TOPIC_TEACHERS[category
   "each specialist report theme must have a unique accent");
 assert.equal(getTopicTeacher("money"), null, "wealth teacher must remain on its existing rendering path");
 assert.equal(getTopicTeacher("period"), null, "period-analysis views must not gain a topic teacher");
-assert.equal(topicTeacherPortrait.toString("ascii", 0, 4), "RIFF", "approved portrait must be a real image");
-assert.equal(topicTeacherPortrait.toString("ascii", 8, 12), "WEBP", "approved portrait must have a valid WebP header");
-assert(topicTeacherCard.includes("topic-teachers-seven.webp")
+assert(topicTeacherCard.includes('<TeacherPortrait')
+  && topicTeacherCard.includes('name={portraitByCategory[teacher.category]}')
   && topicTeacherCard.includes('data-topic-teacher-profile="visible"')
+  && !topicTeacherCard.includes("topic-teachers-seven.webp")
   && !topicTeacherCard.includes("<details") && !topicTeacherCard.includes("가상") && !topicTeacherCard.includes("AI"),
-  "specialists must use the approved artwork and inline accessible profiles without restricted text");
+  "specialists must use separate natural portraits and inline accessible profiles without restricted text");
 assert(topicTeacherCatalog.includes('currentGroup.category !== "money" ? <TopicTeacherCard')
   && topicTeacherCatalog.includes('currentGroup.category === "money" ? <WealthTeacherCard')
   && topicTeacherDetail.includes('product.category !== "money" ? <TopicTeacherCard')
@@ -91,10 +102,9 @@ for (const [name, source] of readabilitySurfaces) {
 assert(v4.includes('conclusion={detail.conclusion.headline}') && v4.includes('immediateAction={detail.conclusion.immediateAction}')
   && wealthTeacher.includes('이번 분석의 결론') && wealthTeacher.includes('실천할 한 가지'),
   "wealth report closing must show existing purchased report conclusion and next action rather than a generic placeholder");
-assert(wealthTeacher.includes('topic-teachers-seven.webp')
-  && wealthTeacher.includes('backgroundPosition: "0% center"')
-  && topicTeacherPortrait.toString("ascii", 8, 12) === "WEBP",
-  "wealth teacher must use the approved first portrait from the final seven-person set");
+assert(wealthTeacher.includes('<TeacherPortrait') && wealthTeacher.includes('name="geumun"')
+  && !wealthTeacher.includes('topic-teachers-seven.webp'),
+  "wealth teacher must use the separate full-frame Geumun portrait");
 assert(
   wealthTeacher.includes('data-wealth-teacher-profile="visible"')
     && wealthTeacher.includes('profileByVariant')

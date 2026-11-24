@@ -357,7 +357,7 @@ export default function PaidFamilyParentChildAnalysisClient({
             <div>
               <p className="text-[11px] font-bold tracking-[0.16em] text-slate-500">구매 전 확인</p>
               <p className="mt-2 text-sm font-semibold text-slate-800">부모·자녀 관계 분석을 결제 후 바로 생성합니다.</p>
-              <p className="mt-1 text-xs leading-5 text-slate-500">결제 완료 후 생성된 {evaluationYear}년판 결과는 구매한 분석에서 다시 볼 수 있습니다.</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">결제 완료 후 생성된 결과는 구매한 분석에서 다시 볼 수 있습니다.</p>
             </div>
             <div className="shrink-0 sm:text-right">
               <p className="text-xs font-medium text-slate-500">결제 금액</p>

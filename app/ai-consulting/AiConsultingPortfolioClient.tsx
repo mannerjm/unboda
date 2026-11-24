@@ -107,7 +107,7 @@ function ConsultingAnswer({ content }: { content: string }) {
   const extraAnswer = hasLongAnswer ? main.slice(firstSentenceEnd + 1).trim() : "";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div>
         <p className="mb-1 text-xs font-bold text-[#5e4bd1]">핵심 답변</p>
         <p className="whitespace-pre-wrap text-base font-semibold leading-7">{shortAnswer}</p>
@@ -118,12 +118,12 @@ function ConsultingAnswer({ content }: { content: string }) {
           </details>
         ) : null}
       </div>
-      <div className="rounded-2xl bg-[#f3f1ff] px-4 py-3">
+      <div className="rounded-xl bg-[#f3f1ff] px-3 py-2">
         <p className="mb-1 text-xs font-bold text-[#5e4bd1]">지금 해볼 일</p>
         <p className="whitespace-pre-wrap leading-7">{action}</p>
       </div>
-      <details className="rounded-xl border border-[#e4e7f0] px-4 py-3 text-sm">
-        <summary className="cursor-pointer font-semibold text-[#5e4bd1]">왜 이렇게 보나요? · 구매 분석 근거</summary>
+      <details className="rounded-lg border-t border-[#e4d9f1] pt-2 text-sm">
+        <summary className="cursor-pointer font-semibold text-[#5e4bd1]">구매 분석 근거 보기</summary>
         <div className="mt-3 space-y-3 border-t border-[#e4e7f0] pt-3">
           <div>
             <p className="mb-1 text-xs font-bold text-slate-500">구매 리포트에서 확인한 내용</p>
@@ -636,8 +636,8 @@ export default function AiConsultingPortfolioClient({
   ) : null;
 
   return (
-    <main className="min-h-screen bg-[#f5f0fb] px-3 py-4 text-[#25183d] sm:px-6 sm:py-6">
-      <div className="mx-auto max-w-6xl">
+    <main className="min-h-screen bg-[#f5f0fb] px-3 py-3 text-[#25183d] sm:px-5 lg:px-6 lg:py-4">
+      <div className="mx-auto w-full max-w-[1600px]">
 
 
         {isPreview ? (
@@ -663,21 +663,21 @@ export default function AiConsultingPortfolioClient({
           </section>
         ) : null}
 
-        <header className="relative isolate overflow-hidden rounded-[1.75rem] border border-[#ded0f5] bg-[radial-gradient(ellipse_at_86%_20%,#e2d0fa,transparent_65%),linear-gradient(120deg,#fcf9ff,#f0e5fb)] px-5 py-5 shadow-sm sm:px-8 sm:py-7">
-          <div className="relative z-10 max-w-[48rem] sm:pr-44 lg:pr-56">
+        <header className="relative isolate overflow-hidden rounded-[1.5rem] border border-[#ded0f5] bg-[radial-gradient(ellipse_at_86%_20%,#e2d0fa,transparent_65%),linear-gradient(120deg,#fcf9ff,#f0e5fb)] px-4 py-4 shadow-sm sm:px-7 lg:min-h-[232px] lg:px-8 lg:py-6">
+          <div className="relative z-10 min-w-0 lg:w-[58%] xl:w-[57%]">
             <p className="text-xs font-black tracking-[0.16em] text-[#7941d0]">UNBODA AI CONSULTING</p>
-            <h1 className="mt-2 break-keep text-2xl font-black tracking-[-0.035em] sm:text-3xl lg:text-4xl">운담 선생님과 AI 상담하기</h1>
+            <h1 className="mt-2 break-keep text-2xl font-black tracking-[-0.045em] sm:text-3xl xl:text-[clamp(1.9rem,2.6vw,2.65rem)]">운담 선생님과 AI 상담하기</h1>
             <p className="mt-2 text-sm leading-6 text-[#58476d] sm:text-base">구매한 사주 분석을 바탕으로 궁금한 점을 편하게 물어보세요.</p>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-[#d9c5f5] bg-white/90 px-3 py-2 text-sm shadow-sm">
-                <span className="font-semibold">공용 질문권 <strong className="text-lg text-[#6734c5]" aria-live="polite">{portfolio ? portfolio.questionsRemaining : "—"}회</strong></span>
+                <span className="inline-flex items-center gap-1.5 font-semibold"><svg aria-hidden="true" className="h-5 w-5 text-[#7139ce]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16v4a3 3 0 0 0 0 6v4H4v-4a3 3 0 0 0 0-6z"/><path d="M13 8v2m0 4v2"/></svg>공용 질문권 <strong className="text-lg text-[#6734c5]" aria-live="polite">{portfolio ? portfolio.questionsRemaining : "—"}회</strong></span>
                 {creditPurchaseHref && !isPreview ? (
                   <Link href={creditPurchaseHref} className="rounded-full bg-[#eee2ff] px-3 py-2 text-sm font-bold text-[#6333b2] hover:bg-[#e5d2fa]">
                     {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 안내 보기 →"}
                   </Link>
                 ) : null}
               </div>
-              <a href={ownedAnalyses.length ? "#owned-analysis-selector" : "/purchased-analyses"} onClick={() => { if (ownedLibraryRef.current) ownedLibraryRef.current.open = true; }} className="rounded-full border border-[#d9c5f5] bg-white/90 px-4 py-3 text-sm font-bold text-[#6333b2] shadow-sm">구매한 분석 보기 →</a>
+              <a href={ownedAnalyses.length ? "#owned-analysis-selector" : "/purchased-analyses"} onClick={() => { if (ownedLibraryRef.current) ownedLibraryRef.current.open = true; }} className="inline-flex items-center gap-2 rounded-full border border-[#d9c5f5] bg-white/90 px-4 py-3 text-sm font-bold text-[#6333b2] shadow-sm"><svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7m-7 4h7"/></svg>구매한 분석 보기 →</a>
             </div>
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-[#675779]">
               <span>현재 연결된 상담 분석 {portfolio ? `${portfolio.analyses.length}개` : "확인 중"}</span>
@@ -686,11 +686,10 @@ export default function AiConsultingPortfolioClient({
               {portfolio && portfolio.analyses.length > 0 ? <a href="#undam-memory" onClick={() => { if (memoryPanelRef.current) memoryPanelRef.current.open = true; setShowMemories(true); }} className="font-bold underline underline-offset-2">기억 관리</a> : null}
             </div>
           </div>
-          <div className="absolute bottom-0 right-0 top-0 hidden w-44 overflow-hidden sm:block lg:w-64" aria-hidden="true">
-            <Image src="/teachers/undam-consulting.webp" alt="" fill sizes="(min-width: 1024px) 256px, 176px" className="object-cover object-top" priority />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#f2e8fb] via-transparent to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[47%] max-w-[650px] lg:block" data-undam-banner="reference">
+            <Image src="/teachers/undam-consulting-banner.webp" alt="산과 소나무를 배경으로 한 운담 선생님 · 사주·운세 전문 AI 상담 선생님" fill sizes="(min-width: 1536px) 650px, 47vw" className="object-contain object-right-bottom [mask-image:linear-gradient(to_right,transparent,black_12%)]" priority unoptimized />
           </div>
-          <div className="mt-3 flex items-center gap-2 sm:hidden"><Image src="/teachers/undam-consulting.webp" alt="운담 선생님 AI 캐릭터" width={48} height={48} className="h-12 w-12 rounded-full object-cover object-top" /><span className="text-sm font-bold text-[#6841aa]">운담 선생님 · AI 상담</span></div>
+          <div className="mt-3 flex items-center gap-3 lg:hidden"><Image src="/teachers/undam-consulting.webp" alt="운담 선생님 AI 캐릭터" width={52} height={52} className="h-12 w-12 rounded-full object-cover object-top" /><span className="text-sm font-bold text-[#6841aa]">운담 선생님 · AI 상담</span></div>
         </header>
 
 
@@ -744,14 +743,15 @@ export default function AiConsultingPortfolioClient({
 
         {!isLoading && portfolio && portfolio.analyses.length > 0 ? (
           <>
-            <section data-section="portfolio-conversation" className="relative mt-3 flex flex-col overflow-hidden rounded-[1.75rem] border border-[#ded0f5] bg-white p-3 shadow-sm sm:p-5">
-              <div className="flex items-center justify-between gap-2 border-b border-[#eee6f8] pb-3">
+            <section data-section="portfolio-conversation" className="relative mt-3 flex h-[min(540px,70dvh)] min-h-[320px] min-w-0 flex-col overflow-hidden rounded-[1.5rem] border border-[#ded0f5] bg-white p-3 shadow-[0_6px_20px_rgba(76,46,130,0.08)] sm:p-4 lg:h-[calc(100dvh-17.5rem)] lg:min-h-[18rem]">
+              <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#eee6f8] pb-1.5">
                 <h2 className="text-sm font-bold text-[#6336a9]">통합 AI 상담</h2>
                 <span className="text-xs text-[#776687]">운담 선생님 · AI</span>
               </div>
-              <p className="mt-2 text-xs leading-5 text-[#675779]">{reportEntryUnavailable ? "이전에 보시던 리포트가 현재 상담 범위에 없습니다. 지금 보유한 분석을 기준으로 질문해 주세요." : "주제를 선택할 필요 없이 질문해 주세요. AI가 구매한 분석 중 관련 리포트를 찾아 답변합니다."}</p>
+              <p className="mt-1 shrink-0 text-xs leading-5 text-[#675779]">{reportEntryUnavailable ? "이전에 보시던 리포트가 현재 상담 범위에 없습니다. 지금 보유한 분석을 기준으로 질문해 주세요." : "주제를 선택할 필요 없이 질문해 주세요. AI가 구매한 분석 중 관련 리포트를 찾아 답변합니다."}</p>
 
 
+              <div ref={chatScrollRef} className="mt-2 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-1 py-2 sm:px-3" aria-label="상담 대화 기록">
               {routingNotice ? (
                 <div className={routingNotice.kind === "outside"
                   ? "mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-6 text-amber-900"
@@ -765,10 +765,9 @@ export default function AiConsultingPortfolioClient({
                 </div>
               ) : null}
 
-              <div ref={chatScrollRef} className="mt-2 min-h-64 max-h-[52dvh] space-y-5 overflow-y-auto overscroll-contain px-1 py-3 sm:min-h-80" aria-label="상담 대화 기록">
                 <div className="flex items-start gap-3">
                   <Image src="/teachers/undam-consulting.webp" alt="" width={44} height={44} className="h-11 w-11 shrink-0 rounded-full object-cover object-top" />
-                  <div className="max-w-[85%]"><p className="mb-1 text-sm font-bold">운담 선생님</p><p className="rounded-2xl rounded-tl-sm bg-[#f1eafa] px-4 py-3 text-sm leading-7">안녕하세요. 운담 선생님입니다. 오늘은 어떤 고민이 있으신가요?</p></div>
+                  <div className="max-w-[85%]"><p className="mb-1 text-sm font-bold">운담 선생님</p><p className="w-fit rounded-2xl rounded-tl-sm bg-[#f1eafa] px-4 py-2.5 text-sm leading-6">안녕하세요. 운담 선생님입니다.<br/>오늘은 어떤 고민이 있으신가요?</p></div>
                 </div>
                 {hasOlderMessages ? <button type="button" onClick={() => void loadOlderMessages()} disabled={isLoadingOlder} className="w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm font-semibold text-[#5e4bd1] disabled:opacity-50">{isLoadingOlder ? "이전 상담 불러오는 중..." : "이전 상담 더 보기"}</button> : null}
                 {!isSending && visibleChatMessages.length === 0 && (portfolio.questionsRemaining > 0 || hasOlderMessages) ? (
@@ -785,8 +784,8 @@ export default function AiConsultingPortfolioClient({
                   const savingMemory = message.role === "user" && savingMemoryMessageId === message.id;
 
                   return (
-                    <div key={message.id} className={message.role === "assistant" ? "space-y-2 pl-12 sm:pl-14" : "space-y-2"}>
-                      {message.role === "assistant" ? <div className="-ml-12 flex items-center gap-2 sm:-ml-14"><Image src="/teachers/undam-consulting.webp" alt="" width={44} height={44} className="h-10 w-10 shrink-0 rounded-full object-cover object-top sm:h-11 sm:w-11" /><span className="text-sm font-bold">운담 선생님</span></div> : null}
+                    <div key={message.id} className={message.role === "assistant" ? "relative min-w-0 space-y-1 pl-12 sm:pl-14" : "relative min-w-0 space-y-1 pr-12 sm:pr-14"}>
+                      {message.role === "assistant" ? <div className="flex items-center gap-2"><Image src="/teachers/undam-consulting.webp" alt="" width={44} height={44} className="absolute left-0 top-0 h-10 w-10 rounded-full object-cover object-top sm:h-11 sm:w-11" /><span className="text-sm font-bold">운담 선생님</span></div> : <span data-user-avatar="true" aria-hidden="true" className="absolute right-0 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#e8d7fc] text-[#7844d7] sm:h-11 sm:w-11"><svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2z"/></svg></span>}
                       <div className={message.role === "user" ? "flex justify-end" : "flex justify-start"}>
                         <span className="rounded-full bg-[#eef0f6] px-2.5 py-1 text-[11px] font-semibold text-slate-500">
                           {message.sourceTitle} · {message.sourceEditionLabel}
@@ -794,8 +793,8 @@ export default function AiConsultingPortfolioClient({
                       </div>
                       <div
                         className={message.role === "user"
-                          ? "ml-auto max-w-[88%] rounded-3xl rounded-br-lg bg-[#e8d9fa] px-4 py-3 text-[15px] leading-7 text-[#302045]"
-                          : "max-w-[94%] whitespace-pre-wrap rounded-3xl rounded-bl-lg border border-[#eee6f8] bg-[#f7f2fc] px-4 py-3 text-[15px] leading-7 text-slate-800"}
+                          ? "ml-auto w-fit max-w-[90%] whitespace-pre-wrap break-words rounded-2xl rounded-tr-sm bg-[#e8d9fa] px-4 py-2.5 text-[15px] leading-6 text-[#302045]"
+                          : "w-fit max-w-[94%] break-words whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-[#f3edf9] px-4 py-3 text-[15px] leading-7 text-slate-800 sm:max-w-[82%]"}
                       >
                         {message.role === "assistant"
                           ? <ConsultingAnswer content={message.content} />
@@ -878,32 +877,25 @@ export default function AiConsultingPortfolioClient({
               <form
                   data-ai-composer="portfolio-sticky"
                   onSubmit={submitQuestion}
-                  className="sticky bottom-0 z-20 mt-2 rounded-[1.5rem] border border-[#d8c5f6] bg-white p-3 shadow-[0_4px_20px_rgba(70,35,130,0.08)]"
+                  className="relative z-20 mt-2 shrink-0 rounded-[1.25rem] border border-[#d8c5f6] bg-white px-2 py-2 shadow-[0_4px_20px_rgba(70,35,130,0.08)]"
                 >
                   <label htmlFor="portfolio-question" className="sr-only">무엇이 궁금하세요?</label>
+                  <div className="flex min-w-0 items-center gap-2">
                   <textarea
                     id="portfolio-question"
                     value={question}
                     onChange={(event) => setQuestion(event.target.value.slice(0, 300))}
                     placeholder="운담 선생님에게 궁금한 내용을 입력해 주세요."
-                    rows={2}
+                    rows={1}
                     disabled={isSending}
-                    className="w-full resize-none rounded-2xl bg-[#f7f3fc] px-4 py-3 text-[15px] leading-7 text-slate-800 outline-none ring-[#6f5ce7] focus:ring-1 disabled:opacity-60"
+                    className="min-h-10 min-w-0 flex-1 resize-none rounded-xl bg-white px-3 py-2 text-[15px] leading-6 text-slate-800 outline-none ring-[#6f5ce7] focus:ring-1 disabled:opacity-60"
                   />
-                  <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-xs leading-5 text-slate-500">
-                      {isPreview
-                        ? "미리보기에서는 질문이 전송되지 않습니다."
-                        : portfolio.questionsRemaining > 0
-                          ? `${question.length}/300 · 답변 완료 시 질문권 1회 차감`
-                          : `${question.length}/300 · 질문권 0회 · 질문은 이 탭에 임시 보관되며 지금은 전송되지 않아요.`}
-                    </span>
                     {portfolio.questionsRemaining > 0 ? (
                       <button
                         type="submit"
                         disabled={isPreview || isSending || question.trim().length < 2}
                         aria-busy={isSending}
-                        className="inline-flex min-w-36 items-center justify-center gap-2 rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[#713bd6] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isSending ? (
                           <>
@@ -913,15 +905,24 @@ export default function AiConsultingPortfolioClient({
                             />
                             <span>답변 준비 중...</span>
                           </>
-                        ) : isPreview ? "미리보기" : "상담하기"}
+                        ) : isPreview ? "미리보기" : <><svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor"><path d="M22 2 9 15l-6-3 19-10ZM22 2l-3 19-7-7 10-12Z"/></svg><span>상담하기</span></>}
                       </button>
                     ) : creditPurchaseHref && !isPreview ? (
-                      <Link href={creditPurchaseHref} className="inline-flex shrink-0 items-center justify-center rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#5f4fd2]">
+                      <Link href={creditPurchaseHref} className="inline-flex min-h-10 max-w-[48%] shrink-0 items-center justify-center rounded-full bg-[#713bd6] px-3 py-2 text-center text-xs font-bold text-white transition hover:bg-[#5f4fd2] sm:max-w-none sm:px-4 sm:text-sm">
                         {creditCheckoutEnabled ? "질문권 구매 후 상담하기 →" : "질문권 상품 안내 보기 →"}
                       </Link>
                     ) : (
                       <button type="button" disabled className="rounded-2xl bg-[#6f5ce7] px-5 py-3 text-sm font-bold text-white opacity-40">미리보기 · 전송 불가</button>
                     )}
+                  </div>
+                  <div className="px-3 pt-1 text-xs">
+                    <span className="text-xs leading-5 text-slate-500">
+                      {isPreview
+                        ? "미리보기에서는 질문이 전송되지 않습니다."
+                        : portfolio.questionsRemaining > 0
+                          ? `${question.length}/300 · 답변 완료 시 질문권 1회 차감`
+                          : `${question.length}/300 · 질문권 0회 · 질문은 이 탭에 임시 보관되며 지금은 전송되지 않아요.`}
+                    </span>
                   </div>
                 </form>
             </section>

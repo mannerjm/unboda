@@ -78,7 +78,7 @@ export default async function PairCompatibilityReportPage({
   const hwadamResult = report!.content as unknown as StoredCompatibilityReport;
 
   return (
-    <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
+    <main data-hwadam-report="completed" className="min-h-screen bg-[linear-gradient(160deg,#fcfaff_0%,#f5effa_65%,#efe6f7_100%)] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
         <div className="mx-auto w-full max-w-5xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <ReportLibraryReturnLink placement="top" />

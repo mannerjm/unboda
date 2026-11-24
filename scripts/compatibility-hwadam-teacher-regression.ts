@@ -7,18 +7,20 @@ const card = read("app/components/HwadamCompatibilityTeacherCard.tsx");
 const portrait = readFileSync("public/teachers/hwadam.webp");
 const imageSha = createHash("sha1").update(Buffer.concat([Buffer.from(`blob ${portrait.length}\0`), portrait])).digest("hex");
 
-assert.equal(imageSha, "ace9988d7c89991e4ea0dd43c38a9bcd65db4171", "approved Hwadam portrait must not change unexpectedly");
+assert.equal(imageSha, "ce4cbc3bfd3fa6cfbafed51f9cb08622831a4638", "approved Hwadam portrait must not change unexpectedly");
 assert.equal(portrait.toString("ascii", 0, 4), "RIFF");
 assert.equal(portrait.toString("ascii", 8, 12), "WEBP");
 assert(portrait.length > 6000, "teacher portrait must be a real, nonempty image");
 assert(card.includes('src="/teachers/hwadam.webp"')
   && card.includes('data-teacher-portrait="full"')
-  && card.includes('data-portrait-fit="balanced"')
-  && card.includes('aspect-[1/2]')
-  && card.includes('className="object-cover object-center"')
+  && card.includes('data-portrait-fit="natural"')
+  && card.includes('width={240}')
+  && card.includes('height={480}')
+  && card.includes('className="block h-auto w-full"')
+  && !card.includes('object-cover object-center')
   && card.includes('"w-[88px] sm:w-[112px]"')
   && card.includes('"w-[80px] sm:w-[100px]"'),
-  "Hwadam must use the same portrait frame proportions and widths as the other seven teachers");
+  "Hwadam must use the same uncropped 1:2 portrait dimensions as the seven subject teachers");
 assert(card.includes('data-compatibility-teacher-profile="visible"')
   && !card.includes("<details") && !card.includes("<summary"),
   "specialist profile must be visible without extra clicks");
@@ -49,9 +51,13 @@ assert.equal(pair.split('<HwadamCompatibilityTeacherCard placement="detail"').le
   "one detail specialist for romantic, friend, work and partnership");
 assert.equal(family.split('<HwadamCompatibilityTeacherCard placement="detail"').length - 1, 1,
   "one detail specialist for all family subtypes");
-assert(catalog.indexOf('<HwadamCompatibilityTeacherCard placement="catalog" />') > catalog.indexOf("</header>")
-  && catalog.indexOf('<HwadamCompatibilityTeacherCard placement="catalog" />') < catalog.indexOf("compatibilityCards.map("),
-  "catalog specialist must appear before product cards");
+assert(catalog.includes('<h1 className="sr-only">궁합 분석</h1>')
+  && !catalog.includes('<h1 className="mt-1 text-2xl')
+  && catalog.includes('data-compatibility-list-heading="compact"'),
+  "catalog must hide the redundant large heading and use a compact section label like wealth");
+assert(catalog.indexOf('<HwadamCompatibilityTeacherCard placement="catalog" />') < catalog.indexOf('data-compatibility-list-heading="compact"')
+  && catalog.indexOf('data-compatibility-list-heading="compact"') < catalog.indexOf("compatibilityCards.map("),
+  "catalog must lead with Hwadam and show the compact product heading before cards");
 assert(pair.indexOf('<HwadamCompatibilityTeacherCard placement="detail"') > pair.indexOf("<CompatibilityDetailHero")
   && pair.indexOf('<HwadamCompatibilityTeacherCard placement="detail"') < pair.indexOf("<PaidCompatibilityAnalysisClient"),
   "pair specialist must appear between existing hero and input form");
@@ -88,4 +94,4 @@ for (const [path, count] of [
 }
 assert(!catalog.includes("priceOverride") && !card.includes("getPaidReport("),
   "teacher display code must not control pricing or report generation");
-console.log("Hwadam specialist regression passed: teacher scale aligned, two selected notices removed across compatibility details, existing reports preserved");
+console.log("Hwadam specialist regression passed: approved new portrait, compact catalog, natural dimensions, preserved checkout and paid results");

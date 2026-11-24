@@ -14,9 +14,7 @@ const recommendations: AnalysisProductRecommendation[] = productIds.map((product
 const markup = renderToStaticMarkup(
   <RecommendationTop3
     profileId="test-profile"
-    paidSummaries={[]}
     recommendations={recommendations}
-    explanation={null}
   />,
 );
 for (const id of productIds) {
@@ -25,10 +23,12 @@ for (const id of productIds) {
 for (const price of ["9,900원", "16,900원"]) {
   assert.ok(markup.includes(price), "Missing accurate product price: " + price);
 }
-assert.equal((markup.match(/aria-pressed="/g) ?? []).length, 3, "All three recommendations must be selectable");
+assert.equal((markup.match(/<a /g) ?? []).length, 3, "Exactly three recommendations must link to detail");
+for (const id of productIds) assert.ok(markup.includes(`/paid-analysis/${id}?profileId=test-profile`), "Missing profile-scoped detail link: " + id);
 assert.equal((markup.match(/<img /g) ?? []).length, 3, "All three canonical photographs must render");
-assert.ok(markup.includes("리포트 구성 자세히 보기"), "Long report preview must be discoverable");
-assert.ok(markup.includes("<details"), "Long report preview must be collapsed initially");
-assert.ok(markup.includes("이 분석 자세히 보기"), "Detailed product navigation must be discoverable");
+assert.ok(!markup.includes("<details") && !markup.includes("리포트 구성 자세히 보기"), "List must not embed details");
+assert.ok(markup.includes("상품 자세히 보기"), "Detailed product navigation must be discoverable");
+const guestMarkup = renderToStaticMarkup(<RecommendationTop3 profileId="guest-record" recommendations={recommendations} guestMode />);
+for (const id of productIds) assert.ok(guestMarkup.includes(`/paid-analysis/${id}?from=guest-recommendation`), "Guest should open detail without profile or checkout");
 assert.ok(!markup.includes("UNBODA.CO.KR"), "Incorrect brand domain must not leak");
 console.log("recommendation-top3-visual-contract-regression: OK", { imageCount: 3, productCount: 3 });

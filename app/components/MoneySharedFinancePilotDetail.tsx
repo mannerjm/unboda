@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import GuestRecommendationPurchaseButton from "@/app/components/GuestRecommendationPurchaseButton";
 import { useEffect, useState } from "react";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
@@ -18,6 +19,7 @@ type Props = {
   state: PremiumAnalysisProductState;
   profileId?: string;
   isSaved?: boolean;
+  guestRecommendation?: boolean;
 };
 
 const STATUS_LABELS: Record<PremiumAnalysisProductState, string> = {
@@ -66,6 +68,7 @@ export default function MoneySharedFinancePilotDetail({
   state,
   profileId,
   isSaved = false,
+  guestRecommendation = false,
 }: Props) {
   const [savedState, setSavedState] = useState(isSaved);
   const [isSaving, setIsSaving] = useState(false);
@@ -296,7 +299,9 @@ export default function MoneySharedFinancePilotDetail({
               <p className="mt-1 text-2xl font-black text-[#39234f]">{price}</p>
             </div>
             <div className="flex w-full min-w-0 flex-col gap-2">
-              {href ? (
+              {guestRecommendation && state === "not_purchased" ? (
+                <GuestRecommendationPurchaseButton productId={product.id} label={ACTION_LABELS[state]} />
+              ) : href ? (
                 <Link href={href} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-[#704ad0] px-4 py-3 text-center text-base font-extrabold text-white transition hover:bg-[#5e38bd] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#704ad0]">
                 {ACTION_LABELS[state]}
                 </Link>

@@ -27,7 +27,6 @@ import {
   resolveCanonicalRecommendationProduct,
   type AnalysisProductRecommendation,
 } from "@/app/lib/analysisProductRecommendations";
-import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
 import { isProfileId, type ProfileDto } from "@/app/lib/profiles/types";
 
 
@@ -107,15 +106,11 @@ function RecommendationsContent({
   profileLabel,
   profileId,
   recommendations,
-  explanation,
-  paidSummaries,
   guestMode = false,
 }: {
   profileLabel: string;
   profileId: string;
   recommendations: readonly AnalysisProductRecommendation[];
-  explanation: Parameters<typeof RecommendationTop3>[0]["explanation"];
-  paidSummaries: Parameters<typeof RecommendationTop3>[0]["paidSummaries"];
   guestMode?: boolean;
 }) {
   return (
@@ -130,10 +125,6 @@ function RecommendationsContent({
               <h1 className="mt-2 max-w-3xl text-3xl font-black leading-tight tracking-[-0.05em] sm:text-4xl">
                 지금 나에게 필요한<br className="hidden sm:block" /> 분석 3가지
               </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-[#635574] sm:text-[15px]">
-                이번 결과를 보고, 무엇이 더 궁금해졌나요? 무료 분석과 같은 계산 근거로 이어가되,
-                상품 이름보다 지금 궁금한 질문을 먼저 보여드려요.
-              </p>
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <span className="rounded-full border border-[#ddcaef] bg-white/75 px-4 py-2 text-xs font-bold text-[#5d477e]">
                   분석 대상 · {profileLabel}
@@ -155,8 +146,6 @@ function RecommendationsContent({
             <RecommendationTop3
               recommendations={recommendations}
               profileId={profileId}
-              paidSummaries={paidSummaries}
-              explanation={explanation}
               guestMode={guestMode}
             />
           ) : (
@@ -208,8 +197,6 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
           profileLabel={record.content.profile.label?.trim() || "나"}
           profileId={record.id}
           recommendations={guestRecommendations}
-          explanation={current.recommendationExplanation}
-          paidSummaries={[]}
           guestMode
         />
       );
@@ -253,23 +240,18 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
   // Never pin an outdated stored first card above a stronger current signal.
   let recommendations = (analysisRecord.content.productRecommendations?.recommendations ?? [])
     .filter((recommendation) => resolveCanonicalRecommendationProduct(recommendation.productId));
-  let recommendationExplanation = analysisRecord.content.recommendationExplanation ?? null;
   try {
     const current = buildCurrentFreeRecommendations(profile);
     recommendations = current.productRecommendations.recommendations;
-    recommendationExplanation = current.recommendationExplanation;
   } catch (error) {
     console.error("[recommendations] deterministic current recommendation calculation failed", error);
   }
-  const paidSummaries = await listUserPaidAnalysisSummaries(user.id);
 
   return (
     <RecommendationsContent
       profileLabel={profile.label}
       profileId={profile.id}
       recommendations={recommendations}
-      explanation={recommendationExplanation}
-      paidSummaries={paidSummaries}
     />
   );
 }

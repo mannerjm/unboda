@@ -120,7 +120,7 @@ for (const state of ["none", "generating"] as const) {
   const href = getPremiumAnalysisHref("career", state, "00000000-0000-4000-8000-000000000001");
   assert(href?.startsWith("/paid-analysis/career/report?profileId=") === true, `${state} premium report must remain reopenable without new payment`);
 }
-assert(recommendation.includes("리포트 준비 화면 보기") && catalogDetail.includes("리포트 준비 화면 보기"), "recommendations and premium catalog must link pending purchases to waiting screen");
+assert(recommendation.includes("/paid-analysis/") && recommendation.includes("encodeURIComponent(profileId)") && catalogDetail.includes("리포트 준비 화면 보기"), "recommendations must reach profile-scoped detail, which retains pending report routing");
 assert(library.includes("리포트 준비 화면 보기") && library.includes("recentReportHref"), "purchase library must expose all pending exact-edition reports");
 
 

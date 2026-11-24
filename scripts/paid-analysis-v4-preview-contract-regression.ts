@@ -154,7 +154,7 @@ const compatibilitySource = readFileSync(
   "utf8",
 );
 assert(
-  compatibilitySource.includes("단순 점수 대신 관계의 맥락을 나눠 설명") &&
+  compatibilitySource.includes("관계별로 더 깊게 보는 영역") && !compatibilitySource.includes("단순 점수 대신 관계의 맥락을 나눠 설명") &&
     compatibilitySource.includes("CompatibilityReportValuePreview"),
   "professional compatibility preview must remain on its independent contract",
 );

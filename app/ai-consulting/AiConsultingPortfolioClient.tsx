@@ -218,17 +218,22 @@ export default function AiConsultingPortfolioClient({
   const [showMemories, setShowMemories] = useState(false);
   const [managementPanel, setManagementPanel] = useState<"owned" | "memory" | "guide" | null>(null);
   const chatScrollRef = useRef<HTMLDivElement>(null);
-  const initialChatProfile = useRef<string | null>(null);
+  const lastChatPosition = useRef<{ profileId: string; latestId: string | undefined } | null>(null);
   const latestChatId = portfolio?.messages[portfolio.messages.length - 1]?.id;
   const initialMessageCount = portfolio?.messages.length ?? 0;
   useEffect(() => {
     const el = chatScrollRef.current;
     if (!el || isLoading) return;
-    const firstView = initialChatProfile.current !== profileId;
-    initialChatProfile.current = profileId;
-    // A short initial conversation starts with the complete greeting; new replies
-    // and long histories still scroll to the newest message.
-    el.scrollTop = firstView && !isSending && initialMessageCount <= 2 ? 0 : el.scrollHeight;
+    const previous = lastChatPosition.current;
+    const firstView = previous?.profileId !== profileId;
+    const newReply = previous?.latestId !== latestChatId;
+    lastChatPosition.current = { profileId, latestId: latestChatId };
+    // Repeated hydration effects must never push the initial greeting offscreen.
+    if (!isSending && initialMessageCount <= 2) {
+      el.scrollTop = 0;
+    } else if (firstView || newReply || isSending) {
+      el.scrollTop = el.scrollHeight;
+    }
   }, [profileId, latestChatId, initialMessageCount, isSending, isLoading]);
   useEffect(() => {
     if (!managementPanel) return;
@@ -707,8 +712,8 @@ export default function AiConsultingPortfolioClient({
             </div>
             {!creditCheckoutEnabled && !isPreview ? <p className="mt-2 text-xs font-medium text-[#675779]">현재 질문권 결제 준비 중</p> : null}
           </div>
-          <div className="pointer-events-none absolute right-0 top-0 hidden h-full aspect-[2.07] lg:block" data-undam-banner="reference">
-            <Image src="/teachers/undam-consulting-banner.webp" alt="산과 소나무를 배경으로 한 운담 선생님 · 사주·운세 전문 AI 상담 선생님" fill sizes="520px" className="object-cover object-right-bottom" style={{ maskImage: "linear-gradient(to right, transparent 0%, black 23%), linear-gradient(to bottom, transparent 0%, black 8%)", maskComposite: "intersect" }} priority unoptimized />
+          <div className="pointer-events-none absolute right-0 top-0 hidden h-full aspect-[2.38] lg:block" data-undam-banner="reference">
+            <Image src="/teachers/undam-consulting-banner.webp" alt="산과 소나무를 배경으로 한 운담 선생님 · 사주·운세 전문 AI 상담 선생님" fill sizes="600px" className="object-cover object-[right_38%]" style={{ maskImage: "linear-gradient(to right, transparent 0%, black 32%), linear-gradient(to bottom, transparent 0%, black 8%)", maskComposite: "intersect" }} priority unoptimized />
           </div>
           <div className="mt-3 flex items-center gap-3 lg:hidden"><Image src="/teachers/undam-consulting.webp" alt="운담 선생님 AI 캐릭터" width={52} height={52} className="h-12 w-12 rounded-full object-cover object-top" /><span className="text-sm font-bold text-[#6841aa]">운담 선생님 · AI 상담</span></div>
         </header>
@@ -769,7 +774,7 @@ export default function AiConsultingPortfolioClient({
               {reportEntryUnavailable ? <p role="status" className="shrink-0 rounded-xl bg-amber-50 px-3 py-2 text-sm leading-6 text-amber-900">이전에 보시던 리포트가 현재 상담 범위에 없습니다. 지금 보유한 분석을 기준으로 질문해 주세요.</p> : null}
 
 
-              <div ref={chatScrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-1 py-1 sm:px-3" aria-label="상담 대화 기록">
+              <div ref={chatScrollRef} className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain [overflow-anchor:none] px-1 py-2 sm:px-3" aria-label="상담 대화 기록">
               {routingNotice ? (
                 <div className={routingNotice.kind === "outside"
                   ? "mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-6 text-amber-900"
@@ -812,7 +817,7 @@ export default function AiConsultingPortfolioClient({
                       <div
                         className={message.role === "user"
                           ? "ml-auto w-fit max-w-[90%] whitespace-pre-wrap break-words rounded-2xl rounded-tr-sm bg-[#e8d9fa] px-4 py-2.5 text-base leading-7 text-[#302045] sm:text-[17px]"
-                          : "w-fit max-w-[94%] break-words whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-[#f3edf9] px-4 py-3 text-base leading-7 text-slate-800 sm:max-w-[82%] sm:text-[17px]"}
+                          : "w-fit max-w-[94%] break-words whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-[#f3edf9] px-4 py-3 text-base leading-7 text-slate-800 sm:min-w-[min(100%,34rem)] sm:max-w-[82%] sm:text-[17px]"}
                       >
                         {message.role === "assistant"
                           ? <ConsultingAnswer content={message.content} />
@@ -906,14 +911,14 @@ export default function AiConsultingPortfolioClient({
                     placeholder="운담 선생님에게 궁금한 내용을 입력해 주세요."
                     rows={1}
                     disabled={isSending}
-                    className="min-h-10 min-w-0 flex-1 resize-none rounded-xl bg-white px-3 py-2 text-base leading-7 text-slate-800 outline-none ring-[#6f5ce7] focus:ring-1 disabled:opacity-60"
+                    className="min-h-12 min-w-0 flex-1 resize-none rounded-xl bg-white px-3 py-2.5 text-base leading-7 text-slate-800 outline-none ring-[#6f5ce7] focus:ring-1 disabled:opacity-60"
                   />
                     {portfolio.questionsRemaining > 0 ? (
                       <button
                         type="submit"
                         disabled={isPreview || isSending || question.trim().length < 2}
                         aria-busy={isSending}
-                        className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[#713bd6] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-[#713bd6] px-5 py-2 text-base font-bold text-white transition hover:bg-[#5f4fd2] disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isSending ? (
                           <>
@@ -926,7 +931,7 @@ export default function AiConsultingPortfolioClient({
                         ) : isPreview ? "미리보기" : <><svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor"><path d="M22 2 9 15l-6-3 19-10ZM22 2l-3 19-7-7 10-12Z"/></svg><span>상담하기</span></>}
                       </button>
                     ) : creditPurchaseHref && !isPreview ? (
-                      <Link href={creditPurchaseHref} className="inline-flex min-h-10 max-w-[48%] shrink-0 items-center justify-center rounded-full bg-[#713bd6] px-3 py-2 text-center text-xs font-bold text-white transition hover:bg-[#5f4fd2] sm:max-w-none sm:px-4 sm:text-sm">
+                      <Link href={creditPurchaseHref} className="inline-flex min-h-12 max-w-[48%] shrink-0 items-center justify-center rounded-full bg-[#713bd6] px-3 py-2 text-center text-sm font-bold text-white transition hover:bg-[#5f4fd2] sm:max-w-none sm:px-4 sm:text-sm">
                         {creditCheckoutEnabled ? "질문권 구매 후 상담하기 →" : "질문권 상품 안내 보기 →"}
                       </Link>
                     ) : (

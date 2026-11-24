@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getSafeReturnTo } from "@/app/lib/auth";
+import { getAuthBackHref, getSafeReturnTo } from "@/app/lib/auth";
 import { getSignupCompletionState } from "@/app/lib/signupPolicy/completion";
 import { AUTH_CAPTCHA_ENABLED, AuthCaptcha } from "@/app/auth/AuthCaptcha";
 import Link from "next/link";
@@ -20,7 +20,7 @@ function SignupPageContent() {
     ? "/auth/complete-guest-analysis?next=recommendations"
     : safeReturnTo;
   // Back link is a distinct navigation target from the post-signup redirect: it must never dead-end on /result.
-  const backHref = origin === "guest-result" || origin === "guest-result-navigation" ? "/guest-result" : origin === "guest-navigation" ? "/guest-saju" : getSafeReturnTo(returnTo, "/");
+  const backHref = getAuthBackHref(returnTo, origin);
   const initialError = searchParams.get("error") === "policy_incomplete"
     ? "가입 정책 확인이 완료되지 않았습니다. 두 항목을 다시 확인해 주세요."
     : null;

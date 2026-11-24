@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getSafeReturnTo } from "@/app/lib/auth";
+import { getAuthBackHref, getSafeReturnTo } from "@/app/lib/auth";
 import { createClient } from "@/app/lib/supabase/client";
 import { AUTH_CAPTCHA_ENABLED, AuthCaptcha } from "@/app/auth/AuthCaptcha";
 import Link from "next/link";
@@ -23,7 +23,7 @@ function LoginPageContent() {
     ? "/auth/complete-guest-analysis?next=recommendations"
     : safeReturnTo;
   // Back link is a distinct navigation target from the post-login redirect: it must never dead-end on /result.
-  const backHref = isGuestResultOrigin || isGuestResultNavigationOrigin ? "/guest-result" : isGuestNavigationOrigin ? "/guest-saju" : getSafeReturnTo(returnTo, "/");
+  const backHref = getAuthBackHref(returnTo, origin);
   const guestContextCopy = safeReturnTo === "/recommendations"
     ? "추천 심층 분석을 확인하려면 로그인해 주세요."
     : safeReturnTo === "/interests"

@@ -65,6 +65,21 @@ export function getSafeReturnTo(
   }
 }
 
+/**
+ * The unauthenticated back link is not the post-authentication destination.
+ * Return to a public entry page for protected consulting and compatibility routes.
+ */
+export function getAuthBackHref(returnTo: string | undefined, origin?: string | null): string {
+  const safe = getSafeReturnTo(returnTo, "/");
+  const pathname = new URL(safe, "https://internal.invalid").pathname.replace(/\/+$/, "") || "/";
+  const compatibility = "/special-analysis/compatibility";
+  if (pathname.startsWith(compatibility + "/")) return compatibility;
+  if (origin === "guest-result" || origin === "guest-result-navigation") return "/guest-result";
+  if (origin === "guest-navigation") return "/guest-saju";
+  if (pathname === "/ai-consulting" || pathname.startsWith("/ai-consulting/")) return "/";
+  return safe;
+}
+
 // ---------------------------------------------------------------------------
 // localStorage-based auth functions REMOVED in Phase 3A.
 // Authentication is now handled by Supabase Auth (see app/lib/supabase/).

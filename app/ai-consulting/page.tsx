@@ -79,6 +79,7 @@ export default async function AiConsultingPage({
   }
 
   return (
+    <AppShell activeProfileId={activeProfile.id}>
     <AiConsultingPortfolioClient
       profileId={activeProfile.id}
       focusProductId={verifiedReport?.productId ?? null}
@@ -88,5 +89,6 @@ export default async function AiConsultingPage({
       freeAnalysisStatus={freeAnalysisStatus}
       creditCheckoutAvailable={creditCheckoutAvailable}
     />
+    </AppShell>
   );
 }

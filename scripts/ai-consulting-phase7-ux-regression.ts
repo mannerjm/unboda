@@ -114,7 +114,7 @@ assert(
 );
 assert(
   portfolioChat.includes('aria-label="AI 답변 준비 중"')
-    && portfolioChat.includes('운보다 AI가 답변을 정리하고 있어요')
+    && portfolioChat.includes('운담 선생님이 답변을 정리하고 있어요')
     && portfolioChat.includes('{isSending ? ('),
   "conversation area must show a separate accessible loading indicator until the answer arrives",
 );

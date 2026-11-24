@@ -1,3 +1,7 @@
+import { hasVerifiedConsultingFoundation, buildVerifiedConsultingChart } from "../app/lib/aiConsulting/consultingFoundation";
+import { getProfileFingerprint } from "../app/lib/freeAnalysisResults/server";
+import type { ProfileDto } from "../app/lib/profiles/types";
+import type { FreeAnalysisResultRecord } from "../app/lib/freeAnalysisResults/server";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { evaluateGeneralAiConsultingScope } from "../app/lib/aiConsultingScope";
@@ -21,3 +25,16 @@ assert(pipeline.includes("buildVerifiedConsultingChart(foundation.profile)") && 
 assert(foundation.includes('free.status === "completed"') && foundation.includes("free.profileFingerprint === getProfileFingerprint(profile)") && foundation.includes('account.paidEligibilityStatus !== "VERIFIED_ADULT"'));
 assert(read("app/lib/aiConsulting/creditCheckout.ts").includes("await requireConsultingFoundation(input.userId, input.profileId)"));
 assert(read("app/lib/aiConsulting/portfolio.ts").includes('state.analyses.filter(analysis => analysis.profileInputVersion === "current")'));
+
+const profile: ProfileDto = {id:"test-profile",label:"검증용",relationshipType:"self",birthDate:"1990-01-15",birthTime:"12:00",birthTimeKnown:false,gender:"남성",calendarType:"양력",isLeapMonth:false,createdAt:"2026-01-01",updatedAt:"2026-01-01"};
+const chart=buildVerifiedConsultingChart(profile);
+const free={id:"test-free",userId:"test-user",profileId:profile.id,profileFingerprint:getProfileFingerprint(profile),profileSnapshot:profile,status:"completed",content:{profile,saju:chart},errorCode:null,updatedAt:"2026-01-01"} as unknown as FreeAnalysisResultRecord;
+assert.equal(hasVerifiedConsultingFoundation(profile,free),true);
+assert.equal(hasVerifiedConsultingFoundation(profile,null),false);
+assert.equal(hasVerifiedConsultingFoundation(profile,{...free,status:"failed"}),false);
+assert.equal(hasVerifiedConsultingFoundation({...profile,birthTimeKnown:true},free),false);
+assert.equal(hasVerifiedConsultingFoundation({...profile,birthDate:"1990-01-16"},free),false);
+assert.equal(hasVerifiedConsultingFoundation({...profile,id:"another"},free),false);
+assert.equal(hasVerifiedConsultingFoundation(profile,{...free,content:null}),false);
+assert.equal(chart.hourPillarHanja,undefined);
+console.log("verified consulting foundation behavioral regression: PASS");

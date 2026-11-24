@@ -679,7 +679,7 @@ export default function AiConsultingPortfolioClient({
 
         {!isLoading && focusAnalysis && focusAnalysis.profileInputVersion !== "current" ? (
           <section className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-950">
-            <p className="font-black">이전 출생정보 기준 상담</p>
+            <p className="font-black">이전 출생정보 기준 상담 기록</p>
             <p className="mt-1">
               이전 출생정보의 리포트와 상담 기록은 보관됩니다. 새 질문에는 현재 프로필의 실제 사주를 사용하며 이전 출생정보의 리포트는 섞지 않습니다.
             </p>

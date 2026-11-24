@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import GuestRecommendationPurchaseButton from "@/app/components/GuestRecommendationPurchaseButton";
 import Image from "next/image";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
@@ -27,6 +28,7 @@ type PremiumProductDetailProps = {
   profileId?: string;
   onClear?: () => void;
   isSaved?: boolean;
+  guestRecommendation?: boolean;
 };
 
 const ACTION_LABELS: Record<PremiumAnalysisProductState, string> = {
@@ -130,6 +132,7 @@ export default function PremiumProductDetail({
   state,
   profileId,
   isSaved = false,
+  guestRecommendation = false,
 }: PremiumProductDetailProps) {
   const [savedState, setSavedState] = useState(isSaved);
   const [isSaving, setIsSaving] = useState(false);
@@ -159,6 +162,7 @@ export default function PremiumProductDetail({
       state={state}
       profileId={profileId}
       isSaved={isSaved}
+      guestRecommendation={guestRecommendation}
     />;
   }
   if (getLaunchProductIds().includes(product.id)) {
@@ -167,6 +171,7 @@ export default function PremiumProductDetail({
       state={state}
       profileId={profileId}
       isSaved={isSaved}
+      guestRecommendation={guestRecommendation}
     />;
   }
 
@@ -309,7 +314,9 @@ export default function PremiumProductDetail({
             </div>
 
             <div className="flex flex-col gap-2 sm:min-w-56">
-              {href ? (
+              {guestRecommendation && state === "not_purchased" ? (
+                <GuestRecommendationPurchaseButton productId={product.id} label={ACTION_LABELS[state]} />
+              ) : href ? (
                 <Link
                   href={href}
                   className="rounded-xl bg-[#6f5ce7] px-5 py-3.5 text-center text-sm font-bold text-white shadow-[0_10px_24px_rgba(93,76,209,0.2)] transition hover:bg-[#5f4fd2]"

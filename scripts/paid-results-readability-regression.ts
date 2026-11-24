@@ -172,8 +172,7 @@ assert(premiumPreview.includes("text-sm leading-6 text-slate-600") || premiumPre
 assert(compatibilityPreview.includes("리포트 구성 미리보기"), "compatibility report preview must remain present");
 assert(compatibilityPreview.includes("text-sm leading-6 text-slate-600"), "compatibility preview explanations must be at least text-sm");
 
-assert(recommendations.includes("<PremiumReportValuePreview product={product} />"), "recommendation result must keep the shared premium report preview");
-assert(recommendations.includes('text-[15px] leading-7 text-slate-700'), "recommendation result body must use the shared readable scale");
+assert(recommendations.includes("/paid-analysis/") && !recommendations.includes("PremiumReportValuePreview"), "recommendation list must defer preview and readable detail to the shared standalone page");
 assert(recommendations.includes("getProductPricing(product.id)"), "recommendation pricing source must remain unchanged");
 
 assert(premiumDetail.includes("PremiumReportValuePreview"), "premium product detail must keep report preview");

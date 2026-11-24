@@ -18,7 +18,7 @@ type PaidAnalysisPageProps = {
   params: Promise<{
     productId: string;
   }>;
-  searchParams: Promise<{ profileId?: string }>;
+  searchParams: Promise<{ profileId?: string; from?: string }>;
 };
 
 export async function generateMetadata({
@@ -48,7 +48,7 @@ export default async function PaidAnalysisPage({
   searchParams,
 }: PaidAnalysisPageProps) {
   const { productId } = await params;
-  const { profileId } = await searchParams;
+  const { profileId, from } = await searchParams;
   const user = await getCurrentUser();
 
   if (profileId && !isProfileId(profileId)) {
@@ -89,6 +89,7 @@ export default async function PaidAnalysisPage({
           <PremiumProductDetail
             product={product}
             state="not_purchased"
+            guestRecommendation={!user && from === "guest-recommendation"}
             isSaved={user ? await isProductSaved(user.id, product.id) : false}
           />
         )}

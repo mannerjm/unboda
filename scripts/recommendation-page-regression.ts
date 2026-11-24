@@ -20,8 +20,7 @@ for (const required of [
 assert.ok(shell.includes('href: "/recommendations"'), "Sidebar recommendation route missing");
 assert.ok(!deep.includes("RecommendationTop3"), "Deep analysis stays manual marketplace discovery");
 for (const required of [
-  "지금 나에게 필요한", "분석 3가지", "이번 결과를 보고,",
-  "같은 계산 근거로 이어가되", "상품 이름보다 지금 궁금한 질문을 먼저",
+  "지금 나에게 필요한", "분석 3가지",
 ]) {
   assert.ok(page.includes(required), "New lavender next-question hero missing: " + required);
 }
@@ -29,26 +28,13 @@ assert.ok(page.includes("bg-[linear-gradient(180deg,#faf6ff_0%,#f3edfb_100%)]"),
   "Recommendation page must share the brand lavender visual system");
 
 for (const required of [
-  "getPremiumAnalysisHref", "toPremiumAnalysisProductState",
-  "resolveCanonicalRecommendationProduct", "validRecommendations",
+  "resolveCanonicalRecommendationProduct", "toCanonicalRecommendations", "validRecommendations",
   "PREMIUM_PRODUCT_PHOTOS", "RecommendationPhoto", 'from "next/image"',
-  "getPremiumProductDisplayTitle", "getProductPricing",
-  "effectiveSelectedProductId", "validRecommendations[0]?.product.id ?? null",
-  "가장 먼저 이어볼 질문", "내 결과에서 이어지는 질문 3가지",
-  "무료 분석과 같은 계산 근거로 선정",
-  "aria-pressed={selected}", 'aria-controls="recommendation-selected-detail"',
-  "getPaidAnalysisTopicConfig", "product.description",
-  "product.details?.slice(0, 3)", "decision.expectedUnderstanding",
-  "formatTopicExpectedUnderstanding", "왜 지금 추천됐나요?",
-  "이 분석에서 보는 것", "분석 후 알 수 있는 것",
-  "리포트 구성 자세히 보기", "<PremiumReportValuePreview product={product} />",
-  'fetch("/api/guest-free-analysis/intent"',
-  "/auth/login?returnTo=/auth/complete-guest-analysis&origin=guest-result",
-]) {
-  assert.ok(cards.includes(required), "Recommendation card/purchase detail missing: " + required);
-}
-assert.ok(cards.indexOf("리포트 구성 자세히 보기") < cards.indexOf("<PremiumReportValuePreview product={product} />"),
-  "Full six-step report preview should start collapsed behind a disclosure");
+  "getPremiumProductDisplayTitle", "getProductPricing", "내 결과에서 이어지는 질문 3가지",
+  "무료 분석과 같은 계산 근거로 선정", "/paid-analysis/", "encodeURIComponent(profileId)", "href={href}",
+  "getPaidAnalysisTopicConfig", "product.description", "상품 자세히 보기",
+]) assert.ok(cards.includes(required), "Recommendation list contract missing: " + required);
+assert.ok(!page.includes("이번 결과를 보고,") && !cards.includes("RecommendationDetail") && !cards.includes("무료 결과에서 추천한 기준 더 보기") && !cards.includes("PremiumReportValuePreview"), "Remove selected guidance and duplicate detail");
 assert.ok(cards.includes('className="object-cover"'), "Product photographs must keep existing square crop");
 assert.ok(!cards.includes("decision.distinction") && !cards.includes("비슷한 분석과의 차이"),
   "Do not repeat sibling comparison or jargon in the main conversion view");

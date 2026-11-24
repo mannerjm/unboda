@@ -47,9 +47,6 @@ assert(
 
 for (const pageCopy of [
   "무료 결과에서 이어보기",
-  "이번 결과를 보고,",
-  "무엇이 더 궁금해졌나요?",
-  "상품 이름보다 지금 궁금한 질문을 먼저",
   "원하는 주제로 직접 찾기",
 ]) {
   assert(recommendationPage.includes(pageCopy), `phase 3 recommendation page copy missing: ${pageCopy}`);
@@ -58,7 +55,7 @@ for (const pageCopy of [
 for (const contract of [
   "buildCurrentFreeRecommendations",
   "RecommendationTop3",
-  "listUserPaidAnalysisSummaries",
+  "getUserProfile",
 ]) {
   assert(recommendationPage.includes(contract), `phase 3 must preserve recommendation logic: ${contract}`);
 }
@@ -76,22 +73,19 @@ for (const cardCopy of [
   "함께 살펴볼 분석",
   "PREMIUM_PRODUCT_PHOTOS",
   "RecommendationPhoto",
-  "왜 지금 추천됐나요?",
-  "리포트 구성 자세히 보기",
-  "AI 상담으로 이어갈 수 있어요.",
-  "이 분석 자세히 보기",
+  "상품 자세히 보기",
 ]) {
   assert(recommendationCards.includes(cardCopy), `phase 3 question-first recommendation UI missing: \${cardCopy}`);
 }
 
 for (const preserved of [
-  "item.profileId === profileId",
-  "getPremiumAnalysisHref",
-  "toPremiumAnalysisProductState",
+  "encodeURIComponent(profileId)",
+  "/paid-analysis/",
+  "href={href}",
   "getProductPricing",
-  "formatTopicExpectedUnderstanding",
 ]) {
   assert(recommendationCards.includes(preserved), `phase 3 must preserve purchase/profile contract: ${preserved}`);
 }
 
+assert(!recommendationPage.includes("이번 결과를 보고,") && !recommendationCards.includes("RecommendationDetail") && !recommendationCards.includes("무료 결과에서 추천한 기준 더 보기"), "requested duplicate guidance and inline detail must be absent");
 console.log("Free-result phase 3 renewal regression passed ✓");

@@ -44,7 +44,7 @@ for (const required of [
 ]) {
   if (!appShellSource.includes(required)) throw new Error(`shell navigation contract missing: ${required}`);
 }
-if (!recommendationSource.includes("getPremiumAnalysisHref") || !recommendationSource.includes("href={href}")) {
+if (!recommendationSource.includes("/paid-analysis/") || !recommendationSource.includes("href={href}")) {
   throw new Error("recommendation Top 3 does not use the canonical paid product destination");
 }
 

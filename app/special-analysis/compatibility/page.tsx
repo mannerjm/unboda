@@ -88,19 +88,12 @@ export default async function CompatibilityAnalysisPage() {
             <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-[#7851ae]">5개 상품</span>
           </div>
 
+          {!activeProfile ? (
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#766786]">
-            {activeProfile ? (
-              <>
-                <span>현재 분석 대상</span>
-                <strong className="font-bold text-[#3e245e]">{activeProfile.label}</strong>
-              </>
-            ) : (
-              <>
                 <span className="font-bold text-[#7651b2]">로그인 없이 둘러보기 가능</span>
                 <span>{user ? "실제 분석 시작 전 내 프로필을 선택해 주세요." : "실제 분석을 시작할 때 로그인과 내 프로필이 필요합니다."}</span>
-              </>
-            )}
           </div>
+          ) : null}
 
           <section aria-label="궁합 유형별 분석 상품" className="mt-3 grid gap-3 md:grid-cols-2">
             {compatibilityCards.map((product) => {

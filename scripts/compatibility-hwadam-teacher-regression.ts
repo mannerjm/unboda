@@ -11,7 +11,7 @@ assert.equal(imageSha, "ce4cbc3bfd3fa6cfbafed51f9cb08622831a4638", "approved Hwa
 assert.equal(portrait.toString("ascii", 0, 4), "RIFF");
 assert.equal(portrait.toString("ascii", 8, 12), "WEBP");
 assert(portrait.length > 6000, "teacher portrait must be a real, nonempty image");
-assert(card.includes('src="/teachers/hwadam.webp"')
+assert(card.includes('src="/teachers/hwadam-rose-v2.webp"')
   && card.includes('data-teacher-portrait="full"')
   && card.includes('data-portrait-fit="natural"')
   && card.includes('width={240}')

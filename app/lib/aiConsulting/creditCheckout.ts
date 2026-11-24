@@ -1,3 +1,5 @@
+import { isGeneralConsultingSource } from "./generalSource";
+import { getUserProfile } from "../profiles/server";
 import { assertPaidPurchaseEligibility } from "../accounts/server";
 import { getCanonicalPremiumProductId } from "../premiumProductRegistry";
 import { getPaidReport } from "../paidReports/server";
@@ -131,6 +133,10 @@ async function assertEligibleAnalysisContext(input: {
   productId: string;
   analysisEditionKey: string;
 }): Promise<string> {
+  if (isGeneralConsultingSource(input.productId, input.analysisEditionKey)) {
+    if (!await getUserProfile(input.profileId, input.userId)) throw new Error("AI_CONSULTING_PROFILE_BOUNDARY_MISMATCH");
+    return input.productId;
+  }
   const productId = getCanonicalPremiumProductId(input.productId);
   const entitlement = await getActiveEntitlementForProfileEdition(
     input.userId,

@@ -25,6 +25,7 @@ export type AiConsultingScopeTier =
   | "NONE";
 
 export type AiConsultingScopeReason =
+  | "within_general_scope"
   | "within_topic_scope"
   | "within_topic_bridge_scope"
   | "within_continuation_scope"
@@ -457,6 +458,16 @@ function evaluatePeriod(
     ],
     userMessage: "",
   });
+}
+
+/** General chat has no commercial topic filter; safety and length checks remain. */
+export function evaluateGeneralAiConsultingScope(questionInput: string): AiConsultingScopeResult {
+  const question = normalize(questionInput);
+  const productId = "ai-consulting-general";
+  if (question.length < 2) return result({ decision: "CLARIFY", reason: "question_too_short", productId, kind: "none", normalizedQuestion: question, answerGuardrails: [], userMessage: "질문을 조금 더 구체적으로 적어 주세요." });
+  if (question.length > AI_CONSULTING_QUESTION_MAX_CHARS) return result({ decision: "DENY", reason: "question_too_long", productId, kind: "none", normalizedQuestion: question, answerGuardrails: [], userMessage: "질문은 300자 이내로 적어 주세요." });
+  if (includesOneOf(question, SAFETY_PATTERNS)) return safetyRedirect(productId, "none", question);
+  return result({ decision: "ALLOW", reason: "within_general_scope", productId, kind: "none", normalizedQuestion: question, answerGuardrails: [], userMessage: "" });
 }
 
 export function evaluateAiConsultingScope(input: {

@@ -27,6 +27,7 @@ export const AI_CONSULTING_CREDIT_POLICY = {
   newPurchaseTermMonths: 12,
   deductOnlyAfterCompletedAnswer: true,
   allowAcrossPurchasedAnalyses: true,
+  allowGeneralWithoutReport: true,
   requireExactAnalysisEntitlement: true,
   requireCompletedAnalysisReport: true,
   chargeOnClarify: false,

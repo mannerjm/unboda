@@ -11,14 +11,35 @@ assert.equal(imageSha, "ace9988d7c89991e4ea0dd43c38a9bcd65db4171", "approved Hwa
 assert.equal(portrait.toString("ascii", 0, 4), "RIFF");
 assert.equal(portrait.toString("ascii", 8, 12), "WEBP");
 assert(portrait.length > 6000, "teacher portrait must be a real, nonempty image");
-assert(card.includes('src="/teachers/hwadam.webp"') && card.includes('className="block h-auto w-full"'),
-  "use the same uncropped Hwadam photograph in every surface");
+assert(card.includes('src="/teachers/hwadam.webp"')
+  && card.includes('data-teacher-portrait="full"')
+  && card.includes('data-portrait-fit="balanced"')
+  && card.includes('aspect-[1/2]')
+  && card.includes('className="object-cover object-center"')
+  && card.includes('"w-[88px] sm:w-[112px]"')
+  && card.includes('"w-[80px] sm:w-[100px]"'),
+  "Hwadam must use the same portrait frame proportions and widths as the other seven teachers");
 assert(card.includes('data-compatibility-teacher-profile="visible"')
   && !card.includes("<details") && !card.includes("<summary"),
   "specialist profile must be visible without extra clicks");
 for (const disallowed of ["가상", "인공지능", "AI", "전문 자격", "경력 20년"]) {
   assert(!card.includes(disallowed), "do not use unverified claims or restricted teacher-profile wording");
 }
+for (const path of [
+  "app/components/PaidCompatibilityAnalysisClient.tsx",
+  "app/components/PaidFamilyParentChildAnalysisClient.tsx",
+  "app/components/PaidFamilyExtendedAnalysisClient.tsx",
+]) {
+  const detail = read(path);
+  assert(!detail.includes("정보는 결제 연결을 위해 현재 브라우저에만 잠시 보관됩니다."),
+    "selected browser information note must be absent from paid compatibility details: " + path);
+  assert(!detail.includes("본인·성인 인증이 아직 완료되지 않았다면 결제 화면에서 NICE 본인확인을 먼저 진행합니다."),
+    "selected identification note must be absent from paid compatibility details: " + path);
+  assert(detail.includes("구매 전 확인") && detail.includes('type="submit"')
+    && detail.includes("<CompatibilityReportValuePreview"),
+    "buyer form, actual checkout and report preview must remain unchanged: " + path);
+}
+
 const catalog = read("app/special-analysis/compatibility/page.tsx");
 const pair = read("app/special-analysis/compatibility/PairCompatibilityPage.tsx");
 const family = read("app/special-analysis/compatibility/family/parent-child/page.tsx");
@@ -67,4 +88,4 @@ for (const [path, count] of [
 }
 assert(!catalog.includes("priceOverride") && !card.includes("getPaidReport("),
   "teacher display code must not control pricing or report generation");
-console.log("Hwadam specialist regression passed: one teacher per surface, seven compatibility report paths, real portrait, and existing stored results preserved");
+console.log("Hwadam specialist regression passed: teacher scale aligned, two selected notices removed across compatibility details, existing reports preserved");

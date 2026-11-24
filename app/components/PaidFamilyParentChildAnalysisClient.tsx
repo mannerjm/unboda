@@ -350,11 +350,6 @@ export default function PaidFamilyParentChildAnalysisClient({
 
         <CompatibilityReportValuePreview mode="parent_child" evaluationYear={evaluationYear} />
 
-        <div className="mt-5 rounded-2xl bg-[#f7f8fc] px-4 py-4 text-sm leading-7 text-slate-600">
-          상대방 정보는 결제 연결을 위해 현재 브라우저에만 잠시 보관됩니다. 주문에는 분석에 필요한 계산 정보만 보관하며, 결제가 완료되면 브라우저에 남아 있던 상대방 정보는 자동으로 삭제됩니다. 구매 리포트는 {evaluationYear}년판으로 고정 저장됩니다.
-        </div>
-        <p className="mt-3 text-xs leading-6 text-slate-500">본인·성인 인증이 아직 완료되지 않았다면 결제 화면에서 NICE 본인확인을 먼저 진행합니다.</p>
-
         {error ? <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
 
         <div className="mt-7 overflow-hidden rounded-3xl border border-[#dfe3ef] bg-[linear-gradient(135deg,#f5f6fc_0%,#f9faff_100%)] shadow-sm">

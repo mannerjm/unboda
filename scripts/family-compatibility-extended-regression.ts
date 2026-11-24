@@ -188,10 +188,15 @@ assert(
   "report preview must explain structure, preserve relationship-specific domains, and avoid presenting sample copy as an actual result",
 );
 assert(!romanticInputClient.includes("결제 후 제공되는 내용") && !parentChildInputClient.includes("결제 후 제공되는 내용") && !inputClient.includes("결제 후 제공되는 내용"), "old flat included-content lists must be replaced by the richer shared preview");
-assert(inputClient.includes("구매 전 확인") && inputClient.includes("결제 금액") && inputClient.includes("NICE 본인확인"), "extended family checkout summary must match the parent-child pre-purchase structure");
-assert(inputClient.includes(sharedStorageNotice) && parentChildInputClient.includes(sharedStorageNotice), "all family purchase forms must use the same browser-session privacy notice");
-assert(inputClient.includes("결제가 완료되면 브라우저에 남아 있던 상대방 정보는 자동으로 삭제됩니다."), "family privacy copy must explain post-payment browser cleanup");
-assert(inputClient.includes("구매 리포트는 {evaluationYear}년판으로 고정 저장됩니다."), "family privacy copy must explain fixed purchase-year storage");
+assert(inputClient.includes("구매 전 확인") && inputClient.includes("결제 금액") && inputClient.includes("결제 완료 후 생성된 {evaluationYear}년판 결과"), "extended family checkout summary must retain price and purchase-year access information");
+assert(!inputClient.includes(sharedStorageNotice) && !parentChildInputClient.includes(sharedStorageNotice), "remove the two selected privacy explanation blocks from family detail forms without changing underlying storage behavior");
+assert(!inputClient.includes("본인·성인 인증이 아직 완료되지 않았다면") && !parentChildInputClient.includes("본인·성인 인증이 아직 완료되지 않았다면"), "remove selected identity notice from detail forms; the checkout gate remains enforced");
+const checkoutSuccess = readFileSync("app/checkout/success/page.tsx", "utf8");
+assert(inputClient.includes("sessionStorage.setItem") && parentChildInputClient.includes("sessionStorage.setItem")
+  && checkoutSuccess.includes("sessionStorage.removeItem(COMPATIBILITY_FAMILY_SIBLING_SESSION_KEY)")
+  && checkoutSuccess.includes("sessionStorage.removeItem(COMPATIBILITY_FAMILY_OTHER_SESSION_KEY)")
+  && checkoutSuccess.includes("sessionStorage.removeItem(COMPATIBILITY_FAMILY_PARENT_CHILD_SESSION_KEY)"),
+  "temporary partner details must remain session-scoped and clear after successful purchase");
 assert(orderRoute.includes("validateCompatibilityPartnerInput") && orderRoute.includes("buildFamilySiblingPaidInputSnapshot") && orderRoute.includes("buildFamilyOtherPaidInputSnapshot"), "extended family orders must validate raw input then derive frozen snapshots server-side");
 assert(checkoutPanel.includes('paidEligibilityStatus !== "VERIFIED_ADULT"') && checkoutPanel.includes("immediateGenerationAcknowledged: true"), "extended family checkout must keep adult and immediate-generation gates");
 assert(generation.includes("isCompatibilityFamilySiblingProductId") && generation.includes("generateFamilySiblingReport"), "paid generation must dispatch sibling reports from the frozen snapshot");

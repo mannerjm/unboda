@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HWADAM_REPORT_DARK_STYLE } from "@/app/components/HwadamCompatibilityTeacherCard";
 import {
   resolveStoredCompatibilityRelationshipType,
   type StoredCompatibilityReport,
@@ -98,7 +99,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
   return (
     <div className="relative mx-auto mt-8 w-full max-w-5xl">
       <article className="overflow-hidden rounded-[2.25rem] border border-[#e1d3f5] bg-[linear-gradient(180deg,#ffffff_0%,#f8f3ff_100%)] shadow-[0_25px_75px_rgba(111,74,171,.13)] ring-1 ring-white/80">
-        <header className="relative overflow-hidden border-b border-[#332d65] bg-[radial-gradient(circle_at_84%_16%,rgba(155,139,255,0.36),transparent_27%),radial-gradient(circle_at_12%_92%,rgba(104,86,216,0.24),transparent_30%),linear-gradient(145deg,#17172f_0%,#242047_48%,#18192f_100%)] px-6 py-9 text-white sm:px-10 sm:py-12">
+        <header data-hwadam-report-theme="hero" style={HWADAM_REPORT_DARK_STYLE} className="relative overflow-hidden border-b border-[#332d65] bg-[radial-gradient(circle_at_84%_16%,rgba(155,139,255,0.36),transparent_27%),radial-gradient(circle_at_12%_92%,rgba(104,86,216,0.24),transparent_30%),linear-gradient(145deg,#17172f_0%,#242047_48%,#18192f_100%)] px-6 py-9 text-white sm:px-10 sm:py-12">
           <div aria-hidden="true" className="absolute -right-12 -top-20 h-72 w-72 rounded-full border border-white/10" />
           <div aria-hidden="true" className="absolute right-12 top-10 h-36 w-36 rounded-full border border-white/[0.06]" />
           <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(180deg,transparent,rgba(255,255,255,0.025))]" />
@@ -200,7 +201,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
           </section>
         ) : null}
 
-        <section className="relative overflow-hidden border-t border-[#2e295c] bg-[radial-gradient(circle_at_top_right,rgba(131,111,239,0.24),transparent_30%),linear-gradient(145deg,#1d1b3d_0%,#292550_100%)] px-6 py-10 text-white shadow-[0_-10px_40px_rgba(31,28,72,0.08)] sm:px-10 sm:py-12">
+        <section data-hwadam-report-theme="action" style={HWADAM_REPORT_DARK_STYLE} className="relative overflow-hidden border-t border-[#2e295c] bg-[radial-gradient(circle_at_top_right,rgba(131,111,239,0.24),transparent_30%),linear-gradient(145deg,#1d1b3d_0%,#292550_100%)] px-6 py-10 text-white shadow-[0_-10px_40px_rgba(31,28,72,0.08)] sm:px-10 sm:py-12">
           <ReportSectionHeader eyebrow="07 · 행동 가이드" title={config.reportActionTitle} description="큰 결론보다 실제 관계에서 반복 가능한 작은 조정 기준으로 정리합니다." tone="dark" />
           <div className="mt-5 grid gap-3 lg:grid-cols-3">
             {report.actionGuide.doNext.map((item, index) => (

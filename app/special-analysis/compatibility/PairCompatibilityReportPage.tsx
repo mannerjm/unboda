@@ -2,10 +2,11 @@ import ReportLibraryReturnLink from "@/app/components/ReportLibraryReturnLink";
 import { notFound, redirect } from "next/navigation";
 import CompatibilityPaidReportPreparing from "@/app/components/CompatibilityPaidReportPreparing";
 import CompatibilityPaidReportView from "@/app/components/CompatibilityPaidReportView";
+import HwadamCompatibilityTeacherCard from "@/app/components/HwadamCompatibilityTeacherCard";
 import AiConsultingEntryCard from "@/app/paid-analysis/[productId]/report/AiConsultingEntryCard";
 import Phase9NextAnalysisSection from "@/app/components/Phase9NextAnalysisSection";
 import VerifiedReviewPanel from "@/app/components/VerifiedReviewPanel";
-import { isStoredCompatibilityReport } from "@/app/lib/compatibilityPaidAnalysis";
+import { isStoredCompatibilityReport, type StoredCompatibilityReport } from "@/app/lib/compatibilityPaidAnalysis";
 import { getPaidReport } from "@/app/lib/paidReports/server";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getUserProfile } from "@/app/lib/profiles/server";
@@ -74,15 +75,19 @@ export default async function PairCompatibilityReportPage({
     );
   }
 
+  const hwadamResult = report!.content as unknown as StoredCompatibilityReport;
+
   return (
-    <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
+    <main data-hwadam-report="completed" className="min-h-screen bg-[linear-gradient(160deg,#fcfaff_0%,#f5effa_65%,#efe6f7_100%)] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
         <div className="mx-auto w-full max-w-5xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <ReportLibraryReturnLink placement="top" />
             <span className="text-xs text-slate-500">{profile.label}님의 {product?.shortTitle ?? "궁합"} 리포트</span>
           </div>
           <>
+              <HwadamCompatibilityTeacherCard placement="report" />
               <CompatibilityPaidReportView content={report.content as unknown as import("@/app/lib/compatibilityPaidAnalysis").StoredCompatibilityReport} />
+              <HwadamCompatibilityTeacherCard placement="closing" conclusion={hwadamResult.report.relationshipCore.headline} action={hwadamResult.report.actionGuide.doNext[0]?.action} />
               <AiConsultingEntryCard
                 productId={productId}
                 profileId={profileId}

@@ -2,10 +2,11 @@ import ReportLibraryReturnLink from "@/app/components/ReportLibraryReturnLink";
 import { notFound, redirect } from "next/navigation";
 import CompatibilityPaidReportPreparing from "@/app/components/CompatibilityPaidReportPreparing";
 import FamilyParentChildPaidReportView from "@/app/components/FamilyParentChildPaidReportView";
+import HwadamCompatibilityTeacherCard from "@/app/components/HwadamCompatibilityTeacherCard";
 import AiConsultingEntryCard from "@/app/paid-analysis/[productId]/report/AiConsultingEntryCard";
 import Phase9NextAnalysisSection from "@/app/components/Phase9NextAnalysisSection";
 import VerifiedReviewPanel from "@/app/components/VerifiedReviewPanel";
-import { isStoredFamilyParentChildReport } from "@/app/lib/familyCompatibilityPaidAnalysis";
+import { isStoredFamilyParentChildReport, type StoredFamilyParentChildReport } from "@/app/lib/familyCompatibilityPaidAnalysis";
 import { getPaidReport } from "@/app/lib/paidReports/server";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getUserProfile } from "@/app/lib/profiles/server";
@@ -67,15 +68,19 @@ export default async function FamilyParentChildPurchasedReportPage({ searchParam
     );
   }
 
+  const hwadamResult = report!.content as unknown as StoredFamilyParentChildReport;
+
   return (
-    <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
+    <main data-hwadam-report="completed" className="min-h-screen bg-[linear-gradient(160deg,#fcfaff_0%,#f5effa_65%,#efe6f7_100%)] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
         <div className="mx-auto w-full max-w-5xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <ReportLibraryReturnLink placement="top" />
             <span className="text-xs text-slate-500">{profile.label}님의 구매 리포트</span>
           </div>
           <>
+              <HwadamCompatibilityTeacherCard placement="report" />
               <FamilyParentChildPaidReportView content={report!.content as unknown as import("@/app/lib/familyCompatibilityPaidAnalysis").StoredFamilyParentChildReport} />
+              <HwadamCompatibilityTeacherCard placement="closing" conclusion={hwadamResult.report.relationshipCore.headline} action={hwadamResult.report.actionGuide.doNext[0]?.action} />
               <AiConsultingEntryCard
                 productId={COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID}
                 profileId={profileId}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HWADAM_REPORT_DARK_STYLE } from "@/app/components/HwadamCompatibilityTeacherCard";
 import { getFamilyOtherRelationshipLabel } from "@/app/lib/familyCompatibilityExtended";
 import type {
   StoredFamilyOtherReport,
@@ -74,7 +75,7 @@ function ActionSection({
   avoid: readonly { action: string; reason: string }[];
 }) {
   return (
-    <section className="relative overflow-hidden rounded-[1.95rem] border border-[#2e295c] bg-[radial-gradient(circle_at_top_right,rgba(131,111,239,0.24),transparent_30%),linear-gradient(145deg,#1d1b3d_0%,#292550_100%)] p-6 text-white shadow-[0_24px_60px_rgba(31,28,72,0.18)] sm:p-7">
+    <section data-hwadam-report-theme="action" style={HWADAM_REPORT_DARK_STYLE} className="relative overflow-hidden rounded-[1.95rem] border border-[#2e295c] bg-[radial-gradient(circle_at_top_right,rgba(131,111,239,0.24),transparent_30%),linear-gradient(145deg,#1d1b3d_0%,#292550_100%)] p-6 text-white shadow-[0_24px_60px_rgba(31,28,72,0.18)] sm:p-7">
       <div className="[&_h2]:text-white [&_p:first-child]:text-[#c8c1ff] [&_p:last-child]:text-slate-300">
         <SectionHeader number="07 · 지금 해볼 것" title="관계를 바꾸는 작은 행동" description="가족 관계에서 바로 시도할 수 있는 행동부터 정리했습니다." />
       </div>
@@ -106,7 +107,7 @@ function SiblingReport({ content }: { content: StoredFamilySiblingReport }) {
   const { report, directions, meta } = content;
   return (
     <article className="mt-8 overflow-hidden rounded-[2.25rem] border border-[#d8d9e6] bg-[linear-gradient(180deg,#ffffff_0%,#f8f8fc_100%)] shadow-[0_30px_90px_rgba(31,28,72,0.14)] ring-1 ring-white/80">
-      <header className="relative overflow-hidden border-b border-[#332d65] bg-[radial-gradient(circle_at_84%_16%,rgba(155,139,255,0.36),transparent_27%),radial-gradient(circle_at_12%_92%,rgba(104,86,216,0.24),transparent_30%),linear-gradient(145deg,#17172f_0%,#242047_48%,#18192f_100%)] px-6 py-9 text-white sm:px-9 sm:py-11">
+      <header data-hwadam-report-theme="hero" style={HWADAM_REPORT_DARK_STYLE} className="relative overflow-hidden border-b border-[#332d65] bg-[radial-gradient(circle_at_84%_16%,rgba(155,139,255,0.36),transparent_27%),radial-gradient(circle_at_12%_92%,rgba(104,86,216,0.24),transparent_30%),linear-gradient(145deg,#17172f_0%,#242047_48%,#18192f_100%)] px-6 py-9 text-white sm:px-9 sm:py-11">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-xs font-bold text-slate-200 backdrop-blur">가족 궁합 리포트</span>
@@ -158,7 +159,7 @@ function OtherFamilyReport({ content }: { content: StoredFamilyOtherReport }) {
   const relationshipLabel = getFamilyOtherRelationshipLabel(meta.relationshipKind);
   return (
     <article className="mt-8 overflow-hidden rounded-[2.25rem] border border-[#d8d9e6] bg-[linear-gradient(180deg,#ffffff_0%,#f8f8fc_100%)] shadow-[0_30px_90px_rgba(31,28,72,0.14)] ring-1 ring-white/80">
-      <header className="relative overflow-hidden border-b border-[#332d65] bg-[radial-gradient(circle_at_84%_16%,rgba(155,139,255,0.36),transparent_27%),radial-gradient(circle_at_12%_92%,rgba(104,86,216,0.24),transparent_30%),linear-gradient(145deg,#17172f_0%,#242047_48%,#18192f_100%)] px-6 py-9 text-white sm:px-9 sm:py-11">
+      <header data-hwadam-report-theme="hero" style={HWADAM_REPORT_DARK_STYLE} className="relative overflow-hidden border-b border-[#332d65] bg-[radial-gradient(circle_at_84%_16%,rgba(155,139,255,0.36),transparent_27%),radial-gradient(circle_at_12%_92%,rgba(104,86,216,0.24),transparent_30%),linear-gradient(145deg,#17172f_0%,#242047_48%,#18192f_100%)] px-6 py-9 text-white sm:px-9 sm:py-11">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-xs font-bold text-slate-200 backdrop-blur">가족 궁합 리포트</span>

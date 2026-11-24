@@ -100,6 +100,9 @@ export async function POST(request: Request) {
     }
 
     const message = error instanceof Error ? error.message : "AI_CONSULTING_CREDIT_ORDER_FAILED";
+    if (message.includes("AI_CONSULTING_FREE_ANALYSIS_REQUIRED")) {
+      return NextResponse.json({ error: "현재 프로필의 무료 사주 분석을 먼저 완료해 주세요. 질문권은 차감되지 않습니다.", code: "FREE_ANALYSIS_REQUIRED" }, { status: 409 });
+    }
     if (message.includes("BASE_ENTITLEMENT_REQUIRED")) {
       return NextResponse.json(
         { error: "구매한 심층 분석에서만 AI 질문권을 구매할 수 있습니다." },

@@ -1,5 +1,5 @@
 import { isGeneralConsultingSource } from "./generalSource";
-import { getUserProfile } from "../profiles/server";
+import { requireConsultingAdult, requireConsultingFoundation } from "./consultingFoundation";
 import { assertPaidPurchaseEligibility } from "../accounts/server";
 import { getCanonicalPremiumProductId } from "../premiumProductRegistry";
 import { getPaidReport } from "../paidReports/server";
@@ -134,7 +134,7 @@ async function assertEligibleAnalysisContext(input: {
   analysisEditionKey: string;
 }): Promise<string> {
   if (isGeneralConsultingSource(input.productId, input.analysisEditionKey)) {
-    if (!await getUserProfile(input.profileId, input.userId)) throw new Error("AI_CONSULTING_PROFILE_BOUNDARY_MISMATCH");
+    // Profile ownership and current free foundation are checked before order creation.
     return input.productId;
   }
   const productId = getCanonicalPremiumProductId(input.productId);
@@ -181,6 +181,8 @@ export async function createPendingAiConsultingCreditOrder(input: {
   }
 
   await assertPaidPurchaseEligibility(input.userId);
+  await requireConsultingAdult(input.userId);
+  await requireConsultingFoundation(input.userId, input.profileId);
   const bundle = requireBundle(input.bundleId);
   await assertEligibleAnalysisContext({
     userId: input.userId,

@@ -679,9 +679,9 @@ export default function AiConsultingPortfolioClient({
 
         {!isLoading && focusAnalysis && focusAnalysis.profileInputVersion !== "current" ? (
           <section className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-950">
-            <p className="font-black">이전 출생정보 기준 상담</p>
+            <p className="font-black">이전 출생정보 기준 상담 기록</p>
             <p className="mt-1">
-              구매 당시 출생 정보가 같은 리포트는 함께 상담할 수 있습니다. 출생 정보를 수정한 뒤 새로 구매한 리포트와는 분석 결과를 섞지 않습니다. 보유한 리포트 목록은 모두 볼 수 있습니다.
+              이전 출생정보의 리포트와 상담 기록은 보관됩니다. 새 질문에는 현재 프로필의 실제 사주를 사용하며 이전 출생정보의 리포트는 섞지 않습니다.
             </p>
             <p className="mt-2 font-semibold">남아 있는 공용 AI 질문권은 그대로 사용할 수 있습니다.</p>
           </section>
@@ -690,7 +690,7 @@ export default function AiConsultingPortfolioClient({
         {!isLoading && portfolio && (portfolio.previousAnalysesExcluded ?? 0) > 0 && !focusAnalysis ? (
           <section className="mt-4 rounded-2xl border border-[#e4d5f6] bg-white px-5 py-4 text-sm leading-6 text-slate-700 shadow-[0_10px_26px_rgba(104,67,168,.08)]">
             <p className="font-bold text-[#11162d]">출생정보 변경 전 리포트 {(portfolio.previousAnalysesExcluded ?? 0)}개는 자동 상담 범위에서 제외되어 있습니다.</p>
-            <p className="mt-1">이전 리포트와 상담 기록은 그대로 보관됩니다. 보유 분석 목록에는 모두 표시하며, 해당 리포트에서 상담으로 들어가면 같은 구매 당시 정보 기준으로 이어갈 수 있습니다.</p>
+            <p className="mt-1">이전 리포트와 상담 기록은 그대로 보관됩니다. 보유 분석 목록에는 모두 표시하며, 새 상담은 현재 출생정보에 일치하는 사주를 기준으로 진행합니다.</p>
           </section>
         ) : null}
 
@@ -698,7 +698,7 @@ export default function AiConsultingPortfolioClient({
           <div className="relative z-10 min-w-0 lg:w-[62%] xl:w-[60%]">
             <p className="text-xs font-black tracking-[0.16em] text-[#7941d0]">UNBODA AI CONSULTING</p>
             <h1 className="mt-2 break-keep text-2xl font-black tracking-[-0.045em] sm:text-3xl xl:text-[clamp(1.9rem,2.6vw,2.65rem)]">운담 선생님과 AI 상담하기</h1>
-            <p className="mt-2 text-base leading-7 text-[#58476d] sm:text-lg">사주와 일상, 궁금한 모든 주제를 편하게 물어보세요.</p>
+            <p className="mt-2 text-base leading-7 text-[#58476d] sm:text-lg">등록하신 실제 사주를 바탕으로 일상과 인생의 궁금한 점을 상담해 드립니다.</p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-[#d9c5f5] bg-white/90 px-3 py-2 text-base shadow-sm">
                 <span className="inline-flex items-center gap-1.5 font-semibold"><svg aria-hidden="true" className="h-5 w-5 text-[#7139ce]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16v4a3 3 0 0 0 0 6v4H4v-4a3 3 0 0 0 0-6z"/><path d="M13 8v2m0 4v2"/></svg>공용 질문권 <strong className="text-lg text-[#6734c5]" aria-live="polite">{portfolio ? portfolio.questionsRemaining : "—"}회</strong></span>
@@ -755,7 +755,7 @@ export default function AiConsultingPortfolioClient({
                   <div className="rounded-[1.5rem] border border-dashed border-[#cfd5e6] bg-white p-7 text-center text-sm leading-7 text-slate-600">
                     {hasOlderMessages
                       ? "이전 상담 더 보기에서 오래된 대화를 확인할 수 있어요."
-                      : "리포트 구매 없이도 궁금한 내용을 편하게 질문할 수 있어요."}
+                      : "리포트 구매 없이도 내 사주를 바탕으로 궁금한 내용을 질문할 수 있어요."}
                   </div>
                 ) : null}
 
@@ -981,7 +981,7 @@ export default function AiConsultingPortfolioClient({
 
         {(!portfolio || isLoading) ? managementMenu : null}
 
-        <section id="undam-guide" hidden={managementPanel !== "guide"} aria-label="이용 안내" className="mt-3 rounded-2xl border border-[#e1d3f3] bg-white p-4"><h2 className="font-bold text-[#6841aa]">이용 안내</h2><div className="mt-2"><TrustPrinciplesCard compact /><p className="mt-2 text-sm leading-6 text-slate-600">현재 연결된 상담 분석 {portfolio ? `${portfolio.analyses.length}개` : "확인 중"} · 리포트 구매 여부와 관계없이 질문권으로 상담할 수 있습니다. 관련 구매 분석이 있으면 참고하며, 없으면 일반 AI 상담으로 답변합니다.</p><p className="mt-2 text-sm leading-6 text-slate-600">유료 리포트 열람 권한은 별도입니다. 출생 정보가 다른 시기의 해석은 섞지 않습니다. 운담 선생님은 AI 캐릭터입니다. 명리 해석은 참고용입니다.</p></div></section>
+        <section id="undam-guide" hidden={managementPanel !== "guide"} aria-label="이용 안내" className="mt-3 rounded-2xl border border-[#e1d3f3] bg-white p-4"><h2 className="font-bold text-[#6841aa]">이용 안내</h2><div className="mt-2"><TrustPrinciplesCard compact /><p className="mt-2 text-sm leading-6 text-slate-600">현재 연결된 상담 분석 {portfolio ? `${portfolio.analyses.length}개` : "확인 중"} · 무료 사주 분석과 성인인증을 완료하면 리포트 구매 여부와 관계없이 질문권으로 상담할 수 있습니다. 관련 구매 분석이 있으면 참고하며, 없으면 현재 사주를 기반으로 답변합니다.</p><p className="mt-2 text-sm leading-6 text-slate-600">유료 리포트 열람 권한은 별도입니다. 출생 정보가 다른 시기의 해석은 섞지 않습니다. 운담 선생님은 AI 캐릭터입니다. 명리 해석은 참고용입니다.</p></div></section>
         {memoryError ? (
           <p className="mt-5 rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">{memoryError}</p>
         ) : null}

@@ -5,6 +5,9 @@ import AppShell from "@/app/components/AppShell";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import AiConsultingPortfolioClient from "./AiConsultingPortfolioClient";
+import { getFreeAnalysisResult } from "@/app/lib/freeAnalysisResults/server";
+import { hasVerifiedConsultingFoundation } from "@/app/lib/aiConsulting/consultingFoundation";
+import { getAccountLifecycle } from "@/app/lib/accounts/server";
 import { getProfileFreeAnalysisFoundationStatus } from "@/app/lib/freeAnalysisEligibility";
 import { isAiConsultingCreditCheckoutEnabled } from "@/app/lib/aiConsulting/creditCheckout";
 import { isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
@@ -47,6 +50,14 @@ export default async function AiConsultingPage({
   }
 
   const freeAnalysisStatus = await getProfileFreeAnalysisFoundationStatus(user.id, activeProfile);
+  const free = await getFreeAnalysisResult(user.id, activeProfile.id);
+  if (!hasVerifiedConsultingFoundation(activeProfile, free)) {
+    return <AppShell activeProfileId={activeProfile.id}><main className="min-h-screen bg-[#f5f0fb] px-5 py-10"><section className="mx-auto max-w-xl rounded-3xl border border-[#ded0f5] bg-white p-8 text-center"><h1 className="text-2xl font-black">운담 선생님과 상담하기 전에</h1><p className="mt-3 leading-7 text-slate-600">현재 프로필의 무료 사주 분석을 먼저 완료해 주세요. 실제 사주 정보를 바탕으로 상담하며, 유료 리포트 구매는 필요하지 않습니다.</p><Link href={freeAnalysisStatus === "generating" ? `/loading?profileId=${encodeURIComponent(activeProfile.id)}` : "/saju"} className="mt-6 inline-flex rounded-xl bg-[#713bd6] px-5 py-3 font-bold text-white">무료 사주 먼저 보기</Link></section></main></AppShell>;
+  }
+  const account = await getAccountLifecycle(user.id);
+  if (account?.status !== "ACTIVE" || account.paidEligibilityStatus !== "VERIFIED_ADULT") {
+    return <AppShell activeProfileId={activeProfile.id}><main className="min-h-screen bg-[#f5f0fb] px-5 py-10"><section className="mx-auto max-w-xl rounded-3xl border border-[#ded0f5] bg-white p-8 text-center"><h1 className="text-2xl font-black">AI 상담 이용을 위한 성인인증</h1><p className="mt-3 leading-7 text-slate-600">성인인증을 완료하면 질문권으로 운담 선생님과 상담할 수 있습니다.</p><Link href="/account" className="mt-6 inline-flex rounded-xl bg-[#713bd6] px-5 py-3 font-bold text-white">계정 정보 및 성인인증 확인</Link></section></main></AppShell>;
+  }
   // A report entry must start from the exact purchased report, never infer it
   // from a URL alone or silently switch to another active profile.
   const reportEntryRequested = Boolean(params.productId && params.edition && !isGeneralConsultingSource(params.productId, params.edition));

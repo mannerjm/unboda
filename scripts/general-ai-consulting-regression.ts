@@ -1,3 +1,7 @@
+import { hasVerifiedConsultingFoundation, buildVerifiedConsultingChart } from "../app/lib/aiConsulting/consultingFoundation";
+import { getProfileFingerprint } from "../app/lib/freeAnalysisResults/server";
+import type { ProfileDto } from "../app/lib/profiles/types";
+import type { FreeAnalysisResultRecord } from "../app/lib/freeAnalysisResults/server";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { evaluateGeneralAiConsultingScope } from "../app/lib/aiConsultingScope";
@@ -13,3 +17,24 @@ assert(sql.includes("AI_CONSULTING_BASE_ENTITLEMENT_REVOKED")&&sql.includes("AI_
 assert(read("app/lib/aiConsulting/answerPipeline.ts").includes("general ? buildGeneralPrompt"));
 assert(read("app/lib/aiConsulting/session.ts").includes("ensure_general_ai_consulting_grant"));
 console.log("general-ai-consulting-regression: PASS");
+
+const pipeline = read("app/lib/aiConsulting/answerPipeline.ts");
+const foundation = read("app/lib/aiConsulting/consultingFoundation.ts");
+assert(pipeline.indexOf("await requireConsultingFoundation(input.userId, input.profileId)") < pipeline.indexOf("const reservation = await reserveAiConsultingQuestion("));
+assert(pipeline.includes("buildVerifiedConsultingChart(foundation.profile)") && pipeline.includes("freeChart,") && !pipeline.includes("현재 프로필과 일치하는 무료 사주 계산 결과 없음"));
+assert(foundation.includes('free.status === "completed"') && foundation.includes("free.profileFingerprint === getProfileFingerprint(profile)") && foundation.includes('account.paidEligibilityStatus !== "VERIFIED_ADULT"'));
+assert(read("app/lib/aiConsulting/creditCheckout.ts").includes("await requireConsultingFoundation(input.userId, input.profileId)"));
+assert(read("app/lib/aiConsulting/portfolio.ts").includes('state.analyses.filter(analysis => analysis.profileInputVersion === "current")'));
+
+const profile: ProfileDto = {id:"test-profile",label:"검증용",relationshipType:"self",birthDate:"1990-01-15",birthTime:"12:00",birthTimeKnown:false,gender:"남성",calendarType:"양력",isLeapMonth:false,createdAt:"2026-01-01",updatedAt:"2026-01-01"};
+const chart=buildVerifiedConsultingChart(profile);
+const free={id:"test-free",userId:"test-user",profileId:profile.id,profileFingerprint:getProfileFingerprint(profile),profileSnapshot:profile,status:"completed",content:{profile,saju:chart},errorCode:null,updatedAt:"2026-01-01"} as unknown as FreeAnalysisResultRecord;
+assert.equal(hasVerifiedConsultingFoundation(profile,free),true);
+assert.equal(hasVerifiedConsultingFoundation(profile,null),false);
+assert.equal(hasVerifiedConsultingFoundation(profile,{...free,status:"failed"}),false);
+assert.equal(hasVerifiedConsultingFoundation({...profile,birthTimeKnown:true},free),false);
+assert.equal(hasVerifiedConsultingFoundation({...profile,birthDate:"1990-01-16"},free),false);
+assert.equal(hasVerifiedConsultingFoundation({...profile,id:"another"},free),false);
+assert.equal(hasVerifiedConsultingFoundation(profile,{...free,content:null}),false);
+assert(!chart.hourPillarHanja, "unknown birth time must not invent an hour pillar");
+console.log("verified consulting foundation behavioral regression: PASS");

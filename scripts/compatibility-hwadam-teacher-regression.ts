@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 const read = (path: string) => readFileSync(path, "utf8");
 const card = read("app/components/HwadamCompatibilityTeacherCard.tsx");
-const portrait = readFileSync("public/teachers/hwadam.webp");
+const portrait = readFileSync("public/teachers/hwadam-rose-v2.webp");
 const imageSha = createHash("sha1").update(Buffer.concat([Buffer.from(`blob ${portrait.length}\0`), portrait])).digest("hex");
 
 assert.equal(imageSha, "ce4cbc3bfd3fa6cfbafed51f9cb08622831a4638", "approved Hwadam portrait must not change unexpectedly");

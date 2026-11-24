@@ -80,12 +80,12 @@ for (const relationBadge of ["연인 관계", "가족 관계", "업무 관계", 
   assert(overview.includes(relationBadge), `compatibility overview must expose relation badge: ${relationBadge}`);
 }
 assert(
-  overview.includes('className="mt-5 grid gap-3 md:grid-cols-2"')
+  overview.includes('className="mt-3 grid gap-3 md:grid-cols-2"')
     && overview.includes("compatibilityCards.map((product) =>"),
   "all five canonical compatibility products must share the compact two-column marketplace layout",
 );
 assert(
-  overview.includes('group flex min-h-[144px] items-stretch')
+  overview.includes('group flex min-h-[124px] items-stretch')
     && overview.includes('rounded-[1.4rem] border border-[#e7d9f3]')
     && overview.includes('text-[16px] font-extrabold leading-[1.4]'),
   "all compatibility photo cards must share the same compact sizing and accessible title treatment",

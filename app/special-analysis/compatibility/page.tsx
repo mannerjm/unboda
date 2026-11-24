@@ -77,22 +77,18 @@ export default async function CompatibilityAnalysisPage() {
     <AppShell activeProfileId={activeProfile?.id}>
       <main className="min-h-screen bg-[linear-gradient(180deg,#fbf7ff_0%,#f2eaff_100%)] px-5 py-7 text-[#281744] sm:px-8 sm:py-9">
         <div className="mx-auto w-full max-w-5xl">
-          <header className="border-b border-[#e4d5f2] pb-5">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-extrabold tracking-[0.08em] text-[#8557bf]">전문 분석 · 궁합</p>
-                <h1 className="mt-1 text-2xl font-black tracking-[-0.025em] text-[#281744] sm:text-3xl">궁합 분석</h1>
-                <p className="mt-2 text-sm leading-6 text-[#6e607e]">
-                  어떤 관계가 궁금하세요? 관계별 사진을 보고 나에게 맞는 궁합을 골라보세요.
-                </p>
-              </div>
-              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-[#7851ae]">5개 상품</span>
-            </div>
-          </header>
-
+          <h1 className="sr-only">궁합 분석</h1>
           <HwadamCompatibilityTeacherCard placement="catalog" />
 
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[#766786]">
+          <div data-compatibility-list-heading="compact" className="flex items-end justify-between gap-4 border-b border-[#e4d5f2] pb-3">
+            <div>
+              <p className="text-xs font-extrabold tracking-[0.06em] text-[#8557bf]">주제별 전문 분석</p>
+              <h2 className="mt-1 text-lg font-black tracking-tight text-[#281744]">궁합</h2>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-[#7851ae]">5개 상품</span>
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#766786]">
             {activeProfile ? (
               <>
                 <span>현재 분석 대상</span>
@@ -106,17 +102,17 @@ export default async function CompatibilityAnalysisPage() {
             )}
           </div>
 
-          <section aria-label="궁합 유형별 분석 상품" className="mt-5 grid gap-3 md:grid-cols-2">
+          <section aria-label="궁합 유형별 분석 상품" className="mt-3 grid gap-3 md:grid-cols-2">
             {compatibilityCards.map((product) => {
               const photo = PREMIUM_PRODUCT_PHOTOS[product.photoId];
               return (
                 <Link
                   key={product.href}
                   href={product.href}
-                  className="group flex min-h-[144px] items-stretch gap-3 rounded-[1.4rem] border border-[#e7d9f3] bg-white p-3 shadow-[0_9px_22px_rgba(87,59,119,0.06)] transition hover:-translate-y-0.5 hover:border-[#b98aed] hover:shadow-[0_12px_25px_rgba(105,62,171,0.11)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7650ba] sm:gap-4"
+                  className="group flex min-h-[124px] items-stretch gap-3 rounded-[1.4rem] border border-[#e7d9f3] bg-white p-3 shadow-[0_9px_22px_rgba(87,59,119,0.06)] transition hover:-translate-y-0.5 hover:border-[#b98aed] hover:shadow-[0_12px_25px_rgba(105,62,171,0.11)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7650ba] sm:gap-4"
                   aria-label={product.title + " 상세 열기"}
                 >
-                  <div className="relative min-h-[112px] w-[112px] shrink-0 overflow-hidden rounded-xl bg-[#ece4f8] sm:w-[124px]">
+                  <div className="relative min-h-[108px] w-[112px] shrink-0 overflow-hidden rounded-xl bg-[#ece4f8] sm:w-[124px]">
                     <Image
                       src={photo.src}
                       alt={photo.alt}

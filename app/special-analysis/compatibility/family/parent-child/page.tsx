@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import FamilyCompatibilityAnalysisClient from "@/app/components/FamilyCompatibilityAnalysisClient";
 import CompatibilityDetailHero from "@/app/components/CompatibilityDetailHero";
+import HwadamCompatibilityTeacherCard from "@/app/components/HwadamCompatibilityTeacherCard";
 import { isProductSaved } from "@/app/lib/interestedAnalyses/server";
 import { COMPATIBILITY_FAMILY_PARENT_CHILD_PRODUCT_ID } from "@/app/lib/specialAnalysisProducts";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
@@ -45,6 +46,7 @@ export default async function ParentChildCompatibilityPage() {
             title="가족 궁합 분석"
             description="먼저 어떤 가족 관계인지 선택한 뒤 서로의 역할과 소통 방식을 살펴보세요. 관계마다 다른 기준의 분석 리포트로 이어집니다."
           />
+          <div className="mx-auto w-full max-w-3xl"><HwadamCompatibilityTeacherCard placement="detail" relationship="가족 궁합" /></div>
           <div className="mt-3 flex flex-wrap items-center gap-2 px-2 text-sm text-[#71647f]">
             <span>현재 분석 대상</span>
             <strong className="font-semibold text-[#392954]">{activeProfile.label}</strong>

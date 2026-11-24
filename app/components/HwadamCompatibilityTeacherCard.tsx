@@ -36,20 +36,21 @@ export default function HwadamCompatibilityTeacherCard({
     <section
       data-compatibility-teacher={placement}
       aria-label="궁합 풀이 담당 화담 선생님"
-      className={`overflow-hidden rounded-[1.35rem] border border-[#e1cee9] bg-[linear-gradient(110deg,#fffafc_0%,#f4ecf8_65%,#eae0f2_100%)] text-[#32223c] shadow-[0_10px_26px_rgba(66,39,93,.07)] ${isCatalog ? "mb-5 mt-5" : "my-4"}`}
+      className={`overflow-hidden rounded-[1.35rem] border border-[#e1cee9] bg-[linear-gradient(110deg,#fffafc_0%,#f4ecf8_65%,#eae0f2_100%)] text-[#32223c] shadow-[0_10px_26px_rgba(66,39,93,.07)] ${isCatalog ? "mb-4" : "my-4"}`}
     >
       <div className="flex items-center gap-3 px-3 py-3 sm:gap-5 sm:px-6 sm:py-5">
         <div
           data-teacher-portrait="full"
-          data-portrait-fit="balanced"
-          className={`relative aspect-[1/2] shrink-0 self-start overflow-hidden rounded-2xl border border-[#d8c2dd] bg-[#efe3f3] shadow-[0_6px_16px_rgba(44,28,50,.09)] ${isCatalog ? "w-[88px] sm:w-[112px]" : "w-[80px] sm:w-[100px]"}`}
+          data-portrait-fit="natural"
+          className={`shrink-0 self-start overflow-hidden rounded-2xl border border-[#d8c2dd] bg-[#efe3f3] shadow-[0_6px_16px_rgba(44,28,50,.09)] ${isCatalog ? "w-[88px] sm:w-[112px]" : "w-[80px] sm:w-[100px]"}`}
         >
           <Image
             src="/teachers/hwadam.webp"
-            alt="자수정빛 한복과 전통 서재 배경이 함께 보이는 화담 선생님 사진"
-            fill
+            alt="분홍빛 한복을 입고 따뜻한 서재에 앉아 있는 화담 선생님"
+            width={240}
+            height={480}
             sizes={isCatalog ? "(max-width: 640px) 88px, 112px" : "(max-width: 640px) 80px, 100px"}
-            className="object-cover object-center"
+            className="block h-auto w-full"
             priority={isCatalog}
           />
         </div>

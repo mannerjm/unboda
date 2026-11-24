@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
+import HwadamCompatibilityTeacherCard from "@/app/components/HwadamCompatibilityTeacherCard";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
@@ -88,6 +89,8 @@ export default async function CompatibilityAnalysisPage() {
               <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-[#7851ae]">5개 상품</span>
             </div>
           </header>
+
+          <HwadamCompatibilityTeacherCard placement="catalog" />
 
           <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[#766786]">
             {activeProfile ? (

@@ -110,7 +110,7 @@ function ConsultingAnswer({ content }: { content: string }) {
     <div className="space-y-2">
       <div>
         <p className="mb-1 text-xs font-bold text-[#5e4bd1]">핵심 답변</p>
-        <p className="whitespace-pre-wrap text-base font-semibold leading-7">{shortAnswer}</p>
+        <p className="whitespace-pre-wrap text-base font-semibold leading-7 sm:text-[18px]">{shortAnswer}</p>
         {extraAnswer ? (
           <details className="mt-2 text-sm leading-6">
             <summary className="cursor-pointer font-semibold text-[#5e4bd1]">답변 더 읽기</summary>
@@ -216,14 +216,25 @@ export default function AiConsultingPortfolioClient({
   const [analysisSearch, setAnalysisSearch] = useState("");
   const [visibleAnalysisLimit, setVisibleAnalysisLimit] = useState(8);
   const [showMemories, setShowMemories] = useState(false);
-  const ownedLibraryRef = useRef<HTMLDetailsElement>(null);
-  const memoryPanelRef = useRef<HTMLDetailsElement>(null);
+  const [managementPanel, setManagementPanel] = useState<"owned" | "memory" | "guide" | null>(null);
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const initialChatProfile = useRef<string | null>(null);
   const latestChatId = portfolio?.messages[portfolio.messages.length - 1]?.id;
+  const initialMessageCount = portfolio?.messages.length ?? 0;
   useEffect(() => {
     const el = chatScrollRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [latestChatId, isSending, isLoading]);
+    if (!el || isLoading) return;
+    const firstView = initialChatProfile.current !== profileId;
+    initialChatProfile.current = profileId;
+    // A short initial conversation starts with the complete greeting; new replies
+    // and long histories still scroll to the newest message.
+    el.scrollTop = firstView && !isSending && initialMessageCount <= 2 ? 0 : el.scrollHeight;
+  }, [profileId, latestChatId, initialMessageCount, isSending, isLoading]);
+  useEffect(() => {
+    if (!managementPanel) return;
+    const ids = { owned: "owned-analysis-selector", memory: "undam-memory", guide: "undam-guide" } as const;
+    document.getElementById(ids[managementPanel])?.scrollIntoView({ block: "nearest", behavior: "auto" });
+  }, [managementPanel]);
   const [latestAnswerSource, setLatestAnswerSource] = useState<AiConsultingPortfolioSource | null>(null);
   const [olderMessages, setOlderMessages] = useState<AiConsultingPortfolioMessage[]>([]);
   const [hasOlderMessages, setHasOlderMessages] = useState(previewData?.state.hasOlderMessages ?? initialPortfolioState?.hasOlderMessages ?? false);
@@ -570,8 +581,7 @@ export default function AiConsultingPortfolioClient({
   // The library is rendered even when there are no current-input reports to
   // route questions through. It is never used directly as an AI answer source.
   const ownedAnalysisLibrary = portfolio && ownedAnalyses.length > 0 ? (
-<details ref={ownedLibraryRef} id="owned-analysis-selector" className="mt-3 scroll-mt-6 rounded-2xl border border-[#e1d3f3] bg-white p-4">
-              <summary className="cursor-pointer font-bold text-[#6841aa]">구매한 분석 보기 · {ownedAnalyses.length}개</summary>
+<section id="owned-analysis-selector" hidden={managementPanel !== "owned"} aria-label="구매한 분석 보기" className="mt-3 scroll-mt-6 rounded-2xl border border-[#e1d3f3] bg-white p-4">
               <div className="mt-4">
               <div className={portfolio.questionsRemaining > 0 ? "grid gap-5 lg:grid-cols-[1.05fr_0.95fr]" : "grid gap-5"}>
                 <div>
@@ -632,12 +642,28 @@ export default function AiConsultingPortfolioClient({
                 </div> : null}
               </div>
               </div>
-            </details>
+            </section>
   ) : null;
+
+  const managementMenu = (
+    <nav id="undam-management" aria-label="AI 상담 관리" className="mt-3 grid grid-cols-3 gap-2 rounded-2xl border border-[#e1d3f3] bg-white p-2 shadow-sm sm:gap-3 sm:p-3">
+      {ownedAnalyses.length > 0 ? (
+        <button type="button" aria-expanded={managementPanel === "owned"} aria-controls="owned-analysis-selector" onClick={() => setManagementPanel((value) => value === "owned" ? null : "owned")} className="flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-center text-[#6841aa] hover:bg-[#f5effb] aria-expanded:bg-[#eee2ff] sm:px-3">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7m-7 4h7"/></svg><span className="text-sm font-bold sm:text-base">구매한 분석</span><span className="text-xs text-slate-600">{ownedAnalyses.length}개 보유</span>
+        </button>
+      ) : <Link href="/purchased-analyses" className="flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-center text-[#6841aa] hover:bg-[#f5effb]"><span className="text-sm font-bold sm:text-base">구매한 분석</span><span className="text-xs text-slate-600">보관함 보기</span></Link>}
+      <button type="button" disabled={!portfolio?.analyses.length} aria-expanded={managementPanel === "memory"} aria-controls={portfolio?.analyses.length ? "undam-memory" : undefined} onClick={() => { setManagementPanel((value) => value === "memory" ? null : "memory"); setShowMemories(true); }} className="flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-center text-[#6841aa] hover:bg-[#f5effb] aria-expanded:bg-[#eee2ff] disabled:opacity-50 sm:px-3">
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span className="text-sm font-bold sm:text-base">기억 관리</span><span className="text-xs text-slate-600">{memories.length}개 저장</span>
+      </button>
+      <button type="button" aria-expanded={managementPanel === "guide"} aria-controls="undam-guide" onClick={() => setManagementPanel((value) => value === "guide" ? null : "guide")} className="flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-center text-[#6841aa] hover:bg-[#f5effb] aria-expanded:bg-[#eee2ff] sm:px-3">
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg><span className="text-sm font-bold sm:text-base">이용 안내</span><span className="text-xs text-slate-600">이용 방법</span>
+      </button>
+    </nav>
+  );
 
   return (
     <main className="min-h-screen bg-[#f5f0fb] px-3 py-3 text-[#25183d] sm:px-5 lg:px-6 lg:py-4">
-      <div className="mx-auto w-full max-w-[1600px]">
+      <div className="mx-auto w-full max-w-[1360px]">
 
 
         {isPreview ? (
@@ -663,31 +689,26 @@ export default function AiConsultingPortfolioClient({
           </section>
         ) : null}
 
-        <header className="relative isolate overflow-hidden rounded-[1.5rem] border border-[#ded0f5] bg-[radial-gradient(ellipse_at_86%_20%,#e2d0fa,transparent_65%),linear-gradient(120deg,#fcf9ff,#f0e5fb)] px-4 py-4 shadow-sm sm:px-7 lg:min-h-[232px] lg:px-8 lg:py-6">
-          <div className="relative z-10 min-w-0 lg:w-[58%] xl:w-[57%]">
+        <header className="relative isolate overflow-hidden rounded-[1.5rem] border border-[#ded0f5] bg-[radial-gradient(ellipse_at_86%_20%,#e2d0fa,transparent_65%),linear-gradient(120deg,#fcf9ff,#f0e5fb)] px-4 py-4 shadow-sm sm:px-7 lg:min-h-[248px] lg:px-9 lg:py-7">
+          <div className="relative z-10 min-w-0 lg:w-[62%] xl:w-[60%]">
             <p className="text-xs font-black tracking-[0.16em] text-[#7941d0]">UNBODA AI CONSULTING</p>
             <h1 className="mt-2 break-keep text-2xl font-black tracking-[-0.045em] sm:text-3xl xl:text-[clamp(1.9rem,2.6vw,2.65rem)]">운담 선생님과 AI 상담하기</h1>
-            <p className="mt-2 text-sm leading-6 text-[#58476d] sm:text-base">구매한 사주 분석을 바탕으로 궁금한 점을 편하게 물어보세요.</p>
+            <p className="mt-2 text-base leading-7 text-[#58476d] sm:text-lg">구매한 사주 분석을 바탕으로 궁금한 점을 편하게 물어보세요.</p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-[#d9c5f5] bg-white/90 px-3 py-2 text-sm shadow-sm">
+              <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-[#d9c5f5] bg-white/90 px-3 py-2 text-base shadow-sm">
                 <span className="inline-flex items-center gap-1.5 font-semibold"><svg aria-hidden="true" className="h-5 w-5 text-[#7139ce]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16v4a3 3 0 0 0 0 6v4H4v-4a3 3 0 0 0 0-6z"/><path d="M13 8v2m0 4v2"/></svg>공용 질문권 <strong className="text-lg text-[#6734c5]" aria-live="polite">{portfolio ? portfolio.questionsRemaining : "—"}회</strong></span>
                 {creditPurchaseHref && !isPreview ? (
-                  <Link href={creditPurchaseHref} className="rounded-full bg-[#eee2ff] px-3 py-2 text-sm font-bold text-[#6333b2] hover:bg-[#e5d2fa]">
+                  <Link href={creditPurchaseHref} className="rounded-full bg-[#eee2ff] px-3 py-2 text-base font-bold text-[#6333b2] hover:bg-[#e5d2fa]">
                     {creditCheckoutEnabled ? "질문권 구매하기 →" : "질문권 상품 안내 보기 →"}
                   </Link>
                 ) : null}
               </div>
-              <a href={ownedAnalyses.length ? "#owned-analysis-selector" : "/purchased-analyses"} onClick={() => { if (ownedLibraryRef.current) ownedLibraryRef.current.open = true; }} className="inline-flex items-center gap-2 rounded-full border border-[#d9c5f5] bg-white/90 px-4 py-3 text-sm font-bold text-[#6333b2] shadow-sm"><svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7m-7 4h7"/></svg>구매한 분석 보기 →</a>
+              <a href={ownedAnalyses.length ? "#owned-analysis-selector" : "/purchased-analyses"} onClick={(event) => { if (ownedAnalyses.length) { event.preventDefault(); setManagementPanel("owned"); document.getElementById("undam-management")?.scrollIntoView({ block: "nearest" }); } }} className="inline-flex items-center gap-2 rounded-full border border-[#d9c5f5] bg-white/90 px-4 py-3 text-base font-bold text-[#6333b2] shadow-sm"><svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7m-7 4h7"/></svg>구매한 분석 보기 →</a>
             </div>
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-[#675779]">
-              <span>현재 연결된 상담 분석 {portfolio ? `${portfolio.analyses.length}개` : "확인 중"}</span>
-              <span>모든 보유 분석에서 함께 사용</span>
-              {!creditCheckoutEnabled && !isPreview ? <span>현재 질문권 결제 준비 중</span> : null}
-              {portfolio && portfolio.analyses.length > 0 ? <a href="#undam-memory" onClick={() => { if (memoryPanelRef.current) memoryPanelRef.current.open = true; setShowMemories(true); }} className="font-bold underline underline-offset-2">기억 관리</a> : null}
-            </div>
+            {!creditCheckoutEnabled && !isPreview ? <p className="mt-2 text-xs font-medium text-[#675779]">현재 질문권 결제 준비 중</p> : null}
           </div>
-          <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[47%] max-w-[650px] lg:block" data-undam-banner="reference">
-            <Image src="/teachers/undam-consulting-banner.webp" alt="산과 소나무를 배경으로 한 운담 선생님 · 사주·운세 전문 AI 상담 선생님" fill sizes="(min-width: 1536px) 650px, 47vw" className="object-contain object-right-bottom [mask-image:linear-gradient(to_right,transparent,black_12%)]" priority unoptimized />
+          <div className="pointer-events-none absolute right-0 top-0 hidden h-full aspect-[2.07] lg:block" data-undam-banner="reference">
+            <Image src="/teachers/undam-consulting-banner.webp" alt="산과 소나무를 배경으로 한 운담 선생님 · 사주·운세 전문 AI 상담 선생님" fill sizes="520px" className="object-cover object-right-bottom" style={{ maskImage: "linear-gradient(to right, transparent 0%, black 23%), linear-gradient(to bottom, transparent 0%, black 8%)", maskComposite: "intersect" }} priority unoptimized />
           </div>
           <div className="mt-3 flex items-center gap-3 lg:hidden"><Image src="/teachers/undam-consulting.webp" alt="운담 선생님 AI 캐릭터" width={52} height={52} className="h-12 w-12 rounded-full object-cover object-top" /><span className="text-sm font-bold text-[#6841aa]">운담 선생님 · AI 상담</span></div>
         </header>
@@ -743,15 +764,12 @@ export default function AiConsultingPortfolioClient({
 
         {!isLoading && portfolio && portfolio.analyses.length > 0 ? (
           <>
-            <section data-section="portfolio-conversation" className="relative mt-3 flex h-[min(540px,70dvh)] min-h-[320px] min-w-0 flex-col overflow-hidden rounded-[1.5rem] border border-[#ded0f5] bg-white p-3 shadow-[0_6px_20px_rgba(76,46,130,0.08)] sm:p-4 lg:h-[calc(100dvh-17.5rem)] lg:min-h-[18rem]">
-              <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#eee6f8] pb-1.5">
-                <h2 className="text-sm font-bold text-[#6336a9]">통합 AI 상담</h2>
-                <span className="text-xs text-[#776687]">운담 선생님 · AI</span>
-              </div>
-              <p className="mt-1 shrink-0 text-xs leading-5 text-[#675779]">{reportEntryUnavailable ? "이전에 보시던 리포트가 현재 상담 범위에 없습니다. 지금 보유한 분석을 기준으로 질문해 주세요." : "주제를 선택할 필요 없이 질문해 주세요. AI가 구매한 분석 중 관련 리포트를 찾아 답변합니다."}</p>
+            <section data-section="portfolio-conversation" className="relative mt-3 flex h-[min(540px,70dvh)] min-h-[320px] min-w-0 flex-col overflow-hidden rounded-[1.5rem] border border-[#ded0f5] bg-white p-3 shadow-[0_6px_20px_rgba(76,46,130,0.08)] sm:p-5 lg:h-[calc(100dvh-18.5rem)] lg:min-h-[21rem]">
+              <h2 className="sr-only">통합 AI 상담</h2>
+              {reportEntryUnavailable ? <p role="status" className="shrink-0 rounded-xl bg-amber-50 px-3 py-2 text-sm leading-6 text-amber-900">이전에 보시던 리포트가 현재 상담 범위에 없습니다. 지금 보유한 분석을 기준으로 질문해 주세요.</p> : null}
 
 
-              <div ref={chatScrollRef} className="mt-2 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-1 py-2 sm:px-3" aria-label="상담 대화 기록">
+              <div ref={chatScrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-1 py-1 sm:px-3" aria-label="상담 대화 기록">
               {routingNotice ? (
                 <div className={routingNotice.kind === "outside"
                   ? "mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-6 text-amber-900"
@@ -766,8 +784,8 @@ export default function AiConsultingPortfolioClient({
               ) : null}
 
                 <div className="flex items-start gap-3">
-                  <Image src="/teachers/undam-consulting.webp" alt="" width={44} height={44} className="h-11 w-11 shrink-0 rounded-full object-cover object-top" />
-                  <div className="max-w-[85%]"><p className="mb-1 text-sm font-bold">운담 선생님</p><p className="w-fit rounded-2xl rounded-tl-sm bg-[#f1eafa] px-4 py-2.5 text-sm leading-6">안녕하세요. 운담 선생님입니다.<br/>오늘은 어떤 고민이 있으신가요?</p></div>
+                  <Image src="/teachers/undam-consulting.webp" alt="" width={56} height={56} className="h-12 w-12 shrink-0 rounded-full object-cover object-top sm:h-14 sm:w-14" />
+                  <div className="max-w-[85%]"><p className="mb-1 text-base font-bold">운담 선생님</p><p className="w-fit rounded-2xl rounded-tl-sm bg-[#f1eafa] px-4 py-2.5 text-base leading-7 sm:text-[17px]">안녕하세요. 운담 선생님입니다.<br/>오늘은 어떤 고민이 있으신가요?</p></div>
                 </div>
                 {hasOlderMessages ? <button type="button" onClick={() => void loadOlderMessages()} disabled={isLoadingOlder} className="w-full rounded-xl border border-[#dce1ef] bg-white px-4 py-3 text-sm font-semibold text-[#5e4bd1] disabled:opacity-50">{isLoadingOlder ? "이전 상담 불러오는 중..." : "이전 상담 더 보기"}</button> : null}
                 {!isSending && visibleChatMessages.length === 0 && (portfolio.questionsRemaining > 0 || hasOlderMessages) ? (
@@ -784,8 +802,8 @@ export default function AiConsultingPortfolioClient({
                   const savingMemory = message.role === "user" && savingMemoryMessageId === message.id;
 
                   return (
-                    <div key={message.id} className={message.role === "assistant" ? "relative min-w-0 space-y-1 pl-12 sm:pl-14" : "relative min-w-0 space-y-1 pr-12 sm:pr-14"}>
-                      {message.role === "assistant" ? <div className="flex items-center gap-2"><Image src="/teachers/undam-consulting.webp" alt="" width={44} height={44} className="absolute left-0 top-0 h-10 w-10 rounded-full object-cover object-top sm:h-11 sm:w-11" /><span className="text-sm font-bold">운담 선생님</span></div> : <span data-user-avatar="true" aria-hidden="true" className="absolute right-0 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#e8d7fc] text-[#7844d7] sm:h-11 sm:w-11"><svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2z"/></svg></span>}
+                    <div key={message.id} className={message.role === "assistant" ? "relative min-w-0 space-y-1 pl-14 sm:pl-[68px]" : "relative min-w-0 space-y-1 pr-14 sm:pr-[68px]"}>
+                      {message.role === "assistant" ? <div className="flex items-center gap-2"><Image src="/teachers/undam-consulting.webp" alt="" width={56} height={56} className="absolute left-0 top-0 h-12 w-12 rounded-full object-cover object-top sm:h-14 sm:w-14" /><span className="text-base font-bold">운담 선생님</span></div> : <span data-user-avatar="true" aria-hidden="true" className="absolute right-0 top-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#e8d7fc] text-[#7844d7] sm:h-14 sm:w-14"><svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2z"/></svg></span>}
                       <div className={message.role === "user" ? "flex justify-end" : "flex justify-start"}>
                         <span className="rounded-full bg-[#eef0f6] px-2.5 py-1 text-[11px] font-semibold text-slate-500">
                           {message.sourceTitle} · {message.sourceEditionLabel}
@@ -793,8 +811,8 @@ export default function AiConsultingPortfolioClient({
                       </div>
                       <div
                         className={message.role === "user"
-                          ? "ml-auto w-fit max-w-[90%] whitespace-pre-wrap break-words rounded-2xl rounded-tr-sm bg-[#e8d9fa] px-4 py-2.5 text-[15px] leading-6 text-[#302045]"
-                          : "w-fit max-w-[94%] break-words whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-[#f3edf9] px-4 py-3 text-[15px] leading-7 text-slate-800 sm:max-w-[82%]"}
+                          ? "ml-auto w-fit max-w-[90%] whitespace-pre-wrap break-words rounded-2xl rounded-tr-sm bg-[#e8d9fa] px-4 py-2.5 text-base leading-7 text-[#302045] sm:text-[17px]"
+                          : "w-fit max-w-[94%] break-words whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-[#f3edf9] px-4 py-3 text-base leading-7 text-slate-800 sm:max-w-[82%] sm:text-[17px]"}
                       >
                         {message.role === "assistant"
                           ? <ConsultingAnswer content={message.content} />
@@ -888,7 +906,7 @@ export default function AiConsultingPortfolioClient({
                     placeholder="운담 선생님에게 궁금한 내용을 입력해 주세요."
                     rows={1}
                     disabled={isSending}
-                    className="min-h-10 min-w-0 flex-1 resize-none rounded-xl bg-white px-3 py-2 text-[15px] leading-6 text-slate-800 outline-none ring-[#6f5ce7] focus:ring-1 disabled:opacity-60"
+                    className="min-h-10 min-w-0 flex-1 resize-none rounded-xl bg-white px-3 py-2 text-base leading-7 text-slate-800 outline-none ring-[#6f5ce7] focus:ring-1 disabled:opacity-60"
                   />
                     {portfolio.questionsRemaining > 0 ? (
                       <button
@@ -927,10 +945,10 @@ export default function AiConsultingPortfolioClient({
                 </form>
             </section>
 
+            {managementMenu}
             {ownedAnalysisLibrary}
 
-            <details ref={memoryPanelRef} id="undam-memory" className="mt-3 rounded-2xl border border-[#e1d3f3] bg-white p-4">
-              <summary className="cursor-pointer font-bold text-[#6841aa]">기억 관리 · {memories.length}개 저장됨</summary>
+            <section id="undam-memory" hidden={managementPanel !== "memory"} aria-label="기억 관리" className="mt-3 rounded-2xl border border-[#e1d3f3] bg-white p-4">
               <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs font-bold tracking-[0.14em] text-[#6f5ce7]">내 상황 · 목표</p>
@@ -993,14 +1011,15 @@ export default function AiConsultingPortfolioClient({
                   ))}
                 </div>
               ) : null}
-            </details>
+            </section>
 
           </>
         ) : null}
 
+        {(!portfolio || isLoading || portfolio.analyses.length === 0) ? managementMenu : null}
         {!isLoading && portfolio?.analyses.length === 0 ? ownedAnalysisLibrary : null}
 
-        <details className="mt-3 rounded-2xl border border-[#e1d3f3] bg-white p-4"><summary className="cursor-pointer font-bold text-[#6841aa]">이용 안내</summary><div className="mt-2"><TrustPrinciplesCard compact /><p className="mt-2 text-xs leading-5 text-slate-600">새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다. 출생 정보가 다른 시기의 해석은 섞지 않습니다. 운담 선생님은 AI 캐릭터입니다.</p></div></details>
+        <section id="undam-guide" hidden={managementPanel !== "guide"} aria-label="이용 안내" className="mt-3 rounded-2xl border border-[#e1d3f3] bg-white p-4"><h2 className="font-bold text-[#6841aa]">이용 안내</h2><div className="mt-2"><TrustPrinciplesCard compact /><p className="mt-2 text-sm leading-6 text-slate-600">현재 연결된 상담 분석 {portfolio ? `${portfolio.analyses.length}개` : "확인 중"} · 질문권은 모든 보유 분석에서 함께 사용합니다. 주제를 선택할 필요 없이 질문해 주세요. AI가 구매한 분석 중 관련 리포트를 찾아 답변합니다.</p><p className="mt-2 text-sm leading-6 text-slate-600">새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다. 출생 정보가 다른 시기의 해석은 섞지 않습니다. 운담 선생님은 AI 캐릭터입니다.</p></div></section>
         {memoryError ? (
           <p className="mt-5 rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">{memoryError}</p>
         ) : null}

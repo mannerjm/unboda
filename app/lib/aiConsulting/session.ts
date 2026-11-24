@@ -255,3 +255,17 @@ export async function ensureAiConsultingThreadForAnalysis(input: {
 
   return row.id;
 }
+
+/** General chat uses a verified paid credit purchase, not a report entitlement. */
+export async function ensureGeneralAiConsultingThread(input: { userId: string; profileId: string }): Promise<string> {
+  const client = createAdminClient();
+  const { data, error } = await client.rpc("ensure_general_ai_consulting_grant", {
+    p_user_id: input.userId, p_profile_id: input.profileId,
+  });
+  const grant = Array.isArray(data) ? data[0] as { id?: string } | undefined : undefined;
+  if (error || !grant?.id) throw new Error(error?.message ?? "AI_CONSULTING_GENERAL_GRANT_FAILED");
+  const response = await client.rpc("get_or_create_ai_consulting_thread", { p_grant_id: grant.id, p_title: "운담 선생님 일반 AI 상담" });
+  const thread = Array.isArray(response.data) ? response.data[0] as { id?: string } | undefined : undefined;
+  if (response.error || !thread?.id) throw new Error(response.error?.message ?? "AI_CONSULTING_GENERAL_THREAD_FAILED");
+  return thread.id;
+}

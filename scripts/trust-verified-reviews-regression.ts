@@ -116,7 +116,7 @@ for (const report of [standardReport, pairReport, parentReport, siblingReport, o
 }
 
 for (const copy of [
-  "구매한 분석을 기준으로 AI 상담",
+  "리포트 없이도 AI 상담",
   "내가 허용한 내용만 장기 기억",
   "완료된 구매 리포트는 다시 열람",
   "정상 답변 완료 기준으로 질문권 차감",

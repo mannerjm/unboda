@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { isGeneralConsultingSource } from "@/app/lib/aiConsulting/generalSource";
+import { getAiConsultingCreditBalance } from "@/app/lib/aiConsulting/server";
 import Script from "next/script";
 import CreditCheckoutClient from "./CreditCheckoutClient";
 import {
@@ -59,7 +61,8 @@ export default async function AiConsultingCreditsPage({
   const returnParams = profileId && productId && edition
     ? new URLSearchParams({ profileId, productId, edition }).toString()
     : "";
-  const consultationHref = returnParams ? `/ai-consulting?${returnParams}` : "/";
+  const general = Boolean(productId && edition && isGeneralConsultingSource(productId, edition));
+  const consultationHref = returnParams && !general ? `/ai-consulting?${returnParams}` : "/ai-consulting";
   const currentHref = returnParams ? `/ai-consulting/credits?${returnParams}` : "/ai-consulting/credits";
   const user = await getCurrentUser();
 
@@ -68,7 +71,7 @@ export default async function AiConsultingCreditsPage({
       <main className="flex min-h-screen items-center justify-center bg-[#f5f7fc] px-5 text-[#11162d]">
         <section className="w-full max-w-xl rounded-[1.75rem] border border-[#dce1ef] bg-white p-8 text-center shadow-sm">
           <h1 className="text-xl font-bold">로그인이 필요합니다</h1>
-          <p className="mt-3 text-sm leading-7 text-slate-700">AI 질문권은 구매한 심층 분석과 같은 계정·프로필에 연결됩니다.</p>
+          <p className="mt-3 text-sm leading-7 text-slate-700">AI 질문권은 현재 계정·프로필에 연결됩니다. 리포트 없이도 상담할 수 있습니다.</p>
           <Link
             href={`/auth/login?returnTo=${encodeURIComponent(currentHref)}`}
             className="mt-6 inline-flex rounded-2xl bg-[#171a3d] px-5 py-3 text-sm font-semibold text-white"
@@ -105,7 +108,7 @@ export default async function AiConsultingCreditsPage({
 
   let session;
   try {
-    session = await getAiConsultingSessionState({
+    session = general ? { state: "ready" as const, questionsRemaining: await getAiConsultingCreditBalance({ userId: user.id, profileId: profile.id }) } : await getAiConsultingSessionState({
       userId: user.id,
       profileId: profile.id,
       productId,
@@ -163,9 +166,9 @@ export default async function AiConsultingCreditsPage({
         <header className="mt-4 flex flex-col gap-3 rounded-[1.75rem] border border-[#35375f] bg-[linear-gradient(135deg,#111734,#282052)] p-5 text-white shadow-[0_12px_30px_rgba(24,29,67,0.12)] sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
             <p className="text-xs font-bold tracking-[0.12em] text-[#c9c3ff]">AI 질문권 · 상담 이어가기</p>
-            <h1 className="mt-1 text-2xl font-black">리포트를 읽고 남은 궁금증을 이어서 물어보세요</h1>
+            <h1 className="mt-1 text-2xl font-black">궁금한 점을 운담 선생님에게 물어보세요</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-200">
-              질문권은 현재 프로필의 보유 분석에서 함께 사용하고, 지난 상담과 직접 저장한 내 상황을 이어서 질문할 수 있어요.
+              질문권은 현재 프로필의 일반 상담과 구매 분석 상담에서 함께 사용하고, 지난 상담과 직접 저장한 내 상황을 이어서 질문할 수 있어요.
             </p>
           </div>
           <div className="self-start rounded-2xl border border-white/20 bg-white/10 px-4 py-3 sm:self-center">
@@ -230,7 +233,7 @@ export default async function AiConsultingCreditsPage({
         </section>
 
         <p className="mt-6 text-xs leading-6 text-slate-500">
-          질문권만으로 구매하지 않은 유료 분석 내용이 열리지는 않습니다. 범위를 벗어난 질문, 확인 요청, 안전 안내, 생성 실패에는 질문권이 차감되지 않습니다.
+          질문권만으로 구매하지 않은 유료 분석 내용이 열리지는 않습니다. 확인 요청, 안전 안내, 생성 실패에는 질문권이 차감되지 않습니다.
         </p>
       </div>
     </main>

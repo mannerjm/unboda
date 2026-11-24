@@ -29,7 +29,7 @@ assert(checkout.includes("reviewCheckout ? (") && checkout.includes("토스 심�
 assert(checkout.includes("bundle.priceKrw.toLocaleString") && checkout.includes("bundle.questions}회 구매하기"), "each bundle must show its own server-defined price and clear purchase CTA");
 assert(checkout.includes("가볍게 이어보기") && checkout.includes("충분히 이어보기") && checkout.includes("오래 이어보기"), "each credit pack must explain the customer use case instead of showing only a number");
 assert(checkout.includes("formatPerQuestionPrice") && checkout.includes("사용하지 않은 질문권은 현재 프로필에 남아"), "credit purchase UX must make per-question value and persistence clear");
-assert(creditsPage.includes("리포트를 읽고 남은 궁금증을 이어서 물어보세요") && creditsPage.includes("지난 상담과 직접 저장한 내 상황을 이어서 질문할 수 있어요."), "credit page hero must explain why a customer would buy more questions");
+assert(creditsPage.includes("궁금한 점을 운담 선생님에게 물어보세요") && creditsPage.includes("지난 상담과 직접 저장한 내 상황을 이어서 질문할 수 있어요."), "credit page hero must explain why a customer would buy more questions");
 assert.deepEqual(AI_CONSULTING_CREDIT_BUNDLES.map((bundle) => bundle.priceKrw), [2900, 4500, 8500], "credit price ladder must remain 2,900 / 4,500 / 8,500 KRW");
 for (const { questions, priceKrw } of AI_CONSULTING_CREDIT_BUNDLES) {
   assert(questions > 0 && priceKrw > 0, "bundles must have a positive count and price");

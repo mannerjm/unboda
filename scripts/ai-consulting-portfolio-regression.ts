@@ -28,8 +28,8 @@ assert(portfolio.includes("routingScore("), "portfolio router must rank eligible
 assert(portfolio.includes('scope.scopeTier === "CORE" ? 20') && portfolio.includes('scope.scopeTier === "BRIDGE" ? 5'), "owned CORE reports must outrank broader BRIDGE answers");
 assert(portfolio.includes("isAiConsultingContinuationQuestion") && portfolio.includes("continuationFollowup") && portfolio.includes("continuation: continuationFollowup && isPreferredSource"), "validated short follow-ups must inherit only the previous owned source, not every report");
 assert(answerPipeline.includes("continuation: input.continuation === true"), "answer pipeline must reproduce the server-validated continuation scope before charging");
-assert(portfolio.includes('reason: "AMBIGUOUS_OWNED_ANALYSIS"') && !portfolio.includes('state: "clarify_source"'), "ambiguous questions must request a clearer topic without requiring report selection or charging");
-assert(portfolio.includes('state: "outside_portfolio"'), "questions outside all owned analyses must fail closed");
+assert(portfolio.includes("ensureGeneralAiConsultingThread") && !portfolio.includes('state: "clarify_source"'), "ambiguous portfolio questions may use independent consultation");
+assert(portfolio.includes("answerGeneralPortfolioQuestion"), "questions outside owned analyses must have a general answer route");
 assert(portfolio.includes("preferredProductId") && portfolio.includes("preferredEditionKey"), "a report-originated question must be able to prefer its exact owned report");
 assert(portfolio.includes("ensureAiConsultingThreadForAnalysis"), "portfolio routing must preserve exact report entitlement/thread boundaries");
 assert(portfolio.includes("answerAiConsultingQuestion"), "portfolio answers must reuse the existing charge-safe grounded answer pipeline");
@@ -50,10 +50,10 @@ assert(client.includes("initialPortfolioState ?? null") && client.includes("setP
 
 for (const copy of [
   "운담 선생님과 AI 상담하기",
-  "새 분석을 구매하면 이 상담에서 답할 수 있는 범위도 함께 넓어집니다.",
+  "리포트 구매 여부와 관계없이 질문권으로 상담할 수 있습니다.",
   "공용 질문권",
   "모든 보유 분석에서 함께 사용",
-  "주제를 선택할 필요 없이 질문해 주세요.",
+  "관련 구매 분석이 있으면 참고하며, 없으면 일반 AI 상담으로 답변합니다.",
   "답할 수 없는 질문은 차감하지 않아요.",
 ]) {
   assert(client.includes(copy), `unified AI consulting UX must expose: ${copy}`);
@@ -68,7 +68,7 @@ assert(client.includes("filteredAnalyses.slice(0, visibleAnalysisLimit)") && cli
 assert(client.includes("visibleAnalyses.map((analysis) => (") && !client.includes("setChosenSource") && !client.includes("loadPortfolio(analysis)") && !client.includes("시작 기준"), "purchased report chips must remain read-only and must not set the consultation basis");
 assert(portfolio.includes("ownedAnalyses: AiConsultingPortfolioAnalysis[]") && portfolio.includes("ownedAnalyses.push(") && portfolio.includes("analyses: currentAnalyses, ownedAnalyses"), "all completed owned reports must be returned separately from the automatic routing set");
 assert(portfolio.includes("AnalysisInputSnapshotSchema.safeParse(") && portfolio.includes("canonicalAnalysisInputMatches(") && portfolio.includes("historicalCohort"), "previous-input report entry must route across every matching purchase-time snapshot, without mixing changed birth times");
-assert(client.includes("portfolio?.ownedAnalyses ?? []") && client.includes("ownedAnalysisLibrary") && client.includes("portfolio?.analyses.length === 0 ? ownedAnalysisLibrary : null"), "owned reports must be discoverable even when no current-input reports can answer new questions");
+assert(client.includes("portfolio?.ownedAnalyses ?? []") && client.includes("ownedAnalysisLibrary") && client.includes("{!isLoading && portfolio ? ("), "owned reports must be discoverable even when no current-input reports can answer new questions");
 assert(client.includes('"#owned-analysis-selector"') && client.includes('id="owned-analysis-selector"') && client.includes("구매한 분석 보기 →"), "customers can inspect owned analyses without choosing the active consultation basis");
 assert(client.includes("전체 보기 · +") && client.includes("접기"), "owned analysis display must support expand/collapse for the full portfolio");
 assert(client.includes("최근 구매한 분석 ${Math.min(3, ownedAnalyses.length)}개") && client.includes("전체 보유 분석 ${filteredAnalyses.length}개"), "owned-analysis labels must show the full purchased count even when eligible consultation scope differs");
@@ -139,7 +139,7 @@ assert(answerPipeline.includes("'적절합니다', '우선됩니다', '검토하
 assert(client.includes("const firstSentenceEnd = main.search(") && client.includes("답변 더 읽기") && client.includes("const shortAnswer = hasLongAnswer"), "long older paid answers must retain their full text while starting with a complete short sentence");
 assert(client.includes("다음 상담에서도 기억할까요?") && client.includes("내가 허용한 내용만 장기 기억으로 남습니다.") && client.includes("이번만 사용") && client.includes("기억하기"), "customer memory UX must require explicit confirmation and make non-persistence easy");
 
-assert(client.includes("function ConsultingAnswer({ content }") && client.includes('<ConsultingAnswer content={message.content} />') && client.includes("핵심 답변") && client.includes("지금 해볼 일") && client.includes("구매 분석 근거 보기") && client.includes("구매 리포트에서 확인한 내용") && client.includes("직접 알려주신 상황 · 목표"), "answer layout should show the answer and action first and let customers expand the underlying report evidence");
+assert(client.includes("function ConsultingAnswer({ content,") && client.includes('<ConsultingAnswer content={message.content} general=') && client.includes("상담 근거 보기") && client.includes("핵심 답변") && client.includes("지금 해볼 일") && client.includes("구매 분석 근거 보기") && client.includes("구매 리포트에서 확인한 내용") && client.includes("직접 알려주신 상황 · 목표"), "answer layout should show the answer and action first and let customers expand the underlying report evidence");
 assert(client.includes('if (!main || !action || !report || userFacts === undefined)') && client.includes('return <div className="whitespace-pre-wrap">{content}</div>'), "unknown older answer formats must remain readable without losing content");
 assert(client.includes("MEMORY_KIND_LABELS") && client.includes("memoryDraftKind") && client.includes("setMemoryDraftKind") && !client.includes("<select"), "memory categories must use simple customer-language chips rather than technical fields");
 assert(client.includes("setMemoryDraftContent(message.content.slice(0, 300))") && client.includes("kind: memoryDraftKind") && client.includes("const content = memoryDraftContent.trim()") && !client.includes("saveAiConsultingMemory("), "memory candidate may start from the customer message, but persistence must use only the customer-confirmed draft and selected category");

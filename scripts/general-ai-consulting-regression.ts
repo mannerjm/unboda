@@ -1,0 +1,15 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { evaluateGeneralAiConsultingScope } from "../app/lib/aiConsultingScope";
+import { isGeneralConsultingSource } from "../app/lib/aiConsulting/generalSource";
+const read=(path:string)=>readFileSync(path,"utf8");
+for(const question of ["이직할지 고민됩니다","파스타 만드는 법 알려주세요","친구와 화해하는 방법은 무엇인가요","올해 재물운을 어떻게 해석할까요"]) assert.equal(evaluateGeneralAiConsultingScope(question).decision,"ALLOW");
+assert.equal(isGeneralConsultingSource("ai-consulting-general","general-v1"),true);
+assert.equal(isGeneralConsultingSource("ai-consulting-general","fake"),false);
+assert.equal(isGeneralConsultingSource("wealth","general-v1"),false);
+const sql=read("supabase/migrations/20261124130000_general_ai_consulting.sql");
+assert(sql.includes("AI_CONSULTING_NO_PROFILE_CREDIT")&&sql.includes("AI_CONSULTING_PROFILE_BOUNDARY_MISMATCH")&&sql.includes("from public,anon,authenticated"));
+assert(sql.includes("AI_CONSULTING_BASE_ENTITLEMENT_REVOKED")&&sql.includes("AI_CONSULTING_BASE_ENTITLEMENT_INACTIVE"));
+assert(read("app/lib/aiConsulting/answerPipeline.ts").includes("general ? buildGeneralPrompt"));
+assert(read("app/lib/aiConsulting/session.ts").includes("ensure_general_ai_consulting_grant"));
+console.log("general-ai-consulting-regression: PASS");

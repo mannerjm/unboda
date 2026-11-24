@@ -19,7 +19,9 @@ import {
   recordAiConsultingFailureOutcome,
   recordAiConsultingSuccessOutcome,
 } from "./operations";
-import { ensureAiConsultingThreadForAnalysis } from "./session";
+import { ensureAiConsultingThreadForAnalysis, ensureGeneralAiConsultingThread } from "./session";
+import { GENERAL_CONSULTING_SOURCE, isGeneralConsultingSource } from "./generalSource";
+import { evaluateGeneralAiConsultingScope } from "../aiConsultingScope";
 import { getAiConsultingCreditBalance } from "./server";
 
 export type AiConsultingPortfolioAnalysis = {
@@ -269,10 +271,11 @@ async function listPortfolioMessages(input: {
   userId: string;
   profileId: string;
   analyses: readonly AiConsultingPortfolioAnalysis[];
+  includeGeneral: boolean;
   before?: string;
   beforeId?: string;
 }): Promise<{ messages: AiConsultingPortfolioMessage[]; hasOlderMessages: boolean }> {
-  if (input.analyses.length === 0) return { messages: [], hasOlderMessages: false };
+  if (input.analyses.length === 0 && !input.includeGeneral) return { messages: [], hasOlderMessages: false };
 
   const sourceByKey = new Map(
     input.analyses.map((analysis) => [
@@ -294,7 +297,7 @@ async function listPortfolioMessages(input: {
   }
 
   const threads = ((threadData ?? []) as ThreadRow[])
-    .filter((thread) => sourceByKey.has(analysisKey(thread.base_product_id, thread.analysis_edition_key)));
+    .filter((thread) => sourceByKey.has(analysisKey(thread.base_product_id, thread.analysis_edition_key)) || (input.includeGeneral && isGeneralConsultingSource(thread.base_product_id, thread.analysis_edition_key)));
 
   if (threads.length === 0) return { messages: [], hasOlderMessages: false };
 
@@ -325,7 +328,7 @@ async function listPortfolioMessages(input: {
   const messages = ((messageData ?? []).slice(0, 40) as MessageRow[]).flatMap((message) => {
     const thread = threadById.get(message.thread_id);
     if (!thread) return [];
-    const source = sourceByKey.get(analysisKey(thread.base_product_id, thread.analysis_edition_key));
+    const source = sourceByKey.get(analysisKey(thread.base_product_id, thread.analysis_edition_key)) ?? (input.includeGeneral && isGeneralConsultingSource(thread.base_product_id, thread.analysis_edition_key) ? GENERAL_CONSULTING_SOURCE : undefined);
     if (!source) return [];
 
     return [{
@@ -370,6 +373,7 @@ export async function getAiConsultingPortfolioState(input: {
       userId: input.userId,
       profileId: input.profileId,
       analyses: messageAnalyses,
+      includeGeneral: !input.messageSource || isGeneralConsultingSource(input.messageSource.productId, input.messageSource.analysisEditionKey),
       before: input.messageBefore,
       beforeId: input.messageBeforeId,
     }),
@@ -395,6 +399,22 @@ function toSource(analysis: AiConsultingPortfolioAnalysis): AiConsultingPortfoli
   };
 }
 
+async function answerGeneralPortfolioQuestion(input: { userId: string; profileId: string; requestId: string; question: string }, questionsRemaining: number): Promise<AiConsultingPortfolioQuestionResult> {
+  const scope = evaluateGeneralAiConsultingScope(input.question);
+  if (scope.decision !== "ALLOW") return { state: "non_chargeable", message: scope.userMessage, reason: scope.reason, questionsRemaining };
+  if (questionsRemaining <= 0) return { state: "credit_required", questionsRemaining: 0, source: GENERAL_CONSULTING_SOURCE };
+  const threadId = await ensureGeneralAiConsultingThread(input);
+  try {
+    const result = await answerAiConsultingQuestion({ ...input, threadId });
+    if (result.state !== "answered") return { state: "non_chargeable", message: result.userMessage, reason: result.scopeReason, questionsRemaining: result.questionsRemaining };
+    try { await recordAiConsultingSuccessOutcome({ userId: input.userId, profileId: input.profileId, requestId: input.requestId, threadId, assistantMessageId: result.assistantMessageId }); } catch (error) { console.error("[general-consulting] success telemetry failed", error instanceof Error ? error.message : "unknown"); }
+    return { state: "answered", questionsRemaining: result.questionsRemaining, source: GENERAL_CONSULTING_SOURCE };
+  } catch (error) {
+    try { await recordAiConsultingFailureOutcome({ userId: input.userId, profileId: input.profileId, requestId: input.requestId, threadId, error }); } catch { /* best-effort telemetry */ }
+    throw error;
+  }
+}
+
 export async function answerAiConsultingPortfolioQuestion(input: {
   userId: string;
   profileId: string;
@@ -418,14 +438,8 @@ export async function answerAiConsultingPortfolioQuestion(input: {
     includePreviousSource,
   });
 
-  if (state.analyses.length === 0) {
-    return {
-      state: "outside_portfolio",
-      message: state.previousAnalysesExcluded > 0
-        ? "현재 출생 정보와 일치하는 완료 리포트가 없습니다. 이전 출생정보 기준 리포트는 자동 상담 범위에서 제외되며, 해당 리포트에서 직접 들어오면 기존 상담을 이어갈 수 있습니다."
-        : "완료된 구매 리포트가 아직 없습니다. 유료 리포트가 완성되면 보유 분석이 AI 상담 범위에 자동으로 추가됩니다.",
-      questionsRemaining: state.questionsRemaining,
-    };
+  if (state.analyses.length === 0 || (input.preferContinuation === true && input.preferredProductId === GENERAL_CONSULTING_SOURCE.productId && isAiConsultingContinuationQuestion(input.question))) {
+    return answerGeneralPortfolioQuestion(input, state.questionsRemaining);
   }
 
   const continuationFollowup =
@@ -468,21 +482,7 @@ export async function answerAiConsultingPortfolioQuestion(input: {
     );
 
   if (allowed.length === 0) {
-    const clarify = evaluated.find((candidate) => candidate.scope.decision === "CLARIFY");
-    if (clarify) {
-      return {
-        state: "non_chargeable",
-        message: "보유한 분석 중 어떤 내용을 이어서 묻는지 조금 더 구체적으로 적어 주세요. 예: 재물 흐름, 이직 판단, 이번 달 흐름, 연인과의 갈등처럼 질문의 주제를 함께 적어 주세요.",
-        reason: clarify.scope.reason,
-        questionsRemaining: state.questionsRemaining,
-      };
-    }
-
-    return {
-      state: "outside_portfolio",
-      message: "현재 보유한 유료 분석의 범위에서는 이 질문에 답할 근거가 없습니다. 관련 분석을 추가로 구매하면 같은 AI 상담에서 새 분석 범위가 자동으로 확장됩니다.",
-      questionsRemaining: state.questionsRemaining,
-    };
+    return answerGeneralPortfolioQuestion(input, state.questionsRemaining);
   }
 
   const preferredCandidate = input.preferredProductId && input.preferredEditionKey
@@ -520,12 +520,7 @@ export async function answerAiConsultingPortfolioQuestion(input: {
     && next.score === top.score
     && next.analysis.productId !== top.analysis.productId
   ) {
-    return {
-      state: "non_chargeable",
-      message: "질문과 연결되는 구매 분석이 여러 개 있어요. 궁금한 주제나 시기를 조금 더 구체적으로 적어 주세요. 질문권은 차감되지 않습니다.",
-      reason: "AMBIGUOUS_OWNED_ANALYSIS",
-      questionsRemaining: state.questionsRemaining,
-    };
+    return answerGeneralPortfolioQuestion(input, state.questionsRemaining);
   }
 
   if (state.questionsRemaining <= 0) {

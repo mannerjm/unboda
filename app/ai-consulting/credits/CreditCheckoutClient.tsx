@@ -30,7 +30,7 @@ declare global {
 const BUNDLE_GUIDANCE: Record<CreditBundle["id"], { title: string; description: string }> = {
   "ai-consulting-3": {
     title: "가볍게 이어보기",
-    description: "리포트를 읽고 궁금한 점 몇 가지만 더 물어볼 때",
+    description: "궁금한 점 몇 가지만 물어볼 때",
   },
   "ai-consulting-5": {
     title: "충분히 이어보기",
@@ -38,7 +38,7 @@ const BUNDLE_GUIDANCE: Record<CreditBundle["id"], { title: string; description: 
   },
   "ai-consulting-10": {
     title: "오래 이어보기",
-    description: "여러 보유 분석을 오가며 계속 상담하고 싶을 때",
+    description: "여러 고민을 오가며 계속 상담하고 싶을 때",
   },
 };
 
@@ -135,7 +135,7 @@ export default function CreditCheckoutClient({
           <h2 id="question-bundles-heading" className="mt-1 text-xl font-black text-[#11162d]">
             내게 맞는 질문 횟수를 골라보세요
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">질문권은 현재 프로필에서 보유한 분석의 AI 상담에 함께 사용할 수 있어요. 신규 구매 질문권 이용기간은 결제일부터 12개월이며, 기간 내 미사용분은 중도해지·환불을 신청할 수 있습니다.</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">질문권은 현재 프로필의 일반 상담과 구매 분석 상담에 함께 사용할 수 있어요. 신규 구매 질문권 이용기간은 결제일부터 12개월이며, 기간 내 미사용분은 중도해지·환불을 신청할 수 있습니다.</p>
         </div>
         <p className="self-start rounded-full bg-[#f3f1ff] px-4 py-2 text-sm font-bold text-[#5e4bd1] sm:self-center">
           현재 {currentBalance}회 남음
@@ -179,7 +179,7 @@ export default function CreditCheckoutClient({
 
       <div className="mt-4 rounded-2xl bg-[#f7f8fc] px-4 py-4 text-sm leading-6 text-slate-600">
         <p><strong className="font-semibold text-slate-800">정상 AI 답변 1회 = 질문권 1회</strong>가 차감됩니다.</p>
-        <p className="mt-1">사용하지 않은 질문권은 현재 프로필에 남아 다음 상담에서도 사용할 수 있어요. 범위를 벗어난 질문이나 답변 생성 실패에는 차감되지 않습니다.</p>
+        <p className="mt-1">사용하지 않은 질문권은 현재 프로필에 남아 다음 상담에서도 사용할 수 있어요. 안전 안내나 답변 생성 실패에는 차감되지 않습니다.</p>
       </div>
 
       {errorMessage ? (

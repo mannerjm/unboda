@@ -45,20 +45,18 @@ function getRecommendationQuestion(productId: string, fallback: string): string 
   return getReadablePaidQuestion(productId, getPaidAnalysisTopicConfig(productId)?.purchaseDecision.decisionQuestion ?? fallback);
 }
 
-function RecommendationPhoto({ productId, primary = false }: { productId: string; primary?: boolean }) {
+function RecommendationPhoto({ productId }: { productId: string }) {
   const photo = PREMIUM_PRODUCT_PHOTOS[productId];
   return (
     <span
-      className={primary
-        ? "relative block h-32 w-32 shrink-0 overflow-hidden rounded-[1.15rem] bg-[#e6ddf6] sm:h-44 sm:w-44"
-        : "relative block h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-[#e6ddf6] sm:h-28 sm:w-28"}
+      className="relative block h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-[#e6ddf6] sm:h-36 sm:w-36"
     >
       {photo ? (
         <Image
           src={photo.src}
           alt={photo.alt}
           fill
-          sizes={primary ? "(max-width: 640px) 128px, 176px" : "(max-width: 640px) 96px, 112px"}
+          sizes="(max-width: 640px) 96px, 144px"
           className="object-cover"
         />
       ) : (
@@ -96,20 +94,20 @@ function RecommendationCard({
     <Link
       href={href}
       prefetch={false}
-      className={"group block w-full rounded-[1.5rem] border p-4 text-left transition hover:-translate-y-0.5 hover:border-[#a789e9] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8060ca] " + cardStyle + (primary ? " sm:p-5" : "")}
+      className={"group flex h-full w-full flex-col rounded-[1.5rem] border p-4 sm:p-5 text-left transition hover:-translate-y-0.5 hover:border-[#a789e9] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8060ca] " + cardStyle}
     >
-      <div className="flex items-start gap-4">
-        <RecommendationPhoto productId={product.id} primary={primary} />
+      <div className="flex flex-1 items-start gap-4">
+        <RecommendationPhoto productId={product.id} />
         <div className="flex min-w-0 flex-1 flex-col self-stretch">
           <p className="text-xs font-extrabold tracking-[0.03em] text-[#7654b5]">
             {primary ? "01 · 가장 먼저 추천해요" : "0" + (index + 1) + " · 함께 살펴볼 분석"}
           </p>
           <p className="mt-1 text-xs font-semibold leading-5 text-[#7b718b]">{displayTitle}</p>
-          <h3 className={"mt-2 font-black tracking-[-0.025em] text-[#211737] " + (primary ? "text-lg leading-7 sm:text-xl sm:leading-8" : "text-[15px] leading-6 sm:text-base")}>
+          <h3 className="mt-2 break-keep text-base font-black leading-6 tracking-[-0.025em] text-[#211737] sm:text-lg sm:leading-7">
             {question}
           </h3>
-          <p className={"mt-2 text-xs leading-5 text-[#655a75] " + (primary ? "line-clamp-2 sm:text-sm sm:leading-6" : "line-clamp-2")}>
-            {primary ? product.description : getShortRecommendationReason(recommendation)}
+          <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#655a75] sm:text-sm sm:leading-6">
+            {product.description}
           </p>
           <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3">
             <span className="text-base font-extrabold text-[#211737]">{price}</span>
@@ -119,12 +117,9 @@ function RecommendationCard({
           </div>
         </div>
       </div>
-      {primary ? (
-        <div className="mt-4 rounded-xl bg-[#f4eefb] px-4 py-3 text-xs leading-5 text-[#594a73] sm:text-sm sm:leading-6">
-          <span className="font-black text-[#6a4ca8]">추천 이유 </span>
-          {getShortRecommendationReason(recommendation)}
-        </div>
-      ) : null}
+      <div className="mt-4 rounded-xl bg-[#f4eefb] px-4 py-3 text-xs leading-5 text-[#594a73] sm:text-sm sm:leading-6">
+        <span className="line-clamp-2"><span className="font-black text-[#6a4ca8]">추천 이유 </span>{getShortRecommendationReason(recommendation)}</span>
+      </div>
     </Link>
   );
 }
@@ -151,27 +146,14 @@ export default function RecommendationTop3({
         </div>
         <p className="text-xs font-medium text-[#766d85]">무료 분석과 같은 계산 근거로 선정</p>
       </div>
-      <p className="mt-2 text-xs leading-5 text-[#766d85]">
-        추천은 매월 실제 계산 근거로 다시 평가하며, 비슷한 흐름이면 다른 사람과 같은 질문이 나올 수도 있어요.
-      </p>
 
-      {validRecommendations[0] ? (
-        <div className="mt-5">
-          <RecommendationCard
-            entry={validRecommendations[0]}
-            index={0}
-            primary
-            profileId={profileId}
-            guestMode={guestMode}
-          />
-        </div>
-      ) : null}
-      <div className="mt-3 grid gap-3 md:grid-cols-2">
-        {validRecommendations.slice(1).map((entry, offset) => (
+      <div className="mt-5 grid auto-rows-fr grid-cols-1 gap-3">
+        {validRecommendations.map((entry, index) => (
           <RecommendationCard
             key={entry.product.id}
             entry={entry}
-            index={offset + 1}
+            index={index}
+            primary={index === 0}
             profileId={profileId}
             guestMode={guestMode}
           />

@@ -103,12 +103,10 @@ function RecommendationPrerequisite({
 }
 
 function RecommendationsContent({
-  profileLabel,
   profileId,
   recommendations,
   guestMode = false,
 }: {
-  profileLabel: string;
   profileId: string;
   recommendations: readonly AnalysisProductRecommendation[];
   guestMode?: boolean;
@@ -126,16 +124,13 @@ function RecommendationsContent({
                 지금 나에게 필요한<br className="hidden sm:block" /> 분석 3가지
               </h1>
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <span className="rounded-full border border-[#ddcaef] bg-white/75 px-4 py-2 text-xs font-bold text-[#5d477e]">
-                  분석 대상 · {profileLabel}
-                </span>
                 {!guestMode ? (
                   <Link href={`/deep-analysis?profileId=${profileId}`} className="rounded-full border border-[#d7c4ee] bg-white/75 px-4 py-2 text-xs font-bold text-[#7150a9] transition hover:bg-white">
-                    원하는 주제로 직접 찾기 →
+                    원하는 주제로 직접 찾기
                   </Link>
                 ) : (
                   <Link href="/deep-analysis" className="rounded-full border border-[#d7c4ee] bg-white/75 px-4 py-2 text-xs font-bold text-[#7150a9] transition hover:bg-white">
-                    원하는 주제로 직접 찾기 →
+                    원하는 주제로 직접 찾기
                   </Link>
                 )}
               </div>
@@ -194,7 +189,6 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
 
       return (
         <RecommendationsContent
-          profileLabel={record.content.profile.label?.trim() || "나"}
           profileId={record.id}
           recommendations={guestRecommendations}
           guestMode
@@ -249,7 +243,6 @@ export default async function RecommendationsPage({ searchParams }: Recommendati
 
   return (
     <RecommendationsContent
-      profileLabel={profile.label}
       profileId={profile.id}
       recommendations={recommendations}
     />

@@ -41,6 +41,10 @@ assert.ok(!cards.includes("decision.distinction") && !cards.includes("비슷한 
 assert.ok(!cards.includes("{recommendation.reasons[0]"),
   "Do not directly leak opaque raw recommendation signals");
 
+assert.ok(!page.includes("분석 대상 · {profileLabel}") && !page.includes("원하는 주제로 직접 찾기 →"), "Selected hero profile label and arrow must be absent");
+assert.ok(page.includes("원하는 주제로 직접 찾기"), "Manual discovery link remains available");
+assert.ok(!cards.includes("추천은 매월 실제 계산 근거로") && cards.includes("auto-rows-fr grid-cols-1"), "Selected explanation absent and all three cards equal");
+
 const launchTopicIds = new Set(listTopicCatalogProducts().map((product) => product.id));
 for (const id of ["career", "wealth", "relationship", "job-change", "marriage"]) {
   const product = resolveCanonicalRecommendationProduct(id);

@@ -41,8 +41,8 @@ assert(
 assert(!result.includes("<RecommendationTop3"), "free result must stay concise and not embed the full recommendation experience");
 assert(!result.includes("buildAnalysisProductRecommendations"), "free result must not recompute recommendations");
 assert(
-  recommendationCards.includes("validRecommendations[0]") && recommendationCards.includes("validRecommendations.slice(1)"),
-  "recommendation presentation must keep the same top-three ranking while visually emphasizing the first recommendation",
+  recommendationCards.includes("validRecommendations.map((entry, index)") && recommendationCards.includes("primary={index === 0}") && recommendationCards.includes("auto-rows-fr grid-cols-1"),
+  "recommendation presentation must keep the same top-three ranking while using equal horizontal cards and first-rank visual emphasis",
 );
 
 for (const pageCopy of [

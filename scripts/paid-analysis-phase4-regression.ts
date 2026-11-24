@@ -63,8 +63,8 @@ assert(accessPanel.includes('<PremiumProductDetail product={product} state={stat
 assert(catalog.includes("PremiumProductDetail"), "deep-analysis discovery must keep using the shared premium detail");
 assert(recommendations.includes("/paid-analysis/") && recommendations.includes("href={href}") && !recommendations.includes("PremiumReportValuePreview") && !recommendations.includes("RecommendationDetail"), "recommendation cards must link straight to shared product detail rather than duplicate it");
 assert(recommendations.includes("가장 먼저 추천해요") && recommendations.includes("함께 살펴볼 분석")
-  && recommendations.includes("validRecommendations.slice(1)"),
-  "recommendations must visually prioritize one primary question over two alternatives without changing ranking");
+  && recommendations.includes("validRecommendations.map((entry, index)") && recommendations.includes("primary={index === 0}"),
+  "recommendations must retain first-rank emphasis within equal-size cards without changing ranking");
 assert(detail.includes("PremiumReportValuePreview") && detail.includes("상담에서 이 주제를 이어서 물어볼 수 있습니다."), "standalone detail retains report preview, storage and AI consultation value");
 assert(catalog.includes('bg-[#f7f8fc]'), "selected catalog detail must sit on the cool Phase 4 surface");
 

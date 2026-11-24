@@ -218,7 +218,7 @@ export default function CompatibilityReportValuePreview({
       </div>
       </details>
     </section>
-    <ProductReviewSummary productId={REVIEW_PRODUCT_BY_MODE[mode]} />
+    <ProductReviewSummary productId={REVIEW_PRODUCT_BY_MODE[mode]} compactWhenEmpty />
     </>
   );
 }

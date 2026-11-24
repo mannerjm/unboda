@@ -36,5 +36,5 @@ assert.equal(hasVerifiedConsultingFoundation({...profile,birthTimeKnown:true},fr
 assert.equal(hasVerifiedConsultingFoundation({...profile,birthDate:"1990-01-16"},free),false);
 assert.equal(hasVerifiedConsultingFoundation({...profile,id:"another"},free),false);
 assert.equal(hasVerifiedConsultingFoundation(profile,{...free,content:null}),false);
-assert.equal(chart.hourPillarHanja,undefined);
+assert(!chart.hourPillarHanja, "unknown birth time must not invent an hour pillar");
 console.log("verified consulting foundation behavioral regression: PASS");

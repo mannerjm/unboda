@@ -104,8 +104,8 @@ for (const marker of [
   );
 }
 assert(reportPreview.includes("리포트 구성 미리보기"), "all compatibility purchases must keep the report structure preview");
-assert(reportPreview.includes("실제 분석 결과를 미리 보여주는 화면이 아니라"), "preview must not masquerade as an actual report");
-assert(reportPreview.includes("단순 점수 대신 관계의 맥락을 나눠 설명"), "preview must retain relationship-context framing");
+assert(reportPreview.includes("실제 개인별 결과를 미리 보여주는 화면은 아닙니다.") && !reportPreview.includes("실제 분석 결과를 미리 보여주는 화면이 아니라"), "preview must retain the non-result disclosure without the removed duplicate");
+assert(reportPreview.includes("관계별로 더 깊게 보는 영역") && reportPreview.includes("config.directionDescription") && !reportPreview.includes("단순 점수 대신 관계의 맥락을 나눠 설명"), "preview must retain relationship-context framing without the removed duplicate");
 
 for (const product of [
   COMPATIBILITY_ROMANTIC_PRODUCT,

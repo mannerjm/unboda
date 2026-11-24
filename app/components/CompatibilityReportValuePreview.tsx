@@ -167,9 +167,6 @@ export default function CompatibilityReportValuePreview({
       <div className="border-b border-[#e4e7f1] bg-[linear-gradient(135deg,#f3f1ff_0%,#fbfcff_72%)] px-5 py-5 sm:px-6">
         <p className="text-xs font-bold tracking-[0.14em] text-slate-500">리포트 구성 미리보기</p>
         <h3 className="mt-2 text-lg font-bold tracking-[-0.02em] text-[#11162d]">{config.headline}</h3>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-          실제 분석 결과를 미리 보여주는 화면이 아니라, 결제 후 어떤 순서와 깊이로 읽게 되는지 안내하는 구성 예시입니다.
-        </p>
       </div>
 
       <div className="p-5 sm:p-6">
@@ -208,7 +205,6 @@ export default function CompatibilityReportValuePreview({
               <p className="text-xs font-bold text-slate-800">관계별로 더 깊게 보는 영역</p>
               {relationshipContext ? <p className="mt-1 text-sm leading-6 text-slate-600">{relationshipContext}</p> : null}
             </div>
-            <p className="text-xs font-semibold text-slate-500">단순 점수 대신 관계의 맥락을 나눠 설명</p>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             {config.domains.map((domain) => (
@@ -219,9 +215,6 @@ export default function CompatibilityReportValuePreview({
           </div>
         </div>
 
-        <p className="mt-5 rounded-2xl bg-[#f7f8fc] px-4 py-3 text-sm leading-6 text-slate-600">
-          실제 문장은 입력한 두 사람의 계산 결과에 따라 달라집니다. 완성된 {evaluationYear}년판 리포트는 결제 후 구매한 분석에서 다시 볼 수 있습니다.
-        </p>
       </div>
       </details>
     </section>

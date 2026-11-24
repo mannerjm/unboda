@@ -11,8 +11,8 @@ export const metadata = buildPublicMetadata({
 export default function TrustPage() {
   const principles = [
     {
-      title: "구매한 분석을 기준으로 AI 상담",
-      body: "AI 상담은 계정이 실제로 보유한 완료 리포트를 확인한 뒤 그 범위 안에서 답변합니다. 구매하지 않은 다른 유료 분석의 독자적인 결론을 임의로 대신하지 않습니다.",
+      title: "리포트 없이도 AI 상담",
+      body: "AI 상담은 리포트 구매 없이도 질문권으로 이용할 수 있습니다. 관련 유효한 구매 리포트가 있으면 참고하되, 구매하지 않은 리포트를 열거나 그 독자적인 결과를 지어내지 않습니다.",
     },
     {
       title: "내가 허용한 내용만 장기 기억",
@@ -28,7 +28,7 @@ export default function TrustPage() {
     },
     {
       title: "정상 답변 완료 기준으로 질문권 차감",
-      body: "AI 상담에서 범위를 벗어난 질문, 안전상 답변할 수 없는 질문, 답변 생성 실패에는 질문권을 차감하지 않습니다.",
+      body: "AI 상담에서 확인이 필요한 질문, 안전상 답변할 수 없는 질문, 답변 생성 실패에는 질문권을 차감하지 않습니다.",
     },
     {
       title: "구매 인증 후기만 표시",

@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { isGeneralConsultingSource } from "@/app/lib/aiConsulting/generalSource";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function PaymentConfirmationStatus({
@@ -82,7 +83,7 @@ function AiCreditCheckoutSuccessContent() {
       return;
     }
 
-    const consultationHref = `/ai-consulting?${new URLSearchParams({ profileId, productId, edition }).toString()}`;
+    const consultationHref = isGeneralConsultingSource(productId, edition) ? "/ai-consulting" : `/ai-consulting?${new URLSearchParams({ profileId, productId, edition }).toString()}`;
 
     fetch(`/api/ai-consulting/credits/orders/${encodeURIComponent(orderId)}/confirm-payment`, {
       method: "POST",
@@ -107,7 +108,7 @@ function AiCreditCheckoutSuccessContent() {
   const productId = searchParams.get("productId");
   const edition = searchParams.get("edition");
   const consultationHref = profileId && productId && edition
-    ? `/ai-consulting?${new URLSearchParams({ profileId, productId, edition }).toString()}`
+    ? (isGeneralConsultingSource(productId, edition) ? "/ai-consulting" : `/ai-consulting?${new URLSearchParams({ profileId, productId, edition }).toString()}`)
     : undefined;
 
   return <PaymentConfirmationStatus errorMessage={errorMessage} consultationHref={consultationHref} />;

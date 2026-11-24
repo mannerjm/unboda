@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function TrustPrinciplesCard({ compact = false, inlineDetails = false }: { compact?: boolean; inlineDetails?: boolean }) {
   const items = [
-    ["구매한 분석을 기준으로 상담", "AI 상담은 현재 계정이 실제로 보유한 리포트 범위 안에서 이어집니다."],
+    ["리포트 없이도 AI 상담", "질문권으로 일반 상담을 이용할 수 있고, 실제 보유한 유효한 리포트는 관련 질문에 참고합니다."],
     ["내가 허용한 내용만 기억", "상담 내용을 임의로 장기 기억으로 저장하지 않고, 직접 저장한 내용만 다음 상담에 참고합니다."],
     ["구매 리포트는 다시 확인", "완료된 유료 리포트는 구매한 분석에서 다시 열람할 수 있습니다."],
     ["정상 답변 완료 기준으로 질문권 차감", "범위 밖 질문이나 답변 생성 실패에는 질문권이 차감되지 않습니다."],

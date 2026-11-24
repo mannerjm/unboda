@@ -95,7 +95,7 @@ assert(preview.includes("previewData={PREVIEW_DATA}"), "operator preview must re
 assert(preview.includes('productId: "study-learning-strategy"') && preview.includes('productId: "business-startup-readiness"'), "operator preview must include more than three analyses so expand/collapse is visible");
 assert(!client.includes('공용 질문권 {portfolio.questionsRemaining}회'), "shared credit count must not be duplicated in the continuation card");
 assert((client.match(/질문권 구매하기 →/g) ?? []).length === 1 && client.includes("질문권 구매 후 상담하기 →"), "credited customers can buy more; zero-credit customers get the composer-adjacent purchase action");
-assert((client.match(/질문권 상품 안내 보기 →/g) ?? []).length === 2 && !client.includes("질문권 상품 보기 →"), "review-only credit products must show the informational link in only the active balance state");
+assert((client.match(/질문권 상품 안내 보기 →/g) ?? []).length === 2 && !client.includes("질문권 상품 보기 →"), "review-only credit products must retain informational links instead of claiming checkout availability");
 assert(!client.includes("credit-recharge-title") && !client.includes("질문권이 0회예요. 이어서 질문해 보세요!"), "zero-credit state must not repeat a full-width purchase banner");
 assert(!client.includes("AI_CONSULTING_CREDIT_BUNDLES"), "bundle prices belong on the credit purchase page, not in a duplicate consultation banner");
 assert(client.includes("질문은 이 탭에 임시 보관되며 지금은 전송되지 않아요.") && client.indexOf('data-ai-composer="portfolio-sticky"') < client.indexOf("{ownedAnalysisLibrary}"), "zero-credit customers must see the same composer before the report library, without duplicate empty panels");
@@ -153,3 +153,7 @@ assert(runtimeMigration.includes("profile-wide balance"), "runtime reservation m
 assert(runtimeMigration.includes("base_entitlement_id"), "internal access must remain pinned to an exact entitlement even with unified UX");
 
 console.log("Unified AI consulting portfolio regression passed ✓");
+
+assert(client.indexOf("visibleChatMessages.map((message)") < client.indexOf('data-ai-composer="portfolio-sticky"'), "chat composer follows messages");
+assert(client.includes("ref={chatScrollRef}") && client.includes("overflow-y-auto") && client.includes("/teachers/undam-consulting.webp"), "chat has bounded history and the selected teacher portrait");
+assert(page.includes("<AppShell activeProfileId={activeProfile.id}>") && client.includes("운담 선생님은 AI 캐릭터입니다."), "existing navigation and AI identity remain explicit");

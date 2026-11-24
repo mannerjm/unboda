@@ -226,7 +226,8 @@ assert(checkoutSuccess.includes('fetch(`/api/orders/${encodeURIComponent(orderId
   "checkout approval UI must preserve server payment confirmation and redirects");
 assert(aiPortfolio.includes('onSubmit={submitQuestion}') &&
        aiPortfolio.includes("data-ai-composer=") &&
-       aiPortfolio.includes("bg-[radial-gradient(circle_at_82%_18%"),
+       aiPortfolio.includes("bg-[radial-gradient(ellipse_at_86%_20%") &&
+       aiPortfolio.includes("/teachers/undam-consulting.webp"),
   "AI 상담 questions and conversation history remain wired into visually polished UI");
 assert(paidReport.includes("detail.conclusion.headline") &&
        paidReport.includes("bg-[linear-gradient(160deg,#fffefe_0%,#faf6ff_45%,#f0eaff_100%)]"),

@@ -45,7 +45,7 @@ export default function HwadamCompatibilityTeacherCard({
           className={`shrink-0 self-start overflow-hidden rounded-2xl border border-[#d8c2dd] bg-[#efe3f3] shadow-[0_6px_16px_rgba(44,28,50,.09)] ${isCatalog ? "w-[88px] sm:w-[112px]" : "w-[80px] sm:w-[100px]"}`}
         >
           <Image
-            src="/teachers/hwadam.webp"
+            src="/teachers/hwadam-rose-v2.webp"
             alt="분홍빛 한복을 입고 따뜻한 서재에 앉아 있는 화담 선생님"
             width={240}
             height={480}

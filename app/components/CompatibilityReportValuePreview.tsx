@@ -139,7 +139,6 @@ export default function CompatibilityReportValuePreview({
           <p className="text-sm font-extrabold text-[#7550c7]">나와 상대방의 사주를 함께 보는 궁합 분석</p>
           <h3 className="mt-3 break-keep text-[26px] font-black leading-[1.35] tracking-[-0.04em] text-[#28163f] sm:text-[32px]">{visual.question}</h3>
           <p className="mt-4 break-keep text-[16px] leading-8 text-[#5d4f6e]">{config.directionDescription}</p>
-          <p className="mt-3 text-sm font-semibold text-[#7550c7]">{evaluationYear}년판 · 두 사람의 실제 결과는 결제 후 확인</p>
         </div>
         <div className="relative mx-auto aspect-[5/4] w-full max-w-[320px] overflow-hidden rounded-[1.7rem] border-[5px] border-white bg-[#e9dff8] shadow-[0_12px_32px_rgba(74,43,117,.14)]">
           <Image src={visual.src} alt={visual.alt} fill sizes="(max-width: 640px) 80vw, 320px" className="object-cover" />

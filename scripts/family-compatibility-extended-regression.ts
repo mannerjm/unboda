@@ -190,7 +190,8 @@ assert(
   "report preview must explain structure, preserve relationship-specific domains, and avoid presenting sample copy as an actual result",
 );
 assert(!romanticInputClient.includes("결제 후 제공되는 내용") && !parentChildInputClient.includes("결제 후 제공되는 내용") && !inputClient.includes("결제 후 제공되는 내용"), "old flat included-content lists must be replaced by the richer shared preview");
-assert(inputClient.includes("구매 전 확인") && inputClient.includes("결제 금액") && inputClient.includes("결제 완료 후 생성된 {evaluationYear}년판 결과"), "extended family checkout summary must retain price and purchase-year access information");
+assert(inputClient.includes("구매 전 확인") && inputClient.includes("결제 금액") && inputClient.includes("결제 완료 후 생성된 결과는 구매한 분석에서 다시 볼 수 있습니다.") && !inputClient.includes("결제 완료 후 생성된 {evaluationYear}년판 결과"), "extended family checkout summary must retain price and report access without edition wording");
+assert(!reportValuePreview.includes("년판 · 두 사람의 실제 결과는 결제 후 확인"), "selected preview edition notice must be absent");
 assert(!inputClient.includes(sharedStorageNotice) && !parentChildInputClient.includes(sharedStorageNotice), "remove the two selected privacy explanation blocks from family detail forms without changing underlying storage behavior");
 assert(!inputClient.includes("본인·성인 인증이 아직 완료되지 않았다면") && !parentChildInputClient.includes("본인·성인 인증이 아직 완료되지 않았다면"), "remove selected identity notice from detail forms; the checkout gate remains enforced");
 const checkoutSuccess = readFileSync("app/checkout/success/page.tsx", "utf8");

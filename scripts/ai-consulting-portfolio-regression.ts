@@ -159,5 +159,10 @@ assert(client.includes("ref={chatScrollRef}") && client.includes("overflow-y-aut
 assert(page.includes("<AppShell activeProfileId={activeProfile.id}>") && client.includes("운담 선생님은 AI 캐릭터입니다."), "existing navigation and AI identity remain explicit");
 
 assert(client.includes("/teachers/undam-consulting-banner.webp") && client.includes('data-undam-banner="reference"'), "approved banner artwork must be used rather than enlarging the small avatar");
-assert(client.includes("max-w-[1600px]") && client.includes("lg:h-[calc(100dvh-17.5rem)]") && client.includes("min-h-0 flex-1 space-y-3 overflow-y-auto"), "consultation must fill desktop space and bound history to keep composer visible");
+assert(client.includes("max-w-[1360px]") && client.includes("lg:h-[calc(100dvh-18.5rem)]") && client.includes("min-h-0 flex-1 space-y-3 overflow-y-auto"), "consultation must fill desktop space and bound history to keep composer visible");
 assert(client.includes('data-user-avatar="true"') && client.includes("ml-auto w-fit max-w-[90%]") && client.includes("w-fit max-w-[94%]") && client.includes("rows={1}"), "message bubbles and one-row composer follow the approved mockup");
+
+assert(client.includes('maskComposite: "intersect"') && client.includes("h-full aspect-[2.07]"), "banner fade applies to the artwork itself, not its empty container");
+assert(client.includes("firstView && !isSending && initialMessageCount <= 2 ? 0 : el.scrollHeight"), "short first conversation starts with intact greeting; new messages follow latest");
+assert(client.includes('id="undam-management"') && client.includes("grid grid-cols-3") && ["owned","memory","guide"].every(panel => client.includes(`hidden={managementPanel !== "${panel}"}`)), "management functions use one compact menu with separate accessible panels");
+assert(client.includes("sm:text-[17px]") && client.includes("sm:h-14 sm:w-14"), "chat text and avatars are easier to read");

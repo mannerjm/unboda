@@ -38,7 +38,7 @@ export default async function ParentChildCompatibilityPage() {
   return (
     <AppShell activeProfileId={activeProfile.id}>
       <main className="min-h-screen bg-[#f5f7fc] px-5 py-8 text-[#11162d] sm:px-8 sm:py-10">
-        <div className="mx-auto w-full max-w-5xl">
+        <div className="mx-auto w-full max-w-3xl">
           <Link href="/special-analysis/compatibility" className="text-sm font-semibold text-slate-600 underline decoration-[#c4c9d9] underline-offset-4">← 궁합 유형 선택</Link>
 
           <CompatibilityDetailHero
@@ -46,12 +46,7 @@ export default async function ParentChildCompatibilityPage() {
             title="가족 궁합 분석"
             description="먼저 어떤 가족 관계인지 선택한 뒤 서로의 역할과 소통 방식을 살펴보세요. 관계마다 다른 기준의 분석 리포트로 이어집니다."
           />
-          <div className="mx-auto w-full max-w-3xl"><HwadamCompatibilityTeacherCard placement="detail" relationship="가족 궁합" /></div>
-          <div className="mt-3 flex flex-wrap items-center gap-2 px-2 text-sm text-[#71647f]">
-            <span>현재 분석 대상</span>
-            <strong className="font-semibold text-[#392954]">{activeProfile.label}</strong>
-            <Link href="/mypage" className="font-semibold text-[#6f4ad3] underline underline-offset-4">프로필 변경</Link>
-          </div>
+          <HwadamCompatibilityTeacherCard placement="detail" relationship="가족 궁합" />
 
           <FamilyCompatibilityAnalysisClient myProfileLabel={activeProfile.label} profileId={activeProfile.id} initialInterestSaved={saved} />
         </div>

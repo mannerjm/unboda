@@ -16,6 +16,7 @@ import {
 } from "@/app/lib/aiConsulting/creditHistory";
 import { getAiConsultingSessionState } from "@/app/lib/aiConsulting/session";
 import { getUserProfile } from "@/app/lib/profiles/server";
+import { requireConsultingAdult, requireConsultingFoundation } from "@/app/lib/aiConsulting/consultingFoundation";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getTossConfigForAccount, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
@@ -106,6 +107,11 @@ export default async function AiConsultingCreditsPage({
     );
   }
 
+  let foundationReady = false;
+  let adultReady = false;
+  try { await requireConsultingFoundation(user.id, profile.id); foundationReady = true; } catch { /* fail closed */ }
+  try { await requireConsultingAdult(user.id); adultReady = true; } catch { /* fail closed */ }
+
   let session;
   try {
     session = general ? { state: "ready" as const, questionsRemaining: await getAiConsultingCreditBalance({ userId: user.id, profileId: profile.id }) } : await getAiConsultingSessionState({
@@ -148,7 +154,7 @@ export default async function AiConsultingCreditsPage({
       const tossConfig = getTossConfigForAccount(user.id);
       // A production-hosted Toss TEST checkout is restricted to review accounts.
       // Display purchase as available only when the authenticated user can use it.
-      providerReady = isTossCheckoutUserAllowed(user.id);
+      providerReady = foundationReady && adultReady && isTossCheckoutUserAllowed(user.id);
       reviewCheckout = providerReady && tossConfig.environment === "sandbox";
     } catch {
       providerReady = false;
@@ -177,6 +183,7 @@ export default async function AiConsultingCreditsPage({
           </div>
         </header>
 
+        {(!foundationReady || !adultReady) ? <section className="mt-4 rounded-2xl border border-[#ded0f5] bg-white p-5"><p className="font-bold">{!foundationReady ? "현재 프로필의 무료 사주를 먼저 완료해 주세요." : "질문권 구매 전에 성인인증을 완료해 주세요."}</p><Link href={!foundationReady ? "/saju" : "/account"} className="mt-3 inline-block font-bold text-[#713bd6] underline">{!foundationReady ? "무료 사주 먼저 보기" : "성인인증 확인하기"}</Link></section> : null}
         <CreditCheckoutClient
           customerKey={user.id}
           profileId={profile.id}

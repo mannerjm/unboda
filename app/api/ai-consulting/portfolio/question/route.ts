@@ -74,6 +74,12 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[ai-consulting-portfolio-question] failed", error);
     const message = error instanceof Error ? error.message : "AI_CONSULTING_PORTFOLIO_QUESTION_FAILED";
+    if (message.includes("AI_CONSULTING_FREE_ANALYSIS_REQUIRED")) {
+      return NextResponse.json({ error: "현재 프로필의 무료 사주 분석을 먼저 완료해 주세요. 질문권은 차감되지 않습니다.", code: "FREE_ANALYSIS_REQUIRED" }, { status: 409 });
+    }
+    if (message.includes("PAID_ELIGIBILITY") || message.includes("EMAIL_NOT_VERIFIED") || message.includes("ACCOUNT_NOT_ACTIVE")) {
+      return NextResponse.json({ error: "성인인증 및 계정 상태를 확인해 주세요. 질문권은 차감되지 않습니다.", code: "PAID_ELIGIBILITY_REQUIRED" }, { status: 403 });
+    }
     const status = message.includes("NO_PROFILE_CREDIT")
       ? 409
       : message.includes("BOUNDARY") || message.includes("ENTITLEMENT")

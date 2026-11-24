@@ -23,6 +23,7 @@ import { ensureAiConsultingThreadForAnalysis, ensureGeneralAiConsultingThread } 
 import { GENERAL_CONSULTING_SOURCE, isGeneralConsultingSource } from "./generalSource";
 import { evaluateGeneralAiConsultingScope } from "../aiConsultingScope";
 import { getAiConsultingCreditBalance } from "./server";
+import { requireConsultingAdult, requireConsultingFoundation } from "./consultingFoundation";
 
 export type AiConsultingPortfolioAnalysis = {
   productId: string;
@@ -425,6 +426,8 @@ export async function answerAiConsultingPortfolioQuestion(input: {
   preferContinuation?: boolean;
   profile: ProfileDto;
 }): Promise<AiConsultingPortfolioQuestionResult> {
+  await requireConsultingAdult(input.userId);
+  await requireConsultingFoundation(input.userId, input.profileId);
   const includePreviousSource = input.preferredProductId && input.preferredEditionKey
     ? {
         productId: input.preferredProductId,
@@ -438,14 +441,15 @@ export async function answerAiConsultingPortfolioQuestion(input: {
     includePreviousSource,
   });
 
-  if (state.analyses.length === 0 || (input.preferContinuation === true && input.preferredProductId === GENERAL_CONSULTING_SOURCE.productId && isAiConsultingContinuationQuestion(input.question))) {
+  const currentAnalyses = state.analyses.filter(analysis => analysis.profileInputVersion === "current");
+  if (currentAnalyses.length === 0 || (input.preferContinuation === true && input.preferredProductId === GENERAL_CONSULTING_SOURCE.productId && isAiConsultingContinuationQuestion(input.question))) {
     return answerGeneralPortfolioQuestion(input, state.questionsRemaining);
   }
 
   const continuationFollowup =
     input.preferContinuation === true
     && isAiConsultingContinuationQuestion(input.question);
-  const evaluated = state.analyses.map((analysis) => {
+  const evaluated = currentAnalyses.map((analysis) => {
     const isPreferredSource = Boolean(
       input.preferredProductId
       && input.preferredEditionKey

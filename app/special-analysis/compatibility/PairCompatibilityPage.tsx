@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import PaidCompatibilityAnalysisClient from "@/app/components/PaidCompatibilityAnalysisClient";
 import CompatibilityDetailHero from "@/app/components/CompatibilityDetailHero";
+import HwadamCompatibilityTeacherCard from "@/app/components/HwadamCompatibilityTeacherCard";
 import { isProductSaved } from "@/app/lib/interestedAnalyses/server";
 import { getPairCompatibilityConfig } from "@/app/lib/pairCompatibilityConfig";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
@@ -48,6 +49,7 @@ export default async function PairCompatibilityPage({
           <div className="mx-auto w-full max-w-3xl">
             <Link href="/special-analysis/compatibility" className="text-sm font-semibold text-slate-600 underline decoration-[#c4c9d9] underline-offset-4">← 궁합 유형 선택</Link>
             <CompatibilityDetailHero mode={config.previewMode} title={config.title} description={config.cardDescription} />
+            <HwadamCompatibilityTeacherCard placement="detail" relationship={config.label} />
           </div>
           <PaidCompatibilityAnalysisClient
             myProfileLabel={activeProfile.label}

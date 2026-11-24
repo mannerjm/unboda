@@ -157,3 +157,7 @@ console.log("Unified AI consulting portfolio regression passed ✓");
 assert(client.indexOf("visibleChatMessages.map((message)") < client.indexOf('data-ai-composer="portfolio-sticky"'), "chat composer follows messages");
 assert(client.includes("ref={chatScrollRef}") && client.includes("overflow-y-auto") && client.includes("/teachers/undam-consulting.webp"), "chat has bounded history and the selected teacher portrait");
 assert(page.includes("<AppShell activeProfileId={activeProfile.id}>") && client.includes("운담 선생님은 AI 캐릭터입니다."), "existing navigation and AI identity remain explicit");
+
+assert(client.includes("/teachers/undam-consulting-banner.webp") && client.includes('data-undam-banner="reference"'), "approved banner artwork must be used rather than enlarging the small avatar");
+assert(client.includes("max-w-[1600px]") && client.includes("lg:h-[calc(100dvh-17.5rem)]") && client.includes("min-h-0 flex-1 space-y-3 overflow-y-auto"), "consultation must fill desktop space and bound history to keep composer visible");
+assert(client.includes('data-user-avatar="true"') && client.includes("ml-auto w-fit max-w-[90%]") && client.includes("w-fit max-w-[94%]") && client.includes("rows={1}"), "message bubbles and one-row composer follow the approved mockup");

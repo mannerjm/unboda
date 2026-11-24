@@ -227,7 +227,7 @@ assert(checkoutSuccess.includes('fetch(`/api/orders/${encodeURIComponent(orderId
 assert(aiPortfolio.includes('onSubmit={submitQuestion}') &&
        aiPortfolio.includes("data-ai-composer=") &&
        aiPortfolio.includes("bg-[radial-gradient(ellipse_at_86%_20%") &&
-       aiPortfolio.includes("/teachers/undam-consulting.webp"),
+       aiPortfolio.includes("/teachers/undam-consulting.webp") && aiPortfolio.includes("/teachers/undam-consulting-banner.webp"),
   "AI 상담 questions and conversation history remain wired into visually polished UI");
 assert(paidReport.includes("detail.conclusion.headline") &&
        paidReport.includes("bg-[linear-gradient(160deg,#fffefe_0%,#faf6ff_45%,#f0eaff_100%)]"),

@@ -1103,7 +1103,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
     </div>
   </div>
 </section>
-<div className="mt-6 grid items-start gap-5 lg:grid-cols-2">
+<div className="mt-6 grid grid-cols-1 gap-6">
 <section className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
   <div className="mb-7 flex items-center gap-3">
     <div className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-900 text-lg text-white">
@@ -1145,7 +1145,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
     </h2>
   </div>
 
-  <div className="space-y-3">
+  <div className="grid gap-3 lg:grid-cols-2">
     <div className="rounded-2xl bg-stone-50 p-4">
       <p className="font-semibold">
         주 용신
@@ -1168,7 +1168,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
       </p>
     </div>
 
-    <div className="rounded-2xl bg-stone-50 p-4">
+    <div className="rounded-2xl bg-stone-50 p-4 lg:col-span-2">
       <p className="font-semibold">
         판단 근거
       </p>

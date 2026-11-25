@@ -164,7 +164,10 @@ export default function PremiumCatalogSection({
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/api/premium-catalog/status")
+    setSummaries([]);
+    setCurrentOwnedProductIds(new Set());
+    setSavedProductIds(new Set());
+    void fetch(`/api/premium-catalog/status${profileId ? `?profileId=${encodeURIComponent(profileId)}` : ""}`, {cache:"no-store"})
       .then(async (response) => {
         const body = await response.json() as { paidAnalysis?: PaidAnalysisSummary[]; savedProductIds?: string[]; currentOwnedProductIds?: string[] };
         if (!cancelled && response.ok) {
@@ -175,7 +178,7 @@ export default function PremiumCatalogSection({
       })
       .catch(() => undefined);
     return () => { cancelled = true; };
-  }, []);
+  }, [profileId]);
 
   const stateByProductId = useMemo(() => {
     const states = new Map<string, CatalogProductState>();

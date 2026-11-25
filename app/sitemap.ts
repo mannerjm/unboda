@@ -26,6 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry("/", "weekly", 1),
     entry("/guest-saju", "monthly", 0.9),
     entry("/deep-analysis", "weekly", 0.9),
+    entry("/period-analysis", "weekly", 0.9),
     entry("/special-analysis/compatibility", "weekly", 0.9),
     entry("/reviews", "weekly", 0.7),
     entry("/trust", "monthly", 0.6),

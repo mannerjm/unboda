@@ -1,4 +1,6 @@
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
+import { getUserProfile } from "@/app/lib/profiles/server";
+import { isProfileId } from "@/app/lib/profiles/types";
 import AppShell from "@/app/components/AppShell";
 import PremiumCatalogSection from "@/app/components/PremiumCatalogSection";
 import PaidProductDiscoveryLinks from "@/app/components/PaidProductDiscoveryLinks";
@@ -20,8 +22,11 @@ function getSingleParam(value: string | string[] | undefined): string | undefine
 
 export default async function DeepAnalysisPage({ searchParams }: { searchParams?: DeepAnalysisSearchParams }) {
   const user = await getCurrentUser();
-  const activeProfile = user ? await getActiveProfile(user.id) : null;
   const params = searchParams ? await searchParams : {};
+  const requestedProfileId = getSingleParam(params.profileId);
+  if (requestedProfileId && !isProfileId(requestedProfileId)) notFound();
+  const activeProfile = user ? (requestedProfileId ? await getUserProfile(requestedProfileId,user.id) : await getActiveProfile(user.id)) : null;
+  if (user && requestedProfileId && !activeProfile) notFound();
   const initialCategory = getSingleParam(params.category);
   if (getSingleParam(params.mode) === "period") {
     const query = new URLSearchParams();

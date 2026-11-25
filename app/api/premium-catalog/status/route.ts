@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { listUserPaidAnalysisSummaries } from "@/app/lib/paidReports/server";
 import { listUserInterestedAnalyses } from "@/app/lib/interestedAnalyses/server";
+import { getUserProfile } from "@/app/lib/profiles/server";
+import { isProfileId } from "@/app/lib/profiles/types";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
 import { getCurrentEditionEntitlementForProfile } from "@/app/lib/purchases/server";
 
@@ -9,19 +11,22 @@ import { getCurrentEditionEntitlementForProfile } from "@/app/lib/purchases/serv
  * Read-only catalog status for the signed-in user. Guests get an empty list so
  * the catalog renders every product as not-purchased without extra requests.
  */
-export async function GET() {
+export async function GET(request: Request) {
   const user = await getCurrentUser();
 
   if (!user) {
     return NextResponse.json({ paidAnalysis: [], savedProductIds: [] });
   }
 
+  const profileId = new URL(request.url).searchParams.get("profileId");
+  if (profileId && !isProfileId(profileId)) return NextResponse.json({error:"유효한 프로필이 아닙니다."},{status:400});
   try {
     const [paidAnalysis, interestedAnalyses, activeProfile] = await Promise.all([
       listUserPaidAnalysisSummaries(user.id),
       listUserInterestedAnalyses(user.id),
-      getActiveProfile(user.id),
+      profileId ? getUserProfile(profileId,user.id) : getActiveProfile(user.id),
     ]);
+    if (profileId && !activeProfile) return NextResponse.json({error:"프로필을 찾을 수 없습니다."},{status:404});
     const savedProductIds = interestedAnalyses.map((record) => record.productId);
     const activePaidProductIds = [...new Set(paidAnalysis
       .filter((summary) => summary.profileId === activeProfile?.id)

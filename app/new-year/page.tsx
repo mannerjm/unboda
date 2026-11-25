@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import AppShell from "@/app/components/AppShell";
+import NewYearTeacherCard from "@/app/components/NewYearTeacherCard";
 import { getServerAnchorDate, parseAnchorDate } from "@/app/lib/analysisReferencePeriod";
 import { newYearTargetYear, NEW_YEAR_DOMAINS } from "@/app/lib/newYearFortune";
 import { buildPublicMetadata } from "@/app/lib/seo";
@@ -30,6 +31,7 @@ export default async function NewYearPage({searchParams}:{searchParams:Promise<{
       <p className="mt-5 text-2xl font-black">{getProductPricing("new-year-fortune").amount.toLocaleString("ko-KR")}원</p><Link href={href} className="mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#a44332] px-5 py-3 font-bold text-white sm:w-auto">{year}년 신년운세 보기</Link></div>
     </section>
     <section className="mt-5 rounded-2xl bg-white p-5 sm:p-7"><h2 className="text-xl font-bold">한 해를 분야별로 살펴보세요</h2><div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">{NEW_YEAR_DOMAINS.map(label=><div key={label} className="min-w-0 break-keep rounded-xl bg-[#f5eefb] px-3 py-4 text-sm font-bold">{label}</div>)}</div><h3 className="mt-5 font-bold">열두 달의 흐름과 실천 계획</h3><p className="mt-2 text-sm leading-6">매월 중요한 흐름과 행동·주의 기준을 확인하고, 구매 보관함에서 다시 읽을 수 있습니다. 구매 후 운담 AI 상담은 기존 질문권으로 이용합니다.</p></section>
+    <NewYearTeacherCard variant="list" />
     <p className="mt-4 text-sm leading-6 text-slate-600">명리 해석은 참고용이며 미래 사건이나 결과를 보장하지 않습니다. 기존 내년 운은 다음 해의 변화와 사전 준비 중심 분석입니다.</p>
   </div></main></AppShell>;
 }

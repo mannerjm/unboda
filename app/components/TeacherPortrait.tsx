@@ -7,7 +7,8 @@ export type TeacherPortraitName =
   | "ongyeol"
   | "dohyeon"
   | "taesan"
-  | "yeonhwa";
+  | "yeonhwa"
+  | "taeun";
 
 type Variant = "list" | "detail" | "report" | "closing";
 

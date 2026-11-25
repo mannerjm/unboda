@@ -105,7 +105,7 @@ assert(homeDailyEntry.includes("선택한 분석 대상의 사주를 바탕으�
 assert(homeDailyEntry.includes("오늘 새로운 흐름이 열렸어요") && homeDailyEntry.includes("오늘의 흐름을 확인했어요") && homeDailyEntry.includes("오늘 내용 다시보기"), "home daily card must adapt to unread/read state without changing its layout");
 assert(homeRendered.includes("<HomeMarketplaceContent copy={copy}"), "new homepage keeps account-stage hero and sales navigation instead of the four old quick-route cards");
 const marketplace = readFileSync("app/components/HomeMarketplaceContent.tsx", "utf8");
-assert(marketplace.includes('aria-label="실제 판매하는 사주 분석 주제"')
+assert(marketplace.includes('aria-label="사주 분석 상품 및 주제"')
   && marketplace.includes("grid-cols-4"), "daily link on sidebar remains available while homepage uses category discovery");
 const todayTopic = page.indexOf('id="today-topic"');
 const todayFlow = page.indexOf("{reading.flow}");

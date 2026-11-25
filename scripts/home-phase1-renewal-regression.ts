@@ -60,10 +60,12 @@ const expected = [
  ["올해 운","/deep-analysis?mode=period&productId=yearly-current"],
  ["다음달 운","/deep-analysis?mode=period&productId=monthly-next"],
  ["두 사람 궁합","/special-analysis/compatibility"],
+ ["신년운세","/paid-analysis/new-year-fortune"],
 ] as const;
-assert.equal(HOME_SALE_CATEGORY_LINKS.length,10,"only ten actually purchasable topic categories");
+assert.equal(HOME_SALE_CATEGORY_LINKS.length,11,"ten existing entries and one seasonal product preview");
 assert.deepEqual(HOME_SALE_CATEGORY_LINKS.map(({label,href})=>[label,href]),
- expected.map(([label,href])=>[label,href]),"every category links to its real existing catalog");
+ expected.map(([label,href])=>[label,href]),"every category links to its real existing catalog or seasonal detail");
+assert.equal(HOME_SALE_CATEGORY_LINKS[10].icon,"🎇","seasonal entry uses a distinct firework icon next to compatibility");
 assert(!HOME_SALE_CATEGORY_LINKS.some(x=>(new Set<string>(["무료 분석","무료분석","심층분석"])).has(x.label)),
  "free hero and generic deep-analysis must not be paid topic grid cards");
 assert(market.includes("grid-cols-4") && market.includes("max-w-[35rem] lg:max-w-[40rem]"), "centered mobile-first four-column storefront, slightly wider PC content for readability");

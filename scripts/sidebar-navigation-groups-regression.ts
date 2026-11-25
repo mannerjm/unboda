@@ -72,3 +72,6 @@ for (const part of [
 assert(!home.includes("function BrandMark()"),
   "homepage must not create a diverging brand mark");
 console.log("sidebar-navigation-groups-regression: OK");
+
+assert(analysis.includes('href: "/new-year", label: "신년운세", icon: "firework"') && analysis.includes('href: "/today", label: "오늘의 운보다", icon: "sun"'), "seasonal and daily navigation must use distinct icons");
+assert(source.includes('firework: "M12 2v3') && source.includes('if (item.href === "/new-year") return profileId ? `/paid-analysis/new-year-fortune?profileId='), "seasonal icon must exist and link directly to the profile-aware product detail");

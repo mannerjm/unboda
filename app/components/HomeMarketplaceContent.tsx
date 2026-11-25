@@ -32,6 +32,7 @@ export const HOME_SALE_CATEGORY_LINKS = [
   { label: "올해 운", icon: "🗓️", href: "/deep-analysis?mode=period&productId=yearly-current" },
   { label: "다음달 운", icon: "📅", href: "/deep-analysis?mode=period&productId=monthly-next" },
   { label: "두 사람 궁합", icon: "💜", href: "/special-analysis/compatibility" },
+  { label: "신년운세", icon: "🎇", href: "/paid-analysis/new-year-fortune" },
 ] as const;
 
 // Featured examples are curated actual sale products, NOT an unverified
@@ -45,7 +46,7 @@ const featuredPremiumIds = [
 
 function SaleCategories() {
   return (
-    <nav className="mx-auto mt-7 w-full" aria-label="실제 판매하는 사주 분석 주제">
+    <nav className="mx-auto mt-7 w-full" aria-label="사주 분석 상품 및 주제">
       <h2 className="sr-only">궁금한 분석 주제를 선택하세요</h2>
       <div className="grid grid-cols-4 gap-x-2.5 gap-y-3 sm:gap-x-3.5 sm:gap-y-4">
         {HOME_SALE_CATEGORY_LINKS.map((item) => (

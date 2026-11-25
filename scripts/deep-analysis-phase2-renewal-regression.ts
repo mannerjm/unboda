@@ -438,4 +438,4 @@ assert(shell.indexOf('>SERVICE</p>') < shell.indexOf('data-sidebar-active-profil
 
 const taeunCard = readFileSync("app/components/NewYearTeacherCard.tsx", "utf8");
 assert(!shell.includes(">주제별 분석</p>"), "remove redundant visible sidebar heading only");
-assert(taeunCard.includes('scope === "period" ? "기간별 분석 전문 선생님" : "신년운세 전문 AI 명리 선생님"'), "period teacher visible subtitle is concise while seasonal subtitle remains unchanged");
+assert(taeunCard.includes('scope === "period" ? "기간별 분석 전문 선생님" : "신년운세 전문 선생님"'), "both teacher visible subtitles are concise; AI disclosure remains in accessible labels");

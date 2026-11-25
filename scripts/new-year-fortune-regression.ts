@@ -85,3 +85,7 @@ const redSheep = readFileSync("public/images/premium/2027-jeongmi-red-sheep.webp
 assert.equal(redSheep.toString("ascii",0,4),"RIFF");
 assert.equal(redSheep.toString("ascii",8,12),"WEBP");
 assert.equal(redSheep.length,9006);
+
+const seasonalDetailCleanup = readFileSync("app/components/CustomerFirstPremiumDetail.tsx", "utf8");
+assert(!seasonalDetailCleanup.includes("어떤 운세를 볼 수 있나요?"), "remove redundant seasonal jump button");
+assert(seasonalDetailCleanup.includes('seasonalYear && state === "not_purchased" && isNewYearSalePending(product.id)') && seasonalDetailCleanup.includes('aria-labelledby="seasonal-value-heading"'), "keep sale status and full seasonal analysis description");

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { NEW_YEAR_DOMAINS, NEW_YEAR_PRODUCT_ID } from "./newYearFortune";
 import type { PeriodAnalysisProductType } from "./analysisPeriodProducts";
 import type {
   PeriodAnalysisStrategy,
@@ -42,6 +43,7 @@ export const PeriodAnalysisBlockSchema = z.object({
     .min(2)
     .max(12),
   keyPoints: z.array(z.string().trim().min(10)).min(2).max(5).optional(),
+  newYearDomains: z.array(z.object({label:z.enum(NEW_YEAR_DOMAINS),summary:z.string().trim().min(45),action:z.string().trim().min(10),caution:z.string().trim().min(10)})).length(8).optional(),
 });
 
 export type PeriodAnalysisBlock = z.infer<typeof PeriodAnalysisBlockSchema>;
@@ -90,7 +92,7 @@ ${items}
   "keyPoints": [
     "이 기간에서 기억할 핵심 1",
     "이 기간에서 기억할 핵심 2"
-  ]
+  ]${strategy.productId === NEW_YEAR_PRODUCT_ID ? `,\n  "newYearDomains": [\n${NEW_YEAR_DOMAINS.map(label => JSON.stringify({label,summary:"개인 실제 계산과 연결한 분야별 상세 분석",action:"현실적인 실천 방법",caution:"주의할 조건"})).join(",\n")}\n  ]` : ""}
 },
 `;
 }
@@ -111,5 +113,6 @@ export function buildPeriodAnalysisPromptRules(
 - intensity는 해당 구간의 힘의 세기나 성격이 실제 근거로 확인될 때만 사용한다.
 - actions와 cautions는 해당 구간에만 해당하는 내용을 각각 최대 3개까지 작성하고, 없으면 생략한다.
 - keyPoints는 이 기간 전체에서 기억할 핵심을 2~5개로 정리한다.
+${strategy.productId===NEW_YEAR_PRODUCT_ID?"- newYearDomains는 지정된 여덟 분야를 정확한 순서로 작성한다. 각 분야 summary는 45자 이상이며 서로 다른 근거와 상황에 연결한다. 각 월 summary에는 일·재물·관계·생활 중 관련 흐름을 설명하고 actions와 cautions를 모두 최소 1개 작성한다. 건강은 생활 관리, 재물은 예산과 위험 관리 관점이다. 월별 계산은 사건 예언이 아니다.":""}
 `;
 }

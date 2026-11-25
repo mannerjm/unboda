@@ -1445,7 +1445,9 @@ export function buildPaidAnalysisDetailPromptV4(
     ? "\n- decisionCheck: 3개 이상 5개 이하 (이 상품은 의사결정형이므로 반드시 포함한다)"
     : "\n- decisionCheck: 이 상품은 탐색형이므로 decisionCheck key 자체를 출력하지 않는다. null이나 빈 배열도 보내지 않는다.";
 
-  const timelineRules = periodStrategy
+  const timelineRules = input.productId === "new-year-fortune"
+    ? "- timeline은 대상 연도 1분기, 2분기, 3분기, 4분기의 정확히 4개 종합 구간으로 작성한다. 12개 월별 상세 분석은 periodAnalysis.timelineItems에 작성한다. 대상 연도를 명시하고 사건을 단정하지 않는다."
+    : periodStrategy
     ? `${buildPeriodTimelineSectionRules(periodStrategy)}
 ${buildPeriodTimelineConsistencyRule(periodStrategy)}`
     : isMonthlyTopic && monthlyCycle

@@ -45,6 +45,13 @@ const PERIOD_PURCHASE_DECISIONS: Readonly<Record<string, PeriodPurchaseDecision>
     expectedUnderstanding: ["올해 전체 흐름에서 현재 위치", "올해 힘을 배분할 우선순위", "변화가 나타나는 주요 구간", "유지하거나 조정해서 살펴볼 부분"],
     distinction: "월 단위 분석보다 넓게, 현재 연도 전체의 흐름과 운영 우선순위를 종합해서 살펴봅니다.",
   },
+  "new-year-fortune": {
+    primaryQuestion: "새해에는 나의 일, 돈, 관계와 생활을 어떻게 준비하면 좋을까?",
+    recommendedFor: ["새해의 분야별 운세를 한 번에 읽고 싶을 때", "1월부터 12월까지 개인별 흐름과 실천 방향을 확인하고 싶을 때"],
+    analysisScope: ["새해 총운", "재물·직업·사업·연애·결혼·대인관계·가족·건강·학업과 자기계발", "1월부터 12월까지 월별 흐름", "기회와 주의 시기", "새해 실천 계획"],
+    expectedUnderstanding: ["한 해의 분야별 방향과 관리 기준", "열두 달의 변화와 구간별 실천 방법", "새해에 집중하고 조정할 우선순위"],
+    distinction: "내년 운은 다음 해 변화와 사전 준비 중심이며, 신년운세는 특정 연도의 분야별 종합 흐름과 열두 달의 실천 방향을 함께 살펴봅니다.",
+  },
   "annual-next": {
     primaryQuestion: "다음 해에는 무엇이 달라지고 지금부터 무엇을 준비해야 할까?",
     recommendedFor: ["내년의 전체 흐름을 미리 살펴보고 싶을 때", "올해와 내년 사이의 변화가 궁금할 때", "다음 해의 중요한 계획을 앞두고 준비 방향을 점검하고 싶을 때"],
@@ -96,6 +103,12 @@ const PERIOD_ANALYSIS_PRODUCT_DEFINITIONS: Omit<PeriodAnalysisProductDefinition,
     title: "올해 흐름 종합 분석",
     shortDescription:
       "올해의 압력·자원 변화와 운영 우선순위를 관찰·조정 기준으로 종합 분석합니다.",
+  },
+  {
+    id: "new-year-fortune",
+    type: "yearly",
+    title: "프리미엄 신년운세",
+    shortDescription: "내 사주로 새해 총운과 분야별 운세, 1월부터 12월까지의 흐름을 살펴봅니다.",
   },
   {
     id: "annual-next",

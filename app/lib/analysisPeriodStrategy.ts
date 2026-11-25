@@ -1,3 +1,4 @@
+import { NEW_YEAR_MONTHS } from "./newYearFortune";
 import type { PeriodAnalysisProductType } from "./analysisPeriodProducts";
 
 export type PeriodAnalysisTimeGranularity =
@@ -163,6 +164,7 @@ const PERIOD_OWNERSHIP_CONTRACTS: Record<
     causeArchitecture: "연간 축적 조건 → 지속·일시 압력 구분 → 운영 우선순위 전환 → 연말 carry-forward/reset 순서로 조직한다.",
     reviewArtifact: "연간 운영 우선순위표와 연중 checkpoint·연말 carry-forward/reset 리뷰",
   },
+  "new-year-fortune": {"requiredInsights":[{"id":"new-year-overview","title":"새해 총운과 우선순위","evidenceInterpretation":"대상 연도 실제 연간 계산과 원국을 연결","mechanismResponsibility":"자원·부담 변화가 한 해 우선순위에 미치는 영향","observableSignal":"일정과 책임 배분 변화","actionResponsibility":"연간 목표와 조정 기준"},{"id":"new-year-domains","title":"분야별 생활 흐름","evidenceInterpretation":"원국과 연간 흐름을 여덟 분야별 조건으로 해석","mechanismResponsibility":"일·돈·관계·가정·학업·생활의 차이","observableSignal":"각 분야에서 확인할 변화 조건","actionResponsibility":"분야별 행동과 주의 기준"},{"id":"new-year-months","title":"열두 달의 월별 운세","evidenceInterpretation":"서버 계산 월주와 개인 일간의 관계를 참고","mechanismResponsibility":"달마다 다른 조건과 생활 준비","observableSignal":"월마다 확인할 기회와 부담 신호","actionResponsibility":"열두 달 각각의 실천·주의 방향"},{"id":"new-year-action","title":"나만의 연간 실천 계획","evidenceInterpretation":"분야별·월별 근거를 종합","mechanismResponsibility":"변화 조건과 실행·조정 우선순위 연결","observableSignal":"계획을 바꿀 구체적 조건","actionResponsibility":"분기별 검토와 연간 실천 계획"}],"evidenceArchitecture":"개인 원국과 대상 연도 → 분야별 해석 → 월별 계산 → 기회와 주의","causeArchitecture":"개인 원국과 연간 조건을 분야별, 월별 변화와 연결한다.","reviewArtifact":"연간 총운, 여덟 분야별 해석, 열두 달의 실천 달력과 계획"},
   "annual-next": {
     requiredInsights: [
       { id: "next-year-theme", title: "다음 해 핵심 테마", evidenceInterpretation: "현재 근거를 다음 해의 실제 연도 테마로 해석한다.", mechanismResponsibility: "현재와 다음 해의 조건 차이가 준비 우선순위에 미치는 경로를 설명한다.", observableSignal: "다음 해를 준비해야 하는 현재의 조건 변화를 확인한다.", actionResponsibility: "다음 해 준비의 첫 기준을 정한다." },
@@ -293,6 +295,15 @@ const PERIOD_ANALYSIS_STRATEGY_DEFINITIONS: readonly PeriodAnalysisStrategyDefin
       "월별 사건을 장황하게 나열하는 서술",
       "대운의 장기 구조를 올해 상품의 중심 결론으로 확장하는 서술",
     ],
+  },
+  {
+    productId: "new-year-fortune",
+    periodType: "yearly",
+    timeGranularity: "year",
+    coreQuestion: "새해의 전체 흐름과 분야별 변화, 월별 준비 방향은 무엇인가",
+    focus: ["대상 연도 실제 계산과 총운","재물·직업·사업·연애·결혼·대인관계·가족·건강·학업의 해석","1월부터 12월까지 월별 흐름과 기회·주의","개인 맞춤 실천 계획"],
+    timelineSpec: {labels:NEW_YEAR_MONTHS,rule:"대상 연도의 양력 1월부터 12월까지 각 월의 서버 계산 근거와 실제 관찰할 생활 조건을 연결한다. 절기 경계와 월별 참고 계산을 구분한다."},
+    prohibitedPatterns:["미래 사건의 확정 또는 보장","월 이름만 변경한 반복 해석","질병·투자 수익·결혼이나 임신을 단정하는 표현"],
   },
   {
     productId: "annual-next",

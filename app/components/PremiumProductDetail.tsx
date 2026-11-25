@@ -165,7 +165,6 @@ export default function PremiumProductDetail({
       profileId={profileId}
       isSaved={isSaved}
       guestRecommendation={guestRecommendation}
-      newYearYear={newYearYear}
     />;
   }
   if (getLaunchProductIds().includes(product.id)) {
@@ -175,6 +174,7 @@ export default function PremiumProductDetail({
       profileId={profileId}
       isSaved={isSaved}
       guestRecommendation={guestRecommendation}
+      newYearYear={newYearYear}
     />;
   }
 

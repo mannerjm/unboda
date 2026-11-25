@@ -435,3 +435,7 @@ assert(storefront.includes('data-period-product-list') && storefront.includes('<
 assert(catalog.includes('p.id !== "new-year-fortune"'), "seasonal product must remain independently navigable");
 assert(page.includes('redirect(`/period-analysis') && page.includes('getUserProfile(requestedProfileId,user.id)'), "legacy route must preserve validated profile");
 assert(shell.indexOf('>SERVICE</p>') < shell.indexOf('data-sidebar-active-profile') && !page.includes('현재 분석 대상'), "ordinary profile name belongs under SERVICE only");
+
+const taeunCard = readFileSync("app/components/NewYearTeacherCard.tsx", "utf8");
+assert(!shell.includes(">주제별 분석</p>"), "remove redundant visible sidebar heading only");
+assert(taeunCard.includes('scope === "period" ? "기간별 분석 전문 선생님" : "신년운세 전문 AI 명리 선생님"'), "period teacher visible subtitle is concise while seasonal subtitle remains unchanged");

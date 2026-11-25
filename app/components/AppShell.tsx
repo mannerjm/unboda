@@ -306,7 +306,6 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                 ) : null}
                 {item.activeHref === "/deep-analysis" && isDeepCatalog ? (
                   <div className="mb-3 ml-4 mt-2 space-y-1 border-l border-[#d8c2f1] pl-3" aria-label="심층분석 주제별 메뉴">
-                    <p className="px-2 pb-1 pt-1 text-[11px] font-black tracking-wide text-[#8d6aa9]">주제별 분석</p>
                     {deepTopicMenu.map(({ category, label }) => {
                       const selected = selectedDeepMode === "topic" && selectedDeepCategory === category;
                       return (

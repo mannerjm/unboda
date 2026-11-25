@@ -9,15 +9,16 @@ import { buildPaidAnalysisV4PreviewModel } from "../app/lib/paidAnalysisV4Previe
 
 const launchedIds = getLaunchProductIds();
 const uniqueIds = new Set(launchedIds);
-assert.equal(launchedIds.length, 57, "exactly 57 launched deep-analysis products expected");
-assert.equal(uniqueIds.size, 57, "duplicate launch product ID would mix records/payments");
+assert.equal(launchedIds.length, 58, "57 established products plus one seasonal product expected");
+assert(launchedIds.includes("new-year-fortune") && launchedIds.includes("annual-next"), "seasonal and next-year products must coexist");
+assert.equal(uniqueIds.size, 58, "duplicate launch product ID would mix records/payments");
 
 const topicIds = launchedIds.filter((id) => !!getPaidAnalysisTopicConfig(id));
 const periodIds = launchedIds.filter((id) => !getPaidAnalysisTopicConfig(id));
 assert.equal(topicIds.length, 50, "50 distinct topic analyses expected");
-assert.equal(periodIds.length, 7, "7 distinct period analyses expected");
+assert.equal(periodIds.length, 8, "8 distinct period analyses expected");
 assert(topicIds.includes("money-shared-finance"), "established pilot must remain in launch set");
-assert.equal(launchedIds.filter((id) => id !== "money-shared-finance").length, 56);
+assert.equal(launchedIds.filter((id) => id !== "money-shared-finance").length, 57);
 
 const questions = new Set<string>();
 const photoSources = new Set<string>();
@@ -44,7 +45,7 @@ for (const id of launchedIds) {
       "topic photo must have its own traceable high-res Pexels original: " + id);
   } else {
     assert(photo.sourcePage.startsWith("UNBODA original")
-      && photo.src.endsWith(".webp"), "period-specific original artwork must remain local: " + id);
+      && (id === "new-year-fortune" ? photo.src === "/images/premium/new-year-fortune.svg" : photo.src.endsWith(".webp")), "period-specific original artwork must remain local: " + id);
   }
 
   const price = getProductPricing(id);
@@ -155,4 +156,4 @@ assert(styles.includes("@media (max-width: 1023px), (hover: none) and (pointer: 
   && styles.includes("section[data-paid-product-directory]"),
   "57-product directory remains hidden on mobile anywhere");
 
-console.log("customer-first-57-rollout-regression: PASS (50 topic + 7 period; 57 IDs, images, prices, question labels, scopes; one checkout per detail)");
+console.log("customer-first-57-rollout-regression: PASS (50 topic + 8 period; 58 IDs, images, prices, question labels, scopes; one checkout per detail)");

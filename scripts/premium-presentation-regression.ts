@@ -43,7 +43,7 @@ for (const [productId, title] of Object.entries(expectedTitles)) {
 }
 
 const launchIds = getLaunchProductIds();
-assert(launchIds.length === 57, `launch product count must be 57, got ${launchIds.length}`);
+assert(launchIds.length === 58, `launch product count must be 58, got ${launchIds.length}`);
 assert(catalogProducts.length === 50, `topic catalog count must be 50, got ${catalogProducts.length}`);
 
 console.log("premium-presentation-regression passed ✓");

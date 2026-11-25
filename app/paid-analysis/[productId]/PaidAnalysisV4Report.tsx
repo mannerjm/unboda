@@ -11,6 +11,7 @@ import {
 import PeriodTimelineSection from "./PeriodTimelineSection";
 import WealthTeacherCard from "@/app/components/WealthTeacherCard";
 import TopicTeacherCard from "@/app/components/TopicTeacherCard";
+import NewYearTeacherCard from "@/app/components/NewYearTeacherCard";
 import { getTopicTeacher } from "@/app/lib/topicTeachers";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import type { CSSProperties } from "react";
@@ -142,7 +143,7 @@ export default function PaidAnalysisV4Report({
         </div>
 
         {productId && (productId === "wealth" || productId.startsWith("money-")) ? <WealthTeacherCard variant="report" /> : null}
-        {teacher ? <TopicTeacherCard category={teacher.category} variant="report" /> : null}
+        {productId === "new-year-fortune" ? <NewYearTeacherCard variant="report" /> : teacher ? <TopicTeacherCard category={teacher.category} variant="report" /> : null}
 
         <section data-report-feature="conclusion" style={darkSectionStyle} className="relative mt-5 overflow-hidden rounded-[2.25rem] border border-[#332d65] bg-[radial-gradient(circle_at_82%_14%,rgba(155,139,255,0.34),transparent_26%),radial-gradient(circle_at_12%_90%,rgba(104,86,216,0.24),transparent_28%),linear-gradient(145deg,#17172f_0%,#242047_48%,#18192f_100%)] px-5 py-8 text-white shadow-[0_28px_80px_rgba(29,27,68,0.24)] sm:px-9 sm:py-10">
           <div className="pointer-events-none absolute right-[-3rem] top-[-4rem] h-48 w-48 rounded-full border border-white/10" />
@@ -414,7 +415,7 @@ export default function PaidAnalysisV4Report({
           </DetailSection>
         </div>
         {productId && (productId === "wealth" || productId.startsWith("money-")) ? <WealthTeacherCard variant="closing" conclusion={detail.conclusion.headline} immediateAction={detail.conclusion.immediateAction} /> : null}
-        {teacher ? <TopicTeacherCard category={teacher.category} variant="closing" conclusion={detail.conclusion.headline} immediateAction={detail.conclusion.immediateAction} /> : null}
+        {productId === "new-year-fortune" ? <NewYearTeacherCard variant="closing" conclusion={detail.conclusion.headline} immediateAction={detail.conclusion.immediateAction} /> : teacher ? <TopicTeacherCard category={teacher.category} variant="closing" conclusion={detail.conclusion.headline} immediateAction={detail.conclusion.immediateAction} /> : null}
       </div>
     </main>
   );

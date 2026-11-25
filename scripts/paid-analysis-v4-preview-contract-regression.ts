@@ -13,7 +13,7 @@ function assert(condition: boolean, message: string): void {
 }
 
 const launchIds = getLaunchProductIds();
-assert(launchIds.length === 57, "V4 preview coverage must stay exactly 57 products");
+assert(launchIds.length === 58, "V4 preview coverage must stay exactly 58 products");
 assert(
   launchIds.every((id) => !id.startsWith("compatibility-")),
   "compatibility products must stay outside the paid-analysis V4 preview system",
@@ -103,13 +103,13 @@ for (const productId of launchIds) {
 }
 
 assert(kindCounts.topic === 50, "V4 preview must cover 50 topic products");
-assert(kindCounts.period === 7, "V4 preview must cover 7 period products");
+assert(kindCounts.period === 8, "V4 preview must cover 8 period products");
 assert(topicPolicyCounts.MONTHLY === 27, "V4 preview must cover 27 monthly topics");
 assert(topicPolicyCounts.YEARLY === 21, "V4 preview must cover 21 yearly topics");
 assert(topicPolicyCounts.LIFETIME === 2, "V4 preview must cover 2 lifetime topics");
 assert(familyCounts.CORE === 44, "V4 preview must cover 44 CORE products");
 assert(familyCounts.DEEP === 8, "V4 preview must cover 8 DEEP products");
-assert(familyCounts.LONG_RANGE === 4, "V4 preview must cover 4 LONG_RANGE products");
+assert(familyCounts.LONG_RANGE === 5, "V4 preview must cover 5 LONG_RANGE products");
 assert(familyCounts.SIGNATURE === 1, "V4 preview must cover 1 SIGNATURE product");
 
 const previewSource = readFileSync("app/components/PremiumReportValuePreview.tsx", "utf8");
@@ -160,5 +160,5 @@ assert(
 );
 
 console.log(
-  "paid-analysis-v4-preview-contract-regression: PASS (57/57, topic=50, period=7, monthly=27, yearly=21, lifetime=2)",
+  "paid-analysis-v4-preview-contract-regression: PASS (58/58, topic=50, period=8, monthly=27, yearly=21, lifetime=2)",
 );

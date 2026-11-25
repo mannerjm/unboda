@@ -36,6 +36,7 @@ function NavIcon({ icon }: { icon: NavItem["icon"] }) {
 
 const analysisNavItems: NavItem[] = [
   { href: "/today", label: "오늘의 운보다", icon: "sun" },
+  { href: "/new-year", label: "신년운세", icon: "sun" },
   { href: "/saju", label: "내 분석", icon: "home" },
   { href: "/recommendations", label: "추천 분석", icon: "chart" },
   { href: "/deep-analysis", label: "심층 분석", icon: "spark" },
@@ -194,6 +195,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
     return `/deep-analysis?mode=${mode}&${key}=${encodeURIComponent(id)}${profilePart}`;
   };
   const navigationHref = (item: NavItem): string => {
+    if (item.href === "/new-year") return profileId ? `/new-year?profileId=${encodeURIComponent(profileId)}` : "/new-year";
     if (isGuest === true) {
       if (item.href === "/saju") return hasGuestResult ? "/guest-result" : "/guest-saju";
       if (item.href === "/recommendations") return "/recommendations";
@@ -263,7 +265,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                         : "text-[#605372] hover:bg-white/80 hover:text-[#6033ad]"
                   }`}
                 >
-                  <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.label}</span>
+                  <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/new-year" && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.label}</span>
                   {item.activeHref === "/ai-consulting" ? <span className="ml-auto rounded-full border border-[#8f7cff]/30 bg-[#eee3ff] px-2 py-0.5 text-[9px] font-black tracking-[0.08em] text-[#7543b4]">이어가기</span> : null}
                 </Link>
                 {item.activeHref === "/special-analysis" && pathname.startsWith("/special-analysis") ? (
@@ -342,8 +344,9 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
         </aside>
 
         <div className="min-w-0 flex-1 lg:pl-60">
-          <header className="flex h-14 items-center justify-between border-b border-[#e4d5f4] bg-white/95 px-5 text-[#281744] lg:hidden">
+          <header className="flex h-14 items-center justify-between gap-2 border-b border-[#e4d5f4] bg-white/95 px-3 text-[#281744] lg:hidden">
             <Link href="/" className="inline-flex items-center gap-2 text-lg font-black tracking-tight text-[#281744]"><BrandMark />운보다</Link>
+            <Link href={profileId ? `/new-year?profileId=${encodeURIComponent(profileId)}` : "/new-year"} className="shrink-0 rounded-full bg-[#fff1df] px-2.5 py-2 text-xs font-bold text-[#8d421d]">신년운세</Link>
             {pathname === "/mypage" && isGuest === false && profileId ? (
               <span className="rounded-full border border-[#e6d7fa] bg-[#f4ebff] px-3 py-1 text-xs font-semibold text-[#65449b]">AI 질문권 {aiCreditBalanceLabel}</span>
             ) : (
@@ -380,7 +383,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                       : "text-[#6a5c7f] hover:bg-[#f3ecff] hover:text-[#6033ad]"
                 }`}
               >
-                    <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.shortLabel ?? item.label}</span>
+                    <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/new-year" && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.shortLabel ?? item.label}</span>
               </Link>
             );
           })}

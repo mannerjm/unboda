@@ -5,7 +5,7 @@ import { getPremiumProduct } from "../app/lib/premiumProductRegistry";
 import { getPaidProductSeoGuide } from "../app/lib/paidProductSeo";
 
 const ids = getLaunchProductIds();
-assert.equal(ids.length, 57, "SEO phase 2 must cover all 57 launch products");
+assert.equal(ids.length, 58, "SEO phase 2 must cover all 57 launch products");
 
 const titles = new Set<string>();
 let topicCount = 0;
@@ -30,7 +30,7 @@ for (const id of ids) {
 }
 
 assert.equal(topicCount, 50);
-assert.equal(periodCount, 7);
+assert.equal(periodCount, 8);
 
 const route = readFileSync("app/paid-analysis/[productId]/page.tsx", "utf8");
 assert(route.includes("getPaidProductSeoGuide(product)"), "Metadata must use product search intent");

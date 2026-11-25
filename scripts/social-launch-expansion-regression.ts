@@ -33,8 +33,8 @@ const expectedSocialCatalogIds = new Set([
 ]);
 
 const launchIds = getLaunchProductIds();
-assert(launchIds.length === 57, `launch catalog must contain 57 products, got ${launchIds.length}`);
-assert(new Set(launchIds).size === 57, "launch product ids must stay unique");
+assert(launchIds.length === 58, `launch catalog must contain 58 products, got ${launchIds.length}`);
+assert(new Set(launchIds).size === 58, "launch product ids must stay unique");
 
 const topicProducts = listTopicCatalogProducts();
 assert(topicProducts.length === 50, `topic catalog must contain 50 products, got ${topicProducts.length}`);

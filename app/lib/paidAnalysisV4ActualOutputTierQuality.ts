@@ -644,6 +644,14 @@ export function auditPaidAnalysisV4ActualOutputTier(
     }
   }
 
+  if(productId==="new-year-fortune"){
+    const block=output.periodAnalysis;
+    const domains=block?.newYearDomains??[];
+    const labels=["재물운","직업운","사업운","연애·결혼운","대인관계운","가족운","건강운","학업·자기계발운"];
+    if(domains.length!==8||domains.some((domain,index)=>domain.label!==labels[index])||new Set(domains.map(domain=>domain.summary.trim())).size!==8)issues.push({field:"periodAnalysis.newYearDomains",severity:"error",message:"신년운세 분야별 분석 8개를 중복 없이 작성해야 합니다."});
+    const months=block?.timelineItems??[];
+    if(months.length!==12||months.some(month=>!month.actions?.length||!month.cautions?.length)||new Set(months.map(month=>month.summary.trim())).size!==12)issues.push({field:"periodAnalysis.timelineItems",severity:"error",message:"열두 달의 독립 분석과 행동·주의 기준을 모두 작성해야 합니다."});
+  }
   return {
     ok: !issues.some((issue) => issue.severity === "error"),
     productId,

@@ -5,6 +5,9 @@ import { buildReferencePeriodSnapshot } from "./analysisReferencePeriod";
 import { getPremiumProduct } from "./premiumProductRegistry";
 import type { ProfileDto } from "./profiles/types";
 import { getSaju } from "./manse";
+import { calculateSaju } from "@fullstackfamily/manseryeok";
+import { getTenGod } from "./tenGod";
+import { NEW_YEAR_PRODUCT_ID } from "./newYearFortune";
 
 export function buildPaidAnalysisInputFromProfile(
   profile: ProfileDto,
@@ -26,7 +29,7 @@ export function buildPaidAnalysisInputFromProfile(
     anchorDate,
     profile.birthTimeKnown,
   );
-  const freeAnalysis = buildFreeAnalysis(saju);
+  let freeAnalysis = buildFreeAnalysis(saju);
   const referencePeriod = buildReferencePeriodSnapshot({
     productId,
     anchorDate,
@@ -37,6 +40,22 @@ export function buildPaidAnalysisInputFromProfile(
     },
   });
 
+  let targetMonthFacts: unknown[] | undefined;
+  let analysisSaju=saju;
+  if (productId===NEW_YEAR_PRODUCT_ID) {
+    const year=referencePeriod?.referenceYear;
+    if (!year) throw new Error("신년운세 대상 연도 확인 실패");
+    analysisSaju=getSaju(profile.birthDate,profile.birthTime,profile.calendarType,profile.isLeapMonth?"윤달":"평달",profile.gender,`${year}-07-15`,profile.birthTimeKnown);
+    freeAnalysis=buildFreeAnalysis(analysisSaju);
+    targetMonthFacts=Array.from({length:12},(_,i)=>{
+      const month=i+1;
+      const last=new Date(Date.UTC(year,month,0)).getUTCDate();
+      return {year,month,samples:[1,15,last].map(day=>{
+        const chart=calculateSaju(year,month,day,12,0);
+        return {day,yearPillar:chart.yearPillarHanja,monthPillar:chart.monthPillarHanja,natalDayStemRelation:getTenGod(saju.dayPillarHanja[0],chart.monthPillarHanja[0])};
+      })};
+    });
+  }
   return {
     productId,
     analysisType: product.analysisType,
@@ -68,7 +87,7 @@ export function buildPaidAnalysisInputFromProfile(
       gyeokguk: freeAnalysis.gyeokgukAnalysis,
     }),
     currentFortuneFlow: JSON.stringify(freeAnalysis.fortuneFlowAnalysis),
-    evidenceFacts: buildPaidAnalysisEvidenceFacts({ saju, freeAnalysis }),
+    evidenceFacts: buildPaidAnalysisEvidenceFacts({ saju: analysisSaju, freeAnalysis }),
     v4Context: {
       currentTiming: JSON.stringify({
         gender: profile.gender,
@@ -83,6 +102,7 @@ export function buildPaidAnalysisInputFromProfile(
             periodTiming: JSON.stringify({
               daeunAnalysis: freeAnalysis.daeunAnalysis,
               seunAnalysis: freeAnalysis.seunAnalysis,
+              ...(targetMonthFacts ? {targetMonthFacts,samplingNote:"양력 월 초·중·말 정오 참고 계산입니다. 절기 경계의 정확한 시각 또는 사건 예측을 뜻하지 않습니다."}:{}),
             }),
           }
         : {}),

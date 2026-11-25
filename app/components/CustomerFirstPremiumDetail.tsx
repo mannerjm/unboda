@@ -15,6 +15,8 @@ import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
 import ProductReviewSummary from "@/app/components/ProductReviewSummary";
 import WealthTeacherCard from "@/app/components/WealthTeacherCard";
 import TopicTeacherCard from "@/app/components/TopicTeacherCard";
+import NewYearTeacherCard from "@/app/components/NewYearTeacherCard";
+import { isNewYearSalePending } from "@/app/lib/newYearFortune";
 
 type Props = {
   product: PremiumProductDefinition;
@@ -177,7 +179,7 @@ export default function CustomerFirstPremiumDetail({
 
       <div className="px-4 sm:px-9">
         {product.category === "money" ? <WealthTeacherCard variant="detail" /> : null}
-        {product.category !== "money" ? <TopicTeacherCard category={product.category} variant="detail" /> : null}
+        {product.id === "new-year-fortune" ? <NewYearTeacherCard variant="detail" /> : product.category !== "money" ? <TopicTeacherCard category={product.category} variant="detail" /> : null}
         <section className="py-11 sm:py-14" aria-labelledby="customer-concerns">
           <p className="text-center text-xs font-extrabold tracking-widest text-[#926bc8]">내 이야기처럼 느껴지는 순간</p>
           <h3 id="customer-concerns" className="mt-3 break-keep text-center text-[25px] font-black tracking-tight text-[#2f1a48] sm:text-[30px]">
@@ -307,7 +309,9 @@ export default function CustomerFirstPremiumDetail({
               <p className="mt-1 text-2xl font-black text-[#39234f]">{price}</p>
             </div>
             <div className="flex w-full min-w-0 flex-col gap-2">
-              {guestRecommendation && state === "not_purchased" ? (
+              {state === "not_purchased" && isNewYearSalePending(product.id) ? (
+                <div role="status" className="rounded-xl bg-[#f1e9fa] px-4 py-3 text-center text-sm font-bold text-[#654789]">정식 판매 준비 중 · 상품 내용을 먼저 살펴보세요.</div>
+              ) : guestRecommendation && state === "not_purchased" ? (
                 <GuestRecommendationPurchaseButton productId={product.id} label={ACTION_LABELS[state]} />
               ) : href ? (
                 <Link href={href} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-[#704ad0] px-4 py-3 text-center text-base font-extrabold text-white transition hover:bg-[#5e38bd] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#704ad0]">

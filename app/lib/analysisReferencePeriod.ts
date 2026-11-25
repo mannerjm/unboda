@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { newYearTargetYear } from "./newYearFortune";
 import type { PeriodAnalysisProductType } from "./analysisPeriodProducts";
 import { getPremiumProduct } from "./premiumProductRegistry";
 import { getKoreaEvaluationDate } from "./evaluationContext";
@@ -198,6 +199,9 @@ export function buildReferencePeriodSnapshot(
 
     case "yearly-current":
       return buildYearSnapshot(productId, anchorDate, 0, "올해 운");
+
+    case "new-year-fortune":
+      return buildYearSnapshot(productId, anchorDate, newYearTargetYear(anchor)-anchor.year, "신년운세");
 
     case "annual-next":
       return buildYearSnapshot(productId, anchorDate, 1, "내년 운");

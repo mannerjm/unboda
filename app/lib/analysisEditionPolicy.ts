@@ -99,6 +99,7 @@ const ANALYSIS_EDITION_POLICY_BY_PRODUCT_ID: Readonly<Record<string, AnalysisEdi
   "monthly-next": "TARGET_MONTH",
   "yearly-current": "TARGET_YEAR",
   "annual-next": "TARGET_YEAR",
+  "new-year-fortune": "TARGET_YEAR",
   "annual-3years": "ROLLING_MULTIYEAR",
   "daeun-current": "DAEUN",
   "lifetime-overview": "LIFETIME",

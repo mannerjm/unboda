@@ -9,6 +9,7 @@ const sidebar = source.slice(source.indexOf('<nav aria-label="메인 네비게�
 
 const routes = [
   ["/today", "오늘의 운보다"],
+  ["/new-year", "신년운세"],
   ["/saju", "내 분석"],
   ["/recommendations", "추천 분석"],
   ["/deep-analysis", "심층 분석"],
@@ -24,7 +25,7 @@ for (const [href, label] of routes) {
   assert(position > cursor, `analysis route must keep its original destination in the new order: ${line}`);
   cursor = position;
 }
-assert.equal((analysis.match(/href:/g) ?? []).length, 8, "exactly eight existing analysis routes, no duplicate compatibility menu");
+assert.equal((analysis.match(/href:/g) ?? []).length, 9, "eight existing analysis routes and one seasonal route, no duplicate compatibility menu");
 assert.equal((management.match(/href:/g) ?? []).length, 2, "exactly two existing management routes");
 for (const [href, label] of [["/mypage", "마이페이지"], ["/support", "고객지원 센터"]]) {
   assert(management.includes(`href: "${href}", label: "${label}"`));

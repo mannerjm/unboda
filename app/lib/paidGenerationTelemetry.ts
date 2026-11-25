@@ -269,6 +269,7 @@ const PERIOD_BANDS: Record<string, PaidGenerationCommercialBand> = {
   "monthly-next": "MONTHLY",
   "yearly-current": "ANNUAL",
   "annual-next": "ANNUAL",
+  "new-year-fortune": "ANNUAL",
   "annual-3years": "LONG_CYCLE",
   "daeun-current": "LONG_CYCLE",
   "lifetime-overview": "SIGNATURE",

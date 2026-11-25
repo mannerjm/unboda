@@ -5,7 +5,8 @@ import ProfileSelector from "@/app/components/ProfileSelector";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { isNewYearSalePending } from "@/app/lib/newYearFortune";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
 import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
@@ -47,6 +48,7 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
   if (!resolved.ok) notFound();
 
   const canonicalProductId = resolved.productId;
+  if (isNewYearSalePending(canonicalProductId)) redirect(`/paid-analysis/${canonicalProductId}${profileId ? `?profileId=${encodeURIComponent(profileId)}` : ""}`);
   const specialProduct = getSpecialAnalysisProduct(canonicalProductId);
   const premiumProduct = specialProduct ? undefined : getPremiumProduct(canonicalProductId);
   if (!specialProduct && !premiumProduct) notFound();

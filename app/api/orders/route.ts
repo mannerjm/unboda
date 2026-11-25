@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { PaidPurchaseEligibilityError } from "@/app/lib/accounts/server";
+import { isNewYearSalePending } from "@/app/lib/newYearFortune";
 import { resolveLaunchPurchasableProduct } from "@/app/lib/purchases/products";
 import {
   ActiveEditionOrderAlreadyPaidError,
@@ -90,6 +91,10 @@ export async function POST(request: Request) {
       { error: "유효하지 않은 분석 상품입니다." },
       { status: 400 },
     );
+  }
+
+  if (isNewYearSalePending(resolved.productId)) {
+    return NextResponse.json({ error: "신년운세는 정식 판매 준비 중입니다.", code: "SEASONAL_SALE_PENDING" }, { status: 403 });
   }
 
   if (!isProfileId(rawProfileId)) {

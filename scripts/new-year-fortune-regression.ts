@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { buildPaidAnalysisInputFromProfile } from "../app/lib/paidAnalysisProfileInput";
 import { resolveLaunchPurchasableProduct } from "../app/lib/purchases/products";
 import type { ProfileDto } from "../app/lib/profiles/types";
-import { newYearTargetYear,NEW_YEAR_MONTHS,NEW_YEAR_DOMAINS } from "../app/lib/newYearFortune";
+import { newYearTargetYear,NEW_YEAR_MONTHS,NEW_YEAR_DOMAINS,isNewYearSalePending } from "../app/lib/newYearFortune";
 import { buildReferencePeriodSnapshot } from "../app/lib/analysisReferencePeriod";
 import { getPeriodAnalysisStrategy } from "../app/lib/analysisPeriodStrategy";
 import { computeAnalysisEditionKey } from "../app/lib/analysisEditionKey";
@@ -61,4 +61,13 @@ const asset=readFileSync("public/teachers/taeun-full-v4.webp");
 assert.equal(asset.toString("ascii",0,4),"RIFF");
 assert.equal(asset.toString("ascii",8,12),"WEBP");
 assert(asset.length>4000,"Taeun portrait must be the actual local image");
+assert(isNewYearSalePending("new-year-fortune"));
+assert(!isNewYearSalePending("annual-next"));
+assert(!isNewYearSalePending("money-income-stability"));
+for (const [file,guard] of [
+ ["app/api/orders/route.ts","isNewYearSalePending(resolved.productId)"],
+ ["app/lib/purchases/server.ts","isNewYearSalePending(resolved.productId)"],
+ ["app/checkout/[productId]/page.tsx","isNewYearSalePending(canonicalProductId)"],
+ ["app/components/CustomerFirstPremiumDetail.tsx","isNewYearSalePending(product.id)"],
+] as const) assert(readFileSync(file,"utf8").includes(guard), "seasonal sale must fail closed at "+file);
 console.log("new-year-fortune-regression: PASS (season, price, profile-bound monthly facts, unknown hour, original teacher asset)");

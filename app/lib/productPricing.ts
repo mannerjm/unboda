@@ -46,6 +46,7 @@ const LAUNCH_V1_DEEP_PRODUCTS = new Set([
 const LAUNCH_V1_LONG_RANGE_PRODUCTS = new Set([
   "yearly-current",
   "annual-next",
+  "new-year-fortune",
   "annual-3years",
   "daeun-current",
 ]);

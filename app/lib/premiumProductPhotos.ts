@@ -282,6 +282,7 @@ export const PREMIUM_PRODUCT_PHOTOS: Readonly<Record<string, PremiumProductPhoto
     alt: "12개월 달력과 부드러운 흐름선으로 올해의 시기를 표현한 이미지",
     sourcePage: "UNBODA original AI-generated artwork (2026-11-12)",
   },
+  "new-year-fortune": { src: "/images/premium/new-year-fortune.svg", alt: "따뜻한 새해 일출과 산 능선, 소나무를 표현한 신년운세 배경", sourcePage: "UNBODA original seasonal vector artwork" },
   "annual-next": {
     src: "/images/premium/period-annual-next-v2.webp",
     alt: "새해를 맞는 달력과 라벤더빛 일출이 담긴 이미지",

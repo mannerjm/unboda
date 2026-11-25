@@ -7,6 +7,28 @@ type PeriodTimelineSectionProps = {
 export default function PeriodTimelineSection({
   periodAnalysis,
 }: PeriodTimelineSectionProps) {
+  if (periodAnalysis.productId === "new-year-fortune") {
+    return <section className="rounded-[2rem] border border-[#ded0f5] bg-white p-4 text-[#281744] shadow-sm sm:p-7">
+      <p className="text-sm font-bold text-[#7951b0]">신년운세 · 분야별 분석</p>
+      <h3 className="mt-2 break-keep text-xl font-bold leading-8">{periodAnalysis.headline}</h3>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        {periodAnalysis.newYearDomains?.map(domain => <article key={domain.label} className="min-w-0 rounded-2xl border border-[#e6dbf5] bg-[#faf7ff] p-4">
+          <h4 className="text-base font-bold">{domain.label}</h4><p className="mt-2 break-words text-[15px] leading-7">{domain.summary}</p>
+          <p className="mt-3 text-sm leading-6"><strong>실천</strong> · {domain.action}</p><p className="mt-2 text-sm leading-6"><strong>주의</strong> · {domain.caution}</p>
+        </article>)}
+      </div>
+      <h3 className="mt-7 text-xl font-bold">열두 달의 운세</h3>
+      <div className="mt-4 grid grid-cols-1 items-start gap-3 min-[360px]:grid-cols-2 lg:grid-cols-3">
+        {periodAnalysis.timelineItems.map(item => <details key={item.periodKey} className="min-w-0 rounded-2xl border border-[#e6dbf5] bg-[#faf7ff] p-3 sm:p-4">
+          <summary className="min-h-12 cursor-pointer break-keep text-base font-bold"><span className="block text-[#7951b0]">{item.label}</span><span className="mt-1 block text-sm leading-6">{item.title}</span></summary>
+          <p className="mt-3 break-words text-[15px] leading-7">{item.summary}</p>
+          <p className="mt-3 text-sm font-bold">실천 방법</p><ul className="mt-1 space-y-1 text-sm leading-6">{item.actions?.map((action,i)=><li key={i}>{action}</li>)}</ul>
+          <p className="mt-3 text-sm font-bold">주의할 점</p><ul className="mt-1 space-y-1 text-sm leading-6">{item.cautions?.map((caution,i)=><li key={i}>{caution}</li>)}</ul>
+        </details>)}
+      </div>
+      <div className="mt-6 rounded-2xl bg-[#f3eafa] p-4"><h3 className="font-bold">한 해의 기회와 주의 · 실천 계획</h3><ul className="mt-3 space-y-2 text-[15px] leading-7">{periodAnalysis.keyPoints?.map((point,i)=><li key={i}>{point}</li>)}</ul></div>
+    </section>;
+  }
   return (
     <div className="relative overflow-hidden rounded-[2rem] border border-[#2f2a5d] bg-[radial-gradient(circle_at_top_right,rgba(129,111,238,0.24),transparent_28%),linear-gradient(145deg,#1a1935_0%,#26224b_55%,#1b1b35_100%)] p-5 text-white shadow-[0_24px_64px_rgba(29,27,68,0.18)] sm:p-7">
       <div className="pointer-events-none absolute right-[-3rem] top-[-3rem] h-40 w-40 rounded-full border border-white/[0.06]" />

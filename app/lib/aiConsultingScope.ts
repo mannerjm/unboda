@@ -76,6 +76,7 @@ const PERIOD_ANCHOR_RULES: Record<string, PeriodAnchorRule> = {
     own: [/올해/u, /금년/u, /이번\s*해/u, /현재\s*연도/u],
     conflicting: [/이번\s*달/u, /다음\s*달/u, /내년/u, /다음\s*해/u, /향후\s*3년/u, /앞으로\s*3년/u, /평생/u, /생애/u, /대운/u],
   },
+  "new-year-fortune": { own: [/신년/u, /새해/u, /\d{1,2}\s*월/u], conflicting: [/평생/u, /생애/u, /향후\s*3년/u, /앞으로\s*3년/u], comparison: [/올해/u, /내년/u] },
   "annual-next": {
     own: [/내년/u, /다음\s*해/u, /다음\s*연도/u],
     conflicting: [/이번\s*달/u, /다음\s*달/u, /올해/u, /금년/u, /향후\s*3년/u, /앞으로\s*3년/u, /평생/u, /생애/u, /대운/u],

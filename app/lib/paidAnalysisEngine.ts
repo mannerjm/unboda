@@ -63,6 +63,7 @@ const PRODUCT_ENGINE_MAP: Record<string, PaidAnalysisEngine> = {
   "yearly-current": "PERIOD",
   "monthly-next": "PERIOD",
   "annual-next": "PERIOD",
+  "new-year-fortune": "PERIOD",
   "annual-3years": "PERIOD",
   "lifetime-overview": "PERIOD",
   "money-income-stability": "MONEY",

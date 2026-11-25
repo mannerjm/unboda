@@ -31,6 +31,7 @@ const SEARCH_INTENTS: Readonly<Record<string, { term: string; question: string }
   "monthly-current": { term: "이번 달 운세", question: "이번 달에는 어떤 생활 영역부터 살펴보면 좋을까요?" },
   "monthly-next": { term: "다음 달 운세", question: "다음 달을 준비하면서 무엇을 미리 점검해야 할까요?" },
   "yearly-current": { term: "올해 운세", question: "올해의 전체 흐름에서 무엇을 우선하면 좋을까요?" },
+  "new-year-fortune": { term: "신년운세", question: "새해의 총운과 분야별 흐름, 열두 달의 준비 방향은 무엇일까요?" },
   "annual-next": { term: "내년 운세", question: "내년을 준비하며 어떤 변화를 미리 살펴봐야 할까요?" },
   "annual-3years": { term: "3년 운세", question: "향후 3년의 흐름은 어떤 차이를 보일까요?" },
   "daeun-current": { term: "대운·10년 운세", question: "현재 장기 흐름은 어떤 국면에 있을까요?" },

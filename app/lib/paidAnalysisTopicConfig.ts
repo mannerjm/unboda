@@ -2192,6 +2192,7 @@ const PERIOD_LAUNCH_PRODUCT_IDS = [
   "monthly-next",
   "yearly-current",
   "annual-next",
+  "new-year-fortune",
   "annual-3years",
   "daeun-current",
   "lifetime-overview",

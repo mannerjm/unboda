@@ -71,3 +71,9 @@ for (const [file,guard] of [
  ["app/components/CustomerFirstPremiumDetail.tsx","isNewYearSalePending(product.id)"],
 ] as const) assert(readFileSync(file,"utf8").includes(guard), "seasonal sale must fail closed at "+file);
 console.log("new-year-fortune-regression: PASS (season, price, profile-bound monthly facts, unknown hour, original teacher asset)");
+const seasonalLanding = readFileSync("app/new-year/page.tsx", "utf8");
+assert(seasonalLanding.includes('year === 2027 ? "/images/premium/2027-jeongmi-red-sheep.webp" : "/images/premium/new-year-fortune.svg"'), "red sheep artwork must apply to 2027 only");
+const redSheep = readFileSync("public/images/premium/2027-jeongmi-red-sheep.webp");
+assert.equal(redSheep.toString("ascii",0,4),"RIFF");
+assert.equal(redSheep.toString("ascii",8,12),"WEBP");
+assert.equal(redSheep.length,9006);

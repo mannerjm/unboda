@@ -89,7 +89,9 @@ function isActivePath(pathname: string, href: string): boolean {
     return true;
   }
 
-  if (href === "/purchased-analyses" && pathname.startsWith("/paid-analysis/")) {
+  if (href === "/new-year" && pathname === "/paid-analysis/new-year-fortune") return true;
+
+  if (href === "/purchased-analyses" && pathname.startsWith("/paid-analysis/") && pathname !== "/paid-analysis/new-year-fortune") {
     return true;
   }
 
@@ -195,7 +197,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
     return `/deep-analysis?mode=${mode}&${key}=${encodeURIComponent(id)}${profilePart}`;
   };
   const navigationHref = (item: NavItem): string => {
-    if (item.href === "/new-year") return profileId ? `/new-year?profileId=${encodeURIComponent(profileId)}` : "/new-year";
+    if (item.href === "/new-year") return profileId ? `/paid-analysis/new-year-fortune?profileId=${encodeURIComponent(profileId)}` : "/paid-analysis/new-year-fortune";
     if (isGuest === true) {
       if (item.href === "/saju") return hasGuestResult ? "/guest-result" : "/guest-saju";
       if (item.href === "/recommendations") return "/recommendations";
@@ -348,7 +350,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
         <div className="min-w-0 flex-1 lg:pl-60">
           <header className="flex h-14 items-center justify-between gap-2 border-b border-[#e4d5f4] bg-white/95 px-3 text-[#281744] lg:hidden">
             <Link href="/" className="inline-flex items-center gap-2 text-lg font-black tracking-tight text-[#281744]"><BrandMark />운보다</Link>
-            <Link href={profileId ? `/new-year?profileId=${encodeURIComponent(profileId)}` : "/new-year"} className="shrink-0 rounded-full bg-[#fff1df] px-2.5 py-2 text-xs font-bold text-[#8d421d]">신년운세</Link>
+            <Link href={profileId ? `/paid-analysis/new-year-fortune?profileId=${encodeURIComponent(profileId)}` : "/paid-analysis/new-year-fortune"} className="shrink-0 rounded-full bg-[#fff1df] px-2.5 py-2 text-xs font-bold text-[#8d421d]">신년운세</Link>
             {pathname === "/mypage" && isGuest === false && profileId ? (
               <span className="rounded-full border border-[#e6d7fa] bg-[#f4ebff] px-3 py-1 text-xs font-semibold text-[#65449b]">AI 질문권 {aiCreditBalanceLabel}</span>
             ) : (

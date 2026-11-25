@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import AppShell from "@/app/components/AppShell";
+import { getActiveProfile } from "@/app/lib/profiles/activeServer";
+import { newYearTargetYear } from "@/app/lib/newYearFortune";
+import { getServerAnchorDate, parseAnchorDate } from "@/app/lib/analysisReferencePeriod";
 import PaidAnalysisAccessPanel from "./PaidAnalysisAccessPanel";
 import PremiumProductDetail from "@/app/components/PremiumProductDetail";
 import PaidProductSeoIntro from "@/app/components/PaidProductSeoIntro";
@@ -37,7 +41,7 @@ export async function generateMetadata({
   const seoGuide = getPaidProductSeoGuide(product);
 
   return buildPublicMetadata({
-    title: seoGuide.searchTitle,
+    title: product.id === "new-year-fortune" ? `${newYearTargetYear(parseAnchorDate(getServerAnchorDate()))}년 신년운세 · 나의 새해 총운과 월별 운세` : seoGuide.searchTitle,
     description: `${displayTitle}: ${product.description}`,
     path: `/paid-analysis/${product.id}`,
   });
@@ -71,14 +75,27 @@ export default async function PaidAnalysisPage({
     notFound();
   }
 
+  if (product.id === "new-year-fortune") {
+    const seasonalProfile = user ? profile ?? await getActiveProfile(user.id) : null;
+    const year = newYearTargetYear(parseAnchorDate(getServerAnchorDate()));
+    return <AppShell activeProfileId={seasonalProfile?.id}>
+      <main data-new-year-detail className="min-h-screen bg-[#f7f2fc] px-3 py-5 text-[#11162d] sm:px-6 sm:py-8">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl">
+          {seasonalProfile ? <p className="mb-3 rounded-xl border border-[#e5d9f4] bg-white px-4 py-2.5 text-sm text-[#655578]">현재 분석 대상: <strong>{seasonalProfile.label}</strong></p> : null}
+          {seasonalProfile ? <PaidAnalysisAccessPanel productId={product.id} profileId={seasonalProfile.id} newYearYear={year} /> : <PremiumProductDetail product={product} state="not_purchased" newYearYear={year} isSaved={user ? await isProductSaved(user.id, product.id) : false} />}
+        </div>
+      </main>
+    </AppShell>;
+  }
+
   return (
     <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-[#11162d] sm:px-8 sm:py-14">
       <div className="mx-auto max-w-5xl">
         <Link
-          href={product.id === "new-year-fortune" ? (profileId ? `/new-year?profileId=${encodeURIComponent(profileId)}` : "/new-year") : (profileId ? `/deep-analysis?profileId=${encodeURIComponent(profileId)}` : "/deep-analysis")}
+          href={profileId ? `/deep-analysis?profileId=${encodeURIComponent(profileId)}` : "/deep-analysis"}
           className="inline-flex items-center rounded-full border border-[#dce1ef] bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-[#b9b2f6] hover:text-[#5e4bd1]"
         >
-          {product.id === "new-year-fortune" ? "← 신년운세로 돌아가기" : "← 심층 분석으로 돌아가기"}
+          ← 심층 분석으로 돌아가기
         </Link>
 
         {!profileId ? <PaidProductSeoIntro product={product} /> : null}

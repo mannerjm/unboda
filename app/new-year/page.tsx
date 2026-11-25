@@ -24,8 +24,8 @@ export default async function NewYearPage({searchParams}:{searchParams:Promise<{
   const href="/paid-analysis/new-year-fortune"+(profile ? `?profileId=${encodeURIComponent(profile.id)}` : "");
   return <AppShell activeProfileId={profile?.id}><main className="min-h-screen bg-[#f7f2fc] px-4 py-6 sm:px-8 sm:py-10 text-[#281744]"><div className="mx-auto max-w-5xl">
     <section className="overflow-hidden rounded-[2rem] border border-[#ecd7bf] bg-[#fff8ed] shadow-sm">
-      <Image src="/images/premium/new-year-fortune.svg" alt="" width={960} height={420} className="w-full h-auto" priority unoptimized />
-      <div className="p-5 sm:p-8"><p className="font-bold text-sm text-[#975a33]">새해, 나의 운을 알아보는 시간</p>
+      <Image src={year === 2027 ? "/images/premium/2027-jeongmi-red-sheep.webp" : "/images/premium/new-year-fortune.svg"} alt={year === 2027 ? "2027년 정미년을 상징하는 붉은 양과 황금빛 새해 풍경" : "새해를 상징하는 일출 풍경"} width={960} height={420} className="w-full h-auto" priority unoptimized />
+      <div className="p-5 sm:p-8"><p className="font-bold text-sm text-[#975a33]">{year === 2027 ? "2027 정미년(丁未年) · 붉은 양의 해" : "새해, 나의 운을 알아보는 시간"}</p>
       <h1 className="mt-2 break-keep text-3xl font-black sm:text-4xl">{year}년 신년운세</h1><p className="mt-3 text-base leading-7 text-[#735b50]">고객님의 실제 사주로 살펴보는 새해 총운과 분야별 흐름, 1월부터 12월까지의 개인 맞춤 분석입니다.</p>
       {profile ? <p className="mt-4 rounded-xl border border-[#ecd7bf] bg-white/70 px-4 py-3 text-sm text-[#735b50]">현재 분석 대상: <strong>{profile.label}</strong></p> : null}
       {isNewYearSalePending("new-year-fortune") ? <p className="mt-4 text-sm font-bold text-[#975a33]">정식 판매 준비 중 · 상품 미리보기</p> : null}

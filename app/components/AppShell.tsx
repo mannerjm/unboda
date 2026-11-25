@@ -35,8 +35,8 @@ function NavIcon({ icon }: { icon: NavItem["icon"] }) {
 }
 
 const analysisNavItems: NavItem[] = [
-  { href: "/today", label: "오늘의 운보다", icon: "sun" },
   { href: "/new-year", label: "신년운세", icon: "sun" },
+  { href: "/today", label: "오늘의 운보다", icon: "sun" },
   { href: "/saju", label: "내 분석", icon: "home" },
   { href: "/recommendations", label: "추천 분석", icon: "chart" },
   { href: "/deep-analysis", label: "심층 분석", icon: "spark" },
@@ -236,19 +236,21 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
     <div className="unboda-detail-theme min-h-screen bg-[#f5f7fc] text-[#11162d]">
       <div className="flex min-h-screen">
         <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 shrink-0 overflow-y-auto border-r border-[#e9ddf6] bg-[linear-gradient(170deg,#ffffff_0%,#f8f3ff_52%,#efe7ff_100%)] px-4 py-6 text-[#281744] shadow-[8px_0_30px_rgba(111,74,169,0.07)] lg:flex lg:flex-col">
-          <div className="mb-10">
+          <div className="mb-5">
             <Link href="/" className="inline-flex items-center gap-2.5 text-xl font-black tracking-tight text-[#281744]"><BrandMark />운보다</Link>
             <p className="mt-3 text-[11px] leading-5 text-[#76688c]">명리 분석 플랫폼</p>
           </div>
 
           <nav aria-label="메인 네비게이션">
-            <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.18em] text-[#8a6eb3]">매일 이용</p>
             <div className="space-y-1">
             {resolvedAnalysisNavItems.map((item) => {
               const active = isActivePath(pathname, item.activeHref);
 
               return (
                 <div key={item.activeHref}>
+                  {item.activeHref === "/today" ? (
+                    <p className="mb-3 mt-6 px-3 text-[10px] font-semibold tracking-[0.18em] text-[#8a6eb3]">무료 이용</p>
+                  ) : null}
                   {item.activeHref === "/saju" || item.activeHref === "/interests" ? (
                     <p className="mb-3 mt-6 px-3 text-[10px] font-semibold tracking-[0.14em] text-[#8a73b1]">
                       {item.activeHref === "/saju" ? "사주 · 분석" : "나의 분석 · 상담"}

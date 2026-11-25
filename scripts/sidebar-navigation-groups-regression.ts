@@ -8,8 +8,8 @@ const mobile = source.slice(source.indexOf("const mobileNavItems:"), source.inde
 const sidebar = source.slice(source.indexOf('<nav aria-label="메인 네비게이션">'), source.indexOf('<nav\n        aria-label="모바일 네비게이션"'));
 
 const routes = [
-  ["/today", "오늘의 운보다"],
   ["/new-year", "신년운세"],
+  ["/today", "오늘의 운보다"],
   ["/saju", "내 분석"],
   ["/recommendations", "추천 분석"],
   ["/deep-analysis", "심층 분석"],
@@ -30,9 +30,12 @@ assert.equal((management.match(/href:/g) ?? []).length, 2, "exactly two existing
 for (const [href, label] of [["/mypage", "마이페이지"], ["/support", "고객지원 센터"]]) {
   assert(management.includes(`href: "${href}", label: "${label}"`));
 }
-for (const heading of ["매일 이용", "사주 · 분석", "나의 분석 · 상담", "계정 · 고객지원"]) {
+for (const heading of ["무료 이용", "사주 · 분석", "나의 분석 · 상담", "계정 · 고객지원"]) {
   assert(sidebar.includes(heading), `sidebar group missing: ${heading}`);
 }
+assert(!sidebar.includes("매일 이용"), "old daily heading must be removed");
+assert(sidebar.includes('item.activeHref === "/today" ? (') && sidebar.includes(">무료 이용</p>"),
+  "free heading starts with Today, after standalone seasonal navigation");
 assert(sidebar.includes('item.activeHref === "/saju" || item.activeHref === "/interests"'),
   "groups must start before discovery and interests rather than adding new routes");
 assert(sidebar.includes('item.activeHref === "/ai-consulting"') && sidebar.includes("이어가기"),

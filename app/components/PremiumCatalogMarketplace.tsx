@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import NewYearTeacherCard from "@/app/components/NewYearTeacherCard";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import type { PremiumCatalogCategoryGroup } from "@/app/lib/premiumCatalog";
@@ -301,6 +302,7 @@ export default function PremiumCatalogMarketplace({
   topicGroups,periodProducts,mode,onModeChange,selectedCategory,onSelectCategory,selectedProductId,
   onSelectProduct,profileId,stateByProductId,savedProductIds,recommendedIdSet,separateCatalog=false,
 }:Props) {
+  const router = useRouter();
   const defaultGroup=topicGroups.find(g=>g.category==="money")??topicGroups[0];
   const currentGroup=topicGroups.find(g=>g.category===selectedCategory)??defaultGroup;
   const selected=mode==="topic"
@@ -314,6 +316,7 @@ export default function PremiumCatalogMarketplace({
     onSelectCategory(category);
   };
   const choosePeriod=(id:string)=>{
+    if (separateCatalog) { router.push(`/period-analysis?productId=${encodeURIComponent(id)}${profileId ? `&profileId=${encodeURIComponent(profileId)}` : ""}`); return; }
     if(mode!=="period")onModeChange("period");
     onSelectProduct(id);
   };

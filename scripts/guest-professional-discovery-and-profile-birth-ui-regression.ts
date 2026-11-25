@@ -38,7 +38,8 @@ assert(hasCanonicalAnalysisInputChanged(legacyProfile, { ...labelOnlyEdit, birth
 
 // Both guest desktop and mobile navigation open PUBLIC professional browsing.
 assert(shell.includes('if (item.href === "/special-analysis") return "/special-analysis/compatibility";'), "guest professional navigation must go directly to public compatibility catalog");
-const lockRule = 'item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null';
+const lockRule = 'item.activeHref !== "/deep-analysis" && item.activeHref !== "/period-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null';
+assert(shell.includes('if (item.href === "/period-analysis") return isGuest === true ? "/period-analysis" : periodAnalysisHref;'), "new period browsing is also public");
 assert.equal(shell.split(lockRule).length - 1, 2, "desktop and mobile must not show a lock on public professional browsing");
 assert(shell.includes('return `/auth/login?returnTo=${encodeURIComponent(item.href)}&origin=${guestOrigin}`;'), "other guest-only entries must retain their login boundary");
 assert(special.includes('redirect("/special-analysis/compatibility")') && !special.includes('redirect("/auth/login'), "legacy professional URL must lead directly to the public compatibility catalog");

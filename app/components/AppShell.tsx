@@ -152,19 +152,20 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
   }, []);
 
   const profileId = searchParams.get("profileId") || activeProfileId || null;
+  const footerProfileId = activeProfileId || profileId;
 
   useEffect(() => {
     let cancelled = false;
     setFooterProfile(null);
-    if (isGuest !== false || !profileId) return;
+    if (isGuest !== false || !footerProfileId) return;
     void fetch("/api/profiles", { cache: "no-store" }).then(async response => {
       if (!response.ok) return;
       const body = await response.json() as { profiles?: { id: string; label: string }[] };
-      const profile = body.profiles?.find(item => item.id === profileId);
+      const profile = body.profiles?.find(item => item.id === footerProfileId);
       if (!cancelled && profile) setFooterProfile({ id: profile.id, label: profile.label });
     }).catch(() => undefined);
     return () => { cancelled = true; };
-  }, [isGuest, profileId]);
+  }, [isGuest, footerProfileId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -367,7 +368,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
             <p className="mt-2 text-xs leading-5 text-[#706182]">
               무료 결과를 바탕으로 필요한 분석을 이어서 살펴보세요.
             </p>
-            {isGuest === false && footerProfile?.id === profileId ? <div data-sidebar-active-profile className="mt-3 rounded-xl border border-[#e4d8f2] bg-white/80 px-3 py-2.5"><p className="text-[11px] font-semibold text-[#76688c]">현재 분석 대상</p><p className="mt-1 break-words text-sm font-bold text-[#392257]">{footerProfile.label}</p></div> : null}
+            {isGuest === false && footerProfile && footerProfile.id === footerProfileId ? <div data-sidebar-active-profile className="mt-3 rounded-xl border border-[#e4d8f2] bg-white/80 px-3 py-2.5"><p className="text-[11px] font-semibold text-[#76688c]">현재 분석 대상</p><p className="mt-1 break-words text-sm font-bold text-[#392257]">{footerProfile.label}</p></div> : null}
           </div>
         </aside>
 
@@ -381,6 +382,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
               <Link href={isGuest === true ? "/auth/login?returnTo=/today" : "/today"} className="rounded-full border border-[#d6c0f3] bg-[#f2e8ff] px-3 py-1.5 text-xs font-bold text-[#6940a4]">오늘의 운보다</Link>
             )}
           </header>
+          <div className="flex justify-end border-b border-[#e4d5f4] bg-white/95 px-3 py-1 lg:hidden"><Link href={periodAnalysisHref} aria-current={isPeriodCatalog ? "page" : undefined} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-bold text-[#6940a4]"><NavIcon icon="calendar" />기간별 분석</Link></div>
           <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
             {isGuest === false && profileId && refreshNoticeSurface ? (
               <MonthlyFreeAnalysisRefreshNotice profileId={profileId} surface={refreshNoticeSurface} />

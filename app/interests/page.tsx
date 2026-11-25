@@ -60,9 +60,6 @@ export default async function InterestedAnalysesPage() {
               궁금한 심층 분석과 궁합을 저장하고, 필요할 때 여기서 다시 살펴보세요.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-2 text-sm font-bold text-[#5e4bd1]">
-                현재 분석 대상 · {activeProfile.label}
-              </span>
               <Link href="/mypage" className="rounded-full border border-[#dce1ef] bg-[#f7f8fc] px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-white">
                 프로필 변경
               </Link>

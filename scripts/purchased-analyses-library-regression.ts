@@ -15,7 +15,7 @@ const saju = readFileSync("app/saju/page.tsx", "utf8");
 assert(page.includes('redirect("/auth/login?returnTo=/purchased-analyses")'), "purchased analyses must require authentication");
 assert(page.includes("getActiveProfile(user.id)"), "purchased analyses must resolve the authoritative active profile");
 assert(page.includes("analysis.profileId === activeProfile.id"), "library must exclude another profile's analyses");
-assert(page.includes("현재 분석 대상") && page.includes("activeProfile.label"), "active profile orientation must be displayed");
+assert(!page.includes("현재 분석 대상 ·") && readFileSync("app/components/AppShell.tsx","utf8").includes("data-sidebar-active-profile"), "active profile orientation must be displayed");
 assert(page.includes("마이페이지에서 프로필 선택") && page.includes('href="/mypage"'), "no-active-profile recovery must link to My Page");
 assert(!page.includes("ProfileSelector"), "purchased analyses must not expose a profile switcher");
 assert(shell.includes('href: "/purchased-analyses"') && shell.includes("구매한 분석"), "shell must expose purchased analyses navigation");

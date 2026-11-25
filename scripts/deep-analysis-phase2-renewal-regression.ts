@@ -77,7 +77,7 @@ assert(storefront.includes("topicGroups.map") && storefront.includes("periodProd
 assert(storefront.includes("currentGroup.products.map") && storefront.includes("onSelectProduct(product.id)"),
   "topic category must open its own thumbnail product list before detail");
 assert(storefront.includes("choosePeriod(product.id)") && storefront.includes("<PremiumProductDetail"),
-  "period navigation must open an existing product detail without a second product grid");
+  "legacy period navigation still opens an existing detail");
 assert(storefront.includes("getProductPricing(productId)") && storefront.includes("getPaidAnalysisTopicConfig"),
   "storefront must retain product-specific prices and original purchase questions");
 assert(storefront.includes("/api/reviews?productId=") && storefront.includes("summary.count<=0"),
@@ -107,8 +107,9 @@ for (const product of listPeriodCatalogProducts()) {
 }
 assert(shell.includes('item.activeHref === "/deep-analysis" && isDeepCatalog')
   && shell.includes('href={deepCatalogHref("topic", category)}')
+  && shell.includes('item.activeHref === "/period-analysis" && isPeriodCatalog')
   && shell.includes('href={deepCatalogHref("period", productId)}'),
-  "global deep-analysis sidebar must expose direct topic and period navigation under the existing item");
+  "global sidebar must expose independent topic and period navigation");
 assert(shell.includes('profileId ? `&profileId=${encodeURIComponent(profileId)}`'),
   "category and period navigation must preserve the analysis profile context");
 assert(!storefront.includes("<aside") && !storefront.includes('md:grid-cols-[166px_minmax(0,1fr)]'),

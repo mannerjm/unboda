@@ -2,6 +2,8 @@
 
 import { useEffect, useId, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import NewYearTeacherCard from "@/app/components/NewYearTeacherCard";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import type { PremiumCatalogCategoryGroup } from "@/app/lib/premiumCatalog";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
@@ -18,6 +20,7 @@ type Props = {
   topicGroups: readonly PremiumCatalogCategoryGroup[];
   periodProducts: readonly PremiumProductDefinition[];
   mode: Mode;
+  separateCatalog?: boolean;
   onModeChange: (mode: Mode) => void;
   selectedCategory: string | null;
   onSelectCategory: (category: string) => void;
@@ -296,7 +299,7 @@ function VerifiedRating({productId}:{productId:string}) {
 
 export default function PremiumCatalogMarketplace({
   topicGroups,periodProducts,mode,onModeChange,selectedCategory,onSelectCategory,selectedProductId,
-  onSelectProduct,profileId,stateByProductId,savedProductIds,recommendedIdSet,
+  onSelectProduct,profileId,stateByProductId,savedProductIds,recommendedIdSet,separateCatalog=false,
 }:Props) {
   const defaultGroup=topicGroups.find(g=>g.category==="money")??topicGroups[0];
   const currentGroup=topicGroups.find(g=>g.category===selectedCategory)??defaultGroup;
@@ -317,20 +320,22 @@ export default function PremiumCatalogMarketplace({
   return <section id="premium-analysis" aria-label="심층분석 상품 찾기" className="py-5 sm:py-7">
     <div className="min-w-0">
         <div className="mb-4 lg:hidden" aria-label="모바일 심층분석 카테고리">
-          <p className="mb-2 text-xs font-black text-[#69449c]">주제별 분석</p>
+          {separateCatalog ? <Link href={`${isPeriod ? "/deep-analysis" : "/period-analysis"}${profileId ? `?profileId=${encodeURIComponent(profileId)}` : ""}`} className="mb-3 inline-flex min-h-11 items-center rounded-xl border border-[#e5d7f5] bg-white px-4 text-sm font-bold text-[#69449c]">{isPeriod ? "심층 분석 보기" : "기간별 분석 보기 →"}</Link> : null}
+          {!separateCatalog || !isPeriod ? <><p className="mb-2 text-xs font-black text-[#69449c]">주제별 분석</p>
           <div className="flex gap-2 overflow-x-auto pb-3">
             {topicGroups.map(group=><button key={group.category} type="button" aria-pressed={mode==="topic"&&currentGroup?.category===group.category} onClick={()=>chooseTopic(group.category)} className={"shrink-0 rounded-full border px-3.5 py-2 text-xs font-bold "+(mode==="topic"&&currentGroup?.category===group.category?"border-[#ad84e8] bg-[#edddff] text-[#542d91]":"border-[#e5d7f5] bg-white text-[#756384]")}>{group.label}</button>)}
           </div>
-          <p className="mb-2 mt-1 text-xs font-black text-[#69449c]">기간별 분석</p>
+          </> : null}
+          {!separateCatalog || isPeriod ? <><p className="mb-2 mt-1 text-xs font-black text-[#69449c]">기간별 분석</p>
           <div className="flex gap-2 overflow-x-auto pb-2">
             {periodProducts.map(product=><button key={product.id} type="button" aria-pressed={isPeriod&&selectedProductId===product.id} onClick={()=>choosePeriod(product.id)} className={"shrink-0 rounded-full border px-3.5 py-2 text-xs font-bold "+(isPeriod&&selectedProductId===product.id?"border-[#ad84e8] bg-[#edddff] text-[#542d91]":"border-[#e5d7f5] bg-white text-[#756384]")}>{product.title}</button>)}
-          </div>
+          </div></> : null}
         </div>
 
         {selected ? (
           <div data-premium-detail-active="true" className="overflow-hidden rounded-[1.8rem] border border-[#e7daf8] bg-white shadow-[0_15px_40px_rgba(90,57,152,.08)]">
             <div className="flex items-center justify-between gap-3 border-b border-[#f0e8f9] px-5 py-4 sm:px-6">
-              <button type="button" onClick={()=>onSelectProduct(null)} className="rounded-full border border-[#e1d2f4] px-4 py-2 text-xs font-bold text-[#69449e] hover:bg-[#f6efff]">{LAUNCHED_CUSTOMER_FIRST_IDS.has(selected.id) ? (isPeriod ? "기간 선택" : "상품 목록") : <>← {isPeriod?"기간 선택":"상품 목록"}</>}</button>
+              {separateCatalog && isPeriod ? <Link href={profileId ? `/period-analysis?profileId=${encodeURIComponent(profileId)}` : "/period-analysis"} className="rounded-full border border-[#e1d2f4] px-4 py-2 text-xs font-bold text-[#69449e]">상품 목록</Link> : <button type="button" onClick={()=>onSelectProduct(null)} className="rounded-full border border-[#e1d2f4] px-4 py-2 text-xs font-bold text-[#69449e] hover:bg-[#f6efff]">{LAUNCHED_CUSTOMER_FIRST_IDS.has(selected.id) ? (isPeriod ? "기간 선택" : "상품 목록") : <>← {isPeriod?"기간 선택":"상품 목록"}</>}</button>}
               <span className="text-xs font-semibold text-[#9a88aa]">{isPeriod?"기간별 분석":currentGroup?.label}</span>
             </div>
             {!LAUNCHED_CUSTOMER_FIRST_IDS.has(selected.id) ? (
@@ -419,6 +424,31 @@ export default function PremiumCatalogMarketplace({
                     
                   </div>
                 </button>;
+              })}
+            </div>
+          </div>
+        ) : separateCatalog && isPeriod ? (
+          <div data-period-product-list>
+            <NewYearTeacherCard variant="list" scope="period" />
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-[#e9dcf5] pb-4">
+              <div><p className="text-xs font-bold text-[#9265b6]">기간별 운세 분석</p><h2 className="mt-1 text-xl font-black text-[#2b1646]">어느 시기의 운이 궁금하세요?</h2></div>
+              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#7148a2]">{periodProducts.length}개 상품</span>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {periodProducts.map(product => {
+                const state=stateByProductId.get(product.id)??"not_purchased";
+                return <Link key={product.id} href={`/period-analysis?productId=${encodeURIComponent(product.id)}${profileId ? `&profileId=${encodeURIComponent(profileId)}` : ""}`} className="group grid min-h-[148px] grid-cols-[116px_minmax(0,1fr)] gap-3 rounded-[1.3rem] border border-[#eadff5] bg-white p-3 text-left shadow-[0_9px_25px_rgba(110,76,165,.07)] transition hover:-translate-y-0.5 hover:border-[#c49be8] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#9164d1] sm:grid-cols-[132px_minmax(0,1fr)]" aria-label={product.title+" 상세 정보 보기"}>
+                  <div className="relative min-h-[122px] overflow-hidden rounded-xl bg-[#f8f1ff]">
+                    <ProductArtwork category="period" productId={product.id}/>
+                    <div className="pointer-events-none absolute inset-0 z-10 flex items-end bg-gradient-to-t from-black/85 via-black/20 to-transparent p-2"><span className="line-clamp-2 text-[17px] font-extrabold leading-[1.2] text-white">{PERIOD_THUMBNAIL_TITLES[product.id]??product.title}</span></div>
+                    {state!=="not_purchased"?<span className="absolute right-1.5 top-1.5 z-20 rounded-md bg-white/95 px-1.5 py-1 text-[9px] font-bold text-[#5b4481]">{STATUS[state]}</span>:null}
+                  </div>
+                  <div className="flex min-w-0 flex-col gap-1 py-0.5">
+                    <p className="line-clamp-1 text-[11px] font-semibold text-[#9265b6]">{product.title}</p>
+                    <h3 className="line-clamp-3 text-[16px] font-extrabold leading-[1.4] text-[#302044] group-hover:text-[#753aba]">{getReadablePaidQuestion(product.id,product.purchaseDecision?.primaryQuestion??product.title)}</h3>
+                    <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2"><VerifiedRating productId={product.id}/><span className="text-sm font-black text-[#372049]">{money(product.id)}</span></div>
+                  </div>
+                </Link>;
               })}
             </div>
           </div>

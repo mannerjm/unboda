@@ -177,7 +177,13 @@ export default function CustomerFirstPremiumDetail({
 
       <div className="px-4 sm:px-9">
         {product.category === "money" ? <WealthTeacherCard variant="detail" /> : null}
-        {product.category !== "money" ? <TopicTeacherCard category={product.category} variant="detail" /> : null}
+        {product.id === "new-year-fortune" ? (
+          <section className="my-4 rounded-2xl border border-[#ecd7bf] bg-[#fff8ed] p-5 sm:p-7" aria-label="신년운세 담당 AI 선생님">
+            <p className="text-xs font-bold text-[#975a33]">신년운세 전문 AI 명리 선생님</p>
+            <h3 className="mt-1 text-lg font-bold text-[#281744]">태운(泰運) 선생님</h3>
+            <p className="mt-2 break-keep text-sm leading-6 text-[#735b50]">고객님의 사주를 바탕으로 새해 총운과 분야별 흐름, 열두 달의 실천 방향을 안내합니다. 구매 후 상담은 기존 운담 AI 상담에서 이어갈 수 있습니다.</p>
+          </section>
+        ) : product.category !== "money" ? <TopicTeacherCard category={product.category} variant="detail" /> : null}
         <section className="py-11 sm:py-14" aria-labelledby="customer-concerns">
           <p className="text-center text-xs font-extrabold tracking-widest text-[#926bc8]">내 이야기처럼 느껴지는 순간</p>
           <h3 id="customer-concerns" className="mt-3 break-keep text-center text-[25px] font-black tracking-tight text-[#2f1a48] sm:text-[30px]">

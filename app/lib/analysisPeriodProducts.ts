@@ -47,7 +47,7 @@ const PERIOD_PURCHASE_DECISIONS: Readonly<Record<string, PeriodPurchaseDecision>
   },
   "new-year-fortune": {
     primaryQuestion: "새해에는 나의 일, 돈, 관계와 생활을 어떻게 준비하면 좋을까?",
-    recommendedFor: ["새해의 분야별 운세를 한 번에 읽고 싶을 때", "1월부터 12월까지 개인별 흐름과 실천 방향을 확인하고 싶을 때"],
+    recommendedFor: ["새해의 분야별 운세를 한 번에 읽고 싶을 때", "1월부터 12월까지 개인별 흐름과 실천 방향을 확인하고 싶을 때", "새해의 목표와 생활 계획을 분야별로 정리하고 싶을 때"],
     analysisScope: ["새해 총운", "재물·직업·사업·연애·결혼·대인관계·가족·건강·학업과 자기계발", "1월부터 12월까지 월별 흐름", "기회와 주의 시기", "새해 실천 계획"],
     expectedUnderstanding: ["한 해의 분야별 방향과 관리 기준", "열두 달의 변화와 구간별 실천 방법", "새해에 집중하고 조정할 우선순위"],
     distinction: "내년 운은 다음 해 변화와 사전 준비 중심이며, 신년운세는 특정 연도의 분야별 종합 흐름과 열두 달의 실천 방향을 함께 살펴봅니다.",

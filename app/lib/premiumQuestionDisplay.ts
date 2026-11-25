@@ -71,6 +71,7 @@ export const READABLE_PAID_QUESTIONS: Readonly<Record<string, string>> = {
   "monthly-current": "이번 달에는 무엇부터 챙기면 좋을까요?",
   "monthly-next": "다음 달을 위해 지금 무엇을 준비할까요?",
   "yearly-current": "올해는 무엇에 집중하면 좋을까요?",
+  "new-year-fortune": "새해에는 나의 일과 돈, 관계를 어떻게 준비하면 좋을까요?",
   "annual-next": "내년을 위해 지금 무엇을 준비할까요?",
   "annual-3years": "앞으로 3년 동안 무엇을 준비하면 좋을까요?",
   "daeun-current": "지금 내 삶의 큰 흐름은 어떨까요?",

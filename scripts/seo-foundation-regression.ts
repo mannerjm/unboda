@@ -14,15 +14,15 @@ const entries = sitemap();
 const urls = new Set(entries.map((entry) => entry.url));
 const launchIds = getLaunchProductIds();
 
-assert.equal(launchIds.length, 57, "SEO sitemap must track all 57 launch paid-analysis products");
-assert.equal(new Set(launchIds).size, 57, "launch product IDs must stay unique");
+assert.equal(launchIds.length, 58, "SEO sitemap must track all 57 launch paid-analysis products");
+assert.equal(new Set(launchIds).size, 58, "launch product IDs must stay unique");
 
 const productTitles = launchIds.map((productId) => {
   const product = getPremiumProduct(productId);
   assert(product, `missing premium product: ${productId}`);
   return getPremiumProductDisplayTitle(product.id, product.title);
 });
-assert.equal(new Set(productTitles).size, 57, "all 57 paid-product SEO titles must stay unique");
+assert.equal(new Set(productTitles).size, 58, "all 57 paid-product SEO titles must stay unique");
 
 for (const productId of launchIds) {
   assert(
@@ -170,11 +170,12 @@ assert(legalPageSource.includes("<h1") && legalPageSource.includes('href="/"'),
 
 const existingSeoPages = entries.filter((entry) => !new URL(entry.url).pathname.startsWith("/blog"));
 const originalPhaseOneUrls = existingSeoPages.filter((entry) => !new URL(entry.url).pathname.startsWith("/special-analysis/compatibility/guide/"));
-assert.equal(originalPhaseOneUrls.length, 66, "57 paid products and 9 canonical public routes must remain intact");
+assert(urls.has(`${SITE_ORIGIN}/new-year`), "seasonal landing must appear in sitemap");
+assert.equal(originalPhaseOneUrls.length, 68, "57 paid products and 9 canonical public routes must remain intact");
 for (const slug of COMPATIBILITY_GUIDE_SLUGS) {
   assert(urls.has(`${SITE_ORIGIN}${getCompatibilityPublicGuidePath(slug)}`), `public compatibility guide missing: ${slug}`);
 }
-assert.equal(existingSeoPages.length, 73, "57 paid products + 9 canonical public + 7 compatibility sitemap pages must remain intact");
+assert.equal(existingSeoPages.length, 75, "57 paid products + 9 canonical public + 7 compatibility sitemap pages must remain intact");
  
 // The public entry must provide crawlable product links without clicking client-only
 // category buttons. Keep all 57 links scoped to the existing Launch registry.
@@ -182,9 +183,9 @@ const discoveryTopics = groupTopicCatalogProductsByCategory().flatMap((group) =>
 const discoveryPeriods = listPeriodCatalogProducts();
 const discoveryIds = [...discoveryTopics, ...discoveryPeriods].map((product) => product.id);
 assert.equal(discoveryTopics.length, 50, "public directory must use 50 Launch topic products");
-assert.equal(discoveryPeriods.length, 7, "public directory must use 7 Launch period products");
-assert.equal(discoveryIds.length, 57, "public product discovery links must contain exactly 57 products");
-assert.equal(new Set(discoveryIds).size, 57, "public product discovery links must not repeat a product");
+assert.equal(discoveryPeriods.length, 8, "public directory must use 7 Launch period products");
+assert.equal(discoveryIds.length, 58, "public product discovery links must contain exactly 57 products");
+assert.equal(new Set(discoveryIds).size, 58, "public product discovery links must not repeat a product");
 assert.deepEqual(new Set(discoveryIds), new Set(launchIds),
   "public product discovery directory and SEO sitemap must link to the same 57 products");
 const directory = readFileSync("app/components/PaidProductDiscoveryLinks.tsx", "utf8");

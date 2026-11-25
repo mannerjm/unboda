@@ -224,7 +224,6 @@ export default function PremiumProductDetail({
         </div>
       </div>
 
-      {product.id === "new-year-fortune" ? <div className="mx-5 my-4 rounded-2xl border border-[#ecd7bf] bg-[#fff8ed] p-5 sm:mx-8"><p className="text-xs font-bold text-[#975a33]">신년운세 전문 AI 명리 선생님</p><h3 className="mt-1 text-lg font-bold">태운 선생님</h3><p className="mt-2 text-sm leading-6 text-slate-700">고객의 실제 사주를 바탕으로 새해 총운과 분야별 흐름, 열두 달의 실천 방향을 안내합니다.</p></div> : null}
       {product.category === "money" ? <div className="px-5 sm:px-8"><WealthTeacherCard variant="detail" /></div> : null}
       {product.category !== "money" && !isPeriod ? <div className="px-5 sm:px-8"><TopicTeacherCard category={product.category} variant="detail" /></div> : null}
       <div className="bg-white px-5 py-8 sm:px-8 sm:py-10">

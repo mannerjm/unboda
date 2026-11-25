@@ -6,7 +6,7 @@ import { getReadablePaidQuestion, READABLE_PAID_QUESTIONS } from "../app/lib/pre
 
 const launchIds = getLaunchProductIds();
 const displayIds = Object.keys(READABLE_PAID_QUESTIONS);
-assert.equal(launchIds.length, 57, "expected 50 topic + 7 period launch questions");
+assert.equal(launchIds.length, 58, "expected 50 topic + 8 period launch questions");
 assert.deepEqual([...displayIds].sort(), [...launchIds].sort(), "each launched STEP 2 product needs exactly one plain-language question");
 
 for (const productId of launchIds) {
@@ -38,4 +38,4 @@ assert.equal(getReadablePaidQuestion("study-learning-strategy", ""), "나에게 
 assert.equal(getReadablePaidQuestion("study-exam-preparation", ""), "시험을 어떻게 준비하면 좋을까요?");
 assert.equal(getReadablePaidQuestion("study-focus-routine", ""), "어떻게 하면 공부에 더 잘 집중할 수 있을까요?");
 assert.equal(getReadablePaidQuestion("study-credential-decision", ""), "지금 이 자격증에 도전해도 괜찮을까요?");
-console.log("plain-language-premium-questions-regression: PASS (57/57)");
+console.log("plain-language-premium-questions-regression: PASS (58/58)");

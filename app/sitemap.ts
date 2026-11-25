@@ -25,6 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
     entry("/", "weekly", 1),
     entry("/guest-saju", "monthly", 0.9),
+    entry("/new-year", "weekly", 0.9),
     entry("/deep-analysis", "weekly", 0.9),
     entry("/special-analysis/compatibility", "weekly", 0.9),
     entry("/reviews", "weekly", 0.7),

@@ -115,7 +115,7 @@ const profile = {
 };
 
 const launchIds = getLaunchProductIds();
-assert.equal(launchIds.length, 57);
+assert.equal(launchIds.length, 58);
 
 for (const productId of launchIds) {
   const prompt = buildPaidAnalysisDetailPromptV4({
@@ -232,4 +232,4 @@ assert(
   "V4 customer UI should use the simpler static label",
 );
 
-console.log("paid-analysis-v4-plain-language-regression: PASS (57/57 prompts + no raw calculation scores)");
+console.log("paid-analysis-v4-plain-language-regression: PASS (58/58 prompts + no raw calculation scores)");

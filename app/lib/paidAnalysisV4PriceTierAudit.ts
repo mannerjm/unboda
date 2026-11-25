@@ -30,7 +30,7 @@ export type PaidAnalysisV4PriceTierAuditReport = {
 const EXPECTED_FAMILY_COUNTS: Readonly<Record<PricingFamily, number>> = {
   CORE: 44,
   DEEP: 8,
-  LONG_RANGE: 4,
+  LONG_RANGE: 5,
   SIGNATURE: 1,
 };
 
@@ -236,7 +236,7 @@ export function auditPaidAnalysisV4PriceTiers(): PaidAnalysisV4PriceTierAuditRep
     }
   }
 
-  pushIf(errors, products.length !== 57, `가격 단계 감사 대상은 정확히 57개여야 합니다. 현재 ${products.length}개입니다.`);
+  pushIf(errors, products.length !== 58, `가격 단계 감사 대상은 정확히 58개여야 합니다. 현재 ${products.length}개입니다.`);
 
   return {
     launchProductCount: launchIds.length,

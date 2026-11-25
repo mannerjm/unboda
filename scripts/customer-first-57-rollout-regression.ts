@@ -121,8 +121,9 @@ for (const [source, ctaId] of [
   assert(!source.slice(0, ctaIndex).includes("onClick={handleSave}"),
     "save interest must not appear above the final purchase section: " + ctaId);
   const bottom = source.slice(ctaIndex);
-  assert(bottom.indexOf("{ACTION_LABELS[state]}") >= 0
-    && bottom.indexOf("{ACTION_LABELS[state]}") < bottom.indexOf("onClick={handleSave}"),
+  const purchaseLabel = ctaId === "customer-purchase-action" ? '{seasonalYear && state === "not_purchased" ? "신년운세 구매하기" : ACTION_LABELS[state]}' : "{ACTION_LABELS[state]}";
+  assert(bottom.indexOf(purchaseLabel) >= 0
+    && bottom.indexOf(purchaseLabel) < bottom.indexOf("onClick={handleSave}"),
     "outlined save must appear immediately below purchase/report button: " + ctaId);
   assert(bottom.includes("disabled={savedState || isSaving}")
     && bottom.includes("관심 분석에 저장됨")

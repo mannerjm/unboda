@@ -11,10 +11,10 @@ import {
   markOrderPaid,
   markTossPaymentReconciliationResult,
   recordTossConfirmationFailure,
-  recordTossConfirmationStarted,
-  recordTossProviderConfirmation,
+   recordTossProviderConfirmation,
 } from "@/app/lib/purchases/server";
 import { getCurrentUser } from "@/app/lib/supabase/auth";
+import { createAdminClient } from "@/app/lib/supabase/admin";
 import { getTossConfigForAccount, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
 import { confirmPaymentWithToss, TossConfirmationError } from "@/app/lib/toss/server";
 
@@ -90,7 +90,10 @@ export async function POST(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "토스 테스트 결제는 승인된 심사용 계정에서만 이용할 수 있습니다.", code: "TOSS_REVIEW_ACCOUNT_REQUIRED" }, { status: 403 });
     }
 
-    await recordTossConfirmationStarted(order);
+    if (order.status !== "pending") return NextResponse.json({ error: "이미 종료된 주문입니다. 새 주문으로 진행해 주세요." }, { status: 409 });
+    // Claim the approval attempt atomically against unpaid closure before calling Toss.
+    const { data: approvalStarted, error: approvalError } = await createAdminClient().rpc("begin_ai_credit_confirmation", { p_order_id: order.id, p_user_id: user.id });
+    if (approvalError || approvalStarted !== true) return NextResponse.json({ error: "결제 주문을 다시 확인해 주세요." }, { status: 409 });
     emitPaymentEvent("payment_attempted", {
       operationalClass: "RECOVERING",
       orderId: order.id,

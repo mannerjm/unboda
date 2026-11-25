@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAuthorizedSchedulerRequest } from "@/app/lib/internal/schedulerAuth";
 import { reconcilePaymentsBatch } from "@/app/lib/purchases/server";
+import { reconcileAiConsultingCreditPaymentsBatch, type AiConsultingCreditReconciliationSummary } from "@/app/lib/aiConsulting/creditCheckout";
 import { reconcileRefundsBatch } from "@/app/lib/refunds/server";
 import { reconcileAccountClosureFinalizations } from "@/app/lib/accounts/server";
 import { cleanupExpiredGuestFreeAnalyses } from "@/app/lib/guestFreeAnalyses/server";
@@ -56,6 +57,10 @@ async function dispatch(request: Request) {
   } catch {
     payments = { ok: false };
   }
+
+  let aiConsultingCredits: WorkerReport<AiConsultingCreditReconciliationSummary>;
+  try { aiConsultingCredits = { ok: true, ...(await reconcileAiConsultingCreditPaymentsBatch()) }; }
+  catch { aiConsultingCredits = { ok: false }; }
 
   let refunds: WorkerReport<{
     processed: number;
@@ -203,7 +208,7 @@ async function dispatch(request: Request) {
     console.error("[customer-journey] retention cleanup unavailable");
   }
 
-  const coreOk = payments.ok && refunds.ok && accountClosures.ok && guestCleanup.ok && creditRefunds.ok;
+  const coreOk = payments.ok && aiConsultingCredits.ok && refunds.ok && accountClosures.ok && guestCleanup.ok && creditRefunds.ok;
   const notificationsOk = operatorAlerts.ok && supportNotifications.ok && creditRefundNotices.ok
     && !["unconfigured", "no_recipients", "failed_final"].includes(operatorAlerts.status)
     && supportNotifications.configured && supportNotifications.failedFinal === 0;
@@ -217,7 +222,7 @@ async function dispatch(request: Request) {
   }
 
   return NextResponse.json(
-    { ok: ok && heartbeatSaved, payments, refunds, accountClosures, guestCleanup, creditRefunds, creditRefundNotices, journeyCleanup, operatorAlerts, supportNotifications },
+    { ok: ok && heartbeatSaved, payments, aiConsultingCredits, refunds, accountClosures, guestCleanup, creditRefunds, creditRefundNotices, journeyCleanup, operatorAlerts, supportNotifications },
     { status: ok && heartbeatSaved ? 200 : 500, headers: { "Cache-Control": "no-store" } },
   );
 }

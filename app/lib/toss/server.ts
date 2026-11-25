@@ -194,8 +194,14 @@ export async function getPaymentByOrderIdFromToss(
   );
 
   if (!response.ok) {
+    // Only the explicit provider code, not an arbitrary 404, proves absence.
+    let lookupCode = "LOOKUP_FAILED";
+    if (response.status === 404) {
+      const payload = await response.json().catch(() => null) as { code?: unknown } | null;
+      if (payload?.code === "NOT_FOUND_PAYMENT") lookupCode = "NOT_FOUND_PAYMENT";
+    }
     throw new TossConfirmationError({
-      provider: "toss", httpStatus: response.status, providerErrorCode: "LOOKUP_FAILED",
+      provider: "toss", httpStatus: response.status, providerErrorCode: lookupCode,
       safeMessage: `Toss 결제 조회가 실패했습니다. (${response.status})`, failureStage: "confirmation",
       retryability: response.status >= 500 ? "RETRYABLE" : "NON_RETRYABLE",
       correlationId: randomUUID(), occurredAt: new Date().toISOString(),

@@ -64,3 +64,11 @@ assert(chat.includes("AI 질문권 구매·내역"), "zero-balance chat state mu
 assert(chat.includes("질문권 내역 보기"), "zero-balance chat state must keep history accessible while checkout is disabled");
 
 console.log("ai consulting credit checkout regression passed");
+
+const mainCron=read("app/api/internal/reconcile/route.ts");
+assert(mainCron.includes("await reconcileAiConsultingCreditPaymentsBatch()"),"hourly master cron must run the credit worker");
+assert(read("app/lib/purchases/server.ts").includes('.eq("orders.payment_provider", "toss")'),"report reconciliation must exclude credit orders");
+assert(confirmRoute.includes('rpc("begin_ai_credit_confirmation"'),"approval must claim the order before calling Toss");
+assert(service.includes("NOT_FOUND_PAYMENT") && service.includes("checkout_route_fingerprint") && service.includes("legacyWrongRoute"),"abandoned credit checkouts require provider and original route evidence");
+const closeRoute=read("app/api/internal/admin/credit-checkout/route.ts");
+assert(closeRoute.includes("requireOperator") && closeRoute.includes("isFinancialMfaVerified") && closeRoute.includes("sameOrigin") && closeRoute.includes("recordOperatorAuditEvent"),"admin closure must be authenticated and audited");

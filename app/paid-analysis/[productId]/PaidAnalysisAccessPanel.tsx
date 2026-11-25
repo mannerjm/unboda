@@ -1,3 +1,4 @@
+import { isNewYearCheckoutAllowed } from "@/app/lib/toss/config";
 import PremiumProductDetail from "@/app/components/PremiumProductDetail";
 import {
   getCanonicalPremiumProductId,
@@ -57,5 +58,5 @@ export default async function PaidAnalysisAccessPanel({
   const state = hasAccess ? report?.status ?? "none" : "not_purchased";
   const isSaved = user ? await isProductSaved(user.id, canonicalProductId) : false;
 
-  return <PremiumProductDetail product={product} state={state} profileId={profileId} isSaved={isSaved} newYearYear={newYearYear} />;
+  return <PremiumProductDetail product={product} state={state} profileId={profileId} isSaved={isSaved} newYearCheckoutAllowed={canonicalProductId === "new-year-fortune" && isNewYearCheckoutAllowed(user?.id)} newYearYear={newYearYear} />;
 }

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { getTossConfigForAccount, isTossCheckoutUserAllowed } from "../app/lib/toss/config";
+import { getTossConfigForAccount, isTossCheckoutUserAllowed, isNewYearCheckoutAllowed } from "../app/lib/toss/config";
 
 // Use synthetic account IDs and fake keys. No provider calls or real orders.
 const testId = "f131d7ca-4024-4e91-a766-d81722f78c51";
@@ -11,7 +11,7 @@ const keys = [
   "TOSS_CLIENT_KEY","TOSS_SECRET_KEY",
   "TOSS_LIVE_CLIENT_KEY","TOSS_LIVE_SECRET_KEY",
   "TOSS_HYBRID_ROUTING_ENABLED","TOSS_LIVE_CHECKOUT_ENABLED",
-  "TOSS_LIVE_PILOT_ENABLED","TOSS_LIVE_PILOT_ACCOUNT_IDS",
+  "TOSS_LIVE_PILOT_ENABLED","TOSS_LIVE_PILOT_ACCOUNT_IDS","NEW_YEAR_LIVE_CHECKOUT_ENABLED",
 ] as const;
 const env = process.env as Record<string,string|undefined>;
 const original = Object.fromEntries(keys.map(k => [k,env[k]]));
@@ -19,6 +19,7 @@ function fails(fn: () => unknown): void {
   assert.throws(fn, "missing provider authorization must fail closed");
 }
 try {
+  delete env.NEW_YEAR_LIVE_CHECKOUT_ENABLED;
   env.NODE_ENV = "production";
   env.TOSS_ENVIRONMENT = "sandbox";
   env.TOSS_REVIEW_MODE = "enabled";
@@ -40,6 +41,9 @@ try {
   env.TOSS_HYBRID_ROUTING_ENABLED = "true";
   assert.equal(getTossConfigForAccount(testId).environment, "sandbox");
   assert.equal(getTossConfigForAccount(testId).clientKey, "test_ck_sample");
+  assert.equal(isNewYearCheckoutAllowed(testId),true);
+  assert.equal(isNewYearCheckoutAllowed(buyerId),false);
+  assert.equal(isNewYearCheckoutAllowed(undefined),false);
   assert.equal(isTossCheckoutUserAllowed(testId), true);
   fails(() => getTossConfigForAccount(buyerId)); // cards not approved
 
@@ -76,6 +80,10 @@ try {
   const live = getTossConfigForAccount(buyerId);
   assert.equal(live.environment, "production");
   assert.equal(live.clientKey, "live_ck_sample");
+  assert.equal(isNewYearCheckoutAllowed(buyerId),false,"seasonal live remains locked even when existing products are live");
+  env.NEW_YEAR_LIVE_CHECKOUT_ENABLED = "true";
+  assert.equal(isNewYearCheckoutAllowed(buyerId),true);
+  delete env.NEW_YEAR_LIVE_CHECKOUT_ENABLED;
   assert.equal(isTossCheckoutUserAllowed(buyerId), true);
   assert.equal(getTossConfigForAccount(testId).environment, "sandbox",
     "owner is always TEST even when live customers are enabled");
@@ -99,6 +107,7 @@ try {
 
   env.TOSS_TEST_ACCOUNT_ID = "";
   fails(() => getTossConfigForAccount(testId));
+  assert.equal(isNewYearCheckoutAllowed(testId),false);
 } finally {
   for (const key of keys) {
     if (original[key] === undefined) delete env[key];

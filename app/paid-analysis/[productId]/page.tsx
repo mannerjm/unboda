@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
 import { getActiveProfile } from "@/app/lib/profiles/activeServer";
+import { isNewYearCheckoutAllowed } from "@/app/lib/toss/config";
 import { newYearTargetYear } from "@/app/lib/newYearFortune";
 import { getServerAnchorDate, parseAnchorDate } from "@/app/lib/analysisReferencePeriod";
 import PaidAnalysisAccessPanel from "./PaidAnalysisAccessPanel";
@@ -81,7 +82,7 @@ export default async function PaidAnalysisPage({
     return <AppShell activeProfileId={seasonalProfile?.id}>
       <main data-new-year-detail className="min-h-screen bg-[#f7f2fc] px-3 py-5 text-[#11162d] sm:px-6 sm:py-8">
         <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl">
-          {seasonalProfile ? <PaidAnalysisAccessPanel productId={product.id} profileId={seasonalProfile.id} newYearYear={year} /> : <PremiumProductDetail product={product} state="not_purchased" newYearYear={year} isSaved={user ? await isProductSaved(user.id, product.id) : false} />}
+          {seasonalProfile ? <PaidAnalysisAccessPanel productId={product.id} profileId={seasonalProfile.id} newYearYear={year} /> : <PremiumProductDetail product={product} state="not_purchased" newYearCheckoutAllowed={isNewYearCheckoutAllowed(user?.id)} newYearYear={year} isSaved={user ? await isProductSaved(user.id, product.id) : false} />}
         </div>
       </main>
     </AppShell>;

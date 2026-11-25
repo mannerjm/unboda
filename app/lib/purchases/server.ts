@@ -1,5 +1,5 @@
 import { isNewYearSalePending } from "../newYearFortune";
-import { getTossConfigForAccount } from "../toss/config";
+import { getTossConfigForAccount, isNewYearCheckoutAllowed } from "../toss/config";
 import type { PaymentStatus } from "../payment";
 import { createAdminClient } from "../supabase/admin";
 import {
@@ -497,7 +497,7 @@ export async function createPendingOrder(input: {
     throw new InvalidProductError(input.productId);
   }
 
-  if (isNewYearSalePending(resolved.productId)) throw new InvalidProductError(input.productId);
+  if (isNewYearSalePending(resolved.productId, resolved.productId === "new-year-fortune" && input.paymentProvider === "toss" && isNewYearCheckoutAllowed(input.userId))) throw new InvalidProductError(input.productId);
 
   // Frozen here, server-side, before the order exists: never recomputed by any
   // later step (payment confirmation, purchase creation, reconciliation, refund).

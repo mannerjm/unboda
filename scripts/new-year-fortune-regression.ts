@@ -62,13 +62,14 @@ assert.equal(asset.toString("ascii",0,4),"RIFF");
 assert.equal(asset.toString("ascii",8,12),"WEBP");
 assert(asset.length>4000,"Taeun portrait must be the actual local image");
 assert(isNewYearSalePending("new-year-fortune"));
+assert(!isNewYearSalePending("new-year-fortune",true));
 assert(!isNewYearSalePending("annual-next"));
 assert(!isNewYearSalePending("money-income-stability"));
 for (const [file,guard] of [
- ["app/api/orders/route.ts","isNewYearSalePending(resolved.productId)"],
+ ["app/api/orders/route.ts","isNewYearSalePending(resolved.productId,"],
  ["app/lib/purchases/server.ts","isNewYearSalePending(resolved.productId)"],
- ["app/checkout/[productId]/page.tsx","isNewYearSalePending(canonicalProductId)"],
- ["app/components/CustomerFirstPremiumDetail.tsx","isNewYearSalePending(product.id)"],
+ ["app/checkout/[productId]/page.tsx","isNewYearSalePending(canonicalProductId,"],
+ ["app/components/CustomerFirstPremiumDetail.tsx","isNewYearSalePending(product.id, newYearCheckoutAllowed)"],
 ] as const) assert(readFileSync(file,"utf8").includes(guard), "seasonal sale must fail closed at "+file);
 console.log("new-year-fortune-regression: PASS (season, price, profile-bound monthly facts, unknown hour, original teacher asset)");
 const seasonalLanding = readFileSync("app/new-year/page.tsx", "utf8");
@@ -88,4 +89,4 @@ assert.equal(redSheep.length,9006);
 
 const seasonalDetailCleanup = readFileSync("app/components/CustomerFirstPremiumDetail.tsx", "utf8");
 assert(!seasonalDetailCleanup.includes("어떤 운세를 볼 수 있나요?"), "remove redundant seasonal jump button");
-assert(seasonalDetailCleanup.includes('seasonalYear && state === "not_purchased" && isNewYearSalePending(product.id)') && seasonalDetailCleanup.includes('aria-labelledby="seasonal-value-heading"'), "keep sale status and full seasonal analysis description");
+assert(seasonalDetailCleanup.includes('seasonalYear && state === "not_purchased" && isNewYearSalePending(product.id, newYearCheckoutAllowed)') && seasonalDetailCleanup.includes('aria-labelledby="seasonal-value-heading"'), "keep sale status and full seasonal analysis description");

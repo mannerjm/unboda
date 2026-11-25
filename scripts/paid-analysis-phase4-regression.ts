@@ -58,7 +58,7 @@ assert(detail.includes("saveAnalysisAction(product.id)"), "premium detail must p
 assert(detail.includes("getProductPricing(productId)"), "premium detail must preserve configured pricing lookup");
 assert(accessPanel.includes("getCurrentEditionEntitlementForProfile"), "detail access must remain edition/profile scoped");
 assert(accessPanel.includes("getPaidReport"), "detail access must keep authoritative report-state lookup");
-assert(accessPanel.includes('<PremiumProductDetail product={product} state={state} profileId={profileId} isSaved={isSaved} newYearYear={newYearYear} />'), "detail access must keep the existing shared-detail contract and pass the server seasonal year");
+assert(accessPanel.includes('<PremiumProductDetail product={product} state={state} profileId={profileId} isSaved={isSaved} newYearCheckoutAllowed={canonicalProductId === "new-year-fortune" && isNewYearCheckoutAllowed(user?.id)} newYearYear={newYearYear} />'), "detail access must keep the existing shared-detail contract and pass the server seasonal year");
 
 assert(catalog.includes("PremiumProductDetail"), "deep-analysis discovery must keep using the shared premium detail");
 assert(recommendations.includes("/paid-analysis/") && recommendations.includes("href={href}") && !recommendations.includes("PremiumReportValuePreview") && !recommendations.includes("RecommendationDetail"), "recommendation cards must link straight to shared product detail rather than duplicate it");

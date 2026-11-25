@@ -227,7 +227,7 @@ assert.equal(
 );
 
 const launchIds = getLaunchProductIds();
-assert.equal(launchIds.length, 57, "all 57 paid-analysis products must remain covered");
+assert.equal(launchIds.length, 58, "all 58 paid-analysis products must remain covered");
 for (const productId of launchIds) {
   const engine = getPaidAnalysisEngine(productId);
   assert(engine, productId + " must resolve to a paid analysis engine");
@@ -306,4 +306,4 @@ for (const phrase of [
   assert(report.includes(phrase), "customer decision-support UI missing: " + phrase);
 }
 
-console.log("premium-report-v4-customer-value-regression: PASS (57/57 products)");
+console.log("premium-report-v4-customer-value-regression: PASS (58/58 products)");

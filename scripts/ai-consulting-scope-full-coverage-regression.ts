@@ -28,7 +28,7 @@ const launchIds = getLaunchProductIds();
 const topicIds = launchIds.filter((id) => Boolean(getPaidAnalysisTopicConfig(id)));
 const periodIds = launchIds.filter((id) => !getPaidAnalysisTopicConfig(id) && Boolean(getPeriodAnalysisStrategy(id)));
 assert.equal(topicIds.length, 50);
-assert.equal(periodIds.length, 7);
+assert.equal(periodIds.length, 8);
 
 const vague = "그건 왜 그래?";
 const unrelated = "오늘 점심 메뉴는 뭘 먹는 게 좋아?";
@@ -98,13 +98,14 @@ const periodMismatch: Record<string, string> = {
   "monthly-current": "다음 달 전체 흐름을 자세히 알려줘",
   "monthly-next": "올해 전체 흐름을 자세히 알려줘",
   "yearly-current": "내년 전체 흐름을 자세히 알려줘",
+  "new-year-fortune": "평생 전체 운세를 자세히 알려줘",
   "annual-next": "이번 달 흐름을 자세히 알려줘",
   "annual-3years": "이번 달 흐름을 자세히 알려줘",
   "daeun-current": "다음 달 흐름을 자세히 알려줘",
   "lifetime-overview": "다음 달 흐름을 자세히 알려줘",
 };
 
-// 7 period products × 7 cases = 49.
+// 8 period products × 7 cases = 56.
 for (const productId of periodIds) {
   const strategy = getPeriodAnalysisStrategy(productId)!;
 
@@ -285,5 +286,5 @@ for (const [productId, question] of [
   assert(bridge.answerGuardrails.some((item) => item.includes("독자적인 결론")));
 }
 
-assert.equal(caseCount, 451, "expected 64 products × 7 cases plus 3 promised period comparisons");
+assert.equal(caseCount, 458, "expected 65 products × 7 cases plus 3 promised period comparisons");
 console.log(`AI consulting full-scope coverage passed: ${caseCount} deterministic cases across 64 products ✓`);

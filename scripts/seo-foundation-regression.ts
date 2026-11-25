@@ -22,7 +22,7 @@ const productTitles = launchIds.map((productId) => {
   assert(product, `missing premium product: ${productId}`);
   return getPremiumProductDisplayTitle(product.id, product.title);
 });
-assert.equal(new Set(productTitles).size, 58, "all 57 paid-product SEO titles must stay unique");
+assert.equal(new Set(productTitles).size, 58, "all 58 paid-product SEO titles must stay unique");
 
 for (const productId of launchIds) {
   assert(
@@ -171,11 +171,11 @@ assert(legalPageSource.includes("<h1") && legalPageSource.includes('href="/"'),
 const existingSeoPages = entries.filter((entry) => !new URL(entry.url).pathname.startsWith("/blog"));
 const originalPhaseOneUrls = existingSeoPages.filter((entry) => !new URL(entry.url).pathname.startsWith("/special-analysis/compatibility/guide/"));
 assert(urls.has(`${SITE_ORIGIN}/new-year`), "seasonal landing must appear in sitemap");
-assert.equal(originalPhaseOneUrls.length, 68, "57 paid products and 9 canonical public routes must remain intact");
+assert.equal(originalPhaseOneUrls.length, 68, "58 paid products and 10 canonical public routes must remain intact");
 for (const slug of COMPATIBILITY_GUIDE_SLUGS) {
   assert(urls.has(`${SITE_ORIGIN}${getCompatibilityPublicGuidePath(slug)}`), `public compatibility guide missing: ${slug}`);
 }
-assert.equal(existingSeoPages.length, 75, "57 paid products + 9 canonical public + 7 compatibility sitemap pages must remain intact");
+assert.equal(existingSeoPages.length, 75, "58 paid products + 10 canonical public + 7 compatibility sitemap pages must remain intact");
  
 // The public entry must provide crawlable product links without clicking client-only
 // category buttons. Keep all 57 links scoped to the existing Launch registry.
@@ -183,16 +183,16 @@ const discoveryTopics = groupTopicCatalogProductsByCategory().flatMap((group) =>
 const discoveryPeriods = listPeriodCatalogProducts();
 const discoveryIds = [...discoveryTopics, ...discoveryPeriods].map((product) => product.id);
 assert.equal(discoveryTopics.length, 50, "public directory must use 50 Launch topic products");
-assert.equal(discoveryPeriods.length, 8, "public directory must use 7 Launch period products");
-assert.equal(discoveryIds.length, 58, "public product discovery links must contain exactly 57 products");
+assert.equal(discoveryPeriods.length, 8, "public directory must use 8 Launch period products");
+assert.equal(discoveryIds.length, 58, "public product discovery links must contain exactly 58 products");
 assert.equal(new Set(discoveryIds).size, 58, "public product discovery links must not repeat a product");
 assert.deepEqual(new Set(discoveryIds), new Set(launchIds),
-  "public product discovery directory and SEO sitemap must link to the same 57 products");
+  "public product discovery directory and SEO sitemap must link to the same 58 products");
 const directory = readFileSync("app/components/PaidProductDiscoveryLinks.tsx", "utf8");
 assert(directory.includes("<details") && directory.includes("<summary"),
   "product directory should remain collapsible for customer experience");
 assert(directory.includes('href={`/paid-analysis/${product.id}`}'),
-  "all 57 public product links must use genuine crawlable Next Link hrefs");
+  "all 58 public product links must use genuine crawlable Next Link hrefs");
 assert(!directory.includes("profileId") && !directory.includes("getCurrentUser"),
   "public SEO directory must never access personal profiles or session data");
 const deepPage = readFileSync("app/deep-analysis/page.tsx", "utf8");
@@ -240,4 +240,4 @@ assert(reviewPageSource.includes('previewReviewDataUnavailable ? [] : await getP
   "production and fully configured previews must still load the actual verified review feed");
 assert(reviewPageSource.includes("운영 환경에서의 후기 조회 동작은 이 화면으로 검증할 수 없습니다."),
   "preview must not pretend the lack of customer data means there are no reviews");
-console.log(`seo-foundation-regression: PASS (57 paid products, ${entries.length} sitemap URLs, site identity + safe breadcrumbs + preview review guard)`);
+console.log(`seo-foundation-regression: PASS (58 paid products, ${entries.length} sitemap URLs, site identity + safe breadcrumbs + preview review guard)`);

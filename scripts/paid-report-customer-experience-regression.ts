@@ -17,7 +17,7 @@ assert(language.includes("쉬운 결론") && language.includes("숫자·비율·
 assert(language.includes("고객 본문과 계산 근거의 강제 분리") && language.includes("고객에게 바로 보이는 문자열에는 다음 전문용어를 쓰지 않는다") && language.includes("전문용어에 괄호 설명을 붙이는 방식도 사용하지 않는다"), "customer copy must completely separate fortune jargon from the main paid report");
 assert(prompt.includes('import { PAID_REPORT_CUSTOMER_LANGUAGE_RULES }') && (prompt.match(/\$\{PAID_REPORT_CUSTOMER_LANGUAGE_RULES\}/g) ?? []).length >= 2, "V2 and V4 paid report prompts must use shared plain-language rules");
 const launchedProducts = getLaunchProductIds();
-assert.equal(launchedProducts.length, 57, "all launched paid-analysis products should be included");
+assert.equal(launchedProducts.length, 58, "all launched paid-analysis products should be included");
 for (const productId of launchedProducts) {
   const generatedPrompt = buildPaidAnalysisDetailPromptV4({
     productId,
@@ -61,4 +61,4 @@ assert(report.includes("<ReportCompletionGate") && report.indexOf("<ReportComple
 assert(completionGate.includes('window.addEventListener("unboda:paid-report-ready"') && completionGate.includes("if (!completed) return null"), "first-purchase follow-up content must remain invisible until the exact report-ready event");
 assert(paidLoading.includes("MysticLoadingScreen") && paidLoading.includes('href="/purchased-analyses"'), "paid loading reuses free visual and preserves purchase recovery");
 assert(freeLoading.includes("asSection") && freeLoading.includes("children"), "shared loading surface supports embedded paid report content");
-console.log("paid-report-customer-experience regression: PASS (57/57 V4 prompts + compatibility + UI)");
+console.log("paid-report-customer-experience regression: PASS (58/58 V4 prompts + compatibility + UI)");

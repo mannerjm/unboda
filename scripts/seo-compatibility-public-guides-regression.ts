@@ -51,8 +51,8 @@ for (const slug of COMPATIBILITY_GUIDE_SLUGS) {
 }
 assert.equal(familyCount, 3);
 assert.equal(titles.size, 7);
-assert.equal(urls.filter((url) => !new URL(url).pathname.startsWith("/blog")).length, 73,
-  "73 canonical SEO URLs must remain while public magazine pages are additive");
+assert.equal(urls.filter((url) => !new URL(url).pathname.startsWith("/blog")).length, 75,
+  "75 canonical SEO URLs must remain while public magazine pages are additive");
 
 const guidePage = readFileSync("app/special-analysis/compatibility/guide/[slug]/page.tsx", "utf8");
 assert(guidePage.includes("generateStaticParams"), "guide should be statically enumerated");

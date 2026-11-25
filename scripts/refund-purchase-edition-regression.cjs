@@ -176,7 +176,7 @@ function harness(options = {}) {
     return module.exports;
   }
   const purchases = load("app/lib/purchases/server.ts", {
-    ...shared, "./products": {}, "./types": { PAID_ANALYSIS_RESOURCE_TYPE: "paid_analysis" },
+    ...shared, "../newYearFortune": load("app/lib/newYearFortune.ts", {}), "./products": {}, "./types": { PAID_ANALYSIS_RESOURCE_TYPE: "paid_analysis" },
     "../premiumProductRegistry": {}, "../analysisEditionForOrder": {},
     "../analysisInputSnapshot": { parseAnalysisInputSnapshot: value => value },
     "../analysisEditionLabel": {}, "../accounts/server": {},

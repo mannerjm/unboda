@@ -631,7 +631,7 @@ export async function generatePaidAnalysisDetailV2(
  */
 export async function generatePaidAnalysisDetailV4(
   input: PaidAnalysisDetailPromptInput,
-  options?: { onResponseTelemetry?: (telemetry: PaidAnalysisResponseTelemetry) => void },
+  options?: { onResponseTelemetry?: (telemetry: PaidAnalysisResponseTelemetry) => void; seasonalRetry?: boolean; seasonalTimeoutMs?: number },
 ): Promise<ResolvedPaidAnalysisDetailV4> {
   const canonicalProductId = input.productId
     ? getCanonicalPremiumProductId(input.productId)
@@ -654,6 +654,9 @@ export async function generatePaidAnalysisDetailV4(
 
   const responseText = await generateAnalysisText(prompt, {
     callType: "paid-analysis-detail-v4",
+    productId: canonicalProductId,
+    seasonalRetry: options?.seasonalRetry,
+    seasonalTimeoutMs: options?.seasonalTimeoutMs,
     onResponseTelemetry: options?.onResponseTelemetry,
   });
 

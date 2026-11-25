@@ -23,6 +23,7 @@ export type PaidAnalysisResponseTelemetry = {
   reasoningTokens: number | null;
   responseIdPresent: boolean;
   durationMs: number;
+  maxOutputTokens?: number;
 };
 
 const PAID_ANALYSIS_V4_TRANSIENT_RETRY_STATUSES = new Set([
@@ -110,7 +111,10 @@ export function shouldFallbackPaidAnalysisV4FastMode(error: unknown): boolean {
 
 export function resolveMaxOutputTokens(
   callType?: AnalysisTextCallType,
+  productId?: string,
+  seasonalRetry = false,
 ): number {
+  if (callType === "paid-analysis-detail-v4" && productId === "new-year-fortune") return seasonalRetry ? 24000 : 16000;
   if (callType === "main-analysis") {
     return 700;
   }
@@ -186,11 +190,15 @@ export async function generateAnalysisText(
   options?: {
     callType?: AnalysisTextCallType;
     onResponseTelemetry?: (telemetry: PaidAnalysisResponseTelemetry) => void;
+    productId?: string;
+    seasonalRetry?: boolean;
+    seasonalTimeoutMs?: number;
   },
 ): Promise<string> {
   const callType = options?.callType;
-  const maxOutputTokens = resolveMaxOutputTokens(callType);
-  const timeoutMs =
+  const maxOutputTokens = resolveMaxOutputTokens(callType, options?.productId, options?.seasonalRetry);
+  const seasonal = callType === "paid-analysis-detail-v4" && options?.productId === "new-year-fortune";
+  const timeoutMs = seasonal ? Math.min(160000, Math.max(1, options?.seasonalTimeoutMs ?? 160000)) :
     callType === "main-analysis" ||
     callType === "recommendation-analysis" ||
     callType === "paid-analysis-detail" ||
@@ -292,6 +300,7 @@ export async function generateAnalysisText(
         reasoningTokens: response.usage?.output_tokens_details?.reasoning_tokens ?? null,
         responseIdPresent: Boolean(response.id || response._request_id),
         durationMs: Date.now() - startedAt,
+        maxOutputTokens,
       });
     }
 

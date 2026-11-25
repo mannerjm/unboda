@@ -21,6 +21,9 @@ import { markPaidGenerationPersistenceFailure } from "@/app/lib/paidGenerationTe
 import { parseAnalysisInputSnapshot, InvalidAnalysisInputSnapshotError } from "@/app/lib/analysisInputSnapshot";
 import type { ProfileDto } from "@/app/lib/profiles/types";
 
+// Allow the bounded seasonal generation and final persistence to finish.
+export const maxDuration = 300;
+
 type PaidAnalysisDetailRequest = {
   productId?: unknown;
   profileId?: unknown;

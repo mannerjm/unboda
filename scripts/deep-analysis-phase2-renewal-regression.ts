@@ -95,6 +95,14 @@ for (const category of ["growth", "business", "health", "money", "career", "soci
   assert(shell.includes(`category: "${category}"`), `global sidebar must retain topic category ${category}`);
 }
 for (const product of listPeriodCatalogProducts()) {
+  if (product.id === "new-year-fortune") {
+    const seasonal = readFileSync("app/new-year/page.tsx", "utf8");
+    assert(shell.includes('href: "/new-year", label: "신년운세"') &&
+      shell.includes('if (item.href === "/new-year") return profileId ?') &&
+      seasonal.includes('"/paid-analysis/new-year-fortune"'),
+      "seasonal product must have its dedicated profile-aware navigation and product link");
+    continue;
+  }
   assert(shell.includes(`productId: "${product.id}"`), `global sidebar must link directly to period product ${product.id}`);
 }
 assert(shell.includes('item.activeHref === "/deep-analysis" && isDeepCatalog')

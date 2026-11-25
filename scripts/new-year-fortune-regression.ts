@@ -67,7 +67,7 @@ assert(!isNewYearSalePending("annual-next"));
 assert(!isNewYearSalePending("money-income-stability"));
 for (const [file,guard] of [
  ["app/api/orders/route.ts","isNewYearSalePending(resolved.productId,"],
- ["app/lib/purchases/server.ts","isNewYearSalePending(resolved.productId)"],
+ ["app/lib/purchases/server.ts","isNewYearSalePending(resolved.productId,"],
  ["app/checkout/[productId]/page.tsx","isNewYearSalePending(canonicalProductId,"],
  ["app/components/CustomerFirstPremiumDetail.tsx","isNewYearSalePending(product.id, newYearCheckoutAllowed)"],
 ] as const) assert(readFileSync(file,"utf8").includes(guard), "seasonal sale must fail closed at "+file);
@@ -90,3 +90,8 @@ assert.equal(redSheep.length,9006);
 const seasonalDetailCleanup = readFileSync("app/components/CustomerFirstPremiumDetail.tsx", "utf8");
 assert(!seasonalDetailCleanup.includes("어떤 운세를 볼 수 있나요?"), "remove redundant seasonal jump button");
 assert(seasonalDetailCleanup.includes('seasonalYear && state === "not_purchased" && isNewYearSalePending(product.id, newYearCheckoutAllowed)') && seasonalDetailCleanup.includes('aria-labelledby="seasonal-value-heading"'), "keep sale status and full seasonal analysis description");
+
+const seasonalOrders = readFileSync("app/api/orders/route.ts","utf8");
+const seasonalPurchaseServer = readFileSync("app/lib/purchases/server.ts","utf8");
+assert(seasonalOrders.includes("isNewYearCheckoutAllowed(user.id)") && seasonalPurchaseServer.includes('input.paymentProvider === "toss" && isNewYearCheckoutAllowed(input.userId)'), "seasonal order authorization must be enforced twice, with real provider selected");
+assert(readFileSync("app/checkout/[productId]/page.tsx","utf8").includes("isNewYearCheckoutAllowed(user?.id)"), "checkout must use the authenticated server account");

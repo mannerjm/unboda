@@ -11,6 +11,10 @@ import {
 assert.equal(resolveModel("paid-analysis-detail-v4"), "gpt-5.6-sol");
 assert.equal(resolveReasoningEffort("paid-analysis-detail-v4"), "low");
 assert.equal(resolveMaxOutputTokens("paid-analysis-detail-v4"), 6000);
+assert.equal(resolveMaxOutputTokens("paid-analysis-detail-v4", "new-year-fortune"), 16000);
+assert.equal(resolveMaxOutputTokens("paid-analysis-detail-v4", "new-year-fortune", true), 24000);
+assert.equal(resolveMaxOutputTokens("paid-analysis-detail-v4", "annual-next", true), 6000);
+assert.equal(resolveMaxOutputTokens("paid-analysis-detail", "new-year-fortune", true), 4800);
 assert.equal(resolveServiceTier("paid-analysis-detail-v4"), "priority");
 
 for (const callType of [

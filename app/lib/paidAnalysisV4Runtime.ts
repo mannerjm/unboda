@@ -99,7 +99,7 @@ async function persistV4Attempt(input: {
     generationContractVersion: "V4",
     model: resolveModel("paid-analysis-detail-v4"),
     reasoningEffort: "low",
-    maxOutputTokens: resolveMaxOutputTokens("paid-analysis-detail-v4"),
+    maxOutputTokens: input.responseTelemetry?.maxOutputTokens ?? resolveMaxOutputTokens("paid-analysis-detail-v4", input.productId),
     requestId: null,
     startedAt: input.startedAt,
     completedAt,

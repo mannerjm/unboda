@@ -19,6 +19,9 @@ import {
   runPaidReportGeneration,
 } from "@/app/lib/paidReports/generation";
 
+// after() report generation shares this route execution budget.
+export const maxDuration = 300;
+
 type RouteContext = {
   params: Promise<{ orderId: string }>;
 };

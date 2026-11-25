@@ -216,6 +216,33 @@ async function main(): Promise<void> {
   assert(repeatedConsistencyThrown, "a third quality failure must be surfaced");
   assert(repeatedConsistencyCalls === 3, "premium quality regeneration must stop after two retries");
 
+  const seasonalInput = {...input, productId:"new-year-fortune"};
+  let seasonalCalls = 0;
+  const seasonalEvents: PaidAnalysisResponseTelemetry[] = [];
+  const seasonalResult = await generatePaidAnalysisDetailV4WithConsistencyRetry(seasonalInput, {
+    generator: async (_input, options) => {
+      seasonalCalls++;
+      assert(options?.seasonalRetry === (seasonalCalls > 1), "seasonal retry escalates only on second call");
+      assert((options?.seasonalTimeoutMs ?? 0) > 0 && (options?.seasonalTimeoutMs ?? 0) <= 160000, "seasonal attempt has bounded timeout");
+      options?.onResponseTelemetry?.({...firstTelemetry, status: seasonalCalls === 1 ? "incomplete" : "completed", incompleteReason: seasonalCalls === 1 ? "max_output_tokens" : null, maxOutputTokens: seasonalCalls === 1 ? 16000 : 24000});
+      if (seasonalCalls === 1) throw new Error("OpenAI 응답이 incomplete 상태입니다. reason=max_output_tokens");
+      return sentinel;
+    },
+    onResponseTelemetry: event => seasonalEvents.push(event),
+  });
+  assert(seasonalResult === sentinel && seasonalCalls === 2, "seasonal output limit receives one automatic retry");
+  assert(seasonalEvents[0]?.maxOutputTokens === 24000 && seasonalEvents[0]?.outputTokens === 80, "seasonal telemetry reflects final budget and aggregate usage");
+  for (const [productId, reason, expectedCalls] of [["new-year-fortune","max_output_tokens",2],["new-year-fortune","content_filter",1],["annual-next","max_output_tokens",1]] as const) {
+    let calls = 0;
+    let rejected = false;
+    try {
+      await generatePaidAnalysisDetailV4WithConsistencyRetry({...input,productId}, {generator:async () => {
+        calls++;
+        throw new Error("OpenAI 응답이 incomplete 상태입니다. reason="+reason);
+      }});
+    } catch { rejected = true; }
+    assert(rejected && calls === expectedCalls, "bounded retry and non-seasonal isolation: "+productId+" "+reason);
+  }
   console.log("PASS: V4 premium quality regeneration is bounded, selective, and telemetry-safe");
 }
 

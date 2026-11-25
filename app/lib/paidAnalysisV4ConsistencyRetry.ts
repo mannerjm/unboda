@@ -6,6 +6,8 @@ import type { PaidAnalysisDetailPromptInput } from "./paidAnalysisDetailPrompt";
 import type { PaidAnalysisResponseTelemetry } from "./ai/generateAnalysisText";
 
 export const PAID_ANALYSIS_V4_CONSISTENCY_RETRY_LIMIT = 2;
+export const SEASONAL_GENERATION_TOTAL_MS = 260000;
+export const SEASONAL_GENERATION_RETRY_MIN_MS = 75000;
 
 const CONSISTENCY_ERROR_PREFIX =
   "심층 분석 결과의 섹션 간 일관성 검증에 실패했습니다.";
@@ -14,6 +16,8 @@ type PaidAnalysisV4Generator = (
   input: PaidAnalysisDetailPromptInput,
   options?: {
     onResponseTelemetry?: (telemetry: PaidAnalysisResponseTelemetry) => void;
+    seasonalRetry?: boolean;
+    seasonalTimeoutMs?: number;
   },
 ) => Promise<ResolvedPaidAnalysisDetailV4>;
 
@@ -61,6 +65,7 @@ export function mergePaidAnalysisV4ResponseTelemetry(
     reasoningTokens: sumTelemetryField(telemetry, "reasoningTokens"),
     responseIdPresent: last.responseIdPresent,
     durationMs: telemetry.reduce((sum, item) => sum + item.durationMs, 0),
+    maxOutputTokens: last.maxOutputTokens,
   };
 }
 
@@ -74,6 +79,9 @@ export async function generatePaidAnalysisDetailV4WithConsistencyRetry(
   const generator = options?.generator ?? generatePaidAnalysisDetailV4;
   const telemetryEvents: PaidAnalysisResponseTelemetry[] = [];
   let consistencyRetryCount = 0;
+  const seasonal = input.productId === "new-year-fortune";
+  const deadline = Date.now() + SEASONAL_GENERATION_TOTAL_MS;
+  const retryLimit = seasonal ? 1 : PAID_ANALYSIS_V4_CONSISTENCY_RETRY_LIMIT;
 
   const emitMergedTelemetry = () => {
     const merged = mergePaidAnalysisV4ResponseTelemetry(telemetryEvents);
@@ -85,6 +93,7 @@ export async function generatePaidAnalysisDetailV4WithConsistencyRetry(
   while (true) {
     try {
       const result = await generator(input, {
+        ...(seasonal ? { seasonalRetry: consistencyRetryCount > 0, seasonalTimeoutMs: Math.min(160000, deadline - Date.now()) } : {}),
         onResponseTelemetry: (telemetry) => {
           telemetryEvents.push(telemetry);
         },
@@ -93,9 +102,11 @@ export async function generatePaidAnalysisDetailV4WithConsistencyRetry(
       emitMergedTelemetry();
       return result;
     } catch (error) {
+      const outputLimitReached = seasonal && error instanceof Error && error.message.includes("incomplete") && error.message.includes("reason=max_output_tokens");
       const shouldRetry =
-        consistencyRetryCount < PAID_ANALYSIS_V4_CONSISTENCY_RETRY_LIMIT &&
-        isRetryablePaidAnalysisV4ConsistencyError(error);
+        consistencyRetryCount < retryLimit &&
+        (!seasonal || deadline - Date.now() >= SEASONAL_GENERATION_RETRY_MIN_MS) &&
+        (isRetryablePaidAnalysisV4ConsistencyError(error) || outputLimitReached);
 
       if (!shouldRetry) {
         emitMergedTelemetry();
@@ -106,7 +117,8 @@ export async function generatePaidAnalysisDetailV4WithConsistencyRetry(
       console.warn("[paid-analysis-v4] quality-regeneration", {
         productId: input.productId,
         retryAttempt: consistencyRetryCount,
-        retryLimit: PAID_ANALYSIS_V4_CONSISTENCY_RETRY_LIMIT,
+        retryLimit,
+        reason: outputLimitReached ? "max_output_tokens" : "quality",
       });
     }
   }

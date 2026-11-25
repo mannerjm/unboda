@@ -55,7 +55,7 @@ const failureGuides: Record<FailureCategory, FailureGuide> = {
   PAYMENT_RECONCILIATION: {
     priority: "상태에 따라 판단",
     check: "연결 주문 상세에서 내부 주문·결제 상태·정산 상태·재시도 시각·실패 코드를 확인합니다.",
-    action: "다음 재시도 시각이 있으면 기다립니다. terminal_mismatch 또는 재시도 시각이 없는 최종 실패면 Toss 관리자 기록의 주문번호·금액·통화·결제 상태와 대조한 뒤 개발 검토로 넘깁니다.",
+    action: "다음 재시도 시각이 있으면 기다립니다. terminal_mismatch 또는 재시도 시각이 없는 최종 실패면 Toss 관리자 기록과 대조합니다. 질문권 미결제 주문은 연결 주문 상세에서 토스 재확인 및 정상 종료 기능을 사용할 수 있습니다.",
     why: "결제가 실제로 됐는지 확실하지 않은 상태에서 이용권을 수동 제공하면 이중 제공 또는 환불 오류가 생길 수 있습니다.",
     never: "주문을 paid로 직접 변경하거나 이용권을 임의 생성하지 않습니다.",
   },
@@ -111,6 +111,7 @@ const labels: Record<string, string> = {
   VERIFIED_ADULT: "성인 인증 완료",
   REVOKED: "재확인 필요",
   pending: "결제 대기",
+  canceled: "결제 미완료 종료",
   paid: "결제 완료",
   reconciliation_required: "자동 정산 필요",
   reconciliation_failed: "정산 재시도 실패",
@@ -188,6 +189,10 @@ export default function AdminLookupConsole({
   const [orderId, setOrderId] = useState("");
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [order, setOrder] = useState<Order | null>(null);
+  const [checkoutCheck, setCheckoutCheck] = useState<{ status: string; canClose: boolean; needsDashboardConfirmation: boolean; message: string } | null>(null);
+  const [dashboardConfirmed, setDashboardConfirmed] = useState(false);
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
+  const [checkoutMfa, setCheckoutMfa] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<"customer" | "order" | null>(null);
   const [failureSummary, setFailureSummary] = useState<Partial<Record<FailureCategory, number>> | null>(initialFailureSummary);
@@ -220,6 +225,7 @@ export default function AdminLookupConsole({
     setLoading("order");
     setMessage(null);
     setOrder(null);
+    setCheckoutCheck(null); setDashboardConfirmed(false); setCheckoutMfa(false);
     try {
       const suffix = reason ? `?reason=${encodeURIComponent(reason)}` : "";
       const result = await request<{ order: Order }>(`/api/internal/admin/orders/${encodeURIComponent(exactOrderId.trim())}${suffix}`);
@@ -230,6 +236,31 @@ export default function AdminLookupConsole({
     } finally {
       setLoading(null);
     }
+  }
+
+  async function checkCreditCheckout(action: "inspect" | "close") {
+    if (!order || checkoutBusy) return;
+    const exactId = order.order.id;
+    setCheckoutBusy(true); setCheckoutMfa(false);
+    try {
+      const response = await fetch("/api/internal/admin/credit-checkout", {
+        method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: exactId, action, dashboardConfirmed }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        setCheckoutMfa(result.mfaRequired === true);
+        throw new Error(result.error ?? "안전하게 처리하지 못했습니다.");
+      }
+      if (result.status === "CLOSED") {
+        await fetchOrder(exactId, "verified-unpaid-close");
+        await loadFailures();
+        await loadFailures("PAYMENT_RECONCILIATION");
+      }
+      setCheckoutCheck(result);
+    } catch (error) {
+      setCheckoutCheck({ status: "ERROR", canClose: false, needsDashboardConfirmation: false, message: error instanceof Error ? error.message : "확인 실패" });
+    } finally { setCheckoutBusy(false); }
   }
 
   async function lookupCustomer(event: FormEvent) {
@@ -262,7 +293,7 @@ export default function AdminLookupConsole({
       <header className="border-b border-slate-200 pb-6">
         <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">CS CONSOLE</p>
         <h2 id="cs-console-heading" className="mt-3 text-2xl font-bold">고객 지원 조회</h2>
-        <p className="mt-3 text-sm leading-6 text-slate-600">고객 지원 목적의 조회 전용 화면입니다. 조회 결과를 임의로 변경하지 마세요.</p>
+        <p className="mt-3 text-sm leading-6 text-slate-600">고객 지원 목적의 조회 중심 화면입니다. 미결제 질문권은 별도 안전 검사와 추가 인증을 통과한 경우에만 종료할 수 있습니다.</p>
       </header>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -325,7 +356,7 @@ export default function AdminLookupConsole({
                   <li key={`${selectedFailure}-${item.referenceId}`} className="py-4 text-sm">
                     <p className="text-xs font-semibold text-slate-500">{referenceLabels[item.referenceType]}</p>
                     <p className="mt-1 break-all font-mono text-xs text-slate-700">{item.referenceId}</p>
-                    <p className="mt-2 font-semibold">{item.productLabel ?? "계정 종료"}{item.editionLabel ? ` · ${item.editionLabel}` : ""}</p>
+                    <p className="mt-2 font-semibold">{item.productLabel ?? (item.referenceType === "ORDER" ? "결제 주문" : item.referenceType === "REPORT" ? "분석 리포트" : "계정 종료")}{item.editionLabel ? ` · ${item.editionLabel}` : ""}</p>
                     <div className="mt-2 grid gap-1 text-xs leading-5 text-slate-600 sm:grid-cols-2">
                       <p>상태: {value(item.status)}</p>
                       <p>재시도: {item.retryCount ?? 0}회</p>
@@ -383,6 +414,17 @@ export default function AdminLookupConsole({
             <Field label="정산 상태">{value(order.payment?.reconciliationStatus)}</Field>
             <Field label="확인 시각">{time(order.payment?.confirmedAt)}</Field>
             <Field label="실패 코드">{value(order.payment?.failureCode)}</Field>
+            {order.order.status === "pending" && ["ai-consulting-3","ai-consulting-5","ai-consulting-10"].includes(order.order.productId) ? (
+              <div className="mt-3 space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+                <p className="text-sm font-bold">미결제 질문권 확인 및 정상 종료</p>
+                <button type="button" disabled={checkoutBusy || loading !== null} onClick={() => void checkCreditCheckout("inspect")} className="min-h-11 rounded-lg bg-[#171a3d] px-4 text-sm font-bold text-white disabled:opacity-50">{checkoutBusy ? "확인 중" : "토스 결제 상태 재확인"}</button>
+                {checkoutCheck ? <p role="status" className="text-sm leading-6">{checkoutCheck.message}</p> : null}
+                {checkoutMfa ? <a href="/admin/mfa" className="text-sm font-bold underline">관리자 추가 인증하기 →</a> : null}
+                {checkoutCheck?.needsDashboardConfirmation ? <label className="flex items-start gap-2 text-sm leading-6"><input type="checkbox" checked={dashboardConfirmed} onChange={(event) => setDashboardConfirmed(event.target.checked)} />원래 토스 TEST/LIVE 상점의 해당 주문번호로 승인·취소 기록이 없음을 직접 확인했습니다.</label> : null}
+                <button type="button" disabled={checkoutBusy || loading !== null || !(checkoutCheck?.canClose || (checkoutCheck?.status === "NOT_FOUND_PAYMENT" && checkoutCheck.needsDashboardConfirmation && dashboardConfirmed))} onClick={() => { if (window.confirm("토스에서 미결제가 다시 확인되는 경우에만 이 주문을 정상 종료합니다. 진행할까요?")) void checkCreditCheckout("close"); }} className="min-h-11 rounded-lg border border-[#171a3d] px-4 text-sm font-bold disabled:opacity-40">미결제 주문 정상 종료</button>
+                <p className="text-xs leading-5 text-slate-600">카드 취소·환불·질문권 지급은 실행하지 않습니다. 안전 조건이 충족되지 않으면 경고가 유지됩니다.</p>
+              </div>
+            ) : checkoutCheck?.status === "CLOSED" ? <p role="status" className="text-sm font-bold text-emerald-800">{checkoutCheck.message}</p> : null}
           </Section>
           <Section title="이용권">
             <Field label="상태">{order.entitlement?.active ? "활성" : "없음 또는 취소됨"}</Field>

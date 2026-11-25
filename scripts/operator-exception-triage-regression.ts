@@ -29,7 +29,7 @@ assert.match(adminConsole, /연결 계정 상세 확인/);
 assert.match(adminConsole, /failure-queue:/);
 assert.match(adminConsole, /동일 구매의 유료 분석 화면을 다시 열도록 안내/);
 assert.match(adminConsole, /terminal_mismatch/);
-assert.ok(!adminConsole.includes('method: "POST"'), "operator triage console must remain read-only");
+assert.ok(adminConsole.includes('"/api/internal/admin/credit-checkout"') && adminConsole.includes('checkCreditCheckout("close")'), "only dedicated verified unpaid checkout action is added to read-only triage");
 
 assert.match(guide, /대표가 예외를 판단하는 순서/);
 assert.match(guide, /연결 주문 상세 확인/);

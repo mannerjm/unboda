@@ -13,7 +13,8 @@ import {
 } from "../purchases/server";
 import type { OrderRecord, PurchaseRecord } from "../purchases/types";
 import { createAdminClient } from "../supabase/admin";
-import { getPaymentByOrderIdFromToss } from "../toss/server";
+import { getPaymentByOrderIdFromToss, TossConfirmationError } from "../toss/server";
+import { createHash } from "node:crypto";
 import { getTossConfig, getTossConfigForAccount, isTossCheckoutUserAllowed, isTossHybridRoutingEnabled } from "../toss/config";
 import {
   getAiConsultingCreditBundle,
@@ -175,7 +176,7 @@ export async function createPendingAiConsultingCreditOrder(input: {
   }
   // Defense in depth: no internal caller may mint an order on a public
   // customer account while the site uses TEST keys for approval review.
-  getTossConfigForAccount(input.userId);
+  const checkoutConfig = getTossConfigForAccount(input.userId);
   if (!isTossCheckoutUserAllowed(input.userId)) {
     throw new Error("TOSS_REVIEW_ACCOUNT_REQUIRED");
   }
@@ -213,6 +214,9 @@ export async function createPendingAiConsultingCreditOrder(input: {
 
   const order = toOrderRecord(data);
   await recordTossConfirmationStarted(order);
+  const { error: routeError } = await createAdminClient().from("toss_payment_records")
+    .update({ checkout_route_fingerprint: creditRouteFingerprint(checkoutConfig) }).eq("order_id", order.id);
+  if (routeError) throw new Error("AI_CREDIT_CHECKOUT_ROUTE_RECORD_FAILED");
   return order;
 }
 
@@ -293,7 +297,7 @@ export async function finalizeAiConsultingCreditPurchase(
   };
 }
 
-async function getAiConsultingCreditOrderById(orderId: string): Promise<OrderRecord | null> {
+export async function getAiConsultingCreditOrderById(orderId: string): Promise<OrderRecord | null> {
   const { data, error } = await createAdminClient()
     .from("orders")
     .select("*")
@@ -301,6 +305,87 @@ async function getAiConsultingCreditOrderById(orderId: string): Promise<OrderRec
     .maybeSingle<OrderRow>();
 
   return error || !data ? null : toOrderRecord(data);
+}
+
+
+// This is a hash of the public client key and environment, not a stored secret.
+function creditRouteFingerprint(config: ReturnType<typeof getTossConfigForAccount>): string {
+  return createHash("sha256").update(config.environment + ":" + config.clientKey).digest("hex");
+}
+
+export type CreditCheckoutInspection = {
+  status: string; canClose: boolean; needsDashboardConfirmation: boolean; message: string;
+};
+
+async function inspectCreditCheckout(order: OrderRecord, dashboardConfirmed = false): Promise<CreditCheckoutInspection> {
+  const blocked = (status: string, message: string): CreditCheckoutInspection =>
+    ({ status, message, canClose: false, needsDashboardConfirmation: false });
+  if (order.paymentProvider !== AI_CONSULTING_CREDIT_PAYMENT_PROVIDER || order.status !== "pending" || order.paidAt || order.transactionId)
+    return blocked("INELIGIBLE", "결제 대기 중인 미결제 질문권 주문만 종료할 수 있습니다.");
+  const db = createAdminClient();
+  const { data: evidence, error } = await db.from("toss_payment_records")
+    .select("payment_key,confirmed_at,confirmed_amount,provider_status,checkout_route_fingerprint,credit_approval_started_at,last_confirmation_attempt_at,reconciliation_status,last_reconciliation_result,confirmation_started_at")
+    .eq("order_id", order.id).maybeSingle();
+  if (error || !evidence) return blocked("UNKNOWN", "내부 결제 증빙을 확인하지 못했습니다.");
+  if (evidence.payment_key || evidence.confirmed_at || evidence.confirmed_amount !== null || evidence.credit_approval_started_at || evidence.last_confirmation_attempt_at
+    || ["paid","externally_confirmed","expired_unpaid"].includes(evidence.reconciliation_status)
+    || (evidence.provider_status && !["READY","IN_PROGRESS","EXPIRED","ABORTED"].includes(evidence.provider_status)))
+    return blocked("EVIDENCE_EXISTS", "결제 승인 시도 또는 금전 증빙이 있어 자동 종료할 수 없습니다.");
+  if (evidence.reconciliation_status === "terminal_mismatch" && !["internal Toss order was not found","Legacy credit checkout needs original merchant verification"].includes(evidence.last_reconciliation_result ?? ""))
+    return blocked("MISMATCH", "실제 불일치 기록은 임의로 종료할 수 없습니다.");
+  const config = getTossConfigForAccount(order.userId, "settlement");
+  const fingerprint = creditRouteFingerprint(config);
+  if (evidence.checkout_route_fingerprint && evidence.checkout_route_fingerprint !== fingerprint)
+    return blocked("ROUTE_MISMATCH", "주문 당시와 현재 토스 상점 정보가 달라 종료할 수 없습니다.");
+  const oldEnough = Date.now() - new Date(order.createdAt).getTime() >= 60 * 60 * 1000;
+  try {
+    const provider = await getPaymentByOrderIdFromToss(order.id, config);
+    if (provider.orderId !== order.id || provider.totalAmount !== order.amount || provider.currency !== "KRW")
+      return blocked("MISMATCH", "토스 주문번호·금액·통화가 일치하지 않습니다.");
+    if (provider.approvedAt || (provider.cancels?.length ?? 0) > 0)
+      return blocked(provider.status, "승인 또는 취소 이력이 있어 미결제로 종료할 수 없습니다.");
+    if (["EXPIRED","ABORTED"].includes(provider.status))
+      return { status: provider.status, canClose: oldEnough, needsDashboardConfirmation: false, message: oldEnough ? "토스에서 결제 미완료 종료가 확인되었습니다." : "결제 유효시간 보호를 위해 대기합니다." };
+    return blocked(provider.status, "토스 결제 상태: " + provider.status + " · 미결제 종료 대상이 아닙니다.");
+  } catch (err) {
+    if (!(err instanceof TossConfirmationError) || err.failure.httpStatus !== 404 || err.failure.providerErrorCode !== "NOT_FOUND_PAYMENT") throw err;
+    const legacy = !evidence.checkout_route_fingerprint;
+    return { status: "NOT_FOUND_PAYMENT", canClose: oldEnough && (!legacy || dashboardConfirmed),
+      needsDashboardConfirmation: legacy,
+      message: !oldEnough ? "결제창 유효시간 보호를 위해 대기합니다." : legacy ? "이전 주문은 토스 관리자에서 원래 TEST/LIVE 상점의 승인·취소 내역이 없음을 확인해 주세요." : "주문 당시 토스 상점에서 결제 정보가 없고 유효시간이 지났습니다." };
+  }
+}
+
+export async function verifyCreditCheckoutForOperator(orderId: string, dashboardConfirmed = false): Promise<CreditCheckoutInspection> {
+  const order = await getAiConsultingCreditOrderById(orderId);
+  if (!order) return { status: "UNKNOWN", canClose: false, needsDashboardConfirmation: false, message: "주문을 확인할 수 없습니다." };
+  return inspectCreditCheckout(order, dashboardConfirmed);
+}
+
+export async function closeVerifiedCreditCheckout(orderId: string, dashboardConfirmed = false): Promise<CreditCheckoutInspection> {
+  const order = await getAiConsultingCreditOrderById(orderId);
+  if (!order) throw new Error("AI_CREDIT_ORDER_NOT_FOUND");
+  // Never trust a client-supplied provider status; every execution performs a new lookup.
+  const inspection = await inspectCreditCheckout(order, dashboardConfirmed);
+  if (!inspection.canClose) return inspection;
+  const fingerprint = creditRouteFingerprint(getTossConfigForAccount(order.userId, "settlement"));
+  const { data, error } = await createAdminClient().rpc("close_verified_unpaid_ai_credit_order", {
+    p_order_id: order.id, p_provider_status: inspection.status, p_expected_amount: order.amount,
+    p_route_fingerprint: fingerprint, p_legacy_dashboard_confirmed: dashboardConfirmed,
+  });
+  if (error || data !== true) throw new Error("AI_CREDIT_UNPAID_CLOSE_SAFETY_CHECK_FAILED");
+  return { status: "CLOSED", canClose: false, needsDashboardConfirmation: false, message: "미결제 주문을 정상 종료했습니다. 결제 취소·환불·질문권 지급은 실행하지 않았습니다." };
+}
+
+async function deferCreditCheckout(orderId: string, previousStatus: string, message: string) {
+  const now = new Date();
+  const { error } = await createAdminClient().from("toss_payment_records").update({
+    reconciliation_status: "confirmation_started", last_reconciliation_result: message,
+    last_reconciled_at: now.toISOString(), updated_at: now.toISOString(),
+    next_retry_at: new Date(now.getTime() + 60 * 60 * 1000).toISOString(),
+  }).eq("order_id", orderId).eq("reconciliation_status", previousStatus)
+    .is("payment_key", null).is("credit_approval_started_at", null);
+  if (error) throw new Error("AI_CREDIT_CHECKOUT_DEFER_FAILED");
 }
 
 export type AiConsultingCreditReconciliationSummary = {
@@ -332,9 +417,12 @@ export async function reconcileAiConsultingCreditPaymentsBatch(): Promise<AiCons
 
   for (const candidate of orders) {
     const record = await getTossPaymentRecordForOrder(candidate.id);
+    const legacyWrongRoute = record?.reconciliationStatus === "terminal_mismatch"
+      && record.lastReconciliationResult === "internal Toss order was not found";
     if (
       record?.reconciliationStatus === "paid" ||
-      record?.reconciliationStatus === "terminal_mismatch" ||
+      record?.reconciliationStatus === "expired_unpaid" ||
+      (record?.reconciliationStatus === "terminal_mismatch" && !legacyWrongRoute) ||
       record?.reconciliationStatus === "reconciliation_failed"
     ) {
       continue;
@@ -359,6 +447,30 @@ export async function reconcileAiConsultingCreditPaymentsBatch(): Promise<AiCons
         continue;
       }
 
+      // A never-approved checkout is not a technical payment failure.
+      if (record && !record.paymentKey && !record.confirmedAt) {
+        const check = await inspectCreditCheckout(order);
+        if (check.canClose) {
+          const closed = await closeVerifiedCreditCheckout(order.id);
+          if (closed.status === "CLOSED") { converged += 1; continue; }
+          throw new Error("AI_CREDIT_CLOSE_RACE");
+        }
+        if (["READY", "IN_PROGRESS", "WAITING_FOR_DEPOSIT", "EXPIRED", "ABORTED", "NOT_FOUND_PAYMENT"].includes(check.status)) {
+          // Legacy 404 is not enough to prove the original merchant. Retain it for operator review.
+          if (check.needsDashboardConfirmation) {
+            if (!legacyWrongRoute) await markTossPaymentReconciliationResult(order.id, "terminal_mismatch", "Legacy credit checkout needs original merchant verification");
+            failed += 1;
+          } else {
+            await deferCreditCheckout(order.id, record.reconciliationStatus, check.message);
+            retryPending += 1;
+          }
+          continue;
+        }
+        if (["MISMATCH", "ROUTE_MISMATCH"].includes(check.status)) {
+          await markTossPaymentReconciliationResult(order.id, "terminal_mismatch", check.message);
+          failed += 1; continue;
+        }
+      }
       // Hybrid mode must query the original TEST/LIVE merchant for this exact order.
       const provider = await getPaymentByOrderIdFromToss(order.id, getTossConfigForAccount(order.userId, "settlement"));
       if (
@@ -395,6 +507,8 @@ export async function reconcileAiConsultingCreditPaymentsBatch(): Promise<AiCons
       );
       converged += 1;
     } catch {
+      // Preserve the exact legacy exception until fresh evidence resolves it.
+      if (legacyWrongRoute) { failed += 1; continue; }
       await markTossPaymentReconciliationResult(
         candidate.id,
         "reconciliation_required",

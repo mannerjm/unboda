@@ -376,7 +376,8 @@ export async function listTossPaymentsForReconciliation(): Promise<TossPaymentRe
   const supabase = createAdminClient();
   const { data: recordData, error: recordError } = await supabase
     .from("toss_payment_records")
-    .select("*")
+    .select("*,orders!inner(payment_provider)")
+    .eq("orders.payment_provider", "toss")
     .in("reconciliation_status", ["pending", "confirmation_started", "externally_confirmed", "reconciliation_required"])
     .lte("next_retry_at", new Date().toISOString())
     .order("updated_at", { ascending: true });

@@ -8,3 +8,10 @@ export function newYearTargetYear(anchor:{year:number;month:number}):number { re
 export function isNewYearSalePending(productId: string): boolean {
   return productId === NEW_YEAR_PRODUCT_ID;
 }
+
+/** Seasonal artwork must not be carried forward to the wrong zodiac year. */
+export function getNewYearArtwork(year: number) {
+  return year === 2027
+    ? { src: "/images/premium/2027-jeongmi-red-sheep.webp", alt: "2027년 정미년을 상징하는 붉은 양과 황금빛 새해 풍경" }
+    : { src: "/images/premium/new-year-fortune.svg", alt: "새해를 상징하는 일출 풍경" };
+}

@@ -29,6 +29,7 @@ type PremiumProductDetailProps = {
   onClear?: () => void;
   isSaved?: boolean;
   guestRecommendation?: boolean;
+  newYearYear?: number;
 };
 
 const ACTION_LABELS: Record<PremiumAnalysisProductState, string> = {
@@ -133,6 +134,7 @@ export default function PremiumProductDetail({
   profileId,
   isSaved = false,
   guestRecommendation = false,
+  newYearYear,
 }: PremiumProductDetailProps) {
   const [savedState, setSavedState] = useState(isSaved);
   const [isSaving, setIsSaving] = useState(false);
@@ -172,6 +174,7 @@ export default function PremiumProductDetail({
       profileId={profileId}
       isSaved={isSaved}
       guestRecommendation={guestRecommendation}
+      newYearYear={newYearYear}
     />;
   }
 

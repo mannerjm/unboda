@@ -34,7 +34,7 @@ assert.equal(periodCount, 8);
 
 const route = readFileSync("app/paid-analysis/[productId]/page.tsx", "utf8");
 assert(route.includes("getPaidProductSeoGuide(product)"), "Metadata must use product search intent");
-assert(route.includes("title: seoGuide.searchTitle"), "SEO title must reflect search intent");
+assert(route.includes(" : seoGuide.searchTitle,") && route.includes("newYearTargetYear(parseAnchorDate(getServerAnchorDate()))") && route.includes("년 신년운세 · 나의 새해 총운과 월별 운세"), "SEO title must reflect search intent, with current seasonal year on the seasonal detail");
 assert(route.includes('path: `/paid-analysis/${product.id}`'), "Canonical must stay query-free");
 assert(route.includes("!profileId ? <PaidProductSeoIntro product={product} /> : null"),
   "Public guide must not alter the profile-scoped purchase view");

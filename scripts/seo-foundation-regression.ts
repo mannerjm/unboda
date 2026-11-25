@@ -170,12 +170,12 @@ assert(legalPageSource.includes("<h1") && legalPageSource.includes('href="/"'),
 
 const existingSeoPages = entries.filter((entry) => !new URL(entry.url).pathname.startsWith("/blog"));
 const originalPhaseOneUrls = existingSeoPages.filter((entry) => !new URL(entry.url).pathname.startsWith("/special-analysis/compatibility/guide/"));
-assert(urls.has(`${SITE_ORIGIN}/new-year`), "seasonal landing must appear in sitemap");
-assert.equal(originalPhaseOneUrls.length, 68, "58 paid products and 10 canonical public routes must remain intact");
+assert(!urls.has(`${SITE_ORIGIN}/new-year`) && urls.has(`${SITE_ORIGIN}/paid-analysis/new-year-fortune`), "only canonical seasonal detail may appear in sitemap");
+assert.equal(originalPhaseOneUrls.length, 67, "58 paid products and 9 canonical public routes must remain intact");
 for (const slug of COMPATIBILITY_GUIDE_SLUGS) {
   assert(urls.has(`${SITE_ORIGIN}${getCompatibilityPublicGuidePath(slug)}`), `public compatibility guide missing: ${slug}`);
 }
-assert.equal(existingSeoPages.length, 75, "58 paid products + 10 canonical public + 7 compatibility sitemap pages must remain intact");
+assert.equal(existingSeoPages.length, 74, "58 paid products + 9 canonical public + 7 compatibility sitemap pages must remain intact");
  
 // The public entry must provide crawlable product links without clicking client-only
 // category buttons. Keep all 57 links scoped to the existing Launch registry.

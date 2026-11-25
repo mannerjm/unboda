@@ -14,11 +14,13 @@ import { isProductSaved } from "@/app/lib/interestedAnalyses/server";
 type PaidAnalysisAccessPanelProps = {
   productId: string;
   profileId?: string;
+  newYearYear?: number;
 };
 
 export default async function PaidAnalysisAccessPanel({
   productId,
   profileId,
+  newYearYear,
 }: PaidAnalysisAccessPanelProps) {
   const canonicalProductId = getCanonicalPremiumProductId(productId);
 
@@ -55,5 +57,5 @@ export default async function PaidAnalysisAccessPanel({
   const state = hasAccess ? report?.status ?? "none" : "not_purchased";
   const isSaved = user ? await isProductSaved(user.id, canonicalProductId) : false;
 
-  return <PremiumProductDetail product={product} state={state} profileId={profileId} isSaved={isSaved} />;
+  return <PremiumProductDetail product={product} state={state} profileId={profileId} isSaved={isSaved} newYearYear={newYearYear} />;
 }

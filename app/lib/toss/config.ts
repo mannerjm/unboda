@@ -151,3 +151,18 @@ export function isTossCheckoutUserAllowed(userId: string): boolean {
     .split(",")
     .some((id) => id.trim().toLowerCase() === userId.toLowerCase());
 }
+
+/** Seasonal checkout uses only the existing authenticated owner TEST rail until explicit live release. */
+export function isNewYearCheckoutAllowed(userId: string | null | undefined): boolean {
+  if (!userId || !TOSS_REVIEW_UUID.test(userId)) return false;
+  try {
+    const config = getTossConfigForAccount(userId);
+    if (!isTossCheckoutUserAllowed(userId)) return false;
+    if (config.environment === "sandbox") {
+      const named = process.env.TOSS_TEST_ACCOUNT_ID?.trim().toLowerCase();
+      if (named) return TOSS_REVIEW_UUID.test(named) && userId.toLowerCase() === named;
+      return (process.env.TOSS_REVIEW_ACCOUNT_IDS ?? "").split(",").some(id => id.trim().toLowerCase() === userId.toLowerCase());
+    }
+    return config.environment === "production" && process.env.NEW_YEAR_LIVE_CHECKOUT_ENABLED === "true";
+  } catch { return false; }
+}

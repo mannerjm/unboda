@@ -26,6 +26,7 @@ type Props = {
   isSaved?: boolean;
   guestRecommendation?: boolean;
   newYearYear?: number;
+  newYearCheckoutAllowed?: boolean;
 };
 
 const STATUS_LABELS: Record<PremiumAnalysisProductState, string> = {
@@ -101,7 +102,7 @@ function getCustomerStory(product: PremiumProductDefinition) {
  * the existing authoritative systems, never duplicated inside this component.
  */
 export default function CustomerFirstPremiumDetail({
-  product, state, profileId, isSaved = false, guestRecommendation = false, newYearYear,
+  product, state, profileId, isSaved = false, guestRecommendation = false, newYearYear, newYearCheckoutAllowed = false,
 }: Props) {
   const [savedState, setSavedState] = useState(isSaved);
   const [isSaving, setIsSaving] = useState(false);
@@ -175,7 +176,7 @@ export default function CustomerFirstPremiumDetail({
             <p className="mt-6 text-sm font-bold text-[#6c5687]">
               {seasonalYear ? "나만의 1년 운세" : "개인화 사주 심층 분석"} <span aria-hidden="true">·</span> <strong className="text-lg font-black text-[#39224f]">{price}</strong>
             </p>
-            {seasonalYear && state === "not_purchased" && isNewYearSalePending(product.id) ? <p className="mt-2 text-xs font-semibold text-[#975a33]">정식 판매 준비 중</p> : null}
+            {seasonalYear && state === "not_purchased" && isNewYearSalePending(product.id, newYearCheckoutAllowed) ? <p className="mt-2 text-xs font-semibold text-[#975a33]">정식 판매 준비 중</p> : null}
           </div>
           <div className="relative mx-auto w-full max-w-[390px]">
             <div className={`relative ${seasonalYear ? "aspect-[16/7]" : "aspect-[4/3]"} overflow-hidden rounded-[1.5rem] border-[5px] border-white bg-[#f8f1ff] shadow-[0_16px_38px_rgba(83,54,124,0.14)]`}>
@@ -332,13 +333,13 @@ export default function CustomerFirstPremiumDetail({
               <p className="mt-1 text-2xl font-black text-[#39234f]">{price}</p>
             </div>
             <div className="flex w-full min-w-0 flex-col gap-2">
-              {state === "not_purchased" && isNewYearSalePending(product.id) ? (
+              {state === "not_purchased" && isNewYearSalePending(product.id, newYearCheckoutAllowed) ? (
                 <div role="status" className="rounded-xl bg-[#f1e9fa] px-4 py-3 text-center text-sm font-bold text-[#654789]">정식 판매 준비 중 · 상품 내용을 먼저 살펴보세요.</div>
               ) : guestRecommendation && state === "not_purchased" ? (
-                <GuestRecommendationPurchaseButton productId={product.id} label={ACTION_LABELS[state]} />
+                <GuestRecommendationPurchaseButton productId={product.id} label={seasonalYear && state === "not_purchased" ? "신년운세 구매하기" : ACTION_LABELS[state]} />
               ) : href ? (
                 <Link href={href} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-[#704ad0] px-4 py-3 text-center text-base font-extrabold text-white transition hover:bg-[#5e38bd] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#704ad0]">
-                {ACTION_LABELS[state]}
+                {seasonalYear && state === "not_purchased" ? "신년운세 구매하기" : ACTION_LABELS[state]}
                 </Link>
               ) : (
                 <p className="text-sm font-semibold text-[#6d5983]">분석할 프로필을 선택한 뒤 리포트를 확인해 주세요.</p>

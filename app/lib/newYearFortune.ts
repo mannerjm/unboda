@@ -4,9 +4,9 @@ export const NEW_YEAR_DOMAINS = ["재물운","직업운","사업운","연애·�
 /** Korean civil calendar: Nov–Dec next year, Jan–Oct current year. */
 export function newYearTargetYear(anchor:{year:number;month:number}):number { return anchor.year+(anchor.month>=11?1:0); }
 
-/** Public browsing is enabled. New paid orders remain disabled until seasonal TEST checkout, generation and refund acceptance is complete. */
-export function isNewYearSalePending(productId: string): boolean {
-  return productId === NEW_YEAR_PRODUCT_ID;
+/** Public browsing is enabled. New orders fail closed unless the server authorizes this account for seasonal checkout. */
+export function isNewYearSalePending(productId: string, checkoutAllowed = false): boolean {
+  return productId === NEW_YEAR_PRODUCT_ID && !checkoutAllowed;
 }
 
 /** Seasonal artwork must not be carried forward to the wrong zodiac year. */

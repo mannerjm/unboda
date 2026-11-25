@@ -16,7 +16,7 @@ import {
 } from "@/app/lib/freeAnalysisEligibility";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { emitPaymentEvent } from "@/app/lib/payments/observability";
-import { getTossConfigForAccount, isTossCheckoutUserAllowed } from "@/app/lib/toss/config";
+import { getTossConfigForAccount, isTossCheckoutUserAllowed, isNewYearCheckoutAllowed } from "@/app/lib/toss/config";
 import {
   buildPartnerCompatibilitySnapshot,
   buildProfileCompatibilitySnapshot,
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (isNewYearSalePending(resolved.productId)) {
+  if (isNewYearSalePending(resolved.productId, resolved.productId === "new-year-fortune" && isNewYearCheckoutAllowed(user.id))) {
     return NextResponse.json({ error: "신년운세는 정식 판매 준비 중입니다.", code: "SEASONAL_SALE_PENDING" }, { status: 403 });
   }
 

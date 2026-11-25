@@ -81,7 +81,6 @@ export default async function PaidAnalysisPage({
     return <AppShell activeProfileId={seasonalProfile?.id}>
       <main data-new-year-detail className="min-h-screen bg-[#f7f2fc] px-3 py-5 text-[#11162d] sm:px-6 sm:py-8">
         <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl">
-          {seasonalProfile ? <p className="mb-3 rounded-xl border border-[#e5d9f4] bg-white px-4 py-2.5 text-sm text-[#655578]">현재 분석 대상: <strong>{seasonalProfile.label}</strong></p> : null}
           {seasonalProfile ? <PaidAnalysisAccessPanel productId={product.id} profileId={seasonalProfile.id} newYearYear={year} /> : <PremiumProductDetail product={product} state="not_purchased" newYearYear={year} isSaved={user ? await isProductSaved(user.id, product.id) : false} />}
         </div>
       </main>
@@ -92,10 +91,10 @@ export default async function PaidAnalysisPage({
     <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-[#11162d] sm:px-8 sm:py-14">
       <div className="mx-auto max-w-5xl">
         <Link
-          href={profileId ? `/deep-analysis?profileId=${encodeURIComponent(profileId)}` : "/deep-analysis"}
+          href={`${product.kind === "PERIOD" ? "/period-analysis" : "/deep-analysis"}${profileId ? `?profileId=${encodeURIComponent(profileId)}` : ""}`}
           className="inline-flex items-center rounded-full border border-[#dce1ef] bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-[#b9b2f6] hover:text-[#5e4bd1]"
         >
-          ← 심층 분석으로 돌아가기
+          {product.kind === "PERIOD" ? "← 기간별 분석으로 돌아가기" : "← 심층 분석으로 돌아가기"}
         </Link>
 
         {!profileId ? <PaidProductSeoIntro product={product} /> : null}

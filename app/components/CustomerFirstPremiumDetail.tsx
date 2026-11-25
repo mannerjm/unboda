@@ -193,7 +193,7 @@ export default function CustomerFirstPremiumDetail({
 
       <div className="px-4 sm:px-9">
         {product.category === "money" ? <WealthTeacherCard variant="detail" /> : null}
-        {product.id === "new-year-fortune" ? <NewYearTeacherCard variant="detail" /> : product.category !== "money" ? <TopicTeacherCard category={product.category} variant="detail" /> : null}
+        {product.id === "new-year-fortune" ? <NewYearTeacherCard variant="detail" /> : product.kind === "PERIOD" ? <NewYearTeacherCard variant="detail" scope="period" /> : product.category !== "money" ? <TopicTeacherCard category={product.category} variant="detail" /> : null}
         <section className="py-11 sm:py-14" aria-labelledby="customer-concerns">
           <p className="text-center text-xs font-extrabold tracking-widest text-[#926bc8]">내 이야기처럼 느껴지는 순간</p>
           <h3 id="customer-concerns" className="mt-3 break-keep text-center text-[25px] font-black tracking-tight text-[#2f1a48] sm:text-[30px]">

@@ -12,7 +12,7 @@ type NavItem = {
   href: string;
   label: string;
   shortLabel?: string;
-  icon: "home" | "chart" | "spark" | "compass" | "book" | "user" | "chat" | "sun" | "firework";
+  icon: "home" | "chart" | "spark" | "compass" | "book" | "user" | "chat" | "sun" | "firework" | "calendar";
 };
 
 function NavIcon({ icon }: { icon: NavItem["icon"] }) {
@@ -20,6 +20,7 @@ function NavIcon({ icon }: { icon: NavItem["icon"] }) {
     home: "M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5M9 21v-6h6v6",
     sun: "M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z",
     firework: "M12 2v3m0 14v3M2 12h3m14 0h3M4.9 4.9l2.2 2.2m9.8 9.8 2.2 2.2m0-14.2-2.2 2.2m-9.8 9.8-2.2 2.2M12 8l1.2 2.8L16 12l-2.8 1.2L12 16l-1.2-2.8L8 12l2.8-1.2L12 8Z",
+    calendar: "M5 5h14v15H5zM8 3v4m8-4v4M5 10h14M9 14h2m3 0h2m-7 3h2",
     chart: "M4 19V5M4 19h16M7 15l3-4 3 2 4-6",
     spark: "m12 3 1.7 6.3L20 11l-6.3 1.7L12 19l-1.7-6.3L4 11l6.3-1.7L12 3Z",
     compass: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Zm3.5-13.5-2.2 4.8-4.8 2.2 2.2-4.8 4.8-2.2Z",
@@ -41,6 +42,7 @@ const analysisNavItems: NavItem[] = [
   { href: "/saju", label: "내 분석", icon: "home" },
   { href: "/recommendations", label: "추천 분석", icon: "chart" },
   { href: "/deep-analysis", label: "심층 분석", icon: "spark" },
+  { href: "/period-analysis", label: "기간별 분석", icon: "calendar" },
   { href: "/special-analysis", label: "전문 분석", icon: "compass" },
   { href: "/interests", label: "관심 분석", icon: "book" },
   { href: "/purchased-analyses", label: "구매한 분석", icon: "book" },
@@ -114,6 +116,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
   // Seed that known state so a fast first click cannot be misrouted through a Guest login link.
   const [isGuest, setIsGuest] = useState<boolean | null>(pathname === "/mypage" ? false : null);
   const [hasGuestResult, setHasGuestResult] = useState(false);
+  const [footerProfile, setFooterProfile] = useState<{id:string; label:string} | null>(null);
   const [aiCreditBalance, setAiCreditBalance] = useState<number | null>(null);
   const [aiCreditBalanceError, setAiCreditBalanceError] = useState(false);
 
@@ -149,6 +152,20 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
   }, []);
 
   const profileId = searchParams.get("profileId") || activeProfileId || null;
+  const footerProfileId = activeProfileId || profileId;
+
+  useEffect(() => {
+    let cancelled = false;
+    setFooterProfile(null);
+    if (isGuest !== false || !footerProfileId) return;
+    void fetch("/api/profiles", { cache: "no-store" }).then(async response => {
+      if (!response.ok) return;
+      const body = await response.json() as { profiles?: { id: string; label: string }[] };
+      const profile = body.profiles?.find(item => item.id === footerProfileId);
+      if (!cancelled && profile) setFooterProfile({ id: profile.id, label: profile.label });
+    }).catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [isGuest, footerProfileId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -189,16 +206,19 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
         : "/recommendations";
   const deepAnalysisHref = profileId ? `/deep-analysis?profileId=${encodeURIComponent(profileId)}` : "/deep-analysis";
   const isDeepCatalog = pathname === "/deep-analysis";
+  const isPeriodCatalog = pathname === "/period-analysis";
+  const periodAnalysisHref = profileId ? `/period-analysis?profileId=${encodeURIComponent(profileId)}` : "/period-analysis";
   const selectedDeepMode = searchParams.get("mode") === "period" ? "period" : "topic";
   const selectedDeepCategory = searchParams.get("category") || "money";
   const selectedDeepProduct = searchParams.get("productId");
   const deepCatalogHref = (mode: "topic" | "period", id: string): string => {
     const key = mode === "topic" ? "category" : "productId";
     const profilePart = profileId ? `&profileId=${encodeURIComponent(profileId)}` : "";
-    return `/deep-analysis?mode=${mode}&${key}=${encodeURIComponent(id)}${profilePart}`;
+    return mode === "period" ? `/period-analysis?${key}=${encodeURIComponent(id)}${profilePart}` : `/deep-analysis?mode=${mode}&${key}=${encodeURIComponent(id)}${profilePart}`;
   };
   const navigationHref = (item: NavItem): string => {
     if (item.href === "/new-year") return profileId ? `/paid-analysis/new-year-fortune?profileId=${encodeURIComponent(profileId)}` : "/paid-analysis/new-year-fortune";
+    if (item.href === "/period-analysis") return isGuest === true ? "/period-analysis" : periodAnalysisHref;
     if (isGuest === true) {
       if (item.href === "/saju") return hasGuestResult ? "/guest-result" : "/guest-saju";
       if (item.href === "/recommendations") return "/recommendations";
@@ -270,7 +290,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                         : "text-[#605372] hover:bg-white/80 hover:text-[#6033ad]"
                   }`}
                 >
-                  <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/new-year" && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.label}</span>
+                  <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/new-year" && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/period-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.label}</span>
                   {item.activeHref === "/ai-consulting" ? <span className="ml-auto rounded-full border border-[#8f7cff]/30 bg-[#eee3ff] px-2 py-0.5 text-[9px] font-black tracking-[0.08em] text-[#7543b4]">이어가기</span> : null}
                 </Link>
                 {item.activeHref === "/special-analysis" && pathname.startsWith("/special-analysis") ? (
@@ -285,7 +305,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                   </div>
                 ) : null}
                 {item.activeHref === "/deep-analysis" && isDeepCatalog ? (
-                  <div className="mb-3 ml-4 mt-2 space-y-1 border-l border-[#d8c2f1] pl-3" aria-label="심층분석 주제별 및 기간별 메뉴">
+                  <div className="mb-3 ml-4 mt-2 space-y-1 border-l border-[#d8c2f1] pl-3" aria-label="심층분석 주제별 메뉴">
                     <p className="px-2 pb-1 pt-1 text-[11px] font-black tracking-wide text-[#8d6aa9]">주제별 분석</p>
                     {deepTopicMenu.map(({ category, label }) => {
                       const selected = selectedDeepMode === "topic" && selectedDeepCategory === category;
@@ -296,9 +316,12 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                         </Link>
                       );
                     })}
-                    <p className="px-2 pb-1 pt-3 text-[11px] font-black tracking-wide text-[#8d6aa9]">기간별 분석</p>
+                  </div>
+                ) : null}
+                {item.activeHref === "/period-analysis" && isPeriodCatalog ? (
+                  <div className="mb-3 ml-4 mt-2 space-y-1 border-l border-[#d8c2f1] pl-3" aria-label="기간별 분석 하위 메뉴">
                     {deepPeriodMenu.map(({ productId, label }) => {
-                      const selected = selectedDeepMode === "period" && selectedDeepProduct === productId;
+                      const selected = selectedDeepProduct === productId;
                       return (
                         <Link key={productId} href={deepCatalogHref("period", productId)} aria-current={selected ? "page" : undefined}
                           className={`block rounded-lg px-2.5 py-2.5 text-sm font-semibold leading-5 transition ${selected ? "bg-[#e9d9ff] text-[#602ea8]" : "text-[#6b5a80] hover:bg-white/80 hover:text-[#6033ad]"}`}>
@@ -345,6 +368,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
             <p className="mt-2 text-xs leading-5 text-[#706182]">
               무료 결과를 바탕으로 필요한 분석을 이어서 살펴보세요.
             </p>
+            {isGuest === false && footerProfile && footerProfile.id === footerProfileId ? <div data-sidebar-active-profile className="mt-3 rounded-xl border border-[#e4d8f2] bg-white/80 px-3 py-2.5"><p className="text-[11px] font-semibold text-[#76688c]">현재 분석 대상</p><p className="mt-1 break-words text-sm font-bold text-[#392257]">{footerProfile.label}</p></div> : null}
           </div>
         </aside>
 
@@ -358,6 +382,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
               <Link href={isGuest === true ? "/auth/login?returnTo=/today" : "/today"} className="rounded-full border border-[#d6c0f3] bg-[#f2e8ff] px-3 py-1.5 text-xs font-bold text-[#6940a4]">오늘의 운보다</Link>
             )}
           </header>
+          <div className="flex justify-end border-b border-[#e4d5f4] bg-white/95 px-3 py-1 lg:hidden"><Link href={periodAnalysisHref} aria-current={isPeriodCatalog ? "page" : undefined} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-bold text-[#6940a4]"><NavIcon icon="calendar" />기간별 분석</Link></div>
           <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
             {isGuest === false && profileId && refreshNoticeSurface ? (
               <MonthlyFreeAnalysisRefreshNotice profileId={profileId} surface={refreshNoticeSurface} />
@@ -388,7 +413,7 @@ function AppShellContent({ children, activeProfileId }: { children: ReactNode; a
                       : "text-[#6a5c7f] hover:bg-[#f3ecff] hover:text-[#6033ad]"
                 }`}
               >
-                    <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/new-year" && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.shortLabel ?? item.label}</span>
+                    <NavIcon icon={item.icon} />{isGuest && item.activeHref !== "/new-year" && item.activeHref !== "/saju" && item.activeHref !== "/recommendations" && item.activeHref !== "/deep-analysis" && item.activeHref !== "/period-analysis" && item.activeHref !== "/special-analysis" ? <LockIcon /> : null}<span>{item.shortLabel ?? item.label}</span>
               </Link>
             );
           })}

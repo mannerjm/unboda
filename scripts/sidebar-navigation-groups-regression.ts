@@ -13,6 +13,7 @@ const routes = [
   ["/saju", "내 분석"],
   ["/recommendations", "추천 분석"],
   ["/deep-analysis", "심층 분석"],
+  ["/period-analysis", "기간별 분석"],
   ["/special-analysis", "전문 분석"],
   ["/interests", "관심 분석"],
   ["/purchased-analyses", "구매한 분석"],
@@ -25,7 +26,7 @@ for (const [href, label] of routes) {
   assert(position > cursor, `analysis route must keep its original destination in the new order: ${line}`);
   cursor = position;
 }
-assert.equal((analysis.match(/href:/g) ?? []).length, 9, "eight existing analysis routes and one seasonal route, no duplicate compatibility menu");
+assert.equal((analysis.match(/href:/g) ?? []).length, 10, "eight existing analysis routes, one seasonal route and period route, no duplicate compatibility menu");
 assert.equal((management.match(/href:/g) ?? []).length, 2, "exactly two existing management routes");
 for (const [href, label] of [["/mypage", "마이페이지"], ["/support", "고객지원 센터"]]) {
   assert(management.includes(`href: "${href}", label: "${label}"`));

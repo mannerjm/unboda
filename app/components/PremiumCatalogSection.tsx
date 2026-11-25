@@ -20,6 +20,7 @@ type PremiumCatalogSectionProps = {
   initialMode?: CatalogMode;
   initialCategory?: string;
   initialProductId?: string;
+  separateCatalog?: boolean;
 };
 
 type CatalogIconName =
@@ -146,9 +147,10 @@ export default function PremiumCatalogSection({
   initialMode = "topic",
   initialCategory,
   initialProductId,
+  separateCatalog = false,
 }: PremiumCatalogSectionProps) {
   const topicGroups = useMemo(() => groupTopicCatalogProductsByCategory(), []);
-  const periodProducts = useMemo(() => listPeriodCatalogProducts(), []);
+  const periodProducts = useMemo(() => separateCatalog ? listPeriodCatalogProducts().filter(p => p.id !== "new-year-fortune") : listPeriodCatalogProducts(), [separateCatalog]);
   const initialSelection = useMemo(() =>
     resolvePremiumCatalogEntry(initialMode, initialCategory, initialProductId, topicGroups, periodProducts),
     [initialMode, initialCategory, initialProductId, topicGroups, periodProducts]);
@@ -162,7 +164,10 @@ export default function PremiumCatalogSection({
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/api/premium-catalog/status")
+    setSummaries([]);
+    setCurrentOwnedProductIds(new Set());
+    setSavedProductIds(new Set());
+    void fetch(`/api/premium-catalog/status${profileId ? `?profileId=${encodeURIComponent(profileId)}` : ""}`, {cache:"no-store"})
       .then(async (response) => {
         const body = await response.json() as { paidAnalysis?: PaidAnalysisSummary[]; savedProductIds?: string[]; currentOwnedProductIds?: string[] };
         if (!cancelled && response.ok) {
@@ -173,7 +178,7 @@ export default function PremiumCatalogSection({
       })
       .catch(() => undefined);
     return () => { cancelled = true; };
-  }, []);
+  }, [profileId]);
 
   const stateByProductId = useMemo(() => {
     const states = new Map<string, CatalogProductState>();
@@ -193,7 +198,7 @@ export default function PremiumCatalogSection({
     setSelectedProductId(null);
   };
 
-  return process.env.NEXT_PUBLIC_PREMIUM_STOREFRONT === "legacy" ? (
+  return !separateCatalog && process.env.NEXT_PUBLIC_PREMIUM_STOREFRONT === "legacy" ? (
     <section id="premium-analysis" className="py-8 sm:py-10">
       <div className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-[0_18px_55px_rgba(28,25,23,0.06)] sm:p-7 lg:p-8">
         <header className="flex flex-col gap-5 border-b border-stone-200 pb-7 lg:flex-row lg:items-end lg:justify-between">
@@ -295,6 +300,7 @@ export default function PremiumCatalogSection({
       topicGroups={topicGroups}
       periodProducts={periodProducts}
       mode={mode}
+      separateCatalog={separateCatalog}
       onModeChange={switchMode}
       selectedCategory={selectedCategory}
       onSelectCategory={(category) => { setSelectedCategory(category); setSelectedProductId(null); }}

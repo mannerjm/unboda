@@ -306,7 +306,7 @@ assert(
 // 17. one batched request, no per-product query
 const fetchCalls = catalogSection.match(/fetch\(/g) ?? [];
 assert(
-  fetchCalls.length === 1 && catalogSection.includes('fetch("/api/premium-catalog/status")'),
+  fetchCalls.length === 1 && catalogSection.includes('fetch(`/api/premium-catalog/status'),
   `the catalog must issue exactly one status request, found ${fetchCalls.length}`,
 );
 assert(

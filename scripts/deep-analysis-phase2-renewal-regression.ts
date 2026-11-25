@@ -40,7 +40,7 @@ for (const category of ["relationship", "career", "money", "growth", "social", "
   assert(catalog.includes(`${category}: {`), `phase 2 must keep customer discovery metadata for ${category}`);
 }
 
-assert(catalog.includes('fetch("/api/premium-catalog/status")'), "phase 2 must preserve purchased-report status loading");
+assert(catalog.includes('fetch(`/api/premium-catalog/status'), "phase 2 must preserve purchased-report status loading");
 assert(catalog.includes("summary.profileId === profileId"), "phase 2 must preserve profile-scoped paid status");
 assert(catalog.includes("currentOwnedProductIds.has(summary.productId)"), "phase 2 must preserve current-edition ownership gating");
 assert(catalog.includes("PremiumProductDetail"), "phase 2 must preserve the existing purchase/detail surface");
@@ -77,7 +77,7 @@ assert(storefront.includes("topicGroups.map") && storefront.includes("periodProd
 assert(storefront.includes("currentGroup.products.map") && storefront.includes("onSelectProduct(product.id)"),
   "topic category must open its own thumbnail product list before detail");
 assert(storefront.includes("choosePeriod(product.id)") && storefront.includes("<PremiumProductDetail"),
-  "period navigation must open an existing product detail without a second product grid");
+  "legacy period navigation still opens an existing detail");
 assert(storefront.includes("getProductPricing(productId)") && storefront.includes("getPaidAnalysisTopicConfig"),
   "storefront must retain product-specific prices and original purchase questions");
 assert(storefront.includes("/api/reviews?productId=") && storefront.includes("summary.count<=0"),
@@ -107,8 +107,9 @@ for (const product of listPeriodCatalogProducts()) {
 }
 assert(shell.includes('item.activeHref === "/deep-analysis" && isDeepCatalog')
   && shell.includes('href={deepCatalogHref("topic", category)}')
+  && shell.includes('item.activeHref === "/period-analysis" && isPeriodCatalog')
   && shell.includes('href={deepCatalogHref("period", productId)}'),
-  "global deep-analysis sidebar must expose direct topic and period navigation under the existing item");
+  "global sidebar must expose independent topic and period navigation");
 assert(shell.includes('profileId ? `&profileId=${encodeURIComponent(profileId)}`'),
   "category and period navigation must preserve the analysis profile context");
 assert(!storefront.includes("<aside") && !storefront.includes('md:grid-cols-[166px_minmax(0,1fr)]'),
@@ -427,3 +428,10 @@ assert(storefront.includes('sm:grid-cols-[216px_1fr]') && storefront.includes('s
 assert(storefront.includes('new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Seoul",year:"numeric"})')
   && storefront.includes('selected.id==="annual-next"') && storefront.includes('{nextYear}년'),
   "Annual-next art must prominently show next KST calendar year (2027 in November 2026) and keep future year rollover correct");
+
+const periodPage = readFileSync("app/period-analysis/page.tsx", "utf8");
+assert(periodPage.includes('initialMode="period"') && periodPage.includes('separateCatalog') && periodPage.includes('getUserProfile(profileId,user.id)'), "period catalog must validate the requested profile and render existing period products");
+assert(storefront.includes('data-period-product-list') && storefront.includes('<NewYearTeacherCard variant="list" scope="period" />'), "period product grid must use Taeun");
+assert(catalog.includes('p.id !== "new-year-fortune"'), "seasonal product must remain independently navigable");
+assert(page.includes('redirect(`/period-analysis') && page.includes('getUserProfile(requestedProfileId,user.id)'), "legacy route must preserve validated profile");
+assert(shell.indexOf('>SERVICE</p>') < shell.indexOf('data-sidebar-active-profile') && !page.includes('현재 분석 대상'), "ordinary profile name belongs under SERVICE only");

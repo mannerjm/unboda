@@ -117,7 +117,7 @@ assert(interests.includes("MY LIBRARY") && purchased.includes("MY LIBRARY"), "li
 // without altering the server-authoritative profile or saved-interest controls.
 assert(interests.includes('max-w-5xl') && interests.includes('rounded-[2rem] border border-[#dce1ef] bg-white p-6 shadow-sm sm:p-8'),
   "interest library must match purchased library width and premium header treatment");
-assert(interests.includes("현재 분석 대상 · {activeProfile.label}") && interests.includes('href="/mypage"') && interests.includes("프로필 변경"),
+assert(!interests.includes("현재 분석 대상 · {activeProfile.label}") && shell.includes("data-sidebar-active-profile") && interests.includes('href="/mypage"') && interests.includes("프로필 변경"),
   "interest library must preserve the existing active profile source and My Page link");
 assert(interestedList.includes("아직 저장한 관심 분석이 없어요")
   && interestedList.includes("왼쪽 심층 분석 또는 전문 분석 메뉴")

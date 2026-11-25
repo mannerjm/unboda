@@ -104,9 +104,6 @@ export default async function PurchasedAnalysesPage({ searchParams }: {
               구매한 리포트와 연도판, 준비 상태를 한곳에서 확인합니다. 신규 구매 리포트는 결제일부터 12개월 동안 다시 열람할 수 있습니다.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-2 text-sm font-bold text-[#5e4bd1]">
-                현재 분석 대상 · {activeProfile.label}
-              </span>
               <Link href="/mypage" className="rounded-full border border-[#dce1ef] bg-[#f7f8fc] px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-white">
                 프로필 변경
               </Link>

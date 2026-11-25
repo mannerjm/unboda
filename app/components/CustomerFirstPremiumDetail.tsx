@@ -175,7 +175,7 @@ export default function CustomerFirstPremiumDetail({
             <p className="mt-6 text-sm font-bold text-[#6c5687]">
               {seasonalYear ? "나만의 1년 운세" : "개인화 사주 심층 분석"} <span aria-hidden="true">·</span> <strong className="text-lg font-black text-[#39224f]">{price}</strong>
             </p>
-            {seasonalYear ? <><a href="#customer-value" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-[#704ad0] px-5 py-3 text-sm font-bold text-white">어떤 운세를 볼 수 있나요?</a>{state === "not_purchased" && isNewYearSalePending(product.id) ? <p className="mt-2 text-xs font-semibold text-[#975a33]">정식 판매 준비 중</p> : null}</> : null}
+            {seasonalYear && state === "not_purchased" && isNewYearSalePending(product.id) ? <p className="mt-2 text-xs font-semibold text-[#975a33]">정식 판매 준비 중</p> : null}
           </div>
           <div className="relative mx-auto w-full max-w-[390px]">
             <div className={`relative ${seasonalYear ? "aspect-[16/7]" : "aspect-[4/3]"} overflow-hidden rounded-[1.5rem] border-[5px] border-white bg-[#f8f1ff] shadow-[0_16px_38px_rgba(83,54,124,0.14)]`}>

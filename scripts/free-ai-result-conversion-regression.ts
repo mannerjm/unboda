@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { splitMemberOverview } from "../app/lib/freeAnalysisAIInterpretation";
 
 function read(path: string): string {
   return readFileSync(path, "utf8");
@@ -36,3 +37,15 @@ assert(result.includes("내 결과에서 이어지는 질문 보기") && result.
 assert(!result.includes("buildAnalysisProductRecommendations"), "result page must not add a new recommendation computation or AI call");
 
 console.log("free AI result conversion regression passed");
+
+// Keep first anonymous result presentation and conversion path intact.
+assert(result.includes("const memberResult = !providedResult"));
+assert(result.includes("data-member-summary") && result.includes("data-member-recommendation"));
+assert(result.includes('memberResult ? "운보다 종합 해석" : "운보다 AI 종합 해석"'));
+assert(result.includes("나의 타고난 사주와 이번 달 운의 흐름") && result.includes("나의 추천 분석 보기") && result.includes("홈으로 돌아가기"));
+assert(result.includes('setStoredResultStale(body.freshness === "STALE")') && result.includes("조회 당시 운세"));
+assert(result.includes('href={providedResult ? "/recommendations" : `/recommendations?profileId=${currentProfileId}`}'));
+assert(read("app/guest-result/page.tsx").includes("<ResultViewerContext.Provider"));
+assert.deepEqual(splitMemberOverview("첫 문장입니다. 둘째 문장입니다. 셋째 문장입니다."), {lead:"첫 문장입니다.", situation:"둘째 문장입니다.", focus:"셋째 문장입니다."});
+assert.deepEqual(splitMemberOverview("끊기지 않는 하나의 문장"), {lead:"끊기지 않는 하나의 문장", situation:"", focus:""});
+assert.equal(splitMemberOverview("첫 문장. 두 번째 문장. 세 번째 문장. 마지막 문장.").situation,"두 번째 문장. 세 번째 문장.");

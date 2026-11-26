@@ -511,3 +511,11 @@ for (const [id, expectedHash] of generatedCoverBlobs) {
   assert(getEditorialProductCover(id));
 }
 assert(editorialComponent.includes("data-generated-cover") && editorialComponent.includes("object-contain object-center") && editorialComponent.includes("failedSrc!==generatedSrc"));
+
+// Native ratio: the original 1100x619 WebP canvas and the list/detail wrappers must agree.
+assert(editorialComponent.includes('const GENERATED_COVER_RATIO = "1100 / 619"'));
+assert(editorialComponent.includes('aspectRatio:GENERATED_COVER_RATIO') && editorialComponent.includes('generatedSrc ? {aspectRatio:GENERATED_COVER_RATIO}'));
+assert(editorialComponent.includes('hasGeneratedProductCover(productId)'));
+const nativeRatioDetail=readFileSync("app/components/CustomerFirstPremiumDetail.tsx","utf8");
+assert(nativeRatioDetail.includes('editorialCover && hasGeneratedProductCover(product.id)') && nativeRatioDetail.includes('generatedCover ? "aspect-auto" : "aspect-[4/3]"'));
+assert(storefront.includes('className="relative w-full overflow-hidden rounded-xl"><EditorialProductCover productId={product.id}/>'));

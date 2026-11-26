@@ -105,6 +105,10 @@ for (const path of [
 }
 
 for (const copy of [
+  "운보다 맞춤 분석",
+  "나만의 리포트를 준비하고 있어요",
+  "결제가 완료되었습니다. 고객님의 사주를 바탕으로 맞춤 리포트를 작성하고 있어요.",
+  "맞춤 분석 진행",
   "예상 소요 시간: 약 30초~1분",
   "실제 생성 시간은 분석 내용과 시스템 상황에 따라 달라질 수 있습니다",
   "리포트 준비에 시간이 더 걸리고 있어요",
@@ -115,6 +119,9 @@ for (const copy of [
 ]) {
   assert(commonWaiting.includes(copy), `shared waiting UI must explain: ${copy}`);
 }
+assert(commonWaiting.includes('eyebrow="운보다 맞춤 분석"') && commonWaiting.includes('steps={["구매 정보 확인", "맞춤 분석 진행", "리포트 저장"]}'), "every paid report shares the same label and steps");
+assert(!/운보다 AI|심층분석 리포트|궁합 리포트를 준비|isCompatibility|isGeneric|kind ===/.test(commonWaiting), "no category-specific loading copy or branching");
+assert(commonWaiting.includes('stage === "confirming"') && commonWaiting.includes("결제를 안전하게 확인하고 있습니다") && commonWaiting.includes("다시 결제하지 말고"), "preserve truthful payment confirmation and failed recovery copy");
 assert(commonWaiting.includes("MysticLoadingScreen") && read("app/components/MysticLoadingScreen.tsx").includes("완료되면 결과 화면으로 자동 이동합니다"), "paid waiting must reuse the free-analysis loading animation and completion explanation");
 for (const state of ["none", "generating"] as const) {
   const href = getPremiumAnalysisHref("career", state, "00000000-0000-4000-8000-000000000001");

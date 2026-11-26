@@ -1,4 +1,5 @@
 import EditorialProductCover from "@/app/components/EditorialProductCover";
+import { getEditorialProductCover } from "@/app/lib/editorialProductCover";
 import Image from "next/image";
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
@@ -108,7 +109,7 @@ export default async function CompatibilityAnalysisPage() {
                   aria-label={product.title + " 상세 열기"}
                 >
                   <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-[#ece4f8]">
-                    {coverId ? <EditorialProductCover productId={coverId}/> : <>
+                    {getEditorialProductCover(coverId) ? <EditorialProductCover productId={coverId}/> : <>
                     <Image
                       src={photo.src}
                       alt={photo.alt}

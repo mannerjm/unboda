@@ -83,13 +83,13 @@ export default function FamilyParentChildPaidReportView({ content }: { content: 
 
       <div className="space-y-5 bg-[linear-gradient(180deg,#f7f7fb_0%,#f1f2f7_42%,#f6f7fb_100%)] p-5 sm:p-7">
         <div className="grid gap-5 lg:grid-cols-2">
-          <EditorialSection number="01 · 정서적 연결" title="가까워지는 방식과 정서적 거리" summary={report.emotionalConnection.summary} points={report.emotionalConnection.keyPoints} />
-          <EditorialSection number="02 · 대화 방식" title="말과 반응이 엇갈리기 쉬운 지점" summary={report.communication.summary} points={report.communication.keyPoints} />
-          <EditorialSection number="03 · 기대와 독립" title="기대와 스스로 결정할 영역" summary={report.expectationAndAutonomy.summary} points={report.expectationAndAutonomy.keyPoints} />
-          <EditorialSection number="04 · 보호와 경계" title="도움이 힘이 되는 선, 부담이 되는 선" summary={report.boundariesAndPressure.summary} points={report.boundariesAndPressure.keyPoints} />
+          <EditorialSection number="01 · 마음이 통하는 순간" title="서로 어떤 때 마음이 가까워질까요?" summary={report.emotionalConnection.summary} points={report.emotionalConnection.keyPoints} />
+          <EditorialSection number="02 · 대화 방식" title="왜 서로의 말이 다르게 들릴까요?" summary={report.communication.summary} points={report.communication.keyPoints} />
+          <EditorialSection number="03 · 기대와 독립" title="서로의 기대와 스스로 해볼 일" summary={report.expectationAndAutonomy.summary} points={report.expectationAndAutonomy.keyPoints} />
+          <EditorialSection number="04 · 보호와 경계" title="도움이 힘이 될 때와 부담이 될 때" summary={report.boundariesAndPressure.summary} points={report.boundariesAndPressure.keyPoints} />
         </div>
 
-        <EditorialSection number="05 · 갈등 뒤 회복" title="다시 연결되기 쉬운 조건" summary={report.recovery.summary} points={report.recovery.keyPoints} />
+        <EditorialSection number="05 · 갈등 뒤 회복" title="서운함을 풀고 다시 가까워지는 방법" summary={report.recovery.summary} points={report.recovery.keyPoints} />
 
         {report.currentTiming ? (
           <section className="rounded-[1.9rem] border border-[#d8d3ff] bg-[radial-gradient(circle_at_82%_18%,rgba(125,104,234,0.12),transparent_28%),linear-gradient(135deg,#f1efff_0%,#f8f7ff_55%,#f3f4fa_100%)] p-6 shadow-[0_16px_38px_rgba(71,58,140,0.07)] sm:p-7">
@@ -105,7 +105,7 @@ export default function FamilyParentChildPaidReportView({ content }: { content: 
         ) : null}
 
         <section data-hwadam-report-theme="action" style={HWADAM_REPORT_DARK_STYLE} className="relative overflow-hidden rounded-[1.95rem] border border-[#2e295c] bg-[radial-gradient(circle_at_top_right,rgba(131,111,239,0.24),transparent_30%),linear-gradient(145deg,#1d1b3d_0%,#292550_100%)] p-6 text-white shadow-[0_24px_60px_rgba(31,28,72,0.18)] sm:p-7">
-          <div className="[&_h2]:text-white [&_p:first-child]:text-[#c8c1ff] [&_p:last-child]:text-slate-300"><SectionHeader number="07 · 지금 해볼 것" title="관계를 바꾸는 작은 행동" description="가족 관계에서 바로 시도할 수 있는 행동부터 정리했습니다." /></div>
+          <div className="[&_h2]:text-white [&_p:first-child]:text-[#c8c1ff] [&_p:last-child]:text-slate-300"><SectionHeader number="07 · 지금 해볼 것" title="서로를 위해 해볼 작은 일" description="가족 관계에서 바로 시도할 수 있는 행동부터 정리했습니다." /></div>
           <div className="mt-6 grid gap-4 lg:grid-cols-3">
             {report.actionGuide.doNext.map((item, index) => (
               <article key={`${item.action}-${index}`} className="rounded-[1.55rem] border border-white/10 bg-white/[0.96] p-5 text-[#11162d] shadow-[0_12px_30px_rgba(0,0,0,0.10)]">

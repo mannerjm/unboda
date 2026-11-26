@@ -108,3 +108,12 @@ const seasonalPrompt = readFileSync("app/lib/analysisPeriodOutput.ts","utf8");
 assert(seasonalPrompt.includes("신년운세 전용 고객 언어") && seasonalPrompt.includes("어려운 한자, 영어, 명리 전문 용어"));
 assert(readFileSync("app/lib/phase9NextAnalysis.ts","utf8").includes('"new-year-fortune": ["annual-3years", "wealth", "relationship"]'));
 assert(readFileSync("app/lib/aiConsultingPresentation.ts","utf8").includes("새해에 어떤 달을 가장 눈여겨보면 좋을까?"));
+
+// Seasonal final layout: summary, key points, then complete domain and month content.
+assert(seasonalReport.indexOf('seasonalView="summary"') < seasonalReport.indexOf("올해 기억할 세 가지"));
+assert(seasonalReport.indexOf("올해 기억할 세 가지") < seasonalReport.indexOf('seasonalView="details"'));
+assert(seasonalReport.includes("나의 총운") && seasonalReport.includes("태운 선생님의 한마디"));
+assert(seasonalReport.includes("세 달마다 달라지는 나의 운세") && seasonalReport.includes("1~3월 · 한 해의 시작"));
+assert(seasonalReport.includes("하면 좋은 것") && seasonalReport.includes("조심하면 좋은 것") && seasonalReport.includes("items-start"));
+assert(seasonalTimeline.includes("DOMAIN_STYLES") && seasonalTimeline.includes("NewYearMonthCalendar") && seasonalTimeline.includes("aria-expanded") && seasonalTimeline.includes("aria-controls"));
+assert(seasonalTimeline.includes("item.summary") && seasonalTimeline.includes("item.actions") && seasonalTimeline.includes("item.cautions"));

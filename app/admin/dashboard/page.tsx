@@ -34,7 +34,7 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
     }
 
     return (
-      <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-slate-900">
+      <main className="min-h-screen bg-white px-5 py-14 text-slate-900">
         <div className="mx-auto w-full max-w-xl">
           <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">CS CONSOLE</p>
           <h1 className="mt-3 text-3xl font-bold">접근 권한 없음</h1>
@@ -111,21 +111,21 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
 
   const operationProps = { failureSummary, aiOperations, aiQuality, operatorAlertConfigured: Boolean(process.env.RESEND_API_KEY?.trim()), supportQueueCount, reportPerformance: journey, soloOps };
   const fmt = (n: number | null | undefined, suffix: string) => n == null ? "조회 불가" : n.toLocaleString("ko-KR") + suffix;
-  const link = (href: string, label: string) => <Link prefetch={false} href={href} className="inline-flex min-h-11 items-center rounded-xl border border-[#dcd5eb] bg-white px-4 py-2 text-sm font-bold text-[#5b398e] hover:bg-[#f5efff]">{label} →</Link>;
+  const link = (href: string, label: string) => <Link prefetch={false} href={href} className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:border-slate-500">{label} →</Link>;
   const unavailable = (title: string) => <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">{title} 조회에 실패했습니다. 0건으로 판단하지 마세요. 기존 관리자 화면에서 다시 확인할 수 있습니다.</div>;
   return (
     <DashboardShell view={view}>
       {view === "overview" ? <>
         <AdminOperationsOverview {...operationProps} view="summary" />
         <section className="mt-6" aria-label="오늘의 핵심 지표">
-          <h2 className="mb-3 text-lg font-bold text-[#302146]">오늘의 핵심 지표</h2>
+          <h2 className="mb-3 text-lg font-bold text-slate-950">오늘의 핵심 지표</h2>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {[
               { label: "오늘 방문자", value: fmt(growth?.periods.today.visitors, "명"), target: "revenue" },
               { label: "오늘 순매출", value: fmt(growth?.periods.today.netRevenueKrw, "원"), target: "revenue" },
               { label: "리포트 최종 실패 (최근 30일)", value: fmt(journey?.reportsFailed30, "건"), target: "reports" },
               { label: "고객지원 요청", value: fmt(supportQueueCount, "건"), target: "support" },
-            ].map(item => <Link prefetch={false} key={item.label} href={"/admin/dashboard?view="+item.target} className="rounded-2xl border border-[#e0d7ed] bg-white p-5 shadow-sm hover:border-[#a78bce]"><p className="text-xs font-semibold text-slate-600">{item.label}</p><p className="mt-2 text-2xl font-bold">{item.value}</p><p className="mt-3 text-xs font-semibold text-[#69439b]">상세 확인 →</p></Link>)}
+            ].map(item => <Link prefetch={false} key={item.label} href={"/admin/dashboard?view="+item.target} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-500"><p className="text-xs font-semibold text-slate-600">{item.label}</p><p className="mt-2 text-2xl font-bold">{item.value}</p><p className="mt-3 text-xs font-semibold text-slate-700">상세 확인 →</p></Link>)}
           </div>
         </section>
         <p className="mt-4 text-xs leading-5 text-slate-500">지표는 기존 운영 집계 기준을 그대로 사용합니다. TEST 거래 포함 여부 등 집계 기준은 변경하지 않았습니다.</p>
@@ -146,7 +146,7 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
       </> : null}
       {view === "refunds" ? <>
         {refundClosure ? <AdminRefundClosureOverview report={refundClosure} productLabels={productLabels} /> : unavailable("환불·회원 탈퇴 현황")}
-        <div className="mt-6 rounded-2xl border border-[#dce1ef] bg-white p-5">
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
           <h2 className="text-lg font-bold">AI 질문권 환불 예외</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">일반 카드 취소는 자동으로 처리하고, 재확인 또는 수동 환불이 필요한 건만 살펴봅니다.</p>
           <div className="mt-4 flex flex-wrap gap-3">{link("/admin/credit-refunds", "질문권 환불 예외 확인")}{link("/admin/mfa", "관리자 인증 앱(MFA) 등록·추가 인증")}{link("/admin/dashboard?view=support#failure-summary-heading", "결제·환불·탈퇴 예외 확인")}</div>
@@ -155,7 +155,7 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
       {view === "reviews" ? <AdminReviewOverview report={reviewDashboard} /> : null}
       {view === "system" ? <>
         <AdminOperationsOverview {...operationProps} view="system" />
-        <div className="mt-5 flex flex-wrap gap-3">{link("/admin/guide", "대표 운영 가이드")}{link("/admin/mfa", "관리자 인증 앱(MFA)")}{link("/admin", "기존 전체 관리자 화면")}</div>
+        <div className="mt-5 flex flex-wrap gap-3">{link("/admin/guide", "대표 운영 가이드")}{link("/admin/mfa", "관리자 인증 앱(MFA)")}{link("/admin?legacy=1", "기존 전체 관리자 화면")}</div>
       </> : null}
     </DashboardShell>
   );

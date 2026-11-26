@@ -152,6 +152,23 @@ export function isTossCheckoutUserAllowed(userId: string): boolean {
     .some((id) => id.trim().toLowerCase() === userId.toLowerCase());
 }
 
+/** Anonymous visitors may enter the login/profile-selection flow, never create an order.
+ * Public presentation requires the seasonal release flag and the existing LIVE rail.
+ * Actual checkout/order authorization remains account-specific.
+ */
+export function isNewYearPublicSaleEnabled(): boolean {
+  if (process.env.NEW_YEAR_LIVE_CHECKOUT_ENABLED !== "true") return false;
+  try {
+    if (isTossHybridRoutingEnabled()) {
+      return process.env.TOSS_LIVE_CHECKOUT_ENABLED === "true"
+        && TOSS_REVIEW_UUID.test(process.env.TOSS_TEST_ACCOUNT_ID?.trim() ?? "")
+        && Boolean(process.env.TOSS_LIVE_CLIENT_KEY?.trim().startsWith("live_ck_"))
+        && Boolean(process.env.TOSS_LIVE_SECRET_KEY?.trim().startsWith("live_sk_"));
+    }
+    return getTossConfig().environment === "production";
+  } catch { return false; }
+}
+
 /** Seasonal checkout uses only the existing authenticated owner TEST rail until explicit live release. */
 export function isNewYearCheckoutAllowed(userId: string | null | undefined): boolean {
   if (!userId || !TOSS_REVIEW_UUID.test(userId)) return false;

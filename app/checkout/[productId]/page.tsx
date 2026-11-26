@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/app/lib/supabase/auth";
 import { getUserProfile } from "@/app/lib/profiles/server";
 import { isProfileId } from "@/app/lib/profiles/types";
 import { notFound, redirect } from "next/navigation";
-import { isNewYearCheckoutAllowed } from "@/app/lib/toss/config";
+import { isNewYearCheckoutAllowed, isNewYearPublicSaleEnabled } from "@/app/lib/toss/config";
 import { isNewYearSalePending } from "@/app/lib/newYearFortune";
 import { getPremiumProduct } from "@/app/lib/premiumProductRegistry";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
@@ -49,7 +49,7 @@ export default async function CheckoutPage({ params, searchParams }: CheckoutPag
   if (!resolved.ok) notFound();
 
   const canonicalProductId = resolved.productId;
-  if (isNewYearSalePending(canonicalProductId, canonicalProductId === "new-year-fortune" && isNewYearCheckoutAllowed(user?.id))) redirect(`/paid-analysis/${canonicalProductId}${profileId ? `?profileId=${encodeURIComponent(profileId)}` : ""}`);
+  if (isNewYearSalePending(canonicalProductId, canonicalProductId === "new-year-fortune" && (user ? isNewYearCheckoutAllowed(user?.id) : isNewYearPublicSaleEnabled()))) redirect(`/paid-analysis/${canonicalProductId}${profileId ? `?profileId=${encodeURIComponent(profileId)}` : ""}`);
   const specialProduct = getSpecialAnalysisProduct(canonicalProductId);
   const premiumProduct = specialProduct ? undefined : getPremiumProduct(canonicalProductId);
   if (!specialProduct && !premiumProduct) notFound();

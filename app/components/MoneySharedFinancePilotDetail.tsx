@@ -45,18 +45,18 @@ const WORRIES = [
 ] as const;
 
 const INSIGHTS = [
-  { title: "누가 결정하나요?", detail: "함께 쓰는 비용의 결정과 승인 기준" },
-  { title: "언제, 누가 부담하나요?", detail: "정산 시점과 실제 비용을 책임지는 기준" },
-  { title: "상황이 달라지면 어떻게 하나요?", detail: "수입·역할 변화에 맞춰 다시 합의할 기준" },
+  { title: "누가 결정하나요?", detail: "함께 쓰는 돈을 누가 정하는지" },
+  { title: "언제, 누가 부담하나요?", detail: "언제 돈을 나누고 누가 얼마나 내는지" },
+  { title: "상황이 달라지면 어떻게 하나요?", detail: "수입이나 상황이 달라질 때 다시 이야기할 부분" },
 ] as const;
 
 /** These are customer-facing labels for the EXISTING six-step report contract,
  * not an example of a generated or guaranteed personal result. */
 const FRIENDLY_REPORT_STEPS = [
-  { title: "함께 쓰는 돈, 무엇부터 정리할까요?", description: "함께 쓰는 돈의 기준을 어디서부터 정리할지 살펴봐요." },
+  { title: "함께 쓰는 돈, 무엇부터 정리할까요?", description: "함께 쓰는 돈에서 무엇이 부담이 되는지 살펴봐요." },
   { title: "돈 문제로 부담이 생기는 상황은 무엇일까요?", description: "결정하는 사람과 실제 비용을 내는 사람이 다른 상황을 구분해요." },
   { title: "내 사주에서 어떤 성향을 살펴볼까요?", description: "나의 돈 관리 성향을 어떤 근거로 해석하는지 살펴봐요." },
-  { title: "지금 다시 확인하면 좋은 부분은 무엇일까요?", description: "책임·역할·정산 기준을 점검할 상황을 살펴봐요." },
+  { title: "지금 다시 확인하면 좋은 부분은 무엇일까요?", description: "함께 내는 돈과 서로의 부담을 다시 이야기할 때를 알아봐요." },
   { title: "서로 어떤 약속을 정하면 좋을까요?", description: "누가 결정하고 언제 정산할지 확인할 질문을 정리해요." },
   { title: "실제 생활에서 추가로 확인할 것은 무엇일까요?", description: "사주 해석으로 알 수 없는 사실과 직접 확인해야 할 내용을 구분해요." },
 ] as const;

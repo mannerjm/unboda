@@ -439,3 +439,21 @@ assert(shell.indexOf('>SERVICE</p>') < shell.indexOf('data-sidebar-active-profil
 const taeunCard = readFileSync("app/components/NewYearTeacherCard.tsx", "utf8");
 assert(!shell.includes(">주제별 분석</p>"), "remove redundant visible sidebar heading only");
 assert(taeunCard.includes('scope === "period" ? "기간별 분석 전문 선생님" : "신년운세 전문 선생님"'), "both teacher visible subtitles are concise; AI disclosure remains in accessible labels");
+
+// The finance-only cover pilot must include ten distinct valid PNG assets.
+const wealthCoverHashes = new Set<string>();
+for (const id of launchedMoneyIds) {
+  const path = `public/images/wealth-covers/${id}.png`;
+  const bytes = readFileSync(path);
+  assert(bytes.length > 10000 && bytes.length < 8000000, `Unexpected cover size: ${id}`);
+  assert.equal(bytes.subarray(0,8).toString("hex"),"89504e470d0a1a0a", `Invalid PNG signature: ${id}`);
+  assert.equal(bytes.subarray(12,16).toString("ascii"),"IHDR");
+  assert(bytes.readUInt32BE(16)>0 && bytes.readUInt32BE(20)>0, `Invalid cover dimensions: ${id}`);
+  const hash = createHash("sha256").update(bytes).digest("hex");
+  assert(!wealthCoverHashes.has(hash), `Duplicate cover: ${id}`);
+  wealthCoverHashes.add(hash);
+}
+assert.equal(wealthCoverHashes.size,10);
+assert(storefront.includes('currentGroup.category==="money" && Object.prototype.hasOwnProperty.call(MONEY_THUMBNAIL_TITLES,product.id)'));
+assert(storefront.includes("data-wealth-cover={product.id}") && storefront.includes("function WealthCover"));
+assert(storefront.includes('src={`/images/wealth-covers/${productId}.png`}') && storefront.includes('quality={75} className="object-contain object-center"'));

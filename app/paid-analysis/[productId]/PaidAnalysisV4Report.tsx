@@ -108,6 +108,7 @@ export default function PaidAnalysisV4Report({
   productId,
   evidenceOverride,
 }: PaidAnalysisV4ReportProps) {
+  const isNewYear = productId === "new-year-fortune";
   const evidenceItems = evidenceOverride?.length ? evidenceOverride : detail.evidence;
   const firstOpportunity = detail.current.opportunities[0];
   const firstCaution = detail.current.cautions[0];
@@ -132,7 +133,7 @@ export default function PaidAnalysisV4Report({
       <div className="mx-auto max-w-5xl px-4 py-7 sm:px-8 sm:py-9">
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 rounded-[1.35rem] border border-[#e6d8f5] bg-white/90 px-4 py-3 shadow-[0_12px_30px_rgba(105,68,170,.09)] backdrop-blur sm:px-5">
           <div>
-            <p className="text-xs font-bold tracking-[0.18em] text-[#6f5ce7]" style={teacher ? { color: teacher.accent } : undefined}>PREMIUM REPORT</p>
+            <p className="text-xs font-bold tracking-[0.18em] text-[#6f5ce7]" style={teacher ? { color: teacher.accent } : undefined}>{isNewYear ? "나만의 새해 운세" : "PREMIUM REPORT"}</p>
             <h1 className="mt-1.5 text-2xl font-black tracking-[-0.03em] text-[#11162d] sm:text-3xl">{analysisType}</h1>
           </div>
           {detail.referencePeriod ? (
@@ -178,21 +179,23 @@ export default function PaidAnalysisV4Report({
           </div>
         </section>
 
+        {isNewYear && detail.periodAnalysis ? <div className="mt-5"><PeriodTimelineSection periodAnalysis={detail.periodAnalysis} /></div> : null}
+
         <section className="mt-5 rounded-[1.9rem] border border-white/80 bg-white/72 p-5 shadow-[0_18px_48px_rgba(35,39,78,0.055)] ring-1 ring-[#e5e6ef] backdrop-blur sm:p-7">
           <SectionHeader
-            eyebrow="KEY POINTS"
-            title="핵심 포인트"
-            description="전체 리포트를 읽기 전에 결론을 움직이는 핵심만 먼저 확인합니다."
+            eyebrow={isNewYear ? "새해의 핵심" : "KEY POINTS"}
+            title={isNewYear ? "올해 기억할 세 가지" : "핵심 포인트"}
+            description={isNewYear ? "올해 어떤 흐름을 만날 수 있고 무엇을 챙기면 좋을지 살펴보세요." : "전체 리포트를 읽기 전에 결론을 움직이는 핵심만 먼저 확인합니다."}
           />
           <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            <ReadingCard eyebrow="핵심 문제" title={detail.coreProblem.title} body={detail.coreProblem.whyItMatters} />
+            <ReadingCard eyebrow={isNewYear ? "올해의 중심 이야기" : "핵심 문제"} title={detail.coreProblem.title} body={detail.coreProblem.whyItMatters} />
             <ReadingCard
-              eyebrow="현재 흐름"
+              eyebrow={isNewYear ? "기대해 볼 변화" : "현재 흐름"}
               title={firstOpportunity?.situation ?? firstCaution?.situation ?? "지금의 기회와 주의"}
               body={firstOpportunity?.implication ?? firstCaution?.implication ?? detail.current.summary}
             />
             <ReadingCard
-              eyebrow="행동 방향"
+              eyebrow={isNewYear ? "나를 위한 한 가지 조언" : "행동 방향"}
               title={firstAction?.action ?? detail.conclusion.immediateAction}
               body={firstAction ? `대상 · ${firstAction.target} · 조건 · ${firstAction.condition}` : detail.conclusion.immediateAction}
             />
@@ -204,16 +207,16 @@ export default function PaidAnalysisV4Report({
             <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#211f43] text-sm font-black text-white shadow-md">i</span>
             <div>
               <p className="text-base font-black text-[#11162d]">이 리포트는 이렇게 읽어 주세요</p>
-              <p className="mt-2 text-[15px] leading-7 text-slate-700">먼저 위의 결론과 ‘지금 바로 할 것’을 확인하세요. 아래에는 왜 이런 판단이 나왔는지, 현실에서 무엇을 확인해야 하는지, 어떤 조건이면 판단을 바꿔야 하는지가 이어집니다. 전문 계산 내용은 필요한 경우에만 ‘계산 근거 펼쳐보기’에서 확인할 수 있어요.</p>
+              <p className="mt-2 text-[15px] leading-7 text-slate-700">{isNewYear ? "위에서 궁금한 운세와 달을 골라 읽어 보세요. 아래에는 내 사주에서 왜 이런 흐름을 읽었는지 쉽게 풀어 놓았어요. 어려운 계산은 궁금할 때만 펼쳐보세요." : "먼저 위의 결론과 ‘지금 바로 할 것’을 확인하세요. 아래에는 왜 이런 판단이 나왔는지, 현실에서 무엇을 확인해야 하는지, 어떤 조건이면 판단을 바꿔야 하는지가 이어집니다. 전문 계산 내용은 필요한 경우에만 ‘계산 근거 펼쳐보기’에서 확인할 수 있어요."}</p>
             </div>
           </div>
         </div>
 
         <div className="mt-5 space-y-4">
           <DetailSection
-            eyebrow="01 · 문제 정의"
-            title="지금 가장 중요한 문제"
-            description="현재 판단에서 무엇을 먼저 정리해야 하는지 설명합니다."
+            eyebrow={isNewYear ? "01 · 새해 이야기" : "01 · 문제 정의"}
+            title={isNewYear ? "올해 나에게 중요한 것은?" : "지금 가장 중요한 문제"}
+            description={isNewYear ? "한 해의 중심이 되는 흐름을 쉽게 알아봅니다." : "현재 판단에서 무엇을 먼저 정리해야 하는지 설명합니다."}
           >
             <p className="text-[15px] leading-8 text-slate-700">{detail.coreProblem.description}</p>
             <p className="mt-5 rounded-[1.35rem] border border-[#e1e2ec] bg-[linear-gradient(135deg,#f8f8fc_0%,#f3f2fb_100%)] px-5 py-4 text-[15px] font-medium leading-7 text-slate-700 shadow-inner">{detail.coreProblem.whyItMatters}</p>
@@ -221,8 +224,8 @@ export default function PaidAnalysisV4Report({
 
           <DetailSection
             eyebrow="02 · 원인"
-            title="왜 이런 판단이 나왔을까"
-            description="계산 결과를 생활 속 조건으로 번역해, 현재 판단과 어떻게 연결되는지 설명합니다."
+            title={isNewYear ? "내 사주에서 왜 이런 운을 읽었을까?" : "왜 이런 판단이 나왔을까"}
+            description={isNewYear ? "내 사주와 새해의 운이 만나 어떤 변화를 만들 수 있는지 풀어드려요." : "계산 결과를 생활 속 조건으로 번역해, 현재 판단과 어떻게 연결되는지 설명합니다."}
           >
             <p className="text-[15px] leading-8 text-slate-700">{detail.cause.summary}</p>
             <div className="mt-5 grid gap-4">
@@ -246,7 +249,7 @@ export default function PaidAnalysisV4Report({
 
           <DetailSection
             eyebrow="03 · 판단 근거"
-            title="이 판단을 뒷받침하는 근거"
+            title={isNewYear ? "내 사주에서 찾은 힌트" : "이 판단을 뒷받침하는 근거"}
             description="먼저 생활 속 의미를 보여드리고, 전문 계산 내용은 원하는 경우에만 펼쳐볼 수 있습니다."
           >
             <div className="grid gap-4 lg:grid-cols-2">
@@ -258,7 +261,7 @@ export default function PaidAnalysisV4Report({
                   <p className="relative mt-2 text-sm leading-6 text-slate-600">{item.linkage}</p>
                   <details className="relative mt-4 rounded-[1.1rem] border border-[#ddd9ef] bg-white/90 px-4 py-3.5">
                     <summary className="cursor-pointer text-sm font-bold text-[#5e4bd1]">
-                      계산 근거 펼쳐보기 · {getPaidAnalysisEvidenceCustomerLabel(item.evidenceKey)}
+                      계산 근거 펼쳐보기 · {isNewYear ? ({monthly_cycle: "대상 월의 운과 내 사주", seun: "새해의 운", yongshin: "나에게 도움이 되는 힘"} as Record<string, string>)[item.evidenceKey] ?? getPaidAnalysisEvidenceCustomerLabel(item.evidenceKey) : getPaidAnalysisEvidenceCustomerLabel(item.evidenceKey)}
                     </summary>
                     <p className="mt-3 text-sm leading-7 text-slate-600">
                       {formatPaidAnalysisEvidenceFactForCustomer(item.evidenceKey, item.fact)}
@@ -271,7 +274,7 @@ export default function PaidAnalysisV4Report({
 
           <DetailSection
             eyebrow="04 · 현재 흐름"
-            title="지금의 기회와 주의할 점"
+            title={isNewYear ? "새해에 기대할 일과 조심할 일" : "지금의 기회와 주의할 점"}
             description="같은 시기에도 활용할 수 있는 힘과 조심할 조건을 따로 봅니다."
           >
             <p className="text-[15px] leading-8 text-slate-700">{detail.current.summary}</p>
@@ -309,7 +312,7 @@ export default function PaidAnalysisV4Report({
             </div>
           </DetailSection>
 
-          <DetailSection eyebrow="05 · 변화 신호" title="앞으로 확인할 변화 신호">
+          <DetailSection eyebrow={isNewYear ? "05 · 계절별 운세" : "05 · 변화 신호"} title={isNewYear ? "계절마다 어떻게 달라질까?" : "앞으로 확인할 변화 신호"}>
             <ol className="relative space-y-4">
               <div className="pointer-events-none absolute bottom-6 left-[19px] top-6 w-px bg-[linear-gradient(180deg,#a89cf0_0%,#d8d4ec_100%)]" />
               {detail.timeline.map((item, index) => (
@@ -325,13 +328,13 @@ export default function PaidAnalysisV4Report({
             </ol>
           </DetailSection>
 
-          {detail.periodAnalysis ? <PeriodTimelineSection periodAnalysis={detail.periodAnalysis} /> : null}
+          {!isNewYear && detail.periodAnalysis ? <PeriodTimelineSection periodAnalysis={detail.periodAnalysis} /> : null}
 
           <section data-report-feature="action" style={darkSectionStyle} className="relative overflow-hidden rounded-[2rem] border border-[#2e295c] bg-[radial-gradient(circle_at_top_right,rgba(131,111,239,0.22),transparent_30%),linear-gradient(145deg,#1d1b3d_0%,#292550_100%)] p-5 text-white shadow-[0_24px_60px_rgba(31,28,72,0.18)] sm:p-7">
             <div className="relative">
               <SectionHeader
-                eyebrow="ACTION GUIDE"
-                title="행동 제안"
+                eyebrow={isNewYear ? "새해를 위한 조언" : "ACTION GUIDE"}
+                title={isNewYear ? "올해 이렇게 보내보세요" : "행동 제안"}
                 description="읽고 끝나지 않도록 바로 실행할 행동과 피할 행동을 마지막에 모았습니다."
                 tone="inverse"
               />
@@ -381,7 +384,7 @@ export default function PaidAnalysisV4Report({
 
           <DetailSection
             eyebrow="마지막 확인"
-            title="이 분석에서 참고할 범위"
+            title={isNewYear ? "운세를 읽을 때 기억해 주세요" : "이 분석에서 참고할 범위"}
             description="비교적 분명하게 볼 수 있는 부분과 현실에서 추가로 확인해야 할 부분을 나눠 보여드립니다."
           >
             <div className="grid gap-4 lg:grid-cols-2">

@@ -92,7 +92,9 @@ export function getAiConsultingPresentation(
       productTitle: getPremiumProductDisplayTitle(premium.id, premium.title),
       editionLabel: formatAnalysisEditionLabel(edition),
       scopeLabel: "이 구매 리포트의 계산 결과와 해석 범위 안에서 다음 질문을 이어갑니다.",
-      suggestedQuestions: premium.kind === "PERIOD"
+      suggestedQuestions: productId === "new-year-fortune"
+        ? ["새해에 어떤 달을 가장 눈여겨보면 좋을까?", "내 재물운과 인연운을 쉽게 다시 설명해 줘.", "새해를 잘 보내려면 무엇부터 하면 좋을까?"]
+        : premium.kind === "PERIOD"
         ? PERIOD_SUGGESTED_QUESTIONS
         : DEFAULT_SUGGESTED_QUESTIONS,
     };

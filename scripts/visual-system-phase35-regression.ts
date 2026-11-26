@@ -107,7 +107,11 @@ for (const [name, source] of [
   ["admin AI quality", adminAi],
   ["admin AI operations", adminAiOperations],
 ] as const) {
-  assert(source.includes('bg-[#f5f7fc]'), `${name} must use the cool Phase 3.5 canvas`);
+  if (name.startsWith("admin")) {
+    assert(source.includes('min-h-screen bg-white') && !source.includes('bg-[#f5f7fc]'), `${name} must use the approved white admin canvas`);
+  } else {
+    assert(source.includes('bg-[#f5f7fc]'), `${name} must use the cool Phase 3.5 canvas`);
+  }
 }
 
 assert(mypage.includes('bg-[#eeecff]') && mypage.includes('border-[#b9b2f6]'), "My Page active profile emphasis must use violet rather than beige");

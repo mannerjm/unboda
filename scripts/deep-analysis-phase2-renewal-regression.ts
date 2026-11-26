@@ -498,3 +498,16 @@ const editorialComponent=readFileSync("app/components/EditorialProductCover.tsx"
 assert(editorialComponent.includes("aspect-[4/3]") && editorialComponent.includes("onError") && editorialComponent.includes("containerType"));
 assert(storefront.includes('editorial.category===currentGroup.category') && storefront.includes('editorial.category==="period"') && storefront.includes("{editorial.intro}"));
 assert(readFileSync("app/components/CustomerFirstPremiumDetail.tsx","utf8").includes('!seasonalYear ? getEditorialProductCover(product.id) : undefined'));
+
+// Verify the actual generated files, not just the existing photo fallback.
+const generatedCoverBlobs = [["study-learning-strategy","aa0166591e4e7121408be44581dcc74e067f5c6d"],["study-exam-preparation","b80c0421f7e19f6e29dfa78c18d370ee5e3993e2"],["study-focus-routine","c33ed030586d9918f2f1cc867ac985c79705d467"],["study-credential-decision","bfd0ab357f978a5548e970e721bd3bfca4de4746"],["business-startup-readiness","268c5d0adc7b4b4f101baf4766445ce688e7ca8d"],["business-expansion-control","8003fff19bb85278b38828c0d5fcab267953c98a"],["business-client-relationship","6269fc9565d9e88bdced8d9f085d532ae07997ad"],["business-team-management","b8437e608687de708f684d699525d012b58adabf"]] as const;
+for (const [id, expectedHash] of generatedCoverBlobs) {
+  const bytes=readFileSync(`public/images/generated-covers/${id}.webp`);
+  assert(bytes.length>50000 && bytes.length<200000, "invalid optimized size "+id);
+  assert.equal(bytes.subarray(0,4).toString("ascii"),"RIFF");
+  assert.equal(bytes.subarray(8,12).toString("ascii"),"WEBP");
+  assert.equal(createHash("sha1").update("blob "+bytes.length+"\0").update(bytes).digest("hex"), expectedHash, id);
+  assert(editorialComponent.includes(JSON.stringify(id)));
+  assert(getEditorialProductCover(id));
+}
+assert(editorialComponent.includes("data-generated-cover") && editorialComponent.includes("object-contain object-center") && editorialComponent.includes("failedSrc!==generatedSrc"));

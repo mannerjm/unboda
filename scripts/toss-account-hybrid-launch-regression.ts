@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { getTossConfigForAccount, isTossCheckoutUserAllowed, isNewYearCheckoutAllowed } from "../app/lib/toss/config";
+import { getTossConfigForAccount, isTossCheckoutUserAllowed, isNewYearCheckoutAllowed, isNewYearPublicSaleEnabled } from "../app/lib/toss/config";
 
 // Use synthetic account IDs and fake keys. No provider calls or real orders.
 const testId = "f131d7ca-4024-4e91-a766-d81722f78c51";
@@ -44,6 +44,7 @@ try {
   assert.equal(isNewYearCheckoutAllowed(testId),true);
   assert.equal(isNewYearCheckoutAllowed(buyerId),false);
   assert.equal(isNewYearCheckoutAllowed(undefined),false);
+  assert.equal(isNewYearPublicSaleEnabled(),false);
   assert.equal(isTossCheckoutUserAllowed(testId), true);
   fails(() => getTossConfigForAccount(buyerId)); // cards not approved
 
@@ -83,7 +84,16 @@ try {
   assert.equal(isNewYearCheckoutAllowed(buyerId),false,"seasonal live remains locked even when existing products are live");
   env.NEW_YEAR_LIVE_CHECKOUT_ENABLED = "true";
   assert.equal(isNewYearCheckoutAllowed(buyerId),true);
+  assert.equal(isNewYearPublicSaleEnabled(),true);
+  assert.equal(isNewYearCheckoutAllowed(undefined),false,"guest entry must never authorize an order");
+  env.TOSS_LIVE_CHECKOUT_ENABLED = "false";
+  assert.equal(isNewYearPublicSaleEnabled(),false);
+  env.TOSS_LIVE_CHECKOUT_ENABLED = "true";
+  env.TOSS_LIVE_SECRET_KEY = "test_sk_wrong";
+  assert.equal(isNewYearPublicSaleEnabled(),false);
+  env.TOSS_LIVE_SECRET_KEY = "live_sk_sample";
   delete env.NEW_YEAR_LIVE_CHECKOUT_ENABLED;
+  assert.equal(isNewYearPublicSaleEnabled(),false);
   assert.equal(isTossCheckoutUserAllowed(buyerId), true);
   assert.equal(getTossConfigForAccount(testId).environment, "sandbox",
     "owner is always TEST even when live customers are enabled");

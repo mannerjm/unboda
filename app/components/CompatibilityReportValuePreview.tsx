@@ -1,4 +1,5 @@
 import EditorialProductCover from "@/app/components/EditorialProductCover";
+import { getEditorialProductCover } from "@/app/lib/editorialProductCover";
 import Image from "next/image";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import ProductReviewSummary from "@/app/components/ProductReviewSummary";
@@ -143,7 +144,7 @@ export default function CompatibilityReportValuePreview({
           <p className="mt-4 break-keep text-[16px] leading-8 text-[#5d4f6e]">{config.directionDescription}</p>
         </div>
         <div className="relative mx-auto aspect-[4/3] w-full max-w-[360px] overflow-hidden rounded-[1.7rem] border-[5px] border-white bg-[#e9dff8] shadow-[0_12px_32px_rgba(74,43,117,.14)]">
-          {coverId ? <EditorialProductCover productId={coverId}/> : <Image src={visual.src} alt={visual.alt} fill sizes="(max-width: 640px) 80vw, 320px" className="object-cover" /> }
+          {getEditorialProductCover(coverId) ? <EditorialProductCover productId={coverId}/> : <Image src={visual.src} alt={visual.alt} fill sizes="(max-width: 640px) 80vw, 320px" className="object-cover" /> }
         </div>
       </div>
 

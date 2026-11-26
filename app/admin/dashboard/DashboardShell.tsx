@@ -18,7 +18,8 @@ const groups = [
     { id: "system", label: "자동화·보안", icon: "M12 3l8 3v6c0 5-5 8-8 9-3-1-8-4-8-9V6zM9 12l2 2 4-4", note: "자동 작업, 알림, 관리자 인증 및 운영 가이드" },
   ] },
 ] as const;
-const items = groups.flatMap(group => [...group.items]);
+type DashboardItem = (typeof groups)[number]["items"][number];
+const items = groups.flatMap<DashboardItem>(group => [...group.items]);
 export type DashboardView = (typeof groups)[number]["items"][number]["id"];
 export function parseDashboardView(value: unknown): DashboardView {
   return items.find(item => item.id === value)?.id ?? "overview";

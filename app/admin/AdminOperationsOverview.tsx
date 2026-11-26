@@ -251,7 +251,7 @@ export default function AdminOperationsOverview({
       </div> : null}
 
       {view === "all" || view === "system" || view === "ai" ? <nav className="mt-5 flex flex-wrap gap-2" aria-label="운영자 바로가기">
-        <Link href="/admin/support" className="border border-slate-900 bg-[#171a3d] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#242957]">고객지원 요청 {supportQueueCount === null ? "-" : `${number(supportQueueCount)}건`}</Link>
+        {view !== "ai" ? <Link href="/admin/support" className="border border-slate-900 bg-[#171a3d] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#242957]">고객지원 요청 {supportQueueCount === null ? "-" : `${number(supportQueueCount)}건`}</Link> : null}
         <Link href="/admin/guide" className="border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800">대표 운영 가이드</Link>
         <Link href="/admin/ai-consulting/operations" className="border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800">AI 상담 운영</Link>
         <Link href="/admin/ai-consulting" className="border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800">AI 품질·비용</Link>

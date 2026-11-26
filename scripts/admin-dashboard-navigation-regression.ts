@@ -15,4 +15,5 @@ assert(legacy.includes('href="/admin/dashboard"') && legacy.includes('await requ
 assert(read("app/admin/AdminOperationsOverview.tsx").includes('view = "all"') && read("app/admin/AdminGrowthOverview.tsx").includes('showJourney = true'), "legacy defaults unchanged");
 assert(page.includes('view=support#failure-summary-heading'), "exception links remain actionable");
 assert(read("next.config.ts").includes('"/admin/:path*"'), "existing private admin namespace");
+assert(page.includes('view === "refunds" ? getAdminRefundClosureDashboard(20) : Promise.resolve(null)'), "only load selected category reads");
 console.log("[admin-dashboard] protected layout, menu routing, reused sections, and legacy fallback passed");

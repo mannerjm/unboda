@@ -44,16 +44,18 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
     );
   }
 
+  const view = parseDashboardView((await searchParams).view);
+  const overview = view === "overview";
   const [growthResult, refundClosureResult, failureResult, operationsResult, qualityResult, supportResult, journeyResult, reviewResult, soloResult] = await Promise.allSettled([
-    getAdminGrowthDashboard(30),
-    getAdminRefundClosureDashboard(20),
-    getOperationalFailureSummary(),
-    getAiConsultingOperationsReport(24),
-    getAiConsultingQualityCostReport(100),
-    getActiveSupportRequestCount(),
-    getAdminCustomerJourneyDashboard(),
-    getAdminReviewDashboard(),
-    getSoloOperationsSnapshot(),
+    overview || view === "revenue" ? getAdminGrowthDashboard(30) : Promise.resolve(null),
+    view === "refunds" ? getAdminRefundClosureDashboard(20) : Promise.resolve(null),
+    overview || view === "support" ? getOperationalFailureSummary() : Promise.resolve(null),
+    overview || view === "ai" ? getAiConsultingOperationsReport(24) : Promise.resolve(null),
+    overview || view === "ai" ? getAiConsultingQualityCostReport(100) : Promise.resolve(null),
+    overview || view === "system" || view === "ai" ? getActiveSupportRequestCount() : Promise.resolve(null),
+    overview || view === "journey" || view === "reports" ? getAdminCustomerJourneyDashboard() : Promise.resolve(null),
+    view === "reviews" ? getAdminReviewDashboard() : Promise.resolve(null),
+    overview || view === "system" ? getSoloOperationsSnapshot() : Promise.resolve(null),
   ]);
 
   const growth = growthResult.status === "fulfilled" ? growthResult.value : null;
@@ -107,7 +109,6 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
     return { productId, label: "상품명 확인 필요" };
   });
 
-  const view = parseDashboardView((await searchParams).view);
   const operationProps = { failureSummary, aiOperations, aiQuality, operatorAlertConfigured: Boolean(process.env.RESEND_API_KEY?.trim()), supportQueueCount, reportPerformance: journey, soloOps };
   const fmt = (n: number | null | undefined, suffix: string) => n == null ? "조회 불가" : n.toLocaleString("ko-KR") + suffix;
   const link = (href: string, label: string) => <Link prefetch={false} href={href} className="inline-flex min-h-11 items-center rounded-xl border border-[#dcd5eb] bg-white px-4 py-2 text-sm font-bold text-[#5b398e] hover:bg-[#f5efff]">{label} →</Link>;
@@ -133,7 +134,7 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
         <AdminOperationsOverview {...operationProps} view="reports" />
         <div className="mt-5 flex flex-wrap gap-3">{link("/admin/dashboard?view=support#failure-summary-heading", "분석 실패·지연 확인")}{link("/admin/customer-journey", "생성·고객 행동 상세")}</div>
       </> : null}
-      {view === "revenue" ? (growth ? <AdminGrowthOverview report={growth} productLabels={productLabels} journey={journey} showJourney={false} /> : unavailable("성장·매출 지표")) : null}
+      {view === "revenue" ? (growth ? <AdminGrowthOverview report={growth} productLabels={productLabels} journey={null} showJourney={false} /> : unavailable("성장·매출 지표")) : null}
       {view === "journey" ? <AdminCustomerJourneyOverview report={journey} /> : null}
       {view === "ai" ? <>
         <AdminOperationsOverview {...operationProps} view="ai" />

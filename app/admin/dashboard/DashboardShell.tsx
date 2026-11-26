@@ -45,9 +45,13 @@ export default function DashboardShell({ view, children }: { view: DashboardView
         </div>)}
       </nav>
       <div className="mt-6 space-y-2 border-t border-slate-200 pt-4">
-        <Link prefetch={false} href="/admin?legacy=1" className="block rounded-lg px-2 py-2 text-sm font-semibold text-slate-700 underline">기존 전체 관리자 화면 ↗</Link>
+        {/* Keep the legacy entry available for future restoration, but hide it in the sidebar. */}
+        <Link prefetch={false} href="/admin?legacy=1" hidden className="hidden rounded-lg px-2 py-2 text-sm font-semibold text-slate-700 underline">기존 전체 관리자 화면 ↗</Link>
         <Link href="/" prefetch={false} className="block rounded-lg px-2 py-2 text-sm text-slate-600">운보다 홈페이지 ↗</Link>
-        <p className="px-2 text-[13px] leading-6 text-slate-600">승인된 운영자 전용 · 기존 권한 및 처리 기준 유지</p>
+        <p className="px-2 text-[13px] leading-6 text-slate-600 break-keep">
+          <span className="block font-semibold">승인된 운영자 전용</span>
+          <span className="block">기존 권한 및 처리 기준 유지</span>
+        </p>
       </div>
     </aside>
     <main className={`${styles.content} min-w-0 bg-[#f5f6f8] px-4 py-5 sm:px-8 lg:px-10 lg:py-8`} id="admin-dashboard-content">

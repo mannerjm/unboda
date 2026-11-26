@@ -23,4 +23,6 @@ assert(shell.includes('styles.content') && readability.includes('.content :globa
 for (const component of ["AdminGrowthOverview", "AdminCustomerJourneyOverview"]) assert(read("app/admin/"+component+".tsx").includes("data-dashboard-redundant-heading"), "hide repeated headings only in new dashboard");
 assert(!/bg-\[#(?:f7f5fc|f0eaf9|e4d7f8|7650bb)\]/i.test(shell), "no lavender background in dashboard");
 assert(page.includes('link("/admin?legacy=1", "기존 전체 관리자 화면")'), "legacy fallback link remains explicit");
+assert(shell.includes('href="/admin?legacy=1" hidden className="hidden') && shell.includes('기존 전체 관리자 화면 ↗'), "legacy link preserved but hidden in sidebar");
+assert(shell.includes('className="block font-semibold">승인된 운영자 전용</span>') && shell.includes('className="block">기존 권한 및 처리 기준 유지</span>'), "operator footer uses separate readable lines");
 console.log("[admin-dashboard] protected layout, menu routing, reused sections, and legacy fallback passed");

@@ -28,6 +28,7 @@ import type {
 import { formatRecommendationPresentationText } from "@/app/lib/recommendationDisplay";
 import {
   parseFreeAnalysisAIInterpretation,
+  splitMemberOverview,
   type FreeAnalysisAIInterpretation,
 } from "@/app/lib/freeAnalysisAIInterpretation";
 import ProfileSelector from "@/app/components/ProfileSelector";
@@ -315,6 +316,9 @@ export function ResultPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const providedResult = useContext(ResultViewerContext);
+  // The first anonymous result supplies context; retain its original UI and navigation.
+  const memberResult = !providedResult;
+  const [storedResultStale, setStoredResultStale] = useState(false);
   const [aiResult, setAiResult] = useState("");
 const [sajuData, setSajuData] = useState<SajuResult | null>(null);
 const [freeAnalysis, setFreeAnalysis] =
@@ -368,6 +372,7 @@ const aiSummarySections = [
 ].filter((section): section is { title: string; text: string } => Boolean(section.text));
 const hasPrimaryAISummary = Boolean(aiInterpretation.strength && aiInterpretation.overview);
 const aiOverviewHighlight = splitAIOverviewHighlight(aiInterpretation.overview ?? "");
+const memberOverview = splitMemberOverview(aiInterpretation.overview ?? "");
 const legacyAISummarySections = aiSummarySections.filter(
   (section) => section.title !== "사주의 특성" && section.title !== "한눈에 보는 핵심",
 );
@@ -434,6 +439,7 @@ useEffect(() => {
     .then(async (response) => {
       const body = await response.json() as {
         analysis?: AnalyzeSuccessResponse;
+        freshness?: "CURRENT" | "STALE";
         error?: string;
       };
 
@@ -459,6 +465,7 @@ useEffect(() => {
     setRecommendationExplanation(saved.recommendationExplanation);
     setProductRecommendations(saved.productRecommendations);
     setGenerationMeta(saved.generationMeta);
+    setStoredResultStale(body.freshness === "STALE");
     })
     .catch((error) => {
       setAiResult(
@@ -549,6 +556,8 @@ const gyeokgukAnalysis =
 const daeunAnalysis =
   freeAnalysis?.daeunAnalysis ?? sajuData.daeunAnalysis;
 const elementRelations = sajuData.elementRelations;
+const storedEvaluation = sajuData.evaluationContext;
+const memberMonthLabel = storedEvaluation ? `${storedEvaluation.evaluationYear}년 ${storedEvaluation.evaluationMonth}월` : "";
 const relationStars =
   freeAnalysis?.relationStars ??
   (sajuData as SajuResult & { relationStars?: AnalyzeFreeResponse["relationStars"] }).relationStars ??
@@ -658,12 +667,13 @@ async function retryMainAnalysis() {
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-[#665779] sm:text-base">
                 출생 정보와 명리 계산 결과를 바탕으로 핵심 구조부터 현재 흐름까지 차근차근 살펴봐요.
-                궁금한 부분이 생기면 결과 아래의 다음 질문으로 이어갈 수 있습니다.
+                {memberResult ? "결과 아래에서 지금 나에게 필요한 맞춤 분석을 살펴볼 수 있어요." : "궁금한 부분이 생기면 결과 아래의 다음 질문으로 이어갈 수 있습니다."}
               </p>
             </div>
             <div className="flex flex-wrap gap-2 lg:max-w-xs lg:justify-end">
               <span className="rounded-full border border-[#e0cef7] bg-white/80 px-4 py-2 text-xs font-bold text-[#644398]">{profileLabel}</span>
               <span className="rounded-full border border-[#e0cef7] bg-white/80 px-4 py-2 text-xs font-bold text-[#68577d]">무료 결과 · 참고용 분석</span>
+              {memberResult ? <div className="flex flex-wrap gap-2 print:hidden"><Link href="/saju" className="rounded-full border border-[#e0cef7] bg-white px-4 py-2 text-xs font-bold text-[#68577d]">다시 분석하기</Link><button type="button" onClick={() => window.print()} className="rounded-full border border-[#e0cef7] bg-white px-4 py-2 text-xs font-bold text-[#68577d]">리포트 인쇄하기</button></div> : null}
             </div>
           </div>
         </header>
@@ -1230,21 +1240,21 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#171a3d] text-lg text-white shadow-sm">
-                運
+                {memberResult ? <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-6 w-6"><path d="M12 2c1.2 6 3.8 8.8 10 10-6.2 1.2-8.8 4-10 10C10.8 16 8.2 13.2 2 12 8.2 10.8 10.8 8 12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg> : "運"}
               </div>
 
               <div>
                 <p className="text-xs font-bold tracking-[0.25em] text-[#7768c7]">
-                  AI ANALYSIS
+                  {memberResult ? "나의 사주를 한눈에" : "AI ANALYSIS"}
                 </p>
                 <h2 className="mt-1 text-2xl font-black tracking-[-0.03em] text-[#11162d] sm:text-3xl">
-                  운보다 AI 종합 해석
+                  {memberResult ? "운보다 종합 해석" : "운보다 AI 종합 해석"}
                 </h2>
               </div>
             </div>
-            <span className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-1.5 text-xs font-bold text-[#6657bd]">
+            {!memberResult ? <span className="rounded-full border border-[#d8d3ff] bg-[#f3f1ff] px-3 py-1.5 text-xs font-bold text-[#6657bd]">
               핵심만 빠르게
-            </span>
+            </span> : null}
           </div>
 
           {generationMeta?.mainAnalysisStatus === "failed" ? (
@@ -1293,6 +1303,22 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
             <>
               {hasPrimaryAISummary ? (
                 <>
+                  {memberResult ? (
+                    <div data-member-summary className="space-y-4">
+                      <div className="rounded-[1.7rem] bg-[linear-gradient(135deg,#171a3d_0%,#252053_58%,#3a285d_100%)] p-5 text-white sm:p-7">
+                        <p className="text-sm font-bold text-[#d6caff]">{memberMonthLabel ? `${memberMonthLabel} · ` : ""}{storedResultStale ? "조회 당시 운세" : "지금 나의 운세"}</p>
+                        <p className="mt-3 break-keep text-[22px] font-black leading-relaxed sm:text-[28px]">{memberOverview.lead}</p>
+                      </div>
+                      <section className="rounded-[1.5rem] border border-[#e6ddf6] bg-[#faf7ff] p-5 sm:p-6">
+                        <h3 className="text-lg font-black text-[#392457]">나는 어떤 사람일까요?</h3>
+                        <div className="mt-3 break-keep text-base leading-8 text-slate-700"><ReactMarkdown>{aiInterpretation.strength ?? ""}</ReactMarkdown></div>
+                      </section>
+                      {memberOverview.situation || memberOverview.focus ? <div className="grid gap-3 sm:grid-cols-2">
+                        {memberOverview.situation ? <section className={`rounded-[1.5rem] border border-blue-100 bg-[#f1f6ff] p-5 ${!memberOverview.focus ? "sm:col-span-2" : ""}`}><h3 className="text-lg font-black text-[#34568b]">나의 현재 상황</h3><p className="mt-3 break-keep text-base leading-8 text-slate-700">{memberOverview.situation}</p></section> : null}
+                        {memberOverview.focus ? <section className="rounded-[1.5rem] border border-orange-100 bg-[#fff6ee] p-5"><h3 className="text-lg font-black text-[#925f32]">지금 살펴볼 점</h3><p className="mt-3 break-keep text-base leading-8 text-slate-700">{memberOverview.focus}</p></section> : null}
+                      </div> : null}
+                    </div>
+                  ) : <>
                   <div className="relative overflow-hidden rounded-[1.7rem] border border-[#8f7cff]/20 bg-[linear-gradient(135deg,#171a3d_0%,#252053_58%,#3a285d_100%)] px-5 py-6 text-white shadow-[0_20px_46px_rgba(29,25,72,0.18)] sm:px-7 sm:py-7">
                     <div className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full bg-[#8f7cff]/20 blur-3xl" />
                     <div className="pointer-events-none absolute -bottom-20 left-[20%] h-40 w-40 rounded-full bg-[#ff8fb8]/10 blur-3xl" />
@@ -1338,6 +1364,8 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
                       </p>
                     </div>
                   </div>
+
+                  </>}
 
                   {legacyAISummarySections.length > 0 ? (
                     <div className="mt-4 grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -1685,6 +1713,17 @@ h3: ({ children }) => {
 </div>
 </section>
   )}
+        {memberResult ? (
+          <section data-member-recommendation className="mt-8 rounded-[2rem] border border-[#e0d5f3] bg-white p-6 text-center shadow-sm sm:p-9" aria-labelledby="member-next-analysis-title">
+            <div aria-hidden="true" className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#f0e8fc] text-[#8054c7]"><svg viewBox="0 0 24 24" fill="none" className="h-7 w-7"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/></svg></div>
+            <h2 id="member-next-analysis-title" className="mt-4 break-keep text-2xl font-black tracking-tight text-[#2b1e40] sm:text-3xl">지금 나에게 필요한 맞춤 분석</h2>
+            <p className="mx-auto mt-3 max-w-xl break-keep text-base leading-7 text-[#625172]">{storedResultStale ? "저장된 사주 결과를 바탕으로 추천 분석을 확인할 수 있어요. 이번 달 운세는 위에서 갱신해 주세요." : "나의 타고난 사주와 이번 달 운의 흐름을 바탕으로 지금 더 자세히 살펴보면 좋은 분석을 추천해 드려요."}</p>
+            <div className="mx-auto mt-6 grid max-w-xl gap-3 print:hidden">
+              <Link href={`/recommendations?profileId=${currentProfileId}`} className="flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[#7954d1] px-5 py-4 text-center text-base font-bold text-white transition hover:bg-[#6540ba] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-700">나의 추천 분석 보기 <span aria-hidden="true">→</span></Link>
+              <Link href="/" className="flex min-h-12 items-center justify-center rounded-xl border border-[#ded5eb] bg-white px-5 py-3 text-center text-base font-semibold text-[#625172] transition hover:bg-[#faf7ff]">홈으로 돌아가기</Link>
+            </div>
+          </section>
+        ) : <>
         <section className="mt-8 overflow-hidden rounded-[2rem] border border-[#d9d2c5] bg-white shadow-[0_20px_55px_rgba(44,38,31,0.06)]" aria-labelledby="next-analysis-title">
           <div className="bg-[linear-gradient(135deg,#111936,#1c183d_55%,#262041)] px-6 py-7 text-white sm:px-8">
             <p className="text-xs font-black tracking-[0.14em] text-[#b2a3ff]">무료 결과에서 이어보기</p>
@@ -1750,6 +1789,7 @@ h3: ({ children }) => {
           </button>
         </div>
 
+        </>}
         <p className="mt-8 text-center text-xs leading-6 text-stone-500">
           본 리포트는 참고용 콘텐츠이며 중요한 건강·법률·투자 결정은
           관련 전문가와 상담해 주세요.

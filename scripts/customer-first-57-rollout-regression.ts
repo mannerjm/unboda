@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { getCustomerProductCopy } from "../app/lib/customerProductCopy";
 import { readFileSync } from "node:fs";
 import { getLaunchProductIds, getPaidAnalysisTopicConfig } from "../app/lib/paidAnalysisTopicConfig";
 import { getPremiumProduct } from "../app/lib/premiumProductRegistry";
@@ -158,3 +159,16 @@ assert(styles.includes("@media (max-width: 1023px), (hover: none) and (pointer: 
   "57-product directory remains hidden on mobile anywhere");
 
 console.log("customer-first-57-rollout-regression: PASS (50 topic + 8 period; 58 IDs, images, prices, question labels, scopes; one checkout per detail)");
+
+// Customer copy is separate from product IDs, scope and price.
+const customerDescriptions = new Set<string>();
+for (const id of launchedIds) {
+  const copy = getCustomerProductCopy(id);
+  assert(copy && copy.description.length > 20, id + " missing customer introduction");
+  assert.equal(new Set(copy.topics).size, 3, id + " needs three distinct reading topics");
+  assert(!customerDescriptions.has(copy.description), id + " duplicates another customer introduction");
+  assert(!/메커니즘|프로토콜|관찰 신호|완료 기준|구조적 압력|실행 우선순위/u.test([copy.description,...copy.topics].join(" ")), id + " exposes office jargon");
+  customerDescriptions.add(copy.description);
+}
+assert.equal(customerDescriptions.size, 58);
+assert(detail.includes("getCustomerProductCopy(product.id)") && detail.includes("const focus = copy?.topics"), "customer details must use curated copy rather than internal scope text");

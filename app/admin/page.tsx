@@ -105,6 +105,7 @@ export default async function AdminPage() {
   return (
     <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
       <div className="mx-auto w-full max-w-6xl">
+        <div className="mb-6 flex justify-end"><Link href="/admin/dashboard" className="inline-flex rounded-xl bg-[#322365] px-4 py-3 text-sm font-bold text-white">새 관리자 대시보드 열기 →</Link></div>
         <AdminOperationsOverview
           failureSummary={failureSummary}
           aiOperations={aiOperations}

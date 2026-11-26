@@ -1,5 +1,6 @@
 "use client";
 
+import EditorialProductCover from "@/app/components/EditorialProductCover";
 import { useState } from "react";
 import PaidFamilyExtendedAnalysisClient from "@/app/components/PaidFamilyExtendedAnalysisClient";
 import PaidFamilyParentChildAnalysisClient from "@/app/components/PaidFamilyParentChildAnalysisClient";
@@ -16,17 +17,17 @@ const RELATIONSHIP_OPTIONS: readonly FamilyRelationshipOption[] = [
   {
     value: "parent_child",
     title: "부모·자녀",
-    description: "보호와 독립, 기대와 경계, 대화와 회복을 부모와 자녀의 방향을 나누어 살펴봅니다.",
+    description: "부모와 자녀가 서로 느끼는 마음과 기대, 대화하는 방법을 알아봐요.",
   },
   {
     value: "siblings",
     title: "형제·자매",
-    description: "정서적 연결과 대화, 비교와 경쟁, 오래 굳어진 역할과 경계, 갈등 뒤 회복을 살펴봅니다.",
+    description: "형제자매가 잘 통하는 부분과 서운한 마음을 풀어가는 방법을 알아봐요.",
   },
   {
     value: "other_family",
     title: "기타 가족",
-    description: "조부모·손주, 조카, 사촌, 인척 등 관계 유형에 맞춰 역할과 기대, 거리와 소통을 살펴봅니다.",
+    description: "조부모·손주, 조카, 사촌, 인척과 서로 편하게 지내는 방법을 알아봐요.",
   },
 ] as const;
 
@@ -76,6 +77,7 @@ export default function FamilyCompatibilityAnalysisClient({
                 onClick={() => selectRelationship(option)}
                 className={`min-w-[240px] snap-start rounded-[22px] border p-5 text-left transition sm:min-w-0 ${selected ? "border-[#7f70e5] bg-[linear-gradient(145deg,#171a3d,#24204d)] text-white shadow-[0_12px_28px_rgba(54,45,112,0.16)]" : "border-[#dce1ef] bg-white text-[#11162d] hover:border-[#aaa0f4] hover:bg-[#faf9ff]"}`}
               >
+                <div className="mb-3 overflow-hidden rounded-xl"><EditorialProductCover productId={option.value==="parent_child" ? "compatibility-family-parent-child" : option.value==="siblings" ? "compatibility-family-siblings" : "compatibility-family-other"}/></div>
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-base font-bold">{option.title}</span>
                   <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${selected ? "bg-white/10 text-white" : "bg-[#f3f1ff] text-[#5e4bd1]"}`}>

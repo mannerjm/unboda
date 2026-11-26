@@ -20,8 +20,8 @@ export default function AdminCustomerJourneyOverview({ report }: { report: Custo
     <section className="border-b border-slate-200 py-8" aria-labelledby="admin-journey-summary-heading">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">CUSTOMER JOURNEY</p>
-          <h2 id="admin-journey-summary-heading" className="mt-2 text-2xl font-bold">고객 재방문·구매 전환</h2>
+          <p data-dashboard-redundant-heading className="text-xs font-semibold tracking-[0.2em] text-slate-500">CUSTOMER JOURNEY</p>
+          <h2 data-dashboard-redundant-heading id="admin-journey-summary-heading" className="mt-2 text-2xl font-bold">고객 재방문·구매 전환</h2>
           <p className="mt-2 text-sm text-slate-600">기존 당일 전환 흐름과 별개로, 실제 동일 고객의 다음 행동을 확인합니다.</p>
         </div>
         <Link href="/admin/customer-journey" className="rounded-lg border border-slate-900 bg-[#171a3d] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#242957]">고객 행동 상세 분석 →</Link>

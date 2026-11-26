@@ -69,8 +69,8 @@ export default function AdminGrowthOverview({
     <section className="border-b border-slate-200 pb-10" aria-labelledby="growth-overview-heading">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">GROWTH & REVENUE</p>
-          <h1 id="growth-overview-heading" className="mt-3 text-3xl font-bold">서비스 성장·매출 현황</h1>
+          <p data-dashboard-redundant-heading className="text-xs font-semibold tracking-[0.2em] text-slate-500">GROWTH & REVENUE</p>
+          <h1 data-dashboard-redundant-heading id="growth-overview-heading" className="mt-3 text-3xl font-bold">서비스 성장·매출 현황</h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
             모든 날짜는 한국시간(KST) 기준입니다. 방문자는 관리자 화면을 제외한 브라우저별 하루 순방문이며,
             매출·환불·성인인증은 실제 저장된 운영 상태를 기준으로 계산합니다.

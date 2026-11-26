@@ -666,7 +666,7 @@ async function retryMainAnalysis() {
                 지금 내 흐름을 읽는<br className="hidden sm:block" /> 첫 번째 리포트
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-[#665779] sm:text-base">
-                출생 정보와 명리 계산 결과를 바탕으로 핵심 구조부터 현재 흐름까지 차근차근 살펴봐요.
+                태어났을 때의 사주를 바탕으로 나의 타고난 모습과 지금의 운세를 차근차근 알아봐요.
                 {memberResult ? "결과 아래에서 지금 나에게 필요한 맞춤 분석을 살펴볼 수 있어요." : "궁금한 부분이 생기면 결과 아래의 다음 질문으로 이어갈 수 있습니다."}
               </p>
             </div>
@@ -973,7 +973,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
     
 
   <p className="mt-6 text-center text-xs leading-6 text-stone-500">
-    일주는 본인을 중심으로 보는 기둥이므로 화면에서 강조해 표시했습니다.
+    일주는 나 자신을 살펴보는 사주 기둥이에요. 쉽게 찾을 수 있도록 색으로 표시했어요.
     {profile?.birthTimeKnown === false ? <span className="mt-1 block text-stone-400">자시(23시 전후) 출생 여부에 따라 일주가 달라질 수 있습니다.</span> : null}
   </p>
 </section>
@@ -1328,7 +1328,7 @@ nobles: freeAnalysis?.dayNobles ?? sajuData.dayNobles,
                         {aiOverviewHighlight.lead || normalizeAIHighlightText(aiInterpretation.overview ?? "")}
                       </p>
                       <p className="mt-3 text-sm leading-6 text-[#c5c9dc]">
-                        긴 설명 대신, 계산 엔진에서 지금 가장 중요한 내용만 압축했어요.
+                        내 사주에서 지금 눈여겨볼 이야기를 쉽고 짧게 정리했어요.
                       </p>
                     </div>
                   </div>
@@ -1731,8 +1731,8 @@ h3: ({ children }) => {
               이번 결과를 보고,<br className="sm:hidden" /> 무엇이 더 궁금해졌나요?
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-[#b7bdd1]">
-              같은 계산 결과에서 이어지는 질문을 먼저 보고, 마음에 걸리는 부분만 더 깊게 살펴보세요.
-              상품을 고르는 것보다 내 질문을 찾는 순서로 이어집니다.
+              내 사주와 지금의 운세를 바탕으로 더 궁금한 이야기를 찾아보세요.
+              마음에 드는 질문부터 천천히 살펴보면 돼요.
             </p>
           </div>
 

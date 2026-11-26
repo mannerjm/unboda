@@ -6,6 +6,10 @@ import { getEditorialProductCover } from "@/app/lib/editorialProductCover";
 
 const GENERATED_COVER_IDS: ReadonlySet<string> = new Set(["study-learning-strategy","study-exam-preparation","study-focus-routine","study-credential-decision","business-startup-readiness","business-expansion-control","business-client-relationship","business-team-management"]);
 
+/** The eight approved originals are 1100 × 619. Use their exact ratio rather than stretching or letterboxing. */
+export function hasGeneratedProductCover(productId:string):boolean { return GENERATED_COVER_IDS.has(productId); }
+const GENERATED_COVER_RATIO = "1100 / 619";
+
 const PALETTES: Record<string, {dark:string;accent:string;light:string}> = {
   career:{dark:"#14263d",accent:"#d9bb82",light:"#f5e7c8"},
   business:{dark:"#17382e",accent:"#c6b478",light:"#f7e8b6"},
@@ -24,15 +28,15 @@ export default function EditorialProductCover({productId,priority=false}:{produc
   const [failedSrc,setFailedSrc]=useState<string|null>(null);
   if(!cover) return null;
   const palette=PALETTES[cover.category]??PALETTES.period;
-  const generatedSrc=GENERATED_COVER_IDS.has(productId) ? `/images/generated-covers/${productId}.webp` : null;
+  const generatedSrc=hasGeneratedProductCover(productId) ? `/images/generated-covers/${productId}.webp` : null;
   // New artwork contains the complete typography. Never crop or overlay it.
   if(generatedSrc && failedSrc!==generatedSrc) return (
-    <div data-generated-cover={productId} className="relative aspect-[4/3] w-full overflow-hidden rounded-[inherit]" style={{background:palette.dark}}>
+    <div data-generated-cover={productId} className="relative w-full overflow-hidden rounded-[inherit]" style={{background:palette.dark,aspectRatio:GENERATED_COVER_RATIO}}>
       <Image src={generatedSrc} alt={cover.title+" · "+cover.hook} fill priority={priority} sizes={priority?"(max-width: 640px) 90vw, 390px":"(max-width: 640px) 42vw, (max-width: 1024px) 24vw, 250px"} className="object-contain object-center" onError={()=>setFailedSrc(generatedSrc)}/>
     </div>
   );
   return (
-    <div data-editorial-cover={productId} aria-label={cover.title+" · "+cover.hook} className="relative isolate aspect-[4/3] w-full overflow-hidden rounded-[inherit] text-white" style={{background:palette.dark,containerType:"inline-size"}}>
+    <div data-editorial-cover={productId} aria-label={cover.title+" · "+cover.hook} className="relative isolate aspect-[4/3] w-full overflow-hidden rounded-[inherit] text-white" style={{background:palette.dark,containerType:"inline-size",...(generatedSrc ? {aspectRatio:GENERATED_COVER_RATIO} : {})}}>
       {failedSrc!==cover.photo.src ? <Image src={cover.photo.src} alt="" fill priority={priority} sizes={priority?"(max-width: 640px) 90vw, 390px":"(max-width: 640px) 42vw, (max-width: 1024px) 24vw, 250px"} className="object-cover object-center" onError={()=>setFailedSrc(cover.photo.src)}/> : null}
       <div aria-hidden="true" className="absolute inset-0" style={{background:`linear-gradient(0deg,${palette.dark} 1%,${palette.dark}ed 17%,${palette.dark}82 49%,${palette.dark}10 78%),linear-gradient(120deg,${palette.dark}aa,transparent 58%)`}}/>
       <svg aria-hidden="true" viewBox="0 0 160 160" className="pointer-events-none absolute -right-[15%] -top-[22%] w-[68%]" style={{color:palette.accent,opacity:.38}} fill="none" stroke="currentColor" strokeWidth=".8"><circle cx="80" cy="80" r="65"/><circle cx="80" cy="80" r="56"/><circle cx="80" cy="80" r="43" strokeDasharray="1 4"/><path d="M80 15V145M15 80H145M34 34L126 126M126 34L34 126"/><path d="M80 27L84 75L132 80L84 84L80 132L76 84L28 80L76 76Z"/></svg>

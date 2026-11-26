@@ -95,3 +95,16 @@ const seasonalOrders = readFileSync("app/api/orders/route.ts","utf8");
 const seasonalPurchaseServer = readFileSync("app/lib/purchases/server.ts","utf8");
 assert(seasonalOrders.includes("isNewYearCheckoutAllowed(user.id)") && seasonalPurchaseServer.includes('input.paymentProvider === "toss" && isNewYearCheckoutAllowed(input.userId)'), "seasonal order authorization must be enforced twice, with real provider selected");
 assert(readFileSync("app/checkout/[productId]/page.tsx","utf8").includes("isNewYearCheckoutAllowed(user?.id)"), "checkout must use the authenticated server account");
+
+// New-year-only readability and navigation; existing payment paths remain untouched.
+const seasonalTeacher = readFileSync("app/components/NewYearTeacherCard.tsx","utf8");
+assert(!seasonalTeacher.includes("태운(泰運)") && seasonalTeacher.includes("태운 선생님"));
+const seasonalReport = readFileSync("app/paid-analysis/[productId]/PaidAnalysisV4Report.tsx","utf8");
+assert(seasonalReport.includes('isNewYear && detail.periodAnalysis') && seasonalReport.includes('!isNewYear && detail.periodAnalysis'));
+assert(seasonalReport.includes("대상 월의 운과 내 사주"));
+const seasonalTimeline = readFileSync("app/paid-analysis/[productId]/PeriodTimelineSection.tsx","utf8");
+assert(seasonalTimeline.includes("나의 새해 운세 한눈에 보기") && seasonalTimeline.includes('id="new-year-months"') && seasonalTimeline.includes('id="new-year-domains"'));
+const seasonalPrompt = readFileSync("app/lib/analysisPeriodOutput.ts","utf8");
+assert(seasonalPrompt.includes("신년운세 전용 고객 언어") && seasonalPrompt.includes("어려운 한자, 영어, 명리 전문 용어"));
+assert(readFileSync("app/lib/phase9NextAnalysis.ts","utf8").includes('"new-year-fortune": ["annual-3years", "wealth", "relationship"]'));
+assert(readFileSync("app/lib/aiConsultingPresentation.ts","utf8").includes("새해에 어떤 달을 가장 눈여겨보면 좋을까?"));

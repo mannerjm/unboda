@@ -9,24 +9,27 @@ export default function PeriodTimelineSection({
 }: PeriodTimelineSectionProps) {
   if (periodAnalysis.productId === "new-year-fortune") {
     return <section className="rounded-[2rem] border border-[#ded0f5] bg-white p-4 text-[#281744] shadow-sm sm:p-7">
-      <p className="text-sm font-bold text-[#7951b0]">신년운세 · 분야별 분석</p>
+      <p className="text-sm font-bold text-[#7951b0]">나의 새해 운세 한눈에 보기</p>
       <h3 className="mt-2 break-keep text-xl font-bold leading-8">{periodAnalysis.headline}</h3>
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      {periodAnalysis.keyPoints?.length ? <div className="mt-4 rounded-2xl bg-[#f3eafa] p-4"><h3 className="font-bold">올해 기억할 운의 흐름</h3><ul className="mt-2 space-y-2 text-[15px] leading-7">{periodAnalysis.keyPoints.map((point,i)=><li key={i}>• {point}</li>)}</ul></div> : null}
+      <nav aria-label="신년운세 바로 보기" className="mt-4 flex flex-wrap gap-2"><a href="#new-year-domains" className="rounded-full border border-[#ded0f5] bg-white px-4 py-2 text-sm font-bold">8가지 운세 보기 ↓</a><a href="#new-year-months" className="rounded-full border border-[#ded0f5] bg-white px-4 py-2 text-sm font-bold">열두 달 운세 보기 ↓</a></nav>
+      <h3 id="new-year-domains" className="mt-6 scroll-mt-6 text-xl font-bold">나의 8가지 운세</h3>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {periodAnalysis.newYearDomains?.map(domain => <article key={domain.label} className="min-w-0 rounded-2xl border border-[#e6dbf5] bg-[#faf7ff] p-4">
           <h4 className="text-base font-bold">{domain.label}</h4><p className="mt-2 break-words text-[15px] leading-7">{domain.summary}</p>
           <p className="mt-3 text-sm leading-6"><strong>실천</strong> · {domain.action}</p><p className="mt-2 text-sm leading-6"><strong>주의</strong> · {domain.caution}</p>
         </article>)}
       </div>
-      <h3 className="mt-7 text-xl font-bold">열두 달의 운세</h3>
+      <h3 id="new-year-months" className="mt-7 scroll-mt-6 text-xl font-bold">열두 달의 운세</h3>
+      <p className="mt-2 text-sm leading-6 text-[#54445b]">궁금한 달을 눌러 그 달의 이야기와 나를 위한 조언을 읽어 보세요.</p>
       <div className="mt-4 grid grid-cols-1 items-start gap-3 min-[360px]:grid-cols-2 lg:grid-cols-3">
         {periodAnalysis.timelineItems.map(item => <details key={item.periodKey} className="min-w-0 rounded-2xl border border-[#e6dbf5] bg-[#faf7ff] p-3 sm:p-4">
-          <summary className="min-h-12 cursor-pointer break-keep text-base font-bold"><span className="block text-[#7951b0]">{item.label}</span><span className="mt-1 block text-sm leading-6">{item.title}</span></summary>
+          <summary className="min-h-12 cursor-pointer break-keep text-base font-bold"><span className="block text-[#7951b0]">{item.label}</span>{item.intensity ? <span className={`mt-1 inline-block rounded-full px-2 py-1 text-xs ${item.intensity === "조정" ? "bg-amber-100 text-amber-900" : item.intensity === "전환" ? "bg-violet-100 text-violet-900" : "bg-white text-[#54445b]"}`}>{{강:"흐름이 강한 달",보통:"차분히 살필 달",조정:"속도를 조절할 달",전환:"변화를 살필 달"}[item.intensity]}</span> : null}<span className="mt-1 block text-sm leading-6">{item.title}</span></summary>
           <p className="mt-3 break-words text-[15px] leading-7">{item.summary}</p>
           <p className="mt-3 text-sm font-bold">실천 방법</p><ul className="mt-1 space-y-1 text-sm leading-6">{item.actions?.map((action,i)=><li key={i}>{action}</li>)}</ul>
           <p className="mt-3 text-sm font-bold">주의할 점</p><ul className="mt-1 space-y-1 text-sm leading-6">{item.cautions?.map((caution,i)=><li key={i}>{caution}</li>)}</ul>
         </details>)}
       </div>
-      <div className="mt-6 rounded-2xl bg-[#f3eafa] p-4"><h3 className="font-bold">한 해의 기회와 주의 · 실천 계획</h3><ul className="mt-3 space-y-2 text-[15px] leading-7">{periodAnalysis.keyPoints?.map((point,i)=><li key={i}>{point}</li>)}</ul></div>
     </section>;
   }
   return (

@@ -36,6 +36,7 @@ const PERIOD_NEXT: Readonly<Record<string, readonly string[]>> = {
   "monthly-next": ["yearly-current", "monthly-12months"],
   "yearly-current": ["annual-next", "annual-3years"],
   "annual-next": ["annual-3years", "daeun-current"],
+  "new-year-fortune": ["annual-3years", "wealth", "relationship"],
   "annual-3years": ["daeun-current", "lifetime-overview"],
   "monthly-12months": ["yearly-current", "annual-3years"],
   "daeun-current": ["lifetime-overview", "annual-3years"],
@@ -115,6 +116,11 @@ function reasonForPremiumCandidate(
     return "이 리포트 이후 새 기준 시기가 열렸습니다. 같은 질문을 최신 흐름으로 다시 확인할 수 있습니다.";
   }
 
+  if (source?.productId === "new-year-fortune" && candidateId !== source.productId) {
+    if (candidateId === "annual-3years") return "새해 이후까지 이어지는 여러 해의 운을 비교해 볼 수 있어요.";
+    if (candidateId === "wealth") return "새해 재물운을 읽고 돈에 관한 나의 사주를 더 자세히 알아볼 수 있어요.";
+    if (candidateId === "relationship") return "새해 인연운을 읽고 나의 관계 성향을 더 깊게 알아볼 수 있어요.";
+  }
   const sourceProduct = source ? getPremiumProduct(source.productId) : undefined;
   const candidate = getPremiumProduct(candidateId);
   if (sourceProduct?.kind === "TOPIC" && candidate?.kind === "TOPIC" && sourceProduct.category === candidate.category) {

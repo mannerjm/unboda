@@ -233,3 +233,11 @@ assert(
 );
 
 console.log("paid-analysis-v4-plain-language-regression: PASS (58/58 prompts + no raw calculation scores)");
+
+// Office-specific jargon is rejected before a new V4 customer report is saved.
+for (const jargon of ["검토 프로토콜", "구조적 압력", "업무 체크리스트"]) {
+  const candidate = makeOutput();
+  candidate.conclusion.rationale = jargon + "을 적용합니다.";
+  const quality = validateCustomerFacingLanguage(candidate);
+  assert(!quality.ok && quality.issues.some(issue => issue.field === "conclusion.rationale" && issue.message.includes(jargon)));
+}

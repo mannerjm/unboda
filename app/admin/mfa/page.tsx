@@ -17,7 +17,7 @@ export default async function AdminMfaPage() {
       <p className="mt-3">승인된 관리자만 추가 인증을 등록할 수 있습니다.</p>
     </main>;
   }
-  return <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900">
+  return <main className="min-h-screen bg-white px-5 py-10 text-slate-900">
     <div className="mx-auto max-w-2xl">
       <Link className="text-sm font-semibold underline" href="/admin">← 관리자 대시보드</Link>
       <h1 className="mt-6 text-3xl font-bold">관리자 인증 앱(MFA) 설정</h1>

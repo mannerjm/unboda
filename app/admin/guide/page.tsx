@@ -63,7 +63,7 @@ export default async function AdminGuidePage() {
       redirect("/auth/login?returnTo=/admin/guide");
     }
     return (
-      <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-slate-900">
+      <main className="min-h-screen bg-white px-5 py-14 text-slate-900">
         <div className="mx-auto w-full max-w-xl">
           <h1 className="text-3xl font-bold">접근 권한 없음</h1>
           <p className="mt-4 text-sm leading-7 text-slate-600">승인된 운영자만 운영 가이드를 볼 수 있습니다.</p>
@@ -73,7 +73,7 @@ export default async function AdminGuidePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
+    <main className="min-h-screen bg-white px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
       <div className="mx-auto w-full max-w-5xl">
         <Link href="/admin" className="text-sm font-semibold text-slate-600 underline underline-offset-4">← 운영 대시보드</Link>
         <header className="mt-6 border-b border-slate-200 pb-6">

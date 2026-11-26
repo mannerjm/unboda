@@ -27,7 +27,7 @@ return <main className="mx-auto max-w-3xl p-8"><h1 className="text-2xl font-bold
     .in("refund_id",bankRefundIds):{data:[],error:null};
   const bankMap=new Map((receipts.data??[]).map(record=>[record.refund_id,record]));
   
-  return <main className="min-h-screen bg-[#f5f7fc] px-4 py-8 text-[#11162d] sm:px-8">
+  return <main className="min-h-screen bg-white px-4 py-8 text-[#11162d] sm:px-8">
     <div className="mx-auto max-w-4xl">
       <Link href="/admin" className="text-sm font-semibold underline">← 운영 대시보드</Link>
       <h1 className="mt-4 text-2xl font-bold">AI 질문권 환불 예외</h1>
@@ -47,7 +47,7 @@ return <main className="mx-auto max-w-3xl p-8"><h1 className="text-2xl font-bold
               ?<p className="mt-3 text-sm font-semibold text-red-700">환불 계좌 접수 상태 조회에 실패했습니다.</p>
               :bankMap.has(row.id)
                 ?<RefundBankDetailsReveal refundId={row.id} bankCode={bankMap.get(row.id)!.bank_code} last4={bankMap.get(row.id)!.account_last4}/>
-                :<p className="mt-3 rounded-lg bg-[#f5f5fb] p-3 text-sm text-slate-700">고객의 대체 환불 계좌 제출을 기다리고 있습니다. 고객은 운보다 질문권 환불 관리 화면에서 직접 제출할 수 있습니다.</p>)}
+                :<p className="mt-3 rounded-lg bg-white p-3 text-sm text-slate-700">고객의 대체 환불 계좌 제출을 기다리고 있습니다. 고객은 운보다 질문권 환불 관리 화면에서 직접 제출할 수 있습니다.</p>)}
             <CreditRefundResolutionControls refundId={row.id} status={row.status} finalFailure={Boolean(row.provider_final_failure)} bankSubmitted={Boolean(bankMap.get(row.id))&&!receipts.error}/>
           </li>
         ))}</ul>}

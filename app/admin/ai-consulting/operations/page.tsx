@@ -46,7 +46,7 @@ function Stat({ label, value, note }: { label: string; value: string; note?: str
 
 function accessDenied() {
   return (
-    <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-slate-900">
+    <main className="min-h-screen bg-white px-5 py-14 text-slate-900">
       <div className="mx-auto w-full max-w-xl">
         <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">AI CONSULTING OPS</p>
         <h1 className="mt-3 text-3xl font-bold">접근 권한 없음</h1>
@@ -72,7 +72,7 @@ export default async function AiConsultingOperationsPage() {
   } catch (error) {
     console.error("[admin-ai-consulting-operations] read failed", error);
     return (
-      <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
+      <main className="min-h-screen bg-white px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
         <div className="mx-auto w-full max-w-6xl">
           <Link href="/admin/ai-consulting" className="text-sm font-semibold text-slate-600 underline underline-offset-4">← 품질·비용</Link>
           <h1 className="mt-6 text-3xl font-bold">AI 상담 운영 모니터링</h1>
@@ -96,7 +96,7 @@ export default async function AiConsultingOperationsPage() {
   const failureStages = Object.entries(report.failureStageCounts).sort((a, b) => b[1] - a[1]);
 
   return (
-    <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
+    <main className="min-h-screen bg-white px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
       <div className="mx-auto w-full max-w-6xl">
         <header className="border-b border-slate-200 pb-6">
           <div className="flex flex-wrap gap-4 text-sm font-semibold text-slate-600">

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import GuestRecommendationPurchaseButton from "@/app/components/GuestRecommendationPurchaseButton";
 import { useEffect, useState } from "react";
-import EditorialProductCover from "@/app/components/EditorialProductCover";
+import EditorialProductCover, { hasGeneratedProductCover } from "@/app/components/EditorialProductCover";
 import { getEditorialProductCover } from "@/app/lib/editorialProductCover";
 import { getWealthStorefrontCopy } from "@/app/lib/wealthStorefrontCopy";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
@@ -127,6 +127,7 @@ export default function CustomerFirstPremiumDetail({
   const headlineRest = commaIndex >= 0 ? headline.slice(commaIndex + 1).trim() : "";
   const wealthCopy = getWealthStorefrontCopy(product.id);
   const editorialCover = !seasonalYear ? getEditorialProductCover(product.id) : undefined;
+  const generatedCover = Boolean(editorialCover && hasGeneratedProductCover(product.id));
   const displayTitle = wealthCopy?.title ?? editorialCover?.title ?? product.title;
   const photo = PREMIUM_PRODUCT_PHOTOS[product.id];
   // Every topic photo uses a high-resolution, 4:3 CENTER CROP of its original
@@ -189,7 +190,7 @@ export default function CustomerFirstPremiumDetail({
             {seasonalYear && state === "not_purchased" && isNewYearSalePending(product.id, newYearCheckoutAllowed) ? <p className="mt-2 text-xs font-semibold text-[#975a33]">정식 판매 준비 중</p> : null}
           </div>
           <div className="relative mx-auto w-full max-w-[390px]">
-            <div className={`relative ${seasonalYear ? "aspect-[16/7]" : "aspect-[4/3]"} overflow-hidden rounded-[1.5rem] border-[5px] border-white bg-[#f8f1ff] shadow-[0_16px_38px_rgba(83,54,124,0.14)]`}>
+            <div className={`relative ${seasonalYear ? "aspect-[16/7]" : generatedCover ? "aspect-auto" : "aspect-[4/3]"} overflow-hidden rounded-[1.5rem] border-[5px] border-white bg-[#f8f1ff] shadow-[0_16px_38px_rgba(83,54,124,0.14)]`}>
               {wealthCopy && !photoFallback ? <Image data-wealth-detail-cover src={wealthCopy.coverSrc} alt={wealthCopy.title + " 재물운 썸네일"} fill priority sizes="(max-width: 640px) 90vw, 390px" quality={75} className="object-contain object-center" onError={() => setPhotoFallback(true)} /> : editorialCover ? <EditorialProductCover productId={product.id} priority /> : <Image src={photoSource} alt={artwork && !photoFallback ? artwork.alt : photo.alt} fill unoptimized priority
                 onError={() => setPhotoFallback(true)}
                 sizes="(max-width: 640px) 90vw, (max-width: 1024px) 390px, 390px" className="object-cover object-center" />}

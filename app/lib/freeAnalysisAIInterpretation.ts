@@ -115,3 +115,10 @@ export function parseFreeAnalysisAIInterpretation(
 
   return sections;
 }
+
+/** Member display only: split existing prose without changing its meaning or adding an AI call. */
+export function splitMemberOverview(text: string): { lead: string; situation: string; focus: string } {
+  const plain = text.replace(/^#{1,6}\s+/gm, "").replace(/[*_>`]/g, "").replace(/\s+/g, " ").trim();
+  const sentences = plain.split(/(?<=[.!?])\s+/u).filter(Boolean);
+  return { lead: sentences[0] ?? "", situation: sentences.length > 2 ? sentences.slice(1, -1).join(" ") : sentences[1] ?? "", focus: sentences.length > 2 ? sentences[sentences.length - 1] : "" };
+}

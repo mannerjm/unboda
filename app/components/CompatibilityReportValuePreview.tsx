@@ -71,45 +71,45 @@ const REVIEW_PRODUCT_BY_MODE: Record<CompatibilityPreviewMode, string> = {
 const PREVIEW_CONFIG: Record<CompatibilityPreviewMode, PreviewConfig> = {
   romantic: {
     headline: "연인·배우자 리포트는 이렇게 읽습니다",
-    directionTitle: "나 → 상대 / 상대 → 나를 따로 해석",
+    directionTitle: "내가 느끼는 마음과 상대가 느끼는 마음",
     directionDescription: "같은 관계라도 서로 다르게 체감할 수 있는 부분을 방향별로 나눠 설명합니다.",
-    domains: ["정서적 연결", "대화", "갈등 패턴", "장기 기준", "갈등 뒤 회복"],
+    domains: ["마음이 통하는 순간", "대화하는 방식", "자주 다투는 이유", "오래 함께하는 방법", "다툰 뒤 마음 풀기"],
   },
   workplace: {
     headline: "직장·동료 리포트는 이렇게 읽습니다",
-    directionTitle: "나 → 동료 / 동료 → 나의 업무 영향을 따로 해석",
+    directionTitle: "내가 동료에게 주는 느낌과 동료가 내게 주는 느낌",
     directionDescription: "같은 업무 관계라도 서로에게 주는 추진력과 부담이 다를 수 있어 방향별로 나눠 설명합니다.",
-    domains: ["업무 스타일", "역할 분담", "의사결정", "소통·갈등", "협업 지속 기준"],
+    domains: ["일하는 방식", "일을 나누는 방법", "함께 결정하는 방식", "오해와 대화", "오래 함께 일하는 방법"],
   },
   friend: {
     headline: "친구·지인 리포트는 이렇게 읽습니다",
-    directionTitle: "나 → 친구 / 친구 → 나의 관계 영향을 따로 해석",
+    directionTitle: "나와 친구가 서로에게 주는 느낌",
     directionDescription: "친밀감과 거리감이 서로에게 어떻게 다르게 느껴지는지 양방향으로 나눠 설명합니다.",
-    domains: ["친밀감", "신뢰", "대화", "거리·경계", "관계 지속 흐름"],
+    domains: ["마음이 가까워지는 순간", "서로 믿는 방식", "대화하는 모습", "편안한 거리", "오래 친구로 지내기"],
   },
   business: {
     headline: "사업·동업 리포트는 이렇게 읽습니다",
-    directionTitle: "나 → 파트너 / 파트너 → 나의 사업 관계 영향을 따로 해석",
+    directionTitle: "나와 동업자가 서로에게 주는 힘과 부담",
     directionDescription: "역할·책임·의사결정에서 서로에게 주는 보완과 부담을 방향별로 나눠 설명합니다.",
-    domains: ["역할·책임", "의사결정", "돈을 보는 방식", "권한·갈등", "장기 동업 기준"],
+    domains: ["일을 나누는 방식", "함께 결정하는 방법", "돈을 보는 방식", "의견이 다를 때", "오래 함께 사업하기"],
   },
   parent_child: {
     headline: "부모·자녀 리포트는 이렇게 읽습니다",
-    directionTitle: "부모 → 자녀 / 자녀 → 부모를 따로 해석",
+    directionTitle: "부모의 마음과 자녀의 마음을 따로 살펴봐요",
     directionDescription: "보호와 기대가 자녀에게 어떻게 닿는지, 자녀의 반응이 부모에게 어떻게 느껴지는지 방향별로 나눠 설명합니다.",
-    domains: ["정서적 연결", "대화", "기대·독립", "보호·경계", "갈등 뒤 회복"],
+    domains: ["마음이 통하는 순간", "서로의 대화", "기대와 스스로 하는 일", "도움이 부담이 되는 때", "다시 가까워지기"],
   },
   siblings: {
     headline: "형제·자매 리포트는 이렇게 읽습니다",
-    directionTitle: "나 → 형제·자매 / 형제·자매 → 나를 따로 해석",
+    directionTitle: "형제자매가 서로에게 느낄 수 있는 마음",
     directionDescription: "서로에게 힘이 되는 부분과 부담으로 느껴질 수 있는 부분을 한 방향으로 뭉개지 않고 나눠 설명합니다.",
-    domains: ["정서적 연결", "대화", "비교·경쟁", "역할·경계", "갈등 뒤 회복"],
+    domains: ["마음이 통하는 순간", "서로의 대화", "비교와 경쟁", "서로 편하게 지내기", "서운함 풀기"],
   },
   other_family: {
     headline: "기타 가족 리포트는 이렇게 읽습니다",
-    directionTitle: "서로에게 미치는 영향을 양방향으로 해석",
+    directionTitle: "서로에게 느껴지는 마음을 나누어 봐요",
     directionDescription: "가족 역할이 달라도 한쪽 관점만 보지 않고, 서로에게 어떻게 다르게 작용하는지 나눠 설명합니다.",
-    domains: ["정서적 거리", "대화", "역할·기대", "연락·도움·관여 경계", "갈등 뒤 회복"],
+    domains: ["서로 편안한 거리", "대화하는 모습", "가족에게 바라는 것", "연락과 도움", "서운함 풀기"],
   },
 };
 
@@ -176,13 +176,13 @@ export default function CompatibilityReportValuePreview({
               <p className="text-xs font-bold text-slate-600">관계 핵심</p>
             </div>
             <p className="mt-3 text-sm font-bold leading-6 text-[#11162d]">두 사람의 기본 관계부터 정리</p>
-            <p className="mt-1 text-sm leading-6 text-slate-600">힘이 되는 지점과 주의할 패턴을 먼저 짚어 전체 리포트의 기준을 잡습니다.</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">서로 힘이 되는 점과 조심하면 좋은 부분부터 살펴봐요.</p>
           </li>
 
           <li className="rounded-2xl border border-[#dce1ef] bg-white p-4">
             <div className="flex items-center gap-2">
               <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#6f5ce7] text-xs font-bold text-white">2</span>
-              <p className="text-xs font-bold text-slate-600">양방향 영향</p>
+              <p className="text-xs font-bold text-slate-600">서로에게 주는 느낌</p>
             </div>
             <p className="mt-3 text-sm font-bold leading-6 text-[#11162d]">{config.directionTitle}</p>
             <p className="mt-1 text-sm leading-6 text-slate-600">{config.directionDescription}</p>
@@ -193,7 +193,7 @@ export default function CompatibilityReportValuePreview({
               <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#6f5ce7] text-xs font-bold text-white">3</span>
               <p className="text-xs font-bold text-slate-600">{evaluationYear}년 흐름</p>
             </div>
-            <p className="mt-3 text-sm font-bold leading-6 text-[#11162d]">올해 달라지는 흐름과 행동 가이드</p>
+            <p className="mt-3 text-sm font-bold leading-6 text-[#11162d]">올해 달라질 수 있는 관계와 작은 조언</p>
             <p className="mt-1 text-sm leading-6 text-slate-600">기본 관계와 올해 흐름을 구분하고, 지금 해볼 행동과 줄이면 좋은 행동까지 연결합니다.</p>
           </li>
         </ol>

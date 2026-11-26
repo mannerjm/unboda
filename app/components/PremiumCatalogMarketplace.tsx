@@ -276,6 +276,14 @@ function ProductArtwork({category,productId,wide=false}: {category:string;produc
   />;
 }
 
+/** Pilot covers already include their own title; keep them uncropped and serve optimized sizes. */
+function WealthCover({productId,title}:{productId:string;title:string}) {
+  const [failed,setFailed]=useState(false);
+  useEffect(()=>setFailed(false),[productId]);
+  if(failed) return <><ProductArtwork category="money" productId={productId}/><span className="absolute inset-x-0 bottom-0 bg-black/70 p-2 text-sm font-bold text-white">{title}</span></>;
+  return <Image src={`/images/wealth-covers/${productId}.png`} alt={title+" 재물운 썸네일"} fill sizes="(max-width: 640px) 44vw, (max-width: 1024px) 22vw, 240px" quality={75} className="object-contain object-center" loading="lazy" onError={()=>setFailed(true)}/>;
+}
+
 type ReviewSummary = {count:number;averageRating:number|null};
 const reviewCache=new Map<string,ReviewSummary|null>();
 function VerifiedRating({productId}:{productId:string}) {
@@ -395,6 +403,25 @@ export default function PremiumCatalogMarketplace({
                 const question=config?.purchaseDecision?.decisionQuestion;
                 const state=stateByProductId.get(product.id)??"not_purchased";
                 const thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id] ?? BUSINESS_THUMBNAIL_TITLES[product.id] ?? HEALTH_THUMBNAIL_TITLES[product.id] ?? MONEY_THUMBNAIL_TITLES[product.id] ?? CAREER_THUMBNAIL_TITLES[product.id] ?? SOCIAL_THUMBNAIL_TITLES[product.id] ?? RELATIONSHIP_THUMBNAIL_TITLES[product.id];
+                if(currentGroup.category==="money" && Object.prototype.hasOwnProperty.call(MONEY_THUMBNAIL_TITLES,product.id)) return (
+                  <button key={product.id} type="button" onClick={()=>onSelectProduct(product.id)} data-wealth-cover={product.id} className="group grid grid-cols-[minmax(0,44%)_minmax(0,1fr)] items-center gap-3 rounded-[1.3rem] border border-[#eadff5] bg-white p-3 text-left shadow-sm transition hover:border-[#c49be8] hover:shadow-md focus-visible:ring-2 focus-visible:ring-[#9164d1]" aria-label={product.title+" 상세 정보 보기"}>
+                    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-[#211b32]">
+                      <WealthCover productId={product.id} title={thumbnailTitle}/>
+                    </div>
+                    <div className="flex h-full min-w-0 flex-col justify-center gap-1.5">
+                      <p className="break-keep text-[11px] font-semibold text-[#9265b6]">{product.title}</p>
+                      <h3 className="break-keep text-sm font-extrabold leading-snug text-[#302044] group-hover:text-[#753aba] sm:text-[16px]">{getReadablePaidQuestion(product.id,question??product.title)}</h3>
+                      <div className="flex flex-wrap items-center gap-1">
+                        {recommendedIdSet.has(product.id)?<span className="rounded bg-[#f0e7ff] px-1.5 py-0.5 text-[10px] font-bold text-[#6c3ab7]">내 추천</span>:null}
+                        {state!=="not_purchased"?<span className="rounded bg-[#f4effa] px-1.5 py-0.5 text-[10px] font-bold text-[#5b4481]">{STATUS[state]}</span>:null}
+                      </div>
+                      <div className="mt-auto flex flex-wrap items-center justify-between gap-1 pt-1">
+                        <VerifiedRating productId={product.id}/>
+                        <span className="text-sm font-black text-[#372049]">{money(product.id)}</span>
+                      </div>
+                    </div>
+                  </button>
+                );
                 return <button key={product.id} type="button" onClick={()=>onSelectProduct(product.id)} className="group grid min-h-[148px] grid-cols-[116px_minmax(0,1fr)] gap-3 rounded-[1.3rem] border border-[#eadff5] bg-white p-3 text-left shadow-[0_9px_25px_rgba(110,76,165,.07)] transition hover:-translate-y-0.5 hover:border-[#c49be8] hover:shadow-[0_14px_30px_rgba(110,76,165,.14)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#9164d1] sm:grid-cols-[132px_minmax(0,1fr)]" aria-label={product.title+" 상세 정보 보기"}>
                   <div className="relative min-h-[122px] overflow-hidden rounded-xl bg-[#f8f1ff]">
                     <ProductArtwork category={currentGroup.category} productId={product.id}/>

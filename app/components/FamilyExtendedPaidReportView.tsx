@@ -77,7 +77,7 @@ function ActionSection({
   return (
     <section data-hwadam-report-theme="action" style={HWADAM_REPORT_DARK_STYLE} className="relative overflow-hidden rounded-[1.95rem] border border-[#2e295c] bg-[radial-gradient(circle_at_top_right,rgba(131,111,239,0.24),transparent_30%),linear-gradient(145deg,#1d1b3d_0%,#292550_100%)] p-6 text-white shadow-[0_24px_60px_rgba(31,28,72,0.18)] sm:p-7">
       <div className="[&_h2]:text-white [&_p:first-child]:text-[#c8c1ff] [&_p:last-child]:text-slate-300">
-        <SectionHeader number="07 · 지금 해볼 것" title="관계를 바꾸는 작은 행동" description="가족 관계에서 바로 시도할 수 있는 행동부터 정리했습니다." />
+        <SectionHeader number="07 · 지금 해볼 것" title="서로를 위해 해볼 작은 일" description="가족 관계에서 바로 시도할 수 있는 행동부터 정리했습니다." />
       </div>
       <div className="mt-5 grid gap-3 lg:grid-cols-3">
         {doNext.map((item, index) => (
@@ -131,12 +131,12 @@ function SiblingReport({ content }: { content: StoredFamilySiblingReport }) {
 
       <div className="space-y-5 bg-[linear-gradient(180deg,#f7f7fb_0%,#f1f2f7_42%,#f6f7fb_100%)] p-5 sm:p-7">
         <div className="grid gap-5 lg:grid-cols-2">
-          <EditorialSection number="01 · 정서적 연결" title="가까움과 거리감이 생기는 방식" summary={report.emotionalBond.summary} points={report.emotionalBond.keyPoints} />
-          <EditorialSection number="02 · 대화 방식" title="말과 반응이 맞거나 엇갈리는 지점" summary={report.communication.summary} points={report.communication.keyPoints} />
-          <EditorialSection number="03 · 비교와 경쟁" title="경쟁보다 협력이 쉬워지는 조건" summary={report.comparisonAndCompetition.summary} points={report.comparisonAndCompetition.keyPoints} />
-          <EditorialSection number="04 · 역할과 경계" title="오래 굳어진 역할과 서로의 선택 범위" summary={report.rolesAndBoundaries.summary} points={report.rolesAndBoundaries.keyPoints} />
+          <EditorialSection number="01 · 마음이 통하는 순간" title="어떤 때 가까워지고 멀게 느껴질까요?" summary={report.emotionalBond.summary} points={report.emotionalBond.keyPoints} />
+          <EditorialSection number="02 · 대화 방식" title="서로의 말이 잘 통할 때와 어긋날 때" summary={report.communication.summary} points={report.communication.keyPoints} />
+          <EditorialSection number="03 · 비교와 경쟁" title="비교보다 서로 돕기 좋은 순간" summary={report.comparisonAndCompetition.summary} points={report.comparisonAndCompetition.keyPoints} />
+          <EditorialSection number="04 · 역할과 경계" title="서로에게 익숙한 역할과 각자의 자유" summary={report.rolesAndBoundaries.summary} points={report.rolesAndBoundaries.keyPoints} />
         </div>
-        <EditorialSection number="05 · 갈등 뒤 회복" title="다시 연결되기 쉬운 조건" summary={report.recovery.summary} points={report.recovery.keyPoints} />
+        <EditorialSection number="05 · 갈등 뒤 회복" title="서운함을 풀고 다시 가까워지는 방법" summary={report.recovery.summary} points={report.recovery.keyPoints} />
         {report.currentTiming ? (
           <section className="rounded-[1.9rem] border border-[#d8d3ff] bg-[radial-gradient(circle_at_82%_18%,rgba(125,104,234,0.12),transparent_28%),linear-gradient(135deg,#f1efff_0%,#f8f7ff_55%,#f3f4fa_100%)] p-6 shadow-[0_16px_38px_rgba(71,58,140,0.07)] sm:p-7">
             <SectionHeader number="06 · 구매 연도 관계 흐름" title={`${meta.evaluationYear}년 형제·자매 관계 흐름`} />
@@ -183,12 +183,12 @@ function OtherFamilyReport({ content }: { content: StoredFamilyOtherReport }) {
 
       <div className="space-y-5 bg-[linear-gradient(180deg,#f7f7fb_0%,#f1f2f7_42%,#f6f7fb_100%)] p-5 sm:p-7">
         <div className="grid gap-5 lg:grid-cols-2">
-          <EditorialSection number="01 · 정서적 거리" title="가까움과 거리를 편안하게 조절하는 방식" summary={report.emotionalDistance.summary} points={report.emotionalDistance.keyPoints} />
+          <EditorialSection number="01 · 마음의 거리" title="서로 부담 없이 지내는 방법" summary={report.emotionalDistance.summary} points={report.emotionalDistance.keyPoints} />
           <EditorialSection number="02 · 대화 방식" title="연락과 표현이 맞거나 엇갈리는 지점" summary={report.communication.summary} points={report.communication.keyPoints} />
-          <EditorialSection number="03 · 역할과 기대" title="가족 역할과 기대를 맞추는 기준" summary={report.roleAndExpectations.summary} points={report.roleAndExpectations.keyPoints} />
-          <EditorialSection number="04 · 거리와 관여" title="연락·도움·조언이 편안해지는 경계" summary={report.boundariesAndContact.summary} points={report.boundariesAndContact.keyPoints} />
+          <EditorialSection number="03 · 역할과 기대" title="가족에게 서로 바라는 이야기" summary={report.roleAndExpectations.summary} points={report.roleAndExpectations.keyPoints} />
+          <EditorialSection number="04 · 거리와 관여" title="연락과 도움을 편하게 주고받는 방법" summary={report.boundariesAndContact.summary} points={report.boundariesAndContact.keyPoints} />
         </div>
-        <EditorialSection number="05 · 갈등 뒤 회복" title="불편함 뒤 다시 연결되기 쉬운 조건" summary={report.recovery.summary} points={report.recovery.keyPoints} />
+        <EditorialSection number="05 · 갈등 뒤 회복" title="불편함 뒤 서운함을 풀고 다시 가까워지는 방법" summary={report.recovery.summary} points={report.recovery.keyPoints} />
         {report.currentTiming ? (
           <section className="rounded-[1.9rem] border border-[#d8d3ff] bg-[radial-gradient(circle_at_82%_18%,rgba(125,104,234,0.12),transparent_28%),linear-gradient(135deg,#f1efff_0%,#f8f7ff_55%,#f3f4fa_100%)] p-6 shadow-[0_16px_38px_rgba(71,58,140,0.07)] sm:p-7">
             <SectionHeader number="06 · 구매 연도 관계 흐름" title={`${meta.evaluationYear}년 ${relationshipLabel} 관계 흐름`} />

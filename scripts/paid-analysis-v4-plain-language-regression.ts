@@ -228,7 +228,7 @@ assert(
   "stored V4 reports must hide legacy raw evidence scores at render time",
 );
 assert(
-  report.includes("확인할 신호 ·") && !report.includes("관찰 신호 ·"),
+  report.includes("이런 모습이 보인다면 ·") && !report.includes("관찰 신호 ·"),
   "V4 customer UI should use the simpler static label",
 );
 

@@ -17,7 +17,10 @@ assert(page.includes('view=support#failure-summary-heading'), "exception links r
 assert(read("next.config.ts").includes('"/admin/:path*"'), "existing private admin namespace");
 assert(page.includes('view === "refunds" ? getAdminRefundClosureDashboard(20) : Promise.resolve(null)'), "only load selected category reads");
 assert(legacy.includes('if ((await searchParams).legacy !== "1") redirect("/admin/dashboard")') && legacy.indexOf("await requireOperator()") < legacy.indexOf('redirect("/admin/dashboard")'), "dashboard is the authenticated default with explicit legacy fallback");
-assert(shell.includes('bg-white text-slate-900') && shell.includes('border-slate-200 bg-white') && shell.includes('border-l-slate-900 bg-white'), "white canvas, sidebar and selected menu");
+assert(shell.includes('bg-[#f5f6f8] text-slate-900') && shell.includes('border-[#d1d5db] bg-white') && shell.includes('border-l-slate-900 bg-[#e8edf4]'), "soft neutral canvas, white sidebar and distinct active menu");
+const readability = read("app/admin/dashboard/DashboardShell.module.css");
+assert(shell.includes('styles.content') && readability.includes('.content :global(.text-xs)') && readability.includes('font-size: 0.875rem') && readability.includes('font-size: 1.75rem') && readability.includes('color: #475569') && readability.includes('border-color: #d1d5db'), "scoped legible typography and card contrast");
+for (const component of ["AdminGrowthOverview", "AdminCustomerJourneyOverview"]) assert(read("app/admin/"+component+".tsx").includes("data-dashboard-redundant-heading"), "hide repeated headings only in new dashboard");
 assert(!/bg-\[#(?:f7f5fc|f0eaf9|e4d7f8|7650bb)\]/i.test(shell), "no lavender background in dashboard");
 assert(page.includes('link("/admin?legacy=1", "기존 전체 관리자 화면")'), "legacy fallback link remains explicit");
 console.log("[admin-dashboard] protected layout, menu routing, reused sections, and legacy fallback passed");

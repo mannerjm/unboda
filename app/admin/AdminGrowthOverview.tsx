@@ -39,10 +39,12 @@ export default function AdminGrowthOverview({
   report,
   productLabels,
   journey,
+  showJourney = true,
 }: {
   report: AdminGrowthDashboard;
   productLabels: ProductLabel[];
   journey: CustomerJourneyDashboard | null;
+  showJourney?: boolean;
 }) {
   const [trendDays, setTrendDays] = useState<7 | 30>(7);
   const productLabelMap = useMemo(
@@ -90,7 +92,7 @@ export default function AdminGrowthOverview({
         <StatCard label="누적 순매출" value={won(totals.netRevenueKrw)} note={`누적 결제 ${won(totals.grossRevenueKrw)} · 환불 ${won(totals.refundAmountKrw)}`} />
       </div>
 
-      <AdminCustomerJourneyOverview report={journey} />
+      {showJourney ? <AdminCustomerJourneyOverview report={journey} /> : null}
 
       <div className="mt-7 rounded-2xl border border-[#dce1ef] bg-white p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">

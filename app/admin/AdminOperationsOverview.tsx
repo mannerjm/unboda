@@ -63,6 +63,7 @@ export default function AdminOperationsOverview({
   supportQueueCount,
   reportPerformance,
   soloOps,
+  view = "all",
 }: {
   failureSummary: FailureSummary | null;
   aiOperations: AiOperationsSnapshot | null;
@@ -71,6 +72,7 @@ export default function AdminOperationsOverview({
   supportQueueCount: number | null;
   reportPerformance: CustomerJourneyDashboard | null;
   soloOps: SoloOperationsSnapshot | null;
+  view?: "all" | "summary" | "reports" | "ai" | "system";
 }) {
   const systemHealthy = soloOps?.scheduler === "healthy" && soloOps?.reportRecovery === "healthy";
   const ownerAttention = failureSummary && soloOps
@@ -110,8 +112,13 @@ export default function AdminOperationsOverview({
     { title: "자동 작업 생존 감시 이상", count: systemHealthy ? 0 : 1, href: "/admin/guide", action: "자동 작업 상태 확인" },
   ].filter((task) => task.count > 0) : [];
 
+  const summary = view === "all" || view === "summary";
+  const system = view === "all" || view === "system";
+  const reports = view === "all" || view === "reports";
+  const ai = view === "all" || view === "ai";
   return (
-    <section className="border-b border-slate-200 pb-8" aria-labelledby="operator-overview-heading">
+    <section className="border-b border-slate-200 pb-8" aria-label={summary ? undefined : "운영 상세"} aria-labelledby={summary ? "operator-overview-heading" : undefined}>
+      {summary ? <>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">SOLO OPERATOR</p>
@@ -163,12 +170,14 @@ export default function AdminOperationsOverview({
               <li key={task.title} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
                 <span className="font-semibold text-slate-900">{task.title} · {number(task.count)}건</span>
                 <span className="text-slate-500">{task.action}</span>
-                <Link href={task.href} className="font-bold text-[#5143b0] underline">확인 →</Link>
+                <Link href={view !== "all" && task.href === "#failure-summary-heading" ? "/admin/dashboard?view=support#failure-summary-heading" : task.href} className="font-bold text-[#5143b0] underline">확인 →</Link>
               </li>
             ))}
           </ul>
         )}
       </div>
+      </> : null}
+      {system ? <>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="자동 작업" value={!soloOps ? "조회 불가" : systemHealthy ? "정상" : "확인 필요"}
           note={soloOps ? `결제·환불: ${soloOps.scheduler} · 리포트 복구: ${soloOps.reportRecovery}` : "자동 작업 실행 상태 확인 실패"}/>
@@ -184,7 +193,8 @@ export default function AdminOperationsOverview({
         <Link href="/admin/reviews" className="font-bold text-[#5143b0] underline">후기 검수 →</Link>
         <Link href="/admin/credit-refunds" className="font-bold text-[#5143b0] underline">질문권 환불 확인 →</Link>
       </nav>
-      <div className="mt-7 rounded-2xl border border-[#dce1ef] bg-white p-5 shadow-sm">
+      </> : null}
+      {reports ? <div className="mt-7 rounded-2xl border border-[#dce1ef] bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-bold">유료 리포트 생성 현황</h2>
@@ -207,9 +217,9 @@ export default function AdminOperationsOverview({
             value={reportPerformance ? number(reportPerformance.generationRetries30) + "회" : "—"}
             note="생성 시도 기록의 재시도 횟수 · 리포트 건수 아님"/>
         </div>
-      </div>
-
-      <div className="mt-4 grid gap-3 lg:grid-cols-5">
+      </div> : null}
+      {(system || ai) ? <div className={`mt-4 grid gap-3 sm:grid-cols-2 ${view === "all" ? "lg:grid-cols-5" : view === "ai" ? "lg:grid-cols-3" : ""}`}>
+        {system ? <>
         <div className={`border p-4 ${supportQueueCount === 0 ? "border-emerald-200 bg-emerald-50" : supportQueueCount === null ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-white"}`}>
           <p className="text-xs font-semibold text-slate-600">고객지원 요청</p>
           <p className="mt-2 text-lg font-bold">{supportQueueCount === null ? "-" : `${number(supportQueueCount)}건`}</p>
@@ -220,6 +230,8 @@ export default function AdminOperationsOverview({
           <p className="mt-2 text-lg font-bold">{operatorAlertConfigured ? "설정됨" : "설정 필요"}</p>
           <p className="mt-2 text-xs leading-5 text-slate-600">자동 복구 건은 알리지 않고, 대표 판단이 필요한 예외가 생길 때만 활성 운영자에게 알립니다.</p>
         </div>
+        </> : null}
+        {ai ? <>
         <div className="border border-slate-200 bg-white p-4">
           <p className="text-xs font-semibold text-slate-500">AI 질문권 무결성</p>
           <p className="mt-2 text-lg font-bold">{aiOperations ? `${number(aiOperations.chargeIntegrityIssueCount)}건` : "-"}</p>
@@ -235,14 +247,15 @@ export default function AdminOperationsOverview({
           <p className="mt-2 text-lg font-bold">{aiQuality ? usd(aiQuality.estimatedAverageCostUsd) : "-"}</p>
           <p className="mt-2 text-xs leading-5 text-slate-500">토큰 기록 완전성 {aiQuality ? percent(aiQuality.telemetryPassRate) : "-"}</p>
         </div>
-      </div>
+        </> : null}
+      </div> : null}
 
-      <nav className="mt-5 flex flex-wrap gap-2" aria-label="운영자 바로가기">
-        <Link href="/admin/support" className="border border-slate-900 bg-[#171a3d] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#242957]">고객지원 요청 {supportQueueCount === null ? "-" : `${number(supportQueueCount)}건`}</Link>
+      {view === "all" || view === "system" || view === "ai" ? <nav className="mt-5 flex flex-wrap gap-2" aria-label="운영자 바로가기">
+        {view !== "ai" ? <Link href="/admin/support" className="border border-slate-900 bg-[#171a3d] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#242957]">고객지원 요청 {supportQueueCount === null ? "-" : `${number(supportQueueCount)}건`}</Link> : null}
         <Link href="/admin/guide" className="border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800">대표 운영 가이드</Link>
         <Link href="/admin/ai-consulting/operations" className="border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800">AI 상담 운영</Link>
         <Link href="/admin/ai-consulting" className="border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800">AI 품질·비용</Link>
-      </nav>
+      </nav> : null}
     </section>
   );
 }

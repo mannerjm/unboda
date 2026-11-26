@@ -42,7 +42,7 @@ export default function RefundBankDetailsReveal({refundId,bankCode,last4}:{
       className="rounded-lg border border-slate-500 px-3 py-2 font-bold disabled:opacity-50">
       {busy?"계좌 확인 중...":details?"계좌 다시 확인":"계좌 확인하기"}
     </button>
-    {details?<div className="rounded-lg bg-[#f2f3fa] p-3">
+    {details?<div className="rounded-lg bg-white p-3">
       <dl className="grid grid-cols-[90px_1fr] gap-2">
         <dt className="font-semibold">은행</dt><dd>{label}</dd>
         <dt className="font-semibold">계좌번호</dt><dd className="select-all break-all font-mono">{details.accountNumber}</dd>

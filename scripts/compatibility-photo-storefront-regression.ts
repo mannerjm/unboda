@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync, statSync } from "node:fs";
+import { getEditorialProductCover } from "../app/lib/editorialProductCover";
 import { PREMIUM_PRODUCT_PHOTOS } from "../app/lib/premiumProductPhotos";
 import {
   COMPATIBILITY_BUSINESS_PRODUCT,
@@ -54,3 +55,9 @@ assert(listing.includes('photoId: "relationship-current"')
   && PREMIUM_PRODUCT_PHOTOS["relationship-current"].src === "/images/premium/relationship-current.jpg",
   "romantic catalog, detail hero and preview must resolve to one canonical first-party image");
 console.log("compatibility photo storefront regression passed: no catalog guide accordion, same romantic image in catalog/hero/preview, 5 canonical entry routes");
+
+const coverIds=["compatibility-romantic","compatibility-workplace","compatibility-friend","compatibility-business","compatibility-family-parent-child","compatibility-family-siblings","compatibility-family-other","compatibility-family"];
+for(const id of coverIds){ const cover=getEditorialProductCover(id); assert(cover?.category==="compatibility" && cover.title && cover.hook); assert(statSync("public"+cover.photo.src).size>1000); }
+assert.equal(new Set(coverIds.map(id=>getEditorialProductCover(id)?.title)).size,8);
+assert(listing.includes("<EditorialProductCover productId={coverId}") && listing.includes("aspect-[4/3]"));
+for(const name of ["CompatibilityDetailHero","CompatibilityReportValuePreview","FamilyCompatibilityAnalysisClient"]){ assert(readFileSync(`app/components/${name}.tsx`,"utf8").includes("<EditorialProductCover")); }

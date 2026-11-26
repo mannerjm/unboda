@@ -1,34 +1,34 @@
 {
   "schemaVersion": 1,
-  "id": "unboda-saju-midnight-sleep-routine-4-0-20261126",
-  "topicKey": "saju-midnight-sleep-routine-4-0-20261126",
+  "id": "unboda-saju-midnight-night-checklist-4-0-20261127",
+  "topicKey": "saju-midnight-night-checklist-4-0-20261127",
   "sajuCategory": "self-understanding",
   "visualStyle": "midnight-indigo",
-  "visualMotif": "sleep-routine",
-  "situation": "밤늦게까지 정리를 끝내지 못한 날",
-  "hook": "밤에도 일이 남나요? 반복된 내 반응, 사주에서 어떻게 볼까요?",
-  "theme": "밤늦게까지 정리를 끝내지 못한 날을 출생 정보에 기반한 전통 사주 해석과 연결. 수면 습관을 진단하지 않고 관찰 가능한 리듬과 다음날 회복 신호를 점검",
-  "thumbnailTitle": "밤의 휴식 사주 | 밤에도 일이 남나요?",
+  "visualMotif": "night-checklist",
+  "situation": "할 일 목록에 쉬는 시간이 빠진 밤",
+  "hook": "쉴 시간을 뺐나요? 반복된 내 반응, 사주에서 어떻게 볼까요?",
+  "theme": "할 일 목록에 쉬는 시간이 빠진 밤을 출생 정보에 기반한 전통 사주 해석과 연결. 건강 지원 습관이 무너지는 조건과 재시작 기준을 점검",
+  "thumbnailTitle": "내일 할 일 사주 | 쉴 시간을 뺐나요?",
   "narrationDraft": [
-    "밤에도 일이 남나요? 반복된 내 반응, 사주에서 어떻게 볼까요?",
+    "쉴 시간을 뺐나요? 반복된 내 반응, 사주에서 어떻게 볼까요?",
     "사주는 태어난 해와 달과 날, 시간으로 전통 해석을 살펴봐요.",
     "출생 시간을 몰라도 시간 모름을 선택하고 무료 결과를 확인해 보세요.",
     "운보다 무료 사주 조회로 내 생활 성향을 하나씩 천천히 살펴보세요."
   ],
   "visualConcepts": [
-    "첫 장면에서 밤늦게까지 정리를 끝내지 못한 날 상황과 밤의 휴식, 침실을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "두 번째 장면에서 밤늦게까지 정리를 끝내지 못한 날 상황과 밤의 휴식, 침실을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "세 번째 장면에서 밤늦게까지 정리를 끝내지 못한 날 상황과 밤의 휴식, 침실을 실제 주제 그림으로 보여주고 움직이는 화면",
-    "마지막 장면에서 밤늦게까지 정리를 끝내지 못한 날 상황과 밤의 휴식, 침실을 실제 주제 그림으로 보여주고 움직이는 화면"
+    "첫 장면에서 할 일 목록에 쉬는 시간이 빠진 밤 상황과 내일 할 일, 메모을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "두 번째 장면에서 할 일 목록에 쉬는 시간이 빠진 밤 상황과 내일 할 일, 메모을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "세 번째 장면에서 할 일 목록에 쉬는 시간이 빠진 밤 상황과 내일 할 일, 메모을 실제 주제 그림으로 보여주고 움직이는 화면",
+    "마지막 장면에서 할 일 목록에 쉬는 시간이 빠진 밤 상황과 내일 할 일, 메모을 실제 주제 그림으로 보여주고 움직이는 화면"
   ],
   "scenes": [
     {
       "headline": [
-        "밤의 휴식 사주",
-        "밤에도 일이 남나요?"
+        "내일 할 일 사주",
+        "쉴 시간을 뺐나요?"
       ],
       "subline": "시간 몰라도 될까?",
-      "illustration": "rest"
+      "illustration": "clock"
     },
     {
       "headline": [
@@ -36,7 +36,7 @@
         "내 생활과 비교"
       ],
       "subline": "사주로 시작하는 자기이해",
-      "illustration": "clock"
+      "illustration": "message"
     },
     {
       "headline": [
@@ -44,31 +44,31 @@
         "기본 해석 참고"
       ],
       "subline": "내 출생 정보로 결과 확인",
-      "illustration": "message"
+      "illustration": "notes"
     },
     {
       "headline": [
         "무료 사주",
         "바로 조회하기"
       ],
-      "subline": "운보다 무료 사주 · 수면 리듬 점검 분석",
-      "illustration": "notes"
+      "subline": "운보다 무료 사주 · 생활 습관 유지 분석",
+      "illustration": "rest"
     }
   ],
-  "targetDateKst": "20261126",
+  "targetDateKst": "20261127",
   "destination": "https://unboda.kr/guest-saju",
   "licenseReviewRequired": true,
   "voiceHumanReviewRequired": true,
   "automatedPublicationAllowed": false,
-  "productId": "health-sleep-rhythm",
-  "productTitle": "수면 리듬 점검 분석",
+  "productId": "health-habit-continuity",
+  "productTitle": "생활 습관 유지 분석",
   "productCategory": "health",
   "productType": "premium",
-  "landingPath": "/paid-analysis/health-sleep-rhythm",
+  "landingPath": "/paid-analysis/health-habit-continuity",
   "contentGoal": "premium-conversion",
-  "productProblem": "수면 관련 밤늦게까지 정리를 끝내지 못한 날 상황을 돌아보고 점검",
-  "productValue": "수면 습관을 진단하지 않고 관찰 가능한 리듬과 다음날 회복 신호를 점검",
-  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 수면 리듬 점검 분석 https://unboda.kr/paid-analysis/health-sleep-rhythm",
+  "productProblem": "습관 관련 할 일 목록에 쉬는 시간이 빠진 밤 상황을 돌아보고 점검",
+  "productValue": "건강 지원 습관이 무너지는 조건과 재시작 기준을 점검",
+  "productCta": "운보다 무료 사주 확인 https://unboda.kr/guest-saju → 생활 습관 유지 분석 https://unboda.kr/paid-analysis/health-habit-continuity",
   "editorialFormat": "curiosity",
   "primaryGoal": "free-saju-conversion"
 }

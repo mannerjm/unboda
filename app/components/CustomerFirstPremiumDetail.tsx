@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import GuestRecommendationPurchaseButton from "@/app/components/GuestRecommendationPurchaseButton";
 import { useEffect, useState } from "react";
+import { getWealthStorefrontCopy } from "@/app/lib/wealthStorefrontCopy";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
@@ -122,6 +123,8 @@ export default function CustomerFirstPremiumDetail({
   const commaIndex = headline.indexOf(",");
   const headlineLead = commaIndex >= 0 ? headline.slice(0, commaIndex + 1) : headline;
   const headlineRest = commaIndex >= 0 ? headline.slice(commaIndex + 1).trim() : "";
+  const wealthCopy = getWealthStorefrontCopy(product.id);
+  const displayTitle = wealthCopy?.title ?? product.title;
   const photo = PREMIUM_PRODUCT_PHOTOS[product.id];
   // Every topic photo uses a high-resolution, 4:3 CENTER CROP of its original
   // licensed Pexels source. The curated list thumbnail was also center-cropped:
@@ -165,7 +168,7 @@ export default function CustomerFirstPremiumDetail({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-[#7354bd]">
-                {seasonalYear ? `${seasonalYear}년 신년운세` : `${product.title} · 사주 심층 분석`}
+                {seasonalYear ? `${seasonalYear}년 신년운세` : `${displayTitle} · 사주 심층 분석`}
               </span>
               <span className="rounded-full border border-[#e3d5fa] bg-[#f0e8ff] px-3 py-1.5 text-xs font-bold text-[#6748a4]">
                 {STATUS_LABELS[state]}
@@ -184,11 +187,11 @@ export default function CustomerFirstPremiumDetail({
           </div>
           <div className="relative mx-auto w-full max-w-[390px]">
             <div className={`relative ${seasonalYear ? "aspect-[16/7]" : "aspect-[4/3]"} overflow-hidden rounded-[1.5rem] border-[5px] border-white bg-[#f8f1ff] shadow-[0_16px_38px_rgba(83,54,124,0.14)]`}>
-              <Image src={photoSource} alt={artwork && !photoFallback ? artwork.alt : photo.alt} fill unoptimized priority
+              {wealthCopy && !photoFallback ? <Image data-wealth-detail-cover src={wealthCopy.coverSrc} alt={wealthCopy.title + " 재물운 썸네일"} fill priority sizes="(max-width: 640px) 90vw, 390px" quality={75} className="object-contain object-center" onError={() => setPhotoFallback(true)} /> : <Image src={photoSource} alt={artwork && !photoFallback ? artwork.alt : photo.alt} fill unoptimized priority
                 onError={() => setPhotoFallback(true)}
-                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 390px, 390px" className="object-cover object-center" />
-              {!seasonalYear ? <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#261831]/85 via-[#261831]/20 to-transparent px-5 pb-4 pt-14 text-white">
-                <p className="break-keep text-sm font-extrabold leading-6">{product.title} · 나의 이야기</p>
+                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 390px, 390px" className="object-cover object-center" />}
+              {!seasonalYear && (!wealthCopy || photoFallback) ? <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#261831]/85 via-[#261831]/20 to-transparent px-5 pb-4 pt-14 text-white">
+                <p className="break-keep text-sm font-extrabold leading-6">{displayTitle} · 나의 이야기</p>
               </div> : null}
             </div>
             {seasonalYear === 2027 ? <p className="mt-2 text-center text-xs font-semibold text-[#975a33]">정미년(丁未年) · 붉은 양의 해</p> : null}
@@ -230,7 +233,7 @@ export default function CustomerFirstPremiumDetail({
         </section> : <section className="rounded-[1.6rem] bg-[#35224f] px-5 py-9 text-white sm:px-8 sm:py-11" aria-labelledby="customer-value">
           <p className="text-xs font-bold tracking-widest text-[#d9c1ff]">이 분석에서 살펴볼 이야기</p>
           <h3 id="customer-value" className="mt-3 break-keep text-[25px] font-black leading-snug tracking-tight sm:text-[30px]">
-            {product.title}에서<br />
+            {displayTitle}에서<br />
             <span className="text-[#e4d0ff]">무엇을 살펴볼지</span> 확인해 보세요.
           </h3>
           <p className="mt-3 max-w-[42rem] break-keep text-sm leading-7 text-[#e7dbee]">
@@ -324,7 +327,7 @@ export default function CustomerFirstPremiumDetail({
         </section>
 
         {state === "not_purchased" ? <ProductReviewSummary productId={product.id} compactWhenEmpty /> : null}
-        <section id="customer-purchase-action" aria-label={product.title + " 구매 및 리포트 확인"} className="mb-8 mt-7 rounded-[1.7rem] border border-[#e3d5f4] bg-[linear-gradient(145deg,#fcf8ff_0%,#eee5ff_100%)] p-5 shadow-[0_12px_35px_rgba(75,46,125,0.08)] sm:p-7">
+        <section id="customer-purchase-action" aria-label={displayTitle + " 구매 및 리포트 확인"} className="mb-8 mt-7 rounded-[1.7rem] border border-[#e3d5f4] bg-[linear-gradient(145deg,#fcf8ff_0%,#eee5ff_100%)] p-5 shadow-[0_12px_35px_rgba(75,46,125,0.08)] sm:p-7">
           <p className="text-xs font-extrabold tracking-wide text-[#865dbe]">
             {state === "not_purchased" ? "나를 위한 사주 심층 분석" : STATUS_LABELS[state]}
           </p>
@@ -333,7 +336,7 @@ export default function CustomerFirstPremiumDetail({
           </h3>
           <div className="mt-5 grid items-center gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-6">
             <div>
-              <p className="text-xs font-semibold text-[#77678a]">{product.title}</p>
+              <p className="text-xs font-semibold text-[#77678a]">{displayTitle}</p>
               <p className="mt-1 text-2xl font-black text-[#39234f]">{price}</p>
             </div>
             <div className="flex w-full min-w-0 flex-col gap-2">

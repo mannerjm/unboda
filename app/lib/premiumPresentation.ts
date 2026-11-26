@@ -1,3 +1,4 @@
+import { getCustomerProductCopy } from "./customerProductCopy";
 import type {
   PremiumProductCategory,
   PremiumProductDefinition,
@@ -33,7 +34,8 @@ export function presentPremiumProduct(
   product: PremiumProductDefinition,
 ): PremiumProductDefinition {
   const title = getPremiumProductDisplayTitle(product.id, product.title);
-  return title === product.title ? product : { ...product, title };
+  const copy = getCustomerProductCopy(product.id);
+  return { ...product, title, description: copy?.description ?? product.description };
 }
 
 export function getPremiumCategoryDisplayLabel(

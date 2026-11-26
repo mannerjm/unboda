@@ -29,6 +29,7 @@ for (const productId of launchedProducts) {
     sajuSummary: "test",
     currentFortuneFlow: "test",
   });
+  assert(generatedPrompt.includes("[운보다 모든 상품의 말투 — 업무 보고서보다 따뜻한 생활 이야기]"), productId + " must receive the shared non-office writing policy");
   assert(generatedPrompt.includes("[유료 리포트 고객 이해도·가치 기준") && generatedPrompt.includes("[고객용 본문과 전문 계산 근거 분리]") && generatedPrompt.includes("고객용 본문에 전문용어를 괄호로 설명하는 방식도 사용하지 않는다"), productId + " must receive the strict beginner-friendly V4 customer-value contract");
 }
 
@@ -52,7 +53,7 @@ assert(
     premium.includes("getPaidAnalysisEvidenceCustomerLabel"),
   "technical evidence must remain inspectable while raw internal scores stay hidden",
 );
-assert(premium.includes("이 판단을 뒷받침하는 근거") && premium.includes("비교적 분명하게 볼 수 있는 부분") && premium.includes("현실에서 추가로 확인해야 할 부분") && premium.includes("이 분석만으로 정할 수 없는 것"), "V4 confidence and evidence UI must read as customer decision support, not an internal model score");
+assert(premium.includes("내 사주에서 찾은 힌트") && premium.includes("비교적 분명하게 볼 수 있는 부분") && premium.includes("현실에서 추가로 확인해야 할 부분") && premium.includes("이 분석만으로 정할 수 없는 것"), "V4 confidence and evidence UI must read as customer decision support, not an internal model score");
 assert(!premium.includes("신뢰도 {detail.confidence.level}") && !premium.includes("Confidence & Limits"), "customer UI must not expose internal confidence labels as product quality scores");
 assert(consulting.includes("상담 화면 보기") && consulting.includes("남은 질문 0회") && consulting.includes("이 리포트로 상담 선생님에게 질문하기") && consulting.includes("새 답변을 받으려면 질문권이 필요해요."), "first-time buyers must see a concise truthful consultation entry for both zero-credit and ready states");
 assert(!consulting.includes('(session.state === "credit_required" && !hasPreviousConversation)'), "no-credit state must never hide the consulting entry");
@@ -62,3 +63,6 @@ assert(completionGate.includes('window.addEventListener("unboda:paid-report-read
 assert(paidLoading.includes("MysticLoadingScreen") && paidLoading.includes('href="/purchased-analyses"'), "paid loading reuses free visual and preserves purchase recovery");
 assert(freeLoading.includes("asSection") && freeLoading.includes("children"), "shared loading surface supports embedded paid report content");
 console.log("paid-report-customer-experience regression: PASS (58/58 V4 prompts + compatibility + UI)");
+
+assert(read("app/lib/mainAnalysisPrompt.ts").includes("회사·업무·문서·성과·책임·평가를 모든 사람의 기본 상황으로 가정하지 마세요"));
+assert(!prompt.includes("현실 직업 정보가 없는 경우에는 책임 범위, 의사결정 권한, 완료 기준"));

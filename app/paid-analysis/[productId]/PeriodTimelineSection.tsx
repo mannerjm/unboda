@@ -81,7 +81,7 @@ export default function PeriodTimelineSection({
         <div className="flex items-center gap-2.5">
           <span className="h-2 w-2 rounded-full bg-[#c8c1ff] shadow-[0_0_0_5px_rgba(200,193,255,0.08)]" />
           <p className="text-xs font-semibold tracking-[0.18em] text-[#c8c1ff]">
-            기간별 흐름
+            시기마다 달라지는 나의 운세
           </p>
         </div>
 
@@ -124,7 +124,7 @@ export default function PeriodTimelineSection({
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
                     {item.actions && item.actions.length > 0 ? (
                       <div className="rounded-[1.1rem] border border-emerald-300/15 bg-emerald-300/[0.07] p-3.5">
-                        <p className="text-xs font-semibold text-emerald-200">이 구간의 행동</p>
+                        <p className="text-xs font-semibold text-emerald-200">이렇게 해보세요</p>
                         <ul className="mt-2 space-y-1.5 text-[15px] leading-7 text-slate-200">
                           {item.actions.map((action) => (
                             <li key={action}>• {action}</li>
@@ -135,7 +135,7 @@ export default function PeriodTimelineSection({
 
                     {item.cautions && item.cautions.length > 0 ? (
                       <div className="rounded-[1.1rem] border border-rose-300/15 bg-rose-300/[0.07] p-3.5">
-                        <p className="text-xs font-semibold text-rose-200">이 구간의 주의</p>
+                        <p className="text-xs font-semibold text-rose-200">조심하면 좋은 점</p>
                         <ul className="mt-2 space-y-1.5 text-[15px] leading-7 text-slate-200">
                           {item.cautions.map((caution) => (
                             <li key={caution}>• {caution}</li>
@@ -152,7 +152,7 @@ export default function PeriodTimelineSection({
 
         {periodAnalysis.keyPoints && periodAnalysis.keyPoints.length > 0 ? (
           <div className="mt-5 rounded-[1.4rem] border border-white/12 bg-white/[0.09] p-4.5 backdrop-blur-sm">
-            <p className="text-xs font-semibold text-[#c8c1ff]">이 기간의 핵심</p>
+            <p className="text-xs font-semibold text-[#c8c1ff]">이 시기에 기억할 이야기</p>
             <ul className="mt-3 space-y-2 text-[15px] leading-7 text-slate-200">
               {periodAnalysis.keyPoints.map((point) => (
                 <li key={point} className="flex gap-2.5">

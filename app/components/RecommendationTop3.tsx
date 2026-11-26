@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import { getPremiumProductDisplayTitle } from "@/app/lib/premiumPresentation";
+import { getCustomerProductCopy } from "@/app/lib/customerProductCopy";
 import { getProductPricing } from "@/app/lib/productPricing";
 import { resolveCanonicalRecommendationProduct, toCanonicalRecommendations } from "@/app/lib/analysisProductRecommendations";
 import type { AnalysisProductRecommendation } from "@/app/lib/analysisProductRecommendations";
@@ -107,7 +108,7 @@ function RecommendationCard({
             {question}
           </h3>
           <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#655a75] sm:text-sm sm:leading-6">
-            {product.description}
+            {getCustomerProductCopy(product.id)?.description ?? product.description}
           </p>
           <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3">
             <span className="text-base font-extrabold text-[#211737]">{price}</span>

@@ -359,7 +359,7 @@ export default function PremiumCatalogMarketplace({
               <div>
                 <p className="text-xs font-bold text-[#8b57bf]">{isPeriod?"기간별":"주제별"} · 심층분석</p>
                 <h2 className="mt-2 text-xl font-black leading-snug text-[#2b1646] sm:text-2xl">{selected.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-[#645571]">{isPeriod?selected.purchaseDecision?.primaryQuestion:getPaidAnalysisTopicConfig(selected.id)?.purchaseDecision?.decisionQuestion}</p>
+                <p className="mt-2 text-sm leading-6 text-[#645571]">{getReadablePaidQuestion(selected.id, (isPeriod?selected.purchaseDecision?.primaryQuestion:getPaidAnalysisTopicConfig(selected.id)?.purchaseDecision?.decisionQuestion) ?? selected.title)}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-3">
                   <span className="text-lg font-black text-[#3a2059]">{money(selected.id)}</span>
                   <VerifiedRating productId={selected.id}/>

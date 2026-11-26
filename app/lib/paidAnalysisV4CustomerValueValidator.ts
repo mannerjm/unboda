@@ -44,6 +44,9 @@ const GENERIC_CUSTOMER_VALUE_PATTERNS: readonly { pattern: RegExp; label: string
 
 const DIFFICULT_CUSTOMER_LANGUAGE_PATTERNS: readonly { pattern: RegExp; label: string; replacement: string }[] = [
   { pattern: /메커니즘/u, label: "메커니즘", replacement: "왜 이런 일이 생기는지" },
+  { pattern: /검토 프로토콜/u, label: "검토 프로토콜", replacement: "살펴볼 순서" },
+  { pattern: /구조적 압력/u, label: "구조적 압력", replacement: "부담이 커지기 쉬운 상황" },
+  { pattern: /업무 체크리스트/u, label: "업무 체크리스트", replacement: "챙겨볼 작은 일" },
   { pattern: /상호성/u, label: "상호성", replacement: "서로 주고받는 정도" },
   { pattern: /완수력/u, label: "완수력", replacement: "끝까지 해내는 힘" },
   { pattern: /지원 장치/u, label: "지원 장치", replacement: "도움받을 방법" },

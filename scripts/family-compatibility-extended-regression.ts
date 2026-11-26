@@ -182,9 +182,9 @@ assert(
   reportValuePreview.includes("리포트 구성 미리보기")
     && reportValuePreview.includes("실제 개인별 결과를 미리 보여주는 화면은 아닙니다.")
     && !reportValuePreview.includes("실제 분석 결과를 미리 보여주는 화면이 아니라")
-    && reportValuePreview.includes("정서적 연결")
-    && reportValuePreview.includes("비교·경쟁")
-    && reportValuePreview.includes("연락·도움·관여 경계")
+    && reportValuePreview.includes("마음이 통하는 순간")
+    && reportValuePreview.includes("비교와 경쟁")
+    && reportValuePreview.includes("연락과 도움")
     && !reportValuePreview.includes("실제 문장은 입력한 두 사람의 계산 결과에 따라 달라집니다.")
     && !reportValuePreview.includes("단순 점수 대신 관계의 맥락을 나눠 설명"),
   "report preview must explain structure, preserve relationship-specific domains, and avoid presenting sample copy as an actual result",

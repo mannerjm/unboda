@@ -228,8 +228,16 @@ assert(
   "stored V4 reports must hide legacy raw evidence scores at render time",
 );
 assert(
-  report.includes("확인할 신호 ·") && !report.includes("관찰 신호 ·"),
+  report.includes("이런 모습이 보인다면 ·") && !report.includes("관찰 신호 ·"),
   "V4 customer UI should use the simpler static label",
 );
 
 console.log("paid-analysis-v4-plain-language-regression: PASS (58/58 prompts + no raw calculation scores)");
+
+// Office-specific jargon is rejected before a new V4 customer report is saved.
+for (const jargon of ["검토 프로토콜", "구조적 압력", "업무 체크리스트"]) {
+  const candidate = makeOutput();
+  candidate.conclusion.rationale = jargon + "을 적용합니다.";
+  const quality = validateCustomerFacingLanguage(candidate);
+  assert(!quality.ok && quality.issues.some(issue => issue.field === "conclusion.rationale" && issue.message.includes(jargon)));
+}

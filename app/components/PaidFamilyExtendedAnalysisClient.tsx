@@ -140,11 +140,11 @@ function BirthDateSelector({ birthYear, birthMonth, birthDay, calendarType, onCh
 }
 
 const OTHER_RELATIONSHIPS: readonly { value: FamilyOtherRelationshipKind; title: string; description: string }[] = [
-  { value: "grandparent_grandchild", title: "조부모·손주", description: "세대 차이와 돌봄·독립의 거리를 함께 봅니다." },
-  { value: "aunt_uncle_niece_nephew", title: "삼촌·이모·고모·조카", description: "가까움과 역할 기대, 조언의 경계를 살펴봅니다." },
-  { value: "cousins", title: "사촌", description: "정서적 거리, 비교와 교류의 리듬을 살펴봅니다." },
-  { value: "in_laws", title: "인척", description: "예의와 거리, 연락과 관여의 경계를 살펴봅니다." },
-  { value: "other_relatives", title: "기타 친족", description: "가족 안의 역할과 기대, 반복되는 소통 패턴을 살펴봅니다." },
+  { value: "grandparent_grandchild", title: "조부모·손주", description: "서로 다른 세대의 마음과 도움을 주고받는 모습을 알아봐요." },
+  { value: "aunt_uncle_niece_nephew", title: "삼촌·이모·고모·조카", description: "가까운 사이에서 바라는 마음과 부담 없이 조언하는 방법을 알아봐요." },
+  { value: "cousins", title: "사촌", description: "사촌 사이에서 느끼는 가까움과 비교, 편하게 지내는 방법을 알아봐요." },
+  { value: "in_laws", title: "인척", description: "서로 예의를 지키면서도 부담 없이 연락하고 지내는 방법을 알아봐요." },
+  { value: "other_relatives", title: "기타 친족", description: "가족에게 바라는 마음과 자주 엇갈리는 대화를 살펴봐요." },
 ];
 
 function roleOptions(kind: FormState["relationshipKind"]): readonly { value: FamilyOtherRole; title: string }[] {

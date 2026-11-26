@@ -89,7 +89,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
     : null;
   const firstStrength = report.strengths[0];
   const conflictPoint = report.conflict.keyPoints[0] ?? report.conflict.summary;
-  const timingPoint = report.currentTiming?.keyPoints[0] ?? report.currentTiming?.summary ?? "현재 관계 흐름은 두 사람의 기본 관계 구조와 함께 살펴봅니다.";
+  const timingPoint = report.currentTiming?.keyPoints[0] ?? report.currentTiming?.summary ?? "두 사람이 서로에게 주는 느낌과 지금의 흐름을 함께 살펴봐요.";
   const strengthGridClass = report.strengths.length <= 1
     ? "lg:grid-cols-1"
     : report.strengths.length === 2
@@ -142,10 +142,10 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
         ) : null}
 
         <section className="bg-[linear-gradient(180deg,#f7f7fb_0%,#f3f4f9_100%)] px-6 py-9 sm:px-10 sm:py-10">
-          <ReportSectionHeader eyebrow="KEY POINTS" title={`${config.label} 핵심 포인트`} description={config.reportKeyPointsDescription} />
+          <ReportSectionHeader eyebrow="한눈에 보는 궁합" title={`${config.label} 기억할 세 가지`} description={config.reportKeyPointsDescription} />
           <div className="mt-5 grid gap-3 lg:grid-cols-3">
             <SummaryTile eyebrow="강점" title={firstStrength?.title ?? "함께 살릴 수 있는 강점"} body={firstStrength?.body ?? "두 사람이 함께 있을 때 살아나는 장점을 아래 리포트에서 구체적으로 확인할 수 있습니다."} />
-            <SummaryTile eyebrow="조율" title={config.reportConflictTitle} body={conflictPoint} />
+            <SummaryTile eyebrow="서로 조심할 점" title={config.reportConflictTitle} body={conflictPoint} />
             <SummaryTile eyebrow={`${meta.evaluationYear}년`} title={report.currentTiming?.headline ?? config.reportTimingTitle} body={timingPoint} />
           </div>
         </section>
@@ -166,7 +166,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
         ) : null}
 
         <section data-section="pair-perspective" className="border-t border-[#dedbf3] bg-[radial-gradient(circle_at_90%_10%,rgba(143,124,255,0.12),transparent_25%),linear-gradient(135deg,#f2efff_0%,#f8f7ff_58%,#f2f4fb_100%)] px-6 py-10 sm:px-10 sm:py-12">
-          <ReportSectionHeader eyebrow="02 · 양방향 영향" title={config.reportDirectionTitle} description={config.reportDirectionDescription} />
+          <ReportSectionHeader eyebrow="02 · 서로에게 주는 느낌" title={config.reportDirectionTitle} description={config.reportDirectionDescription} />
           <div className="mt-7 grid gap-4 lg:grid-cols-2">
             <PerspectiveCard label={`${meta.myProfileLabel}${workplaceRole ? ` (${workplaceRole.myRole})` : ""} → ${meta.partnerLabel}${workplaceRole ? ` (${workplaceRole.partnerRole})` : ""}`} headline={perspectives.meToPartner.headline} summary={perspectives.meToPartner.summary} signals={perspectives.meToPartner.signals} />
             <PerspectiveCard label={`${meta.partnerLabel}${workplaceRole ? ` (${workplaceRole.partnerRole})` : ""} → ${meta.myProfileLabel}${workplaceRole ? ` (${workplaceRole.myRole})` : ""}`} headline={perspectives.partnerToMe.headline} summary={perspectives.partnerToMe.summary} signals={perspectives.partnerToMe.signals} />
@@ -202,7 +202,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
         ) : null}
 
         <section data-hwadam-report-theme="action" style={HWADAM_REPORT_DARK_STYLE} className="relative overflow-hidden border-t border-[#2e295c] bg-[radial-gradient(circle_at_top_right,rgba(131,111,239,0.24),transparent_30%),linear-gradient(145deg,#1d1b3d_0%,#292550_100%)] px-6 py-10 text-white shadow-[0_-10px_40px_rgba(31,28,72,0.08)] sm:px-10 sm:py-12">
-          <ReportSectionHeader eyebrow="07 · 행동 가이드" title={config.reportActionTitle} description="큰 결론보다 실제 관계에서 반복 가능한 작은 조정 기준으로 정리합니다." tone="dark" />
+          <ReportSectionHeader eyebrow="07 · 서로를 위한 작은 조언" title={config.reportActionTitle} description="서로에게 도움이 될 만한 작은 일부터 가볍게 해보세요." tone="dark" />
           <div className="mt-5 grid gap-3 lg:grid-cols-3">
             {report.actionGuide.doNext.map((item, index) => (
               <article key={`${item.action}-${item.reason}`} className="rounded-[1.55rem] border border-white/10 bg-white/[0.96] p-5 text-[#11162d] shadow-[0_12px_30px_rgba(0,0,0,0.10)] sm:p-6">
@@ -225,7 +225,7 @@ export default function CompatibilityPaidReportView({ content }: { content: Stor
           </div>
         </section>
       </article>
-      <p className="mx-auto mt-5 max-w-3xl rounded-[1.35rem] border border-[#e1e2ec] bg-white/80 px-5 py-4 text-center text-sm leading-6 text-slate-600 shadow-sm">{config.label} 궁합은 두 사람의 명리 구조와 현재 흐름을 해석한 참고 콘텐츠입니다. 상대의 의도나 관계·사업의 결과를 확정하거나 대신 결정하지 않습니다.</p>
+      <p className="mx-auto mt-5 max-w-3xl rounded-[1.35rem] border border-[#e1e2ec] bg-white/80 px-5 py-4 text-center text-sm leading-6 text-slate-600 shadow-sm">{config.label} 궁합은 두 사람의 사주와 현재 운을 바탕으로 관계를 돌아보는 참고 자료예요. 상대의 의도나 관계·사업의 결과를 확정하거나 대신 결정하지 않습니다.</p>
     </div>
   );
 }

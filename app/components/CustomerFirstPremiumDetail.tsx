@@ -9,6 +9,7 @@ import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
 import { getProductPricing } from "@/app/lib/productPricing";
 import { getReadablePaidQuestion } from "@/app/lib/premiumQuestionDisplay";
+import { getCustomerProductCopy } from "@/app/lib/customerProductCopy";
 import { getPaidAnalysisTopicConfig } from "@/app/lib/paidAnalysisTopicConfig";
 import { buildPaidAnalysisV4PreviewModel } from "@/app/lib/paidAnalysisV4PreviewModel";
 import { saveAnalysisAction } from "@/app/lib/interestedAnalyses/actions";
@@ -51,14 +52,15 @@ const ACTION_LABELS: Record<PremiumAnalysisProductState, string> = {
  * These are areas to explore, never a preview of a person's actual outcome.
  */
 function getCustomerStory(product: PremiumProductDefinition) {
+  const copy = getCustomerProductCopy(product.id);
   const config = product.kind === "TOPIC" ? getPaidAnalysisTopicConfig(product.id) : undefined;
   const topic = config?.purchaseDecision;
   const period = product.purchaseDecision;
-  const focus = (product.kind === "PERIOD" ? period?.analysisScope : topic?.whatItAnalyzes)
+  const focus = copy?.topics ?? (product.kind === "PERIOD" ? period?.analysisScope : topic?.whatItAnalyzes)
     ?? product.details ?? [];
-  const outcomes = (product.kind === "PERIOD" ? period?.expectedUnderstanding : topic?.expectedUnderstanding)
+  const outcomes = copy?.topics ?? (product.kind === "PERIOD" ? period?.expectedUnderstanding : topic?.expectedUnderstanding)
     ?? product.details ?? [];
-  const situations = (product.kind === "PERIOD" ? period?.recommendedFor : topic?.recommendedFor)
+  const situations = copy?.topics ?? (product.kind === "PERIOD" ? period?.recommendedFor : topic?.recommendedFor)
     ?? product.recommendedFor ?? [];
   const concerns = [0, 1, 2].map((index) => ({
     icon: ["🔎", "💬", "🧭"][index],
@@ -70,7 +72,7 @@ function getCustomerStory(product: PremiumProductDefinition) {
     detail: outcomes[index] ?? focus[index] ?? product.description,
   }));
   const reportPoints = Array.from(new Set([
-    ...focus, ...(config?.actionFocus ?? []), ...outcomes, ...(product.details ?? []),
+    ...focus, ...(copy ? [] : [...(config?.actionFocus ?? []), ...outcomes, ...(product.details ?? [])]),
   ].map((line) => line.trim()).filter(Boolean)));
   const headings = [
     "무엇부터 살펴볼까요?",
@@ -82,7 +84,7 @@ function getCustomerStory(product: PremiumProductDefinition) {
   ];
   const reportSteps = headings.map((title, index) => ({
     title,
-    description: reportPoints[index] ?? product.description,
+    description: reportPoints[index] ?? (copy ? ["지금의 나를 이해하는 이야기", "내 사주에서 읽은 변화와 그 이유", "일상에서 참고할 작은 조언"][index - 3] : product.description) ?? product.description,
   }));
   const disclaimer = product.kind === "PERIOD"
     ? "사주 흐름은 참고할 관점과 점검 기준을 제시하며, 특정 사건이나 결과를 확정하지 않습니다."
@@ -134,6 +136,8 @@ export default function CustomerFirstPremiumDetail({
   const photoSource = artwork && !photoFallback ? artwork.src : originalPhotoUrl && !photoFallback ? originalPhotoUrl : photo.src;
   const preview = buildPaidAnalysisV4PreviewModel(product);
   const story = getCustomerStory(product);
+  const customerCopy = getCustomerProductCopy(product.id);
+  const description = customerCopy?.description ?? product.description;
   const seasonalConcerns = [
     {icon:"💰",question:"올해는 돈을 더 모을 수 있을까요?",context:"수입과 지출, 돈을 관리할 때 살펴볼 시기"},
     {icon:"💼",question:"이직이나 새로운 일을 시작해도 될까요?",context:"일과 사업의 변화, 준비할 기회"},
@@ -171,7 +175,7 @@ export default function CustomerFirstPremiumDetail({
               {headlineLead}{headlineRest ? <span className="block text-[#7050bf]">{headlineRest}</span> : null}
             </HeadlineTag>
             <p className="mt-4 max-w-[37rem] break-keep text-[15px] font-medium leading-7 text-[#584968] sm:text-base sm:leading-8">
-              {seasonalYear ? "돈과 일, 새로운 인연부터 1월부터 12월까지. 내 사주로 새해의 흐름과 준비할 일을 알아보세요." : <>{product.description} <span className="font-bold text-[#3a2951]">내 사주를 바탕으로 이 주제의 흐름을 살펴보고,</span> 일상에서 확인할 기준을 정리해 보세요.</>}
+              {seasonalYear ? "돈과 일, 새로운 인연부터 1월부터 12월까지. 내 사주로 새해의 흐름과 준비할 일을 알아보세요." : <>{description}</>}
             </p>
             <p className="mt-6 text-sm font-bold text-[#6c5687]">
               {seasonalYear ? "나만의 1년 운세" : "개인화 사주 심층 분석"} <span aria-hidden="true">·</span> <strong className="text-lg font-black text-[#39224f]">{price}</strong>
@@ -184,7 +188,7 @@ export default function CustomerFirstPremiumDetail({
                 onError={() => setPhotoFallback(true)}
                 sizes="(max-width: 640px) 90vw, (max-width: 1024px) 390px, 390px" className="object-cover object-center" />
               {!seasonalYear ? <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#261831]/85 via-[#261831]/20 to-transparent px-5 pb-4 pt-14 text-white">
-                <p className="break-keep text-sm font-extrabold leading-6">{product.title} · 내 사주에서 살펴볼 기준</p>
+                <p className="break-keep text-sm font-extrabold leading-6">{product.title} · 나의 이야기</p>
               </div> : null}
             </div>
             {seasonalYear === 2027 ? <p className="mt-2 text-center text-xs font-semibold text-[#975a33]">정미년(丁未年) · 붉은 양의 해</p> : null}
@@ -198,7 +202,7 @@ export default function CustomerFirstPremiumDetail({
         <section className="py-11 sm:py-14" aria-labelledby="customer-concerns">
           <p className="text-center text-xs font-extrabold tracking-widest text-[#926bc8]">내 이야기처럼 느껴지는 순간</p>
           <h3 id="customer-concerns" className="mt-3 break-keep text-center text-[25px] font-black tracking-tight text-[#2f1a48] sm:text-[30px]">
-            혹시 이런 고민을 해본 적 있으신가요?
+            {seasonalYear || !customerCopy ? "혹시 이런 고민을 해본 적 있으신가요?" : "이런 이야기가 궁금하신가요?"}
           </h3>
           <div className="mx-auto mt-7 max-w-[760px] divide-y divide-[#e7def1] border-y border-[#e7def1]">
             {(seasonalYear ? seasonalConcerns : story.concerns).map((item, index) => (
@@ -207,7 +211,7 @@ export default function CustomerFirstPremiumDetail({
                 <div className="min-w-0">
                   <span className="text-xs font-extrabold tracking-wide text-[#956fc9]">0{index + 1} · 나의 일상</span>
                   <h4 className="break-keep text-lg font-extrabold leading-7 text-[#302044] sm:text-xl">{item.question}</h4>
-                  <p className="mt-1.5 break-keep text-sm leading-6 text-[#746581]">{item.context}</p>
+                  {seasonalYear || !customerCopy ? <p className="mt-1.5 break-keep text-sm leading-6 text-[#746581]">{item.context}</p> : null}
                 </div>
               </div>
             ))}
@@ -230,10 +234,10 @@ export default function CustomerFirstPremiumDetail({
             <span className="text-[#e4d0ff]">무엇을 살펴볼지</span> 확인해 보세요.
           </h3>
           <p className="mt-3 max-w-[42rem] break-keep text-sm leading-7 text-[#e7dbee]">
-            {product.description} 개인별 결과를 미리 확정하지 않고 이 상품의 고유한 분석 범위를 기준으로 안내합니다.
+            {description} 실제 나의 사주에 맞춘 이야기는 구매 후 리포트에서 읽을 수 있어요.
           </p>
           <div className="mt-7 grid gap-5 border-t border-white/25 pt-7 md:grid-cols-3 md:gap-0">
-            {story.insights.map((item, index) => (
+            {(customerCopy ? [{title:"나의 성향",detail:"내 사주에서 읽은 나의 모습"},{title:"지금의 흐름",detail:"이 주제에서 눈여겨볼 변화와 이유"},{title:"생활 속 작은 조언",detail:"내 상황에 맞게 참고할 수 있는 이야기"}] : story.insights).map((item, index) => (
               <div key={index} className={index === 0 ? "md:pr-5" : "md:border-l md:border-white/25 md:px-5"}>
                 <span className="text-xl font-black text-[#e0c5ff]">0{index + 1}</span>
                 <h4 className="mt-2 break-keep text-lg font-extrabold">{item.title}</h4>
@@ -254,7 +258,7 @@ export default function CustomerFirstPremiumDetail({
             </p>
           </div>
           <ol className="mx-auto mt-7 flex max-w-[820px] flex-col items-center gap-3 text-center sm:flex-row sm:justify-center sm:gap-4">
-            {["내 사주 분석", "개인화 리포트", "상담에서 이어가기"].map((title, index) => (
+            {["내 사주 분석", "나만의 리포트", "상담에서 이어가기"].map((title, index) => (
               <li key={title} className="flex-1">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#e9dafa] text-sm font-black text-[#7050bc]">{index + 1}</span>
                 <p className="mt-2 font-extrabold text-[#38274d]">{title}</p>
@@ -269,7 +273,7 @@ export default function CustomerFirstPremiumDetail({
         <section className="mb-6 border-t border-[#ece5f4] pt-8" aria-labelledby="customer-purchase-note">
           <h3 id="customer-purchase-note" className="text-xl font-black text-[#302048]">구매 전 확인할 내용</h3>
           <p className="mt-2 break-keep text-sm leading-7 text-[#6e607b]">
-            {seasonalYear ? "내 사주를 바탕으로 새해를 돌아보는 참고 자료예요. 미래의 결과를 보장하지 않으며 의료·금융 등 전문 상담을 대신하지 않습니다." : <>이 리포트는 내 사주와 {product.title}의 고유한 분석 질문을 바탕으로 해석합니다. {story.disclaimer}</>}
+            {seasonalYear ? "내 사주를 바탕으로 새해를 돌아보는 참고 자료예요. 미래의 결과를 보장하지 않으며 의료·금융 등 전문 상담을 대신하지 않습니다." : <>내 사주를 바탕으로 풀어보는 참고 자료예요. {story.disclaimer}</>}
           </p>
           <div className="mt-5 space-y-3">
             {state === "not_purchased" && !seasonalYear ? (

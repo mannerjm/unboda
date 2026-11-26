@@ -133,7 +133,7 @@ assert(appShell.includes('>명리 분석 플랫폼</p>') && !appShell.includes('
 assert(v4.includes('text-[15px] leading-7 text-slate-700'), "V4 report must keep readable 15px body copy");
 assert(v4.includes('className="mx-auto max-w-5xl px-4 py-7 sm:px-8 sm:py-9"'), "V4 report must keep mobile-aware outer padding");
 assert(v4.includes('className="mt-5 space-y-4"'), "V4 report must keep the tightened section rhythm");
-assert(v4.includes("결론 먼저") && v4.includes("KEY POINTS") && v4.includes("ACTION GUIDE"), "V4 hierarchy must remain conclusion → key points → action");
+assert(v4.includes("결론 먼저") && v4.includes("한눈에 보는 내 운세") && v4.includes("나를 위한 조언"), "V4 hierarchy must remain conclusion → key points → action");
 assert(
   v4.includes("evidenceItems.map")
     && v4.includes("const evidenceItems = evidenceOverride?.length ? evidenceOverride : detail.evidence")

@@ -85,7 +85,7 @@ assert(
   "all five canonical compatibility products must share the compact two-column marketplace layout",
 );
 assert(
-  overview.includes('group flex min-h-[124px] items-stretch')
+  overview.includes('group grid grid-cols-[minmax(0,42%)_minmax(0,1fr)]')
     && overview.includes('rounded-[1.4rem] border border-[#e7d9f3]')
     && overview.includes('text-[16px] font-extrabold leading-[1.4]'),
   "all compatibility photo cards must share the same compact sizing and accessible title treatment",

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { getEditorialProductCover } from "../app/lib/editorialProductCover";
 import { getWealthStorefrontCopy } from "../app/lib/wealthStorefrontCopy";
 import { PREMIUM_PRODUCT_PHOTOS } from "../app/lib/premiumProductPhotos";
 import { PERIOD_PREMIUM_PRODUCTS } from "../app/lib/premiumProductRegistry";
@@ -480,3 +481,20 @@ for (const name of ["CustomerFirstPremiumDetail","MoneySharedFinancePilotDetail"
   assert(detail.includes("wealthCopy && !photoFallback") && detail.includes('quality={75} className="object-contain object-center"'));
   assert(detail.includes('getPremiumAnalysisHref(product.id, state, profileId)') && detail.includes('getProductPricing(product.id)'));
 }
+
+// All launched non-money topics and ordinary periods get the same list/detail cover mapping.
+const standardCoverIds = [...topicGroups.filter(group=>group.category!=="money").flatMap(group=>group.products.map(p=>p.id)), ...periodProducts.filter(p=>p.id!=="new-year-fortune").map(p=>p.id)];
+assert.equal(new Set(standardCoverIds).size,47);
+for(const id of standardCoverIds){
+  const cover=getEditorialProductCover(id);
+  assert(cover && cover.title && cover.hook && cover.intro, "missing approved layout metadata for "+id);
+  assert(statSync("public"+cover.photo.src).size>1000, "missing existing photo for "+id);
+}
+assert.equal(new Set(standardCoverIds.map(id=>getEditorialProductCover(id)?.title)).size,47);
+assert.equal(getEditorialProductCover("new-year-fortune"),undefined);
+for(const id of launchedMoneyIds) assert.equal(getEditorialProductCover(id),undefined);
+assert.equal(getEditorialProductCover("not-a-product"),undefined);
+const editorialComponent=readFileSync("app/components/EditorialProductCover.tsx","utf8");
+assert(editorialComponent.includes("aspect-[4/3]") && editorialComponent.includes("onError") && editorialComponent.includes("containerType"));
+assert(storefront.includes('editorial.category===currentGroup.category') && storefront.includes('editorial.category==="period"') && storefront.includes("{editorial.intro}"));
+assert(readFileSync("app/components/CustomerFirstPremiumDetail.tsx","utf8").includes('!seasonalYear ? getEditorialProductCover(product.id) : undefined'));

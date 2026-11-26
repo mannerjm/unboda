@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import GuestRecommendationPurchaseButton from "@/app/components/GuestRecommendationPurchaseButton";
 import { useEffect, useState } from "react";
+import EditorialProductCover from "@/app/components/EditorialProductCover";
+import { getEditorialProductCover } from "@/app/lib/editorialProductCover";
 import { getWealthStorefrontCopy } from "@/app/lib/wealthStorefrontCopy";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
@@ -124,7 +126,8 @@ export default function CustomerFirstPremiumDetail({
   const headlineLead = commaIndex >= 0 ? headline.slice(0, commaIndex + 1) : headline;
   const headlineRest = commaIndex >= 0 ? headline.slice(commaIndex + 1).trim() : "";
   const wealthCopy = getWealthStorefrontCopy(product.id);
-  const displayTitle = wealthCopy?.title ?? product.title;
+  const editorialCover = !seasonalYear ? getEditorialProductCover(product.id) : undefined;
+  const displayTitle = wealthCopy?.title ?? editorialCover?.title ?? product.title;
   const photo = PREMIUM_PRODUCT_PHOTOS[product.id];
   // Every topic photo uses a high-resolution, 4:3 CENTER CROP of its original
   // licensed Pexels source. The curated list thumbnail was also center-cropped:
@@ -187,10 +190,10 @@ export default function CustomerFirstPremiumDetail({
           </div>
           <div className="relative mx-auto w-full max-w-[390px]">
             <div className={`relative ${seasonalYear ? "aspect-[16/7]" : "aspect-[4/3]"} overflow-hidden rounded-[1.5rem] border-[5px] border-white bg-[#f8f1ff] shadow-[0_16px_38px_rgba(83,54,124,0.14)]`}>
-              {wealthCopy && !photoFallback ? <Image data-wealth-detail-cover src={wealthCopy.coverSrc} alt={wealthCopy.title + " 재물운 썸네일"} fill priority sizes="(max-width: 640px) 90vw, 390px" quality={75} className="object-contain object-center" onError={() => setPhotoFallback(true)} /> : <Image src={photoSource} alt={artwork && !photoFallback ? artwork.alt : photo.alt} fill unoptimized priority
+              {wealthCopy && !photoFallback ? <Image data-wealth-detail-cover src={wealthCopy.coverSrc} alt={wealthCopy.title + " 재물운 썸네일"} fill priority sizes="(max-width: 640px) 90vw, 390px" quality={75} className="object-contain object-center" onError={() => setPhotoFallback(true)} /> : editorialCover ? <EditorialProductCover productId={product.id} priority /> : <Image src={photoSource} alt={artwork && !photoFallback ? artwork.alt : photo.alt} fill unoptimized priority
                 onError={() => setPhotoFallback(true)}
                 sizes="(max-width: 640px) 90vw, (max-width: 1024px) 390px, 390px" className="object-cover object-center" />}
-              {!seasonalYear && (!wealthCopy || photoFallback) ? <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#261831]/85 via-[#261831]/20 to-transparent px-5 pb-4 pt-14 text-white">
+              {!seasonalYear && !editorialCover && (!wealthCopy || photoFallback) ? <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#261831]/85 via-[#261831]/20 to-transparent px-5 pb-4 pt-14 text-white">
                 <p className="break-keep text-sm font-extrabold leading-6">{displayTitle} · 나의 이야기</p>
               </div> : null}
             </div>

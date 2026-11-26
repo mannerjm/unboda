@@ -1,3 +1,5 @@
+import EditorialProductCover from "@/app/components/EditorialProductCover";
+import { getEditorialProductCover } from "@/app/lib/editorialProductCover";
 import Image from "next/image";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 
@@ -41,6 +43,7 @@ export default function CompatibilityDetailHero({
   description: string;
 }) {
   const visual = HERO_VISUALS[mode];
+  const coverId = `compatibility-${mode}`;
 
   return (
     <header className="mt-7 overflow-hidden rounded-[2rem] border border-[#e6d6f7] bg-[linear-gradient(140deg,#fff9fd_0%,#f2eaff_62%,#e9e8ff_100%)] p-5 shadow-[0_18px_45px_rgba(92,64,137,0.10)] sm:p-8">
@@ -54,8 +57,8 @@ export default function CompatibilityDetailHero({
           <p className="mt-4 break-keep text-[16px] leading-8 text-[#5b4e71]">{description}</p>
           <p className="mt-3 text-sm text-[#796b89]">실제 두 사람의 결과는 정보를 입력하고 분석이 완료된 뒤 확인할 수 있습니다.</p>
         </div>
-        <div className="relative mx-auto aspect-[5/4] w-full max-w-[360px] overflow-hidden rounded-[1.7rem] border-[5px] border-white bg-[#e6ddf7] shadow-[0_12px_32px_rgba(74,43,117,0.13)]">
-          <Image src={visual.src} alt={visual.alt} fill sizes="(max-width: 640px) 86vw, 360px" className="object-cover" />
+        <div className="relative mx-auto aspect-[4/3] w-full max-w-[390px] overflow-hidden rounded-[1.7rem] border-[5px] border-white bg-[#e6ddf7] shadow-[0_12px_32px_rgba(74,43,117,0.13)]">
+          {getEditorialProductCover(coverId) ? <EditorialProductCover productId={coverId} priority/> : <Image src={visual.src} alt={visual.alt} fill sizes="(max-width: 640px) 86vw, 360px" className="object-cover" /> }
         </div>
       </div>
     </header>

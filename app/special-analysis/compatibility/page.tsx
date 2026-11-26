@@ -1,3 +1,5 @@
+import EditorialProductCover from "@/app/components/EditorialProductCover";
+import { getEditorialProductCover } from "@/app/lib/editorialProductCover";
 import Image from "next/image";
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
@@ -98,14 +100,16 @@ export default async function CompatibilityAnalysisPage() {
           <section aria-label="궁합 유형별 분석 상품" className="mt-3 grid gap-3 md:grid-cols-2">
             {compatibilityCards.map((product) => {
               const photo = PREMIUM_PRODUCT_PHOTOS[product.photoId];
+              const coverId = "compatibility-" + (product.photoId==="relationship-family-role" ? "family" : product.href.split("/").pop());
               return (
                 <Link
                   key={product.href}
                   href={product.href}
-                  className="group flex min-h-[124px] items-stretch gap-3 rounded-[1.4rem] border border-[#e7d9f3] bg-white p-3 shadow-[0_9px_22px_rgba(87,59,119,0.06)] transition hover:-translate-y-0.5 hover:border-[#b98aed] hover:shadow-[0_12px_25px_rgba(105,62,171,0.11)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7650ba] sm:gap-4"
+                  className="group grid grid-cols-[minmax(0,42%)_minmax(0,1fr)] sm:grid-cols-[minmax(0,44%)_minmax(0,1fr)] items-center gap-3 rounded-[1.4rem] border border-[#e7d9f3] bg-white p-3 shadow-[0_9px_22px_rgba(87,59,119,0.06)] transition hover:-translate-y-0.5 hover:border-[#b98aed] hover:shadow-[0_12px_25px_rgba(105,62,171,0.11)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7650ba] sm:gap-4"
                   aria-label={product.title + " 상세 열기"}
                 >
-                  <div className="relative min-h-[108px] w-[112px] shrink-0 overflow-hidden rounded-xl bg-[#ece4f8] sm:w-[124px]">
+                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-[#ece4f8]">
+                    {getEditorialProductCover(coverId) ? <EditorialProductCover productId={coverId}/> : <>
                     <Image
                       src={photo.src}
                       alt={photo.alt}
@@ -117,14 +121,14 @@ export default async function CompatibilityAnalysisPage() {
                       <span className="text-[15px] font-extrabold leading-5 tracking-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,.75)]">
                         {product.photoLabel}
                       </span>
-                    </div>
+                    </div></>}
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col py-0.5">
                     <span className="text-[11px] font-extrabold text-[#875ac1]">{product.category} · 궁합 분석</span>
                     <h2 className="mt-1 text-[16px] font-extrabold leading-[1.4] tracking-[-0.02em] text-[#25153c]">
                       {product.title}
                     </h2>
-                    <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-[#655773]">{product.question}</p>
+                    <p className="mt-1.5 break-keep text-sm leading-6 text-[#655773]">{product.question}</p>
                     {product.photoId === "relationship-family-role" ? (
                       <p className="mt-1 text-[11px] font-semibold leading-4 text-[#7656aa]">부모·자녀 · 형제·자매 · 기타 가족</p>
                     ) : null}

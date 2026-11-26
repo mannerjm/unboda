@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import GuestRecommendationPurchaseButton from "@/app/components/GuestRecommendationPurchaseButton";
 import { useEffect, useState } from "react";
+import { getWealthStorefrontCopy } from "@/app/lib/wealthStorefrontCopy";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import { getPremiumAnalysisHref, type PremiumAnalysisProductState } from "@/app/lib/premiumAnalysisNavigation";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
@@ -82,6 +83,8 @@ export default function MoneySharedFinancePilotDetail({
   const commaIndex = headline.indexOf(",");
   const headlineLead = commaIndex >= 0 ? headline.slice(0, commaIndex + 1) : headline;
   const headlineRest = commaIndex >= 0 ? headline.slice(commaIndex + 1).trim() : "";
+  const wealthCopy = getWealthStorefrontCopy(product.id);
+  const displayTitle = wealthCopy?.title ?? product.title;
   const photo = PREMIUM_PRODUCT_PHOTOS["money-shared-finance"];
   // Keep the original pilot photo and subject framing, matching the 4:3
   // high-resolution center crop used across the other 56 detail pages.
@@ -114,7 +117,7 @@ export default function MoneySharedFinancePilotDetail({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-[#7354bd]">
-                {product.title} · 사주 심층 분석
+                {displayTitle} · 사주 심층 분석
               </span>
               <span className="rounded-full border border-[#e3d5fa] bg-[#f0e8ff] px-3 py-1.5 text-xs font-bold text-[#6748a4]">
                 {STATUS_LABELS[state]}
@@ -127,9 +130,9 @@ export default function MoneySharedFinancePilotDetail({
               {headlineLead}{headlineRest ? <span className="block text-[#7050bf]">{headlineRest}</span> : null}
             </h2>
             <p className="mt-4 max-w-[37rem] break-keep text-[15px] font-medium leading-7 text-[#584968] sm:text-base sm:leading-8">
-              생활비를 같이 쓰는데도 자꾸 서운한 마음이 드나요?
-              <span className="font-bold text-[#3a2951]"> 내 사주를 바탕으로 돈을 대하는 성향을 살펴보고,</span>
-              함께 쓰는 돈의 기준을 어떻게 정할지 알아보세요.
+              같이 쓰는 돈인데 자꾸 나만 더 부담하는 기분이 드나요?
+              <span className="font-bold text-[#3a2951]"> 내 사주에서 돈을 대하는 성향을 알아보고,</span>
+              서로 부담을 나누는 방법을 살펴보세요.
             </p>
             <p className="mt-6 text-sm font-bold text-[#6c5687]">
               개인화 사주 심층 분석 <span aria-hidden="true">·</span> <strong className="text-lg font-black text-[#39224f]">{price}</strong>
@@ -137,6 +140,7 @@ export default function MoneySharedFinancePilotDetail({
           </div>
           <div className="relative mx-auto w-full max-w-[390px]">
             <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] border-[5px] border-white bg-[#f8f1ff] shadow-[0_16px_38px_rgba(83,54,124,0.14)]">
+              {wealthCopy && !photoFallback ? <Image data-wealth-detail-cover src={wealthCopy.coverSrc} alt={wealthCopy.title + " 재물운 썸네일"} fill priority sizes="(max-width: 640px) 90vw, 390px" quality={75} className="object-contain object-center" onError={() => setPhotoFallback(true)} /> : <>
               <Image
                 src={photoFallback ? photo.src : originalPhotoUrl}
                 alt={photo.alt}
@@ -148,8 +152,8 @@ export default function MoneySharedFinancePilotDetail({
                 className="object-cover object-center"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#261831]/85 via-[#261831]/20 to-transparent px-5 pb-4 pt-14 text-white">
-                <p className="break-keep text-sm font-extrabold leading-6">함께 쓰는 돈, 서로의 기준부터 살펴보세요.</p>
-              </div>
+                <p className="break-keep text-sm font-extrabold leading-6">함께 쓰는 돈, 서로 부담을 나누는 방법을 알아봐요.</p>
+              </div></>}
             </div>
           </div>
         </div>
@@ -286,7 +290,7 @@ export default function MoneySharedFinancePilotDetail({
 
         {state === "not_purchased" ? <ProductReviewSummary productId={product.id} compactWhenEmpty /> : null}
         {/* Exactly one state-aware purchase/report entry, after all descriptions and reviews. */}
-        <section id="finance-purchase-action" aria-label="공동 재정 경계 분석 구매 및 리포트 확인" className="mb-8 mt-7 rounded-[1.7rem] border border-[#e3d5f4] bg-[linear-gradient(145deg,#fcf8ff_0%,#eee5ff_100%)] p-5 shadow-[0_12px_35px_rgba(75,46,125,0.08)] sm:p-7">
+        <section id="finance-purchase-action" aria-label={displayTitle + " 구매 및 리포트 확인"} className="mb-8 mt-7 rounded-[1.7rem] border border-[#e3d5f4] bg-[linear-gradient(145deg,#fcf8ff_0%,#eee5ff_100%)] p-5 shadow-[0_12px_35px_rgba(75,46,125,0.08)] sm:p-7">
           <p className="text-xs font-extrabold tracking-wide text-[#865dbe]">
             {state === "not_purchased" ? "나를 위한 사주 심층 분석" : STATUS_LABELS[state]}
           </p>
@@ -295,7 +299,7 @@ export default function MoneySharedFinancePilotDetail({
           </h3>
           <div className="mt-5 grid items-center gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-6">
             <div>
-              <p className="text-xs font-semibold text-[#77678a]">공동 재정 경계 분석</p>
+              <p className="text-xs font-semibold text-[#77678a]">{displayTitle}</p>
               <p className="mt-1 text-2xl font-black text-[#39234f]">{price}</p>
             </div>
             <div className="flex w-full min-w-0 flex-col gap-2">

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { getWealthStorefrontCopy } from "../app/lib/wealthStorefrontCopy";
 import { PREMIUM_PRODUCT_PHOTOS } from "../app/lib/premiumProductPhotos";
 import { PERIOD_PREMIUM_PRODUCTS } from "../app/lib/premiumProductRegistry";
 import { groupTopicCatalogProductsByCategory, listPeriodCatalogProducts } from "../app/lib/premiumCatalog";
@@ -457,3 +458,25 @@ assert.equal(wealthCoverHashes.size,10);
 assert(storefront.includes('currentGroup.category==="money" && Object.prototype.hasOwnProperty.call(MONEY_THUMBNAIL_TITLES,product.id)'));
 assert(storefront.includes("data-wealth-cover={product.id}") && storefront.includes("function WealthCover"));
 assert(storefront.includes('src={`/images/wealth-covers/${productId}.png`}') && storefront.includes('quality={75} className="object-contain object-center"'));
+
+// Wealth pilot: list and both detail renderers share the same approved covers and display-only names.
+const wealthNames = new Set<string>();
+const wealthIntros = new Set<string>();
+for (const id of launchedMoneyIds) {
+  const copy = getWealthStorefrontCopy(id);
+  assert(copy, "missing wealth display copy: " + id);
+  assert.equal(copy.coverSrc, `/images/wealth-covers/${id}.png`);
+  assert(copy.title.length > 2 && copy.intro.length >= 12);
+  wealthNames.add(copy.title); wealthIntros.add(copy.intro);
+}
+assert.equal(wealthNames.size,10);
+assert.equal(wealthIntros.size,10);
+for(const group of topicGroups.filter(group=>group.category!=="money")) for(const product of group.products) assert.equal(getWealthStorefrontCopy(product.id),undefined);
+for(const product of periodProducts) assert.equal(getWealthStorefrontCopy(product.id),undefined);
+assert(storefront.includes("data-wealth-intro") && storefront.includes("{wealthCopy.title}") && storefront.includes("{wealthCopy.intro}"));
+for (const name of ["CustomerFirstPremiumDetail","MoneySharedFinancePilotDetail"]) {
+  const detail = readFileSync(`app/components/${name}.tsx`,"utf8");
+  assert(detail.includes("getWealthStorefrontCopy(product.id)") && detail.includes("data-wealth-detail-cover src={wealthCopy.coverSrc}"));
+  assert(detail.includes("wealthCopy && !photoFallback") && detail.includes('quality={75} className="object-contain object-center"'));
+  assert(detail.includes('getPremiumAnalysisHref(product.id, state, profileId)') && detail.includes('getProductPricing(product.id)'));
+}

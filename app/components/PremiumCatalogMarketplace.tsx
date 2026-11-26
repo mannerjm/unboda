@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import NewYearTeacherCard from "@/app/components/NewYearTeacherCard";
+import { getWealthStorefrontCopy } from "@/app/lib/wealthStorefrontCopy";
 import { PREMIUM_PRODUCT_PHOTOS } from "@/app/lib/premiumProductPhotos";
 import type { PremiumCatalogCategoryGroup } from "@/app/lib/premiumCatalog";
 import type { PremiumProductDefinition } from "@/app/lib/premiumProductRegistry";
@@ -403,14 +404,16 @@ export default function PremiumCatalogMarketplace({
                 const question=config?.purchaseDecision?.decisionQuestion;
                 const state=stateByProductId.get(product.id)??"not_purchased";
                 const thumbnailTitle=STUDY_THUMBNAIL_TITLES[product.id] ?? BUSINESS_THUMBNAIL_TITLES[product.id] ?? HEALTH_THUMBNAIL_TITLES[product.id] ?? MONEY_THUMBNAIL_TITLES[product.id] ?? CAREER_THUMBNAIL_TITLES[product.id] ?? SOCIAL_THUMBNAIL_TITLES[product.id] ?? RELATIONSHIP_THUMBNAIL_TITLES[product.id];
-                if(currentGroup.category==="money" && Object.prototype.hasOwnProperty.call(MONEY_THUMBNAIL_TITLES,product.id)) return (
-                  <button key={product.id} type="button" onClick={()=>onSelectProduct(product.id)} data-wealth-cover={product.id} className="group grid grid-cols-[minmax(0,44%)_minmax(0,1fr)] items-center gap-3 rounded-[1.3rem] border border-[#eadff5] bg-white p-3 text-left shadow-sm transition hover:border-[#c49be8] hover:shadow-md focus-visible:ring-2 focus-visible:ring-[#9164d1]" aria-label={product.title+" 상세 정보 보기"}>
+                const wealthCopy = getWealthStorefrontCopy(product.id);
+                if(currentGroup.category==="money" && Object.prototype.hasOwnProperty.call(MONEY_THUMBNAIL_TITLES,product.id) && wealthCopy) return (
+                  <button key={product.id} type="button" onClick={()=>onSelectProduct(product.id)} data-wealth-cover={product.id} className="group grid grid-cols-[minmax(0,42%)_minmax(0,1fr)] sm:grid-cols-[minmax(0,44%)_minmax(0,1fr)] items-center gap-2.5 sm:gap-3 rounded-[1.3rem] border border-[#eadff5] bg-white p-3 text-left shadow-sm transition hover:border-[#c49be8] hover:shadow-md focus-visible:ring-2 focus-visible:ring-[#9164d1]" aria-label={product.title+" 상세 정보 보기"}>
                     <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-[#211b32]">
-                      <WealthCover productId={product.id} title={thumbnailTitle}/>
+                      <WealthCover productId={product.id} title={wealthCopy.title}/>
                     </div>
                     <div className="flex h-full min-w-0 flex-col justify-center gap-1.5">
-                      <p className="break-keep text-[11px] font-semibold text-[#9265b6]">{product.title}</p>
+                      <p className="break-keep text-xs font-bold text-[#8054ad]">{wealthCopy.title}</p>
                       <h3 className="break-keep text-sm font-extrabold leading-snug text-[#302044] group-hover:text-[#753aba] sm:text-[16px]">{getReadablePaidQuestion(product.id,question??product.title)}</h3>
+                      <p data-wealth-intro className="break-keep text-xs leading-relaxed text-[#6c6079] sm:text-[13px]">{wealthCopy.intro}</p>
                       <div className="flex flex-wrap items-center gap-1">
                         {recommendedIdSet.has(product.id)?<span className="rounded bg-[#f0e7ff] px-1.5 py-0.5 text-[10px] font-bold text-[#6c3ab7]">내 추천</span>:null}
                         {state!=="not_purchased"?<span className="rounded bg-[#f4effa] px-1.5 py-0.5 text-[10px] font-bold text-[#5b4481]">{STATUS[state]}</span>:null}

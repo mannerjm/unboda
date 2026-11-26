@@ -117,3 +117,8 @@ assert(seasonalReport.includes("세 달마다 달라지는 나의 운세") && se
 assert(seasonalReport.includes("하면 좋은 것") && seasonalReport.includes("조심하면 좋은 것") && seasonalReport.includes("items-start"));
 assert(seasonalTimeline.includes("DOMAIN_STYLES") && seasonalTimeline.includes("NewYearMonthCalendar") && seasonalTimeline.includes("aria-expanded") && seasonalTimeline.includes("aria-controls"));
 assert(seasonalTimeline.includes("item.summary") && seasonalTimeline.includes("item.actions") && seasonalTimeline.includes("item.cautions"));
+
+// Anonymous entry is presentation only: authenticated order guards remain separate.
+assert(detailPage.includes("user ? isNewYearCheckoutAllowed(user.id) : isNewYearPublicSaleEnabled()"));
+assert(readFileSync("app/checkout/[productId]/page.tsx","utf8").includes("user ? isNewYearCheckoutAllowed(user?.id) : isNewYearPublicSaleEnabled()"));
+assert(!seasonalOrders.includes("isNewYearPublicSaleEnabled") && !seasonalPurchaseServer.includes("isNewYearPublicSaleEnabled"));

@@ -51,7 +51,7 @@ export function listPeriodCatalogProducts(): readonly PremiumProductDefinition[]
 
   return PERIOD_PREMIUM_PRODUCTS.filter(
     (product) => product.kind === "PERIOD" && launchIds.has(product.id),
-  );
+  ).map(presentPremiumProduct);
 }
 
 /** Topic products grouped by category, preserving first-appearance category order. */

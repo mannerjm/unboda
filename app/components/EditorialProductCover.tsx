@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useState } from "react";
 import { getEditorialProductCover } from "@/app/lib/editorialProductCover";
 
+const GENERATED_COVER_IDS: ReadonlySet<string> = new Set(["study-learning-strategy","study-exam-preparation","study-focus-routine","study-credential-decision","business-startup-readiness","business-expansion-control","business-client-relationship","business-team-management"]);
+
 const PALETTES: Record<string, {dark:string;accent:string;light:string}> = {
   career:{dark:"#14263d",accent:"#d9bb82",light:"#f5e7c8"},
   business:{dark:"#17382e",accent:"#c6b478",light:"#f7e8b6"},
@@ -22,6 +24,13 @@ export default function EditorialProductCover({productId,priority=false}:{produc
   const [failedSrc,setFailedSrc]=useState<string|null>(null);
   if(!cover) return null;
   const palette=PALETTES[cover.category]??PALETTES.period;
+  const generatedSrc=GENERATED_COVER_IDS.has(productId) ? `/images/generated-covers/${productId}.webp` : null;
+  // New artwork contains the complete typography. Never crop or overlay it.
+  if(generatedSrc && failedSrc!==generatedSrc) return (
+    <div data-generated-cover={productId} className="relative aspect-[4/3] w-full overflow-hidden rounded-[inherit]" style={{background:palette.dark}}>
+      <Image src={generatedSrc} alt={cover.title+" · "+cover.hook} fill priority={priority} sizes={priority?"(max-width: 640px) 90vw, 390px":"(max-width: 640px) 42vw, (max-width: 1024px) 24vw, 250px"} className="object-contain object-center" onError={()=>setFailedSrc(generatedSrc)}/>
+    </div>
+  );
   return (
     <div data-editorial-cover={productId} aria-label={cover.title+" · "+cover.hook} className="relative isolate aspect-[4/3] w-full overflow-hidden rounded-[inherit] text-white" style={{background:palette.dark,containerType:"inline-size"}}>
       {failedSrc!==cover.photo.src ? <Image src={cover.photo.src} alt="" fill priority={priority} sizes={priority?"(max-width: 640px) 90vw, 390px":"(max-width: 640px) 42vw, (max-width: 1024px) 24vw, 250px"} className="object-cover object-center" onError={()=>setFailedSrc(cover.photo.src)}/> : null}

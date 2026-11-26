@@ -39,7 +39,7 @@ function Dashboard({ report: r }: { report: CustomerJourneyDashboard }) {
     <section className="mt-8">
       <h2 className="text-xl font-bold">1. 재방문·장기 고객가치</h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">최초 방문·최초 구매 뒤 실제 동일 고객이 다시 오는지와, 관측 기간 동안 고객당 순매출이 얼마나 쌓이는지 봅니다.</p>
-      <div className="mt-4 rounded-2xl border border-[#dce1ef] bg-[#fafbff] p-5">
+      <div className="mt-4 rounded-2xl border border-[#dce1ef] bg-white p-5">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
             <p className="text-xs font-semibold tracking-[0.14em] text-[#6f5ce7]">DAILY UNBODA RETENTION</p>
@@ -214,7 +214,7 @@ export default async function AdminCustomerJourneyPage() {
   let report: CustomerJourneyDashboard | null = null;
   try { report = await getAdminCustomerJourneyDashboard(); }
   catch (error) { console.error("[admin-journey] dashboard unavailable",error instanceof Error ? error.name : "unknown"); }
-  return <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
+  return <main className="min-h-screen bg-white px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
     <div className="mx-auto max-w-6xl">
       <Link href="/admin" className="text-sm font-semibold text-slate-600 underline underline-offset-4">← 관리자 현황으로</Link>
       <p className="mt-7 text-xs font-semibold tracking-[0.2em] text-slate-500">CUSTOMER JOURNEY</p>

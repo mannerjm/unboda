@@ -27,33 +27,33 @@ export function parseDashboardView(value: unknown): DashboardView {
 
 export default function DashboardShell({ view, children }: { view: DashboardView; children: ReactNode }) {
   const current = items.find(item => item.id === view) ?? items[0];
-  return <div className="min-h-screen bg-[#f7f5fc] text-slate-900 lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
-    <aside className="border-b border-[#e6def0] bg-[#f0eaf9] p-4 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r lg:p-5">
+  return <div className="min-h-screen bg-white text-slate-900 lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
+    <aside className="border-b border-slate-200 bg-white p-4 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r lg:p-5">
       <div className="flex items-center gap-3 py-2">
-        <div aria-hidden="true" className="grid h-10 w-10 place-items-center rounded-2xl bg-[#7650bb] text-lg font-black text-white">운</div>
-        <div><p className="text-lg font-black text-[#33204f]">운보다 관리자</p><p className="text-xs text-[#726080]">통합 운영 대시보드</p></div>
+        <div aria-hidden="true" className="grid h-10 w-10 place-items-center rounded-2xl border border-slate-400 bg-white text-lg font-black text-slate-900">운</div>
+        <div><p className="text-lg font-black text-slate-950">운보다 관리자</p><p className="text-xs text-slate-500">통합 운영 대시보드</p></div>
       </div>
       <nav aria-label="관리자 주제별 메뉴" className="mt-4 space-y-5">
         {groups.map(group => <div key={group.label}>
-          <p className="mb-2 px-2 text-[11px] font-bold tracking-wide text-[#725c8a]">{group.label}</p>
+          <p className="mb-2 px-2 text-[11px] font-bold tracking-wide text-slate-600">{group.label}</p>
           <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-1">
-            {group.items.map(item => <Link key={item.id} prefetch={false} href={"/admin/dashboard?view="+item.id} aria-current={view === item.id ? "page" : undefined} className={"flex min-h-11 items-center gap-3 rounded-xl border px-3 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#7448b8] "+(view === item.id ? "border-[#ceb7eb] bg-[#e4d7f8] text-[#59338e]" : "border-transparent text-[#554665] hover:bg-white/70")}>
+            {group.items.map(item => <Link key={item.id} prefetch={false} href={"/admin/dashboard?view="+item.id} aria-current={view === item.id ? "page" : undefined} className={"flex min-h-11 items-center gap-3 rounded-xl border px-3 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-700 "+(view === item.id ? "border-slate-400 border-l-4 border-l-slate-900 bg-white font-bold text-slate-950" : "border-transparent text-slate-600 hover:border-slate-300 hover:text-slate-950")}>
               <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d={item.icon}/></svg><span>{item.label}</span>
             </Link>)}
           </div>
         </div>)}
       </nav>
-      <div className="mt-6 space-y-2 border-t border-[#dcd0ea] pt-4">
-        <Link prefetch={false} href="/admin" className="block rounded-lg px-2 py-2 text-sm font-semibold text-[#62468a] underline">기존 전체 관리자 화면 ↗</Link>
-        <Link href="/" prefetch={false} className="block rounded-lg px-2 py-2 text-sm text-[#685777]">운보다 홈페이지 ↗</Link>
-        <p className="px-2 text-xs leading-5 text-[#78698a]">승인된 운영자 전용 · 기존 권한 및 처리 기준 유지</p>
+      <div className="mt-6 space-y-2 border-t border-slate-200 pt-4">
+        <Link prefetch={false} href="/admin?legacy=1" className="block rounded-lg px-2 py-2 text-sm font-semibold text-slate-700 underline">기존 전체 관리자 화면 ↗</Link>
+        <Link href="/" prefetch={false} className="block rounded-lg px-2 py-2 text-sm text-slate-600">운보다 홈페이지 ↗</Link>
+        <p className="px-2 text-xs leading-5 text-slate-500">승인된 운영자 전용 · 기존 권한 및 처리 기준 유지</p>
       </div>
     </aside>
-    <main className="min-w-0 px-4 py-5 sm:px-8 lg:px-10 lg:py-8" id="admin-dashboard-content">
+    <main className="min-w-0 bg-white px-4 py-5 sm:px-8 lg:px-10 lg:py-8" id="admin-dashboard-content">
       <div className="mx-auto max-w-[1400px]">
-        <header className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[#e6def0] pb-4">
-          <div><p className="text-xs font-bold text-[#7959a7]">관리자 / {current.label}</p><h1 className="mt-1 text-2xl font-black text-[#32204c]">{current.label}</h1><p className="mt-1 text-sm text-slate-600">{current.note}</p></div>
-          <a href={"/admin/dashboard?view="+view} className="inline-flex min-h-11 items-center rounded-xl border border-[#ddd3ea] bg-white px-4 text-sm font-semibold text-[#5b398e]">현황 새로고침</a>
+        <header className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div><p className="text-xs font-bold text-slate-600">관리자 / {current.label}</p><h1 className="mt-1 text-2xl font-black text-slate-950">{current.label}</h1><p className="mt-1 text-sm text-slate-600">{current.note}</p></div>
+          <a href={"/admin/dashboard?view="+view} className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700">현황 새로고침</a>
         </header>
         {children}
       </div>

@@ -20,7 +20,7 @@ import AdminReviewOverview from "./AdminReviewOverview";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ legacy?: string | string[] }> }) {
   try {
     await requireOperator();
   } catch (error) {
@@ -29,7 +29,7 @@ export default async function AdminPage() {
     }
 
     return (
-      <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-slate-900">
+      <main className="min-h-screen bg-white px-5 py-14 text-slate-900">
         <div className="mx-auto w-full max-w-xl">
           <p className="text-xs font-semibold tracking-[0.2em] text-slate-500">CS CONSOLE</p>
           <h1 className="mt-3 text-3xl font-bold">접근 권한 없음</h1>
@@ -38,6 +38,9 @@ export default async function AdminPage() {
       </main>
     );
   }
+
+  // Keep the original full view available explicitly; the new dashboard is the default.
+  if ((await searchParams).legacy !== "1") redirect("/admin/dashboard");
 
   const [growthResult, refundClosureResult, failureResult, operationsResult, qualityResult, supportResult, journeyResult, reviewResult, soloResult] = await Promise.allSettled([
     getAdminGrowthDashboard(30),
@@ -103,9 +106,9 @@ export default async function AdminPage() {
   });
 
   return (
-    <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
+    <main className="min-h-screen bg-white px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
       <div className="mx-auto w-full max-w-6xl">
-        <div className="mb-6 flex justify-end"><Link href="/admin/dashboard" className="inline-flex rounded-xl bg-[#322365] px-4 py-3 text-sm font-bold text-white">새 관리자 대시보드 열기 →</Link></div>
+        <div className="mb-6 flex justify-end"><Link href="/admin/dashboard" className="inline-flex rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white">새 관리자 대시보드 열기 →</Link></div>
         <AdminOperationsOverview
           failureSummary={failureSummary}
           aiOperations={aiOperations}
@@ -142,7 +145,7 @@ export default async function AdminPage() {
           </section>
         )}
 
-         <div className="mt-8 rounded-2xl border border-[#dce1ef] bg-white p-5">
+         <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
           <Link href="/admin/mfa" className="mb-5 inline-flex rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-900">
             <span>관리자 인증 앱(MFA) 등록 · 추가 인증 →</span>
           </Link>

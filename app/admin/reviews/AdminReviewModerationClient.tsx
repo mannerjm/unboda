@@ -60,7 +60,7 @@ export default function AdminReviewModerationClient({ items }: { items: AdminRev
             </div>
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{STATUS_LABEL[item.status]}</span>
-              {item.aiConsultingUsed ? <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">AI 상담 이용</span> : null}
+              {item.aiConsultingUsed ? <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-violet-700">AI 상담 이용</span> : null}
             </div>
           </div>
           <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">{item.body}</p>

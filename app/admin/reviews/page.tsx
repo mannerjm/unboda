@@ -18,7 +18,7 @@ export default async function AdminReviewsPage() {
       redirect("/auth/login?returnTo=/admin/reviews");
     }
     return (
-      <main className="min-h-screen bg-[#f5f7fc] px-5 py-14 text-slate-900">
+      <main className="min-h-screen bg-white px-5 py-14 text-slate-900">
         <div className="mx-auto max-w-xl">
           <h1 className="text-3xl font-bold">접근 권한 없음</h1>
           <p className="mt-4 text-sm text-slate-600">승인된 운영자만 사용할 수 있습니다.</p>
@@ -30,7 +30,7 @@ export default async function AdminReviewsPage() {
   const report = await getAdminReviewDashboard();
 
   return (
-    <main className="min-h-screen bg-[#f5f7fc] px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
+    <main className="min-h-screen bg-white px-5 py-10 text-slate-900 sm:px-8 sm:py-14">
       <div className="mx-auto w-full max-w-5xl">
         <Link href="/admin" className="text-sm font-semibold text-slate-600 underline underline-offset-4">← ADMIN</Link>
         <p className="mt-6 text-xs font-semibold tracking-[0.2em] text-slate-500">VERIFIED REVIEWS</p>

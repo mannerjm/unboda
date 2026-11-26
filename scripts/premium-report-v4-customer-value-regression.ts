@@ -298,7 +298,7 @@ const report = read("app/paid-analysis/[productId]/PaidAnalysisV4Report.tsx");
 assert(!report.includes("자주 나오는 사주 용어 쉽게 보기"), "primary report flow must not teach jargon");
 assert(!report.includes("신뢰도 {detail.confidence.level}"), "internal confidence level must not look like a product score");
 for (const phrase of [
-  "이 판단을 뒷받침하는 근거",
+  "내 사주에서 찾은 힌트",
   "비교적 분명하게 볼 수 있는 부분",
   "현실에서 추가로 확인해야 할 부분",
   "이 분석만으로 정할 수 없는 것",
